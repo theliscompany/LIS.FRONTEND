@@ -1,26 +1,34 @@
-import React from 'react';
-//import logo from './logo.svg';
 import './App.css';
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import Layout from './Layout';
+import Home from './Home';
+import Login from './Login';
+// import ResponsiveAppBar from './ResponsiveAppBar';
+// import Haulages from './Haulages';
+// import MiniDrawer from './MiniDrawer';
+// import Seafreights from './Seafreights';
+import Notifications from './Notifications';
+import Wizard from './Wizard';
+import Simulation from './Simulation';
+import Landing from './Landing';
 
-function App() {
+const App = () => {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src="./favicon.ico" className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <>
+        <BrowserRouter>
+            <Routes>
+                <Route path='admin' element={<Layout />}>
+                  <Route path="admin/" element={<Home />} />
+                  <Route path='admin/wizard' element={<Wizard />} />
+                  <Route path='admin/simulation' element={<Simulation />} />
+                  <Route path='admin/requests' element={<Notifications />} />
+                </Route>
+                <Route path="/" element={<Landing />} />
+                <Route path='login' element={<Login />} />
+            </Routes>
+        </BrowserRouter>
+    </>
   );
-}
+};
 
 export default App;

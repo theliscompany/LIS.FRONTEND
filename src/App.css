@@ -22,6 +22,7 @@
   justify-content: center;
   font-size: calc(10px + 2vmin);
   color: white;
+  /*border-bottom: 1px solid rgb(241, 242, 246)*/
 }
 
 .App-link {
@@ -35,4 +36,64 @@
   to {
     transform: rotate(360deg);
   }
+}
+
+.cs-listitem {
+  margin-top: 2px;
+  margin-bottom: 6px;
+}
+.cs-listitem:hover {
+  border-radius: 10px !important;
+  background-color: rgb(235, 238, 249) !important;
+}
+.cs-listitembutton {
+  padding: 4px 12px !important;
+}
+/*.cs-listitemicon {
+  
+}*/
+.cs-navlink {
+  text-decoration: none;
+  color: initial;
+}
+.cs-navlink-active {
+  text-decoration: none;
+  color: initial;
+}
+.cs-navlink-active > .cs-listitem {
+  text-decoration: none;
+  color: initial;
+  background-color: rgb(235, 238, 249);
+  border-radius: 10px;
+}
+
+.full-header {
+  height: 100vh;
+  position: relative;
+  background-color: #343a40;
+  background: url("../public/assets/img/backimage.png") no-repeat center center;
+  background-size: cover;
+  /*padding-top: 8rem;
+  padding-bottom: 8rem;*/
+  line-height: 60px !important;
+}
+.full-header:before {
+  content: "";
+  position: absolute;
+  background-color: #000;
+  height: 100%;
+  width: 100%;
+  top: 0;
+  left: 0;
+  opacity: 0.75;
+}
+.full-header h1, .masthead .h1 {
+  /*font-size: 2.25rem;*/
+  font-size: 1.5rem;
+  line-height: 60px;
+}
+.logo-front {
+  width: 450px;
+  /*background-color: white;*/
+  border-radius: 5px;
 }
