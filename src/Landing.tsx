@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Box, Grid, Paper, Typography } from '@mui/material';
+import { Box, Card, Grid, Paper, Typography } from '@mui/material';
 import './App.css';
 
 function Landing() {
@@ -38,8 +38,22 @@ function Landing() {
                 <Box sx={contentStyles}>
                     <img src={"/assets/img/logo-omnifreight-big.png"} style={{ backgroundColor: "#fff", padding: "5px 125px", width: "450px" }} alt="omnifreight pro" />
 
-                    <Grid>
-                        
+                    <Grid container>
+                        <Grid item>
+                            <Card>
+                                Card 1
+                            </Card>
+                        </Grid>
+                        <Grid item>
+                            <Card>
+                                Card 2
+                            </Card>
+                        </Grid>
+                        <Grid item>
+                            <Card>
+                                Card 3
+                            </Card>
+                        </Grid>
                     </Grid>
                 </Box>
             </Box>
