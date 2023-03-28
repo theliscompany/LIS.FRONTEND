@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
-import './App.css';
+import '../../App.css';
 
-function Simulation() {
+function Seafreights() {
   /*useEffect(() => {
     fetch("https://localhost:7054/api/Users")
     .then((response) => response.json())
@@ -15,4 +15,4 @@ function Simulation() {
   );
 }
 
-export default Simulation;
+export default Seafreights;

@@ -10,9 +10,9 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import FolderIcon from '@mui/icons-material/Folder';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import React, { useEffect } from 'react';
-import './App.css';
+import '../../App.css';
 
-function Notifications() {
+function Requests() {
     const [notifications, setNotifications] = React.useState<any>(null);
     
     useEffect(() => {
@@ -26,8 +26,8 @@ function Notifications() {
   
     return (
         <div style={{ background: "#fff", borderTopLeftRadius: 20, borderTopRightRadius: 20 }}>
-            <Box py={4} sx={{  }}>
-                <Typography variant="h5" mt={3} mx={3}><b>Notifications</b></Typography>
+            <Box py={4}>
+                <Typography variant="h5" mt={3} mx={3}><b>List of requests for quote</b></Typography>
                 
                 {
                     notifications != null ? 
@@ -36,14 +36,10 @@ function Notifications() {
                             notifications.map((item: any, i: number) => {
                                 return (
                                     <ListItem
+                                        key={"request-"+i}
                                         component="a"
                                         href={"/request/" + item.id}
                                         sx={{ borderTop: "1px solid #e6e6e6" }}
-                                        secondaryAction={
-                                            <IconButton edge="end" aria-label="delete">
-                                                {item.building_number > 10000 ? <img src="red_dot.png" style={{ width: "8px" }} /> : null}
-                                            </IconButton>
-                                        }
                                     >
                                         <ListItemAvatar>
                                             <Avatar>
@@ -65,5 +61,4 @@ function Notifications() {
     );
 }
 
-export default Notifications;
-
+export default Requests;

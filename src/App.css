@@ -92,8 +92,31 @@
   font-size: 1.5rem;
   line-height: 60px;
 }
-.logo-front {
-  width: 450px;
-  /*background-color: white;*/
-  border-radius: 5px;
+
+.react-cookie-law-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  max-width: 1260px !important;
+}
+.react-cookie-law-manage-btn {
+  display: none !important;
+}
+.react-cookie-law-msg {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+}
+.react-cookie-law-accept-btn {
+  height: 30px;
+  padding-left: 15px !important;
+  padding-right: 15px !important;
+}
+.react-cookie-law-policy {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.react-cookie-law-button-wrapper {
+  margin-left: 20px;
 }

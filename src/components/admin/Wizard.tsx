@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
-import './App.css';
+import '../../App.css';
 
-function Home() {
+function Wizard() {
   /*useEffect(() => {
     fetch("https://localhost:7054/api/Users")
     .then((response) => response.json())
@@ -15,4 +15,4 @@ function Home() {
   );
 }
 
-export default Home;
+export default Wizard;

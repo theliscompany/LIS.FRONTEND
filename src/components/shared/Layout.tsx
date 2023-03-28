@@ -33,10 +33,10 @@ import LogoutIcon from '@mui/icons-material/Logout';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import MailOutlinedIcon from '@mui/icons-material/MailOutlined';
 import RequestPageOutlinedIcon from '@mui/icons-material/RequestPageOutlined';
-import Home from './Home';
-import './App.css';
-import ResponsiveAppBar from './ResponsiveAppBar';
-import Login from './Login';
+import Home from '../admin/Home';
+import '../../App.css';
+import ResponsiveAppBar from '../others/ResponsiveAppBar';
+import Login from '../authentification/Login';
 import { Badge, Container } from '@mui/material';
 import { Outlet, NavLink } from 'react-router-dom';
 import { styled, useTheme, createTheme, Theme, CSSObject } from '@mui/material/styles';
@@ -171,8 +171,8 @@ function Layout(props: {children?: React.ReactNode}) {
         <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1, backgroundColor: "#fff", boxShadow: 0, borderBottom: "1px solid rgb(241, 242, 246)" }}>
           <Container style={{ maxWidth: "2000px" }}>
             <Toolbar disableGutters>
-                <Typography variant="h6" noWrap component="a" href="/">
-                    <img src="./img/logolisquotes.png" className="img-fluid" style={{ maxHeight: "50px", marginTop: "10px" }} />
+                <Typography variant="h6" noWrap component="a" href="/admin/">
+                    <img src="../img/logolisquotes.png" className="img-fluid" style={{ maxHeight: "50px", marginTop: "10px" }} />
                 </Typography>
 
                 <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }} />
@@ -227,7 +227,7 @@ function Layout(props: {children?: React.ReactNode}) {
                     
                     <DarkTooltip title="Cyrille Penaye">
                         <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                            <Avatar alt="Cyrille Penaye" {...stringAvatar('Cyrille Penaye')} src="./cyrillepenaye.jpg" />
+                            <Avatar alt="Cyrille Penaye" {...stringAvatar('Cyrille Penaye')} src="../cyrillepenaye.jpg" />
                         </IconButton>
                     </DarkTooltip>
                     <Menu
@@ -249,7 +249,7 @@ function Layout(props: {children?: React.ReactNode}) {
                         onClose={handleCloseUserMenu}
                     >
                         <div style={{ height: "148px", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", background: "rgb(246, 248, 252)", marginBottom: "8px" }}>
-                            <Avatar alt="Cyrille Penaye" sx={{ width: "64px", height: "64px", marginBottom: "6px" }} src="./cyrillepenaye.jpg" />
+                            <Avatar alt="Cyrille Penaye" sx={{ width: "64px", height: "64px", marginBottom: "6px" }} src="../cyrillepenaye.jpg" />
                             <Typography variant="subtitle2" sx={{ fontWeight: "bolder" }}>Cyrille Penaye</Typography >
                             <Typography variant="caption">cyrille.penaye@omnifreight.eu</Typography>
                         </div>
@@ -259,13 +259,6 @@ function Layout(props: {children?: React.ReactNode}) {
                             </ListItemIcon>
                             <ListItemText primary={"View Profile"} />
                         </MenuItem>
-                        <MenuItem dense key={"x1-Billing"} title="Billing" onClick={handleCloseUserMenu}>
-                            <ListItemIcon className="cs-listitemicon">
-                                <CreditCardIcon fontSize="small" />
-                            </ListItemIcon>
-                            <ListItemText primary={"Billing"} />
-                        </MenuItem>
-                        <Divider />
                         <MenuItem dense key={"x1-Invite Members"} title="Invite Members" onClick={handleCloseUserMenu}>
                             <ListItemIcon className="cs-listitemicon">
                                 <GroupsIcon fontSize="small" />
@@ -297,7 +290,7 @@ function Layout(props: {children?: React.ReactNode}) {
             <Toolbar />
             <Box sx={{ overflow: 'none', margin: "0 10px", marginTop: "8px" }}>
                 <List dense>
-                    <NavLink to="/" className={({ isActive }) => isActive ? "cs-navlink-active" : "cs-navlink"}>
+                    <NavLink to="/admin/" className={({ isActive }) => isActive ? "cs-navlink-active" : "cs-navlink"}>
                         <ListItem className="cs-listitem" key={"Overview"} disablePadding disableGutters>
                         <DarkTooltip title="Overview" placement="right" arrow>
                             <ListItemButton className="cs-listitembutton">
@@ -309,7 +302,7 @@ function Layout(props: {children?: React.ReactNode}) {
                         </DarkTooltip>
                         </ListItem>
                     </NavLink>
-                    <NavLink to="/settings" className={({ isActive }) => isActive ? "cs-navlink-active" : "cs-navlink"}>
+                    <NavLink to="/admin/settings" className={({ isActive }) => isActive ? "cs-navlink-active" : "cs-navlink"}>
                         <ListItem className="cs-listitem" key={"Settings"} disablePadding disableGutters>
                         <DarkTooltip title="Settings" placement="right" arrow>
                             <ListItemButton className="cs-listitembutton">
@@ -321,7 +314,7 @@ function Layout(props: {children?: React.ReactNode}) {
                         </DarkTooltip>
                         </ListItem>
                     </NavLink>
-                    <NavLink to="/requests" className={({ isActive }) => isActive ? "cs-navlink-active" : "cs-navlink"}>
+                    <NavLink to="/admin/requests" className={({ isActive }) => isActive ? "cs-navlink-active" : "cs-navlink"}>
                         <ListItem className="cs-listitem" key={"Requests"} disablePadding disableGutters>
                         <DarkTooltip title="Requests" placement="right" arrow>
                             <ListItemButton className="cs-listitembutton">
@@ -336,10 +329,10 @@ function Layout(props: {children?: React.ReactNode}) {
                 </List>
                 <Divider color="#F1F2F6" style={{ borderBottom: "1px solid rgb(241, 242, 246)" }} />
                 <List dense>
-                    <NavLink to="/wizard" className={({ isActive }) => isActive ? "cs-navlink-active" : "cs-navlink"}>
+                    <NavLink to="/admin/wizard" className={({ isActive }) => isActive ? "cs-navlink-active" : "cs-navlink"}>
                         <ListItem className="cs-listitem" key={"Wizard"} disablePadding disableGutters>
                             <DarkTooltip title="Wizard" placement="right" arrow>
-                                <ListItemButton className="cs-listitembutton" component="a" href="/wizard">
+                                <ListItemButton className="cs-listitembutton">
                                     <ListItemIcon className="cs-listitemicon">
                                         <AutoFixHighIcon fontSize="small" />
                                     </ListItemIcon>
@@ -348,10 +341,10 @@ function Layout(props: {children?: React.ReactNode}) {
                             </DarkTooltip>
                         </ListItem>
                     </NavLink>
-                    <NavLink to="/simulation" className={({ isActive }) => isActive ? "cs-navlink-active" : "cs-navlink"}>
+                    <NavLink to="/admin/simulation" className={({ isActive }) => isActive ? "cs-navlink-active" : "cs-navlink"}>
                         <ListItem className="cs-listitem" key={"Simulation"} disablePadding disableGutters>
                             <DarkTooltip title="Simulation" placement="right" arrow>
-                                <ListItemButton className="cs-listitembutton" component="a" href="/simulation">
+                                <ListItemButton className="cs-listitembutton">
                                     <ListItemIcon className="cs-listitemicon">
                                         <AppRegistrationIcon fontSize="small" />
                                     </ListItemIcon>
