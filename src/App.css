@@ -15,7 +15,7 @@
 
 .App-header {
   background-color: #282c34;
-  min-height: 100vh;
+  /* min-height: 100vh; */
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -68,7 +68,7 @@
 }
 
 .full-header {
-  height: 100vh;
+  /* height: 100vh; */
   position: relative;
   background-color: #343a40;
   background: url("../public/assets/img/backimage.png") no-repeat center center;

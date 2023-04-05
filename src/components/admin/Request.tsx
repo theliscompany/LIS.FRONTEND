@@ -6,15 +6,19 @@ import '../../App.css';
 import AutocompleteSearch from '../shared/AutocompleteSearch';
 import { inputLabelStyles, BootstrapInput } from '../../misc/styles';
 import axios from 'axios';
-import { enqueueSnackbar } from 'notistack';
+import { enqueueSnackbar, SnackbarProvider } from 'notistack';
 
 let statusTypes = ["EnAttente", "Valider", "Rejeter"];
 let cargoTypes = ["Container", "Conventional", "RollOnRollOff"];
 
 function convertStringToObject(str: string): { city: string, country: string } {
-    const [city, ...countryArr] = str.split(', ');
-    const country = countryArr.join(', ');
-    return { city, country };
+    console.log(str);
+    if (str !== undefined) {
+        const [city, ...countryArr] = str.split(', ');
+        const country = countryArr.join(', ');
+        return { city, country };
+    }
+    return { city: "", country: "" };
 }
 
 function Request(props: any) {
@@ -62,9 +66,9 @@ function Request(props: any) {
     
     function validateRequest() {
         var myHeaders = new Headers();
-        myHeaders.append("Accept", "*/");
+        //myHeaders.append("Accept", "*/");
         myHeaders.append("Content-Type", "application/json");
-        fetch("https://localhost:7089/api/Request", {
+        fetch("https://localhost:7089/api/Request/"+id, {
             method: "PUT",
             body: JSON.stringify({ id: id, status: 1, whatsapp: phone, email: email, departure: departure, arrival: arrival, cargoType: 0, quantity: quantity, detail: message }),
             headers: myHeaders
@@ -78,9 +82,8 @@ function Request(props: any) {
 
     function rejectRequest() {
         var myHeaders = new Headers();
-        myHeaders.append("Accept", "*/");
         myHeaders.append("Content-Type", "application/json");
-        fetch("https://localhost:7089/api/Request", {
+        fetch("https://localhost:7089/api/Request/"+id, {
             method: "PUT",
             body: JSON.stringify({ id: id, status: 2, whatsapp: phone, email: email, departure: departure, arrival: arrival, cargoType: 0, quantity: quantity, detail: message }),
             headers: myHeaders
@@ -94,6 +97,7 @@ function Request(props: any) {
     
     return (
         <div style={{ background: "#fff", borderTopLeftRadius: 20, borderTopRightRadius: 20 }}>
+            <SnackbarProvider />
             <Box py={4}>
                 <Typography variant="h5" mt={3} mx={5}><b>Manage a request for quote N° {id}</b></Typography>
                 <Box py={4}>
@@ -120,7 +124,8 @@ function Request(props: any) {
                             <Grid item xs={6}>
                                 <InputLabel htmlFor="departure" sx={inputLabelStyles}>City and country of departure of the goods</InputLabel>
                                 <AutocompleteSearch id="departure" value={departureTown} onChange={(e: any) => { setDepartureTown(convertStringToObject(e.target.innerText)); setDeparture(e.target.innerText); }} fullWidth disabled={status === "Valider"} />
-                            </Grid><Grid item xs={6}>
+                            </Grid>
+                            <Grid item xs={6}>
                                 <InputLabel htmlFor="arrival" sx={inputLabelStyles}>City and country of arrival of the goods</InputLabel>
                                 <AutocompleteSearch id="arrival" value={arrivalTown} onChange={(e: any) => { setArrivalTown(convertStringToObject(e.target.innerText)); setArrival(e.target.innerText); }} fullWidth disabled={status === "Valider"} />
                             </Grid>

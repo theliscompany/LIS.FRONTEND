@@ -13,6 +13,8 @@ import { MuiTelInput } from 'mui-tel-input';
 import { SnackbarProvider, enqueueSnackbar } from 'notistack';
 import AutocompleteSearch from '../shared/AutocompleteSearch';
 import { useIsAuthenticated } from '@azure/msal-react';
+import Testimonies from './Testimonies';
+import Footer from './Footer';
 
 
 export interface DialogTitleProps {
@@ -327,10 +329,26 @@ function Landing() {
                 </Box>
             </Box>
             
-            <Box>
-                I identify as
-            </Box>
-
+            <Fab aria-describedby={id} color="default" onClick={handleClick} sx={{ backgroundColor: "#fff", position: "fixed", right: "20px", bottom: "20px", width: "64px", height: "64px" }}>
+                <WhatsAppIcon fontSize="large" sx={{ color: "#59CE72", width: "36px", height: "36px" }} />
+            </Fab>
+            <Popover
+                id={id} 
+                open={open} 
+                anchorEl={anchorEl}
+                onClose={handleClose}   
+                anchorOrigin={{
+                    vertical: 'top',
+                    horizontal: 'right',
+                }}
+                transformOrigin={{
+                    vertical: 'bottom',
+                    horizontal: 'right',
+                }}
+            >
+                <iframe title="whatsapp form" src="https://whatsform.com/dRTy_6"  width="100%" height="600" frameBorder="0"></iframe>
+            </Popover>
+            
             <BootstrapDialog
                 onClose={() => setModal(false)}
                 aria-labelledby="custom-dialog-title"
@@ -498,26 +516,9 @@ function Landing() {
                     <Button variant="contained" color={!load ? "primary" : "info"} className="mr-3" onClick={sendContactFormRedirect} disabled={email === "" || !validMail(email)} sx={{ textTransform: "none" }}>Download</Button>
                 </DialogActions>
             </BootstrapDialog>
-
-            <Fab aria-describedby={id} color="default" onClick={handleClick} sx={{ backgroundColor: "#fff", position: "fixed", right: "20px", bottom: "20px", width: "64px", height: "64px" }}>
-                <WhatsAppIcon fontSize="large" sx={{ color: "#59CE72", width: "36px", height: "36px" }} />
-            </Fab>
-            <Popover
-                id={id} 
-                open={open} 
-                anchorEl={anchorEl}
-                onClose={handleClose}   
-                anchorOrigin={{
-                    vertical: 'top',
-                    horizontal: 'right',
-                }}
-                transformOrigin={{
-                    vertical: 'bottom',
-                    horizontal: 'right',
-                }}
-            >
-                <iframe title="whatsapp form" src="https://whatsform.com/dRTy_6"  width="100%" height="600" frameBorder="0"></iframe>
-            </Popover>
+            
+            <Testimonies />
+            <Footer />
         </div>
     );
 }

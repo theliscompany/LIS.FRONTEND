@@ -379,7 +379,7 @@ function Layout(props: {children?: React.ReactNode}) {
                         </List>
                     </Box>
                 </Drawer>
-                <Box component="main" sx={{ flexGrow: 1, p: 3, background: "#f9fafb", minHeight: "100vh" }}>
+                <Box component="main" sx={{ flexGrow: 1, p: 3, background: "#f9fafb" }}>
                     <Toolbar />
                     <Outlet />
                 </Box>
