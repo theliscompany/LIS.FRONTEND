@@ -156,7 +156,7 @@ function Request(props: any) {
                                 <Button variant="contained" color="primary" sx={{ mt: 2, mr: 2, textTransform: "none" }} onClick={validateRequest} >Validate</Button>
                                 <Button variant="contained" color="inherit" sx={{ background: "#fff", color: "#333", mt: 2, textTransform: "none" }} onClick={rejectRequest} >Reject</Button>
                             </Grid>
-                        </Grid>: null
+                        </Grid> : null
                     }
                 </Box>
             </Box>

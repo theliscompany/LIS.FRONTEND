@@ -5,16 +5,21 @@ import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import React, { useEffect } from 'react';
 import '../../App.css';
-import { Button, Chip, Grid, InputLabel, NativeSelect } from '@mui/material';
+import { Button, Chip, Grid, InputLabel, NativeSelect, Skeleton } from '@mui/material';
 import PlaceIcon from '@mui/icons-material/Place';
 import SearchIcon from '@mui/icons-material/Search';
 import AutocompleteSearch from '../shared/AutocompleteSearch';
 import { BootstrapInput, inputLabelStyles } from '../../misc/styles';
 
+
 function convertStringToObject(str: string): { city: string, country: string } {
-    const [city, ...countryArr] = str.split(', ');
-    const country = countryArr.join(', ');
-    return { city, country };
+    console.log(str);
+    if (str !== undefined) {
+        const [city, ...countryArr] = str.split(', ');
+        const country = countryArr.join(', ');
+        return { city, country };
+    }
+    return { city: "", country: "" };
 }
 
 function createGetRequestUrl(variable1: string, variable2: string, variable3: string, variable4: string) {
@@ -62,6 +67,7 @@ function dateTimeDiff(date_time: string) {
 function Requests() {
     const [notifications, setNotifications] = React.useState<any>(null);
     const [design, setDesign] = React.useState<string>("List");
+    const [load, setLoad] = React.useState<boolean>(true);
     const [status, setStatus] = React.useState<string>("");
     const [cargoType, setCargoType] = React.useState<string>("");
     const [departureTown, setDepartureTown] = React.useState<any>(null);
@@ -82,18 +88,21 @@ function Requests() {
     }, []);
 
     function loadRequests() {
+        setLoad(true);
         fetch("https://localhost:7089/api/Request")
         .then((response) => response.json())
         .then((data) => {
             console.log(data);
             if(data.code === 200) {
                 //filter((elm: any) => { return elm.status !== "Rejeter" })
+                setLoad(false);
                 setNotifications(data.data.reverse());
             }
         });
     }
 
     function searchRequests() {
+        setLoad(true);
         var requestFormatted = createGetRequestUrl(departure, arrival, cargoType, status);
         //alert(requestFormatted);
         fetch(requestFormatted)
@@ -102,13 +111,14 @@ function Requests() {
             console.log(data);
             if(data.code === 200) {
                 //filter((elm: any) => { return elm.status !== "Rejeter" })
+                setLoad(false);
                 setNotifications(data.data.reverse());
             }
         });
     }
   
     return (
-        <div style={{ background: "#fff", borderTopLeftRadius: 20, borderTopRightRadius: 20 }}>
+        <div style={{ background: "#fff", borderTopLeftRadius: 20, borderTopRightRadius: 20, overflowX: "hidden" }}>
             <Box py={4}>
                 <Typography variant="h5" mt={3} mx={5}><b>List of requests for quote</b></Typography>
                 <Grid container spacing={1} mx={4} mt={2}>
@@ -215,7 +225,7 @@ function Requests() {
                                 )
                             })
                         }
-                    </List> : null
+                    </List> : <Skeleton sx={{ mx: 5, mt: 3 }} />
                 }
             </Box>
         </div>
