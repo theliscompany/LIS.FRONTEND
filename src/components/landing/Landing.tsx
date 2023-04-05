@@ -1,22 +1,19 @@
-import React, { useEffect } from 'react';
-import { Box, Button, Card, CardActions, CardContent, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, FormControl, Grid, IconButton, InputBase, InputBaseProps, InputLabel, Modal, Paper, TextField, Typography } from '@mui/material';
+import React from 'react';
+import { Box, Button, Card, CardActions, CardContent, Checkbox, Dialog, DialogActions, DialogContent, DialogTitle, Fab, Grid, IconButton, InputBase, InputLabel, ListItemText, MenuItem, NativeSelect, Paper, Popover, Select, SelectChangeEvent, Typography } from '@mui/material';
 import { alpha, styled } from '@mui/material/styles';
 import CloseIcon from '@mui/icons-material/Close';
+import FaceIcon from '@mui/icons-material/Face';
+import WhatsAppIcon from '@mui/icons-material/WhatsApp';
+import { bottomStyles, cardStyles, imageStyles, buttonStyles, contentStyles, buttonCloseStyles, overlayStyles, inputLabelStyles, cardTextStyles, BootstrapInput, BootstrapDialog } from '../../misc/styles';
 import '../../App.css';
 // @ts-ignore
 import { CookieBanner } from '@palmabit/react-cookie-law';
 import ReCAPTCHA from "react-google-recaptcha";
-import { MuiTelInput } from 'mui-tel-input'
+import { MuiTelInput } from 'mui-tel-input';
+import { SnackbarProvider, enqueueSnackbar } from 'notistack';
+import AutocompleteSearch from '../shared/AutocompleteSearch';
+import { useIsAuthenticated } from '@azure/msal-react';
 
-
-const BootstrapDialog = styled(Dialog)(({ theme }) => ({
-    '& .MuiDialogContent-root': {
-      padding: theme.spacing(2),
-    },
-    '& .MuiDialogActions-root': {
-      padding: theme.spacing(1),
-    },
-}));
 
 export interface DialogTitleProps {
     id: string;
@@ -48,118 +45,16 @@ function BootstrapDialogTitle(props: DialogTitleProps) {
     );
 }
 
-const BootstrapInput = styled(InputBase)(({ theme }) => ({
-    'label + &': {
-      marginTop: theme.spacing(1),
-    },
-    '& .MuiInputBase-input': {
-      borderRadius: 4,
-      position: 'relative',
-      backgroundColor: theme.palette.mode === 'light' ? '#fcfcfb' : '#2b2b2b',
-      border: '1px solid #ced4da',
-      fontSize: 16,
-      //width: 'auto',
-      padding: '10px 12px',
-      transition: theme.transitions.create([
-        'border-color',
-        'background-color',
-        'box-shadow',
-      ]),
-      // Use the system font instead of the default Roboto font.
-      fontFamily: [
-        '-apple-system',
-        'BlinkMacSystemFont',
-        '"Segoe UI"',
-        'Roboto',
-        '"Helvetica Neue"',
-        'Arial',
-        'sans-serif',
-        '"Apple Color Emoji"',
-        '"Segoe UI Emoji"',
-        '"Segoe UI Symbol"',
-      ].join(','),
-      '&:focus': {
-        boxShadow: `${alpha(theme.palette.primary.main, 0.25)} 0 0 0 0.2rem`,
-        borderColor: theme.palette.primary.main,
-      },
-    },
-}));
-  
+function convertStringToObject(str: string): { city: string, country: string } {
+    const [city, ...countryArr] = str.split(', ');
+    const country = countryArr.join(', ');
+    return { city, country };
+}
+
 
 
 function Landing() {
-    const overlayStyles = {
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        width: '100%',
-        height: '100%',
-        backgroundColor: 'rgba(0, 0, 0, 0.75)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        zIndex: 1,
-        borderRadius: 0
-    };
-      
-    const imageStyles = {
-        //position: 'relative',
-        //zIndex: 0,
-        width: "100vw"
-    };
-      
-    const contentStyles = {
-        position: 'absolute',
-        top: '47.5%',
-        left: '50%',
-        transform: 'translate(-50%, -50%)',
-        zIndex: 2,
-    };
-
-    const buttonStyles = {
-        ':hover': {
-            backgroundColor: "#0097b2",
-        },
-        backgroundColor: "#008089",
-        color: "#fff",
-        borderRadius: "30px",
-        padding: "10px 20px 10px",
-        textTransform: "none",
-        fontSize: 17,
-        fontWeight: 400,
-        fontFamily: "PT Sans"
-    }
-
-    const cardStyles = { 
-        mx: 2,
-        px: 0.5,
-        py: 1,
-        minHeight: "190px"
-    }
-
-    const bottomStyles = { 
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        lineHeight: 1
-    }
-
-    const cardTextStyles = { 
-        lineHeight: 1.2,
-        fontSize: 19,
-        fontWeight: "bold",
-        fontFamily: "PT Sans",
-        minHeight: "75px" 
-    }
-
-    const buttonCloseStyles = {
-        ':hover': {
-            backgroundColor: "#5a6268",
-        },
-        textTransform: "none", 
-        backgroundColor: "#6c757d"
-    }
-
+    const isAuthenticated = useIsAuthenticated();
     const [modal, setModal] = React.useState<boolean>(false);
     const [modal2, setModal2] = React.useState<boolean>(false);
     const [modal3, setModal3] = React.useState<boolean>(false);
@@ -167,6 +62,45 @@ function Landing() {
     const [email, setEmail] = React.useState<string>("");
     const [captcha, setCaptcha] = React.useState<string | null>(null);
     const [phone, setPhone] = React.useState<string>("");
+    const [message, setMessage] = React.useState<string>("");
+    const [subjects, setSubjects] = React.useState<string[]>([]);
+    const [quantity, setQuantity] = React.useState<number>(1);
+    const [cargoType, setCargoType] = React.useState<string>("0");
+    const [departureTown, setDepartureTown] = React.useState<any>(convertStringToObject("Antwerp, Belgium"));
+    const [arrivalTown, setArrivalTown] = React.useState<any>(convertStringToObject("Douala, Cameroon"));
+    const [departure, setDeparture] = React.useState<string>("");
+    const [arrival, setArrival] = React.useState<string>("");
+    const [anchorEl, setAnchorEl] = React.useState<HTMLButtonElement | null>(null);
+
+    const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+        setAnchorEl(event.currentTarget);
+    };
+
+    const handleClose = () => {
+        setAnchorEl(null);
+    };
+
+    const open = Boolean(anchorEl);
+    const id = open ? 'simple-popover' : undefined;
+    
+    
+    // const handleArrivalLocationChange = (value: string) => {
+    //     setArrivalTown(value);
+    // };
+    
+    const handleChangeSubject = (event: SelectChangeEvent<typeof subjects>) => {
+        const {
+           target: { value },
+        } = event;
+        setSubjects(
+            // On autofill we get a stringified value.
+            typeof value === 'string' ? value.split(',') : value,
+        );
+    };
+
+    const handleChangeCargoType = (event: { target: { value: string } }) => {
+        setCargoType(event.target.value);
+    };
     
     function onChangeCaptcha(value: any) {
         console.log("Captcha value:", value);
@@ -185,40 +119,129 @@ function Landing() {
     }
       
     function sendContactFormRedirect() {
-      if (captcha !== null) {
-        if (phone !== "" || email !== "") {
-          if (email == "" || email !== "" && validMail(email)) {
-            setLoad(true);
-            var myHeaders = new Headers();
-            myHeaders.append("Accept", "*/");
-            myHeaders.append("Content-Type", "application/json");
-            fetch("https://omnifreightinfo.azurewebsites.net/api/QuotationBasic", {
-              method: "POST",
-              body: JSON.stringify({ phoneNumber: phone, email: email, goodsType: "" }),
-              headers: myHeaders
-            }).then((data: any) => {
-              //toast.success("data.MessageSuccess");
-              setPhone("");
-              setEmail("")
-              download("./assets/omnifreight_flyer.pdf", "Flyer Omnifreight.png");
-            }).catch(error => { 
-              setLoad(false);
-              //toast.error("data.MessageError");
-            });
-          }
-          else {
-            //toast.info("data.MessageWrongEmail");
-          }
+        if (captcha !== null) {
+            if (phone !== "" || email !== "") {
+                if (email === "" || email !== "" && validMail(email)) {
+                    setLoad(true);
+                    var myHeaders = new Headers();
+                    myHeaders.append("Accept", "*/");
+                    myHeaders.append("Content-Type", "application/json");
+                    fetch("https://omnifreightinfo.azurewebsites.net/api/QuotationBasic", {
+                        method: "POST",
+                        body: JSON.stringify({ phoneNumber: phone, email: email, goodsType: "" }),
+                        headers: myHeaders
+                    }).then((data: any) => {
+                        enqueueSnackbar("data.MessageSuccess", { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                        setPhone("");
+                        setEmail("")
+                        download("/assets/omnifreight_flyer.pdf", "Flyer Omnifreight.pdf");
+                    }).catch(error => { 
+                        setLoad(false);
+                        enqueueSnackbar("data.MessageError", { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });    
+                    });
+                }
+                else {
+                    enqueueSnackbar("data.MessageWrongEmail", { variant: "info", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                }
+            }
+            else {
+                enqueueSnackbar("data.MessageEmptyFields", { variant: "info", anchorOrigin: { horizontal: "right", vertical: "top"} });
+            }
         }
         else {
-          //toast.info("data.MessageEmptyFields");
+            enqueueSnackbar("data.MessageCaptcha", { variant: "info", anchorOrigin: { horizontal: "right", vertical: "top"} });
         }
-      }
-      else {
-        //toast.info("data.MessageCaptcha");
-      }
     }
-  
+
+    function sendContactForm() {
+        if (captcha !== null) {
+            if (phone !== "" || email !== "") {
+                if (email === "" || email !== "" && validMail(email)) {
+                var msg = "I want infos about : " + subjects.toString();
+                console.log(msg);
+                setLoad(true);
+                var myHeaders = new Headers();
+                myHeaders.append("Accept", "*/");
+                myHeaders.append("Content-Type", "application/json");
+                fetch("https://omnifreightinfo.azurewebsites.net/api/QuotationBasic", {
+                    method: "POST",
+                    body: JSON.stringify({ phoneNumber: phone, email: email, goodsType: msg+message }),
+                    headers: myHeaders
+                }).then((data: any) => {
+                    //setShow(true);
+                    setLoad(false);
+                    setPhone("");
+                    setEmail("");
+                    setSubjects([]);
+                    setMessage("");
+                    enqueueSnackbar("data.MessageSuccess", { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                }).catch(error => { 
+                    setLoad(false);
+                    enqueueSnackbar("data.MessageError", { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                });        
+                }
+                else {
+                    enqueueSnackbar("data.MessageWrongEmail", { variant: "info", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                }
+            }
+            else {
+                enqueueSnackbar("data.MessageEmptyFields", { variant: "info", anchorOrigin: { horizontal: "right", vertical: "top"} });
+            }
+        }
+        else {
+            enqueueSnackbar("data.MessageCaptcha", { variant: "info", anchorOrigin: { horizontal: "right", vertical: "top"} });
+        }
+    }
+
+    function sendQuotationForm() {
+        if (captcha !== null) {
+                if ((phone !== "" && arrival !== "" && departure !== "") || (email !== "" && arrival !== "" && departure !== "")) {
+                    if (email === "" || email !== "" && validMail(email)) {
+                        setLoad(true);
+                        var myHeaders = new Headers();
+                        myHeaders.append('Accept', '');
+                        myHeaders.append("Content-Type", "application/json");
+                        fetch("https://localhost:7089/api/Request", {
+                            method: "POST",
+                            body: JSON.stringify({ Whatsapp: phone, Email: email, Departure: departure, Arrival: arrival, CargoType: Number(cargoType), Quantity: quantity, Detail: message }),
+                            headers: myHeaders
+                        }).then((data: any) => {
+                            setLoad(false);
+                            if (data.code === 201) {
+                                enqueueSnackbar("data.MessageSuccess", { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                                //resetFields();
+                                setPhone("");
+                                setEmail("");
+                                setMessage("");
+                            }
+                            else {
+                                enqueueSnackbar("data.MessageUnknownError", { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                            }
+                        }).catch(error => { 
+                            setLoad(false);
+                            enqueueSnackbar("data.MessageError", { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                        });        
+                    }
+                    else {
+                        enqueueSnackbar("data.MessageWrongEmail", { variant: "info", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                    }
+                }
+                else {
+                    enqueueSnackbar("data.MessageEmptyFields", { variant: "info", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                }
+        }
+        else {
+            enqueueSnackbar("data.MessageCaptcha", { variant: "info", anchorOrigin: { horizontal: "right", vertical: "top"} });
+        }
+    }
+
+    const defaultSubjects = [
+        'Sea shipments',
+        'Air shipments',
+        'Become a reseller',
+        'Job opportunities',
+    ];
+
     
     
     return (
@@ -230,10 +253,27 @@ function Landing() {
                 acceptButtonText="I understood"
                 privacyPolicyLinkText="privacy policy"
             />
+            <SnackbarProvider />
+            
             <Box position="relative">
                 <Paper sx={overlayStyles} />
                 <img style={imageStyles} src={"/assets/img/backimage.png"} alt="overlay" />
                 <Box sx={contentStyles}>
+                    <Button 
+                        variant="contained"
+                        color="inherit" 
+                        size="large"
+                        href={!isAuthenticated ? "/login" : "/admin/"}
+                        sx={{ 
+                            textTransform: "inherit",
+                            backgroundColor: "#fff", 
+                            borderRadius: "20px", 
+                            position: "absolute", 
+                            right: "-100px" 
+                        }}
+                    >
+                        <FaceIcon sx={{ mr: 1 }} /> {!isAuthenticated ? "Login" : "Admin"}
+                    </Button>
                     <Grid container sx={{ width: "1100px", alignItems: "center", justifyContent: "center", my: 3 }}>
                         <Grid item xs={10} sx={{ backgroundColor: "#fff" }}>
                             <img src={"/assets/img/logo-omnifreight-big.png"} style={{ width: "450px" }} alt="omnifreight pro" />
@@ -293,68 +333,55 @@ function Landing() {
 
             <BootstrapDialog
                 onClose={() => setModal(false)}
-                aria-labelledby="customized-dialog-title"
+                aria-labelledby="custom-dialog-title"
                 open={modal}
                 maxWidth="md"
                 fullWidth
             >
-                <BootstrapDialogTitle id="customized-dialog-title" onClose={() => setModal(false)}>
+                <BootstrapDialogTitle id="custom-dialog-title" onClose={() => setModal(false)}>
                     <b>Request quote</b>
                 </BootstrapDialogTitle>
                 <DialogContent dividers>
-                    <Typography variant="subtitle1" gutterBottom>
+                    <Typography variant="subtitle1" gutterBottom px={2}>
                         Please fill in the form and click the button to send a request for a quote.
                     </Typography>
-                </DialogContent>
-                <DialogActions>
-                    <Button variant="contained" onClick={() => alert("Check")} sx={{ textTransform: "none" }}>Continue</Button>
-                    <Button variant="contained" onClick={() => setModal(false)} sx={buttonCloseStyles}>Close</Button>
-                </DialogActions>
-            </BootstrapDialog>
-            
-            <BootstrapDialog
-                onClose={() => setModal2(false)}
-                aria-labelledby="customized-dialog-title"
-                open={modal2}
-                maxWidth="md"
-                fullWidth
-            >
-                <BootstrapDialogTitle id="customized-dialog-title" onClose={() => setModal2(false)}>
-                    <b>Contact a manager</b>
-                </BootstrapDialogTitle>
-                <DialogContent dividers>
-                    <Typography variant="subtitle1" gutterBottom>
-                        Please fill in the form and click the button to send a request for a quote.
-                    </Typography>
-                </DialogContent>
-                <DialogActions>
-                    <Button variant="contained" onClick={() => alert("Check")} sx={{ textTransform: "none" }}>Continue</Button>
-                    <Button variant="contained" onClick={() => setModal2(false)} sx={buttonCloseStyles}>Close</Button>
-                </DialogActions>
-            </BootstrapDialog>
-            
-            <BootstrapDialog
-                onClose={() => setModal3(false)}
-                aria-labelledby="customized-dialog-title"
-                open={modal3}
-                maxWidth="md"
-                fullWidth
-            >
-                <BootstrapDialogTitle id="customized-dialog-title" onClose={() => setModal3(false)}>
-                    <b>Download our brochure</b>
-                </BootstrapDialogTitle>
-                <DialogContent dividers>
-                    <Typography variant="subtitle1" gutterBottom>
-                        Please fill in the form and click the button to send a request for a quote.
-                    </Typography>
-                    <Grid container spacing={2} mt={1}>
+                    <Grid container spacing={2} mt={1} px={2}>
                         <Grid item xs={6}>
-                            <InputLabel htmlFor="whatsapp-number">Whatsapp number</InputLabel>
-                            <MuiTelInput id="phone" value={phone} onChange={setPhone} defaultCountry="CM" preferredCountries={["CM", "BE", "KE"]} fullWidth sx={{ mt: 1 }} />
+                            <InputLabel htmlFor="whatsapp-phone-number" sx={inputLabelStyles}>Whatsapp number</InputLabel>
+                            <MuiTelInput id="whatsapp-phone-number" value={phone} onChange={setPhone} defaultCountry="CM" preferredCountries={["CM", "BE", "KE"]} fullWidth sx={{ mt: 1 }} />
                         </Grid>
                         <Grid item xs={6}>
-                            <InputLabel htmlFor="download-email">Email</InputLabel>
-                            <BootstrapInput key={"dosis-1"} id="download-email" value={email} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)} fullWidth />
+                            <InputLabel htmlFor="request-email" sx={inputLabelStyles}>Email</InputLabel>
+                            <BootstrapInput id="request-email" type="email" value={email} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)} fullWidth />
+                        </Grid>
+                        <Grid item xs={6}>
+                            <InputLabel htmlFor="departure" sx={inputLabelStyles}>City and country of departure of the goods</InputLabel>
+                            <AutocompleteSearch id="departure" value={departureTown} onChange={(e: any) => { setDepartureTown(convertStringToObject(e.target.innerText)); setDeparture(e.target.innerText); }} fullWidth />
+                        </Grid><Grid item xs={6}>
+                            <InputLabel htmlFor="arrival" sx={inputLabelStyles}>City and country of arrival of the goods</InputLabel>
+                            <AutocompleteSearch id="arrival" value={arrivalTown} onChange={(e: any) => { setArrivalTown(convertStringToObject(e.target.innerText)); setArrival(e.target.innerText); }} fullWidth />
+                        </Grid>
+                        <Grid item xs={6}>
+                            <InputLabel htmlFor="cargo-type" sx={inputLabelStyles}>Type of cargo</InputLabel>
+                            <NativeSelect
+                                id="demo-customized-select-native"
+                                value={cargoType}
+                                onChange={handleChangeCargoType}
+                                input={<BootstrapInput />}
+                                fullWidth
+                            >
+                                <option value="0">Container</option>
+                                <option value="1">Conventional</option>
+                                <option value="2">Roll-on/Roll-off</option>
+                            </NativeSelect>
+                        </Grid>
+                        <Grid item xs={6}>
+                            <InputLabel htmlFor="quantity" sx={inputLabelStyles}>Quantity</InputLabel>
+                            <BootstrapInput id="quantity" type="number" inputProps={{ min: 0, max: 100 }} value={quantity} onChange={(e: any) => {console.log(e); setQuantity(e.target.value)}} fullWidth />
+                        </Grid>
+                        <Grid item xs={12} mt={1}>
+                            <InputLabel htmlFor="request-message" sx={inputLabelStyles}>Other details about your need (Optional)</InputLabel>
+                            <BootstrapInput id="request-message" type="text" multiline rows={3} value={message} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setMessage(e.target.value)} fullWidth />
                         </Grid>
                         <Grid item xs={12}>
                             <ReCAPTCHA
@@ -366,9 +393,131 @@ function Landing() {
                     </Grid>
                 </DialogContent>
                 <DialogActions>
-                    <Button variant="contained" color={!load ? "primary" : "info"} className="mr-3" onClick={sendContactFormRedirect} disabled={email == "" || !validMail(email)} sx={{ textTransform: "none" }}>Download</Button>
+                    <Button variant="contained" color={!load ? "primary" : "info"} className="mr-3" onClick={sendQuotationForm} disabled={load === true} sx={{ textTransform: "none" }}>Continue</Button>
+                    {/* <Button variant="contained" onClick={() => alert("Check")} sx={{ textTransform: "none" }}>Continue</Button> */}
+                    <Button variant="contained" onClick={() => setModal(false)} sx={buttonCloseStyles}>Close</Button>
                 </DialogActions>
             </BootstrapDialog>
+            
+            <BootstrapDialog
+                onClose={() => setModal2(false)}
+                aria-labelledby="custom-dialog-title2"
+                open={modal2}
+                maxWidth="md"
+                fullWidth
+            >
+                <BootstrapDialogTitle id="custom-dialog-title2" onClose={() => setModal2(false)}>
+                    <b>Contact a manager</b>
+                </BootstrapDialogTitle>
+                <DialogContent dividers>
+                    <Typography variant="subtitle1" gutterBottom px={2}>
+                        Please fill in the form and click the button to send a request for a quote.
+                    </Typography>
+                    <Grid container spacing={2} mt={1} px={2}>
+                        <Grid item xs={6}>
+                            <InputLabel htmlFor="phone-number" sx={inputLabelStyles}>Whatsapp number</InputLabel>
+                            <MuiTelInput id="phone-number" value={phone} onChange={setPhone} defaultCountry="CM" preferredCountries={["CM", "BE", "KE"]} fullWidth sx={{ mt: 1 }} />
+                        </Grid>
+                        <Grid item xs={6}>
+                            <InputLabel htmlFor="contact-email" sx={inputLabelStyles}>Email</InputLabel>
+                            <BootstrapInput id="contact-email" type="email" value={email} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)} fullWidth />
+                        </Grid>
+                        <Grid item xs={12} mt={1}>
+                            <InputLabel htmlFor="request-subjects" sx={inputLabelStyles}>What topics would you like information on ?</InputLabel>
+                            <Select
+                                labelId="request-subjects"
+                                id="subjects"
+                                multiple
+                                value={subjects}
+                                onChange={handleChangeSubject}
+                                input={<BootstrapInput />}
+                                renderValue={(selected) => selected.join(', ')}
+                                //MenuProps={MenuProps}
+                                fullWidth
+                            >
+                                {defaultSubjects.map((name) => (
+                                    <MenuItem key={name} value={name}>
+                                        <Checkbox checked={subjects.indexOf(name) > -1} />
+                                        <ListItemText primary={name} />
+                                    </MenuItem>
+                                ))}
+                            </Select>
+                        </Grid>
+                        <Grid item xs={12} mt={1}>
+                            <InputLabel htmlFor="request-details" sx={inputLabelStyles}>Enter the details of your need</InputLabel>
+                            <BootstrapInput id="request-details" type="text" multiline rows={3} value={message} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setMessage(e.target.value)} fullWidth />
+                        </Grid>
+                        <Grid item xs={12}>
+                            <ReCAPTCHA
+                                sitekey="6LcapWceAAAAAGab4DRszmgw_uSBgNFSivuYY9kI"
+                                hl="en-GB"
+                                onChange={onChangeCaptcha}
+                            />
+                        </Grid>
+                    </Grid>
+                </DialogContent>
+                <DialogActions>
+                    <Button variant="contained" color={!load ? "primary" : "info"} onClick={sendContactForm} disabled={load === true} sx={{ textTransform: "none" }}>Continue</Button>
+                    <Button variant="contained" onClick={() => setModal2(false)} sx={buttonCloseStyles}>Close</Button>
+                </DialogActions>
+            </BootstrapDialog>
+            
+            <BootstrapDialog
+                onClose={() => setModal3(false)}
+                aria-labelledby="custom-dialog-title3"
+                open={modal3}
+                maxWidth="md"
+                fullWidth
+            >
+                <BootstrapDialogTitle id="custom-dialog-title3" onClose={() => setModal3(false)}>
+                    <b>Download our brochure</b>
+                </BootstrapDialogTitle>
+                <DialogContent dividers>
+                    <Typography variant="subtitle1" gutterBottom px={2}>
+                        Please fill in the form and click the button to send a request for a quote.
+                    </Typography>
+                    <Grid container spacing={2} mt={1} px={2}>
+                        <Grid item xs={6}>
+                            <InputLabel htmlFor="whatsapp-number" sx={inputLabelStyles}>Whatsapp number</InputLabel>
+                            <MuiTelInput id="whatsapp-number" className="custom-phone-number" value={phone} onChange={setPhone} defaultCountry="CM" preferredCountries={["CM", "BE", "KE"]} fullWidth sx={{ mt: 1 }} />
+                        </Grid>
+                        <Grid item xs={6}>
+                            <InputLabel htmlFor="download-email" sx={inputLabelStyles}>Email</InputLabel>
+                            <BootstrapInput id="download-email" type="email" value={email} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)} fullWidth />
+                        </Grid>
+                        <Grid item xs={12}>
+                            <ReCAPTCHA
+                                sitekey="6LcapWceAAAAAGab4DRszmgw_uSBgNFSivuYY9kI"
+                                hl="en-GB"
+                                onChange={onChangeCaptcha}
+                            />
+                        </Grid>
+                    </Grid>
+                </DialogContent>
+                <DialogActions>
+                    <Button variant="contained" color={!load ? "primary" : "info"} className="mr-3" onClick={sendContactFormRedirect} disabled={email === "" || !validMail(email)} sx={{ textTransform: "none" }}>Download</Button>
+                </DialogActions>
+            </BootstrapDialog>
+
+            <Fab aria-describedby={id} color="default" onClick={handleClick} sx={{ backgroundColor: "#fff", position: "fixed", right: "20px", bottom: "20px", width: "64px", height: "64px" }}>
+                <WhatsAppIcon fontSize="large" sx={{ color: "#59CE72", width: "36px", height: "36px" }} />
+            </Fab>
+            <Popover
+                id={id} 
+                open={open} 
+                anchorEl={anchorEl}
+                onClose={handleClose}   
+                anchorOrigin={{
+                    vertical: 'top',
+                    horizontal: 'right',
+                }}
+                transformOrigin={{
+                    vertical: 'bottom',
+                    horizontal: 'right',
+                }}
+            >
+                <iframe title="whatsapp form" src="https://whatsform.com/dRTy_6"  width="100%" height="600" frameBorder="0"></iframe>
+            </Popover>
         </div>
     );
 }
