@@ -7,6 +7,7 @@ import AutocompleteSearch from '../shared/AutocompleteSearch';
 import { inputLabelStyles, BootstrapInput } from '../../misc/styles';
 import axios from 'axios';
 import { enqueueSnackbar, SnackbarProvider } from 'notistack';
+import { protectedResources } from '../../authConfig';
 
 let statusTypes = ["EnAttente", "Valider", "Rejeter"];
 let cargoTypes = ["Container", "Conventional", "RollOnRollOff"];
@@ -41,7 +42,7 @@ function Request(props: any) {
 
     useEffect(() => {
         setLoad(true)
-        fetch("https://localhost:7089/api/Request/"+id)
+        fetch(protectedResources.apiLisQuotes.endPoint+"/Request/"+id)
         .then((response) => response.json())
         .then((data) => {
             console.log(data);
@@ -68,7 +69,7 @@ function Request(props: any) {
         var myHeaders = new Headers();
         //myHeaders.append("Accept", "*/");
         myHeaders.append("Content-Type", "application/json");
-        fetch("https://localhost:7089/api/Request/"+id, {
+        fetch(protectedResources.apiLisQuotes.endPoint+"/Request/"+id, {
             method: "PUT",
             body: JSON.stringify({ id: id, status: 1, whatsapp: phone, email: email, departure: departure, arrival: arrival, cargoType: 0, quantity: quantity, detail: message }),
             headers: myHeaders
@@ -83,7 +84,7 @@ function Request(props: any) {
     function rejectRequest() {
         var myHeaders = new Headers();
         myHeaders.append("Content-Type", "application/json");
-        fetch("https://localhost:7089/api/Request/"+id, {
+        fetch(protectedResources.apiLisQuotes.endPoint+"/Request/"+id, {
             method: "PUT",
             body: JSON.stringify({ id: id, status: 2, whatsapp: phone, email: email, departure: departure, arrival: arrival, cargoType: 0, quantity: quantity, detail: message }),
             headers: myHeaders

@@ -15,6 +15,7 @@ import AutocompleteSearch from '../shared/AutocompleteSearch';
 import { useIsAuthenticated } from '@azure/msal-react';
 import Testimonies from './Testimonies';
 import Footer from './Footer';
+import { protectedResources } from '../../authConfig';
 
 
 export interface DialogTitleProps {
@@ -203,7 +204,7 @@ function Landing() {
                         var myHeaders = new Headers();
                         myHeaders.append('Accept', '');
                         myHeaders.append("Content-Type", "application/json");
-                        fetch("https://localhost:7089/api/Request", {
+                        fetch(protectedResources.apiLisQuotes.endPoint+"/Request", {
                             method: "POST",
                             body: JSON.stringify({ Whatsapp: phone, Email: email, Departure: departure, Arrival: arrival, CargoType: Number(cargoType), Quantity: quantity, Detail: message }),
                             headers: myHeaders

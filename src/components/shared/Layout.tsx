@@ -33,6 +33,7 @@ import { styled, Theme, CSSObject } from '@mui/material/styles';
 import { useEffect } from 'react';
 import { useMsal } from '@azure/msal-react';
 import '../../App.css';
+import { protectedResources } from '../../authConfig';
 //import "../../styles/HideLauncher.css";
 
 // function closeWhatsappForm() {
@@ -164,7 +165,7 @@ function Layout(props: {children?: React.ReactNode}) {
     //const notifications = ["Nouvelle demande : je veux...", "Nouvelle demande : le port de..."];
 
     useEffect(() => {
-        fetch("https://localhost:7089/api/Request")
+        fetch(protectedResources.apiLisQuotes.endPoint+"/Request")
         .then((response) => response.json())
         .then((data) => {
             console.log(data);

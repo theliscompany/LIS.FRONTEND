@@ -10,6 +10,7 @@ import PlaceIcon from '@mui/icons-material/Place';
 import SearchIcon from '@mui/icons-material/Search';
 import AutocompleteSearch from '../shared/AutocompleteSearch';
 import { BootstrapInput, inputLabelStyles } from '../../misc/styles';
+import { protectedResources } from '../../authConfig';
 
 
 function convertStringToObject(str: string): { city: string, country: string } {
@@ -89,7 +90,7 @@ function Requests() {
 
     function loadRequests() {
         setLoad(true);
-        fetch("https://localhost:7089/api/Request")
+        fetch(protectedResources.apiLisQuotes.endPoint+"/Request")
         .then((response) => response.json())
         .then((data) => {
             console.log(data);
