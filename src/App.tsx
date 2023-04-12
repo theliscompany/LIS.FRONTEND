@@ -41,6 +41,7 @@ const App = () => {
             <Route path="/" element={<Landing />} />
             <Route path="privacy-policy" element={<Privacy />} />
             <Route path="login" element={<Login />} />
+            <Route path="*" element={<NotFound />} />
           </Routes>
         </UnauthenticatedTemplate>      
       </BrowserRouter>         
