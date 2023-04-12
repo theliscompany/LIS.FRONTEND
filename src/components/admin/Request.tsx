@@ -1,4 +1,4 @@
-import { Alert, Box, Button, Grid, InputLabel, NativeSelect, Typography } from '@mui/material';
+import { Alert, Box, Button, Grid, InputLabel, NativeSelect, Skeleton, Typography } from '@mui/material';
 import { MuiTelInput } from 'mui-tel-input';
 import React, { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
@@ -7,6 +7,8 @@ import AutocompleteSearch from '../shared/AutocompleteSearch';
 import { inputLabelStyles, BootstrapInput } from '../../misc/styles';
 import { enqueueSnackbar, SnackbarProvider } from 'notistack';
 import { protectedResources } from '../../authConfig';
+import { useAuthorizedBackendApi } from '../../api/api';
+import { BackendService } from '../../services/fetch';
 
 //let statusTypes = ["EnAttente", "Valider", "Rejeter"];
 let cargoTypes = ["Container", "Conventional", "RollOnRollOff"];
@@ -34,39 +36,44 @@ function Request(props: any) {
     const [departure, setDeparture] = React.useState<string>("");
     const [arrival, setArrival] = React.useState<string>("");
     let { id } = useParams();
+
+    const context = useAuthorizedBackendApi();
     
     const handleChangeCargoType = (event: { target: { value: string } }) => {
         setCargoType(event.target.value);
     };
 
     useEffect(() => {
-        setLoad(true)
-        fetch(protectedResources.apiLisQuotes.endPoint+"/Request/"+id)
-        .then((response) => response.json())
-        .then((data) => {
-            console.log(data);
-            if(data.code === 200) {
-                setEmail(data.data.email);
-                setPhone(data.data.whatsapp);
-                setDeparture(data.data.departure);
-                setArrival(data.data.arrival);
-                setDepartureTown(convertStringToObject(data.data.departure));
-                setArrivalTown(convertStringToObject(data.data.arrival));
-                setStatus(data.data.status);
-                setCargoType(String(cargoTypes.indexOf(data.data.cargoType)));
-                setQuantity(data.data.quantity);
-                setMessage(data.data.detail);
-                setLoad(false);
-            }
-            else {
-                setLoad(false);
-            }
-        });
-    }, []);
+        loadRequest();
+    }, [context]);
+    
+    const loadRequest = async () => {
+        if (context) {
+            setLoad(true);
+            const response:any = await (context as BackendService<any>).getSingle(protectedResources.apiLisQuotes.endPoint+"/Request/"+id);
+            if (response !== null && response.code !== undefined) {
+                if (response.code === 200) {
+                    setEmail(response.data.email);
+                    setPhone(response.data.whatsapp);
+                    setDeparture(response.data.departure);
+                    setArrival(response.data.arrival);
+                    setDepartureTown(convertStringToObject(response.data.departure));
+                    setArrivalTown(convertStringToObject(response.data.arrival));
+                    setStatus(response.data.status);
+                    setCargoType(String(cargoTypes.indexOf(response.data.cargoType)));
+                    setQuantity(response.data.quantity);
+                    setMessage(response.data.detail);
+                    setLoad(false);
+                }
+                else {
+                    setLoad(false);
+                }
+            }  
+        }
+    }
     
     function validateRequest() {
         var myHeaders = new Headers();
-        //myHeaders.append("Accept", "*/");
         myHeaders.append("Content-Type", "application/json");
         fetch(protectedResources.apiLisQuotes.endPoint+"/Request/"+id, {
             method: "PUT",
@@ -156,7 +163,7 @@ function Request(props: any) {
                                 <Button variant="contained" color="primary" sx={{ mt: 2, mr: 2, textTransform: "none" }} onClick={validateRequest} >Validate</Button>
                                 <Button variant="contained" color="inherit" sx={{ background: "#fff", color: "#333", mt: 2, textTransform: "none" }} onClick={rejectRequest} >Reject</Button>
                             </Grid>
-                        </Grid> : null
+                        </Grid> : <Skeleton sx={{ mx: 5, mt: 3 }} />
                     }
                 </Box>
             </Box>

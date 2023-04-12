@@ -34,6 +34,8 @@ import { useEffect } from 'react';
 import { useMsal } from '@azure/msal-react';
 import '../../App.css';
 import { protectedResources } from '../../authConfig';
+import { useAuthorizedBackendApi } from '../../api/api';
+import { BackendService } from '../../services/fetch';
 //import "../../styles/HideLauncher.css";
 
 // function closeWhatsappForm() {
@@ -130,6 +132,8 @@ function Layout(props: {children?: React.ReactNode}) {
     const [open, setOpen] = React.useState(true);
     const [notifications, setNotifications] = React.useState<any>(null);
 
+    const context = useAuthorizedBackendApi();
+
     // useEffect(() => {
     //     closeWhatsappForm();
     // }, []);
@@ -162,18 +166,20 @@ function Layout(props: {children?: React.ReactNode}) {
         setOpen(false);
     };
 
-    //const notifications = ["Nouvelle demande : je veux...", "Nouvelle demande : le port de..."];
+    const loadRequests = async () => {
+        if (context) {
+            const response:any = await (context as BackendService<any>).getSingle(protectedResources.apiLisQuotes.endPoint+"/Request");
+            if (response !== null && response.code !== undefined) {
+                if (response.code === 200) {
+                    setNotifications(response.data.filter((elm: any) => { return elm.status === "EnAttente" }).reverse());
+                }
+            }  
+        }
+    }
 
     useEffect(() => {
-        fetch(protectedResources.apiLisQuotes.endPoint+"/Request")
-        .then((response) => response.json())
-        .then((data) => {
-            console.log(data);
-            if(data.code === 200) {
-                setNotifications(data.data.filter((elm: any) => { return elm.status === "EnAttente" }).reverse());
-            }
-        });
-    }, []);
+        loadRequests();
+    }, [context]);
     
     return (
         <React.Fragment>

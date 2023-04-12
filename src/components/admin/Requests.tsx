@@ -11,6 +11,9 @@ import SearchIcon from '@mui/icons-material/Search';
 import AutocompleteSearch from '../shared/AutocompleteSearch';
 import { BootstrapInput, inputLabelStyles } from '../../misc/styles';
 import { protectedResources } from '../../authConfig';
+import { enqueueSnackbar, SnackbarProvider } from 'notistack';
+import { useAuthorizedBackendApi } from '../../api/api';
+import { BackendService } from '../../services/fetch';
 
 
 function convertStringToObject(str: string): { city: string, country: string } {
@@ -75,6 +78,8 @@ function Requests() {
     const [arrivalTown, setArrivalTown] = React.useState<any>(null);
     const [departure, setDeparture] = React.useState<string>("");
     const [arrival, setArrival] = React.useState<string>("");
+
+    const context = useAuthorizedBackendApi();
     
     const handleChangeCargoType = (event: { target: { value: string } }) => {
         setCargoType(event.target.value);
@@ -86,38 +91,47 @@ function Requests() {
 
     useEffect(() => {
         loadRequests();
-    }, []);
+    }, [context]);
 
-    function loadRequests() {
-        setLoad(true);
-        fetch(protectedResources.apiLisQuotes.endPoint+"/Request")
-        .then((response) => response.json())
-        .then((data) => {
-            console.log(data);
-            if(data.code === 200) {
-                setLoad(false);
-                setNotifications(data.data.reverse());
-            }
-        });
+    const loadRequests = async () => {
+        console.log(context);
+        if (context) {
+            setLoad(true);
+            const response:any = await (context as BackendService<any>).getSingle(protectedResources.apiLisQuotes.endPoint+"/Request");
+            if (response !== null && response.code !== undefined) {
+                if (response.code === 200) {
+                    setLoad(false);
+                    setNotifications(response.data.reverse());
+                }
+                else {
+                    setLoad(false);
+                    enqueueSnackbar("Error during the loading of the data", { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                }
+            }  
+        }
     }
 
-    function searchRequests() {
-        setLoad(true);
-        var requestFormatted = createGetRequestUrl(departure, arrival, cargoType, status);
-        //alert(requestFormatted);
-        fetch(requestFormatted)
-        .then((response) => response.json())
-        .then((data) => {
-            console.log(data);
-            if(data.code === 200) {
-                setLoad(false);
-                setNotifications(data.data.reverse());
-            }
-        });
+    const searchRequests = async () => {
+        if (context) {
+            setLoad(true);
+            var requestFormatted = createGetRequestUrl(departure, arrival, cargoType, status);
+            const response:any = await (context as BackendService<any>).getSingle(requestFormatted);
+            if (response !== null && response.code !== undefined) {
+                if (response.code === 200) {
+                    setLoad(false);
+                    setNotifications(response.data.reverse());
+                }
+                else {
+                    setLoad(false);
+                    enqueueSnackbar("Error during the loading of the data", { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                }
+            }  
+        }
     }
-  
+
     return (
         <div style={{ background: "#fff", borderTopLeftRadius: 20, borderTopRightRadius: 20, overflowX: "hidden" }}>
+            <SnackbarProvider />
             <Box py={4}>
                 <Typography variant="h5" mt={3} mx={5}><b>List of requests for quote</b></Typography>
                 <Grid container spacing={1} mx={4} mt={2}>
@@ -172,60 +186,58 @@ function Requests() {
                         </Button>
                     </Grid>
                 </Grid>
-                
+
                 {
-                    notifications !== null ? 
-                    <List sx={{ 
-                        mt: 3 
-                    }}>
-                        {
-                            notifications.map((item: any, i: number) => {
-                                return (
-                                    <ListItem
-                                        key={"request-"+i}
-                                        component="a"
-                                        href={"/admin/request/" + item.id}
-                                        sx={{ 
-                                            '&:hover': {
-                                                backgroundColor: "#fbfbfb"
-                                            },
-                                            borderTop: "1px solid #e6e6e6", 
-                                            px: 5, pt: 1.25, pb: 2 
-                                        }}
-                                    >
-                                        <Grid container sx={{ maxWidth: "600px", color: "#333" }}>
-                                            <Grid item xs={12}>
-                                                <ListItemText
-                                                    primary={<Typography variant="subtitle1" color="#333"><b>{"#" + item.id + " New quote request" + " from : " + item.email}</b></Typography>}
-                                                    secondary={<></>}
-                                                />        
+                    !load ? 
+                        notifications !== null ? 
+                        <List sx={{ 
+                            mt: 3 
+                        }}>
+                            {
+                                notifications.map((item: any, i: number) => {
+                                    return (
+                                        <ListItem
+                                            key={"request-"+i}
+                                            component="a"
+                                            href={"/admin/request/" + item.id}
+                                            sx={{ 
+                                                '&:hover': {
+                                                    backgroundColor: "#fbfbfb"
+                                                },
+                                                borderTop: "1px solid #e6e6e6", 
+                                                px: 5, pt: 1.25, pb: 2 
+                                            }}
+                                        >
+                                            <Grid container sx={{ maxWidth: "600px", color: "#333" }}>
+                                                <Grid item xs={12}>
+                                                    <ListItemText
+                                                        primary={<Typography variant="subtitle1" color="#333"><b>{"#" + item.id + " New quote request" + " from : " + item.email}</b></Typography>}
+                                                    />        
+                                                </Grid>
+                                                <Grid item xs={12}>
+                                                    {dateTimeDiff(item.createdAt)} <Chip size="small" label={item.status} color={item.status === "EnAttente" ? "warning" : item.status === "Valider" ? "success" : "error"} sx={{ ml: 1 }} />
+                                                </Grid>
+                                                <Grid item xs={6} mt={1}>
+                                                    <Typography variant="subtitle1" display="flex" alignItems="center" justifyContent="left" fontSize={15}>Departure location</Typography>
+                                                    <Typography variant="subtitle2" display="flex" alignItems="center" justifyContent="left" fontSize={14}>
+                                                        <PlaceIcon sx={{ position: "relative", right: "4px" }} /> <span>{item.departure}</span>
+                                                    </Typography>
+                                                </Grid>
+                                                <Grid item xs={6} mt={1}>
+                                                    <Typography variant="subtitle1" display="flex" alignItems="center" justifyContent="left" fontSize={15}>Arrival location</Typography>
+                                                    <Typography variant="subtitle2" display="flex" alignItems="center" justifyContent="left" fontSize={14}>
+                                                        <PlaceIcon sx={{ position: "relative", right: "4px" }} /> <span>{item.arrival}</span>
+                                                    </Typography>
+                                                </Grid>
                                             </Grid>
-                                            <Grid item xs={12}>
-                                                {dateTimeDiff(item.createdAt)} <Chip size="small" label={item.status} color={item.status === "EnAttente" ? "warning" : item.status === "Valider" ? "success" : "error"} sx={{ ml: 1 }} />
-                                            </Grid>
-                                            <Grid item xs={6} mt={1}>
-                                                <Typography variant="subtitle1" display="flex" alignItems="center" justifyContent="left" fontSize={15}>Departure location</Typography>
-                                                <Typography variant="subtitle2" display="flex" alignItems="center" justifyContent="left" fontSize={14}>
-                                                    <PlaceIcon sx={{ position: "relative", right: "4px" }} /> <span>{item.departure}</span>
-                                                </Typography>
-                                            </Grid>
-                                            <Grid item xs={6} mt={1}>
-                                                <Typography variant="subtitle1" display="flex" alignItems="center" justifyContent="left" fontSize={15}>Arrival location</Typography>
-                                                <Typography variant="subtitle2" display="flex" alignItems="center" justifyContent="left" fontSize={14}>
-                                                    <PlaceIcon sx={{ position: "relative", right: "4px" }} /> <span>{item.arrival}</span>
-                                                </Typography>
-                                            </Grid>
-                                            {/* <Grid item xs={6}>
-                                                <Button variant="contained" color="primary" sx={{ mt: 2, mr: 2, textTransform: "none" }} disabled={item.status === "Valider"} >Validate</Button>
-                                                <Button variant="contained" sx={{ mt: 2, textTransform: "none" }}>Reject</Button>
-                                            </Grid> */}
-                                        </Grid>
-                                    </ListItem>
-                                )
-                            })
-                        }
-                    </List> : <Skeleton sx={{ mx: 5, mt: 3 }} />
+                                        </ListItem>
+                                    )
+                                })
+                            }
+                        </List> : <Typography variant="subtitle1" mx={5} my={3}>Error during the loading of the data</Typography>
+                    : <Skeleton sx={{ mx: 5, mt: 3 }} />
                 }
+                
             </Box>
         </div>
     );

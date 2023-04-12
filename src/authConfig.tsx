@@ -22,6 +22,6 @@ export const loginRequest: PopupRequest = {
 
 export const protectedResources = {
   apiLisQuotes: {
-    endPoint: "https://localhost:7089/api"
+    endPoint: "https://lisquotes-svc.azurewebsites.net/api"
   }
 }
