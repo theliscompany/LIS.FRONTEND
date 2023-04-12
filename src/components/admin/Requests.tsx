@@ -24,7 +24,7 @@ function convertStringToObject(str: string): { city: string, country: string } {
 }
 
 function createGetRequestUrl(variable1: string, variable2: string, variable3: string, variable4: string) {
-    let url = 'https://localhost:7089/api/Request?';
+    let url = protectedResources.apiLisQuotes.endPoint+'/Request?';
     if (variable1) {
       url += 'departure=' + encodeURIComponent(variable1) + '&';
     }
