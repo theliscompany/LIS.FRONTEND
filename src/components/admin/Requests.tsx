@@ -37,7 +37,7 @@ function createGetRequestUrl(variable1: string, variable2: string, variable3: st
     if (variable4) {
       url += 'status=' + encodeURIComponent(variable4) + '&';
     }
-    // Remove the trailing '&' character if any variables were included
+    
     if (url.slice(-1) === '&') {
       url = url.slice(0, -1);
     }
@@ -67,7 +67,7 @@ function dateTimeDiff(date_time: string) {
 
 function Requests() {
     const [notifications, setNotifications] = React.useState<any>(null);
-    const [design, setDesign] = React.useState<string>("List");
+    //const [design, setDesign] = React.useState<string>("List");
     const [load, setLoad] = React.useState<boolean>(true);
     const [status, setStatus] = React.useState<string>("");
     const [cargoType, setCargoType] = React.useState<string>("");
@@ -95,7 +95,6 @@ function Requests() {
         .then((data) => {
             console.log(data);
             if(data.code === 200) {
-                //filter((elm: any) => { return elm.status !== "Rejeter" })
                 setLoad(false);
                 setNotifications(data.data.reverse());
             }
@@ -111,7 +110,6 @@ function Requests() {
         .then((data) => {
             console.log(data);
             if(data.code === 200) {
-                //filter((elm: any) => { return elm.status !== "Rejeter" })
                 setLoad(false);
                 setNotifications(data.data.reverse());
             }

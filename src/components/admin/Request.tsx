@@ -5,11 +5,10 @@ import { useParams } from 'react-router-dom';
 import '../../App.css';
 import AutocompleteSearch from '../shared/AutocompleteSearch';
 import { inputLabelStyles, BootstrapInput } from '../../misc/styles';
-import axios from 'axios';
 import { enqueueSnackbar, SnackbarProvider } from 'notistack';
 import { protectedResources } from '../../authConfig';
 
-let statusTypes = ["EnAttente", "Valider", "Rejeter"];
+//let statusTypes = ["EnAttente", "Valider", "Rejeter"];
 let cargoTypes = ["Container", "Conventional", "RollOnRollOff"];
 
 function convertStringToObject(str: string): { city: string, country: string } {

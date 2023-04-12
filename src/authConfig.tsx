@@ -20,7 +20,7 @@ export const msalConfig: any = {
 
 export const loginRequest: PopupRequest = {
   scopes: [
-    "api://014e295e-2acf-4ac5-a773-890952f66d1f/ReadQuotesRequests/ReadQuotes"
+    "api://014e295e-2acf-4ac5-a773-890952f66d1f/ReadQuotesRequests"
   ]
 };
 

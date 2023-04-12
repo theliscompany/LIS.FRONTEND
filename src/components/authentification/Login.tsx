@@ -21,12 +21,6 @@ function Login() {
     instance.loginRedirect(loginRequest);
   }
 
-  // useEffect(() => {
-  //   if (isAuthenticated) {
-  //     window.location.href = "/admin/"
-  //   }
-  // }, []);
-  
   return (
     <React.Fragment>
       <Box sx={{ flexGrow: 1 }}>
@@ -37,8 +31,8 @@ function Login() {
               </Typography>
           </Toolbar>
         </AppBar>
-        <Grid container spacing={0} sx={{ alignItems: "stretch" }}>
-          <Grid item xs={4} pt={3} px={4} sx={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "calc(100vh - 60px)", backgroundColor: "#008089", backgroundImage: "url('galaxybg.jpg')" }}>
+        <Grid container spacing={0}>
+          <Grid item xs={12} md={4} px={4} sx={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", pt: { xs: 0, md: 3 }, height: { xs: "420px", md: "calc(100vh - 60px)"}, backgroundColor: "#008089" }}>
             <Card variant="outlined" sx={{ padding: "30px" }}>
               <Alert severity="info" icon={<InfoOutlinedIcon sx={{ color: "#333" }} fontSize="small" />} sx={{ color: "#333", background: "rgb(235, 238, 249)" }}>
                 <Typography variant="subtitle2" fontFamily="inherit">Please sign in to continue.</Typography>
@@ -51,13 +45,10 @@ function Login() {
               </Button>
             </Card>
           </Grid>
-          <Grid item xs={8} p={3} sx={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", backgroundColor: "#68b7d7" }}>
+          <Grid item xs={12} md={8} p={3} sx={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", backgroundColor: "#68b7d7" }}>
             <img src="./img/login-image.svg" alt="login" style={{ width: "60%", display: "block", margin: "0 auto" }} />
-            <Typography variant="h4" mt={3} fontFamily="inherit" color="#fff"><span>Welcome! Your adventure starts here...</span></Typography>
+            <Typography variant="h4" mt={3} fontFamily="inherit" color="#fff" sx={{ fontSize: { xs: 24 } }}><span>Welcome! Your adventure starts here...</span></Typography>
             <Typography variant="body1" mt={2} fontFamily="inherit" mb={3} color="#fff">Discover LIS QUOTES, your application for managing requests for quotes.</Typography>
-            {/* <Button variant="outlined" color="secondary" size="large" sx={{ color: "#fff", borderColor: "#fff", textTransform: "none" }} disableElevation>
-              Learn more
-            </Button> */}
           </Grid>
         </Grid>
       </Box>

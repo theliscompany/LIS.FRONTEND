@@ -38,16 +38,16 @@ export const buttonStyles = {
     borderRadius: "30px",
     padding: "10px 20px 10px",
     textTransform: "none",
-    fontSize: 17,
+    fontSize: { xs: 15, md: 17 },
     fontWeight: 400,
     fontFamily: "PT Sans"
 }
 
 export const cardStyles = { 
-    mx: 2,
+    mx: { xs: 1, md: 2 },
     px: 0.5,
     py: 1,
-    minHeight: "190px"
+    minHeight: { xs: "160px", md: "190px" }
 }
 
 export const bottomStyles = { 
@@ -59,10 +59,10 @@ export const bottomStyles = {
 
 export const cardTextStyles = { 
     lineHeight: 1.2,
-    fontSize: 19,
+    fontSize: { xs: 17, md: 19 },
     fontWeight: "bold",
     fontFamily: "PT Sans",
-    minHeight: "75px" 
+    minHeight: { xs: "55px", md: "75px" } 
 }
 
 export const buttonCloseStyles = {
@@ -75,6 +75,18 @@ export const buttonCloseStyles = {
 
 export const inputLabelStyles = { 
     fontSize: 15 
+}
+
+export const h4textStyles = {
+  fontSize: { xs: 21, md: 30 }
+}
+
+export const h5textStyles = {
+  fontSize: { xs: 18, md: 20 }
+}
+
+export const textStyles = {
+  fontSize: { xs: 15, md: 17 }
 }
 
 export const BootstrapInput = styled(InputBase)(({ theme }) => ({

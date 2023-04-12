@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Box, Button, Card, CardActions, CardContent, Checkbox, Dialog, DialogActions, DialogContent, DialogTitle, Fab, Grid, IconButton, InputBase, InputLabel, ListItemText, MenuItem, NativeSelect, Paper, Popover, Select, SelectChangeEvent, Typography } from '@mui/material';
 import { alpha, styled } from '@mui/material/styles';
 import CloseIcon from '@mui/icons-material/Close';
@@ -12,10 +12,11 @@ import ReCAPTCHA from "react-google-recaptcha";
 import { MuiTelInput } from 'mui-tel-input';
 import { SnackbarProvider, enqueueSnackbar } from 'notistack';
 import AutocompleteSearch from '../shared/AutocompleteSearch';
-import { useIsAuthenticated } from '@azure/msal-react';
+import { useAccount, useIsAuthenticated, useMsal } from '@azure/msal-react';
 import Testimonies from './Testimonies';
 import Footer from './Footer';
-import { protectedResources } from '../../authConfig';
+import { loginRequest, protectedResources } from '../../authConfig';
+import { AuthenticationResult } from '@azure/msal-browser';
 
 
 export interface DialogTitleProps {
@@ -74,6 +75,35 @@ function Landing() {
     const [departure, setDeparture] = React.useState<string>("");
     const [arrival, setArrival] = React.useState<string>("");
     const [anchorEl, setAnchorEl] = React.useState<HTMLButtonElement | null>(null);
+    
+    const { instance, accounts } = useMsal();
+    const account = useAccount(accounts[0] || {});
+    const [accessToken, setAccessToken] = React.useState<string>();
+    
+    useEffect(()=>{
+        const getToken = async () => {
+            if(account) {
+                const token = await instance.acquireTokenSilent({
+                    scopes: loginRequest.scopes,
+                    account: account
+                }).then((response:AuthenticationResult)=>{
+                    return response.accessToken;
+                }).catch(()=>{
+                    return instance.acquireTokenPopup({
+                        ...loginRequest,
+                        account: account
+                        }).then((response) => {
+                            return response.accessToken;
+                    });
+                })
+
+                console.log(token);
+                setAccessToken(token);
+            }
+        }
+
+        getToken();
+    },[account, instance])
 
     const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
         setAnchorEl(event.currentTarget);
@@ -258,78 +288,83 @@ function Landing() {
             />
             <SnackbarProvider />
             
-            <Box position="relative">
-                <Paper sx={overlayStyles} />
-                <img style={imageStyles} src={"/assets/img/backimage.png"} alt="overlay" />
-                <Box sx={contentStyles}>
-                    <Button 
-                        variant="contained"
-                        color="inherit" 
-                        size="large"
-                        href={!isAuthenticated ? "/login" : "/admin/"}
-                        sx={{ 
-                            textTransform: "inherit",
-                            backgroundColor: "#fff", 
-                            borderRadius: "20px", 
-                            position: "absolute", 
-                            right: "-100px" 
-                        }}
-                    >
-                        <FaceIcon sx={{ mr: 1 }} /> {!isAuthenticated ? "Login" : "Admin"}
-                    </Button>
-                    <Grid container sx={{ width: "1100px", alignItems: "center", justifyContent: "center", my: 3 }}>
-                        <Grid item xs={10} sx={{ backgroundColor: "#fff" }}>
-                            <img src={"/assets/img/logo-omnifreight-big.png"} style={{ width: "450px" }} alt="omnifreight pro" />
-                        </Grid>
+            <Box sx={{ 
+                background: "url('/assets/img/backimage.png') center center / cover no-repeat", 
+                backgroundBlendMode: "overlay", backgroundColor: "rgba(0,0,0,0.75)", 
+                height: { xs: "auto", md: "100vh" }, pb: { xs: 5, md: 1 } 
+            }}>
+                <Button 
+                    variant="contained"
+                    color="inherit" 
+                    size="large"
+                    href={!isAuthenticated ? "/login" : "/admin/"}
+                    sx={{ 
+                        textTransform: "inherit",
+                        backgroundColor: "#fff",
+                        borderRadius: "20px",
+                        position: "absolute",
+                        top: { xs: "20px", md: "50px"},
+                        right: { xs: "30px", md: "110px"}
+                    }}
+                >
+                    <FaceIcon sx={{ mr: 1 }} /> {!isAuthenticated ? "Login" : "Admin"}
+                </Button>
+                
+                <Grid container px={1} sx={{ py: { xs: 2, md: 5 } }}>
+                    <Grid item xs={12} md={12} sx={{ maxWidth: { xs: "280px", md: "915px" }, mt: 5, mb: 0, mx: "auto", backgroundColor: "#fff" }}>
+                        <img src={"/assets/img/logo-omnifreight-big.png"} className="logo-front" alt="omnifreight pro" />
                     </Grid>
-                    <Grid container>
-                        <Grid item xs={9} sx={{ margin: "0 auto" }}>
-                            <Typography variant="h3" color="#fff" sx={{ fontFamily: "PT Sans", fontSize: "2.75rem", lineHeight: "60px" }}>
-                                We organize the shipment of your goods to Africa from all over the world!
-                            </Typography>
-                        </Grid>    
+                </Grid>
+                <Grid container px={1} sx={{ mb: { xs: 3, md: 5 } }}>
+                    <Grid item xs={12} sx={{ maxWidth: { md: "840px" }, mx: { md: "auto" } }}>
+                        <Typography variant="h3" color="#fff" sx={{ fontFamily: "PT Sans", fontSize: { xs: "1.35rem", md: "2.75rem" }, lineHeight: { xs: "30px", md: "60px" } }}>
+                            We organize the shipment of your goods to Africa from all over the world!
+                        </Typography>
+                    </Grid>    
+                </Grid>
+                <Grid container sx={{ maxWidth: { md: "1300px" }, mx: { md: "auto" }, px: { xs: 1, md: 5 }, mt: { xs: 0, md: 5 }, pt: {xs: 0, md: 5} }}>
+                    <Grid item xs={12} md={4} sx={{ mb: { xs: 2 } }}>
+                        <Card sx={cardStyles}>
+                            <CardContent>
+                                <Typography sx={cardTextStyles} gutterBottom>
+                                    « Would you like to receive a quotation for a shipment of goods? »
+                                </Typography>
+                            </CardContent>
+                            <CardActions sx={bottomStyles}>
+                                <Button sx={buttonStyles} size="medium" onClick={() => setModal(true)}>Request a quote</Button>
+                            </CardActions>
+                        </Card>
                     </Grid>
-                    <Grid container sx={{ alignItems: "stretch", marginTop: "15vh" }}>
-                        <Grid item xs={4}>
-                            <Card sx={cardStyles}>
-                                <CardContent>
-                                    <Typography sx={cardTextStyles} gutterBottom>
-                                        « Would you like to receive a quotation for a shipment of goods? »
-                                    </Typography>
-                                </CardContent>
-                                <CardActions sx={bottomStyles}>
-                                    <Button sx={buttonStyles} size="medium" onClick={() => setModal(true)}>Request a quote</Button>
-                                </CardActions>
-                            </Card>
-                        </Grid>
-                        <Grid item xs={4}>
-                            <Card sx={cardStyles}>
-                                <CardContent>
-                                    <Typography sx={cardTextStyles} gutterBottom>
-                                        « Would you like an Omnifreight manager to contact you? »
-                                    </Typography>
-                                </CardContent>
-                                <CardActions sx={bottomStyles}>
-                                    <Button size="medium" sx={buttonStyles} onClick={() => setModal2(true)}>Contact a manager</Button>
-                                </CardActions>
-                            </Card>
-                        </Grid>
-                        <Grid item xs={4}>
-                            <Card sx={cardStyles}>
-                                <CardContent>
-                                    <Typography sx={cardTextStyles} gutterBottom>
-                                        « Want to see more information about Omnifreight? »
-                                    </Typography>
-                                </CardContent>
-                                <CardActions sx={bottomStyles}>
-                                    <Button size="medium" sx={buttonStyles} onClick={() => setModal3(true)}>Download our brochure</Button>
-                                </CardActions>
-                            </Card>
-                        </Grid>
+                    <Grid item xs={12} md={4} sx={{ mb: { xs: 2 } }}>
+                        <Card sx={cardStyles}>
+                            <CardContent>
+                                <Typography sx={cardTextStyles} gutterBottom>
+                                    « Would you like an Omnifreight manager to contact you? »
+                                </Typography>
+                            </CardContent>
+                            <CardActions sx={bottomStyles}>
+                                <Button size="medium" sx={buttonStyles} onClick={() => setModal2(true)}>Contact a manager</Button>
+                            </CardActions>
+                        </Card>
                     </Grid>
-                </Box>
+                    <Grid item xs={12} md={4} sx={{ mb: { xs: 2 } }}>
+                        <Card sx={cardStyles}>
+                            <CardContent>
+                                <Typography sx={cardTextStyles} gutterBottom>
+                                    « Want to see more information about Omnifreight? »
+                                </Typography>
+                            </CardContent>
+                            <CardActions sx={bottomStyles}>
+                                <Button size="medium" sx={buttonStyles} onClick={() => setModal3(true)}>Download our brochure</Button>
+                            </CardActions>
+                        </Card>
+                    </Grid>
+                </Grid>
             </Box>
             
+            <Testimonies />
+            <Footer />
+
             <Fab aria-describedby={id} color="default" onClick={handleClick} sx={{ backgroundColor: "#fff", position: "fixed", right: "20px", bottom: "20px", width: "64px", height: "64px" }}>
                 <WhatsAppIcon fontSize="large" sx={{ color: "#59CE72", width: "36px", height: "36px" }} />
             </Fab>
@@ -365,22 +400,23 @@ function Landing() {
                         Please fill in the form and click the button to send a request for a quote.
                     </Typography>
                     <Grid container spacing={2} mt={1} px={2}>
-                        <Grid item xs={6}>
+                        <Grid item xs={12} md={6}>
                             <InputLabel htmlFor="whatsapp-phone-number" sx={inputLabelStyles}>Whatsapp number</InputLabel>
                             <MuiTelInput id="whatsapp-phone-number" value={phone} onChange={setPhone} defaultCountry="CM" preferredCountries={["CM", "BE", "KE"]} fullWidth sx={{ mt: 1 }} />
                         </Grid>
-                        <Grid item xs={6}>
+                        <Grid item xs={12} md={6}>
                             <InputLabel htmlFor="request-email" sx={inputLabelStyles}>Email</InputLabel>
                             <BootstrapInput id="request-email" type="email" value={email} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)} fullWidth />
                         </Grid>
-                        <Grid item xs={6}>
+                        <Grid item xs={12} md={6}>
                             <InputLabel htmlFor="departure" sx={inputLabelStyles}>City and country of departure of the goods</InputLabel>
                             <AutocompleteSearch id="departure" value={departureTown} onChange={(e: any) => { setDepartureTown(convertStringToObject(e.target.innerText)); setDeparture(e.target.innerText); }} fullWidth />
-                        </Grid><Grid item xs={6}>
+                        </Grid>
+                        <Grid item xs={12} md={6}>
                             <InputLabel htmlFor="arrival" sx={inputLabelStyles}>City and country of arrival of the goods</InputLabel>
                             <AutocompleteSearch id="arrival" value={arrivalTown} onChange={(e: any) => { setArrivalTown(convertStringToObject(e.target.innerText)); setArrival(e.target.innerText); }} fullWidth />
                         </Grid>
-                        <Grid item xs={6}>
+                        <Grid item xs={12} md={6}>
                             <InputLabel htmlFor="cargo-type" sx={inputLabelStyles}>Type of cargo</InputLabel>
                             <NativeSelect
                                 id="demo-customized-select-native"
@@ -394,7 +430,7 @@ function Landing() {
                                 <option value="2">Roll-on/Roll-off</option>
                             </NativeSelect>
                         </Grid>
-                        <Grid item xs={6}>
+                        <Grid item xs={12} md={6}>
                             <InputLabel htmlFor="quantity" sx={inputLabelStyles}>Quantity</InputLabel>
                             <BootstrapInput id="quantity" type="number" inputProps={{ min: 0, max: 100 }} value={quantity} onChange={(e: any) => {console.log(e); setQuantity(e.target.value)}} fullWidth />
                         </Grid>
@@ -433,11 +469,11 @@ function Landing() {
                         Please fill in the form and click the button to send a request for a quote.
                     </Typography>
                     <Grid container spacing={2} mt={1} px={2}>
-                        <Grid item xs={6}>
+                        <Grid item xs={12} md={6}>
                             <InputLabel htmlFor="phone-number" sx={inputLabelStyles}>Whatsapp number</InputLabel>
                             <MuiTelInput id="phone-number" value={phone} onChange={setPhone} defaultCountry="CM" preferredCountries={["CM", "BE", "KE"]} fullWidth sx={{ mt: 1 }} />
                         </Grid>
-                        <Grid item xs={6}>
+                        <Grid item xs={12} md={6}>
                             <InputLabel htmlFor="contact-email" sx={inputLabelStyles}>Email</InputLabel>
                             <BootstrapInput id="contact-email" type="email" value={email} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)} fullWidth />
                         </Grid>
@@ -496,11 +532,11 @@ function Landing() {
                         Please fill in the form and click the button to send a request for a quote.
                     </Typography>
                     <Grid container spacing={2} mt={1} px={2}>
-                        <Grid item xs={6}>
+                        <Grid item xs={12} md={6}>
                             <InputLabel htmlFor="whatsapp-number" sx={inputLabelStyles}>Whatsapp number</InputLabel>
                             <MuiTelInput id="whatsapp-number" className="custom-phone-number" value={phone} onChange={setPhone} defaultCountry="CM" preferredCountries={["CM", "BE", "KE"]} fullWidth sx={{ mt: 1 }} />
                         </Grid>
-                        <Grid item xs={6}>
+                        <Grid item xs={12} md={6}>
                             <InputLabel htmlFor="download-email" sx={inputLabelStyles}>Email</InputLabel>
                             <BootstrapInput id="download-email" type="email" value={email} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)} fullWidth />
                         </Grid>
@@ -516,10 +552,7 @@ function Landing() {
                 <DialogActions>
                     <Button variant="contained" color={!load ? "primary" : "info"} className="mr-3" onClick={sendContactFormRedirect} disabled={email === "" || !validMail(email)} sx={{ textTransform: "none" }}>Download</Button>
                 </DialogActions>
-            </BootstrapDialog>
-            
-            <Testimonies />
-            <Footer />
+            </BootstrapDialog>            
         </div>
     );
 }

@@ -12,3 +12,13 @@ code {
     monospace;
 }
 
+.logo-front {
+  width: 450px;
+  border-radius: 5px;
+}
+
+@media only screen and (max-width: 600px) {
+  .logo-front {
+    width: 250px;
+  }
+}
