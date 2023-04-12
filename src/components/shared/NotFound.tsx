@@ -3,12 +3,7 @@ import { Box, Typography } from '@mui/material';
 import '../../App.css';
 
 function NotFound() {
-    /*useEffect(() => {
-    fetch("https://localhost:7054/api/Users")
-    .then((response) => response.json())
-    .then((data) => console.log(data));
-    })*/
-
+    
     return (
     <div>
         <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" sx={{ height: "100vh" }}>
