@@ -31,7 +31,6 @@ const App = () => {
               <Route path="request/:id" element={<Request />} />
             </Route> 
             <Route path="/" element={<Landing />} />
-            <Route path="login" element={<Login />} />
             <Route path="privacy-policy" element={<Privacy />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
@@ -40,7 +39,6 @@ const App = () => {
           <Routes>
             <Route path="/" element={<Landing />} />
             <Route path="privacy-policy" element={<Privacy />} />
-            <Route path="login" element={<Login />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </UnauthenticatedTemplate>      
