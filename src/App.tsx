@@ -2,7 +2,7 @@ import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import './App.css';
 import Layout from './components/shared/Layout';
 import Home from './components/admin/Home';
-import Login from './components/authentification/Login';
+import Login from './components/others/Login';
 // import ResponsiveAppBar from './ResponsiveAppBar';
 // import Haulages from './Haulages';
 // import MiniDrawer from './MiniDrawer';

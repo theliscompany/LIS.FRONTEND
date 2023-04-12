@@ -1,4 +1,3 @@
-import React, { useEffect } from 'react';
 import '../../App.css';
 
 function Wizard() {

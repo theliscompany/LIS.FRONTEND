@@ -1,10 +1,9 @@
-import React, { useEffect } from 'react';
-import { Box, Button, Card, CardActions, CardContent, Checkbox, Dialog, DialogActions, DialogContent, DialogTitle, Fab, Grid, IconButton, InputBase, InputLabel, ListItemText, MenuItem, NativeSelect, Paper, Popover, Select, SelectChangeEvent, Typography } from '@mui/material';
-import { alpha, styled } from '@mui/material/styles';
+import React from 'react';
+import { Box, Button, Card, CardActions, CardContent, Checkbox, DialogActions, DialogContent, DialogTitle, Fab, Grid, IconButton, InputLabel, ListItemText, MenuItem, NativeSelect, Popover, Select, SelectChangeEvent, Typography } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import FaceIcon from '@mui/icons-material/Face';
 import WhatsAppIcon from '@mui/icons-material/WhatsApp';
-import { bottomStyles, cardStyles, imageStyles, buttonStyles, contentStyles, buttonCloseStyles, overlayStyles, inputLabelStyles, cardTextStyles, BootstrapInput, BootstrapDialog } from '../../misc/styles';
+import { bottomStyles, cardStyles, buttonStyles, buttonCloseStyles, inputLabelStyles, cardTextStyles, BootstrapInput, BootstrapDialog } from '../../misc/styles';
 import '../../App.css';
 // @ts-ignore
 import { CookieBanner } from '@palmabit/react-cookie-law';
@@ -12,11 +11,11 @@ import ReCAPTCHA from "react-google-recaptcha";
 import { MuiTelInput } from 'mui-tel-input';
 import { SnackbarProvider, enqueueSnackbar } from 'notistack';
 import AutocompleteSearch from '../shared/AutocompleteSearch';
-import { useAccount, useIsAuthenticated, useMsal } from '@azure/msal-react';
+import { useIsAuthenticated, useMsal } from '@azure/msal-react';
 import Testimonies from './Testimonies';
 import Footer from './Footer';
 import { loginRequest, protectedResources } from '../../authConfig';
-import { AuthenticationResult } from '@azure/msal-browser';
+// import { AuthenticationResult } from '@azure/msal-browser';
 
 
 export interface DialogTitleProps {
@@ -76,34 +75,38 @@ function Landing() {
     const [arrival, setArrival] = React.useState<string>("");
     const [anchorEl, setAnchorEl] = React.useState<HTMLButtonElement | null>(null);
     
-    const { instance, accounts } = useMsal();
-    const account = useAccount(accounts[0] || {});
-    const [accessToken, setAccessToken] = React.useState<string>();
+    const { instance } = useMsal();
+    // const account = useAccount(accounts[0] || {});
+    // const [accessToken, setAccessToken] = React.useState<string>();
     
-    useEffect(()=>{
-        const getToken = async () => {
-            if(account) {
-                const token = await instance.acquireTokenSilent({
-                    scopes: loginRequest.scopes,
-                    account: account
-                }).then((response:AuthenticationResult)=>{
-                    return response.accessToken;
-                }).catch(()=>{
-                    return instance.acquireTokenPopup({
-                        ...loginRequest,
-                        account: account
-                        }).then((response) => {
-                            return response.accessToken;
-                    });
-                })
+    const handleLogin = () => {
+        instance.loginRedirect(loginRequest);
+    }
+    
+    // useEffect(()=>{
+    //     const getToken = async () => {
+    //         if(account) {
+    //             const token = await instance.acquireTokenSilent({
+    //                 scopes: loginRequest.scopes,
+    //                 account: account
+    //             }).then((response:AuthenticationResult)=>{
+    //                 return response.accessToken;
+    //             }).catch(()=>{
+    //                 return instance.acquireTokenPopup({
+    //                     ...loginRequest,
+    //                     account: account
+    //                     }).then((response) => {
+    //                         return response.accessToken;
+    //                 });
+    //             })
 
-                console.log(token);
-                setAccessToken(token);
-            }
-        }
+    //             console.log(token);
+    //             setAccessToken(token);
+    //         }
+    //     }
 
-        getToken();
-    },[account, instance])
+    //     getToken();
+    // },[account, instance])
 
     const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
         setAnchorEl(event.currentTarget);
@@ -297,7 +300,7 @@ function Landing() {
                     variant="contained"
                     color="inherit" 
                     size="large"
-                    href={!isAuthenticated ? "/login" : "/admin/"}
+                    href={!isAuthenticated ? undefined : "/admin/"}
                     sx={{ 
                         textTransform: "inherit",
                         backgroundColor: "#fff",
@@ -306,6 +309,7 @@ function Landing() {
                         top: { xs: "20px", md: "50px"},
                         right: { xs: "30px", md: "110px"}
                     }}
+                    onClick={!isAuthenticated ? handleLogin : undefined}
                 >
                     <FaceIcon sx={{ mr: 1 }} /> {!isAuthenticated ? "Login" : "Admin"}
                 </Button>
