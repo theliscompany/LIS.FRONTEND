@@ -71,8 +71,8 @@ function Landing() {
     const [cargoType, setCargoType] = React.useState<string>("0");
     const [departureTown, setDepartureTown] = React.useState<any>(convertStringToObject("Antwerp, Belgium"));
     const [arrivalTown, setArrivalTown] = React.useState<any>(convertStringToObject("Douala, Cameroon"));
-    const [departure, setDeparture] = React.useState<string>("");
-    const [arrival, setArrival] = React.useState<string>("");
+    const [departure, setDeparture] = React.useState<string>("Antwerp, Belgium");
+    const [arrival, setArrival] = React.useState<string>("Douala, Cameroon");
     const [anchorEl, setAnchorEl] = React.useState<HTMLButtonElement | null>(null);
     
     const { instance } = useMsal();
@@ -83,31 +83,6 @@ function Landing() {
         instance.loginRedirect(loginRequest);
     }
     
-    // useEffect(()=>{
-    //     const getToken = async () => {
-    //         if(account) {
-    //             const token = await instance.acquireTokenSilent({
-    //                 scopes: loginRequest.scopes,
-    //                 account: account
-    //             }).then((response:AuthenticationResult)=>{
-    //                 return response.accessToken;
-    //             }).catch(()=>{
-    //                 return instance.acquireTokenPopup({
-    //                     ...loginRequest,
-    //                     account: account
-    //                     }).then((response) => {
-    //                         return response.accessToken;
-    //                 });
-    //             })
-
-    //             console.log(token);
-    //             setAccessToken(token);
-    //         }
-    //     }
-
-    //     getToken();
-    // },[account, instance])
-
     const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
         setAnchorEl(event.currentTarget);
     };
@@ -139,7 +114,7 @@ function Landing() {
     };
     
     function onChangeCaptcha(value: any) {
-        console.log("Captcha value:", value);
+        //console.log("Captcha value:", value);
         setCaptcha(value);
     }
 
@@ -241,7 +216,9 @@ function Landing() {
                             method: "POST",
                             body: JSON.stringify({ Whatsapp: phone, Email: email, Departure: departure, Arrival: arrival, CargoType: Number(cargoType), Quantity: quantity, Detail: message }),
                             headers: myHeaders
-                        }).then((data: any) => {
+                        })
+                        .then((response: any) => response.json())
+                        .then((data: any) => {
                             setLoad(false);
                             if (data.code === 201) {
                                 enqueueSnackbar("data.MessageSuccess", { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
@@ -253,7 +230,8 @@ function Landing() {
                             else {
                                 enqueueSnackbar("data.MessageUnknownError", { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
                             }
-                        }).catch(error => { 
+                        })
+                        .catch(error => { 
                             setLoad(false);
                             enqueueSnackbar("data.MessageError", { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
                         });        

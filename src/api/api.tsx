@@ -36,7 +36,6 @@ export function AuthorizedBackendApiProvider(props:any):any {//BackendService<un
                 })
 
                 setAccessToken(token);
-                console.log(token);
             }
         }
 

@@ -134,10 +134,6 @@ function Layout(props: {children?: React.ReactNode}) {
 
     const context = useAuthorizedBackendApi();
 
-    // useEffect(() => {
-    //     closeWhatsappForm();
-    // }, []);
-
     const handleLogout = () => {
         instance.logoutRedirect();
     }

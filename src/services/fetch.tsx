@@ -50,7 +50,7 @@ export class BackendService<T> {
         let options_: RequestInit = this.getOption();
 
         return fetch(url, options_).then((_response: Response) => {
-            return this.processGetSignleRequest(_response);
+            return this.processGetSingleRequest(_response);
         });
     }
 
@@ -66,6 +66,28 @@ export class BackendService<T> {
         let options_ : RequestInit = {
             body: content_,
             method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json",
+                "Authorization": authorization
+            }
+        };
+
+        return fetch(url, options_).then((_response: Response) => {
+            return this.processPostRequests(_response);
+        });
+    }
+
+    put = (url: string, model: T): Promise<FileResponse | null> => {
+        url = url.replace(/[?&]$/, "");
+
+        const authorization = "Bearer " + this.accessToken;
+
+        const content_ = JSON.stringify(model);
+
+        let options_ : RequestInit = {
+            body: content_,
+            method: "PUT",
             headers: {
                 "Content-Type": "application/json",
                 "Accept": "application/json",
@@ -99,7 +121,7 @@ export class BackendService<T> {
         return Promise.resolve<T[] | null>(null);
     }
 
-    protected processGetSignleRequest(response: Response): Promise<T | null> {
+    protected processGetSingleRequest(response: Response): Promise<T | null> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 200) {
