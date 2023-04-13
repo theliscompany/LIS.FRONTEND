@@ -17,6 +17,11 @@ code {
   border-radius: 5px;
 }
 
+div.eapps-widget {
+  display: none;
+}
+
+
 @media only screen and (max-width: 600px) {
   .logo-front {
     width: 250px;
