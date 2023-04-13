@@ -70,7 +70,6 @@ function dateTimeDiff(date_time: string) {
 
 function Requests() {
     const [notifications, setNotifications] = React.useState<any>(null);
-    //const [design, setDesign] = React.useState<string>("List");
     const [load, setLoad] = React.useState<boolean>(true);
     const [status, setStatus] = React.useState<string>("");
     const [cargoType, setCargoType] = React.useState<string>("");
