@@ -14,7 +14,6 @@ import { BackendService } from '../../services/fetch';
 let cargoTypes = ["Container", "Conventional", "RollOnRollOff"];
 
 function convertStringToObject(str: string): { city: string, country: string } {
-    //console.log(str);
     if (str !== undefined) {
         const [city, ...countryArr] = str.split(', ');
         const country = countryArr.join(', ');
@@ -118,40 +117,6 @@ function Request(props: any) {
                 enqueueSnackbar("data.MessageError", { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
             }
         }
-    }
-    
-    function validateRequest1() {
-        var myHeaders = new Headers();
-        myHeaders.append("Content-Type", "application/json");
-        fetch(protectedResources.apiLisQuotes.endPoint+"/Request/"+id, {
-            method: "PUT",
-            body: JSON.stringify({ id: id, status: 1, whatsapp: phone, email: email, departure: departure, arrival: arrival, cargoType: 0, quantity: quantity, detail: message }),
-            headers: myHeaders
-        })
-        .then((data: any) => {
-            enqueueSnackbar("data.MessageSuccess", { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
-        })
-        .catch(error => { 
-            setLoad(false);
-            enqueueSnackbar("data.MessageError", { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });    
-        });
-    }
-
-    function rejectRequest1() {
-        var myHeaders = new Headers();
-        myHeaders.append("Content-Type", "application/json");
-        fetch(protectedResources.apiLisQuotes.endPoint+"/Request/"+id, {
-            method: "PUT",
-            body: JSON.stringify({ id: id, status: 2, whatsapp: phone, email: email, departure: departure, arrival: arrival, cargoType: 0, quantity: quantity, detail: message }),
-            headers: myHeaders
-        })
-        .then((data: any) => {
-            enqueueSnackbar("data.MessageSuccess", { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
-        })
-        .catch(error => { 
-            setLoad(false);
-            enqueueSnackbar("data.MessageError", { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });    
-        });
     }
     
     return (

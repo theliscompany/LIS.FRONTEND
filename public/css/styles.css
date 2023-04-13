@@ -11391,9 +11391,6 @@ footer.footer {
 .logo img {
   max-height: 65px;
 }
-div.eapps-widget {
-  display: none;
-}
 /*
 div[class="^Bubble__BubbleComponent"] {
   margin-right: 50px !important;
