@@ -31,19 +31,11 @@ import { Badge, Container } from '@mui/material';
 import { Outlet, NavLink } from 'react-router-dom';
 import { styled, Theme, CSSObject } from '@mui/material/styles';
 import { useEffect } from 'react';
-import { useMsal } from '@azure/msal-react';
+import { useAccount, useMsal } from '@azure/msal-react';
 import '../../App.css';
 import { protectedResources } from '../../authConfig';
 import { useAuthorizedBackendApi } from '../../api/api';
 import { BackendService } from '../../services/fetch';
-//import "../../styles/HideLauncher.css";
-
-// function closeWhatsappForm() {
-//     var whatsappForm: HTMLElement | null = document.getElementById("wf-launcher-container");
-//     if (whatsappForm !== null) {
-//         whatsappForm.style.display = "none";
-//     }
-// }
 
 function stringToColor(string: string) {
     let hash = 0;
@@ -65,12 +57,12 @@ function stringToColor(string: string) {
     return color;
 }
 
-function stringAvatar(name: string) {
+function stringAvatar(name: string | undefined) {
     return {
         sx: {
-        bgcolor: stringToColor(name),
+            bgcolor: name !== undefined ? stringToColor(name) : "#333",
         },
-        children: `${name.split(' ')[0][0]}${name.split(' ')[1][0]}`,
+        children: `${name?.split(' ')[0][0]}${name?.split(' ')[1][0]}`,
     };
 }
 
@@ -126,11 +118,12 @@ const DarkTooltip = styled(({ className, ...props }: TooltipProps) => (
 }));
   
 function Layout(props: {children?: React.ReactNode}) {
-    const { instance } = useMsal();
+    const { instance, accounts } = useMsal();
     const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(null);
     const [anchorElNotifications, setAnchorElNotifications] = React.useState<null | HTMLElement>(null);
     const [open, setOpen] = React.useState(true);
     const [notifications, setNotifications] = React.useState<any>(null);
+    const account = useAccount(accounts[0] || {});
 
     const context = useAuthorizedBackendApi();
 
@@ -164,6 +157,7 @@ function Layout(props: {children?: React.ReactNode}) {
 
     const loadRequests = async () => {
         if (context) {
+            console.log(context);
             const response:any = await (context as BackendService<any>).getSingle(protectedResources.apiLisQuotes.endPoint+"/Request");
             if (response !== null && response.code !== undefined) {
                 if (response.code === 200) {
@@ -238,9 +232,9 @@ function Layout(props: {children?: React.ReactNode}) {
                                     : null
                                 }
                                 
-                                <DarkTooltip title="Cyrille Penaye">
+                                <DarkTooltip title={account?.name}>
                                     <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                                        <Avatar alt="Cyrille Penaye" {...stringAvatar('Cyrille Penaye')} src="../cyrillepenaye.jpg" />
+                                        <Avatar alt={account?.name} {...stringAvatar(account?.name)} src="../cyrillepenaye.jpg" />
                                     </IconButton>
                                 </DarkTooltip>
                                 <Menu
@@ -262,9 +256,9 @@ function Layout(props: {children?: React.ReactNode}) {
                                     onClose={handleCloseUserMenu}
                                 >
                                     <div style={{ height: "148px", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", background: "rgb(246, 248, 252)", marginBottom: "8px" }}>
-                                        <Avatar alt="Cyrille Penaye" sx={{ width: "64px", height: "64px", marginBottom: "6px" }} src="../cyrillepenaye.jpg" />
-                                        <Typography variant="subtitle2" sx={{ fontWeight: "bolder" }}>Cyrille Penaye</Typography >
-                                        <Typography variant="caption">cyrille.penaye@omnifreight.eu</Typography>
+                                        <Avatar alt={account?.name} sx={{ width: "64px", height: "64px", marginBottom: "6px" }} src="../cyrillepenaye.jpg" />
+                                        <Typography variant="subtitle2" sx={{ fontWeight: "bolder" }}>{account?.name}</Typography >
+                                        <Typography variant="caption">{account?.username}</Typography>
                                     </div>
                                     <MenuItem dense key={"x1-View Profile"} title="View Profile" onClick={handleCloseUserMenu}>
                                         <ListItemIcon className="cs-listitemicon">
