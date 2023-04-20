@@ -133,6 +133,12 @@ function Landing() {
         const body:any = { from: from, to: to, subject: subject, htmlContent: htmlContent };
         const data = await (context as BackendService<any>).postForm(protectedResources.apiLisQuotes.endPoint+"/Email", body);
         console.log(data);
+        if (data?.status === 200) {
+            enqueueSnackbar("data.MessageSuccess", { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
+        }
+        else {
+            enqueueSnackbar("data.MessageError", { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+        }
     }
       
     function sendContactFormRedirect() {
@@ -148,9 +154,10 @@ function Landing() {
                         body: JSON.stringify({ phoneNumber: phone, email: email, goodsType: "" }),
                         headers: myHeaders
                     }).then((data: any) => {
-                        enqueueSnackbar("data.MessageSuccess", { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                        //enqueueSnackbar("data.MessageSuccess", { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
                         setPhone("");
                         setEmail("")
+                        setLoad(false);
                         // download("/assets/omnifreight_flyer.pdf", "Flyer Omnifreight.pdf");
                         // Here i should send the email to the file
                         var content = "<body style=\"font-family: Arial, sans-serif; font-size: 14px; color: #333;\">\r\n\t<div style=\"background-color: #f2f2f2; padding: 20px;\">\r\n\t\t<h1 style=\"color: #000; margin-bottom: 20px;\">Download the flyer</h1>\r\n\t\t<p style=\"margin-bottom: 20px;\">We have sent you the flyer.</p>\r\n\t\t<a href=\"https://lisquotes-ui.azurewebsites.net/assets/omnifreight_flyer.pdf\" style=\"display: inline-block; background-color: #008089; color: #fff; padding: 10px 20px; text-decoration: none;\">Download</a>\r\n\t\t<p style=\"margin-top: 20px;\">Please, click the button up to download the document.</p>\r\n\t</div>\r\n</body>";
