@@ -69,7 +69,7 @@ function dateTimeDiff(date_time: string) {
     }
 }
 
-function Requests() {
+function RequestsSearch() {
     const [notifications, setNotifications] = React.useState<any>(null);
     const [load, setLoad] = React.useState<boolean>(true);
     const [status, setStatus] = React.useState<string>("");
@@ -248,4 +248,4 @@ function Requests() {
     );
 }
 
-export default Requests;
+export default RequestsSearch;

@@ -27,15 +27,18 @@ import GroupsIcon from '@mui/icons-material/Groups';
 import LogoutIcon from '@mui/icons-material/Logout';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import RequestQuoteIcon from '@mui/icons-material/RequestQuote';
-import { Badge, Container } from '@mui/material';
-import { Outlet, NavLink } from 'react-router-dom';
+import { Badge, Container, InputAdornment } from '@mui/material';
+import { Outlet, NavLink, Link } from 'react-router-dom';
 import { styled, Theme, CSSObject } from '@mui/material/styles';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useAccount, useMsal } from '@azure/msal-react';
 import '../../App.css';
 import { protectedResources } from '../../authConfig';
 import { useAuthorizedBackendApi } from '../../api/api';
 import { BackendService } from '../../services/fetch';
+import { BootstrapInput } from '../../misc/styles';
+import Search from '@mui/icons-material/Search';
+
 
 function stringToColor(string: string) {
     let hash = 0;
@@ -119,10 +122,11 @@ const DarkTooltip = styled(({ className, ...props }: TooltipProps) => (
   
 function Layout(props: {children?: React.ReactNode}) {
     const { instance, accounts } = useMsal();
-    const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(null);
-    const [anchorElNotifications, setAnchorElNotifications] = React.useState<null | HTMLElement>(null);
-    const [open, setOpen] = React.useState(true);
-    const [notifications, setNotifications] = React.useState<any>(null);
+    const [anchorElUser, setAnchorElUser] = useState<null | HTMLElement>(null);
+    const [anchorElNotifications, setAnchorElNotifications] = useState<null | HTMLElement>(null);
+    const [open, setOpen] = useState(true);
+    const [notifications, setNotifications] = useState<any>(null);
+    const [searchText, setSearchText] = useState<string>("");
     const account = useAccount(accounts[0] || {});
 
     const context = useAuthorizedBackendApi();
@@ -157,7 +161,6 @@ function Layout(props: {children?: React.ReactNode}) {
 
     const loadRequests = async () => {
         if (context) {
-            console.log(context);
             const response:any = await (context as BackendService<any>).getSingle(protectedResources.apiLisQuotes.endPoint+"/Request");
             if (response !== null && response.code !== undefined) {
                 if (response.code === 200) {
@@ -181,6 +184,24 @@ function Layout(props: {children?: React.ReactNode}) {
                             <Typography variant="h6" noWrap component="a" href="/admin/">
                                 <img src="/img/logolisquotes.png" className="img-fluid" style={{ maxHeight: "50px", marginTop: "10px" }} alt="lisquotes" />
                             </Typography>
+                            <BootstrapInput 
+                                id="searchText" 
+                                type="text" 
+                                value={searchText}
+                                placeholder="Type something to search..."
+                                sx={{ ml: 5, minWidth: { md: "400px" } }} 
+                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchText(e.target.value)} endAdornment={
+                                    <InputAdornment position="end">
+                                        <IconButton href={"/admin/search/"+searchText} edge="end"><Search /></IconButton>
+                                    </InputAdornment>
+                                } 
+                                onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
+                                    if (e.key === "Enter") {
+                                        window.location.href = "/admin/search/"+searchText;
+                                        e.preventDefault();
+                                    }
+                                }}
+                            />
 
                             <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }} />
                             <Box sx={{ flexGrow: 0 }}>
@@ -218,7 +239,7 @@ function Layout(props: {children?: React.ReactNode}) {
                                             {
                                                 notifications.map((item: any, i: any) => {
                                                     return (
-                                                        <MenuItem dense key={"msg-"+i} title="View" onClick={handleCloseNotificationsMenu}>
+                                                        <MenuItem dense key={"msg-"+i} title="View" component="a" href={"/admin/request/"+item.id}>
                                                             <ListItemIcon className="cs-listitemicon">
                                                                 <RequestQuoteIcon fontSize="small" />
                                                             </ListItemIcon>

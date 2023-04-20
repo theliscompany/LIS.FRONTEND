@@ -33,10 +33,11 @@ export function AuthorizedBackendApiProvider(props:any):any {
                         }).then((response) => {
                             return response.accessToken;
                     });
-                })
+                });
+
+                console.log(token);
 
                 setAccessToken(token);
-                console.log(account);
             }
         }
 

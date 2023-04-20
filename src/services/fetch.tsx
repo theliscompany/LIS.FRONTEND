@@ -34,7 +34,7 @@ export class BackendService<T> {
 
         url = url.replace(/[?&]$/, "");
 
-        const authorization = "Bearer " + this.accessToken;
+        //const authorization = "Bearer " + this.accessToken;
         let options_: RequestInit = this.getOption();
 
         return fetch(url, options_).then((_response: Response) => {
@@ -46,7 +46,7 @@ export class BackendService<T> {
 
         url = url.replace(/[?&]$/, "");
 
-        const authorization = "Bearer " + this.accessToken;
+        //const authorization = "Bearer " + this.accessToken;
         let options_: RequestInit = this.getOption();
 
         return fetch(url, options_).then((_response: Response) => {
@@ -113,9 +113,9 @@ export class BackendService<T> {
             
             return result200;
             });
-        } else if (status !== 200 && status !== 204) {
+            } else if (status !== 200 && status !== 204) {
             return response.text().then((_responseText) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+                return throwException("An unexpected server error occurred.", status, _responseText, _headers);
             });
         }
         return Promise.resolve<T[] | null>(null);
