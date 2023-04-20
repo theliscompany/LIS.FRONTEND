@@ -96,7 +96,7 @@ function RequestsSearch() {
 
     const loadRequests = async () => {
         if (context) {
-            console.log(search);
+            // console.log(search);
             setLoad(true);
             const response:any = await (context as BackendService<any>).getSingle(search !== undefined ? protectedResources.apiLisQuotes.endPoint+"/Request?Search="+search : protectedResources.apiLisQuotes.endPoint+"/Request");
             if (response !== null && response.code !== undefined) {

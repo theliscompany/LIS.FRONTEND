@@ -16,8 +16,6 @@ export const overlayStyles = {
 };
   
 export const imageStyles = {
-    //position: 'relative',
-    //zIndex: 0,
     width: "100vw"
 };
   
@@ -134,4 +132,3 @@ export const BootstrapDialog = styled(Dialog)(({ theme }) => ({
       padding: theme.spacing(1),
     },
 }));
-
