@@ -11,7 +11,7 @@ export const useAuthorizedBackendApi = (): BackendService<unknown> | null => {
     return useContext(AuthorizedBackendApiContext);
 }
 
-export function AuthorizedBackendApiProvider(props:any):any {//BackendService<unknown> | null {
+export function AuthorizedBackendApiProvider(props:any):any {
     const { instance, accounts } = useMsal();
     const account = useAccount(accounts[0] || {});
     const [accessToken, setAccessToken] = useState<string>();
@@ -33,7 +33,9 @@ export function AuthorizedBackendApiProvider(props:any):any {//BackendService<un
                         }).then((response) => {
                             return response.accessToken;
                     });
-                })
+                });
+
+                console.log(token);
 
                 setAccessToken(token);
             }

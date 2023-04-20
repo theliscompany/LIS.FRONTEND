@@ -11,6 +11,7 @@ import { AuthenticatedTemplate, UnauthenticatedTemplate } from '@azure/msal-reac
 import NotFound from './components/shared/NotFound';
 import Request from './components/admin/Request';
 import { AuthorizedBackendApiProvider } from './api/api';
+import RequestsSearch from './components/admin/RequestsSearch';
 
 const App = () => {
   return (
@@ -24,6 +25,7 @@ const App = () => {
                 <Route path="wizard" element={<Wizard />} />
                 <Route path="simulation" element={<Simulation />} />
                 <Route path="requests" element={<Requests />} />
+                <Route path="search/:search" element={<RequestsSearch />} />
                 <Route path="request/:id" element={<Request />} />
               </Route> 
               <Route path="/" element={<Landing />} />

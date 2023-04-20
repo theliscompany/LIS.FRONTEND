@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Box, Button, Card, CardActions, CardContent, Checkbox, DialogActions, DialogContent, DialogTitle, Fab, Grid, IconButton, InputLabel, ListItemText, MenuItem, NativeSelect, Popover, Select, SelectChangeEvent, Typography } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import FaceIcon from '@mui/icons-material/Face';
@@ -9,6 +9,7 @@ import '../../App.css';
 import { CookieBanner } from '@palmabit/react-cookie-law';
 import ReCAPTCHA from "react-google-recaptcha";
 import { MuiTelInput } from 'mui-tel-input';
+import { MuiChipsInput, MuiChipsInputChip } from 'mui-chips-input';
 import { SnackbarProvider, enqueueSnackbar } from 'notistack';
 import AutocompleteSearch from '../shared/AutocompleteSearch';
 import { useIsAuthenticated, useMsal } from '@azure/msal-react';
@@ -58,22 +59,23 @@ function convertStringToObject(str: string): { city: string, country: string } {
 
 function Landing() {
     const isAuthenticated = useIsAuthenticated();
-    const [modal, setModal] = React.useState<boolean>(false);
-    const [modal2, setModal2] = React.useState<boolean>(false);
-    const [modal3, setModal3] = React.useState<boolean>(false);
-    const [load, setLoad] = React.useState<boolean>(false);
-    const [email, setEmail] = React.useState<string>("");
-    const [captcha, setCaptcha] = React.useState<string | null>(null);
-    const [phone, setPhone] = React.useState<string>("");
-    const [message, setMessage] = React.useState<string>("");
-    const [subjects, setSubjects] = React.useState<string[]>([]);
-    const [quantity, setQuantity] = React.useState<number>(1);
-    const [cargoType, setCargoType] = React.useState<string>("0");
-    const [departureTown, setDepartureTown] = React.useState<any>(convertStringToObject("Antwerp, Belgium"));
-    const [arrivalTown, setArrivalTown] = React.useState<any>(convertStringToObject("Douala, Cameroon"));
-    const [departure, setDeparture] = React.useState<string>("Antwerp, Belgium");
-    const [arrival, setArrival] = React.useState<string>("Douala, Cameroon");
-    const [anchorEl, setAnchorEl] = React.useState<HTMLButtonElement | null>(null);
+    const [modal, setModal] = useState<boolean>(false);
+    const [modal2, setModal2] = useState<boolean>(false);
+    const [modal3, setModal3] = useState<boolean>(false);
+    const [load, setLoad] = useState<boolean>(false);
+    const [email, setEmail] = useState<string>("");
+    const [captcha, setCaptcha] = useState<string | null>(null);
+    const [phone, setPhone] = useState<string>("");
+    const [message, setMessage] = useState<string>("");
+    const [subjects, setSubjects] = useState<string[]>([]);
+    const [quantity, setQuantity] = useState<number>(1);
+    const [cargoType, setCargoType] = useState<string>("0");
+    const [departureTown, setDepartureTown] = useState<any>(convertStringToObject("Antwerp, Belgium"));
+    const [arrivalTown, setArrivalTown] = useState<any>(convertStringToObject("Douala, Cameroon"));
+    const [departure, setDeparture] = useState<string>("Antwerp, Belgium");
+    const [arrival, setArrival] = useState<string>("Douala, Cameroon");
+    const [tags, setTags] = useState<MuiChipsInputChip[]>([]);
+    const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
     
     const { instance } = useMsal();
     // const account = useAccount(accounts[0] || {});
@@ -93,11 +95,6 @@ function Landing() {
 
     const open = Boolean(anchorEl);
     const id = open ? 'simple-popover' : undefined;
-    
-    
-    // const handleArrivalLocationChange = (value: string) => {
-    //     setArrivalTown(value);
-    // };
     
     const handleChangeSubject = (event: SelectChangeEvent<typeof subjects>) => {
         const {
@@ -214,7 +211,7 @@ function Landing() {
                         myHeaders.append("Content-Type", "application/json");
                         fetch(protectedResources.apiLisQuotes.endPoint+"/Request", {
                             method: "POST",
-                            body: JSON.stringify({ Whatsapp: phone, Email: email, Departure: departure, Arrival: arrival, CargoType: Number(cargoType), Quantity: quantity, Detail: message }),
+                            body: JSON.stringify({ Whatsapp: phone, Email: email, Departure: departure, Arrival: arrival, CargoType: Number(cargoType), Quantity: quantity, Detail: message, Tags: tags.join(",") }),
                             headers: myHeaders
                         })
                         .then((response: any) => response.json())
@@ -415,6 +412,33 @@ function Landing() {
                         <Grid item xs={12} md={6}>
                             <InputLabel htmlFor="quantity" sx={inputLabelStyles}>Quantity</InputLabel>
                             <BootstrapInput id="quantity" type="number" inputProps={{ min: 0, max: 100 }} value={quantity} onChange={(e: any) => {console.log(e); setQuantity(e.target.value)}} fullWidth />
+                        </Grid>
+                        <Grid item xs={12} mt={1}>
+                            <InputLabel htmlFor="tags" sx={inputLabelStyles}>Tags</InputLabel>
+                            <MuiChipsInput 
+                                id="tags" 
+                                placeholder="Type some key words of your request" 
+                                value={tags} variant="outlined" 
+                                onChange={(elm: MuiChipsInputChip[]) => { setTags(elm); }} 
+                                fullWidth 
+                                sx={{ 
+                                    mt: 1,
+                                    borderRadius: 4,
+                                    '& .MuiInputBase-root input': {
+                                        border: '1px solid #ced4da',
+                                        padding: '10.5px 16px'
+                                    },
+                                    '& input': {
+                                        position: 'relative',
+                                        backgroundColor: '#fcfcfb',
+                                        fontSize: 16,
+                                        fontFamily: ['-apple-system','BlinkMacSystemFont','"Segoe UI"','Roboto','"Helvetica Neue"','Arial','sans-serif','"Apple Color Emoji"','"Segoe UI Emoji"','"Segoe UI Symbol"',].join(','),
+                                    }, 
+                                }} 
+                                renderChip={(Component, key, props) => {
+                                    return <Component {...props} key={key} sx={{ mt: .75 }} />
+                                }}
+                            />
                         </Grid>
                         <Grid item xs={12} mt={1}>
                             <InputLabel htmlFor="request-message" sx={inputLabelStyles}>Other details about your need (Optional)</InputLabel>

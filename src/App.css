@@ -150,3 +150,8 @@ input#whatsapp-phone-number, input#phone-number, input#whatsapp-number {
 .MuiAlert-action {
   padding: 0px;
 }
+
+svg.MuiSvgIcon-root.MuiSvgIcon-fontSizeMedium.MuiNativeSelect-icon.MuiNativeSelect-iconStandard {
+  position: absolute;
+  right: 8.5px;
+}
