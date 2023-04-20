@@ -76,7 +76,36 @@ export class BackendService<T> {
         return fetch(url, options_).then((_response: Response) => {
             return this.processPostRequests(_response);
         });
+    } 
+
+    postForm = (url: string, model: any): Promise<FileResponse | null> => {
+        url = url.replace(/[?&]$/, "");
+    
+        const authorization = "Bearer " + this.accessToken;
+    
+        const formData = new FormData();
+        for (const [key, value] of Object.entries(model)) {
+            if (value !== null && value !== undefined) {
+                if (typeof value === "string" || value instanceof Blob) {
+                    formData.append(key, value);
+                }
+            }
+        }
+        console.log(formData);
+        
+        let options_: RequestInit = {
+            body: formData,
+            method: "POST",
+            headers: {
+                "Authorization": authorization
+            }
+        };
+    
+        return fetch(url, options_).then((_response: Response) => {
+            return this.processPostRequests(_response);
+        });
     }
+      
 
     put = (url: string, model: T): Promise<FileResponse | null> => {
         url = url.replace(/[?&]$/, "");

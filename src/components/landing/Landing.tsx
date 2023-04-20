@@ -16,6 +16,8 @@ import { useIsAuthenticated, useMsal } from '@azure/msal-react';
 import Testimonies from './Testimonies';
 import Footer from './Footer';
 import { loginRequest, protectedResources } from '../../authConfig';
+import { BackendService } from '../../services/fetch';
+import { useAuthorizedBackendApi } from '../../api/api';
 // import { AuthenticationResult } from '@azure/msal-browser';
 
 
@@ -78,6 +80,7 @@ function Landing() {
     const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
     
     const { instance } = useMsal();
+    const context = useAuthorizedBackendApi();
     // const account = useAccount(accounts[0] || {});
     // const [accessToken, setAccessToken] = React.useState<string>();
     
@@ -125,6 +128,12 @@ function Landing() {
         a.setAttribute("download", fileName);
         a.click();
     }
+
+    const postEmail = async(from: string, to: string, subject: string, htmlContent: string) => {
+        const body:any = { from: from, to: to, subject: subject, htmlContent: htmlContent };
+        const data = await (context as BackendService<any>).postForm(protectedResources.apiLisQuotes.endPoint+"/Email", body);
+        console.log(data);
+    }
       
     function sendContactFormRedirect() {
         if (captcha !== null) {
@@ -142,7 +151,10 @@ function Landing() {
                         enqueueSnackbar("data.MessageSuccess", { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
                         setPhone("");
                         setEmail("")
-                        download("/assets/omnifreight_flyer.pdf", "Flyer Omnifreight.pdf");
+                        // download("/assets/omnifreight_flyer.pdf", "Flyer Omnifreight.pdf");
+                        // Here i should send the email to the file
+                        var content = "<body style=\"font-family: Arial, sans-serif; font-size: 14px; color: #333;\">\r\n\t<div style=\"background-color: #f2f2f2; padding: 20px;\">\r\n\t\t<h1 style=\"color: #000; margin-bottom: 20px;\">Download the flyer</h1>\r\n\t\t<p style=\"margin-bottom: 20px;\">We have sent you the flyer.</p>\r\n\t\t<a href=\"https://lisquotes-ui.azurewebsites.net/assets/omnifreight_flyer.pdf\" style=\"display: inline-block; background-color: #008089; color: #fff; padding: 10px 20px; text-decoration: none;\">Download</a>\r\n\t\t<p style=\"margin-top: 20px;\">Please, click the button up to download the document.</p>\r\n\t</div>\r\n</body>";
+                        postEmail("cyrille.penaye@omnifreight.eu", email, "You received the flyer", content);
                     }).catch(error => { 
                         setLoad(false);
                         enqueueSnackbar("data.MessageError", { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });    
