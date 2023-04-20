@@ -1,6 +1,6 @@
 import { Alert, Box, Button, Grid, InputLabel, NativeSelect, Skeleton, Typography } from '@mui/material';
 import { MuiTelInput } from 'mui-tel-input';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import '../../App.css';
 import AutocompleteSearch from '../shared/AutocompleteSearch';
@@ -9,6 +9,7 @@ import { enqueueSnackbar, SnackbarProvider } from 'notistack';
 import { protectedResources } from '../../authConfig';
 import { useAuthorizedBackendApi } from '../../api/api';
 import { BackendService } from '../../services/fetch';
+import { MuiChipsInput, MuiChipsInputChip } from 'mui-chips-input';
 
 //let statusTypes = ["EnAttente", "Valider", "Rejeter"];
 let cargoTypes = ["Container", "Conventional", "RollOnRollOff"];
@@ -23,17 +24,18 @@ function convertStringToObject(str: string): { city: string, country: string } {
 }
 
 function Request(props: any) {
-    const [load, setLoad] = React.useState<boolean>(true);
-    const [email, setEmail] = React.useState<string>("");
-    const [status, setStatus] = React.useState<string | null>(null);
-    const [phone, setPhone] = React.useState<string>("");
-    const [message, setMessage] = React.useState<string>("");
-    const [quantity, setQuantity] = React.useState<number>(1);
-    const [cargoType, setCargoType] = React.useState<string>("0");
-    const [departureTown, setDepartureTown] = React.useState<any>(null);
-    const [arrivalTown, setArrivalTown] = React.useState<any>(null);
-    const [departure, setDeparture] = React.useState<string>("");
-    const [arrival, setArrival] = React.useState<string>("");
+    const [load, setLoad] = useState<boolean>(true);
+    const [email, setEmail] = useState<string>("");
+    const [status, setStatus] = useState<string | null>(null);
+    const [phone, setPhone] = useState<string>("");
+    const [message, setMessage] = useState<string>("");
+    const [quantity, setQuantity] = useState<number>(1);
+    const [cargoType, setCargoType] = useState<string>("0");
+    const [departureTown, setDepartureTown] = useState<any>(null);
+    const [arrivalTown, setArrivalTown] = useState<any>(null);
+    const [departure, setDeparture] = useState<string>("");
+    const [arrival, setArrival] = useState<string>("");
+    const [tags, setTags] = useState<MuiChipsInputChip[]>([]);
     let { id } = useParams();
 
     const context = useAuthorizedBackendApi();
@@ -62,6 +64,7 @@ function Request(props: any) {
                     setCargoType(String(cargoTypes.indexOf(response.data.cargoType)));
                     setQuantity(response.data.quantity);
                     setMessage(response.data.detail);
+                    setTags(response.data.tags !== null ? response.data.tags.split(",") : []);
                     setLoad(false);
                 }
                 else {
@@ -82,7 +85,8 @@ function Request(props: any) {
                 arrival: arrival,
                 cargoType: 0,
                 quantity: quantity,
-                detail: message
+                detail: message,
+                tags: tags.length !== 0 ? tags.join(",") : null
             };
 
             const data = await (context as BackendService<any>).put(protectedResources.apiLisQuotes.endPoint+"/Request/"+id, body);
@@ -106,7 +110,8 @@ function Request(props: any) {
                 arrival: arrival,
                 cargoType: 0,
                 quantity: quantity,
-                detail: message
+                detail: message,
+                tags: tags.length !== 0 ? tags.join(",") : null
             };
 
             const data = await (context as BackendService<any>).put(protectedResources.apiLisQuotes.endPoint+"/Request/"+id, body);
@@ -171,6 +176,33 @@ function Request(props: any) {
                             <Grid item xs={6}>
                                 <InputLabel htmlFor="quantity" sx={inputLabelStyles}>Quantity</InputLabel>
                                 <BootstrapInput id="quantity" type="number" inputProps={{ min: 0, max: 100 }} value={quantity} onChange={(e: any) => {console.log(e); setQuantity(e.target.value)}} fullWidth disabled={status === "Valider"} />
+                            </Grid>
+                            <Grid item xs={12} mt={1}>
+                                <InputLabel htmlFor="tags" sx={inputLabelStyles}>Tags</InputLabel>
+                                <MuiChipsInput 
+                                    id="tags" 
+                                    placeholder="Type some key words of your request" 
+                                    value={tags} variant="outlined" 
+                                    onChange={(elm: MuiChipsInputChip[]) => { setTags(elm); }} 
+                                    fullWidth 
+                                    sx={{ 
+                                        mt: 1,
+                                        borderRadius: 4,
+                                        '& .MuiInputBase-root input': {
+                                            border: '1px solid #ced4da',
+                                            padding: '10.5px 16px'
+                                        },
+                                        '& input': {
+                                            position: 'relative',
+                                            backgroundColor: '#fcfcfb',
+                                            fontSize: 16,
+                                            fontFamily: ['-apple-system','BlinkMacSystemFont','"Segoe UI"','Roboto','"Helvetica Neue"','Arial','sans-serif','"Apple Color Emoji"','"Segoe UI Emoji"','"Segoe UI Symbol"',].join(','),
+                                        }, 
+                                    }} 
+                                    renderChip={(Component, key, props) => {
+                                        return <Component {...props} key={key} sx={{ mt: .75 }} />
+                                    }}
+                                />
                             </Grid>
                             <Grid item xs={12} mt={1}>
                                 <InputLabel htmlFor="request-message" sx={inputLabelStyles}>Other details about your need (Optional)</InputLabel>
