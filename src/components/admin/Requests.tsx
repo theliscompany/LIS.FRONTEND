@@ -15,6 +15,7 @@ import { enqueueSnackbar, SnackbarProvider } from 'notistack';
 import { useAuthorizedBackendApi } from '../../api/api';
 import { BackendService } from '../../services/fetch';
 import { useParams } from 'react-router-dom';
+import { RequestResponseDto } from '../../models/models';
 
 
 function convertStringToObject(str: string): { city: string, country: string } {
@@ -96,10 +97,9 @@ function Requests() {
 
     const loadRequests = async () => {
         if (context) {
-            // console.log(search);
             setLoad(true);
-            const response:any = await (context as BackendService<any>).getSingle(search !== undefined ? protectedResources.apiLisQuotes.endPoint+"/Request?Search="+search : protectedResources.apiLisQuotes.endPoint+"/Request");
-            if (response !== null && response.code !== undefined) {
+            const response: RequestResponseDto = await (context as BackendService<any>).getSingle(search !== undefined ? protectedResources.apiLisQuotes.endPoint+"/Request?Search="+search : protectedResources.apiLisQuotes.endPoint+"/Request");
+            if (response !== null && response.code !== undefined && response.data !== undefined) {
                 if (response.code === 200) {
                     setLoad(false);
                     setNotifications(response.data.reverse());
@@ -116,15 +116,15 @@ function Requests() {
         if (context) {
             setLoad(true);
             var requestFormatted = createGetRequestUrl(departure, arrival, cargoType, status);
-            const response:any = await (context as BackendService<any>).getSingle(requestFormatted);
-            if (response !== null && response.code !== undefined) {
+            const response: RequestResponseDto = await (context as BackendService<any>).getSingle(requestFormatted);
+            if (response !== null && response.code !== undefined && response.data !== undefined) {
                 if (response.code === 200) {
                     setLoad(false);
                     setNotifications(response.data.reverse());
                 }
                 else {
                     setLoad(false);
-                    enqueueSnackbar("Error during the loading of the data", { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                    enqueueSnackbar("Error during the loading of the data.", { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
                 }
             }  
         }
