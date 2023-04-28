@@ -238,7 +238,6 @@ function Landing() {
     ];
 
     
-    
     return (
         <div className="App" style={{ overflowX: "hidden" }}>
             <CookieBanner

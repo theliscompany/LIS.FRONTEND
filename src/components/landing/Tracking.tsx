@@ -11,6 +11,12 @@ function Tracking() {
     const [trackingNumber, setTrackingNumber] = useState<string>(id !== undefined ? id : "");
     const [load, setLoad] = useState<boolean>(false);
     const [trackingData, setTrackingData] = useState<any>(null);
+
+    useEffect(() => {
+        if (id !== undefined) {
+            loadRequest();
+        }
+    }, []);
     
     const loadRequest = async () => {
         setLoad(true);
