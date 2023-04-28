@@ -1,14 +1,14 @@
-import { Alert, Box, Button, Divider, Grid, InputLabel, List, ListItem, ListItemText, Typography } from '@mui/material';
+import { Alert, Box, Button, Chip, Divider, Grid, InputLabel, List, ListItem, ListItemText, Typography } from '@mui/material';
 import Skeleton from '@mui/material/Skeleton';
 import React, { useEffect, useState } from 'react';
-import { useAuthorizedBackendApi } from '../../api/api';
 import '../../App.css';
 import { protectedResources } from '../../authConfig';
 import { BootstrapInput, inputLabelStyles } from '../../misc/styles';
-import { BackendService } from '../../services/fetch';
+import { useParams } from 'react-router-dom';
 
 function Tracking() {
-    const [trackingNumber, setTrackingNumber] = useState<string>("");
+    const { id } = useParams();
+    const [trackingNumber, setTrackingNumber] = useState<string>(id !== undefined ? id : "");
     const [load, setLoad] = useState<boolean>(false);
     const [trackingData, setTrackingData] = useState<any>(null);
     
@@ -57,8 +57,12 @@ function Tracking() {
                                 trackingData.requestQuoteData.isConfirmed ? 
                                 <Alert severity="info">You have confirmed your request. You can check other informations about your request down below :</Alert> : <Alert severity="warning">Your request is not confirmed, please check your email or spam.</Alert>
                             }
-                            {/* <Typography sx={{ mt: 3 }}>Informations about your request :  </Typography> */}
+                            <Typography sx={{ mt: 3 }}>Request status : <Chip size="small" label={trackingData.status} color={trackingData.status === "EnAttente" ? "warning" : trackingData.status === "Valider" ? "success" : "error"} sx={{ ml: 1 }} /> </Typography>
                             <List sx={{ my: 3, border: "1px #e2e2e2 solid" }}>
+                                {/* <ListItem>
+                                    <ListItemText primary="Status" secondary={trackingData.status} />
+                                </ListItem>
+                                <Divider /> */}
                                 <ListItem>
                                     <ListItemText primary="Phone number" secondary={trackingData.requestQuoteData.whatsapp} />
                                 </ListItem>

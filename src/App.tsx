@@ -32,6 +32,7 @@ const App = () => {
               <Route path="/" element={<Landing />} />
               <Route path="privacy-policy" element={<Privacy />} />
               <Route path="tracking" element={<Tracking />} />
+              <Route path="tracking/:id" element={<Tracking />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </AuthorizedBackendApiProvider>
