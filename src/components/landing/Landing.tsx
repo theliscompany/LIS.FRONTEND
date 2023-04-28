@@ -3,7 +3,7 @@ import { Box, Button, Card, CardActions, CardContent, Checkbox, DialogActions, D
 import CloseIcon from '@mui/icons-material/Close';
 import FaceIcon from '@mui/icons-material/Face';
 import WhatsAppIcon from '@mui/icons-material/WhatsApp';
-import { bottomStyles, cardStyles, buttonStyles, buttonCloseStyles, inputLabelStyles, cardTextStyles, BootstrapInput, BootstrapDialog } from '../../misc/styles';
+import { bottomStyles, cardStyles, buttonStyles, buttonCloseStyles, inputLabelStyles, cardTextStyles, BootstrapInput, BootstrapDialog, BootstrapDialogTitle } from '../../misc/styles';
 import '../../App.css';
 // @ts-ignore
 import { CookieBanner } from '@palmabit/react-cookie-law';
@@ -18,46 +18,14 @@ import Footer from './Footer';
 import { loginRequest, protectedResources } from '../../authConfig';
 import { BackendService } from '../../services/fetch';
 import { useAuthorizedBackendApi } from '../../api/api';
+import { DialogTitleProps, MailData } from '../../models/models';
 // import { AuthenticationResult } from '@azure/msal-browser';
-
-
-export interface DialogTitleProps {
-    id: string;
-    children?: React.ReactNode;
-    onClose: () => void;
-}
-  
-function BootstrapDialogTitle(props: DialogTitleProps) {
-    const { children, onClose, ...other } = props;
-  
-    return (
-      <DialogTitle sx={{ m: 0, p: 2 }} {...other}>
-        {children}
-        {onClose ? (
-          <IconButton
-            aria-label="close"
-            onClick={onClose}
-            sx={{
-              position: 'absolute',
-              right: 8,
-              top: 8,
-              color: (theme) => theme.palette.grey[500],
-            }}
-          >
-            <CloseIcon />
-          </IconButton>
-        ) : null}
-      </DialogTitle>
-    );
-}
 
 function convertStringToObject(str: string): { city: string, country: string } {
     const [city, ...countryArr] = str.split(', ');
     const country = countryArr.join(', ');
     return { city, country };
 }
-
-
 
 function Landing() {
     const isAuthenticated = useIsAuthenticated();
@@ -130,14 +98,14 @@ function Landing() {
     }
 
     const postEmail = async(from: string, to: string, subject: string, htmlContent: string) => {
-        const body:any = { from: from, to: to, subject: subject, htmlContent: htmlContent };
+        const body: MailData = { from: from, to: to, subject: subject, htmlContent: htmlContent };
         const data = await (context as BackendService<any>).postForm(protectedResources.apiLisQuotes.endPoint+"/Email", body);
         console.log(data);
         if (data?.status === 200) {
-            enqueueSnackbar("data.MessageSuccess", { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
+            enqueueSnackbar("The document has been sent to your email.", { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
         }
         else {
-            enqueueSnackbar("data.MessageError", { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+            enqueueSnackbar("An error occured. Please refresh the page or check your internet connection.", { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
         }
     }
       
@@ -154,7 +122,6 @@ function Landing() {
                         body: JSON.stringify({ phoneNumber: phone, email: email, goodsType: "" }),
                         headers: myHeaders
                     }).then((data: any) => {
-                        //enqueueSnackbar("data.MessageSuccess", { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
                         setPhone("");
                         setEmail("")
                         setLoad(false);
@@ -164,19 +131,19 @@ function Landing() {
                         postEmail("cyrille.penaye@omnifreight.eu", email, "You received the flyer", content);
                     }).catch(error => { 
                         setLoad(false);
-                        enqueueSnackbar("data.MessageError", { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });    
+                        enqueueSnackbar("An error occured. Please refresh the page or check your internet connection.", { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });    
                     });
                 }
                 else {
-                    enqueueSnackbar("data.MessageWrongEmail", { variant: "info", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                    enqueueSnackbar("The email is not valid, please verify it.", { variant: "info", anchorOrigin: { horizontal: "right", vertical: "top"} });
                 }
             }
             else {
-                enqueueSnackbar("data.MessageEmptyFields", { variant: "info", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                enqueueSnackbar("One or many fields are empty, please verify the form.", { variant: "info", anchorOrigin: { horizontal: "right", vertical: "top"} });
             }
         }
         else {
-            enqueueSnackbar("data.MessageCaptcha", { variant: "info", anchorOrigin: { horizontal: "right", vertical: "top"} });
+            enqueueSnackbar("You must check the captcha before sending your request.", { variant: "info", anchorOrigin: { horizontal: "right", vertical: "top"} });
         }
     }
 
@@ -184,39 +151,38 @@ function Landing() {
         if (captcha !== null) {
             if (phone !== "" || email !== "") {
                 if (email === "" || email !== "" && validMail(email)) {
-                var msg = "I want infos about : " + subjects.toString();
-                console.log(msg);
-                setLoad(true);
-                var myHeaders = new Headers();
-                myHeaders.append("Accept", "*/");
-                myHeaders.append("Content-Type", "application/json");
-                fetch("https://omnifreightinfo.azurewebsites.net/api/QuotationBasic", {
-                    method: "POST",
-                    body: JSON.stringify({ phoneNumber: phone, email: email, goodsType: msg+message }),
-                    headers: myHeaders
-                }).then((data: any) => {
-                    //setShow(true);
-                    setLoad(false);
-                    setPhone("");
-                    setEmail("");
-                    setSubjects([]);
-                    setMessage("");
-                    enqueueSnackbar("data.MessageSuccess", { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
-                }).catch(error => { 
-                    setLoad(false);
-                    enqueueSnackbar("data.MessageError", { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
-                });        
+                    var msg = "I want infos about : " + subjects.toString();
+                    console.log(msg);
+                    setLoad(true);
+                    var myHeaders = new Headers();
+                    myHeaders.append("Accept", "*/");
+                    myHeaders.append("Content-Type", "application/json");
+                    fetch("https://omnifreightinfo.azurewebsites.net/api/QuotationBasic", {
+                        method: "POST",
+                        body: JSON.stringify({ phoneNumber: phone, email: email, goodsType: msg+message }),
+                        headers: myHeaders
+                    }).then((data: any) => {
+                        setLoad(false);
+                        setPhone("");
+                        setEmail("");
+                        setSubjects([]);
+                        setMessage("");
+                        enqueueSnackbar("Thanks, we have received your informations.", { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                    }).catch(error => { 
+                        setLoad(false);
+                        enqueueSnackbar("An error occured. Please refresh the page or check your internet connection.", { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                    });        
                 }
                 else {
-                    enqueueSnackbar("data.MessageWrongEmail", { variant: "info", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                    enqueueSnackbar("The email is not valid, please verify it.", { variant: "info", anchorOrigin: { horizontal: "right", vertical: "top"} });
                 }
             }
             else {
-                enqueueSnackbar("data.MessageEmptyFields", { variant: "info", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                enqueueSnackbar("One or many fields are empty, please verify the form.", { variant: "info", anchorOrigin: { horizontal: "right", vertical: "top"} });
             }
         }
         else {
-            enqueueSnackbar("data.MessageCaptcha", { variant: "info", anchorOrigin: { horizontal: "right", vertical: "top"} });
+            enqueueSnackbar("You must check the captcha before sending your request.", { variant: "info", anchorOrigin: { horizontal: "right", vertical: "top"} });
         }
     }
 
@@ -237,31 +203,30 @@ function Landing() {
                         .then((data: any) => {
                             setLoad(false);
                             if (data.code === 201) {
-                                enqueueSnackbar("data.MessageSuccess", { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
-                                //resetFields();
+                                enqueueSnackbar("Your request has been sent with success.", { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
                                 setPhone("");
                                 setEmail("");
                                 setMessage("");
                             }
                             else {
-                                enqueueSnackbar("data.MessageUnknownError", { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                                enqueueSnackbar("An error occured. Please refresh the page or check your internet connection.", { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
                             }
                         })
                         .catch(error => { 
                             setLoad(false);
-                            enqueueSnackbar("data.MessageError", { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                            enqueueSnackbar("An error happened when we were sending your request.", { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
                         });        
                     }
                     else {
-                        enqueueSnackbar("data.MessageWrongEmail", { variant: "info", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                        enqueueSnackbar("The email is not valid, please verify it.", { variant: "info", anchorOrigin: { horizontal: "right", vertical: "top"} });
                     }
                 }
                 else {
-                    enqueueSnackbar("data.MessageEmptyFields", { variant: "info", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                    enqueueSnackbar("One or many fields are empty, please verify the form.", { variant: "info", anchorOrigin: { horizontal: "right", vertical: "top"} });
                 }
         }
         else {
-            enqueueSnackbar("data.MessageCaptcha", { variant: "info", anchorOrigin: { horizontal: "right", vertical: "top"} });
+            enqueueSnackbar("You must check the captcha before sending your request.", { variant: "info", anchorOrigin: { horizontal: "right", vertical: "top"} });
         }
     }
 

@@ -12,6 +12,7 @@ import NotFound from './components/shared/NotFound';
 import Request from './components/admin/Request';
 import { AuthorizedBackendApiProvider } from './api/api';
 import RequestsSearch from './components/admin/RequestsSearch';
+import Tracking from './components/landing/Tracking';
 
 const App = () => {
   return (
@@ -30,6 +31,7 @@ const App = () => {
               </Route> 
               <Route path="/" element={<Landing />} />
               <Route path="privacy-policy" element={<Privacy />} />
+              <Route path="tracking" element={<Tracking />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </AuthorizedBackendApiProvider>
@@ -38,6 +40,7 @@ const App = () => {
           <Routes>
             <Route path="/" element={<Landing />} />
             <Route path="privacy-policy" element={<Privacy />} />
+            <Route path="tracking" element={<Tracking />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </UnauthenticatedTemplate>      

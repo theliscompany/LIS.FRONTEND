@@ -161,7 +161,7 @@ function Layout(props: {children?: React.ReactNode}) {
 
     const loadRequests = async () => {
         if (context) {
-            const response:any = await (context as BackendService<any>).getSingle(protectedResources.apiLisQuotes.endPoint+"/Request");
+            const response = await (context as BackendService<any>).getSingle(protectedResources.apiLisQuotes.endPoint+"/Request");
             if (response !== null && response.code !== undefined) {
                 if (response.code === 200) {
                     setNotifications(response.data.filter((elm: any) => { return elm.status === "EnAttente" }).reverse());
@@ -397,7 +397,7 @@ function Layout(props: {children?: React.ReactNode}) {
                         </List>
                     </Box>
                 </Drawer>
-                <Box component="main" sx={{ flexGrow: 1, p: 3, background: "#f9fafb" }}>
+                <Box component="main" sx={{ flexGrow: 1, p: 3, background: "#f9fafb", minHeight: "100vh" }}>
                     <Toolbar />
                     <Outlet />
                 </Box>

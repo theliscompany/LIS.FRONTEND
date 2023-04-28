@@ -154,25 +154,20 @@ function DownloadForm(props:{closeDialog(): void}) {
               body: JSON.stringify({ phoneNumber: phone, email: email, goodsType: "" }),
               headers: myHeaders
             }).then((data: any) => {
-              //toast.success("data.MessageSuccess");
               setPhone("");
               setEmail("")
               download("./assets/omnifreight_flyer.pdf", "Flyer Omnifreight.png");
             }).catch(error => { 
               setLoad(false);
-              //toast.error("data.MessageError");
             });
           }
           else {
-            //toast.info("data.MessageWrongEmail");
           }
         }
         else {
-          //toast.info("data.MessageEmptyFields");
         }
       }
       else {
-        //toast.info("data.MessageCaptcha");
       }
     }
   

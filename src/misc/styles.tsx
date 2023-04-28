@@ -1,5 +1,7 @@
-import { Dialog, InputBase } from '@mui/material';
+import { Dialog, DialogTitle, IconButton, InputBase } from '@mui/material';
 import { alpha, styled } from '@mui/material/styles';
+import { DialogTitleProps } from '../models/models';
+import CloseIcon from '@mui/icons-material/Close';
 
 export const overlayStyles = {
     position: 'absolute',
@@ -132,3 +134,28 @@ export const BootstrapDialog = styled(Dialog)(({ theme }) => ({
       padding: theme.spacing(1),
     },
 }));
+
+export const BootstrapDialogTitle = (props: DialogTitleProps) => {
+  const { children, onClose, ...other } = props;
+
+  return (
+    <DialogTitle sx={{ m: 0, p: 2 }} {...other}>
+      {children}
+      {onClose ? (
+        <IconButton
+          aria-label="close"
+          onClick={onClose}
+          sx={{
+            position: 'absolute',
+            right: 8,
+            top: 8,
+            color: (theme) => theme.palette.grey[500],
+          }}
+        >
+          <CloseIcon />
+        </IconButton>
+      ) : null}
+    </DialogTitle>
+  );
+}
+
