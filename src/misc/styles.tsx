@@ -1,4 +1,5 @@
-import { Dialog, DialogTitle, IconButton, InputBase } from '@mui/material';
+import { Dialog, DialogTitle, IconButton, InputBase, Tooltip, TooltipProps } from '@mui/material';
+import { tooltipClasses } from '@mui/material/Tooltip';
 import { alpha, styled } from '@mui/material/styles';
 import { DialogTitleProps } from '../models/models';
 import CloseIcon from '@mui/icons-material/Close';
@@ -89,6 +90,35 @@ export const textStyles = {
   fontSize: { xs: 15, md: 17 }
 }
 
+export const datetimeStyles = {
+  mt: 0.75,
+  '.MuiInputBase-input': { 
+    py: "12.5px", 
+    background: "#fcfcfb"
+  } 
+}
+
+export const tagInputStyles = { 
+  mt: 1,
+  borderRadius: 4,
+  '& .MuiInputBase-root input': {
+      border: '1px solid #ced4da',
+      padding: '10.5px 16px'
+  },
+  '& input': {
+      position: 'relative',
+      backgroundColor: '#fcfcfb',
+      fontSize: 16,
+      fontFamily: ['-apple-system','BlinkMacSystemFont','"Segoe UI"','Roboto','"Helvetica Neue"','Arial','sans-serif','"Apple Color Emoji"','"Segoe UI Emoji"','"Segoe UI Symbol"',].join(','),
+  }, 
+}
+
+export const whiteButtonStyles = { 
+  background: "#fff", 
+  color: "#333", mt: 2, 
+  textTransform: "none" 
+}
+
 export const BootstrapInput = styled(InputBase)(({ theme }) => ({
     'label + &': {
       marginTop: theme.spacing(1),
@@ -133,6 +163,17 @@ export const BootstrapDialog = styled(Dialog)(({ theme }) => ({
     '& .MuiDialogActions-root': {
       padding: theme.spacing(1),
     },
+}));
+
+export const DarkTooltip = styled(({ className, ...props }: TooltipProps) => (
+  <Tooltip {...props} arrow classes={{ popper: className }} />
+))(({ theme }) => ({
+  [`& .${tooltipClasses.arrow}`]: {
+    color: theme.palette.common.black,
+  },
+  [`& .${tooltipClasses.tooltip}`]: {
+    backgroundColor: theme.palette.common.black,
+  },
 }));
 
 export const BootstrapDialogTitle = (props: DialogTitleProps) => {

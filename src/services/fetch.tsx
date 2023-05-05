@@ -1,13 +1,11 @@
 import { AccountInfo, AuthenticationResult, IPublicClientApplication } from '@azure/msal-browser';
 import { loginRequest } from '../authConfig';
 
-export const GetToken = (instance:IPublicClientApplication,account: AccountInfo): Promise<AuthenticationResult> => {
-    
+export const GetToken = (instance:IPublicClientApplication,account: AccountInfo): Promise<AuthenticationResult> => {    
     return instance.acquireTokenSilent({
         scopes: loginRequest.scopes,
         account: account
     })
-
 }
 
 export class BackendService<T> {
@@ -18,13 +16,22 @@ export class BackendService<T> {
         this.accessToken = accessToken;
     }
 
-    private getOption = ():RequestInit => {
-
+    private getOption = (): RequestInit => {
         const authorization = "Bearer " + this.accessToken;
         return {
             method: "GET",
             headers: {
                 "Accept": "application/json",
+                "Authorization": authorization
+            }
+        };
+    }
+
+    private deleteOption = (): RequestInit => {
+        const authorization = "Bearer " + this.accessToken;
+        return {
+            method: "DELETE",
+            headers: {
                 "Authorization": authorization
             }
         };
@@ -53,8 +60,6 @@ export class BackendService<T> {
             return this.processGetSingleRequest(_response);
         });
     }
-
-    
 
     post = (url: string, model: T): Promise<FileResponse | null> => {
         url = url.replace(/[?&]$/, "");
@@ -91,7 +96,7 @@ export class BackendService<T> {
                 }
             }
         }
-        console.log(formData);
+        //console.log(formData);
         
         let options_: RequestInit = {
             body: formData,
@@ -104,8 +109,7 @@ export class BackendService<T> {
         return fetch(url, options_).then((_response: Response) => {
             return this.processPostRequests(_response);
         });
-    }
-      
+    }     
 
     put = (url: string, model: T): Promise<FileResponse | null> => {
         url = url.replace(/[?&]$/, "");
@@ -129,20 +133,32 @@ export class BackendService<T> {
         });
     }
 
+    delete = (url:string): Promise<T | null> => {
+        url = url.replace(/[?&]$/, "");
+
+        //const authorization = "Bearer " + this.accessToken;
+        let options_: RequestInit = this.deleteOption();
+
+        return fetch(url, options_).then((_response: Response) => {
+            return this.processGetSingleRequest(_response);
+        });
+    }
+
     protected processGetRequest(response: Response): Promise<T[] | null> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 200) {
             return response.text().then((_responseText) => {
-            let result200: T[] | null = null;
-            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            if (Array.isArray(resultData200)) {
-                result200 = [...resultData200]
-            }
-            
-            return result200;
+                let result200: T[] | null = null;
+                let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+                if (Array.isArray(resultData200)) {
+                    result200 = [...resultData200]
+                }
+                
+                return result200;
             });
-            } else if (status !== 200 && status !== 204) {
+        } 
+        else if (status !== 200 && status !== 204) {
             return response.text().then((_responseText) => {
                 return throwException("An unexpected server error occurred.", status, _responseText, _headers);
             });
@@ -168,14 +184,15 @@ export class BackendService<T> {
     protected processPostRequests(response: Response): Promise<FileResponse | null> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 200 || status === 206) {
+        if (status === 200 || status === 201 || status === 206) {
             const contentDisposition = response.headers ? response.headers.get("content-disposition") : undefined;
             const fileNameMatch = contentDisposition ? /filename="?([^"]*?)"?(;|$)/g.exec(contentDisposition) : undefined;
             const fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[1] : undefined;
             return response.blob().then(blob => { return { fileName: fileName, data: blob, status: status, headers: _headers }; });
-        } else if (status !== 200 && status !== 204) {
+        } 
+        else if (status !== 200 && status !== 201 && status !== 204) {
             return response.text().then((_responseText) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+                return throwException("An unexpected server error occurred.", status, _responseText, _headers);
             });
         }
 

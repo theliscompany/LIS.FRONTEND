@@ -20,6 +20,7 @@ function Tracking() {
     
     const loadRequest = async () => {
         setLoad(true);
+        setTrackingData(null);
         var myHeaders = new Headers();
         myHeaders.append("Accept", "*/");
         fetch(protectedResources.apiLisQuotes.endPoint+"/Tracking/"+trackingNumber, {
@@ -60,8 +61,8 @@ function Tracking() {
                         trackingData !== null && trackingData !== undefined ? 
                         <Box>
                             {
-                                trackingData.requestQuoteData.isConfirmed ? 
-                                <Alert severity="info">You have confirmed your request. You can check other informations about your request down below :</Alert> : <Alert severity="warning">Your request is not confirmed, please check your email or spam.</Alert>
+                                trackingData.assignee !== null ? 
+                                <Alert severity="info">Your request has been assigned to the agent : {trackingData.assignee.name}. You can contact her/him at this email : {trackingData.assignee.email} </Alert> : <Alert severity="warning">There is no agent assigned for the moment. For questions, please contact contact-assign@omnifreight.eu </Alert>
                             }
                             <Typography sx={{ mt: 3 }}>Request status : <Chip size="small" label={trackingData.status} color={trackingData.status === "EnAttente" ? "warning" : trackingData.status === "Valider" ? "success" : "error"} sx={{ ml: 1 }} /> </Typography>
                             <List sx={{ my: 3, border: "1px #e2e2e2 solid" }}>

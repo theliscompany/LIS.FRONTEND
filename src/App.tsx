@@ -13,6 +13,9 @@ import Request from './components/admin/Request';
 import { AuthorizedBackendApiProvider } from './api/api';
 import RequestsSearch from './components/admin/RequestsSearch';
 import Tracking from './components/landing/Tracking';
+import NewRequest from './components/admin/NewRequest';
+import UsersAssigment from './components/admin/UsersAssignment';
+import Histories from './components/admin/Histories';
 
 const App = () => {
   return (
@@ -22,14 +25,18 @@ const App = () => {
           <AuthorizedBackendApiProvider>
             <Routes>
               <Route path='admin/*' element={<Layout />}>
-                <Route path="admin" element={<Home />} />
+                <Route path="" element={<Histories />} />
+                <Route path="admin" element={<Histories />} />
                 <Route path="wizard" element={<Wizard />} />
                 <Route path="simulation" element={<Simulation />} />
                 <Route path="requests" element={<Requests />} />
                 <Route path="search/:search" element={<RequestsSearch />} />
                 <Route path="request/:id" element={<Request />} />
+                <Route path="new-request" element={<NewRequest />} />
+                <Route path="users" element={<UsersAssigment />} />
               </Route> 
               <Route path="/" element={<Landing />} />
+              <Route path="landing" element={<Landing />} />
               <Route path="privacy-policy" element={<Privacy />} />
               <Route path="tracking" element={<Tracking />} />
               <Route path="tracking/:id" element={<Tracking />} />
@@ -40,6 +47,9 @@ const App = () => {
         <UnauthenticatedTemplate>
           <Routes>
             <Route path="/" element={<Landing />} />
+            <Route path="admin/" element={<Landing />} />
+            <Route path="admin/*" element={<Landing />} />
+            <Route path="landing" element={<Landing />} />
             <Route path="privacy-policy" element={<Privacy />} />
             <Route path="tracking" element={<Tracking />}>
               <Route path=":id" element={<Tracking />} />
