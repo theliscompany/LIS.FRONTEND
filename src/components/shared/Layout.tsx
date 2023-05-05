@@ -12,6 +12,8 @@ import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import SettingsIcon from '@mui/icons-material/Settings';
+import PeopleIcon from '@mui/icons-material/PeopleAltOutlined';
+import AddIcon from '@mui/icons-material/AddCircleOutline';
 import HomeIcon from '@mui/icons-material/Home';
 import FirstPageIcon from '@mui/icons-material/FirstPage';
 import Avatar from '@mui/material/Avatar';
@@ -36,7 +38,7 @@ import '../../App.css';
 import { protectedResources } from '../../authConfig';
 import { useAuthorizedBackendApi } from '../../api/api';
 import { BackendService } from '../../services/fetch';
-import { BootstrapInput } from '../../misc/styles';
+import { BootstrapInput, DarkTooltip } from '../../misc/styles';
 import Search from '@mui/icons-material/Search';
 
 
@@ -109,17 +111,6 @@ const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' 
 }),
 );
 
-const DarkTooltip = styled(({ className, ...props }: TooltipProps) => (
-    <Tooltip {...props} arrow classes={{ popper: className }} />
-  ))(({ theme }) => ({
-    [`& .${tooltipClasses.arrow}`]: {
-      color: theme.palette.common.black,
-    },
-    [`& .${tooltipClasses.tooltip}`]: {
-      backgroundColor: theme.palette.common.black,
-    },
-}));
-  
 function Layout(props: {children?: React.ReactNode}) {
     const { instance, accounts } = useMsal();
     const [anchorElUser, setAnchorElUser] = useState<null | HTMLElement>(null);
@@ -330,14 +321,26 @@ function Layout(props: {children?: React.ReactNode}) {
                                 </DarkTooltip>
                                 </ListItem>
                             </NavLink>
-                            <NavLink to="/admin/settings" className={({ isActive }) => isActive ? "cs-navlink-active" : "cs-navlink"}>
-                                <ListItem className="cs-listitem" key={"Settings"} disablePadding disableGutters>
-                                <DarkTooltip title="Settings" placement="right" arrow>
+                            <NavLink to="/admin/users" className={({ isActive }) => isActive ? "cs-navlink-active" : "cs-navlink"}>
+                                <ListItem className="cs-listitem" key={"Users"} disablePadding disableGutters>
+                                <DarkTooltip title="Users" placement="right" arrow>
                                     <ListItemButton className="cs-listitembutton">
                                         <ListItemIcon className="cs-listitemicon">
-                                            <SettingsIcon fontSize="small" />
+                                            <PeopleIcon fontSize="small" />
                                         </ListItemIcon>
-                                        <ListItemText primary={"Settings"} />
+                                        <ListItemText primary={"Users"} />
+                                    </ListItemButton>
+                                </DarkTooltip>
+                                </ListItem>
+                            </NavLink>
+                            <NavLink to="/admin/new-request" className={({ isActive }) => isActive ? "cs-navlink-active" : "cs-navlink"}>
+                                <ListItem className="cs-listitem" key={"New request"} disablePadding disableGutters>
+                                <DarkTooltip title="New request" placement="right" arrow>
+                                    <ListItemButton className="cs-listitembutton">
+                                        <ListItemIcon className="cs-listitemicon">
+                                            <AddIcon fontSize="small" />
+                                        </ListItemIcon>
+                                        <ListItemText primary={"New request"} />
                                     </ListItemButton>
                                 </DarkTooltip>
                                 </ListItem>

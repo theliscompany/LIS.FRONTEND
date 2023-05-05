@@ -3,13 +3,21 @@ import ListItem from '@mui/material/ListItem';
 import ListItemText from '@mui/material/ListItemText';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
+import dayjs, { Dayjs } from 'dayjs';
+import { DemoContainer, DemoItem } from '@mui/x-date-pickers/internals/demo';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
+import { MobileDateTimePicker } from '@mui/x-date-pickers/MobileDateTimePicker';
+import { DesktopDateTimePicker } from '@mui/x-date-pickers/DesktopDateTimePicker';
+import { StaticDateTimePicker } from '@mui/x-date-pickers/StaticDateTimePicker';
 import React, { useEffect } from 'react';
 import '../../App.css';
 import { Button, Chip, Grid, InputLabel, NativeSelect, Skeleton } from '@mui/material';
 import PlaceIcon from '@mui/icons-material/Place';
 import SearchIcon from '@mui/icons-material/Search';
 import AutocompleteSearch from '../shared/AutocompleteSearch';
-import { BootstrapInput, inputLabelStyles } from '../../misc/styles';
+import { BootstrapInput, datetimeStyles, inputLabelStyles } from '../../misc/styles';
 import { protectedResources } from '../../authConfig';
 import { enqueueSnackbar, SnackbarProvider } from 'notistack';
 import { useAuthorizedBackendApi } from '../../api/api';
@@ -28,7 +36,7 @@ function convertStringToObject(str: string): { city: string, country: string } {
     return { city: "", country: "" };
 }
 
-function createGetRequestUrl(variable1: string, variable2: string, variable3: string, variable4: string) {
+function createGetRequestUrl(variable1: string, variable2: string, variable3: string, variable4: string, variable5: Dayjs|null, variable6: Dayjs|null, variable7: Dayjs|null, variable8: Dayjs|null) {
     let url = protectedResources.apiLisQuotes.endPoint+'/Request?';
     if (variable1) {
       url += 'departure=' + encodeURIComponent(variable1) + '&';
@@ -42,6 +50,18 @@ function createGetRequestUrl(variable1: string, variable2: string, variable3: st
     if (variable4) {
       url += 'status=' + encodeURIComponent(variable4) + '&';
     }
+    if (variable5) {
+        url += 'createdAtStart=' + encodeURIComponent(variable5.format('YYYY-MM-DDTHH:mm:ss')) + '&';
+    }
+    if (variable6) {
+        url += 'createdAtEnd=' + encodeURIComponent(variable6.format('YYYY-MM-DDTHH:mm:ss')) + '&';
+    }
+    if (variable7) {
+        url += 'updatedAtStart=' + encodeURIComponent(variable7.format('YYYY-MM-DDTHH:mm:ss')) + '&';
+    }
+    if (variable8) {
+        url += 'updatedAtEnd=' + encodeURIComponent(variable8.format('YYYY-MM-DDTHH:mm:ss')) + '&';
+    }  
     
     if (url.slice(-1) === '&') {
       url = url.slice(0, -1);
@@ -79,6 +99,10 @@ function Requests() {
     const [arrivalTown, setArrivalTown] = React.useState<any>(null);
     const [departure, setDeparture] = React.useState<string>("");
     const [arrival, setArrival] = React.useState<string>("");
+    const [createdDateStart, setCreatedDateStart] = React.useState<Dayjs | null>(null);
+    const [createdDateEnd, setCreatedDateEnd] = React.useState<Dayjs | null>(null);
+    const [updatedDateStart, setUpdatedDateStart] = React.useState<Dayjs | null>(null);
+    const [updatedDateEnd, setUpdatedDateEnd] = React.useState<Dayjs | null>(null);
     let { search } = useParams();
 
     const context = useAuthorizedBackendApi();
@@ -115,7 +139,7 @@ function Requests() {
     const searchRequests = async () => {
         if (context) {
             setLoad(true);
-            var requestFormatted = createGetRequestUrl(departure, arrival, cargoType, status);
+            var requestFormatted = createGetRequestUrl(departure, arrival, cargoType, status, createdDateStart, createdDateEnd, updatedDateStart, updatedDateEnd);
             const response: RequestResponseDto = await (context as BackendService<any>).getSingle(requestFormatted);
             if (response !== null && response.code !== undefined && response.data !== undefined) {
                 if (response.code === 200) {
@@ -134,12 +158,12 @@ function Requests() {
         <div style={{ background: "#fff", borderTopLeftRadius: 20, borderTopRightRadius: 20, overflowX: "hidden" }}>
             <SnackbarProvider />
             <Box py={4}>
-                <Typography variant="h5" mt={3} mx={5}>
+                <Typography variant="h5" mt={3} px={5}>
                     {
                         search !== undefined ? <b>Search result for : {search}</b> : <b>List of requests for quote</b>
                     }
                 </Typography>
-                <Grid container spacing={1} mx={4} mt={2}>
+                <Grid container spacing={1} px={5} mt={2}>
                     <Grid item xs={3}>
                         <InputLabel htmlFor="departure" sx={inputLabelStyles}>Departure location</InputLabel>
                         <AutocompleteSearch id="departure" value={departureTown} onChange={(e: any) => { setDepartureTown(convertStringToObject(e.target.innerText)); setDeparture(e.target.innerText); }} fullWidth disabled={status === "Valider"} />
@@ -148,7 +172,7 @@ function Requests() {
                         <InputLabel htmlFor="arrival" sx={inputLabelStyles}>Arrival location</InputLabel>
                         <AutocompleteSearch id="arrival" value={arrivalTown} onChange={(e: any) => { setArrivalTown(convertStringToObject(e.target.innerText)); setArrival(e.target.innerText); }} fullWidth disabled={status === "Valider"} />
                     </Grid>
-                    <Grid item xs={2}>
+                    <Grid item xs={3}>
                         <InputLabel htmlFor="cargo-type" sx={inputLabelStyles}>Type of cargo</InputLabel>
                         <NativeSelect
                             id="demo-customized-select-native"
@@ -163,7 +187,7 @@ function Requests() {
                             <option value="2">Roll-on/Roll-off</option>
                         </NativeSelect>
                     </Grid>
-                    <Grid item xs={2}>
+                    <Grid item xs={3}>
                         <InputLabel htmlFor="cargo-type" sx={inputLabelStyles}>Status</InputLabel>
                         <NativeSelect
                             id="demo-customized-select-native2"
@@ -178,7 +202,47 @@ function Requests() {
                             <option value="2">Rejeté</option>
                         </NativeSelect>
                     </Grid>
-                    <Grid item xs={2} sx={{ display: "flex", alignItems: "end" }}>
+                    <Grid item xs={3} mt={1}>
+                        <InputLabel htmlFor="created-date-start" sx={inputLabelStyles}>Created date start</InputLabel>
+                        <LocalizationProvider dateAdapter={AdapterDayjs}>
+                            <DateTimePicker 
+                                value={createdDateStart} 
+                                onChange={(value: any) => { setCreatedDateStart(value) }}
+                                slotProps={{ textField: { id: "created-date-start", fullWidth: true, sx: datetimeStyles }, inputAdornment: { sx: { position: "relative", right: "11.5px" } } }}
+                            />
+                        </LocalizationProvider>
+                    </Grid>
+                    <Grid item xs={3} mt={1}>
+                        <InputLabel htmlFor="created-date-end" sx={inputLabelStyles}>Created date end</InputLabel>
+                        <LocalizationProvider dateAdapter={AdapterDayjs}>
+                            <DateTimePicker 
+                                value={createdDateEnd} 
+                                onChange={(value: any) => { setCreatedDateEnd(value) }}
+                                slotProps={{ textField: { id: "created-date-end", fullWidth: true, sx: datetimeStyles }, inputAdornment: { sx: { position: "relative", right: "11.5px" } } }}
+                            />
+                        </LocalizationProvider>
+                    </Grid>
+                    <Grid item xs={3} mt={1}>
+                        <InputLabel htmlFor="updated-date-start" sx={inputLabelStyles}>Updated date start</InputLabel>
+                        <LocalizationProvider dateAdapter={AdapterDayjs}>
+                            <DateTimePicker 
+                                value={updatedDateStart} 
+                                onChange={(value: any) => { setUpdatedDateStart(value) }} 
+                                slotProps={{ textField: { id: "updated-date-start", fullWidth: true, sx: datetimeStyles }, inputAdornment: { sx: { position: "relative", right: "11.5px" } } }}
+                            />
+                        </LocalizationProvider>
+                    </Grid>
+                    <Grid item xs={3} mt={1}>
+                        <InputLabel htmlFor="updated-date-end" sx={inputLabelStyles}>Updated date end</InputLabel>
+                        <LocalizationProvider dateAdapter={AdapterDayjs}>
+                            <DateTimePicker 
+                                value={updatedDateEnd} 
+                                onChange={(value: any) => { setUpdatedDateEnd(value) }} 
+                                slotProps={{ textField: { id: "updated-date-end", fullWidth: true, sx: datetimeStyles }, inputAdornment: { sx: { position: "relative", right: "11.5px" } } }}
+                            />
+                        </LocalizationProvider>
+                    </Grid>
+                    <Grid item xs={2} mt={1} sx={{ display: "flex", alignItems: "end" }}>
                         <Button 
                             variant="contained" 
                             color="inherit"
@@ -186,6 +250,7 @@ function Requests() {
                             size="large"
                             sx={{ backgroundColor: "#fff", color: "#333", textTransform: "none", mb: 0.15 }}
                             onClick={searchRequests}
+                            fullWidth
                         >
                             Search
                         </Button>
@@ -220,7 +285,7 @@ function Requests() {
                                                     />        
                                                 </Grid>
                                                 <Grid item xs={12}>
-                                                    {dateTimeDiff(item.createdAt)} <Chip size="small" label={item.status} color={item.status === "EnAttente" ? "warning" : item.status === "Valider" ? "success" : "error"} sx={{ ml: 1 }} />
+                                                    {dateTimeDiff(item.createdAt)} <Chip size="small" label={item.status} color={item.status === "EnAttente" ? "warning" : item.status === "Valider" ? "success" : "secondary"} sx={{ ml: 1 }} />
                                                 </Grid>
                                                 <Grid item xs={6} mt={1}>
                                                     <Typography variant="subtitle1" display="flex" alignItems="center" justifyContent="left" fontSize={15}>Departure location</Typography>

@@ -1,16 +1,17 @@
 export interface RequestDto {
     id: number;
     whatsapp: string;
-    email: string;
+    email?: string;
     departure: string;
     arrival: string;
-    status: string|number;
+    status?: string|number|null|undefined;
     cargoType: string|number;
     quantity: number;
     detail: string;
     createdAt?: string;
     updatedAt?: string;
-    tags: null|string
+    tags: string|null,
+    assigneeId: number|null;
 }
 
 export interface RequestResponseDto {

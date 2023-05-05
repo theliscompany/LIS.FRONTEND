@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Box, Button, Card, CardActions, CardContent, Checkbox, DialogActions, DialogContent, DialogTitle, Fab, Grid, IconButton, InputLabel, ListItemText, MenuItem, NativeSelect, Popover, Select, SelectChangeEvent, Typography } from '@mui/material';
+import { Alert, Box, Button, Card, CardActions, CardContent, Checkbox, DialogActions, DialogContent, DialogTitle, Fab, Grid, IconButton, InputLabel, ListItemText, MenuItem, NativeSelect, Popover, Select, SelectChangeEvent, Typography } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import FaceIcon from '@mui/icons-material/Face';
 import WhatsAppIcon from '@mui/icons-material/WhatsApp';
@@ -32,6 +32,7 @@ function Landing() {
     const [modal, setModal] = useState<boolean>(false);
     const [modal2, setModal2] = useState<boolean>(false);
     const [modal3, setModal3] = useState<boolean>(false);
+    const [modal4, setModal4] = useState<boolean>(false);
     const [load, setLoad] = useState<boolean>(false);
     const [email, setEmail] = useState<string>("");
     const [captcha, setCaptcha] = useState<string | null>(null);
@@ -90,13 +91,6 @@ function Landing() {
         return /^(([^<>()\[\]\.,;:\s@\"]+(\.[^<>()\[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()\.,;\s@\"]+\.{0,1})+([^<>()\.,;:\s@\"]{2,}|[\d\.]+))$/.test(mail);
     }
   
-    function download(fileUrl: any, fileName: any) {
-        var a = document.createElement("a");
-        a.href = fileUrl;
-        a.setAttribute("download", fileName);
-        a.click();
-    }
-
     const postEmail = async(from: string, to: string, subject: string, htmlContent: string) => {
         const body: MailData = { from: from, to: to, subject: subject, htmlContent: htmlContent };
         const data = await (context as BackendService<any>).postForm(protectedResources.apiLisQuotes.endPoint+"/Email", body);
@@ -207,6 +201,8 @@ function Landing() {
                                 setPhone("");
                                 setEmail("");
                                 setMessage("");
+                                setModal(false);
+                                setModal4(true);
                             }
                             else {
                                 enqueueSnackbar("An error occured. Please refresh the page or check your internet connection.", { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
@@ -438,8 +434,7 @@ function Landing() {
                 </DialogContent>
                 <DialogActions>
                     <Button variant="contained" color={!load ? "primary" : "info"} className="mr-3" onClick={sendQuotationForm} disabled={load === true} sx={{ textTransform: "none" }}>Continue</Button>
-                    {/* <Button variant="contained" onClick={() => alert("Check")} sx={{ textTransform: "none" }}>Continue</Button> */}
-                    <Button variant="contained" onClick={() => setModal(false)} sx={buttonCloseStyles}>Close</Button>
+                    <Button variant="contained" onClick={() => { setModal(false); }} sx={buttonCloseStyles}>Close</Button>
                 </DialogActions>
             </BootstrapDialog>
             
@@ -541,7 +536,26 @@ function Landing() {
                 <DialogActions>
                     <Button variant="contained" color={!load ? "primary" : "info"} className="mr-3" onClick={sendContactFormRedirect} disabled={email === "" || !validMail(email)} sx={{ textTransform: "none" }}>Download</Button>
                 </DialogActions>
-            </BootstrapDialog>            
+            </BootstrapDialog>         
+
+            <BootstrapDialog
+                onClose={() => setModal4(false)}
+                aria-labelledby="custom-dialog-title4"
+                open={modal4}
+                maxWidth="md"
+                fullWidth
+                sx={{ p: 5 }}
+            >
+                <BootstrapDialogTitle id="custom-dialog-title4" onClose={() => setModal4(false)}>
+                    <b>Congratulations!</b>
+                </BootstrapDialogTitle>
+                <DialogContent dividers>
+                    <Alert severity="success" sx={{ mb: 3 }}>
+                        <Typography variant="subtitle1" gutterBottom px={2}>Your request has been successfully sent, please check your email or your spam to get your tracking number.</Typography>
+                    </Alert>
+                    {/* <img src="/img/checkemail.jpg" style={{ width: "300px", display: "block", margin: "0 auto" }} alt="check email" /> */}
+                </DialogContent>
+            </BootstrapDialog>   
         </div>
     );
 }
