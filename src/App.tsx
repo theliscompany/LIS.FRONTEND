@@ -16,6 +16,7 @@ import Tracking from './components/landing/Tracking';
 import NewRequest from './components/admin/NewRequest';
 import UsersAssigment from './components/admin/UsersAssignment';
 import Histories from './components/admin/Histories';
+import MyRequests from './components/admin/MyRequests';
 
 const App = () => {
   return (
@@ -33,6 +34,7 @@ const App = () => {
                 <Route path="search/:search" element={<RequestsSearch />} />
                 <Route path="request/:id" element={<Request />} />
                 <Route path="new-request" element={<NewRequest />} />
+                <Route path="my-requests" element={<MyRequests />} />
                 <Route path="users" element={<UsersAssigment />} />
               </Route> 
               <Route path="/" element={<Landing />} />
