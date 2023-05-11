@@ -278,6 +278,12 @@ function Layout(props: {children?: React.ReactNode}) {
                                         </ListItemIcon>
                                         <ListItemText primary={"View Profile"} />
                                     </MenuItem>
+                                    <MenuItem dense key={"x1-My Requests"} title="My Requests" component="a" href="/admin/my-requests">
+                                        <ListItemIcon className="cs-listitemicon">
+                                            <AutoFixHighIcon fontSize="small" />
+                                        </ListItemIcon>
+                                        <ListItemText primary={"My Requests"} />
+                                    </MenuItem>
                                     <MenuItem dense key={"x1-Invite Members"} title="Invite Members" onClick={handleCloseUserMenu}>
                                         <ListItemIcon className="cs-listitemicon">
                                             <GroupsIcon fontSize="small" />
@@ -345,6 +351,18 @@ function Layout(props: {children?: React.ReactNode}) {
                                 </DarkTooltip>
                                 </ListItem>
                             </NavLink>
+                            <NavLink to="/admin/my-requests" className={({ isActive }) => isActive ? "cs-navlink-active" : "cs-navlink"}>
+                                <ListItem className="cs-listitem" key={"My requests"} disablePadding disableGutters>
+                                <DarkTooltip title="My requests" placement="right" arrow>
+                                    <ListItemButton className="cs-listitembutton">
+                                        <ListItemIcon className="cs-listitemicon">
+                                            <AutoFixHighIcon fontSize="small" />
+                                        </ListItemIcon>
+                                        <ListItemText primary={"My requests"} />
+                                    </ListItemButton>
+                                </DarkTooltip>
+                                </ListItem>
+                            </NavLink>
                             <NavLink to="/admin/requests" className={({ isActive }) => isActive ? "cs-navlink-active" : "cs-navlink"}>
                                 <ListItem className="cs-listitem" key={"Requests"} disablePadding disableGutters>
                                 <DarkTooltip title="Requests" placement="right" arrow>
@@ -358,7 +376,7 @@ function Layout(props: {children?: React.ReactNode}) {
                                 </ListItem>
                             </NavLink>
                         </List>
-                        <Divider color="#F1F2F6" style={{ borderBottom: "1px solid rgb(241, 242, 246)" }} />
+                        {/* <Divider color="#F1F2F6" style={{ borderBottom: "1px solid rgb(241, 242, 246)" }} />
                         <List dense>
                             <NavLink to="/admin/wizard" className={({ isActive }) => isActive ? "cs-navlink-active" : "cs-navlink"}>
                                 <ListItem className="cs-listitem" key={"Wizard"} disablePadding disableGutters>
@@ -384,7 +402,7 @@ function Layout(props: {children?: React.ReactNode}) {
                                     </DarkTooltip>
                                 </ListItem>
                             </NavLink>
-                        </List>
+                        </List> */}
 
                         <List dense sx={{ position: "absolute", bottom: "0px", left: "10px", right: "10px" }}>
                             <ListItem className="cs-listitem" key={"Collapse"} disablePadding disableGutters>

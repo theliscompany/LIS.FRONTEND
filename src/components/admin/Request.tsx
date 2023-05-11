@@ -18,8 +18,8 @@ let cargoTypes = ["Container", "Conventional", "RollOnRollOff"];
 
 let statusTypes = [
     { type: "EnAttente", value: "En attente", description: "En attente de traitement" }, 
-    { type: "Valider", value: "Valider", description: "Devis validé par l'employé" }, 
-    { type: "Rejeter", value: "Rejeter", description: "Devis rejeté par l'employé" }, 
+    { type: "Valider", value: "Validé", description: "Devis validé par l'employé" }, 
+    { type: "Rejeter", value: "Rejeté", description: "Devis rejeté par l'employé" }, 
     { type: "EnCoursDeTraitement", value: "En cours de traitement", description: "Devis en cours de traitement" }, 
     { type: "EnTransit", value: "En transit", description: "Marchandise en cours de transport" }, 
     { type: "EnDouane", value: "En douane", description: "Marchandise en cours de dédouanement" }, 
@@ -46,11 +46,11 @@ function Request(props: any) {
     const [loadNotes, setLoadNotes] = useState<boolean>(true);
     const [email, setEmail] = useState<string>("");
     const [status, setStatus] = useState<string | null>(null);
+    const [trackingNumber, setTrackingNumber] = useState<string>("");
     const [phone, setPhone] = useState<string>("");
     const [message, setMessage] = useState<string>("");
     const [quantity, setQuantity] = useState<number>(1);
     const [cargoType, setCargoType] = useState<string>("0");
-    const [assignedManager, setAssignedManager] = useState<string>("null");
     const [departureTown, setDepartureTown] = useState<any>(null);
     const [arrivalTown, setArrivalTown] = useState<any>(null);
     const [departure, setDeparture] = useState<string>("");
@@ -65,6 +65,7 @@ function Request(props: any) {
     const [statusMessage, setStatusMessage] = useState<string>("");
     const [generalNote, setGeneralNote] = useState<string>("");
     const [selectedStatus, setSelectedStatus] = React.useState('EnAttente');
+    const [assignedManager, setAssignedManager] = useState<string>("null");
     const [assignees, setAssignees] = useState<any>(null);
     const [notes, setNotes] = useState<any>(null);
     const [idUser, setIdUser] = useState<any>(null);
@@ -152,6 +153,7 @@ function Request(props: any) {
                     setMessage(response.data.detail);
                     setTags(response.data.tags !== null ? response.data.tags.split(",") : []);
                     setAssignedManager(response.data.assigneeId);
+                    setTrackingNumber(response.data.trackingNumber);
                     setLoad(false);
 
                     // Now i can get assignees (for synchronisation problems)
@@ -317,6 +319,9 @@ function Request(props: any) {
                     {
                         !load ? 
                         <Grid container spacing={2} mt={1} px={5}>
+                            <Grid item xs={12}>
+                                <Typography variant="body2" color="dodgerblue" sx={{ fontWeight: "bold" }}>Tracking N° {trackingNumber}</Typography>
+                            </Grid>
                             <Grid item xs={12}>
                                 <Alert 
                                     severity="info" 

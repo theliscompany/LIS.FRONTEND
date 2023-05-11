@@ -1,15 +1,17 @@
-import { Box, Button, Grid, InputLabel, NativeSelect, Typography } from '@mui/material';
+import { Alert, Box, Button, Grid, InputLabel, NativeSelect, Skeleton, Typography } from '@mui/material';
 import { MuiTelInput } from 'mui-tel-input';
 import React, { useEffect, useState } from 'react';
 import '../../App.css';
 import AutocompleteSearch from '../shared/AutocompleteSearch';
-import { inputLabelStyles, BootstrapInput } from '../../misc/styles';
+import { inputLabelStyles, BootstrapInput, whiteButtonStyles } from '../../misc/styles';
 import { enqueueSnackbar, SnackbarProvider } from 'notistack';
 import { protectedResources } from '../../authConfig';
 import { useAuthorizedBackendApi } from '../../api/api';
 import { BackendService } from '../../services/fetch';
 import { MuiChipsInput, MuiChipsInputChip } from 'mui-chips-input';
 import { MailData } from '../../models/models';
+import { useAccount, useMsal } from '@azure/msal-react';
+import { Link } from 'react-router-dom';
 
 //let statusTypes = ["EnAttente", "Valider", "Rejeter"];
 let cargoTypes = ["Container", "Conventional", "RollOnRollOff"];
@@ -29,6 +31,7 @@ function validMail(mail: string) {
 
 function NewRequest(props: any) {
     const [load, setLoad] = useState<boolean>(false);
+    const [loadUser, setLoadUser] = useState<boolean>(true);
     const [email, setEmail] = useState<string>("");
     const [status, setStatus] = useState<string | null>(null);
     const [phone, setPhone] = useState<string>("");
@@ -43,13 +46,70 @@ function NewRequest(props: any) {
     const [modal, setModal] = useState<boolean>(false);
     const [mailSubject, setMailSubject] = useState<string>("");
     const [mailContent, setMailContent] = useState<string>("");
+    const [currentUser, setCurrentUser] = useState<any>(null);
+    const [assignedManager, setAssignedManager] = useState<string>("null");
+    const [assignees, setAssignees] = useState<any>(null);
     //let { id } = useParams();
-
+    const { instance, accounts } = useMsal();
+    const account = useAccount(accounts[0] || {});
+    
     const context = useAuthorizedBackendApi();
     
     const handleChangeCargoType = (event: { target: { value: string } }) => {
         setCargoType(event.target.value);
     };
+
+    const handleChangeAssignedManager = (event: { target: { value: string } }) => {
+        setAssignedManager(event.target.value);
+    };
+    
+    useEffect(() => {
+        getAssignees();
+    }, [instance, account, context]);
+
+    const assignManager = async (idQuote: string) => {
+        if (currentUser !== null && currentUser !== undefined && currentUser !== "") {
+            if (context) {
+                const response = await (context as BackendService<any>).put(protectedResources.apiLisQuotes.endPoint+"/Assignee/"+idQuote+"/"+assignedManager, []);
+                if (response !== null) {
+                    setLoad(false);
+                    enqueueSnackbar("Your request has been created and assigned with success.", { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                    //enqueueSnackbar("The manager has been assigned to this request.", { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                }
+                else {
+                    setLoad(false);
+                    enqueueSnackbar("An error happened during the operation.", { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                }
+            }
+        }
+        else {
+            setLoad(false);
+            enqueueSnackbar("Your request has been created  .", { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+        }
+    }
+
+    const getAssignees = async () => {
+        if (context) {
+            setLoadUser(true);
+            const response = await (context as BackendService<any>).getSingle(protectedResources.apiLisQuotes.endPoint+"/Assignee");
+            if (response !== null && response.code !== undefined) {
+                if (response.code === 200) {
+                    var aux = response.data.find((elm: any) => elm.email === account?.username);
+                    //console.log(account);
+                    setAssignees(response.data);
+                    setCurrentUser(aux);
+                    if (aux !== null && aux !== undefined && aux !== "") {
+                        setAssignedManager(aux.id);
+                    }
+                    //console.log(response.data.find((elm: any) => elm.email === account?.username));
+                    setLoadUser(false);
+                }
+                else {
+                    setLoadUser(false);
+                }
+            }
+        }
+    }
 
     const postEmail = async(from: string, to: string, subject: string, htmlContent: string) => {
         const body: MailData = { from: from, to: to, subject: subject, htmlContent: htmlContent };
@@ -91,14 +151,17 @@ function NewRequest(props: any) {
                 })
                 .then((response: any) => response.json())
                 .then((data: any) => {
-                    setLoad(false);
+                    //setLoad(false);
                     if (data.code === 201) {
-                        enqueueSnackbar("Your request has been created with success.", { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                        //enqueueSnackbar("Your request has been created with success.", { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
                         setPhone("");
                         setEmail("");
                         setMessage("");
+
+                        assignManager(data.data.id);
                     }
                     else {
+                        setLoad(false);
                         enqueueSnackbar("An error occured. Please refresh the page or check your internet connection.", { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
                     }
                 })
@@ -142,7 +205,7 @@ function NewRequest(props: any) {
                         <Grid item xs={6}>
                             <InputLabel htmlFor="cargo-type" sx={inputLabelStyles}>Type of cargo</InputLabel>
                             <NativeSelect
-                                id="demo-customized-select-native"
+                                id="cargo-type"
                                 value={cargoType}
                                 onChange={handleChangeCargoType}
                                 input={<BootstrapInput />}
@@ -187,6 +250,38 @@ function NewRequest(props: any) {
                         <Grid item xs={12} mt={1}>
                             <InputLabel htmlFor="request-message" sx={inputLabelStyles}>Other details about your need (Optional)</InputLabel>
                             <BootstrapInput id="request-message" type="text" multiline rows={3} value={message} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setMessage(e.target.value)} fullWidth />
+                        </Grid>
+                        <Grid item xs={6}>
+                            {
+                                !loadUser ? 
+                                currentUser !== null && currentUser !== undefined ? 
+                                <Alert severity="info" sx={{ my: 2 }}>This new request will be assigned to the current user {account?.name} by default.</Alert> : 
+                                <Alert severity="warning" sx={{ my: 2 }}>This new request will not be assigned to the current user, you need to grant him the permission in <Link to="/admin/users" style={{ textDecoration: "none" }}>Users</Link>.</Alert>
+                                : <Skeleton sx={{ my: 2 }} />
+                            }            
+                        </Grid>
+                        <Grid item xs={6} mt={1}>
+                            <InputLabel htmlFor="assigned-manager" sx={inputLabelStyles}>Assigned manager</InputLabel>
+                            {
+                                !loadUser ? 
+                                <>
+                                    <NativeSelect
+                                        id="assigned-manager"
+                                        value={assignedManager}
+                                        onChange={handleChangeAssignedManager}
+                                        input={<BootstrapInput />}
+                                        fullWidth
+                                        /*disabled={status === "Valider"}*/
+                                    >
+                                        <option value="">No agent assigned</option>
+                                        {
+                                            assignees.map((row: any, i: number) => (
+                                                <option key={"assigneeId-"+i} value={String(row.id)}>{row.name}</option>
+                                            ))
+                                        }
+                                    </NativeSelect>
+                                </> : <Skeleton sx={{ mt: 3 }} />   
+                            }
                         </Grid>
                         <Grid item xs={12}>
                             <Button variant="contained" color={!load ? "primary" : "info"} className="mr-3" onClick={sendQuotationForm} disabled={load === true} sx={{ textTransform: "none" }}>Create the request</Button>

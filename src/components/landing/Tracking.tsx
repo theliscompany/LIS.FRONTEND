@@ -45,7 +45,7 @@ function Tracking() {
     
     return (
         <Box sx={{ maxWidth: "lg", margin: "0 auto" }}>
-            <Grid container my={5} sx={{ px: { md: 3, xs: 2 } }}>
+            <Grid container my={5} sx={{ px: { md: 0, xs: 2 } }}>
                 <Grid item xs={12} fontSize={16} my={3}>
                     <Typography variant="h4" fontWeight="bold">Request tracking</Typography>
                 </Grid>
@@ -55,7 +55,7 @@ function Tracking() {
                 <Grid item xs={12} md={6} mt={2}>
                     <Button variant="contained" color={!load ? "primary" : "info"} size="large" className="mr-3" onClick={loadRequest}  sx={{ textTransform: "none", ml: { md: 3, xs: 0 } }}>Track my request</Button>
                 </Grid>
-                <Grid item xs={12} md={8} mt={2}>
+                <Grid item xs={12} md={12} mt={2}>
                     {
                         load ? <Skeleton sx={{ mt: 3 }} /> : 
                         trackingData !== null && trackingData !== undefined ? 
@@ -65,11 +65,7 @@ function Tracking() {
                                 <Alert severity="info">Your request has been assigned to the agent : {trackingData.assignee.name}. You can contact her/him at this email : {trackingData.assignee.email} </Alert> : <Alert severity="warning">There is no agent assigned for the moment. For questions, please contact contact-assign@omnifreight.eu </Alert>
                             }
                             <Typography sx={{ mt: 3 }}>Request status : <Chip size="small" label={trackingData.status} color={trackingData.status === "EnAttente" ? "warning" : trackingData.status === "Valider" ? "success" : "error"} sx={{ ml: 1 }} /> </Typography>
-                            <List sx={{ my: 3, border: "1px #e2e2e2 solid" }}>
-                                {/* <ListItem>
-                                    <ListItemText primary="Status" secondary={trackingData.status} />
-                                </ListItem>
-                                <Divider /> */}
+                            <List sx={{ my: 3, border: "1px #e2e2e2 solid" }} dense>
                                 <ListItem>
                                     <ListItemText primary="Phone number" secondary={trackingData.requestQuoteData.whatsapp} />
                                 </ListItem>
@@ -99,18 +95,48 @@ function Tracking() {
                                 </ListItem>
                                 <Divider />
                                 <ListItem>
-                                    <ListItemText primary="Request date" secondary={trackingData.requestQuoteData.createdAt} />
+                                    <ListItemText primary="Request date" secondary={(new Date(trackingData.requestQuoteData.createdAt)).toLocaleString()} />
                                 </ListItem>
+                            </List>
+                            <Typography sx={{ mt: 3 }}>You have received the following messages : </Typography>
+                            <List sx={{ my: 3, border: "1px #e2e2e2 solid" }} dense>
+                                {
+                                    trackingData.notes.map((elm: any) => {
+                                        return <>
+                                            <ListItem>
+                                                <ListItemText primary={"Date : " + (new Date(elm.createdAt)).toLocaleString()} secondary={elm.content} />
+                                            </ListItem>
+                                            <Divider />
+                                        </>;
+                                    })
+                                }
                             </List>
                         </Box> 
                         : <Typography sx={{ mt: 3 }}>The tracking code is not defined. </Typography>
                     }
-                    {/* {
-                        trackingData !== null ? 
-                        <Typography sx={{ mt: 3 }}>The status of your request is {trackingData.status} </Typography> 
-                        : <Typography sx={{ mt: 3 }}>The tracking code is not valid. </Typography>
-                    } */}
                 </Grid>
+                {/* <Grid item xs={12} md={12} mt={2}>
+                    {
+                        load ? <Skeleton sx={{ mt: 3 }} /> : 
+                        trackingData !== null && trackingData !== undefined ? 
+                        <Box>
+                            <Typography sx={{ mt: 3 }}>You have received the following messages : </Typography>
+                            <List sx={{ my: 3, border: "1px #e2e2e2 solid" }} dense>
+                                {
+                                    trackingData.notes.map((elm: any) => {
+                                        return <>
+                                            <ListItem>
+                                                <ListItemText primary={"Date : " + (new Date(elm.createdAt)).toLocaleString()} secondary={elm.content} />
+                                            </ListItem>
+                                            <Divider />
+                                        </>;
+                                    })
+                                }
+                            </List>
+                        </Box> 
+                        : null
+                    }
+                </Grid> */}
             </Grid>
         </Box>
     );
