@@ -74,8 +74,14 @@ function UsersAssigment(props: any) {
         })
         .then((response: any) => response.json())
         .then((data: any) => {
-            //console.log(data);
-            setUsers(data.value);
+            if (data.error === undefined) {
+                console.log(data);
+                setUsers(data.value);
+            }
+            else {
+                setShowAlert(true);
+                setLoad(false);
+            }
         })
         .catch(error => { 
             setShowAlert(true);
@@ -174,7 +180,7 @@ function UsersAssigment(props: any) {
                     <Grid container spacing={1} px={5} mt={2}>
                         <Grid item xs={12}>
                             {
-                                users !== null && assignees !== null ?
+                                users !== null && users !== undefined && assignees !== null ?
                                 <TableContainer component={Paper}>
                                     <Table sx={{ minWidth: 650 }} aria-label="simple table">
                                         <TableHead>
@@ -216,11 +222,11 @@ function UsersAssigment(props: any) {
                                             }
                                         </TableBody>
                                     </Table>
-                                </TableContainer> : <Skeleton sx={{ mt: 3 }} />
+                                </TableContainer> : !showAlert ? <Skeleton sx={{ mt: 3 }} /> : null
                             }
                             {
                                 showAlert ?
-                                <Alert severity="warning">You cant manage the users because you are not the administrator. Please contact the administrator so he can grant you the desired role.</Alert> : null
+                                <Alert severity="warning">You cant manage the users because you are not an administrator. Please contact the administrator so he can grant you the desired role.</Alert> : null
                             }
                         </Grid>
                     </Grid>
