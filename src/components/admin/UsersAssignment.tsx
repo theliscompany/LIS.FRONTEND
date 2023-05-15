@@ -1,4 +1,4 @@
-import { Box, Chip, Grid, IconButton, Paper, Skeleton, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@mui/material';
+import { Alert, Box, Chip, Grid, IconButton, Paper, Skeleton, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@mui/material';
 import { useEffect, useState } from 'react';
 import '../../App.css';
 import { DarkTooltip } from '../../misc/styles';
@@ -13,6 +13,7 @@ import { AuthenticationResult } from '@azure/msal-browser';
 
 function UsersAssigment(props: any) {
     const [load, setLoad] = useState<boolean>(false);
+    const [showAlert, setShowAlert] = useState<boolean>(false);
     const [users, setUsers] = useState<any>(null);
     const [assignees, setAssignees] = useState<any>(null);
 
@@ -77,6 +78,7 @@ function UsersAssigment(props: any) {
             setUsers(data.value);
         })
         .catch(error => { 
+            setShowAlert(true);
             setLoad(false);
         });
     }
@@ -215,6 +217,10 @@ function UsersAssigment(props: any) {
                                         </TableBody>
                                     </Table>
                                 </TableContainer> : <Skeleton sx={{ mt: 3 }} />
+                            }
+                            {
+                                showAlert ?
+                                <Alert severity="warning">You cant manage the users because you are not the administrator. Please contact the administrator so he can grant you the desired role.</Alert> : null
                             }
                         </Grid>
                     </Grid>
