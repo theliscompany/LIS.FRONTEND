@@ -20,10 +20,28 @@ import { Dayjs } from 'dayjs';
 let cargoTypes = ["Container", "Conventional", "RollOnRollOff"];
 
 let defaultContainers = [
-    'Container 1',
-    'Container 2',
-    'Container 3',
-    'Container 4',
+    "20' Dry",
+    "40' Dry",
+    "40' HC",
+    "20' VT",
+    "40' VT",
+    "20' RF",
+    "40' RF",
+    "40' HC RF",
+    "20' FL",
+    "40' FL",
+    "20' OT",
+    "40' OT",
+    "20' Tank",
+    "40' Tank",
+    "40' HC OT"
+];
+let haulageTypes = [
+    "On trailer, direct loading", 
+    "On trailer, Loading with Interval", 
+    "Side loader, direct loading", 
+    "Side loader, Loading with Interval, from trailer to floor", 
+    "Side loader, Loading with Interval, from floor to trailer"
 ];
 let statusTypes = [
     { type: "EnAttente", value: "En attente", description: "En attente de traitement" }, 
@@ -49,8 +67,25 @@ function convertStringToObject(str: string): { city: string, country: string } {
     return { city: "", country: "" };
 }
 
-function Request(props: any) {
-    const [load, setLoad] = useState<boolean>(true);
+function createGetRequestUrl(url: string, variable1: string|undefined, variable2: string, variable3: string) {
+    if (variable1) {
+      url += 'plannedDeparture=' + encodeURIComponent(variable1) + '&';
+    }
+    if (variable2) {
+      url += 'haulageType=' + encodeURIComponent(variable2) + '&';
+    }
+    if (variable3) {
+      url += 'loadingCityId=' + encodeURIComponent(variable3) + '&';
+    }
+    
+    if (url.slice(-1) === '&') {
+      url = url.slice(0, -1);
+    }
+    return url;
+}
+
+function RequestTest(props: any) {
+    const [load, setLoad] = useState<boolean>(false);
     const [loadAssignees, setLoadAssignees] = useState<boolean>(true);
     const [loadNotes, setLoadNotes] = useState<boolean>(true);
     const [email, setEmail] = useState<string>("");
@@ -83,9 +118,9 @@ function Request(props: any) {
     const [departureDate, setDepartureDate] = useState<Dayjs | null>(null);
     const [containersSelected, setContainersSelected] = useState<string[]>([]);
     const [destinationPort, setDestinationPort] = useState<string | null>(null);
-    const [townDeparture, setTownDeparture] = useState<string | null>(null);
+    const [loadingCity, setLoadingCity] = useState<string>("");
     const [portDeparture, setPortDeparture] = useState<string | null>(null);
-    const [haulageType, setHaulageType] = useState<string | null>(null);
+    const [haulageType, setHaulageType] = useState<string>("On trailer, direct loading");
     let { id } = useParams();
 
     const context = useAuthorizedBackendApi();
@@ -118,7 +153,7 @@ function Request(props: any) {
     
     useEffect(() => {
         //loadRequest();
-        getAssignees();
+        //getAssignees();
     }, [context]);
     
     const postEmail = async(from: string, to: string, subject: string, htmlContent: string) => {
@@ -136,17 +171,6 @@ function Request(props: any) {
         }
     }
 
-    function sendEmail() {
-        if (mailSubject !== "" || mailContent !== "") {
-            var content = "<body style=\"font-family: Arial, sans-serif; font-size: 14px; color: #333;\">\r\n\t<div style=\"background-color: #f2f2f2; padding: 20px;\">\r\n\t\t<p style=\"margin-bottom: 20px;\">"+ mailContent +"</p>\r\n\t\t<p style=\"margin-top: 20px;\">Please, click the button up to track your request.</p>\r\n\t<a href=\"https://lisquotes-ui.azurewebsites.net/tracking\" style=\"display: inline-block; background-color: #008089; color: #fff; padding: 10px 20px; text-decoration: none;\">Tracking</a>\r\n\t\t</div>\r\n</body>";
-            //var content = "<body style=\"font-family: Arial, sans-serif; font-size: 14px; color: #333;\">\r\n\t<div style=\"background-color: #f2f2f2; padding: 20px;\">\r\n\t\t<p style=\"margin-bottom: 20px;\">"+ mailContent +"</p>\r\n\t\t</div>\r\n</body>";
-            postEmail("cyrille.penaye@omnifreight.eu", email, mailSubject, content);
-        }
-        else {
-            enqueueSnackbar("The subject and/or content fields are empty, please fill them.", { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
-        }
-    }
-      
     const getAssignees = async () => {
         if (context) {
             setLoadAssignees(true);
@@ -194,6 +218,14 @@ function Request(props: any) {
                     setLoad(false);
                 }
             }  
+        }
+    }
+
+    const getPriceRequests = async () => {
+        if (context) {
+            var urlSent = createGetRequestUrl(protectedResources.apiLisPricing.endPoint+"/Pricing/HaulagesOfferRequest?", departureDate?.toISOString(), haulageType, loadingCity);
+            const response = await (context as BackendService<any>).getSingle(urlSent);
+            console.log(response);  
         }
     }
     
@@ -634,7 +666,7 @@ function Request(props: any) {
                 </BootstrapDialogTitle>
                 <DialogContent dividers>
                     <Grid container spacing={2} mt={1} px={2}>
-                        <Grid item xs={12} mt={1}>
+                        <Grid item xs={6} mt={1}>
                             <InputLabel htmlFor="departure-date" sx={inputLabelStyles}>Departure date</InputLabel>
                             <LocalizationProvider dateAdapter={AdapterDayjs}>
                                 <DateTimePicker 
@@ -644,7 +676,7 @@ function Request(props: any) {
                                 />
                             </LocalizationProvider>
                         </Grid>
-                        <Grid item xs={12} mt={1}>
+                        <Grid item xs={6} mt={1}>
                             <InputLabel htmlFor="containers" sx={inputLabelStyles}>Containers</InputLabel>
                             <Select
                                 labelId="request-containers"
@@ -665,19 +697,19 @@ function Request(props: any) {
                                 ))}
                             </Select>
                         </Grid>
-                        <Grid item xs={12} mt={1}>
-                            <InputLabel htmlFor="destination-port" sx={inputLabelStyles}>Destination port</InputLabel>
-                            {/* <BootstrapInput id="general-note" type="text" multiline rows={4} value={generalNote} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setGeneralNote(e.target.value)} fullWidth /> */}
-                        </Grid>
-                        <Grid item xs={6} mt={1}>
-                            <InputLabel htmlFor="town-departure" sx={inputLabelStyles}>Departure town</InputLabel>
-                            {/* <BootstrapInput id="general-note" type="text" multiline rows={4} value={generalNote} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setGeneralNote(e.target.value)} fullWidth /> */}
-                        </Grid>
                         <Grid item xs={6} mt={1}>
                             <InputLabel htmlFor="port-departure" sx={inputLabelStyles}>Departure port</InputLabel>
-                            {/* <BootstrapInput id="general-note" type="text" multiline rows={4} value={generalNote} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setGeneralNote(e.target.value)} fullWidth /> */}
+                            <BootstrapInput id="port-departure" type="text" value={portDeparture} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPortDeparture(e.target.value)} fullWidth />
                         </Grid>
-                        <Grid item xs={12} mt={1}>
+                        <Grid item xs={6} mt={1}>
+                            <InputLabel htmlFor="destination-port" sx={inputLabelStyles}>Destination port</InputLabel>
+                            <BootstrapInput id="destination-port" type="text" value={destinationPort} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setDestinationPort(e.target.value)} fullWidth />
+                        </Grid>
+                        <Grid item xs={6} mt={1}>
+                            <InputLabel htmlFor="loading-city" sx={inputLabelStyles}>Loading city (empty if no haulage)</InputLabel>
+                            <BootstrapInput id="loading-city" type="text" value={loadingCity} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setLoadingCity(e.target.value)} fullWidth />
+                        </Grid>
+                        <Grid item xs={6} mt={1}>
                             <InputLabel htmlFor="haulage-type" sx={inputLabelStyles}>Haulage type (loading timing)</InputLabel>
                             <NativeSelect
                                 id="haulage-type"
@@ -686,14 +718,17 @@ function Request(props: any) {
                                 input={<BootstrapInput />}
                                 fullWidth
                             >
-                                <option value="0">Haulage 1</option>
-                                <option value="1">Haulage 2</option>
-                                <option value="2">Haulage 3</option>
+                                {
+                                    haulageTypes.map((item: any, i: number) => (
+                                        <option key={"kdq"+i} value={item}>{item}</option>
+                                    ))
+                                }
                             </NativeSelect>
                         </Grid>
                     </Grid>
                 </DialogContent>
                 <DialogActions>
+                    <Button variant="contained" color={!load ? "primary" : "info"} className="mr-3" onClick={() => { getPriceRequests(); }} sx={{ textTransform: "none" }}>Generate the offer</Button>
                     <Button variant="contained" onClick={() => setModal5(false)} sx={buttonCloseStyles}>Close</Button>
                 </DialogActions>
             </BootstrapDialog>
@@ -701,4 +736,4 @@ function Request(props: any) {
     );
 }
 
-export default Request;
+export default RequestTest;
