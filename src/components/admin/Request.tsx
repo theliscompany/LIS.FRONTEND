@@ -836,9 +836,7 @@ function Request(props: any) {
                                     onChange={handleChangeContainers}
                                     input={<BootstrapInput />}
                                     renderValue={(selected) => {
-                                        // return containers.find((elm: any) => elm.packageId === selected).packageName.join(', ');
                                         return getPackageNamesByIds(selected, containers).join(', ');
-                                        //return selected.join(', ');
                                     }}
                                     //MenuProps={MenuProps}
                                     fullWidth
