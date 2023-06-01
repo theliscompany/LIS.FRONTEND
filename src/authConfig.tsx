@@ -15,8 +15,8 @@ export const msalConfig: any = {
 
 export const loginRequest: PopupRequest = {
   scopes: [
-    "api://e0e63c6a-8095-4823-a523-2c7b007e9cf5/PricingsRead",
-    // "api://a9d2f4e4-a410-4588-8fbf-1be9101209b3/LIS.Quote.ReadWrite",
+    // "api://e0e63c6a-8095-4823-a523-2c7b007e9cf5/PricingsRead",
+    "api://a9d2f4e4-a410-4588-8fbf-1be9101209b3/LIS.Quote.ReadWrite",
     // "api://e0e63c6a-8095-4823-a523-2c7b007e9cf5/.default",
     // "https://graph.microsoft.com/User.ReadBasic.All"
   ]
@@ -28,11 +28,28 @@ export const graphRequest: PopupRequest = {
   ]
 };
 
+export const pricingRequest: PopupRequest = {
+  scopes: [
+    "api://e0e63c6a-8095-4823-a523-2c7b007e9cf5/PricingsRead",
+  ]
+};
+
+export const transportRequest: PopupRequest = {
+  scopes: [
+    "api://f0b35c43-ffd4-4096-bb75-32306b1e7109/LIS.TRANSPORT.PortsRead",
+    "api://f0b35c43-ffd4-4096-bb75-32306b1e7109/LIS.TRANSPORT.CitiesRead",
+    "api://f0b35c43-ffd4-4096-bb75-32306b1e7109/LIS.TRANSPORT.ContainersRead"
+  ]
+};
+
 export const protectedResources = {
   apiLisQuotes: {
     endPoint: "https://lisquotes-svc.azurewebsites.net/api"
   },
   apiLisPricing: {
     endPoint: "https://lis-pricing-dev.azurewebsites.net/api"
+  },
+  apiLisTransport: {
+    endPoint: "https://listransport.azurewebsites.net"
   }
 }

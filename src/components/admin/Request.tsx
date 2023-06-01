@@ -1,4 +1,4 @@
-import { Alert, Box, Button, Checkbox, Chip, DialogActions, DialogContent, FormControl, FormControlLabel, FormLabel, Grid, IconButton, InputLabel, ListItemText, MenuItem, NativeSelect, Paper, Radio, RadioGroup, Select, SelectChangeEvent, Skeleton, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@mui/material';
+import { Alert, Autocomplete, Box, Button, Checkbox, Chip, DialogActions, DialogContent, FormControl, FormControlLabel, FormLabel, Grid, IconButton, InputLabel, ListItemText, MenuItem, NativeSelect, Paper, Radio, RadioGroup, Select, SelectChangeEvent, Skeleton, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Typography } from '@mui/material';
 import { MuiTelInput } from 'mui-tel-input';
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
@@ -7,7 +7,7 @@ import AutocompleteSearch from '../shared/AutocompleteSearch';
 import { inputLabelStyles, BootstrapInput, BootstrapDialogTitle, BootstrapDialog, buttonCloseStyles, DarkTooltip, tagInputStyles, whiteButtonStyles, datetimeStyles } from '../../misc/styles';
 import { enqueueSnackbar, SnackbarProvider } from 'notistack';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { protectedResources } from '../../authConfig';
+import { pricingRequest, protectedResources, transportRequest } from '../../authConfig';
 import { useAuthorizedBackendApi } from '../../api/api';
 import { BackendService } from '../../services/fetch';
 import { MuiChipsInput, MuiChipsInputChip } from 'mui-chips-input';
@@ -15,15 +15,18 @@ import { MailData, RequestDto } from '../../models/models';
 import { DateTimePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { Dayjs } from 'dayjs';
+import { useAccount, useMsal } from '@azure/msal-react';
+import { AuthenticationResult } from '@azure/msal-browser';
 
 //let statusTypes = ["EnAttente", "Valider", "Rejeter"];
 let cargoTypes = ["Container", "Conventional", "RollOnRollOff"];
 
-let defaultContainers = [
-    'Container 1',
-    'Container 2',
-    'Container 3',
-    'Container 4',
+let haulageTypes = [
+    "On trailer, direct loading", 
+    "On trailer, Loading with Interval", 
+    "Side loader, direct loading", 
+    "Side loader, Loading with Interval, from trailer to floor", 
+    "Side loader, Loading with Interval, from floor to trailer"
 ];
 let statusTypes = [
     { type: "EnAttente", value: "En attente", description: "En attente de traitement" }, 
@@ -47,6 +50,56 @@ function convertStringToObject(str: string): { city: string, country: string } {
         return { city, country };
     }
     return { city: "", country: "" };
+}
+
+function createGetRequestUrl(url: string, variable1: string|undefined, variable2: string, variable3: string) {
+    if (variable1) {
+        url += 'PlannedDeparture=' + encodeURIComponent(variable1) + '&';
+    }
+    if (variable2) {
+        url += 'HaulageType=' + encodeURIComponent(variable2) + '&';
+    }
+    if (variable3) {
+        url += 'LoadingCityId=' + encodeURIComponent(variable3) + '&';
+    }
+    
+    if (url.slice(-1) === '&') {
+        url = url.slice(0, -1);
+    }
+    return url;
+}
+
+function createGetRequestUrl2(url: string, variable1: string, variable2: string, variable3: string|undefined, variable4: string) {
+    if (variable1) {
+        url += 'DeparturePortId=' + encodeURIComponent(variable1) + '&';
+    }
+    if (variable2) {
+        url += 'DestinationPortId=' + encodeURIComponent(variable2) + '&';
+    }
+    if (variable3) {
+        url += 'PlannedDeparture=' + encodeURIComponent(variable3) + '&';
+    }
+    if (variable4) {
+        url += 'ContainerTypesId=' + encodeURIComponent(variable4) + '&';
+    }
+    
+    if (url.slice(-1) === '&') {
+        url = url.slice(0, -1);
+    }
+    return url;
+}
+
+function getPackageNamesByIds(ids: string[], packages: any) {
+    const packageNames = [];
+  
+    for (const id of ids) {
+        const foundPackage = packages.find((pkg: any) => pkg.packageId === id);
+        if (foundPackage) {
+            packageNames.push(foundPackage.packageName);
+        }
+    }
+  
+    return packageNames;
 }
 
 function Request(props: any) {
@@ -82,12 +135,18 @@ function Request(props: any) {
     
     const [departureDate, setDepartureDate] = useState<Dayjs | null>(null);
     const [containersSelected, setContainersSelected] = useState<string[]>([]);
-    const [destinationPort, setDestinationPort] = useState<string | null>(null);
-    const [townDeparture, setTownDeparture] = useState<string | null>(null);
-    const [portDeparture, setPortDeparture] = useState<string | null>(null);
-    const [haulageType, setHaulageType] = useState<string | null>(null);
+    const [destinationPort, setDestinationPort] = useState<any>(null);
+    const [portDeparture, setPortDeparture] = useState<any>(null);
+    const [loadingCity, setLoadingCity] = useState<any>(null);
+    const [haulageType, setHaulageType] = useState<string>("");
+    const [cities, setCities] = useState<any>(null);
+    const [ports, setPorts] = useState<any>(null);
+    const [containers, setContainers] = useState<any>(null);
     let { id } = useParams();
 
+    const { instance, accounts } = useMsal();
+    const account = useAccount(accounts[0] || {});
+        
     const context = useAuthorizedBackendApi();
     
     const handleChangeContainers = (event: SelectChangeEvent<typeof containersSelected>) => {
@@ -118,35 +177,12 @@ function Request(props: any) {
     
     useEffect(() => {
         //loadRequest();
+        getContainers();
+        getPorts();
+        getCities();
         getAssignees();
     }, [context]);
     
-    const postEmail = async(from: string, to: string, subject: string, htmlContent: string) => {
-        const body: MailData = { from: from, to: to, subject: subject, htmlContent: htmlContent };
-        const data = await (context as BackendService<any>).postForm(protectedResources.apiLisQuotes.endPoint+"/Email", body);
-        console.log(data);
-        if (data?.status === 200) {
-            enqueueSnackbar("The message has been successfully sent.", { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
-            setMailSubject("");
-            setMailContent("");
-            setModal(false);
-        }
-        else {
-            enqueueSnackbar("An error occured. Please refresh the page or check your internet connection.", { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
-        }
-    }
-
-    function sendEmail() {
-        if (mailSubject !== "" || mailContent !== "") {
-            var content = "<body style=\"font-family: Arial, sans-serif; font-size: 14px; color: #333;\">\r\n\t<div style=\"background-color: #f2f2f2; padding: 20px;\">\r\n\t\t<p style=\"margin-bottom: 20px;\">"+ mailContent +"</p>\r\n\t\t<p style=\"margin-top: 20px;\">Please, click the button up to track your request.</p>\r\n\t<a href=\"https://lisquotes-ui.azurewebsites.net/tracking\" style=\"display: inline-block; background-color: #008089; color: #fff; padding: 10px 20px; text-decoration: none;\">Tracking</a>\r\n\t\t</div>\r\n</body>";
-            //var content = "<body style=\"font-family: Arial, sans-serif; font-size: 14px; color: #333;\">\r\n\t<div style=\"background-color: #f2f2f2; padding: 20px;\">\r\n\t\t<p style=\"margin-bottom: 20px;\">"+ mailContent +"</p>\r\n\t\t</div>\r\n</body>";
-            postEmail("cyrille.penaye@omnifreight.eu", email, mailSubject, content);
-        }
-        else {
-            enqueueSnackbar("The subject and/or content fields are empty, please fill them.", { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
-        }
-    }
-      
     const getAssignees = async () => {
         if (context) {
             setLoadAssignees(true);
@@ -341,6 +377,150 @@ function Request(props: any) {
         }
     }
 
+    const getPriceRequests = async () => {
+        console.log(containersSelected);
+        if (departureDate !== null && containersSelected.length !== 0 && destinationPort !== null) {
+            getSeaFreightPriceOffers();
+            if (loadingCity !== null && haulageType !== "") {
+                getHaulagePriceOffers();
+            }
+        }
+        else {
+            enqueueSnackbar("The fields departure date, containers and destination port cannot be empty, fill them.", { variant: "warning", anchorOrigin: { horizontal: "right", vertical: "top"} });
+        }
+    }
+    
+    const getHaulagePriceOffers = async () => {
+        if (context && account) {
+            const token = await instance.acquireTokenSilent({
+                scopes: pricingRequest.scopes,
+                account: account
+            })
+            .then((response: AuthenticationResult) => {
+                return response.accessToken;
+            })
+            .catch(() => {
+                return instance.acquireTokenPopup({
+                    ...pricingRequest,
+                    account: account
+                    }).then((response) => {
+                        return response.accessToken;
+                    });
+                }
+            );
+            
+            var urlSent = createGetRequestUrl(protectedResources.apiLisPricing.endPoint+"/Pricing/HaulagesOfferRequest?", departureDate?.toISOString(), haulageType, loadingCity.id);
+            const response = await (context as BackendService<any>).getWithToken(urlSent, token);
+            console.log(response);  
+        }
+    }
+    
+    const getSeaFreightPriceOffers = async () => {
+        if (context && account) {
+            const token = await instance.acquireTokenSilent({
+                scopes: pricingRequest.scopes,
+                account: account
+            })
+            .then((response: AuthenticationResult) => {
+                return response.accessToken;
+            })
+            .catch(() => {
+                return instance.acquireTokenPopup({
+                    ...pricingRequest,
+                    account: account
+                    }).then((response) => {
+                        return response.accessToken;
+                    });
+                }
+            );
+            
+            var urlSent = createGetRequestUrl2(protectedResources.apiLisPricing.endPoint+"/Pricing/SeaFreightsOffersRequest?", portDeparture.id, destinationPort.id, departureDate?.toISOString(), containersSelected.toString());
+            const response = await (context as BackendService<any>).getWithToken(urlSent, token);
+            console.log(response);  
+        }
+    }
+    
+    const getContainers = async () => {
+        if (context && account) {
+            const token = await instance.acquireTokenSilent({
+                scopes: transportRequest.scopes,
+                account: account
+            })
+            .then((response: AuthenticationResult) => {
+                return response.accessToken;
+            })
+            .catch(() => {
+                return instance.acquireTokenPopup({
+                    ...transportRequest,
+                    account: account
+                    }).then((response) => {
+                        return response.accessToken;
+                    });
+                }
+            );
+            
+            const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Package/Containers", token);
+            console.log(response);
+            if (response !== null && response !== undefined) {
+                setContainers(response);
+            }  
+        }
+    }
+    
+    const getPorts = async () => {
+        if (context && account) {
+            const token = await instance.acquireTokenSilent({
+                scopes: transportRequest.scopes,
+                account: account
+            })
+            .then((response: AuthenticationResult) => {
+                return response.accessToken;
+            })
+            .catch(() => {
+                return instance.acquireTokenPopup({
+                    ...transportRequest,
+                    account: account
+                    }).then((response) => {
+                        return response.accessToken;
+                    });
+                }
+            );
+            
+            const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Port/Ports", token);
+            console.log(response);
+            if (response !== null && response !== undefined) {
+                setPorts(response);
+            }  
+        }
+    }
+    
+    const getCities = async () => {
+        if (context && account) {
+            const token = await instance.acquireTokenSilent({
+                scopes: transportRequest.scopes,
+                account: account
+            })
+            .then((response: AuthenticationResult) => {
+                return response.accessToken;
+            })
+            .catch(() => {
+                return instance.acquireTokenPopup({
+                    ...transportRequest,
+                    account: account
+                    }).then((response) => {
+                        return response.accessToken;
+                    });
+                }
+            );
+            
+            const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/City/Cities", token);
+            console.log(response);
+            if (response !== null && response !== undefined) {
+                setCities(response);
+            }  
+        }
+    }
+    
     return (
         <div style={{ background: "#fff", borderTopLeftRadius: 20, borderTopRightRadius: 20 }}>
             <SnackbarProvider />
@@ -634,50 +814,129 @@ function Request(props: any) {
                 </BootstrapDialogTitle>
                 <DialogContent dividers>
                     <Grid container spacing={2} mt={1} px={2}>
-                        <Grid item xs={12} mt={1}>
+                        <Grid item xs={6} mt={1}>
                             <InputLabel htmlFor="departure-date" sx={inputLabelStyles}>Departure date</InputLabel>
                             <LocalizationProvider dateAdapter={AdapterDayjs}>
                                 <DateTimePicker 
                                     value={departureDate} 
                                     onChange={(value: any) => { setDepartureDate(value) }}
-                                    slotProps={{ textField: { id: "created-date-start", fullWidth: true, sx: datetimeStyles }, inputAdornment: { sx: { position: "relative", right: "11.5px" } } }}
+                                    slotProps={{ textField: { id: "departure-date", fullWidth: true, sx: datetimeStyles }, inputAdornment: { sx: { position: "relative", right: "11.5px" } } }}
                                 />
                             </LocalizationProvider>
                         </Grid>
-                        <Grid item xs={12} mt={1}>
-                            <InputLabel htmlFor="containers" sx={inputLabelStyles}>Containers</InputLabel>
-                            <Select
-                                labelId="request-containers"
-                                id="containers"
-                                multiple
-                                value={containersSelected}
-                                onChange={handleChangeContainers}
-                                input={<BootstrapInput />}
-                                renderValue={(selected) => selected.join(', ')}
-                                //MenuProps={MenuProps}
-                                fullWidth
-                            >
-                                {defaultContainers.map((name) => (
-                                    <MenuItem key={name} value={name}>
-                                        <Checkbox checked={containersSelected.indexOf(name) > -1} />
-                                        <ListItemText primary={name} />
-                                    </MenuItem>
-                                ))}
-                            </Select>
-                        </Grid>
-                        <Grid item xs={12} mt={1}>
-                            <InputLabel htmlFor="destination-port" sx={inputLabelStyles}>Destination port</InputLabel>
-                            {/* <BootstrapInput id="general-note" type="text" multiline rows={4} value={generalNote} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setGeneralNote(e.target.value)} fullWidth /> */}
-                        </Grid>
                         <Grid item xs={6} mt={1}>
-                            <InputLabel htmlFor="town-departure" sx={inputLabelStyles}>Departure town</InputLabel>
-                            {/* <BootstrapInput id="general-note" type="text" multiline rows={4} value={generalNote} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setGeneralNote(e.target.value)} fullWidth /> */}
+                            <InputLabel htmlFor="containers" sx={inputLabelStyles}>Containers</InputLabel>
+                            {
+                                containers !== null ?
+                                <Select
+                                    labelId="request-containers"
+                                    id="containers"
+                                    multiple
+                                    value={containersSelected}
+                                    onChange={handleChangeContainers}
+                                    input={<BootstrapInput />}
+                                    renderValue={(selected) => {
+                                        // return containers.find((elm: any) => elm.packageId === selected).packageName.join(', ');
+                                        return getPackageNamesByIds(selected, containers).join(', ');
+                                        //return selected.join(', ');
+                                    }}
+                                    //MenuProps={MenuProps}
+                                    fullWidth
+                                >
+                                    {containers.map((item: any, i: number) => (
+                                        <MenuItem key={"container-"+i} value={item.packageId}>
+                                            <Checkbox checked={containersSelected.indexOf(item.packageId) > -1} />
+                                            <ListItemText primary={item.packageName} />
+                                        </MenuItem>
+                                    ))}
+                                </Select>
+                                : <Skeleton />
+                            }
                         </Grid>
                         <Grid item xs={6} mt={1}>
                             <InputLabel htmlFor="port-departure" sx={inputLabelStyles}>Departure port</InputLabel>
-                            {/* <BootstrapInput id="general-note" type="text" multiline rows={4} value={generalNote} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setGeneralNote(e.target.value)} fullWidth /> */}
+                            {/* <BootstrapInput id="port-departure" type="text" value={portDeparture} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPortDeparture(e.target.value)} fullWidth /> */}
+                            {
+                                ports !== null ?
+                                <Autocomplete
+                                    disablePortal
+                                    id="port-departure"
+                                    options={ports}
+                                    renderOption={(props, option, i) => {
+                                        return (
+                                            <li {...props} key={option.portId}>
+                                                {option.portName+", "+option.country}
+                                            </li>
+                                        );
+                                    }}
+                                    getOptionLabel={(option: any) => { 
+                                        if (option !== null && option !== undefined) {
+                                            return option.portName+', '+option.country;
+                                        }
+                                        return ""; 
+                                    }}
+                                    value={portDeparture}
+                                    sx={{ mt: 1 }}
+                                    renderInput={(params) => <TextField {...params} />}
+                                    onChange={(e: any, value: any) => { setPortDeparture(value); }}
+                                    fullWidth
+                                /> : <Skeleton />
+                            }
                         </Grid>
-                        <Grid item xs={12} mt={1}>
+                        <Grid item xs={6} mt={1}>
+                            <InputLabel htmlFor="destination-port" sx={inputLabelStyles}>Destination port</InputLabel>
+                            {/* <BootstrapInput id="destination-port" type="text" value={destinationPort} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setDestinationPort(e.target.value)} fullWidth /> */}
+                            {
+                                ports !== null ?
+                                <Autocomplete
+                                    disablePortal
+                                    id="destination-port"
+                                    options={ports}
+                                    renderOption={(props, option, i) => {
+                                        return (
+                                            <li {...props} key={option.portId}>
+                                                {option.portName+", "+option.country}
+                                            </li>
+                                        );
+                                    }}
+                                    getOptionLabel={(option: any) => { 
+                                        if (option !== null && option !== undefined) {
+                                            return option.portName+', '+option.country;
+                                        }
+                                        return ""; 
+                                    }}
+                                    value={destinationPort}
+                                    sx={{ mt: 1 }}
+                                    renderInput={(params) => <TextField {...params} />}
+                                    onChange={(e: any, value: any) => { setDestinationPort(value); }}
+                                    fullWidth
+                                /> : <Skeleton />
+                            }
+                        </Grid>
+                        <Grid item xs={6} mt={1}>
+                            <InputLabel htmlFor="loading-city" sx={inputLabelStyles}>Loading city (empty if no haulage)</InputLabel>
+                            {/* <BootstrapInput id="loading-city" type="text" value={loadingCity} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setLoadingCity(e.target.value)} fullWidth /> */}
+                            {
+                                cities !== null ?
+                                <Autocomplete
+                                    disablePortal
+                                    id="loading-city"
+                                    options={cities}
+                                    getOptionLabel={(option: any) => { 
+                                        if (option !== null && option !== undefined) {
+                                            return option.name+', '+option.country;
+                                        }
+                                        return ""; 
+                                    }}
+                                    value={loadingCity}
+                                    sx={{ mt: 1 }}
+                                    renderInput={(params) => <TextField {...params} />}
+                                    onChange={(e: any, value: any) => { setLoadingCity(value); }}
+                                    fullWidth
+                                /> : <Skeleton />
+                            }
+                        </Grid>
+                        <Grid item xs={6} mt={1}>
                             <InputLabel htmlFor="haulage-type" sx={inputLabelStyles}>Haulage type (loading timing)</InputLabel>
                             <NativeSelect
                                 id="haulage-type"
@@ -686,14 +945,18 @@ function Request(props: any) {
                                 input={<BootstrapInput />}
                                 fullWidth
                             >
-                                <option value="0">Haulage 1</option>
-                                <option value="1">Haulage 2</option>
-                                <option value="2">Haulage 3</option>
+                                <option key={"kdq-"} value="">Any type</option>
+                                {
+                                    haulageTypes.map((item: any, i: number) => (
+                                        <option key={"kdq"+i} value={item}>{item}</option>
+                                    ))
+                                }
                             </NativeSelect>
                         </Grid>
                     </Grid>
                 </DialogContent>
                 <DialogActions>
+                    <Button variant="contained" color={!load ? "primary" : "info"} className="mr-3" onClick={() => { getPriceRequests(); }} sx={{ textTransform: "none" }}>Generate the offer</Button>
                     <Button variant="contained" onClick={() => setModal5(false)} sx={buttonCloseStyles}>Close</Button>
                 </DialogActions>
             </BootstrapDialog>

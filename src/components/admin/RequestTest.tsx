@@ -7,7 +7,7 @@ import AutocompleteSearch from '../shared/AutocompleteSearch';
 import { inputLabelStyles, BootstrapInput, BootstrapDialogTitle, BootstrapDialog, buttonCloseStyles, DarkTooltip, tagInputStyles, whiteButtonStyles, datetimeStyles } from '../../misc/styles';
 import { enqueueSnackbar, SnackbarProvider } from 'notistack';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { protectedResources } from '../../authConfig';
+import { pricingRequest, protectedResources, transportRequest } from '../../authConfig';
 import { useAuthorizedBackendApi } from '../../api/api';
 import { BackendService } from '../../services/fetch';
 import { MuiChipsInput, MuiChipsInputChip } from 'mui-chips-input';
@@ -15,6 +15,8 @@ import { MailData, RequestDto } from '../../models/models';
 import { DateTimePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { Dayjs } from 'dayjs';
+import { useAccount, useMsal } from '@azure/msal-react';
+import { AuthenticationResult } from '@azure/msal-browser';
 
 //let statusTypes = ["EnAttente", "Valider", "Rejeter"];
 let cargoTypes = ["Container", "Conventional", "RollOnRollOff"];
@@ -117,12 +119,16 @@ function RequestTest(props: any) {
     
     const [departureDate, setDepartureDate] = useState<Dayjs | null>(null);
     const [containersSelected, setContainersSelected] = useState<string[]>([]);
-    const [destinationPort, setDestinationPort] = useState<string | null>(null);
+    const [destinationPort, setDestinationPort] = useState<string>("");
     const [loadingCity, setLoadingCity] = useState<string>("");
-    const [portDeparture, setPortDeparture] = useState<string | null>(null);
+    const [portDeparture, setPortDeparture] = useState<string>("");
     const [haulageType, setHaulageType] = useState<string>("On trailer, direct loading");
     let { id } = useParams();
 
+    
+    const { instance, accounts } = useMsal();
+    const account = useAccount(accounts[0] || {});
+        
     const context = useAuthorizedBackendApi();
     
     const handleChangeContainers = (event: SelectChangeEvent<typeof containersSelected>) => {
@@ -154,23 +160,9 @@ function RequestTest(props: any) {
     useEffect(() => {
         //loadRequest();
         //getAssignees();
+        getPorts();
     }, [context]);
     
-    const postEmail = async(from: string, to: string, subject: string, htmlContent: string) => {
-        const body: MailData = { from: from, to: to, subject: subject, htmlContent: htmlContent };
-        const data = await (context as BackendService<any>).postForm(protectedResources.apiLisQuotes.endPoint+"/Email", body);
-        console.log(data);
-        if (data?.status === 200) {
-            enqueueSnackbar("The message has been successfully sent.", { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
-            setMailSubject("");
-            setMailContent("");
-            setModal(false);
-        }
-        else {
-            enqueueSnackbar("An error occured. Please refresh the page or check your internet connection.", { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
-        }
-    }
-
     const getAssignees = async () => {
         if (context) {
             setLoadAssignees(true);
@@ -222,9 +214,50 @@ function RequestTest(props: any) {
     }
 
     const getPriceRequests = async () => {
-        if (context) {
+        if (context && account) {
+            const token = await instance.acquireTokenSilent({
+                scopes: pricingRequest.scopes,
+                account: account
+            })
+            .then((response: AuthenticationResult) => {
+                return response.accessToken;
+            })
+            .catch(() => {
+                return instance.acquireTokenPopup({
+                    ...pricingRequest,
+                    account: account
+                    }).then((response) => {
+                        return response.accessToken;
+                    });
+                }
+            );
+            
             var urlSent = createGetRequestUrl(protectedResources.apiLisPricing.endPoint+"/Pricing/HaulagesOfferRequest?", departureDate?.toISOString(), haulageType, loadingCity);
-            const response = await (context as BackendService<any>).getSingle(urlSent);
+            const response = await (context as BackendService<any>).getWithToken(urlSent, token);
+            console.log(response);  
+        }
+    }
+    
+    const getPorts = async () => {
+        if (context && account) {
+            const token = await instance.acquireTokenSilent({
+                scopes: transportRequest.scopes,
+                account: account
+            })
+            .then((response: AuthenticationResult) => {
+                return response.accessToken;
+            })
+            .catch(() => {
+                return instance.acquireTokenPopup({
+                    ...transportRequest,
+                    account: account
+                    }).then((response) => {
+                        return response.accessToken;
+                    });
+                }
+            );
+            
+            const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Port/Ports", token);
             console.log(response);  
         }
     }
@@ -728,7 +761,7 @@ function RequestTest(props: any) {
                     </Grid>
                 </DialogContent>
                 <DialogActions>
-                    <Button variant="contained" color={!load ? "primary" : "info"} className="mr-3" onClick={() => { getPriceRequests(); }} sx={{ textTransform: "none" }}>Generate the offer</Button>
+                    <Button variant="contained" color={!load ? "primary" : "info"} className="mr-3" onClick={() => { getPorts(); }} sx={{ textTransform: "none" }}>Generate the offer</Button>
                     <Button variant="contained" onClick={() => setModal5(false)} sx={buttonCloseStyles}>Close</Button>
                 </DialogActions>
             </BootstrapDialog>
