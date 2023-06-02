@@ -15,10 +15,7 @@ export const msalConfig: any = {
 
 export const loginRequest: PopupRequest = {
   scopes: [
-    // "api://e0e63c6a-8095-4823-a523-2c7b007e9cf5/PricingsRead",
     "api://a9d2f4e4-a410-4588-8fbf-1be9101209b3/LIS.Quote.ReadWrite",
-    // "api://e0e63c6a-8095-4823-a523-2c7b007e9cf5/.default",
-    // "https://graph.microsoft.com/User.ReadBasic.All"
   ]
 };
 

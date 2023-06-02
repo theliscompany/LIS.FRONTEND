@@ -80,7 +80,7 @@ function createGetRequestUrl2(url: string, variable1: string, variable2: string,
         url += 'PlannedDeparture=' + encodeURIComponent(variable3) + '&';
     }
     if (variable4) {
-        url += 'ContainerTypesId=' + encodeURIComponent(variable4) + '&';
+        url += 'ContainerTypesId=' + variable4 + '&';
     }
     
     if (url.slice(-1) === '&') {
@@ -434,7 +434,8 @@ function Request(props: any) {
                 }
             );
             
-            var urlSent = createGetRequestUrl2(protectedResources.apiLisPricing.endPoint+"/Pricing/SeaFreightsOffersRequest?", portDeparture.id, destinationPort.id, departureDate?.toISOString(), containersSelected.toString());
+            var containersFormatted = containersSelected.join("&ContainerTypesId=");
+            var urlSent = createGetRequestUrl2(protectedResources.apiLisPricing.endPoint+"/Pricing/SeaFreightsOffersRequest?", portDeparture.portId, destinationPort.portId, departureDate?.toISOString(), containersFormatted);
             const response = await (context as BackendService<any>).getWithToken(urlSent, token);
             console.log(response);  
         }
