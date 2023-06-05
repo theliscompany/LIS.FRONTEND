@@ -1,4 +1,4 @@
-import { Alert, Autocomplete, Box, Button, Checkbox, Chip, DialogActions, DialogContent, FormControl, FormControlLabel, FormLabel, Grid, IconButton, InputLabel, ListItemText, MenuItem, NativeSelect, Paper, Radio, RadioGroup, Select, SelectChangeEvent, Skeleton, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Typography } from '@mui/material';
+import { Alert, Autocomplete, Box, Button, Checkbox, Chip, DialogActions, DialogContent, FormControl, FormControlLabel, FormLabel, Grid, IconButton, InputLabel, ListItemText, MenuItem, NativeSelect, Paper, Radio, RadioGroup, Select, SelectChangeEvent, Skeleton, Step, StepLabel, Stepper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Typography } from '@mui/material';
 import { MuiTelInput } from 'mui-tel-input';
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
@@ -102,10 +102,13 @@ function getPackageNamesByIds(ids: string[], packages: any) {
     return packageNames;
 }
 
+const steps = ['Search for offers', 'List of offers', 'Send an offer'];
+
 function Request(props: any) {
     const [load, setLoad] = useState<boolean>(true);
     const [loadAssignees, setLoadAssignees] = useState<boolean>(true);
     const [loadNotes, setLoadNotes] = useState<boolean>(true);
+    const [loadResults, setLoadResults] = useState<boolean>(false);
     const [email, setEmail] = useState<string>("");
     const [status, setStatus] = useState<string | null>(null);
     const [trackingNumber, setTrackingNumber] = useState<string>("");
@@ -142,6 +145,8 @@ function Request(props: any) {
     const [cities, setCities] = useState<any>(null);
     const [ports, setPorts] = useState<any>(null);
     const [containers, setContainers] = useState<any>(null);
+    const [haulages, setHaulages] = useState<any>(null);
+    const [seafreights, setSeafreights] = useState<any>(null);
     let { id } = useParams();
 
     const { instance, accounts } = useMsal();
@@ -173,6 +178,55 @@ function Request(props: any) {
     
     const handleChangeStatus = (event: React.ChangeEvent<HTMLInputElement>) => {
         setSelectedStatus((event.target as HTMLInputElement).value);
+    };
+    
+    // Stepper functions
+    const [activeStep, setActiveStep] = React.useState(0);
+    const [skipped, setSkipped] = React.useState(new Set<number>());
+
+    const isStepOptional = (step: number) => {
+        return step === 5;
+    };
+
+    const isStepSkipped = (step: number) => {
+        return skipped.has(step);
+    };
+
+    const handleNext = () => {
+        let newSkipped = skipped;
+        if (isStepSkipped(activeStep)) {
+            newSkipped = new Set(newSkipped.values());
+            newSkipped.delete(activeStep);
+        }
+        if (activeStep === 0) {
+            getPriceRequests();
+        }
+
+        setActiveStep((prevActiveStep) => prevActiveStep + 1);
+        setSkipped(newSkipped);
+    };
+
+    const handleBack = () => {
+        setActiveStep((prevActiveStep) => prevActiveStep - 1);
+    };
+
+    const handleSkip = () => {
+        if (!isStepOptional(activeStep)) {
+        // You probably want to guard against something like this,
+        // it should never occur unless someone's actively trying to break something.
+        throw new Error("You can't skip a step that isn't optional.");
+        }
+
+        setActiveStep((prevActiveStep) => prevActiveStep + 1);
+        setSkipped((prevSkipped) => {
+        const newSkipped = new Set(prevSkipped.values());
+        newSkipped.add(activeStep);
+        return newSkipped;
+        });
+    };
+
+    const handleReset = () => {
+        setActiveStep(0);
     };
     
     useEffect(() => {
@@ -378,8 +432,8 @@ function Request(props: any) {
     }
 
     const getPriceRequests = async () => {
-        console.log(containersSelected);
         if (departureDate !== null && containersSelected.length !== 0 && destinationPort !== null) {
+            setLoadResults(true);
             getSeaFreightPriceOffers();
             if (loadingCity !== null && haulageType !== "") {
                 getHaulagePriceOffers();
@@ -411,6 +465,8 @@ function Request(props: any) {
             
             var urlSent = createGetRequestUrl(protectedResources.apiLisPricing.endPoint+"/Pricing/HaulagesOfferRequest?", departureDate?.toISOString(), haulageType, loadingCity.id);
             const response = await (context as BackendService<any>).getWithToken(urlSent, token);
+            setLoadResults(false);
+            setHaulages(response);
             console.log(response);  
         }
     }
@@ -434,9 +490,12 @@ function Request(props: any) {
                 }
             );
             
+            
             var containersFormatted = containersSelected.join("&ContainerTypesId=");
             var urlSent = createGetRequestUrl2(protectedResources.apiLisPricing.endPoint+"/Pricing/SeaFreightsOffersRequest?", portDeparture.portId, destinationPort.portId, departureDate?.toISOString(), containersFormatted);
             const response = await (context as BackendService<any>).getWithToken(urlSent, token);
+            setLoadResults(false);
+            setSeafreights(response);
             console.log(response);  
         }
     }
@@ -814,148 +873,261 @@ function Request(props: any) {
                     <b>Generate a price offer</b>
                 </BootstrapDialogTitle>
                 <DialogContent dividers>
-                    <Grid container spacing={2} mt={1} px={2}>
-                        <Grid item xs={6} mt={1}>
-                            <InputLabel htmlFor="departure-date" sx={inputLabelStyles}>Departure date</InputLabel>
-                            <LocalizationProvider dateAdapter={AdapterDayjs}>
-                                <DateTimePicker 
-                                    value={departureDate} 
-                                    onChange={(value: any) => { setDepartureDate(value) }}
-                                    slotProps={{ textField: { id: "departure-date", fullWidth: true, sx: datetimeStyles }, inputAdornment: { sx: { position: "relative", right: "11.5px" } } }}
-                                />
-                            </LocalizationProvider>
-                        </Grid>
-                        <Grid item xs={6} mt={1}>
-                            <InputLabel htmlFor="containers" sx={inputLabelStyles}>Containers</InputLabel>
-                            {
-                                containers !== null ?
-                                <Select
-                                    labelId="request-containers"
-                                    id="containers"
-                                    multiple
-                                    value={containersSelected}
-                                    onChange={handleChangeContainers}
-                                    input={<BootstrapInput />}
-                                    renderValue={(selected) => {
-                                        return getPackageNamesByIds(selected, containers).join(', ');
-                                    }}
-                                    //MenuProps={MenuProps}
-                                    fullWidth
-                                >
-                                    {containers.map((item: any, i: number) => (
-                                        <MenuItem key={"container-"+i} value={item.packageId}>
-                                            <Checkbox checked={containersSelected.indexOf(item.packageId) > -1} />
-                                            <ListItemText primary={item.packageName} />
-                                        </MenuItem>
-                                    ))}
-                                </Select>
-                                : <Skeleton />
+                    <Box sx={{ width: '100%' }}>
+                        <Stepper activeStep={activeStep}>
+                            {steps.map((label, index) => {
+                            const stepProps: { completed?: boolean } = {};
+                            const labelProps: {
+                                optional?: React.ReactNode;
+                            } = {};
+                            if (isStepOptional(index)) {
+                                labelProps.optional = (
+                                <Typography variant="caption">Optional</Typography>
+                                );
                             }
-                        </Grid>
-                        <Grid item xs={6} mt={1}>
-                            <InputLabel htmlFor="port-departure" sx={inputLabelStyles}>Departure port</InputLabel>
-                            {/* <BootstrapInput id="port-departure" type="text" value={portDeparture} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPortDeparture(e.target.value)} fullWidth /> */}
-                            {
-                                ports !== null ?
-                                <Autocomplete
-                                    disablePortal
-                                    id="port-departure"
-                                    options={ports}
-                                    renderOption={(props, option, i) => {
-                                        return (
-                                            <li {...props} key={option.portId}>
-                                                {option.portName+", "+option.country}
-                                            </li>
-                                        );
-                                    }}
-                                    getOptionLabel={(option: any) => { 
-                                        if (option !== null && option !== undefined) {
-                                            return option.portName+', '+option.country;
-                                        }
-                                        return ""; 
-                                    }}
-                                    value={portDeparture}
-                                    sx={{ mt: 1 }}
-                                    renderInput={(params) => <TextField {...params} />}
-                                    onChange={(e: any, value: any) => { setPortDeparture(value); }}
-                                    fullWidth
-                                /> : <Skeleton />
+                            if (isStepSkipped(index)) {
+                                stepProps.completed = false;
                             }
-                        </Grid>
-                        <Grid item xs={6} mt={1}>
-                            <InputLabel htmlFor="destination-port" sx={inputLabelStyles}>Destination port</InputLabel>
-                            {/* <BootstrapInput id="destination-port" type="text" value={destinationPort} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setDestinationPort(e.target.value)} fullWidth /> */}
-                            {
-                                ports !== null ?
-                                <Autocomplete
-                                    disablePortal
-                                    id="destination-port"
-                                    options={ports}
-                                    renderOption={(props, option, i) => {
-                                        return (
-                                            <li {...props} key={option.portId}>
-                                                {option.portName+", "+option.country}
-                                            </li>
-                                        );
-                                    }}
-                                    getOptionLabel={(option: any) => { 
-                                        if (option !== null && option !== undefined) {
-                                            return option.portName+', '+option.country;
-                                        }
-                                        return ""; 
-                                    }}
-                                    value={destinationPort}
-                                    sx={{ mt: 1 }}
-                                    renderInput={(params) => <TextField {...params} />}
-                                    onChange={(e: any, value: any) => { setDestinationPort(value); }}
-                                    fullWidth
-                                /> : <Skeleton />
-                            }
-                        </Grid>
-                        <Grid item xs={6} mt={1}>
-                            <InputLabel htmlFor="loading-city" sx={inputLabelStyles}>Loading city (empty if no haulage)</InputLabel>
-                            {/* <BootstrapInput id="loading-city" type="text" value={loadingCity} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setLoadingCity(e.target.value)} fullWidth /> */}
-                            {
-                                cities !== null ?
-                                <Autocomplete
-                                    disablePortal
-                                    id="loading-city"
-                                    options={cities}
-                                    getOptionLabel={(option: any) => { 
-                                        if (option !== null && option !== undefined) {
-                                            return option.name+', '+option.country;
-                                        }
-                                        return ""; 
-                                    }}
-                                    value={loadingCity}
-                                    sx={{ mt: 1 }}
-                                    renderInput={(params) => <TextField {...params} />}
-                                    onChange={(e: any, value: any) => { setLoadingCity(value); }}
-                                    fullWidth
-                                /> : <Skeleton />
-                            }
-                        </Grid>
-                        <Grid item xs={6} mt={1}>
-                            <InputLabel htmlFor="haulage-type" sx={inputLabelStyles}>Haulage type (loading timing)</InputLabel>
-                            <NativeSelect
-                                id="haulage-type"
-                                value={haulageType}
-                                onChange={handleChangeHaulageType}
-                                input={<BootstrapInput />}
-                                fullWidth
-                            >
-                                <option key={"kdq-"} value="">Any type</option>
+                            return (
+                                <Step key={label} {...stepProps}>
+                                    <StepLabel {...labelProps}>{label}</StepLabel>
+                                </Step>
+                            );
+                            })}
+                        </Stepper>
+                        {activeStep === steps.length ? (
+                            <React.Fragment>
+                                <Typography sx={{ mt: 2, mb: 1 }}>
+                                    All steps completed - you&apos;re finished
+                                </Typography>
+                                <Box sx={{ display: 'flex', flexDirection: 'row', pt: 2 }}>
+                                    <Box sx={{ flex: '1 1 auto' }} />
+                                    <Button onClick={handleReset}>Reset</Button>
+                                </Box>
+                            </React.Fragment>
+                        ) : (
+                            <React.Fragment>
+                                {/* <Typography sx={{ mt: 2, mb: 1 }}>Step {activeStep + 1}</Typography> */}
                                 {
-                                    haulageTypes.map((item: any, i: number) => (
-                                        <option key={"kdq"+i} value={item}>{item}</option>
-                                    ))
+                                    activeStep === 0 ?
+                                    <Grid container spacing={2} mt={1} px={2}>
+                                        <Grid item xs={6} mt={1}>
+                                            <InputLabel htmlFor="departure-date" sx={inputLabelStyles}>Departure date</InputLabel>
+                                            <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                                <DateTimePicker 
+                                                    value={departureDate} 
+                                                    onChange={(value: any) => { setDepartureDate(value) }}
+                                                    slotProps={{ textField: { id: "departure-date", fullWidth: true, sx: datetimeStyles }, inputAdornment: { sx: { position: "relative", right: "11.5px" } } }}
+                                                />
+                                            </LocalizationProvider>
+                                        </Grid>
+                                        <Grid item xs={6} mt={1}>
+                                            <InputLabel htmlFor="containers" sx={inputLabelStyles}>Containers</InputLabel>
+                                            {
+                                                containers !== null ?
+                                                <Select
+                                                    labelId="request-containers"
+                                                    id="containers"
+                                                    multiple
+                                                    value={containersSelected}
+                                                    onChange={handleChangeContainers}
+                                                    input={<BootstrapInput />}
+                                                    renderValue={(selected) => {
+                                                        return getPackageNamesByIds(selected, containers).join(', ');
+                                                    }}
+                                                    //MenuProps={MenuProps}
+                                                    fullWidth
+                                                >
+                                                    {containers.map((item: any, i: number) => (
+                                                        <MenuItem key={"container-"+i} value={item.packageId}>
+                                                            <Checkbox checked={containersSelected.indexOf(item.packageId) > -1} />
+                                                            <ListItemText primary={item.packageName} />
+                                                        </MenuItem>
+                                                    ))}
+                                                </Select>
+                                                : <Skeleton />
+                                            }
+                                        </Grid>
+                                        <Grid item xs={6} mt={1}>
+                                            <InputLabel htmlFor="port-departure" sx={inputLabelStyles}>Departure port</InputLabel>
+                                            {/* <BootstrapInput id="port-departure" type="text" value={portDeparture} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPortDeparture(e.target.value)} fullWidth /> */}
+                                            {
+                                                ports !== null ?
+                                                <Autocomplete
+                                                    disablePortal
+                                                    id="port-departure"
+                                                    options={ports}
+                                                    renderOption={(props, option, i) => {
+                                                        return (
+                                                            <li {...props} key={option.portId}>
+                                                                {option.portName+", "+option.country}
+                                                            </li>
+                                                        );
+                                                    }}
+                                                    getOptionLabel={(option: any) => { 
+                                                        if (option !== null && option !== undefined) {
+                                                            return option.portName+', '+option.country;
+                                                        }
+                                                        return ""; 
+                                                    }}
+                                                    value={portDeparture}
+                                                    sx={{ mt: 1 }}
+                                                    renderInput={(params) => <TextField {...params} />}
+                                                    onChange={(e: any, value: any) => { setPortDeparture(value); }}
+                                                    fullWidth
+                                                /> : <Skeleton />
+                                            }
+                                        </Grid>
+                                        <Grid item xs={6} mt={1}>
+                                            <InputLabel htmlFor="destination-port" sx={inputLabelStyles}>Destination port</InputLabel>
+                                            {/* <BootstrapInput id="destination-port" type="text" value={destinationPort} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setDestinationPort(e.target.value)} fullWidth /> */}
+                                            {
+                                                ports !== null ?
+                                                <Autocomplete
+                                                    disablePortal
+                                                    id="destination-port"
+                                                    options={ports}
+                                                    renderOption={(props, option, i) => {
+                                                        return (
+                                                            <li {...props} key={option.portId}>
+                                                                {option.portName+", "+option.country}
+                                                            </li>
+                                                        );
+                                                    }}
+                                                    getOptionLabel={(option: any) => { 
+                                                        if (option !== null && option !== undefined) {
+                                                            return option.portName+', '+option.country;
+                                                        }
+                                                        return ""; 
+                                                    }}
+                                                    value={destinationPort}
+                                                    sx={{ mt: 1 }}
+                                                    renderInput={(params) => <TextField {...params} />}
+                                                    onChange={(e: any, value: any) => { setDestinationPort(value); }}
+                                                    fullWidth
+                                                /> : <Skeleton />
+                                            }
+                                        </Grid>
+                                        <Grid item xs={6} mt={1}>
+                                            <InputLabel htmlFor="loading-city" sx={inputLabelStyles}>Loading city (empty if no haulage)</InputLabel>
+                                            {/* <BootstrapInput id="loading-city" type="text" value={loadingCity} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setLoadingCity(e.target.value)} fullWidth /> */}
+                                            {
+                                                cities !== null ?
+                                                <Autocomplete
+                                                    disablePortal
+                                                    id="loading-city"
+                                                    options={cities}
+                                                    getOptionLabel={(option: any) => { 
+                                                        if (option !== null && option !== undefined) {
+                                                            return option.name+', '+option.country;
+                                                        }
+                                                        return ""; 
+                                                    }}
+                                                    value={loadingCity}
+                                                    sx={{ mt: 1 }}
+                                                    renderInput={(params) => <TextField {...params} />}
+                                                    onChange={(e: any, value: any) => { setLoadingCity(value); }}
+                                                    fullWidth
+                                                /> : <Skeleton />
+                                            }
+                                        </Grid>
+                                        <Grid item xs={6} mt={1}>
+                                            <InputLabel htmlFor="haulage-type" sx={inputLabelStyles}>Haulage type (loading timing)</InputLabel>
+                                            <NativeSelect
+                                                id="haulage-type"
+                                                value={haulageType}
+                                                onChange={handleChangeHaulageType}
+                                                input={<BootstrapInput />}
+                                                fullWidth
+                                            >
+                                                <option key={"kdq-"} value="">Any type</option>
+                                                {
+                                                    haulageTypes.map((item: any, i: number) => (
+                                                        <option key={"kdq"+i} value={item}>{item}</option>
+                                                    ))
+                                                }
+                                            </NativeSelect>
+                                        </Grid>
+                                    </Grid> : null
                                 }
-                            </NativeSelect>
-                        </Grid>
-                    </Grid>
+                                {
+                                    activeStep === 1 ?
+                                    <Grid container spacing={2} mt={1} px={2}>
+                                        <Grid item xs={12}>
+                                            {
+                                                !loadResults ? 
+                                                haulages !== null ? 
+                                                    <Box>
+                                                        {/* <Typography variant="h5" sx={{ my: 3, fontSize: 19, fontWeight: "bold" }}>List of haulages pricing offers</Typography> */}
+                                                        <TableContainer component={Paper}>
+                                                            <Table sx={{ minWidth: 650 }} aria-label="simple table">
+                                                                <TableHead>
+                                                                    <TableRow>
+                                                                        {/* <TableCell align="left" sx={{ fontSize: 16, fontWeight: "bolder" }}>Id</TableCell> */}
+                                                                        <TableCell align="left" sx={{ fontSize: 14, fontWeight: "bolder" }}>Haulier</TableCell>
+                                                                        <TableCell align="left" sx={{ fontSize: 14, fontWeight: "bolder" }}>Loading Port</TableCell>
+                                                                        <TableCell align="left" sx={{ fontSize: 14, fontWeight: "bolder" }}>Free Time</TableCell>
+                                                                        <TableCell align="left" sx={{ fontSize: 14, fontWeight: "bolder" }}>Multi Stop</TableCell>
+                                                                        <TableCell align="left" sx={{ fontSize: 14, fontWeight: "bolder" }}>Overtime Tariff</TableCell>
+                                                                        <TableCell align="left" sx={{ fontSize: 14, fontWeight: "bolder" }}>Unit Tariff</TableCell>
+                                                                        <TableCell align="left" sx={{ fontSize: 14, fontWeight: "bolder" }}>Valid Until</TableCell>
+                                                                        <TableCell align="left"><b></b></TableCell>
+                                                                    </TableRow>
+                                                                </TableHead>
+                                                                <TableBody>
+                                                                    {
+                                                                        haulages.map((row: any, i: number) => (
+                                                                            <TableRow key={"history-"+row.id} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                                                                                {/* <TableCell align="left">{row.id}</TableCell> */}
+                                                                                <TableCell align="left">{row.haulierName}</TableCell>
+                                                                                <TableCell align="left">{row.loadingPort}</TableCell>
+                                                                                <TableCell align="left">{row.freeTime+" days"}</TableCell>
+                                                                                <TableCell align="left">{row.multiStop+" "+row.currency}</TableCell>
+                                                                                <TableCell align="left">{row.overtimeTariff+" "+row.currency}</TableCell>
+                                                                                <TableCell align="left">{row.unitTariff+" "+row.currency}</TableCell>
+                                                                                <TableCell align="left">{(new Date(row.validUntil)).toLocaleString()}</TableCell>
+                                                                                <TableCell align="left" sx={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+                                                                                    <Button variant="contained" color="inherit" sx={whiteButtonStyles} style={{ marginTop: "0px" }}>Select</Button>
+                                                                                </TableCell>
+                                                                            </TableRow>
+                                                                        ))
+                                                                    }
+                                                                </TableBody>
+                                                            </Table>
+                                                        </TableContainer>
+                                                    </Box> 
+                                                    : null
+                                                : <Skeleton />
+                                            }
+                                        </Grid>
+                                    </Grid> : null
+                                }
+
+                                <Box sx={{ display: 'flex', flexDirection: 'row', pt: 2 }}>
+                                    <Button
+                                        color="inherit"
+                                        disabled={activeStep === 0}
+                                        onClick={handleBack}
+                                        sx={{ mr: 1 }}
+                                    >
+                                        Back
+                                    </Button>
+                                    <Box sx={{ flex: '1 1 auto' }} />
+                                    {isStepOptional(activeStep) && (
+                                    <Button color="inherit" onClick={handleSkip} sx={{ mr: 1 }}>
+                                        Skip
+                                    </Button>
+                                    )}
+                                    <Button onClick={handleNext}>
+                                        {activeStep === steps.length - 1 ? 'Finish' : 'Next'}
+                                    </Button>
+                                </Box>
+                            </React.Fragment>
+                        )}
+                    </Box>
                 </DialogContent>
                 <DialogActions>
-                    <Button variant="contained" color={!load ? "primary" : "info"} className="mr-3" onClick={() => { getPriceRequests(); }} sx={{ textTransform: "none" }}>Generate the offer</Button>
+                    {/* <Button variant="contained" color={!load ? "primary" : "info"} className="mr-3" onClick={() => { getPriceRequests(); }} sx={{ textTransform: "none" }}>Generate the offer</Button> */}
                     <Button variant="contained" onClick={() => setModal5(false)} sx={buttonCloseStyles}>Close</Button>
                 </DialogActions>
             </BootstrapDialog>
