@@ -18,6 +18,16 @@ import { Dayjs } from 'dayjs';
 import { useAccount, useMsal } from '@azure/msal-react';
 import { AuthenticationResult } from '@azure/msal-browser';
 
+import { DataGrid, GridColDef, GridValueGetterParams } from '@mui/x-data-grid';
+const columnsSeafreights: GridColDef[] = [
+    { field: 'carrierName', headerName: 'Carrier', width: 200 },
+    { field: 'carrierAgentName', headerName: 'Carrier agent', width: 300 },
+    { field: 'departurePortName', headerName: 'Departure port', width: 225 },
+    { field: 'frequency', headerName: 'Frequency', valueGetter: (params: GridValueGetterParams) => `${params.row.frequency || ''} / day`, },
+    { field: 'transitTime', headerName: 'Transit time', valueGetter: (params: GridValueGetterParams) => `${params.row.transitTime || ''} days` },
+    { field: 'prices', headerName: 'Prices', valueGetter: (params: GridValueGetterParams) => `${params.row.transitTime || ''} days` },
+];
+
 //let statusTypes = ["EnAttente", "Valider", "Rejeter"];
 let cargoTypes = ["Container", "Conventional", "RollOnRollOff"];
 
@@ -453,15 +463,16 @@ function Request(props: any) {
             .then((response: AuthenticationResult) => {
                 return response.accessToken;
             })
-            .catch(() => {
+            .catch((err) => {
                 return instance.acquireTokenPopup({
                     ...pricingRequest,
                     account: account
-                    }).then((response) => {
-                        return response.accessToken;
-                    });
-                }
-            );
+                }).then((response) => {
+                    return response.accessToken;
+                });
+                console.log(err);
+                setLoadResults(false);
+            });
             
             var urlSent = createGetRequestUrl(protectedResources.apiLisPricing.endPoint+"/Pricing/HaulagesOfferRequest?", departureDate?.toISOString(), haulageType, loadingCity.id);
             const response = await (context as BackendService<any>).getWithToken(urlSent, token);
@@ -480,15 +491,16 @@ function Request(props: any) {
             .then((response: AuthenticationResult) => {
                 return response.accessToken;
             })
-            .catch(() => {
+            .catch((err) => {
                 return instance.acquireTokenPopup({
                     ...pricingRequest,
                     account: account
-                    }).then((response) => {
-                        return response.accessToken;
-                    });
-                }
-            );
+                }).then((response) => {
+                    return response.accessToken;
+                });
+                console.log(err);
+                setLoadResults(false);
+            });
             
             
             var containersFormatted = containersSelected.join("&ContainerTypesId=");
@@ -1054,11 +1066,32 @@ function Request(props: any) {
                                     activeStep === 1 ?
                                     <Grid container spacing={2} mt={1} px={2}>
                                         <Grid item xs={12}>
+                                            <Alert severity="info" sx={{ mb: 2 }}>You have to select one seafreight, one haulage and one service for your offer.</Alert>
                                             {
                                                 !loadResults ? 
-                                                haulages !== null ? 
+                                                seafreights !== null && seafreights.length !== 0 ?
+                                                    <DataGrid
+                                                        rows={seafreights}
+                                                        columns={columnsSeafreights}
+                                                        // initialState={{
+                                                        // pagination: {
+                                                        //     paginationModel: { page: 0, pageSize: 5 },
+                                                        // },
+                                                        // }}
+                                                        // pageSizeOptions={[5, 10]}
+                                                        hideFooter
+                                                        getRowId={(row) => row?.seaFreightId}
+                                                        sx={{ height: 250 }}
+                                                        checkboxSelection
+                                                    />
+                                                    : null
+                                                : <Skeleton />
+                                            }
+                                            {
+                                                !loadResults ? 
+                                                haulages !== null && haulages.length !== 0 ? 
                                                     <Box>
-                                                        {/* <Typography variant="h5" sx={{ my: 3, fontSize: 19, fontWeight: "bold" }}>List of haulages pricing offers</Typography> */}
+                                                        <Typography variant="h5" sx={{ my: 3, fontSize: 19, fontWeight: "bold" }}>List of haulages pricing offers</Typography>
                                                         <TableContainer component={Paper}>
                                                             <Table sx={{ minWidth: 650 }} aria-label="simple table">
                                                                 <TableHead>
@@ -1086,8 +1119,8 @@ function Request(props: any) {
                                                                                 <TableCell align="left">{row.overtimeTariff+" "+row.currency}</TableCell>
                                                                                 <TableCell align="left">{row.unitTariff+" "+row.currency}</TableCell>
                                                                                 <TableCell align="left">{(new Date(row.validUntil)).toLocaleString()}</TableCell>
-                                                                                <TableCell align="left" sx={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
-                                                                                    <Button variant="contained" color="inherit" sx={whiteButtonStyles} style={{ marginTop: "0px" }}>Select</Button>
+                                                                                <TableCell align="left">
+                                                                                    <Button variant="contained" color="inherit" sx={whiteButtonStyles} style={{ marginTop: "0px", marginBottom: "0px" }}>Select</Button>
                                                                                 </TableCell>
                                                                             </TableRow>
                                                                         ))
