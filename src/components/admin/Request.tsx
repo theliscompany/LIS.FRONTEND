@@ -19,37 +19,6 @@ import { useAccount, useMsal } from '@azure/msal-react';
 import { AuthenticationResult } from '@azure/msal-browser';
 
 import { DataGrid, GridColDef, GridEventListener, GridRenderCellParams, GridValueFormatterParams, GridValueGetterParams } from '@mui/x-data-grid';
-const columnsSeafreights: GridColDef[] = [
-    { field: 'carrierName', headerName: 'Carrier', width: 200 },
-    { field: 'carrierAgentName', headerName: 'Carrier agent', width: 275 },
-    { field: 'departurePortName', headerName: 'Departure port', width: 125 },
-    { field: 'frequency', headerName: 'Frequency', valueFormatter: (params: GridValueFormatterParams) => `${params.value || ''} / day`, },
-    { field: 'transitTime', headerName: 'Transit time', valueFormatter: (params: GridValueFormatterParams) => `${params.value || ''} days` },
-    { field: 'currency', headerName: 'Prices', renderCell: (params: GridRenderCellParams) => {
-        return (
-            <Box sx={{ my: 1, mr: 1 }}>
-                <Box sx={{ my: 1 }} hidden={params.row.price20dry === 0}>{"20' Dry : "+params.row.price20dry+" "+params.row.currency}</Box>
-                <Box sx={{ my: 1 }} hidden={params.row.price20rf === 0}>{"20' Rf : "+params.row.price20rf+" "+params.row.currency}</Box>
-                <Box sx={{ my: 1 }} hidden={params.row.price40dry === 0}>{"40' Dry : "+params.row.price40dry+" "+params.row.currency}</Box>
-                <Box sx={{ my: 1 }} hidden={params.row.price40hc === 0}>{"40' Hc : "+params.row.price40hc+" "+params.row.currency}</Box>
-                <Box sx={{ my: 1 }} hidden={params.row.price40hcrf === 0}>{"40' HcRf : "+params.row.price40hcrf+" "+params.row.currency}</Box>
-            </Box>
-        );
-    }, width: 200 },
-];
-const columnsHaulages: GridColDef[] = [
-    { field: 'haulierName', headerName: 'Haulier', width: 200 },
-    { field: 'loadingPort', headerName: 'Loading port', renderCell: (params: GridRenderCellParams) => {
-        return (
-            <Box sx={{ my: 2 }}>{params.row.loadingPort}</Box>
-        );
-    }, width: 275 },
-    { field: 'freeTime', headerName: 'Free time', valueFormatter: (params: GridValueFormatterParams) => `${params.value || ''} days`, },
-    { field: 'multiStop', headerName: 'Multi stop', valueGetter: (params: GridValueGetterParams) => `${params.row.multiStop || ''} ${params.row.currency}` },
-    { field: 'overtimeTariff', headerName: 'Overtime tariff', valueGetter: (params: GridValueGetterParams) => `${params.row.overtimeTariff || ''} ${params.row.currency}` },
-    { field: 'unitTariff', headerName: 'Unit tariff', valueGetter: (params: GridValueGetterParams) => `${params.row.unitTariff || ''} ${params.row.currency}` },
-    { field: 'validUntil', headerName: 'Valid until', valueFormatter: (params: GridValueFormatterParams) => `${(new Date(params.value)).toLocaleString() || ''}`, width: 200 },
-];
 
 //let statusTypes = ["EnAttente", "Valider", "Rejeter"];
 let cargoTypes = ["Container", "Conventional", "RollOnRollOff"];
@@ -135,6 +104,7 @@ function getPackageNamesByIds(ids: string[], packages: any) {
     return packageNames;
 }
 
+
 const steps = ['Search for offers', 'List of offers', 'Send an offer'];
 
 function Request(props: any) {
@@ -185,13 +155,48 @@ function Request(props: any) {
     
     const [promotion, setPromotion] = useState<number>(0);
     const [reduction, setReduction] = useState<number>(0);
+    const [adding, setAdding] = useState<number>(0);
     const [details, setDetails] = useState<string>("");
+    const [totalPrice, setTotalPrice] = useState<number>(0);
     let { id } = useParams();
 
     const { instance, accounts } = useMsal();
     const account = useAccount(accounts[0] || {});
         
     const context = useAuthorizedBackendApi();
+    
+    const columnsSeafreights: GridColDef[] = [
+        { field: 'carrierName', headerName: 'Carrier', width: 200 },
+        { field: 'carrierAgentName', headerName: 'Carrier agent', width: 275 },
+        { field: 'departurePortName', headerName: 'Departure port', width: 125 },
+        { field: 'frequency', headerName: 'Frequency', valueFormatter: (params: GridValueFormatterParams) => `${params.value || ''} / day`, },
+        { field: 'transitTime', headerName: 'Transit time', valueFormatter: (params: GridValueFormatterParams) => `${params.value || ''} days` },
+        { field: 'currency', headerName: 'Prices', renderCell: (params: GridRenderCellParams) => {
+            return (
+                <Box sx={{ my: 1, mr: 1 }}>
+                    <Box sx={{ my: 1 }} hidden={params.row.price20dry === 0 || !getPackageNamesByIds(containersSelected, containers).includes("20' Dry")}>{"20' Dry : "+params.row.price20dry+" "+params.row.currency}</Box>
+                    <Box sx={{ my: 1 }} hidden={params.row.price20rf === 0 || !getPackageNamesByIds(containersSelected, containers).includes("20' Rf")}>{"20' Rf : "+params.row.price20rf+" "+params.row.currency}</Box>
+                    <Box sx={{ my: 1 }} hidden={params.row.price40dry === 0 || !getPackageNamesByIds(containersSelected, containers).includes("40' Dry")}>{"40' Dry : "+params.row.price40dry+" "+params.row.currency}</Box>
+                    <Box sx={{ my: 1 }} hidden={params.row.price40hc === 0 || !getPackageNamesByIds(containersSelected, containers).includes("40' Hc")}>{"40' Hc : "+params.row.price40hc+" "+params.row.currency}</Box>
+                    <Box sx={{ my: 1 }} hidden={params.row.price40hcrf === 0 || !getPackageNamesByIds(containersSelected, containers).includes("40' HcRf")}>{"40' HcRf : "+params.row.price40hcrf+" "+params.row.currency}</Box>
+                </Box>
+            );
+        }, width: 200 },
+    ];
+    
+    const columnsHaulages: GridColDef[] = [
+        { field: 'haulierName', headerName: 'Haulier', width: 200 },
+        { field: 'loadingPort', headerName: 'Loading port', renderCell: (params: GridRenderCellParams) => {
+            return (
+                <Box sx={{ my: 2 }}>{params.row.loadingPort}</Box>
+            );
+        }, width: 275 },
+        { field: 'freeTime', headerName: 'Free time', valueFormatter: (params: GridValueFormatterParams) => `${params.value || ''} days`, width: 125 },
+        { field: 'multiStop', headerName: 'Multi stop', valueGetter: (params: GridValueGetterParams) => `${params.row.multiStop || ''} ${params.row.currency}` },
+        { field: 'overtimeTariff', headerName: 'Overtime tariff', valueGetter: (params: GridValueGetterParams) => `${params.row.overtimeTariff || ''} ${params.row.currency}` },
+        { field: 'unitTariff', headerName: 'Unit tariff', valueGetter: (params: GridValueGetterParams) => `${params.row.unitTariff || ''} ${params.row.currency}` },
+        { field: 'validUntil', headerName: 'Valid until', valueFormatter: (params: GridValueFormatterParams) => `${(new Date(params.value)).toLocaleString() || ''}`, width: 200 },
+    ];
     
     const handleChangeContainers = (event: SelectChangeEvent<typeof containersSelected>) => {
         const {
@@ -218,7 +223,7 @@ function Request(props: any) {
     const handleChangeStatus = (event: React.ChangeEvent<HTMLInputElement>) => {
         setSelectedStatus((event.target as HTMLInputElement).value);
     };
-    
+
     // Stepper functions
     const [activeStep, setActiveStep] = React.useState(0);
     const [skipped, setSkipped] = React.useState(new Set<number>());
@@ -244,6 +249,25 @@ function Request(props: any) {
         }
         if (activeStep == 1) {
             if (selectedHaulage !== null && selectedSeafreight !== null) {
+                // Here we calculate the total price of the offer
+                var seafreightPrices = 0;
+                if (selectedSeafreight.price20dry !== 0 && getPackageNamesByIds(containersSelected, containers).includes("20' Dry")) {
+                    seafreightPrices += selectedSeafreight.price20dry;
+                }
+                if (selectedSeafreight.price20rf !== 0 && getPackageNamesByIds(containersSelected, containers).includes("20' Rf")) {
+                    seafreightPrices += selectedSeafreight.price20rf;
+                }
+                if (selectedSeafreight.price40dry !== 0 && getPackageNamesByIds(containersSelected, containers).includes("40' Dry")) {
+                    seafreightPrices += selectedSeafreight.price40dry;
+                }
+                if (selectedSeafreight.price40hc !== 0 && getPackageNamesByIds(containersSelected, containers).includes("40' Hc")) {
+                    seafreightPrices += selectedSeafreight.price40hc;
+                }
+                if (selectedSeafreight.price40hcrf !== 0 && getPackageNamesByIds(containersSelected, containers).includes("40' HcRf")) {
+                    seafreightPrices += selectedSeafreight.price40hcrf;
+                }
+                setTotalPrice(seafreightPrices + selectedHaulage.unitTariff);
+
                 setActiveStep((prevActiveStep) => prevActiveStep + 1);
                 setSkipped(newSkipped);
             }
@@ -488,6 +512,8 @@ function Request(props: any) {
 
     const getPriceRequests = async () => {
         if (departureDate !== null && containersSelected.length !== 0 && destinationPort !== null) {
+            // alert(containersSelected);
+            console.log(containers.map((elm: any) => elm.packageName));
             setLoadResults(true);
             getSeaFreightPriceOffers();
             if (loadingCity !== null && haulageType !== "") {
@@ -1113,14 +1139,14 @@ function Request(props: any) {
                                                 !loadResults ? 
                                                 seafreights !== null && seafreights.length !== 0 ?
                                                     <Box>
-                                                        <Typography variant="h5" sx={{ my: 3, fontSize: 19, fontWeight: "bold" }}>List of sea freights pricing offers</Typography>
+                                                        <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>List of sea freights pricing offers</Typography>
                                                         <DataGrid
                                                             rows={seafreights}
                                                             columns={columnsSeafreights}
                                                             hideFooter
                                                             getRowId={(row) => row?.seaFreightId}
                                                             getRowHeight={() => "auto" }
-                                                            sx={{ height: 275 }}
+                                                            sx={{ height: "auto" }}
                                                             onRowClick={handleRowSeafreightsClick}
                                                             // checkboxSelection
                                                         />
@@ -1132,14 +1158,14 @@ function Request(props: any) {
                                                 !loadResults ? 
                                                 haulages !== null && haulages.length !== 0 ?
                                                     <Box>
-                                                        <Typography variant="h5" sx={{ my: 3, fontSize: 19, fontWeight: "bold" }}>List of haulages pricing offers</Typography>
+                                                        <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>List of haulages pricing offers</Typography>
                                                         <DataGrid
                                                             rows={haulages}
                                                             columns={columnsHaulages}
                                                             hideFooter
                                                             getRowId={(row) => row?.id}
                                                             // getRowHeight={() => "auto" }
-                                                            sx={{ height: 225 }}
+                                                            sx={{ height: "auto" }}
                                                             onRowClick={handleRowHaulagesClick}
                                                             // checkboxSelection
                                                         />
@@ -1154,45 +1180,57 @@ function Request(props: any) {
                                     activeStep === 2 ?
                                     <Grid container spacing={2} mt={1} px={2}>
                                         <Grid item xs={12}>
-                                            <Typography variant="h5" sx={{ my: 3, fontSize: 19, fontWeight: "bold" }}>Selected haulage</Typography>
-                                            <DataGrid
-                                                rows={[selectedHaulage]}
-                                                columns={columnsHaulages}
-                                                hideFooter
-                                                getRowId={(row) => row?.id}
-                                                getRowHeight={() => "auto" }
-                                                sx={{ height: 125 }}
-                                                //onRowClick={handleRowSeafreightsClick}
-                                                // checkboxSelection
-                                            />
-                                        </Grid>
-                                        <Grid item xs={12}>
-                                            <Typography variant="h5" sx={{ my: 3, fontSize: 19, fontWeight: "bold" }}>Selected sea freight</Typography>
+                                            <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>Selected sea freight</Typography>
                                             <DataGrid
                                                 rows={[selectedSeafreight]}
                                                 columns={columnsSeafreights}
                                                 hideFooter
                                                 getRowId={(row) => row?.seaFreightId}
                                                 getRowHeight={() => "auto" }
-                                                sx={{ height: 175 }}
+                                                sx={{ height: "auto" }}
                                                 //onRowClick={handleRowSeafreightsClick}
                                                 // checkboxSelection
                                             />
                                         </Grid>
-                                        <Grid item xs={6}>
+                                        <Grid item xs={12}>
+                                            <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>Selected haulage</Typography>
+                                            <DataGrid
+                                                rows={[selectedHaulage]}
+                                                columns={columnsHaulages}
+                                                hideFooter
+                                                getRowId={(row) => row?.id}
+                                                getRowHeight={() => "auto" }
+                                                sx={{ height: "auto" }}
+                                                //onRowClick={handleRowSeafreightsClick}
+                                                // checkboxSelection
+                                            />
+                                        </Grid>
+                                        <Grid item xs={4}>
                                             <InputLabel htmlFor="promotion" sx={inputLabelStyles}>Promotion (en %)</InputLabel>
                                             <BootstrapInput id="promotion" type="number" value={promotion} onChange={(e: any) => setPromotion(e.target.value)} fullWidth />
                                         </Grid>
-                                        <Grid item xs={6}>
+                                        <Grid item xs={4}>
                                             <InputLabel htmlFor="reduction" sx={inputLabelStyles}>Reduction (en %)</InputLabel>
                                             <BootstrapInput id="reduction" type="number" value={reduction} onChange={(e: any) => setReduction(e.target.value)} fullWidth />
+                                        </Grid>
+                                        <Grid item xs={4}>
+                                            <InputLabel htmlFor="adding" sx={inputLabelStyles}>Valeur ajoutée (en {selectedSeafreight !== null ? selectedSeafreight.currency : null})</InputLabel>
+                                            <BootstrapInput id="adding" type="number" value={adding} onChange={(e: any) => setAdding(e.target.value)} fullWidth />
                                         </Grid>
                                         <Grid item xs={12}>
                                             <InputLabel htmlFor="details" sx={inputLabelStyles}>Details of the offer</InputLabel>
                                             <BootstrapInput id="details" type="text" multiline rows={3} value={details} onChange={(e: any) => setDetails(e.target.value)} fullWidth />
                                         </Grid>
                                         <Grid item xs={12}>
-                                            <Typography variant="h6">TOTAL PRICE : </Typography>
+                                            <Typography variant="h6">
+                                                { 
+                                                    selectedHaulage !== null && selectedSeafreight !== null ? 
+                                                    <Chip variant="outlined" size="medium"
+                                                        label={"TOTAL PRICE : "+ Number(totalPrice+totalPrice*promotion/100-totalPrice*reduction/100+adding*1).toString()+" "+selectedSeafreight.currency}
+                                                        sx={{ fontWeight: "bold", fontSize: 16, py: 3 }} 
+                                                    /> : null
+                                                }
+                                            </Typography>
                                         </Grid>
                                     </Grid>
                                     : null
