@@ -1,7 +1,7 @@
 import { AccountInfo, AuthenticationResult, IPublicClientApplication } from '@azure/msal-browser';
 import { loginRequest } from '../authConfig';
-
-export const GetToken = (instance:IPublicClientApplication,account: AccountInfo): Promise<AuthenticationResult> => {    
+    
+export const GetToken = (instance: IPublicClientApplication, account: AccountInfo): Promise<AuthenticationResult> => {    
     return instance.acquireTokenSilent({
         scopes: loginRequest.scopes,
         account: account
@@ -11,6 +11,7 @@ export const GetToken = (instance:IPublicClientApplication,account: AccountInfo)
 export class BackendService<T> {
     private accessToken?: string;
     protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+    
 
     constructor(accessToken?: string) {
         this.accessToken = accessToken;
@@ -37,11 +38,30 @@ export class BackendService<T> {
         };
     }
 
-    get = (url:string): Promise<T[] | null> => {
+    private getOptionWithParamsToken = (token: string): RequestInit => {
+        const authorization = "Bearer " + token;
+        return {
+            method: "GET",
+            headers: {
+                "Accept": "application/json",
+                "Authorization": authorization
+            }
+        };
+    }
 
+    getWithToken = async (url: string, token: string): Promise<T | null> => {
         url = url.replace(/[?&]$/, "");
 
-        //const authorization = "Bearer " + this.accessToken;
+        let options_: RequestInit = this.getOptionWithParamsToken(token);
+
+        return fetch(url, options_).then((_response: Response) => {
+            return this.processGetSingleRequest(_response);
+        });
+    }
+
+    get = (url: string): Promise<T[] | null> => {
+        url = url.replace(/[?&]$/, "");
+
         let options_: RequestInit = this.getOption();
 
         return fetch(url, options_).then((_response: Response) => {
@@ -49,8 +69,7 @@ export class BackendService<T> {
         });
     }
 
-    getSingle = (url:string): Promise<T | null> => {
-
+    getSingle = (url: string): Promise<T | null> => {
         url = url.replace(/[?&]$/, "");
 
         //const authorization = "Bearer " + this.accessToken;
@@ -133,7 +152,7 @@ export class BackendService<T> {
         });
     }
 
-    delete = (url:string): Promise<T | null> => {
+    delete = (url: string): Promise<T | null> => {
         url = url.replace(/[?&]$/, "");
 
         //const authorization = "Bearer " + this.accessToken;

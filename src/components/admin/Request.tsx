@@ -1,21 +1,35 @@
-import { Alert, Box, Button, Chip, DialogActions, DialogContent, FormControl, FormControlLabel, FormLabel, Grid, IconButton, InputLabel, NativeSelect, Paper, Radio, RadioGroup, Skeleton, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@mui/material';
+import { Alert, Autocomplete, Box, Button, Checkbox, Chip, DialogActions, DialogContent, FormControl, FormControlLabel, FormLabel, Grid, IconButton, InputLabel, ListItemText, MenuItem, NativeSelect, Paper, Radio, RadioGroup, Select, SelectChangeEvent, Skeleton, Step, StepLabel, Stepper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Typography } from '@mui/material';
 import { MuiTelInput } from 'mui-tel-input';
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import '../../App.css';
 import AutocompleteSearch from '../shared/AutocompleteSearch';
-import { inputLabelStyles, BootstrapInput, BootstrapDialogTitle, BootstrapDialog, buttonCloseStyles, DarkTooltip, tagInputStyles, whiteButtonStyles } from '../../misc/styles';
+import { inputLabelStyles, BootstrapInput, BootstrapDialogTitle, BootstrapDialog, buttonCloseStyles, DarkTooltip, tagInputStyles, whiteButtonStyles, datetimeStyles } from '../../misc/styles';
 import { enqueueSnackbar, SnackbarProvider } from 'notistack';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { protectedResources } from '../../authConfig';
+import { pricingRequest, protectedResources, transportRequest } from '../../authConfig';
 import { useAuthorizedBackendApi } from '../../api/api';
 import { BackendService } from '../../services/fetch';
 import { MuiChipsInput, MuiChipsInputChip } from 'mui-chips-input';
 import { MailData, RequestDto } from '../../models/models';
+import { DateTimePicker, LocalizationProvider } from '@mui/x-date-pickers';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { Dayjs } from 'dayjs';
+import { useAccount, useMsal } from '@azure/msal-react';
+import { AuthenticationResult } from '@azure/msal-browser';
+
+import { DataGrid, GridColDef, GridEventListener, GridRenderCellParams, GridValueFormatterParams, GridValueGetterParams } from '@mui/x-data-grid';
 
 //let statusTypes = ["EnAttente", "Valider", "Rejeter"];
 let cargoTypes = ["Container", "Conventional", "RollOnRollOff"];
 
+let haulageTypes = [
+    "On trailer, direct loading", 
+    "On trailer, Loading with Interval", 
+    "Side loader, direct loading", 
+    "Side loader, Loading with Interval, from trailer to floor", 
+    "Side loader, Loading with Interval, from floor to trailer"
+];
 let statusTypes = [
     { type: "EnAttente", value: "En attente", description: "En attente de traitement" }, 
     { type: "Valider", value: "Validé", description: "Devis validé par l'employé" }, 
@@ -40,10 +54,64 @@ function convertStringToObject(str: string): { city: string, country: string } {
     return { city: "", country: "" };
 }
 
+function createGetRequestUrl(url: string, variable1: string|undefined, variable2: string, variable3: string) {
+    if (variable1) {
+        url += 'PlannedDeparture=' + encodeURIComponent(variable1) + '&';
+    }
+    if (variable2) {
+        url += 'HaulageType=' + encodeURIComponent(variable2) + '&';
+    }
+    if (variable3) {
+        url += 'LoadingCityId=' + encodeURIComponent(variable3) + '&';
+    }
+    
+    if (url.slice(-1) === '&') {
+        url = url.slice(0, -1);
+    }
+    return url;
+}
+
+function createGetRequestUrl2(url: string, variable1: string, variable2: string, variable3: string|undefined, variable4: string) {
+    if (variable1) {
+        url += 'DeparturePortId=' + encodeURIComponent(variable1) + '&';
+    }
+    if (variable2) {
+        url += 'DestinationPortId=' + encodeURIComponent(variable2) + '&';
+    }
+    if (variable3) {
+        url += 'PlannedDeparture=' + encodeURIComponent(variable3) + '&';
+    }
+    if (variable4) {
+        url += 'ContainerTypesId=' + variable4 + '&';
+    }
+    
+    if (url.slice(-1) === '&') {
+        url = url.slice(0, -1);
+    }
+    return url;
+}
+
+function getPackageNamesByIds(ids: string[], packages: any) {
+    const packageNames = [];
+  
+    for (const id of ids) {
+        const foundPackage = packages.find((pkg: any) => pkg.packageId === id);
+        if (foundPackage) {
+            packageNames.push(foundPackage.packageName);
+        }
+    }
+  
+    return packageNames;
+}
+
+
+const steps = ['Search for offers', 'List of offers', 'Send an offer'];
+
 function Request(props: any) {
     const [load, setLoad] = useState<boolean>(true);
     const [loadAssignees, setLoadAssignees] = useState<boolean>(true);
     const [loadNotes, setLoadNotes] = useState<boolean>(true);
+    const [loadResults, setLoadResults] = useState<boolean>(false);
     const [email, setEmail] = useState<string>("");
     const [status, setStatus] = useState<string | null>(null);
     const [trackingNumber, setTrackingNumber] = useState<string>("");
@@ -60,6 +128,7 @@ function Request(props: any) {
     const [modal2, setModal2] = useState<boolean>(false);
     const [modal3, setModal3] = useState<boolean>(false);
     const [modal4, setModal4] = useState<boolean>(false);
+    const [modal5, setModal5] = useState<boolean>(false);
     const [mailSubject, setMailSubject] = useState<string>("");
     const [mailContent, setMailContent] = useState<string>("");
     const [statusMessage, setStatusMessage] = useState<string>("");
@@ -69,9 +138,79 @@ function Request(props: any) {
     const [assignees, setAssignees] = useState<any>(null);
     const [notes, setNotes] = useState<any>(null);
     const [idUser, setIdUser] = useState<any>(null);
+    
+    const [departureDate, setDepartureDate] = useState<Dayjs | null>(null);
+    const [containersSelected, setContainersSelected] = useState<string[]>([]);
+    const [destinationPort, setDestinationPort] = useState<any>(null);
+    const [portDeparture, setPortDeparture] = useState<any>(null);
+    const [loadingCity, setLoadingCity] = useState<any>(null);
+    const [haulageType, setHaulageType] = useState<string>("");
+    const [cities, setCities] = useState<any>(null);
+    const [ports, setPorts] = useState<any>(null);
+    const [containers, setContainers] = useState<any>(null);
+    const [haulages, setHaulages] = useState<any>(null);
+    const [seafreights, setSeafreights] = useState<any>(null);
+    const [selectedHaulage, setSelectedHaulage] = useState<any>(null);
+    const [selectedSeafreight, setSelectedSeafreight] = useState<any>(null);
+    
+    const [promotion, setPromotion] = useState<number>(0);
+    const [reduction, setReduction] = useState<number>(0);
+    const [adding, setAdding] = useState<number>(0);
+    const [details, setDetails] = useState<string>("");
+    const [totalPrice, setTotalPrice] = useState<number>(0);
     let { id } = useParams();
 
+    const { instance, accounts } = useMsal();
+    const account = useAccount(accounts[0] || {});
+        
     const context = useAuthorizedBackendApi();
+    
+    const columnsSeafreights: GridColDef[] = [
+        { field: 'carrierName', headerName: 'Carrier', width: 200 },
+        { field: 'carrierAgentName', headerName: 'Carrier agent', width: 275 },
+        { field: 'departurePortName', headerName: 'Departure port', width: 125 },
+        { field: 'frequency', headerName: 'Frequency', valueFormatter: (params: GridValueFormatterParams) => `${params.value || ''} / day`, },
+        { field: 'transitTime', headerName: 'Transit time', valueFormatter: (params: GridValueFormatterParams) => `${params.value || ''} days` },
+        { field: 'currency', headerName: 'Prices', renderCell: (params: GridRenderCellParams) => {
+            return (
+                <Box sx={{ my: 1, mr: 1 }}>
+                    <Box sx={{ my: 1 }} hidden={params.row.price20dry === 0 || !getPackageNamesByIds(containersSelected, containers).includes("20' Dry")}>{"20' Dry : "+params.row.price20dry+" "+params.row.currency}</Box>
+                    <Box sx={{ my: 1 }} hidden={params.row.price20rf === 0 || !getPackageNamesByIds(containersSelected, containers).includes("20' Rf")}>{"20' Rf : "+params.row.price20rf+" "+params.row.currency}</Box>
+                    <Box sx={{ my: 1 }} hidden={params.row.price40dry === 0 || !getPackageNamesByIds(containersSelected, containers).includes("40' Dry")}>{"40' Dry : "+params.row.price40dry+" "+params.row.currency}</Box>
+                    <Box sx={{ my: 1 }} hidden={params.row.price40hc === 0 || !getPackageNamesByIds(containersSelected, containers).includes("40' Hc")}>{"40' Hc : "+params.row.price40hc+" "+params.row.currency}</Box>
+                    <Box sx={{ my: 1 }} hidden={params.row.price40hcrf === 0 || !getPackageNamesByIds(containersSelected, containers).includes("40' HcRf")}>{"40' HcRf : "+params.row.price40hcrf+" "+params.row.currency}</Box>
+                </Box>
+            );
+        }, width: 200 },
+    ];
+    
+    const columnsHaulages: GridColDef[] = [
+        { field: 'haulierName', headerName: 'Haulier', width: 200 },
+        { field: 'loadingPort', headerName: 'Loading port', renderCell: (params: GridRenderCellParams) => {
+            return (
+                <Box sx={{ my: 2 }}>{params.row.loadingPort}</Box>
+            );
+        }, width: 275 },
+        { field: 'freeTime', headerName: 'Free time', valueFormatter: (params: GridValueFormatterParams) => `${params.value || ''} days`, width: 125 },
+        { field: 'multiStop', headerName: 'Multi stop', valueGetter: (params: GridValueGetterParams) => `${params.row.multiStop || ''} ${params.row.currency}` },
+        { field: 'overtimeTariff', headerName: 'Overtime tariff', valueGetter: (params: GridValueGetterParams) => `${params.row.overtimeTariff || ''} ${params.row.currency}` },
+        { field: 'unitTariff', headerName: 'Unit tariff', valueGetter: (params: GridValueGetterParams) => `${params.row.unitTariff || ''} ${params.row.currency}` },
+        { field: 'validUntil', headerName: 'Valid until', valueFormatter: (params: GridValueFormatterParams) => `${(new Date(params.value)).toLocaleString() || ''}`, width: 200 },
+    ];
+    
+    const handleChangeContainers = (event: SelectChangeEvent<typeof containersSelected>) => {
+        const {
+           target: { value },
+        } = event;
+        setContainersSelected(
+            // On autofill we get a stringified value.
+            typeof value === 'string' ? value.split(',') : value,
+        );
+    };
+
+    const handleChangeHaulageType = (event: { target: { value: string } }) => {
+        setHaulageType(event.target.value);
+    };
     
     const handleChangeCargoType = (event: { target: { value: string } }) => {
         setCargoType(event.target.value);
@@ -84,38 +223,99 @@ function Request(props: any) {
     const handleChangeStatus = (event: React.ChangeEvent<HTMLInputElement>) => {
         setSelectedStatus((event.target as HTMLInputElement).value);
     };
+
+    // Stepper functions
+    const [activeStep, setActiveStep] = React.useState(0);
+    const [skipped, setSkipped] = React.useState(new Set<number>());
+
+    const isStepOptional = (step: number) => {
+        return step === 5;
+    };
+
+    const isStepSkipped = (step: number) => {
+        return skipped.has(step);
+    };
+
+    const handleNext = () => {
+        let newSkipped = skipped;
+        if (isStepSkipped(activeStep)) {
+            newSkipped = new Set(newSkipped.values());
+            newSkipped.delete(activeStep);
+        }
+        if (activeStep === 0) {
+            getPriceRequests();
+            setActiveStep((prevActiveStep) => prevActiveStep + 1);
+            setSkipped(newSkipped);
+        }
+        if (activeStep == 1) {
+            if (selectedHaulage !== null && selectedSeafreight !== null) {
+                // Here we calculate the total price of the offer
+                var seafreightPrices = 0;
+                if (selectedSeafreight.price20dry !== 0 && getPackageNamesByIds(containersSelected, containers).includes("20' Dry")) {
+                    seafreightPrices += selectedSeafreight.price20dry;
+                }
+                if (selectedSeafreight.price20rf !== 0 && getPackageNamesByIds(containersSelected, containers).includes("20' Rf")) {
+                    seafreightPrices += selectedSeafreight.price20rf;
+                }
+                if (selectedSeafreight.price40dry !== 0 && getPackageNamesByIds(containersSelected, containers).includes("40' Dry")) {
+                    seafreightPrices += selectedSeafreight.price40dry;
+                }
+                if (selectedSeafreight.price40hc !== 0 && getPackageNamesByIds(containersSelected, containers).includes("40' Hc")) {
+                    seafreightPrices += selectedSeafreight.price40hc;
+                }
+                if (selectedSeafreight.price40hcrf !== 0 && getPackageNamesByIds(containersSelected, containers).includes("40' HcRf")) {
+                    seafreightPrices += selectedSeafreight.price40hcrf;
+                }
+                setTotalPrice(seafreightPrices + selectedHaulage.unitTariff);
+
+                setActiveStep((prevActiveStep) => prevActiveStep + 1);
+                setSkipped(newSkipped);
+            }
+            else {
+                enqueueSnackbar("You need to select a haulage and a sea freight before going to the next step.", { variant: "warning", anchorOrigin: { horizontal: "right", vertical: "top"} });
+            }
+        }
+    };
+
+    const handleBack = () => {
+        setActiveStep((prevActiveStep) => prevActiveStep - 1);
+    };
+
+    const handleSkip = () => {
+        if (!isStepOptional(activeStep)) {
+            // You probably want to guard against something like this,
+            // it should never occur unless someone's actively trying to break something.
+            throw new Error("You can't skip a step that isn't optional.");
+        }
+
+        setActiveStep((prevActiveStep) => prevActiveStep + 1);
+        setSkipped((prevSkipped) => {
+            const newSkipped = new Set(prevSkipped.values());
+            newSkipped.add(activeStep);
+            return newSkipped;
+        });
+    };
+
+    const handleReset = () => {
+        setActiveStep(0);
+    };
+    
+    const handleRowHaulagesClick: GridEventListener<'rowClick'> = (params) => {
+        setSelectedHaulage(params.row);
+    };
+    
+    const handleRowSeafreightsClick: GridEventListener<'rowClick'> = (params) => {
+        setSelectedSeafreight(params.row);
+    };
     
     useEffect(() => {
         //loadRequest();
+        getContainers();
+        getPorts();
+        getCities();
         getAssignees();
     }, [context]);
     
-    const postEmail = async(from: string, to: string, subject: string, htmlContent: string) => {
-        const body: MailData = { from: from, to: to, subject: subject, htmlContent: htmlContent };
-        const data = await (context as BackendService<any>).postForm(protectedResources.apiLisQuotes.endPoint+"/Email", body);
-        console.log(data);
-        if (data?.status === 200) {
-            enqueueSnackbar("The message has been successfully sent.", { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
-            setMailSubject("");
-            setMailContent("");
-            setModal(false);
-        }
-        else {
-            enqueueSnackbar("An error occured. Please refresh the page or check your internet connection.", { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
-        }
-    }
-
-    function sendEmail() {
-        if (mailSubject !== "" || mailContent !== "") {
-            var content = "<body style=\"font-family: Arial, sans-serif; font-size: 14px; color: #333;\">\r\n\t<div style=\"background-color: #f2f2f2; padding: 20px;\">\r\n\t\t<p style=\"margin-bottom: 20px;\">"+ mailContent +"</p>\r\n\t\t<p style=\"margin-top: 20px;\">Please, click the button up to track your request.</p>\r\n\t<a href=\"https://lisquotes-ui.azurewebsites.net/tracking\" style=\"display: inline-block; background-color: #008089; color: #fff; padding: 10px 20px; text-decoration: none;\">Tracking</a>\r\n\t\t</div>\r\n</body>";
-            //var content = "<body style=\"font-family: Arial, sans-serif; font-size: 14px; color: #333;\">\r\n\t<div style=\"background-color: #f2f2f2; padding: 20px;\">\r\n\t\t<p style=\"margin-bottom: 20px;\">"+ mailContent +"</p>\r\n\t\t</div>\r\n</body>";
-            postEmail("cyrille.penaye@omnifreight.eu", email, mailSubject, content);
-        }
-        else {
-            enqueueSnackbar("The subject and/or content fields are empty, please fill them.", { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
-        }
-    }
-      
     const getAssignees = async () => {
         if (context) {
             setLoadAssignees(true);
@@ -310,6 +510,160 @@ function Request(props: any) {
         }
     }
 
+    const getPriceRequests = async () => {
+        if (departureDate !== null && containersSelected.length !== 0 && destinationPort !== null) {
+            // alert(containersSelected);
+            console.log(containers.map((elm: any) => elm.packageName));
+            setLoadResults(true);
+            getSeaFreightPriceOffers();
+            if (loadingCity !== null && haulageType !== "") {
+                getHaulagePriceOffers();
+            }
+        }
+        else {
+            enqueueSnackbar("The fields departure date, containers and destination port cannot be empty, fill them.", { variant: "warning", anchorOrigin: { horizontal: "right", vertical: "top"} });
+        }
+    }
+    
+    const getHaulagePriceOffers = async () => {
+        if (context && account) {
+            const token = await instance.acquireTokenSilent({
+                scopes: pricingRequest.scopes,
+                account: account
+            })
+            .then((response: AuthenticationResult) => {
+                return response.accessToken;
+            })
+            .catch((err) => {
+                return instance.acquireTokenPopup({
+                    ...pricingRequest,
+                    account: account
+                }).then((response) => {
+                    return response.accessToken;
+                });
+                console.log(err);
+                setLoadResults(false);
+            });
+            
+            var urlSent = createGetRequestUrl(protectedResources.apiLisPricing.endPoint+"/Pricing/HaulagesOfferRequest?", departureDate?.toISOString(), haulageType, loadingCity.id);
+            const response = await (context as BackendService<any>).getWithToken(urlSent, token);
+            setLoadResults(false);
+            setHaulages(response);
+            console.log(response);  
+        }
+    }
+    
+    const getSeaFreightPriceOffers = async () => {
+        if (context && account) {
+            const token = await instance.acquireTokenSilent({
+                scopes: pricingRequest.scopes,
+                account: account
+            })
+            .then((response: AuthenticationResult) => {
+                return response.accessToken;
+            })
+            .catch((err) => {
+                return instance.acquireTokenPopup({
+                    ...pricingRequest,
+                    account: account
+                }).then((response) => {
+                    return response.accessToken;
+                });
+                console.log(err);
+                setLoadResults(false);
+            });
+            
+            
+            var containersFormatted = containersSelected.join("&ContainerTypesId=");
+            var urlSent = createGetRequestUrl2(protectedResources.apiLisPricing.endPoint+"/Pricing/SeaFreightsOffersRequest?", portDeparture.portId, destinationPort.portId, departureDate?.toISOString(), containersFormatted);
+            const response = await (context as BackendService<any>).getWithToken(urlSent, token);
+            setLoadResults(false);
+            setSeafreights(response);
+            console.log(response);  
+        }
+    }
+    
+    const getContainers = async () => {
+        if (context && account) {
+            const token = await instance.acquireTokenSilent({
+                scopes: transportRequest.scopes,
+                account: account
+            })
+            .then((response: AuthenticationResult) => {
+                return response.accessToken;
+            })
+            .catch(() => {
+                return instance.acquireTokenPopup({
+                    ...transportRequest,
+                    account: account
+                    }).then((response) => {
+                        return response.accessToken;
+                    });
+                }
+            );
+            
+            const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Package/Containers", token);
+            console.log(response);
+            if (response !== null && response !== undefined) {
+                setContainers(response);
+            }  
+        }
+    }
+    
+    const getPorts = async () => {
+        if (context && account) {
+            const token = await instance.acquireTokenSilent({
+                scopes: transportRequest.scopes,
+                account: account
+            })
+            .then((response: AuthenticationResult) => {
+                return response.accessToken;
+            })
+            .catch(() => {
+                return instance.acquireTokenPopup({
+                    ...transportRequest,
+                    account: account
+                    }).then((response) => {
+                        return response.accessToken;
+                    });
+                }
+            );
+            
+            const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Port/Ports", token);
+            console.log(response);
+            if (response !== null && response !== undefined) {
+                setPorts(response);
+            }  
+        }
+    }
+    
+    const getCities = async () => {
+        if (context && account) {
+            const token = await instance.acquireTokenSilent({
+                scopes: transportRequest.scopes,
+                account: account
+            })
+            .then((response: AuthenticationResult) => {
+                return response.accessToken;
+            })
+            .catch(() => {
+                return instance.acquireTokenPopup({
+                    ...transportRequest,
+                    account: account
+                    }).then((response) => {
+                        return response.accessToken;
+                    });
+                }
+            );
+            
+            const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/City/Cities", token);
+            console.log(response);
+            if (response !== null && response !== undefined) {
+                setCities(response);
+            }  
+        }
+    }
+    
     return (
         <div style={{ background: "#fff", borderTopLeftRadius: 20, borderTopRightRadius: 20 }}>
             <SnackbarProvider />
@@ -414,6 +768,7 @@ function Request(props: any) {
                                 <Button variant="contained" color="inherit" sx={whiteButtonStyles} onClick={() => { setModal2(true); }} >Change the status</Button>
                                 <Button variant="contained" color="inherit" sx={whiteButtonStyles} style={{ float: "right" }} onClick={() => { setModal3(true); }} >Add a comment/note</Button>
                                 <Button variant="contained" color="inherit" sx={whiteButtonStyles} style={{ float: "right", marginRight: "10px" }} onClick={() => { setModal4(true); getNotes(id); }} >List of notes</Button>
+                                <Button variant="contained" color="success" sx={{ mt: 2, mr: 2, textTransform: "none" }} style={{ float: "right", marginRight: "10px" }} onClick={() => { setModal5(true); }} >Generate price offer</Button>
                             </Grid>
                         </Grid> : <Skeleton sx={{ mx: 5, mt: 3 }} />
                     }
@@ -460,7 +815,7 @@ function Request(props: any) {
                 maxWidth="md"
                 fullWidth
             >
-                <BootstrapDialogTitle id="custom-dialog-title" onClose={() => setModal2(false)}>
+                <BootstrapDialogTitle id="custom-dialog-title2" onClose={() => setModal2(false)}>
                     <b>Change the request status</b>
                 </BootstrapDialogTitle>
                 <DialogContent dividers>
@@ -504,7 +859,7 @@ function Request(props: any) {
                 maxWidth="md"
                 fullWidth
             >
-                <BootstrapDialogTitle id="custom-dialog-title" onClose={() => setModal3(false)}>
+                <BootstrapDialogTitle id="custom-dialog-title3" onClose={() => setModal3(false)}>
                     <b>Add a comment/note</b>
                 </BootstrapDialogTitle>
                 <DialogContent dividers>
@@ -512,9 +867,6 @@ function Request(props: any) {
                         Please fill in the field below and click the button to add note.
                     </Typography>
                     <Grid container spacing={2} mt={1} px={2}>
-                        <Grid item xs={12}>
-                            
-                        </Grid>
                         <Grid item xs={12} mt={1}>
                             <InputLabel htmlFor="general-note" sx={inputLabelStyles}>General note</InputLabel>
                             <BootstrapInput id="general-note" type="text" multiline rows={4} value={generalNote} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setGeneralNote(e.target.value)} fullWidth />
@@ -535,7 +887,7 @@ function Request(props: any) {
                 maxWidth="lg"
                 fullWidth
             >
-                <BootstrapDialogTitle id="custom-dialog-title" onClose={() => setModal4(false)}>
+                <BootstrapDialogTitle id="custom-dialog-title4" onClose={() => setModal4(false)}>
                     <b>List of notes of request N° {id}</b>
                 </BootstrapDialogTitle>
                 <DialogContent dividers>
@@ -589,6 +941,328 @@ function Request(props: any) {
                 </DialogContent>
                 <DialogActions>
                     <Button variant="contained" onClick={() => setModal4(false)} sx={buttonCloseStyles}>Close</Button>
+                </DialogActions>
+            </BootstrapDialog>
+
+            {/* Price offer  */}
+            <BootstrapDialog
+                onClose={() => setModal5(false)}
+                aria-labelledby="custom-dialog-title5"
+                open={modal5}
+                maxWidth="lg"
+                fullWidth
+            >
+                <BootstrapDialogTitle id="custom-dialog-title5" onClose={() => setModal5(false)}>
+                    <b>Generate a price offer</b>
+                </BootstrapDialogTitle>
+                <DialogContent dividers>
+                    <Box sx={{ width: '100%' }}>
+                        <Stepper activeStep={activeStep}>
+                            {steps.map((label, index) => {
+                            const stepProps: { completed?: boolean } = {};
+                            const labelProps: {
+                                optional?: React.ReactNode;
+                            } = {};
+                            if (isStepOptional(index)) {
+                                labelProps.optional = (
+                                <Typography variant="caption">Optional</Typography>
+                                );
+                            }
+                            if (isStepSkipped(index)) {
+                                stepProps.completed = false;
+                            }
+                            return (
+                                <Step key={label} {...stepProps}>
+                                    <StepLabel {...labelProps}>{label}</StepLabel>
+                                </Step>
+                            );
+                            })}
+                        </Stepper>
+                        {activeStep === steps.length ? (
+                            <React.Fragment>
+                                <Typography sx={{ mt: 2, mb: 1 }}>
+                                    All steps completed - you&apos;re finished
+                                </Typography>
+                                <Box sx={{ display: 'flex', flexDirection: 'row', pt: 2 }}>
+                                    <Box sx={{ flex: '1 1 auto' }} />
+                                    <Button onClick={handleReset}>Reset</Button>
+                                </Box>
+                            </React.Fragment>
+                        ) : (
+                            <React.Fragment>
+                                {/* <Typography sx={{ mt: 2, mb: 1 }}>Step {activeStep + 1}</Typography> */}
+                                {
+                                    activeStep === 0 ?
+                                    <Grid container spacing={2} mt={1} px={2}>
+                                        <Grid item xs={6} mt={1}>
+                                            <InputLabel htmlFor="departure-date" sx={inputLabelStyles}>Departure date</InputLabel>
+                                            <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                                <DateTimePicker 
+                                                    value={departureDate} 
+                                                    onChange={(value: any) => { setDepartureDate(value) }}
+                                                    slotProps={{ textField: { id: "departure-date", fullWidth: true, sx: datetimeStyles }, inputAdornment: { sx: { position: "relative", right: "11.5px" } } }}
+                                                />
+                                            </LocalizationProvider>
+                                        </Grid>
+                                        <Grid item xs={6} mt={1}>
+                                            <InputLabel htmlFor="containers" sx={inputLabelStyles}>Containers</InputLabel>
+                                            {
+                                                containers !== null ?
+                                                <Select
+                                                    labelId="request-containers"
+                                                    id="containers"
+                                                    multiple
+                                                    value={containersSelected}
+                                                    onChange={handleChangeContainers}
+                                                    input={<BootstrapInput />}
+                                                    renderValue={(selected) => {
+                                                        return getPackageNamesByIds(selected, containers).join(', ');
+                                                    }}
+                                                    //MenuProps={MenuProps}
+                                                    fullWidth
+                                                >
+                                                    {containers.map((item: any, i: number) => (
+                                                        <MenuItem key={"container-"+i} value={item.packageId}>
+                                                            <Checkbox checked={containersSelected.indexOf(item.packageId) > -1} />
+                                                            <ListItemText primary={item.packageName} />
+                                                        </MenuItem>
+                                                    ))}
+                                                </Select>
+                                                : <Skeleton />
+                                            }
+                                        </Grid>
+                                        <Grid item xs={6} mt={1}>
+                                            <InputLabel htmlFor="port-departure" sx={inputLabelStyles}>Departure port</InputLabel>
+                                            {
+                                                ports !== null ?
+                                                <Autocomplete
+                                                    disablePortal
+                                                    id="port-departure"
+                                                    options={ports}
+                                                    renderOption={(props, option, i) => {
+                                                        return (
+                                                            <li {...props} key={option.portId}>
+                                                                {option.portName+", "+option.country}
+                                                            </li>
+                                                        );
+                                                    }}
+                                                    getOptionLabel={(option: any) => { 
+                                                        if (option !== null && option !== undefined) {
+                                                            return option.portName+', '+option.country;
+                                                        }
+                                                        return ""; 
+                                                    }}
+                                                    value={portDeparture}
+                                                    sx={{ mt: 1 }}
+                                                    renderInput={(params) => <TextField {...params} />}
+                                                    onChange={(e: any, value: any) => { setPortDeparture(value); }}
+                                                    fullWidth
+                                                /> : <Skeleton />
+                                            }
+                                        </Grid>
+                                        <Grid item xs={6} mt={1}>
+                                            <InputLabel htmlFor="destination-port" sx={inputLabelStyles}>Destination port</InputLabel>
+                                            {
+                                                ports !== null ?
+                                                <Autocomplete
+                                                    disablePortal
+                                                    id="destination-port"
+                                                    options={ports}
+                                                    renderOption={(props, option, i) => {
+                                                        return (
+                                                            <li {...props} key={option.portId}>
+                                                                {option.portName+", "+option.country}
+                                                            </li>
+                                                        );
+                                                    }}
+                                                    getOptionLabel={(option: any) => { 
+                                                        if (option !== null && option !== undefined) {
+                                                            return option.portName+', '+option.country;
+                                                        }
+                                                        return ""; 
+                                                    }}
+                                                    value={destinationPort}
+                                                    sx={{ mt: 1 }}
+                                                    renderInput={(params) => <TextField {...params} />}
+                                                    onChange={(e: any, value: any) => { setDestinationPort(value); }}
+                                                    fullWidth
+                                                /> : <Skeleton />
+                                            }
+                                        </Grid>
+                                        <Grid item xs={6} mt={1}>
+                                            <InputLabel htmlFor="loading-city" sx={inputLabelStyles}>Loading city (empty if no haulage)</InputLabel>
+                                            {
+                                                cities !== null ?
+                                                <Autocomplete
+                                                    disablePortal
+                                                    id="loading-city"
+                                                    options={cities}
+                                                    getOptionLabel={(option: any) => { 
+                                                        if (option !== null && option !== undefined) {
+                                                            return option.name+', '+option.country;
+                                                        }
+                                                        return ""; 
+                                                    }}
+                                                    value={loadingCity}
+                                                    sx={{ mt: 1 }}
+                                                    renderInput={(params) => <TextField {...params} />}
+                                                    onChange={(e: any, value: any) => { setLoadingCity(value); }}
+                                                    fullWidth
+                                                /> : <Skeleton />
+                                            }
+                                        </Grid>
+                                        <Grid item xs={6} mt={1}>
+                                            <InputLabel htmlFor="haulage-type" sx={inputLabelStyles}>Haulage type (loading timing)</InputLabel>
+                                            <NativeSelect
+                                                id="haulage-type"
+                                                value={haulageType}
+                                                onChange={handleChangeHaulageType}
+                                                input={<BootstrapInput />}
+                                                fullWidth
+                                            >
+                                                <option key={"kdq-"} value="">Any type</option>
+                                                {
+                                                    haulageTypes.map((item: any, i: number) => (
+                                                        <option key={"kdq"+i} value={item}>{item}</option>
+                                                    ))
+                                                }
+                                            </NativeSelect>
+                                        </Grid>
+                                    </Grid> : null
+                                }
+                                {
+                                    activeStep === 1 ?
+                                    <Grid container spacing={2} mt={1} px={2}>
+                                        <Grid item xs={12}>
+                                            <Alert severity="info" sx={{ mb: 2 }}>You can select an offer by clicking on his row. You have to select one seafreight, one haulage and one service for your offer.</Alert>
+                                            {
+                                                !loadResults ? 
+                                                seafreights !== null && seafreights.length !== 0 ?
+                                                    <Box>
+                                                        <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>List of sea freights pricing offers</Typography>
+                                                        <DataGrid
+                                                            rows={seafreights}
+                                                            columns={columnsSeafreights}
+                                                            hideFooter
+                                                            getRowId={(row) => row?.seaFreightId}
+                                                            getRowHeight={() => "auto" }
+                                                            sx={{ height: "auto" }}
+                                                            onRowClick={handleRowSeafreightsClick}
+                                                            // checkboxSelection
+                                                        />
+                                                    </Box>
+                                                    : null
+                                                : <Skeleton />
+                                            }
+                                            {
+                                                !loadResults ? 
+                                                haulages !== null && haulages.length !== 0 ?
+                                                    <Box>
+                                                        <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>List of haulages pricing offers</Typography>
+                                                        <DataGrid
+                                                            rows={haulages}
+                                                            columns={columnsHaulages}
+                                                            hideFooter
+                                                            getRowId={(row) => row?.id}
+                                                            // getRowHeight={() => "auto" }
+                                                            sx={{ height: "auto" }}
+                                                            onRowClick={handleRowHaulagesClick}
+                                                            // checkboxSelection
+                                                        />
+                                                    </Box>
+                                                    : null
+                                                : <Skeleton />
+                                            }
+                                        </Grid>
+                                    </Grid> : null
+                                }
+                                {
+                                    activeStep === 2 ?
+                                    <Grid container spacing={2} mt={1} px={2}>
+                                        <Grid item xs={12}>
+                                            <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>Selected sea freight</Typography>
+                                            <DataGrid
+                                                rows={[selectedSeafreight]}
+                                                columns={columnsSeafreights}
+                                                hideFooter
+                                                getRowId={(row) => row?.seaFreightId}
+                                                getRowHeight={() => "auto" }
+                                                sx={{ height: "auto" }}
+                                                //onRowClick={handleRowSeafreightsClick}
+                                                // checkboxSelection
+                                            />
+                                        </Grid>
+                                        <Grid item xs={12}>
+                                            <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>Selected haulage</Typography>
+                                            <DataGrid
+                                                rows={[selectedHaulage]}
+                                                columns={columnsHaulages}
+                                                hideFooter
+                                                getRowId={(row) => row?.id}
+                                                getRowHeight={() => "auto" }
+                                                sx={{ height: "auto" }}
+                                                //onRowClick={handleRowSeafreightsClick}
+                                                // checkboxSelection
+                                            />
+                                        </Grid>
+                                        <Grid item xs={4}>
+                                            <InputLabel htmlFor="promotion" sx={inputLabelStyles}>Promotion (en %)</InputLabel>
+                                            <BootstrapInput id="promotion" type="number" value={promotion} onChange={(e: any) => setPromotion(e.target.value)} fullWidth />
+                                        </Grid>
+                                        <Grid item xs={4}>
+                                            <InputLabel htmlFor="reduction" sx={inputLabelStyles}>Reduction (en %)</InputLabel>
+                                            <BootstrapInput id="reduction" type="number" value={reduction} onChange={(e: any) => setReduction(e.target.value)} fullWidth />
+                                        </Grid>
+                                        <Grid item xs={4}>
+                                            <InputLabel htmlFor="adding" sx={inputLabelStyles}>Valeur ajoutée (en {selectedSeafreight !== null ? selectedSeafreight.currency : null})</InputLabel>
+                                            <BootstrapInput id="adding" type="number" value={adding} onChange={(e: any) => setAdding(e.target.value)} fullWidth />
+                                        </Grid>
+                                        <Grid item xs={12}>
+                                            <InputLabel htmlFor="details" sx={inputLabelStyles}>Details of the offer</InputLabel>
+                                            <BootstrapInput id="details" type="text" multiline rows={3} value={details} onChange={(e: any) => setDetails(e.target.value)} fullWidth />
+                                        </Grid>
+                                        <Grid item xs={12}>
+                                            <Typography variant="h6">
+                                                { 
+                                                    selectedHaulage !== null && selectedSeafreight !== null ? 
+                                                    <Chip variant="outlined" size="medium"
+                                                        label={"TOTAL PRICE : "+ Number(totalPrice+totalPrice*promotion/100-totalPrice*reduction/100+adding*1).toString()+" "+selectedSeafreight.currency}
+                                                        sx={{ fontWeight: "bold", fontSize: 16, py: 3 }} 
+                                                    /> : null
+                                                }
+                                            </Typography>
+                                        </Grid>
+                                    </Grid>
+                                    : null
+                                }
+
+                                <Box sx={{ display: 'flex', flexDirection: 'row', pt: 2, px: 2 }}>
+                                    <Button
+                                        variant="contained" 
+                                        color="inherit" 
+                                        sx={whiteButtonStyles}
+                                        disabled={activeStep === 0}
+                                        onClick={handleBack}
+                                    >
+                                        Back
+                                    </Button>
+                                    <Box sx={{ flex: '1 1 auto' }} />
+                                    {isStepOptional(activeStep) && (
+                                    <Button variant="contained" color="inherit" sx={whiteButtonStyles} onClick={handleSkip}>
+                                        Skip
+                                    </Button>
+                                    )}
+                                    <Button variant="contained" color="inherit" sx={whiteButtonStyles} onClick={handleNext}>
+                                        {activeStep === steps.length - 1 ? 'Send the offer to validation' : 'Next step'}
+                                    </Button>
+                                </Box>
+                            </React.Fragment>
+                        )}
+                    </Box>
+                </DialogContent>
+                <DialogActions>
+                    {/* <Button variant="contained" color={!load ? "primary" : "info"} className="mr-3" onClick={() => { getPriceRequests(); }} sx={{ textTransform: "none" }}>Generate the offer</Button> */}
+                    <Button variant="contained" onClick={() => setModal5(false)} sx={buttonCloseStyles}>Close</Button>
                 </DialogActions>
             </BootstrapDialog>
         </div>

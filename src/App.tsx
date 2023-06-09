@@ -17,6 +17,7 @@ import NewRequest from './components/admin/NewRequest';
 import UsersAssigment from './components/admin/UsersAssignment';
 import Histories from './components/admin/Histories';
 import MyRequests from './components/admin/MyRequests';
+import RequestTest from './components/admin/RequestTest';
 
 const App = () => {
   return (
@@ -36,6 +37,7 @@ const App = () => {
                 <Route path="new-request" element={<NewRequest />} />
                 <Route path="my-requests" element={<MyRequests />} />
                 <Route path="users" element={<UsersAssigment />} />
+                <Route path="test" element={<RequestTest />} />
               </Route> 
               <Route path="/" element={<Landing />} />
               <Route path="landing" element={<Landing />} />
