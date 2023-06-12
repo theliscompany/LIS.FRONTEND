@@ -2,9 +2,9 @@ import { PopupRequest } from "@azure/msal-browser";
 
 export const msalConfig: any = {
   auth: {
-    clientId: "d43ec3b1-e8a1-492a-9a94-6c5c4285e8ab",
+    clientId: "788aee08-9270-4549-9a97-c43b43a8bb73",
     authority: "https://login.microsoftonline.com/abb93e13-2d77-476f-a287-59892d6b3c24",
-    redirectUri: "/",
+    redirectUri: "/admin/",
     navigateToLoginRequestUrl: false
   },
   cache: {
