@@ -67,7 +67,7 @@ function stringAvatar(name: string | undefined) {
         sx: {
             bgcolor: name !== undefined ? stringToColor(name) : "#333",
         },
-        children: `${name?.split(' ')[0][0]}${name?.split(' ')[1][0]}`,
+        children: `${name?.split(' ')[0][0]}`,
     };
 }
 
