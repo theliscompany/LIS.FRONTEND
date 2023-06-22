@@ -161,9 +161,9 @@ function Layout(props: {children?: React.ReactNode}) {
         }
     }
 
-    useEffect(() => {
-        loadRequests();
-    }, [context]);
+    // useEffect(() => {
+    //     loadRequests();
+    // }, [context]);
     
     return (
         <React.Fragment>
