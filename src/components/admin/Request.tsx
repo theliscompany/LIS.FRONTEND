@@ -122,7 +122,7 @@ function Request(props: any) {
     const [quantity, setQuantity] = useState<number>(1);
     const [containersSelection, setContainersSelection] = useState<any>([]);
     const [cargoType, setCargoType] = useState<string>("0");
-    const [cargoProducts, setCargoProducts] = useState<any>(null);
+    const [cargoProducts, setCargoProducts] = useState<any>([]);
     const [packingType, setPackingType] = useState<string>("");
     const [departureTown, setDepartureTown] = useState<any>(null);
     const [arrivalTown, setArrivalTown] = useState<any>(null);
@@ -330,6 +330,9 @@ function Request(props: any) {
             else {
                 enqueueSnackbar("You need to select a sea freight before going to the next step.", { variant: "warning", anchorOrigin: { horizontal: "right", vertical: "top"} });
             }
+        }
+        if (activeStep === 2) {
+            createNewOffer();
         }
     };
 
@@ -783,6 +786,71 @@ function Request(props: any) {
             if (response !== null && response !== undefined) {
                 setProducts(response);
             }  
+        }
+    }
+    
+    const createNewOffer = async () => {
+        if (selectedSeafreight !== null) {
+            if (context) {
+                var dataSent = { 
+                    "requestQuoteId": id,
+                    "comment": details,
+                    // "quoteOfferId": 0,
+                    "quoteOfferNumber": 0,
+                    "createdBy": "string",
+                    "emailUser": email,
+                    // "haulage": {
+                    //     "id": selectedHaulage.id,
+                    //     "haulierId": selectedHaulage.id,
+                    //     "haulierName": selectedHaulage.haulierName,
+                    //     "currency": selectedHaulage.currency,
+                    //     "loadingCityName": selectedHaulage.loadingPort,
+                    //     "freeTime": selectedHaulage.freeTime,
+                    //     "multiStop": selectedHaulage.multiStop,
+                    //     "overtimeTariff": selectedHaulage.overtimeTariff,
+                    //     "unitTariff": selectedHaulage.unitTariff,
+                    //     "haulageType": haulageType,
+                    //     "emptyPickupDepot": "string"
+                    // },
+                    // "miscellaneousList": [
+                    //     {
+                    //     "id": "string",
+                    //     "departurePortId": 0,
+                    //     "destinationPortId": 0,
+                    //     "departurePortName": "string",
+                    //     "destinationPortName": "string",
+                    //     "supplierId": 0,
+                    //     "supplierName": "string",
+                    //     "currency": "string"
+                    //     }
+                    // ],
+                    "seaFreight": {
+                        "id": selectedSeafreight.seaFreightId,
+                        "departurePortId": portDeparture.portName,
+                        "destinationPortId": destinationPort.portId,
+                        "departurePortName": selectedSeafreight.departurePortName,
+                        "destinationPortName": destinationPort.portName,
+                        "carrierId": 0,
+                        "carrierName": selectedSeafreight.carrierName,
+                        "carrierAgentId": 0,
+                        "carrierAgentName": selectedSeafreight.carrierAgentName,
+                        "currency": selectedSeafreight.currency,
+                        "transitTime": selectedSeafreight.transitTime,
+                        "frequency": selectedSeafreight.frequency
+                    } 
+                };
+                const response = await (context as BackendService<any>).post(protectedResources.apiLisOffer.endPoint+"/QuoteOffer", dataSent);
+                if (response !== null) {
+                    setModal5(false);
+                    enqueueSnackbar("The offer has been successfully sent.", { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                }
+                else {
+                    enqueueSnackbar("An error happened during the operation.", { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                }
+            }
+        }
+        else {
+            enqueueSnackbar("The content field is empty, please fill it.", { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
         }
     }
     
@@ -1431,7 +1499,7 @@ function Request(props: any) {
                                                             rows={miscs}
                                                             columns={columnsMiscs}
                                                             hideFooter
-                                                            // getRowId={(row) => row?.seaFreightId}
+                                                            getRowId={(row) => row?.id}
                                                             getRowHeight={() => "auto" }
                                                             sx={{ height: "auto" }}
                                                             onRowClick={handleRowMiscsClick}
@@ -1461,20 +1529,40 @@ function Request(props: any) {
                                                 // checkboxSelection
                                             />
                                         </Grid>
-                                        <Grid item xs={12}>
-                                            <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>Selected haulage</Typography>
-                                            <DataGrid
-                                                rows={[selectedHaulage]}
-                                                columns={columnsHaulages}
-                                                hideFooter
-                                                getRowId={(row) => row?.id}
-                                                getRowHeight={() => "auto" }
-                                                sx={{ height: "auto" }}
-                                                isRowSelectable={(params) => false}
-                                                //onRowClick={handleRowSeafreightsClick}
-                                                // checkboxSelection
-                                            />
-                                        </Grid>
+                                        {
+                                            selectedHaulage !== null ? 
+                                            <Grid item xs={12}>
+                                                <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>Selected haulage</Typography>
+                                                <DataGrid
+                                                    rows={[selectedHaulage]}
+                                                    columns={columnsHaulages}
+                                                    hideFooter
+                                                    getRowId={(row) => row?.id}
+                                                    getRowHeight={() => "auto" }
+                                                    sx={{ height: "auto" }}
+                                                    isRowSelectable={(params) => false}
+                                                    //onRowClick={handleRowSeafreightsClick}
+                                                    // checkboxSelection
+                                                />
+                                            </Grid> : null
+                                        }
+                                        {
+                                            selectedMisc !== null ? 
+                                            <Grid item xs={12}>
+                                                <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>Selected haulage</Typography>
+                                                <DataGrid
+                                                    rows={[selectedHaulage]}
+                                                    columns={columnsHaulages}
+                                                    hideFooter
+                                                    getRowId={(row) => row?.id}
+                                                    getRowHeight={() => "auto" }
+                                                    sx={{ height: "auto" }}
+                                                    isRowSelectable={(params) => false}
+                                                    //onRowClick={handleRowSeafreightsClick}
+                                                    // checkboxSelection
+                                                />
+                                            </Grid> : null
+                                        }
                                         <Grid item xs={12}>
                                             <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>Selected miscellaneous</Typography>
                                             <DataGrid
