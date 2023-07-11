@@ -324,6 +324,10 @@ function Request(props: any) {
                     setTotalPrice(seafreightPrices);
                 }
                 
+                console.log("Haulage : ", [selectedHaulage]);
+                console.log("SeaFreight : ", [selectedSeafreight]);
+                console.log("Misc : ", [selectedMisc]);
+
                 setActiveStep((prevActiveStep) => prevActiveStep + 1);
                 setSkipped(newSkipped);
             }
@@ -793,11 +797,12 @@ function Request(props: any) {
         if (selectedSeafreight !== null) {
             if (context) {
                 var dataSent = { 
-                    "requestQuoteId": id,
+                    "requestQuoteId": Number(id),
                     "comment": details,
-                    // "quoteOfferId": 0,
-                    "quoteOfferNumber": 0,
-                    "createdBy": "string",
+                    "quoteOfferId": 20,
+                    "quoteOfferNumber": 10,
+                    // "quoteOfferVm": 0,
+                    "createdBy": account?.username,
                     "emailUser": email,
                     // "haulage": {
                     //     "id": selectedHaulage.id,
@@ -810,7 +815,6 @@ function Request(props: any) {
                     //     "overtimeTariff": selectedHaulage.overtimeTariff,
                     //     "unitTariff": selectedHaulage.unitTariff,
                     //     "haulageType": haulageType,
-                    //     "emptyPickupDepot": "string"
                     // },
                     // "miscellaneousList": [
                     //     {
@@ -826,7 +830,7 @@ function Request(props: any) {
                     // ],
                     "seaFreight": {
                         "id": selectedSeafreight.seaFreightId,
-                        "departurePortId": portDeparture.portName,
+                        "departurePortId": portDeparture.portId,
                         "destinationPortId": destinationPort.portId,
                         "departurePortName": selectedSeafreight.departurePortName,
                         "destinationPortName": destinationPort.portName,
@@ -1481,7 +1485,7 @@ function Request(props: any) {
                                                             columns={columnsHaulages}
                                                             hideFooter
                                                             getRowId={(row) => row?.id}
-                                                            // getRowHeight={() => "auto" }
+                                                            getRowHeight={() => "auto" }
                                                             sx={{ height: "auto" }}
                                                             onRowClick={handleRowHaulagesClick}
                                                             // checkboxSelection
@@ -1525,7 +1529,7 @@ function Request(props: any) {
                                                 getRowHeight={() => "auto" }
                                                 sx={{ height: "auto" }}
                                                 isRowSelectable={(params) => false}
-                                                //onRowClick={handleRowSeafreightsClick}
+                                                // onRowClick={handleRowSeafreightsClick}
                                                 // checkboxSelection
                                             />
                                         </Grid>
@@ -1549,10 +1553,10 @@ function Request(props: any) {
                                         {
                                             selectedMisc !== null ? 
                                             <Grid item xs={12}>
-                                                <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>Selected haulage</Typography>
+                                                <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>Selected miscellaneous</Typography>
                                                 <DataGrid
-                                                    rows={[selectedHaulage]}
-                                                    columns={columnsHaulages}
+                                                    rows={[selectedMisc]}
+                                                    columns={columnsMiscs}
                                                     hideFooter
                                                     getRowId={(row) => row?.id}
                                                     getRowHeight={() => "auto" }
@@ -1563,20 +1567,6 @@ function Request(props: any) {
                                                 />
                                             </Grid> : null
                                         }
-                                        <Grid item xs={12}>
-                                            <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>Selected miscellaneous</Typography>
-                                            <DataGrid
-                                                rows={[selectedMisc]}
-                                                columns={columnsMiscs}
-                                                hideFooter
-                                                getRowId={(row) => row?.id}
-                                                getRowHeight={() => "auto" }
-                                                sx={{ height: "auto" }}
-                                                isRowSelectable={(params) => false}
-                                                //onRowClick={handleRowSeafreightsClick}
-                                                // checkboxSelection
-                                            />
-                                        </Grid>
                                         <Grid item xs={4}>
                                             <InputLabel htmlFor="margin" sx={inputLabelStyles}>Margin (in %)</InputLabel>
                                             <BootstrapInput id="margin" type="number" value={margin} onChange={(e: any) => setMargin(e.target.value)} fullWidth />
@@ -1596,7 +1586,7 @@ function Request(props: any) {
                                         <Grid item xs={12}>
                                             <Typography variant="h6">
                                                 { 
-                                                    selectedHaulage !== null && selectedSeafreight !== null ? 
+                                                    selectedSeafreight !== null ? 
                                                     <Chip variant="outlined" size="medium"
                                                         label={"TOTAL PRICE : "+ Number(totalPrice+totalPrice*margin/100-totalPrice*reduction/100+adding*1).toString()+" "+selectedSeafreight.currency}
                                                         sx={{ fontWeight: "bold", fontSize: 16, py: 3 }} 
