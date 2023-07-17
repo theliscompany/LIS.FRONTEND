@@ -19,6 +19,9 @@ import { useAccount, useMsal } from '@azure/msal-react';
 import { AuthenticationResult } from '@azure/msal-browser';
 
 import { DataGrid, GridColDef, GridEventListener, GridRenderCellParams, GridValueFormatterParams, GridValueGetterParams } from '@mui/x-data-grid';
+import axios from 'axios';
+//@ts-ignore
+// import crypto from 'crypto-browserify';
 
 //let statusTypes = ["EnAttente", "Valider", "Rejeter"];
 let cargoTypes = ["Container", "Conventional", "RollOnRollOff"];
@@ -46,6 +49,14 @@ let statusTypes = [
     { type: "EnAttenteDeFacturation", value: "En attente de facturation", description: "En attente de facturation après livraison "} 
 ];
 
+function transformId(id: string) {
+    // const hash = crypto.createHash('sha256').update(id).digest('hex');
+    const hash = "";
+    let output = hash.substring(0, 8);
+    output = 'OMNI-' + output.substring(0, 4);
+    return output;  
+}
+  
 function convertStringToObject(str: string): { city: string, country: string } {
     if (str !== undefined) {
         const [city, ...countryArr] = str.split(', ');
@@ -368,15 +379,15 @@ function Request(props: any) {
         setActiveStep(0);
     };
     
-    const handleRowHaulagesClick: GridEventListener<'rowClick'> = (params) => {
+    const handleRowHaulagesClick: GridEventListener<'rowClick'> = (params: any) => {
         setSelectedHaulage(params.row);
     };
     
-    const handleRowSeafreightsClick: GridEventListener<'rowClick'> = (params) => {
+    const handleRowSeafreightsClick: GridEventListener<'rowClick'> = (params: any) => {
         setSelectedSeafreight(params.row);
     };
     
-    const handleRowMiscsClick: GridEventListener<'rowClick'> = (params) => {
+    const handleRowMiscsClick: GridEventListener<'rowClick'> = (params: any) => {
         setSelectedMisc(params.row);
     };
     
@@ -796,7 +807,44 @@ function Request(props: any) {
     const createNewOffer = async () => {
         if (selectedSeafreight !== null) {
             if (context) {
-                var dataSent = { 
+                var haulage = null;
+                var miscellaneous = null;
+                if (selectedHaulage !== null) {
+                    haulage = {
+                        "id": selectedHaulage.id,
+                        "haulierId": selectedHaulage.id,
+                        "haulierName": selectedHaulage.haulierName,
+                        "currency": selectedHaulage.currency,
+                        "loadingCityName": selectedHaulage.loadingPort,
+                        "freeTime": selectedHaulage.freeTime,
+                        "multiStop": selectedHaulage.multiStop,
+                        "overtimeTariff": selectedHaulage.overtimeTariff,
+                        "unitTariff": selectedHaulage.unitTariff,
+                        "haulageType": haulageType,
+                    }
+                }
+                if (selectedMisc !== null) {
+                    miscellaneous = [
+                        {
+                            "id": selectedMisc.id,
+                            "departurePortId": null,
+                            "destinationPortId": null,
+                            "departurePortName": null,
+                            "destinationPortName": null,
+                            "supplierId": 0,
+                            "supplierName": selectedMisc.supplierName,
+                            "currency": selectedMisc.currency,
+                            "price20": selectedMisc.price20,
+                            "price40": selectedMisc.price40,
+                            "price20Dry": selectedMisc.price20dry,
+                            "price20Rf": selectedMisc.price20rf,
+                            "price40Dry": selectedMisc.price40dry,
+                            "price40Hc": selectedMisc.price40hc,
+                            "price40HcRf": selectedMisc.price40hcRf
+                        }                      
+                    ]
+                }
+                var dataSent = {
                     "requestQuoteId": Number(id),
                     "comment": details,
                     "quoteOfferId": 20,
@@ -804,30 +852,8 @@ function Request(props: any) {
                     // "quoteOfferVm": 0,
                     "createdBy": account?.username,
                     "emailUser": email,
-                    // "haulage": {
-                    //     "id": selectedHaulage.id,
-                    //     "haulierId": selectedHaulage.id,
-                    //     "haulierName": selectedHaulage.haulierName,
-                    //     "currency": selectedHaulage.currency,
-                    //     "loadingCityName": selectedHaulage.loadingPort,
-                    //     "freeTime": selectedHaulage.freeTime,
-                    //     "multiStop": selectedHaulage.multiStop,
-                    //     "overtimeTariff": selectedHaulage.overtimeTariff,
-                    //     "unitTariff": selectedHaulage.unitTariff,
-                    //     "haulageType": haulageType,
-                    // },
-                    // "miscellaneousList": [
-                    //     {
-                    //     "id": "string",
-                    //     "departurePortId": 0,
-                    //     "destinationPortId": 0,
-                    //     "departurePortName": "string",
-                    //     "destinationPortName": "string",
-                    //     "supplierId": 0,
-                    //     "supplierName": "string",
-                    //     "currency": "string"
-                    //     }
-                    // ],
+                    "haulage": haulage,
+                    "miscellaneousList": miscellaneous,
                     "seaFreight": {
                         "id": selectedSeafreight.seaFreightId,
                         "departurePortId": portDeparture.portId,
@@ -840,10 +866,28 @@ function Request(props: any) {
                         "carrierAgentName": selectedSeafreight.carrierAgentName,
                         "currency": selectedSeafreight.currency,
                         "transitTime": selectedSeafreight.transitTime,
-                        "frequency": selectedSeafreight.frequency
-                    } 
+                        "frequency": selectedSeafreight.frequency,
+                        "price20Dry": selectedSeafreight.price20dry,
+                        "price20Rf": selectedSeafreight.price20rf,
+                        "price40Dry": selectedSeafreight.price40dry,
+                        "price40Hc": selectedSeafreight.price40hc,
+                        "price40HcRf": selectedSeafreight.price40hcrf
+                    },
+                    "containers": containersSelection.map((elm: any) => { return { "containerId": elm.container, quantity: elm.quantity } }),
+                    "departureDate": departureDate,
+                    "departurePortId": portDeparture.portId,
+                    "destinationPortId": destinationPort.portId,
+                    // "haulageType": haulageType,
+                    // "plannedLoadingDate": "2023-07-14T08:18:24.720Z",
+                    // "loadingCityId": 0,
+                    "margin": margin,
+                    "reduction": reduction,
+                    "extraFee": adding,
+                    "totalPrice": totalPrice
                 };
-                const response = await (context as BackendService<any>).post(protectedResources.apiLisOffer.endPoint+"/QuoteOffer", dataSent);
+                const response = await (context as BackendService<any>).postBasic(protectedResources.apiLisOffer.endPoint+"/QuoteOffer", dataSent);
+                // const response = await axios.post(protectedResources.apiLisOffer.endPoint+"/QuoteOffer", dataSent);
+                
                 if (response !== null) {
                     setModal5(false);
                     enqueueSnackbar("The offer has been successfully sent.", { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
@@ -1465,7 +1509,7 @@ function Request(props: any) {
                                                             rows={seafreights}
                                                             columns={columnsSeafreights}
                                                             hideFooter
-                                                            getRowId={(row) => row?.seaFreightId}
+                                                            getRowId={(row: any) => row?.seaFreightId}
                                                             getRowHeight={() => "auto" }
                                                             sx={{ height: "auto" }}
                                                             onRowClick={handleRowSeafreightsClick}
@@ -1484,7 +1528,7 @@ function Request(props: any) {
                                                             rows={haulages}
                                                             columns={columnsHaulages}
                                                             hideFooter
-                                                            getRowId={(row) => row?.id}
+                                                            getRowId={(row: any) => row?.id}
                                                             getRowHeight={() => "auto" }
                                                             sx={{ height: "auto" }}
                                                             onRowClick={handleRowHaulagesClick}
@@ -1503,7 +1547,7 @@ function Request(props: any) {
                                                             rows={miscs}
                                                             columns={columnsMiscs}
                                                             hideFooter
-                                                            getRowId={(row) => row?.id}
+                                                            getRowId={(row: any) => row?.id}
                                                             getRowHeight={() => "auto" }
                                                             sx={{ height: "auto" }}
                                                             onRowClick={handleRowMiscsClick}
@@ -1525,10 +1569,10 @@ function Request(props: any) {
                                                 rows={[selectedSeafreight]}
                                                 columns={columnsSeafreights}
                                                 hideFooter
-                                                getRowId={(row) => row?.seaFreightId}
+                                                getRowId={(row: any) => row?.seaFreightId}
                                                 getRowHeight={() => "auto" }
                                                 sx={{ height: "auto" }}
-                                                isRowSelectable={(params) => false}
+                                                isRowSelectable={(params: any) => false}
                                                 // onRowClick={handleRowSeafreightsClick}
                                                 // checkboxSelection
                                             />
@@ -1541,10 +1585,10 @@ function Request(props: any) {
                                                     rows={[selectedHaulage]}
                                                     columns={columnsHaulages}
                                                     hideFooter
-                                                    getRowId={(row) => row?.id}
+                                                    getRowId={(row: any) => row?.id}
                                                     getRowHeight={() => "auto" }
                                                     sx={{ height: "auto" }}
-                                                    isRowSelectable={(params) => false}
+                                                    isRowSelectable={(params: any) => false}
                                                     //onRowClick={handleRowSeafreightsClick}
                                                     // checkboxSelection
                                                 />
@@ -1558,10 +1602,10 @@ function Request(props: any) {
                                                     rows={[selectedMisc]}
                                                     columns={columnsMiscs}
                                                     hideFooter
-                                                    getRowId={(row) => row?.id}
+                                                    getRowId={(row: any) => row?.id}
                                                     getRowHeight={() => "auto" }
                                                     sx={{ height: "auto" }}
-                                                    isRowSelectable={(params) => false}
+                                                    isRowSelectable={(params: any) => false}
                                                     //onRowClick={handleRowSeafreightsClick}
                                                     // checkboxSelection
                                                 />
@@ -1588,7 +1632,7 @@ function Request(props: any) {
                                                 { 
                                                     selectedSeafreight !== null ? 
                                                     <Chip variant="outlined" size="medium"
-                                                        label={"TOTAL PRICE : "+ Number(totalPrice+totalPrice*margin/100-totalPrice*reduction/100+adding*1).toString()+" "+selectedSeafreight.currency}
+                                                        label={"TOTAL PRICE : "+ Number(totalPrice+totalPrice*margin/100-totalPrice*reduction/100+adding*1).toFixed(2).toString()+" "+selectedSeafreight.currency}
                                                         sx={{ fontWeight: "bold", fontSize: 16, py: 3 }} 
                                                     /> : null
                                                 }

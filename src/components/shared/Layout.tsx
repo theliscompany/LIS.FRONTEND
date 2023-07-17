@@ -375,7 +375,20 @@ function Layout(props: {children?: React.ReactNode}) {
                                 </DarkTooltip>
                                 </ListItem>
                             </NavLink>
+                            <NavLink to="/admin/price-offers" className={({ isActive }) => isActive ? "cs-navlink-active" : "cs-navlink"}>
+                                <ListItem className="cs-listitem" key={"Requests"} disablePadding disableGutters>
+                                <DarkTooltip title="Price offers" placement="right" arrow>
+                                    <ListItemButton className="cs-listitembutton">
+                                        <ListItemIcon className="cs-listitemicon">
+                                            <PortraitIcon fontSize="small" />
+                                        </ListItemIcon>
+                                        <ListItemText primary={"Price offers"} />
+                                    </ListItemButton>
+                                </DarkTooltip>
+                                </ListItem>
+                            </NavLink>
                         </List>
+                        
                         {/* <Divider color="#F1F2F6" style={{ borderBottom: "1px solid rgb(241, 242, 246)" }} />
                         <List dense>
                             <NavLink to="/admin/wizard" className={({ isActive }) => isActive ? "cs-navlink-active" : "cs-navlink"}>

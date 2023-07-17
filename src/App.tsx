@@ -18,6 +18,8 @@ import UsersAssigment from './components/admin/UsersAssignment';
 import Histories from './components/admin/Histories';
 import MyRequests from './components/admin/MyRequests';
 import RequestTest from './components/admin/RequestTest';
+import PriceOffers from './components/admin/PriceOffers';
+import ManagePriceOffer from './components/admin/ManagePriceOffer';
 
 const App = () => {
   return (
@@ -36,6 +38,8 @@ const App = () => {
                 <Route path="request/:id" element={<Request />} />
                 <Route path="new-request" element={<NewRequest />} />
                 <Route path="my-requests" element={<MyRequests />} />
+                <Route path="price-offers" element={<PriceOffers />} />
+                <Route path="manage-offer/:id" element={<ManagePriceOffer />} />
                 <Route path="users" element={<UsersAssigment />} />
                 <Route path="test" element={<RequestTest />} />
               </Route> 

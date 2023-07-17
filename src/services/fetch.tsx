@@ -130,6 +130,25 @@ export class BackendService<T> {
         });
     }     
 
+    postBasic = (url: string, model: T): Promise<FileResponse | null> => {
+        url = url.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(model);
+
+        let options_ : RequestInit = {
+            body: content_,
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+
+        return fetch(url, options_).then((_response: Response) => {
+            return this.processPostRequests(_response);
+        });
+    } 
+    
     put = (url: string, model: T): Promise<FileResponse | null> => {
         url = url.replace(/[?&]$/, "");
 
