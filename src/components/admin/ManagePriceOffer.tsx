@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { AuthenticationResult } from '@azure/msal-browser';
 import { useAccount, useMsal } from '@azure/msal-react';
-import { Typography, Box, Grid, TableCell, TableHead, Paper, Table, TableBody, TableContainer, TableRow, Chip, IconButton, InputLabel, Button } from '@mui/material';
+import { Typography, Box, Grid, TableCell, TableHead, Paper, Table, TableBody, TableContainer, TableRow, Chip, IconButton, InputLabel, Button, Alert } from '@mui/material';
 import Skeleton from '@mui/material/Skeleton';
 import { SnackbarProvider, enqueueSnackbar } from 'notistack';
 import { useAuthorizedBackendApi } from '../../api/api';
@@ -20,9 +20,10 @@ function ManagePriceOffer(props: any) {
   const [reduction, setReduction] = useState<number>(0);
   const [adding, setAdding] = useState<number>(0);
   const [details, setDetails] = useState<string>("");
+  const [comment, setComment] = useState<string>("");
   const [containers, setContainers] = useState<any>(null);
   const [containersId, setContainersId] = useState<any>([]);
-
+  
   let { id } = useParams();
   const { instance, accounts } = useMsal();
   const account = useAccount(accounts[0] || {});
@@ -104,6 +105,42 @@ function ManagePriceOffer(props: any) {
     }
   }
   
+  const acceptOffer = async () => {
+    if(context) {
+      const body: any = {
+        id: id,
+        newStatus: "Accepted",
+      };
+
+      const data = await (context as BackendService<any>).put(protectedResources.apiLisOffer.endPoint+"/QuoteOffer/"+id+"/status?newStatus=Accepted", body);
+      if (data?.status === 200) {
+        enqueueSnackbar("Your price offer has been approved with success.", { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
+        loadOffer();
+      }
+      else {
+        enqueueSnackbar("An error happened during the operation.", { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+      }
+    }
+  }
+
+  const rejectOffer = async () => {
+    if(context) {
+      const body: any = {
+        id: id,
+        newStatus: "Rejected",
+      };
+
+      const data = await (context as BackendService<any>).put(protectedResources.apiLisOffer.endPoint+"/QuoteOffer/"+id+"/status?newStatus=Rejected", body);
+      if (data?.status === 200) {
+        enqueueSnackbar("Your price offer has been rejected with success.", { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
+        loadOffer();
+      }
+      else {
+        enqueueSnackbar("An error happened during the operation.", { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+      }
+    }
+  }
+
   function getPackageNamesByIds(ids: string[], packages: any) {
     const packageNames = [];
   
@@ -132,8 +169,8 @@ return (
                         rows={[offer.seaFreight]}
                         columns={
                           [
-                            { field: 'carrierName', headerName: 'Carrier', width: 200 },
-                            { field: 'carrierAgentName', headerName: 'Carrier agent', width: 275 },
+                            { field: 'carrierName', headerName: 'Carrier', width: 175 },
+                            { field: 'carrierAgentName', headerName: 'Carrier agent', width: 175 },
                             { field: 'departurePortName', headerName: 'Departure port', width: 125 },
                             { field: 'frequency', headerName: 'Frequency', valueFormatter: (params: GridValueFormatterParams) => `${params.value || ''} / day`, },
                             { field: 'transitTime', headerName: 'Transit time', valueFormatter: (params: GridValueFormatterParams) => `${params.value || ''} days` },
@@ -165,12 +202,12 @@ return (
                             rows={[offer.haulage]}
                             columns={
                               [
-                                { field: 'haulierName', headerName: 'Haulier', width: 200 },
+                                { field: 'haulierName', headerName: 'Haulier', width: 175 },
                                 { field: 'loadingPort', headerName: 'Loading port', renderCell: (params: GridRenderCellParams) => {
                                     return (
                                         <Box sx={{ my: 2 }}>{params.row.loadingPort}</Box>
                                     );
-                                }, width: 275 },
+                                }, width: 175 },
                                 { field: 'freeTime', headerName: 'Free time', valueFormatter: (params: GridValueFormatterParams) => `${params.value || ''} days`, width: 125 },
                                 { field: 'multiStop', headerName: 'Multi stop', valueGetter: (params: GridValueGetterParams) => `${params.row.multiStop || ''} ${params.row.currency}` },
                                 { field: 'overtimeTariff', headerName: 'Overtime tariff', valueGetter: (params: GridValueGetterParams) => `${params.row.overtimeTariff || ''} ${params.row.currency}` },
@@ -195,8 +232,8 @@ return (
                             rows={offer.miscellaneousList}
                             columns={
                               [
-                                { field: 'supplierName', headerName: 'Supplier', width: 200 },
-                                { field: 'departurePortName', headerName: 'Departure port', width: 275, valueFormatter: (params: GridValueFormatterParams) => `${offer.seaFreight.departurePortName || ''}`, },
+                                { field: 'supplierName', headerName: 'Supplier', width: 175 },
+                                { field: 'departurePortName', headerName: 'Departure port', width: 175, valueFormatter: (params: GridValueFormatterParams) => `${offer.seaFreight.departurePortName || ''}`, },
                                 { field: 'destinationPortName', headerName: 'Destination port', width: 325, valueFormatter: (params: GridValueFormatterParams) => `${offer.seaFreight.destinationPortName || ''}`, },
                                 { field: 'currency', headerName: 'Prices', renderCell: (params: GridRenderCellParams) => {
                                     return (
@@ -247,10 +284,15 @@ return (
                       }
                   </Typography>
               </Grid>
-              <Grid item xs={12}>
+              <Grid item xs={6}>
+                <Alert severity="info">
+                  The status of this offer is : <strong>{offer.status}</strong>
+                </Alert>
+              </Grid>
+              <Grid item xs={6} sx={{ pt: 1.5 }}>
                 <Button variant="contained" color="primary" sx={{ mr: 1, textTransform: "none" }} onClick={updateOffer}>Edit the offer</Button>
-                <Button variant="contained" color="success" sx={{ mr: 1, textTransform: "none" }}>Accept the offer</Button>
-                <Button variant="contained" color="secondary" sx={{ mr: 1, textTransform: "none" }}>Reject the offer</Button>
+                <Button variant="contained" color="success" sx={{ mr: 1, textTransform: "none" }} onClick={acceptOffer}>Approve the offer</Button>
+                <Button variant="contained" color="secondary" sx={{ mr: 1, textTransform: "none" }} onClick={rejectOffer}>Reject the offer</Button>
               </Grid>
               </Grid> : <Skeleton sx={{ mx: 5, mt: 3 }} />
             }

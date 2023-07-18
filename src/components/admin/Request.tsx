@@ -22,6 +22,8 @@ import { DataGrid, GridColDef, GridEventListener, GridRenderCellParams, GridValu
 import axios from 'axios';
 //@ts-ignore
 // import crypto from 'crypto-browserify';
+import CryptoJS from 'crypto-js';
+import { v4 as uuidv4 } from 'uuid';
 
 //let statusTypes = ["EnAttente", "Valider", "Rejeter"];
 let cargoTypes = ["Container", "Conventional", "RollOnRollOff"];
@@ -49,11 +51,12 @@ let statusTypes = [
     { type: "EnAttenteDeFacturation", value: "En attente de facturation", description: "En attente de facturation après livraison "} 
 ];
 
-function transformId(id: string) {
+function transformId(id: string | undefined) {
     // const hash = crypto.createHash('sha256').update(id).digest('hex');
-    const hash = "";
-    let output = hash.substring(0, 8);
-    output = 'OMNI-' + output.substring(0, 4);
+    const hash = CryptoJS.SHA256(id);
+    const hashHex = hash.toString(CryptoJS.enc.Hex);
+    let output = hashHex.substring(0, 8);
+    output = 'OMNI-' + output.substring(0, 6);
     return output;  
 }
   
@@ -812,7 +815,7 @@ function Request(props: any) {
                 if (selectedHaulage !== null) {
                     haulage = {
                         "id": selectedHaulage.id,
-                        "haulierId": selectedHaulage.id,
+                        "haulierId": 0,
                         "haulierName": selectedHaulage.haulierName,
                         "currency": selectedHaulage.currency,
                         "loadingCityName": selectedHaulage.loadingPort,
@@ -821,6 +824,9 @@ function Request(props: any) {
                         "overtimeTariff": selectedHaulage.overtimeTariff,
                         "unitTariff": selectedHaulage.unitTariff,
                         "haulageType": haulageType,
+                        "loadingPort": loadingCity.name,
+                        "loadingPortId": loadingCity.id,
+                        "containerNames": [null]
                     }
                 }
                 if (selectedMisc !== null) {
@@ -847,9 +853,10 @@ function Request(props: any) {
                 var dataSent = {
                     "requestQuoteId": Number(id),
                     "comment": details,
-                    "quoteOfferId": 20,
+                    // "quoteOfferNumber": transformId(uuidv4()),
+                    "quoteOfferVm": 0,
+                    "quoteOfferId": 10,
                     "quoteOfferNumber": 10,
-                    // "quoteOfferVm": 0,
                     "createdBy": account?.username,
                     "emailUser": email,
                     "haulage": haulage,
