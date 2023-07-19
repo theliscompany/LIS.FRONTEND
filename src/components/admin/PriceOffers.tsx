@@ -29,6 +29,13 @@ function colors(value: string) {
     }
 }
 
+function statusLabel(value: string) {
+    if (value === "Accepted")
+        return "Approved";
+    else
+        return value;
+}
+
 function PriceOffers() {
     const [load, setLoad] = useState<boolean>(true);
     const [offers, setOffers] = useState<any>(null);
@@ -151,11 +158,11 @@ function PriceOffers() {
                                                                     <TableCell align="left">{ports.find((elm: any) => elm.portId === row.destinationPortId).portName}</TableCell>
                                                                     {/* <TableCell align="left">{row.haulage !== null ? <Chip label="Yes" color="success" /> : <Chip label="No" />}</TableCell>
                                                                     <TableCell align="left">{row.miscellaneousList !== null ? <Chip label="Yes" color="success" /> : <Chip label="No" />}</TableCell> */}
-                                                                    <TableCell align="left"><Chip label={row.status} color={colors(row.status)} /></TableCell>
+                                                                    <TableCell align="left"><Chip label={statusLabel(row.status)} color={colors(row.status)} /></TableCell>
                                                                     <TableCell align="left">{row.status !== "Accepted" && row.clientApproval === "Pending" ? <Chip label={"No email"} /> : <Chip label={row.clientApproval} color={colors(row.clientApproval)} />}</TableCell>
                                                                     <TableCell align="left">{Number(row.totalPrice+row.totalPrice*row.margin/100-row.totalPrice*row.reduction/100+row.extraFee*1).toFixed(2)} {row.seaFreight.currency}</TableCell>
                                                                     <TableCell align="left">
-                                                                        <IconButton href={"/admin/manage-offer/"+row.id} sx={{ mr: 1 }}>
+                                                                        <IconButton href={"/admin/quote-offers/"+row.id} sx={{ mr: 1 }}>
                                                                             <EditIcon fontSize="small" />
                                                                         </IconButton>
                                                                         <IconButton onClick={() => { setCurrentId(row.id); setModal(true); }}>

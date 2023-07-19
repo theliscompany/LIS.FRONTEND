@@ -11,6 +11,13 @@ import { BackendService } from '../../services/fetch';
 import { BootstrapInput, inputLabelStyles } from '../../misc/styles';
 import { DataGrid, GridRenderCellParams, GridValueFormatterParams, GridValueGetterParams } from '@mui/x-data-grid';
 
+function statusLabel(value: string) {
+  if (value === "Accepted")
+      return "Approved";
+  else
+      return value;
+}
+
 function ManagePriceOffer(props: any) {
   const [load, setLoad] = useState<boolean>(true);
   const [offer, setOffer] = useState<any>(null);
@@ -302,12 +309,12 @@ return (
               </Grid>
               <Grid item xs={6}>
                 <Alert severity="info">
-                  The status of this offer is : <div>- <strong>{offer.status}</strong> by Omnifreight</div>
+                  The status of this offer is : <div>- <strong>{statusLabel(offer.status)}</strong> by Omnifreight</div>
                   {offer.status === "Accepted" ? <div>- <strong>{offer.clientApproval}</strong> by the client</div> : null}
                 </Alert>
               </Grid>
               <Grid item xs={6} sx={{ pt: 1.5, display: "flex", alignItems: "center", justifyContent: "end" }}>
-                <Button variant="contained" color="primary" sx={{ mr: 1, textTransform: "none" }} onClick={updateOffer}>Edit the offer</Button>
+                <Button variant="contained" color="primary" sx={{ mr: 1, textTransform: "none" }} onClick={updateOffer}>Update the offer</Button>
                 <Button variant="contained" color="success" sx={{ mr: 1, textTransform: "none" }} onClick={acceptOffer}>Approve the offer</Button>
                 <Button variant="contained" color="secondary" sx={{ mr: 1, textTransform: "none" }} onClick={rejectOffer}>Reject the offer</Button>
               </Grid>

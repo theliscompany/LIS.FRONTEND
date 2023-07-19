@@ -375,7 +375,7 @@ function Layout(props: {children?: React.ReactNode}) {
                                 </DarkTooltip>
                                 </ListItem>
                             </NavLink>
-                            <NavLink to="/admin/price-offers" className={({ isActive }) => isActive ? "cs-navlink-active" : "cs-navlink"}>
+                            <NavLink to="/admin/quote-offers" className={({ isActive }) => isActive ? "cs-navlink-active" : "cs-navlink"}>
                                 <ListItem className="cs-listitem" key={"Requests"} disablePadding disableGutters>
                                 <DarkTooltip title="Price offers" placement="right" arrow>
                                     <ListItemButton className="cs-listitembutton">
