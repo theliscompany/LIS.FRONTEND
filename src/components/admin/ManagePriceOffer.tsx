@@ -26,7 +26,6 @@ function ManagePriceOffer(props: any) {
   const [reduction, setReduction] = useState<number>(0);
   const [adding, setAdding] = useState<number>(0);
   const [details, setDetails] = useState<string>("");
-  const [comment, setComment] = useState<string>("");
   const [containers, setContainers] = useState<any>(null);
   const [containersId, setContainersId] = useState<any>([]);
   
