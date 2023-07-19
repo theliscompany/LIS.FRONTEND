@@ -1,16 +1,15 @@
-import React, { useEffect, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
 import { AuthenticationResult } from '@azure/msal-browser';
 import { useAccount, useMsal } from '@azure/msal-react';
-import { Typography, Box, Grid, TableCell, TableHead, Paper, Table, TableBody, TableContainer, TableRow, Chip, IconButton, InputLabel, Button, Alert } from '@mui/material';
+import { Typography, Box, Grid, Chip, InputLabel, Button, Alert } from '@mui/material';
 import Skeleton from '@mui/material/Skeleton';
 import { SnackbarProvider, enqueueSnackbar } from 'notistack';
 import { useAuthorizedBackendApi } from '../../api/api';
-import { pricingRequest, protectedResources, transportRequest } from '../../authConfig';
+import { protectedResources, transportRequest } from '../../authConfig';
 import { BackendService } from '../../services/fetch';
-import EditIcon from '@mui/icons-material/Edit';
 import { BootstrapInput, inputLabelStyles } from '../../misc/styles';
-import { DataGrid, GridColDef, GridRenderCellParams, GridValueFormatterParams, GridValueGetterParams } from '@mui/x-data-grid';
+import { DataGrid, GridRenderCellParams, GridValueFormatterParams, GridValueGetterParams } from '@mui/x-data-grid';
 
 function ManagePriceOffer(props: any) {
   const [load, setLoad] = useState<boolean>(true);
@@ -88,12 +87,29 @@ function ManagePriceOffer(props: any) {
   const updateOffer = async () => {
     if(context) {
       const body: any = {
-        containers: offer.containers,
-        margin: margin,
-        reduction: reduction,
-        extraFee: adding,
-        comment: details
-      };
+        "requestQuoteId": offer.requestQuoteId,
+        "comment": details,
+        // "quoteOfferNumber": transformId(uuidv4()),
+        "quoteOfferVm": 0,
+        "quoteOfferId": offer.quoteOfferId,
+        "quoteOfferNumber": offer.quoteOfferNumber,
+        "createdBy": offer.createdBy,
+        "emailUser": offer.emailUser,
+        "haulage": offer.haulage,
+        "miscellaneousList": offer.miscellaneousList,
+        "seaFreight": offer.seaFreight,
+        "containers": offer.containers,
+        "departureDate": offer.departureDate,
+        "departurePortId": offer.departurePortId,
+        "destinationPortId": offer.destinationPortId,
+        // "haulageType": haulageType,
+        // "plannedLoadingDate": "2023-07-14T08:18:24.720Z",
+        // "loadingCityId": 0,
+        "margin": margin,
+        "reduction": reduction,
+        "extraFee": adding,
+        "totalPrice": offer.totalPrice
+    };;
 
       const data = await (context as BackendService<any>).put(protectedResources.apiLisOffer.endPoint+"/QuoteOffer/"+id, body);
       if (data?.status === 200) {
@@ -110,9 +126,10 @@ function ManagePriceOffer(props: any) {
       const body: any = {
         id: id,
         newStatus: "Accepted",
+        comment: details
       };
 
-      const data = await (context as BackendService<any>).put(protectedResources.apiLisOffer.endPoint+"/QuoteOffer/"+id+"/status?newStatus=Accepted", body);
+      const data = await (context as BackendService<any>).put(protectedResources.apiLisOffer.endPoint+"/QuoteOffer/"+id+"/approval?newStatus=Accepted?comment="+details, body);
       if (data?.status === 200) {
         enqueueSnackbar("Your price offer has been approved with success.", { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
         loadOffer();
@@ -286,10 +303,11 @@ return (
               </Grid>
               <Grid item xs={6}>
                 <Alert severity="info">
-                  The status of this offer is : <strong>{offer.status}</strong>
+                  The status of this offer is : <div>- <strong>{offer.status}</strong> by Omnifreight</div>
+                  {offer.status === "Accepted" ? <div>- <strong>{offer.clientApproval}</strong> by the client</div> : null}
                 </Alert>
               </Grid>
-              <Grid item xs={6} sx={{ pt: 1.5 }}>
+              <Grid item xs={6} sx={{ pt: 1.5, display: "flex", alignItems: "center", justifyContent: "end" }}>
                 <Button variant="contained" color="primary" sx={{ mr: 1, textTransform: "none" }} onClick={updateOffer}>Edit the offer</Button>
                 <Button variant="contained" color="success" sx={{ mr: 1, textTransform: "none" }} onClick={acceptOffer}>Approve the offer</Button>
                 <Button variant="contained" color="secondary" sx={{ mr: 1, textTransform: "none" }} onClick={rejectOffer}>Reject the offer</Button>
