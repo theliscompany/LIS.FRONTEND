@@ -126,10 +126,9 @@ function ManagePriceOffer(props: any) {
       const body: any = {
         id: id,
         newStatus: "Accepted",
-        comment: details
       };
 
-      const data = await (context as BackendService<any>).put(protectedResources.apiLisOffer.endPoint+"/QuoteOffer/"+id+"/approval?newStatus=Accepted?comment="+details, body);
+      const data = await (context as BackendService<any>).put(protectedResources.apiLisOffer.endPoint+"/QuoteOffer/"+id+"/status?newStatus=Accepted", body);
       if (data?.status === 200) {
         enqueueSnackbar("Your price offer has been approved with success.", { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
         loadOffer();
