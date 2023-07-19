@@ -18,6 +18,9 @@ import UsersAssigment from './components/admin/UsersAssignment';
 import Histories from './components/admin/Histories';
 import MyRequests from './components/admin/MyRequests';
 import RequestTest from './components/admin/RequestTest';
+import PriceOffers from './components/admin/PriceOffers';
+import ManagePriceOffer from './components/admin/ManagePriceOffer';
+import ApproveOffer from './components/admin/ApproveOffer';
 
 const App = () => {
   return (
@@ -36,6 +39,8 @@ const App = () => {
                 <Route path="request/:id" element={<Request />} />
                 <Route path="new-request" element={<NewRequest />} />
                 <Route path="my-requests" element={<MyRequests />} />
+                <Route path="quote-offers" element={<PriceOffers />} />
+                <Route path="quote-offers/:id" element={<ManagePriceOffer />} />
                 <Route path="users" element={<UsersAssigment />} />
                 <Route path="test" element={<RequestTest />} />
               </Route> 
@@ -44,6 +49,7 @@ const App = () => {
               <Route path="privacy-policy" element={<Privacy />} />
               <Route path="tracking" element={<Tracking />} />
               <Route path="tracking/:id" element={<Tracking />} />
+              <Route path="quote-offers/approve/:id" element={<ApproveOffer />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </AuthorizedBackendApiProvider>
