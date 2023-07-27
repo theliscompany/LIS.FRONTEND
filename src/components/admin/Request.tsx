@@ -492,7 +492,7 @@ function Request(props: any) {
                 whatsapp: phone,
                 departure: departure,
                 arrival: arrival,
-                cargoType: 0,
+                cargoType: Number(cargoType),
                 quantity: quantity,
                 detail: message,
                 tags: tags.length !== 0 ? tags.join(",") : null,
@@ -930,38 +930,49 @@ function Request(props: any) {
                                     <Typography variant="subtitle1" display="inline">Do you think this request need more informations?</Typography>
                                 </Alert>
                             </Grid>
-                            <Grid item xs={6}>
-                                <InputLabel htmlFor="whatsapp-phone-number" sx={inputLabelStyles}>Whatsapp number</InputLabel>
-                                <MuiTelInput id="whatsapp-phone-number" value={phone} onChange={setPhone} defaultCountry="CM" preferredCountries={["CM", "BE", "KE"]} sx={{ mt: 1, paddingLeft: "4px" }} fullWidth /*disabled={status === "Valider"}*/ />
-                            </Grid>
-                            <Grid item xs={6}>
-                                <InputLabel htmlFor="request-email" sx={inputLabelStyles}>Email</InputLabel>
-                                <BootstrapInput id="request-email" type="email" value={email} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)} fullWidth disabled />
-                            </Grid>
-                            <Grid item xs={6}>
-                                <InputLabel htmlFor="departure" sx={inputLabelStyles}>City and country of departure of the goods</InputLabel>
-                                <AutocompleteSearch id="departure" value={departureTown} onChange={(e: any) => { setDepartureTown(convertStringToObject(e.target.innerText)); setDeparture(e.target.innerText); }} fullWidth /*disabled={status === "Valider"}*/ />
-                            </Grid>
-                            <Grid item xs={6}>
-                                <InputLabel htmlFor="arrival" sx={inputLabelStyles}>City and country of arrival of the goods</InputLabel>
-                                <AutocompleteSearch id="arrival" value={arrivalTown} onChange={(e: any) => { setArrivalTown(convertStringToObject(e.target.innerText)); setArrival(e.target.innerText); }} fullWidth /*disabled={status === "Valider"}*/ />
-                            </Grid>
-                            {/* <Grid item xs={6}>
-                                <InputLabel htmlFor="cargo-type" sx={inputLabelStyles}>Type of cargo</InputLabel>
-                                <NativeSelect
-                                    id="cargo-type"
-                                    value={cargoType}
-                                    onChange={handleChangeCargoType}
-                                    input={<BootstrapInput />}
-                                    fullWidth
-                                >
-                                    <option value="0">Container</option>
-                                    <option value="1">Conventional</option>
-                                    <option value="2">Roll-on/Roll-off</option>
-                                </NativeSelect>
-                            </Grid> */}
-                            <Grid item xs={6}>
-                                <InputLabel htmlFor="cargo-products" sx={inputLabelStyles}>Type of products</InputLabel>
+                            <Grid item xs={12} md={6} mt={1}>
+                            <InputLabel htmlFor="departure" sx={inputLabelStyles}>Where do you want us to pickup your products?</InputLabel>
+                            <AutocompleteSearch id="departure" value={departureTown} onChange={(e: any) => { setDepartureTown(convertStringToObject(e.target.innerText)); setDeparture(e.target.innerText); }} fullWidth />
+                        </Grid>
+                        <Grid item xs={12} md={6} mt={1}>
+                            <InputLabel htmlFor="arrival" sx={inputLabelStyles}>Where do you want to transport your products?</InputLabel>
+                            <AutocompleteSearch id="arrival" value={arrivalTown} onChange={(e: any) => { setArrivalTown(convertStringToObject(e.target.innerText)); setArrival(e.target.innerText); }} fullWidth />
+                        </Grid>
+                        <Grid item xs={12} md={6} mt={1}>
+                            <InputLabel htmlFor="cargo-type" sx={inputLabelStyles}>In what type of cargo do you want to transport your goods?</InputLabel>
+                            <NativeSelect
+                                id="demo-customized-select-native"
+                                value={cargoType}
+                                onChange={handleChangeCargoType}
+                                input={<BootstrapInput />}
+                                fullWidth
+                            >
+                                <option value="0">Container</option>
+                                <option value="1">Conventional</option>
+                                <option value="2">Roll-on/Roll-off</option>
+                            </NativeSelect>
+                        </Grid>
+                        <Grid item xs={12} md={6} mt={1}>
+                            <InputLabel htmlFor="quantity" sx={inputLabelStyles}>How many units of cargo do you want to transport?</InputLabel>
+                            <BootstrapInput id="quantity" type="number" inputProps={{ min: 0, max: 100 }} value={quantity} onChange={(e: any) => {console.log(e); setQuantity(e.target.value)}} fullWidth />
+                        </Grid>
+                        <Grid item xs={12}>
+                            <InputLabel htmlFor="tags" sx={inputLabelStyles}>Tags</InputLabel>
+                            <MuiChipsInput 
+                                id="tags" 
+                                placeholder="Type some key words of your request" 
+                                value={tags} variant="outlined" 
+                                onChange={(elm: MuiChipsInputChip[]) => { setTags(elm); }} 
+                                fullWidth 
+                                sx={tagInputStyles} 
+                                renderChip={(Component, key, props) => {
+                                    return <Component {...props} key={key} sx={{ mt: .75 }} />
+                                }}
+                            />
+                        </Grid>
+                        
+                        <Grid item xs={6}>
+                            <InputLabel htmlFor="cargo-products" sx={inputLabelStyles}>Type of products</InputLabel>
                                 {
                                     products !== null ?
                                     <Autocomplete
@@ -999,93 +1010,10 @@ function Request(props: any) {
                                 </NativeSelect>
                             </Grid>
                             
-                            <Grid item xs={6}>
-                                <InputLabel htmlFor="container-type" sx={inputLabelStyles}>Container Type</InputLabel>
-                                {
-                                    containers !== null ?
-                                    <NativeSelect
-                                        id="container-type"
-                                        value={containerType}
-                                        onChange={(event: { target: { value: any } }) => { setContainerType(Number(event.target.value)); }}
-                                        input={<BootstrapInput />}
-                                        fullWidth
-                                    >
-                                        <option key={"elm1-x"} value={0}>Not defined</option>
-                                        {containers.map((elm: any, i: number) => (
-                                            <option key={"elm1-"+i} value={elm.packageId}>{elm.packageName}</option>
-                                        ))}
-                                    </NativeSelect>
-                                    : <Skeleton />
-                                }
-                            </Grid>
-                            <Grid item xs={4}>
-                                <InputLabel htmlFor="quantity" sx={inputLabelStyles}>Quantity</InputLabel>
-                                <BootstrapInput id="quantity" type="number" inputProps={{ min: 0, max: 100 }} value={quantity} onChange={(e: any) => {console.log(e); setQuantity(e.target.value)}} fullWidth /*disabled={status === "Valider"}*/ />
-                            </Grid>
-                            <Grid item xs={2}>
-                                <Button 
-                                    variant="contained" color="inherit" fullWidth sx={whiteButtonStyles} 
-                                    style={{ marginTop: "30px", height: "42px", float: "right" }} 
-                                    onClick={() => {
-                                        if (containerType !== 0 && quantity > 0) {
-                                            setContainersSelection((prevItems: any) => [...prevItems, { container: containerType, quantity: quantity }]);
-                                            setContainerType(0); setQuantity(1);
-                                        } 
-                                        else {
-                                            enqueueSnackbar("You need to select a container type and a good value for quantity.", { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
-                                        }
-                                    }} 
-                                >
-                                    Add the container
-                                </Button>
-                            </Grid>
-                            <Grid item xs={12}>
-                                {
-                                    containersSelection !== undefined && containersSelection !== null && containersSelection.length !== 0 && containers !== null ? 
-                                        <List>
-                                            {
-                                                containersSelection.map((item: any, index: number) => (
-                                                    <ListItem
-                                                        key={"listitem1-"+index}
-                                                        sx={{ border: "1px solid #e5e5e5" }}
-                                                        secondaryAction={
-                                                            <IconButton edge="end" onClick={() => {
-                                                                setContainersSelection((prevItems: any) => prevItems.filter((item: any, i: number) => i !== index));
-                                                            }}>
-                                                                <DeleteIcon />
-                                                            </IconButton>
-                                                        }
-                                                    >
-                                                        <ListItemText primary={
-                                                            containers.find((elm: any) => elm.packageId === item.container) !== undefined ?
-                                                            "Container : "+containers.find((elm: any) => elm.packageId === item.container).packageName+" | Quantity : "+item.quantity
-                                                            : "Container : "+item.container+" | Quantity : "+item.quantity
-                                                        } />
-                                                    </ListItem>
-                                                ))
-                                            }
-                                        </List>
-                                    : null  
-                                }
-                            </Grid>
                             
-                            <Grid item xs={12}>
-                                <InputLabel htmlFor="tags" sx={inputLabelStyles}>Tags</InputLabel>
-                                <MuiChipsInput 
-                                    id="tags" 
-                                    placeholder="Type some key words of your request" 
-                                    value={tags} variant="outlined" 
-                                    onChange={(elm: MuiChipsInputChip[]) => { setTags(elm); }} 
-                                    fullWidth 
-                                    sx={tagInputStyles} 
-                                    renderChip={(Component, key, props) => {
-                                        return <Component {...props} key={key} sx={{ mt: .75 }} />
-                                    }}
-                                />
-                            </Grid>
                             <Grid item xs={6} mt={.5}>
                                 <InputLabel htmlFor="request-message" sx={inputLabelStyles}>Other details about your need (Optional)</InputLabel>
-                                <BootstrapInput id="request-message" type="text" multiline rows={3.5} value={message} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setMessage(e.target.value)} fullWidth /*disabled={status === "Valider"}*/ />
+                                <BootstrapInput id="request-message" type="text" multiline rows={3.5} value={message} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setMessage(e.target.value)} fullWidth />
                             </Grid>
                             <Grid item xs={6} mt={1}>
                                 <InputLabel htmlFor="assigned-manager" sx={inputLabelStyles}>Assigned manager</InputLabel>
@@ -1356,7 +1284,79 @@ function Request(props: any) {
                                 {
                                     activeStep === 0 ?
                                     <Grid container spacing={2} mt={1} px={2}>
-                                        <Grid item xs={6} mt={1}>
+                                        <Grid item xs={4}>
+                                            <InputLabel htmlFor="container-type" sx={inputLabelStyles}>Container Type</InputLabel>
+                                            {
+                                                containers !== null ?
+                                                <NativeSelect
+                                                    id="container-type"
+                                                    value={containerType}
+                                                    onChange={(event: { target: { value: any } }) => { setContainerType(Number(event.target.value)); }}
+                                                    input={<BootstrapInput />}
+                                                    fullWidth
+                                                >
+                                                    <option key={"elm1-x"} value={0}>Not defined</option>
+                                                    {containers.map((elm: any, i: number) => (
+                                                        <option key={"elm1-"+i} value={elm.packageId}>{elm.packageName}</option>
+                                                    ))}
+                                                </NativeSelect>
+                                                : <Skeleton />
+                                            }
+                                        </Grid>
+                                        <Grid item xs={4}>
+                                            <InputLabel htmlFor="quantity" sx={inputLabelStyles}>Quantity</InputLabel>
+                                            <BootstrapInput id="quantity" type="number" inputProps={{ min: 0, max: 100 }} value={quantity} onChange={(e: any) => {console.log(e); setQuantity(e.target.value)}} fullWidth /*disabled={status === "Valider"}*/ />
+                                        </Grid>
+                                        <Grid item xs={4}>
+                                            <Button 
+                                                variant="contained" color="inherit" fullWidth sx={whiteButtonStyles} 
+                                                style={{ marginTop: "30px", height: "42px", float: "right" }} 
+                                                onClick={() => {
+                                                    if (containerType !== 0 && quantity > 0) {
+                                                        setContainersSelection((prevItems: any) => [...prevItems, { container: containerType, quantity: quantity }]);
+                                                        setContainerType(0); setQuantity(1);
+                                                    } 
+                                                    else {
+                                                        enqueueSnackbar("You need to select a container type and a good value for quantity.", { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                                                    }
+                                                }} 
+                                            >
+                                                Add the container
+                                            </Button>
+                                        </Grid>
+                                        <Grid item xs={12}>
+                                            {
+                                                containersSelection !== undefined && containersSelection !== null && containersSelection.length !== 0 && containers !== null ? 
+                                                    <Grid container spacing={2}>
+                                                        {
+                                                            containersSelection.map((item: any, index: number) => (
+                                                                <Grid item xs={4}>
+                                                                    <ListItem
+                                                                        key={"listitem1-"+index}
+                                                                        sx={{ border: "1px solid #e5e5e5" }}
+                                                                        secondaryAction={
+                                                                            <IconButton edge="end" onClick={() => {
+                                                                                setContainersSelection((prevItems: any) => prevItems.filter((item: any, i: number) => i !== index));
+                                                                            }}>
+                                                                                <DeleteIcon />
+                                                                            </IconButton>
+                                                                        }
+                                                                    >
+                                                                        <ListItemText primary={
+                                                                            containers.find((elm: any) => elm.packageId === item.container) !== undefined ?
+                                                                            "Container : "+containers.find((elm: any) => elm.packageId === item.container).packageName+" | Quantity : "+item.quantity
+                                                                            : "Container : "+item.container+" | Quantity : "+item.quantity
+                                                                        } />
+                                                                    </ListItem>
+                                                                </Grid>
+                                                            ))
+                                                        }
+                                                    </Grid>
+                                                : null  
+                                            }
+                                        </Grid>
+                                        
+                                        <Grid item xs={4} mt={1}>
                                             <InputLabel htmlFor="departure-date" sx={inputLabelStyles}>Departure date</InputLabel>
                                             <LocalizationProvider dateAdapter={AdapterDayjs}>
                                                 <DateTimePicker 
@@ -1366,7 +1366,7 @@ function Request(props: any) {
                                                 />
                                             </LocalizationProvider>
                                         </Grid>
-                                        <Grid item xs={6} mt={1}>
+                                        {/* <Grid item xs={4} mt={1}>
                                             <InputLabel htmlFor="request-containerss" sx={inputLabelStyles}>Containers</InputLabel>
                                             {
                                                 containers !== null ?
@@ -1392,8 +1392,8 @@ function Request(props: any) {
                                                 </Select>
                                                 : <Skeleton />
                                             }
-                                        </Grid>
-                                        <Grid item xs={6} mt={1}>
+                                        </Grid> */}
+                                        <Grid item xs={4} mt={1}>
                                             <InputLabel htmlFor="port-departure" sx={inputLabelStyles}>Departure port</InputLabel>
                                             {
                                                 ports !== null ?
@@ -1422,7 +1422,7 @@ function Request(props: any) {
                                                 /> : <Skeleton />
                                             }
                                         </Grid>
-                                        <Grid item xs={6} mt={1}>
+                                        <Grid item xs={4} mt={1}>
                                             <InputLabel htmlFor="destination-port" sx={inputLabelStyles}>Destination port</InputLabel>
                                             {
                                                 ports !== null ?
@@ -1451,7 +1451,7 @@ function Request(props: any) {
                                                 /> : <Skeleton />
                                             }
                                         </Grid>
-                                        <Grid item xs={6} mt={1}>
+                                        <Grid item xs={4} mt={1}>
                                             <InputLabel htmlFor="loading-date" sx={inputLabelStyles}>Loading date</InputLabel>
                                             <LocalizationProvider dateAdapter={AdapterDayjs}>
                                                 <DateTimePicker 
@@ -1461,7 +1461,7 @@ function Request(props: any) {
                                                 />
                                             </LocalizationProvider>
                                         </Grid>
-                                        <Grid item xs={6} mt={1}>
+                                        <Grid item xs={4} mt={1}>
                                             <InputLabel htmlFor="loading-city" sx={inputLabelStyles}>Loading city (empty if no haulage)</InputLabel>
                                             {
                                                 cities !== null ?
@@ -1483,7 +1483,7 @@ function Request(props: any) {
                                                 /> : <Skeleton />
                                             }
                                         </Grid>
-                                        <Grid item xs={6} mt={1}>
+                                        <Grid item xs={4} mt={1}>
                                             <InputLabel htmlFor="haulage-type" sx={inputLabelStyles}>Haulage type (loading timing)</InputLabel>
                                             <NativeSelect
                                                 id="haulage-type"
