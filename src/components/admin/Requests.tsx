@@ -12,6 +12,7 @@ import { MobileDateTimePicker } from '@mui/x-date-pickers/MobileDateTimePicker';
 import { DesktopDateTimePicker } from '@mui/x-date-pickers/DesktopDateTimePicker';
 import { StaticDateTimePicker } from '@mui/x-date-pickers/StaticDateTimePicker';
 import React, { useEffect } from 'react';
+import { NavLink, Link } from 'react-router-dom';
 import '../../App.css';
 import { Button, Chip, Grid, InputLabel, NativeSelect, Skeleton } from '@mui/material';
 import PlaceIcon from '@mui/icons-material/Place';
@@ -91,7 +92,7 @@ function dateTimeDiff(date_time: string) {
 }
 
 function Requests() {
-    const [notifications, setNotifications] = React.useState<any>(null);
+    const [requests, setRequests] = React.useState<any>(null);
     const [load, setLoad] = React.useState<boolean>(true);
     const [status, setStatus] = React.useState<string>("");
     const [cargoType, setCargoType] = React.useState<string>("");
@@ -126,7 +127,7 @@ function Requests() {
             if (response !== null && response.code !== undefined && response.data !== undefined) {
                 if (response.code === 200) {
                     setLoad(false);
-                    setNotifications(response.data.reverse());
+                    setRequests(response.data.reverse());
                 }
                 else {
                     setLoad(false);
@@ -144,7 +145,7 @@ function Requests() {
             if (response !== null && response.code !== undefined && response.data !== undefined) {
                 if (response.code === 200) {
                     setLoad(false);
-                    setNotifications(response.data.reverse());
+                    setRequests(response.data.reverse());
                 }
                 else {
                     setLoad(false);
@@ -259,17 +260,17 @@ function Requests() {
 
                 {
                     !load ? 
-                        notifications !== null ? 
+                        requests !== null ? 
                         <List sx={{ 
                             mt: 3 
                         }}>
                             {
-                                notifications.map((item: any, i: number) => {
+                                requests.map((item: any, i: number) => {
                                     return (
                                         <ListItem
                                             key={"request-"+i}
-                                            component="a"
-                                            href={"/admin/request/" + item.id}
+                                            component={NavLink}
+                                            to={"/admin/request/" + item.id}
                                             sx={{ 
                                                 '&:hover': {
                                                     backgroundColor: "#fbfbfb"

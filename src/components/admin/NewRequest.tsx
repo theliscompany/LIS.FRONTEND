@@ -17,15 +17,6 @@ import { AuthenticationResult } from '@azure/msal-browser';
 //let statusTypes = ["EnAttente", "Valider", "Rejeter"];
 let cargoTypes = ["Container", "Conventional", "RollOnRollOff"];
 
-function convertStringToObject(str: string): { city: string, country: string } {
-    if (str !== undefined) {
-        const [city, ...countryArr] = str.split(', ');
-        const country = countryArr.join(', ');
-        return { city, country };
-    }
-    return { city: "", country: "" };
-}
-
 function validMail(mail: string) {
     return /^(([^<>()\[\]\.,;:\s@\"]+(\.[^<>()\[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()\.,;\s@\"]+\.{0,1})+([^<>()\.,;:\s@\"]{2,}|[\d\.]+))$/.test(mail);
 }
@@ -39,8 +30,8 @@ function NewRequest(props: any) {
     const [message, setMessage] = useState<string>("");
     const [quantity, setQuantity] = useState<number>(1);
     const [cargoType, setCargoType] = useState<string>("0");
-    const [departurePort, setDepartureTown] = useState<any>(null);
-    const [arrivalPort, setArrivalTown] = useState<any>(null);
+    const [departurePort, setDeparturePort] = useState<any>(null);
+    const [arrivalPort, setArrivalPort] = useState<any>(null);
     const [departure, setDeparture] = useState<string>("");
     const [arrival, setArrival] = useState<string>("");
     // const [tags, setTags] = useState<MuiChipsInputChip[]>([]);
@@ -256,7 +247,7 @@ function NewRequest(props: any) {
                         </Grid>
                         <Grid item xs={12} md={6} mt={1}>
                             <InputLabel htmlFor="departure" sx={inputLabelStyles}>Where do you want us to pickup your products?</InputLabel>
-                            {/* <AutocompleteSearch id="departure" value={departurePort} onChange={(e: any) => { setDepartureTown(convertStringToObject(e.target.innerText)); setDeparture(e.target.innerText); }} fullWidth /> */}
+                            {/* <AutocompleteSearch id="departure" value={departurePort} onChange={(e: any) => { setDeparturePort(convertStringToObject(e.target.innerText)); setDeparture(e.target.innerText); }} fullWidth /> */}
                             {
                                 ports !== null ?
                                 <Autocomplete
@@ -279,14 +270,14 @@ function NewRequest(props: any) {
                                     value={departurePort}
                                     sx={{ mt: 1 }}
                                     renderInput={(params) => <TextField {...params} />}
-                                    onChange={(e: any, value: any) => { setDepartureTown(value); }}
+                                    onChange={(e: any, value: any) => { setDeparturePort(value); }}
                                     fullWidth
                                 /> : <Skeleton />
                             }
                         </Grid>
                         <Grid item xs={12} md={6} mt={1}>
                             <InputLabel htmlFor="arrival" sx={inputLabelStyles}>Where do you want to transport your products?</InputLabel>
-                            {/* <AutocompleteSearch id="arrival" value={arrivalPort} onChange={(e: any) => { setArrivalTown(convertStringToObject(e.target.innerText)); setArrival(e.target.innerText); }} fullWidth /> */}
+                            {/* <AutocompleteSearch id="arrival" value={arrivalPort} onChange={(e: any) => { setArrivalPort(convertStringToObject(e.target.innerText)); setArrival(e.target.innerText); }} fullWidth /> */}
                             {
                                 ports !== null ?
                                 <Autocomplete
@@ -309,7 +300,7 @@ function NewRequest(props: any) {
                                     value={arrivalPort}
                                     sx={{ mt: 1 }}
                                     renderInput={(params) => <TextField {...params} />}
-                                    onChange={(e: any, value: any) => { setArrivalTown(value); }}
+                                    onChange={(e: any, value: any) => { setArrivalPort(value); }}
                                     fullWidth
                                 /> : <Skeleton />
                             }
