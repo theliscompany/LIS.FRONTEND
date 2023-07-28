@@ -60,13 +60,13 @@ function transformId(id: string | undefined) {
     return output;  
 }
   
-function convertStringToObject(str: string): { city: string, country: string } {
+function convertStringToObject(str: string): { portName: string, country: string } {
     if (str !== undefined) {
-        const [city, ...countryArr] = str.split(', ');
+        const [portName, ...countryArr] = str.split(', ');
         const country = countryArr.join(', ');
-        return { city, country };
+        return { portName, country };
     }
-    return { city: "", country: "" };
+    return { portName: "", country: "" };
 }
 
 function createGetRequestUrl(url: string, variable1: string|undefined, variable2: string, variable3: string) {
@@ -160,7 +160,7 @@ function Request(props: any) {
     
     const [departureDate, setDepartureDate] = useState<Dayjs | null>(null);
     const [containersSelected, setContainersSelected] = useState<string[]>([]);
-    const [destinationPort, setDestinationPort] = useState<any>(null);
+    const [portDestination, setPortDestination] = useState<any>(null);
     const [portDeparture, setPortDeparture] = useState<any>(null);
     const [loadingDate, setLoadingDate] = useState<Dayjs | null>(null);
     const [loadingCity, setLoadingCity] = useState<any>(null);
@@ -224,7 +224,7 @@ function Request(props: any) {
     const columnsMiscs: GridColDef[] = [
         { field: 'supplierName', headerName: 'Supplier', width: 200 },
         { field: 'departurePortName', headerName: 'Departure port', width: 275, valueFormatter: (params: GridValueFormatterParams) => `${portDeparture.portName || ''}`, },
-        { field: 'destinationPortName', headerName: 'Destination port', width: 325, valueFormatter: (params: GridValueFormatterParams) => `${destinationPort.portName || ''}`, },
+        { field: 'destinationPortName', headerName: 'Destination port', width: 325, valueFormatter: (params: GridValueFormatterParams) => `${portDestination.portName || ''}`, },
         { field: 'currency', headerName: 'Prices', renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box sx={{ my: 1, mr: 1 }}>
@@ -283,7 +283,8 @@ function Request(props: any) {
             newSkipped.delete(activeStep);
         }
         if (activeStep === 0) {
-            if (departureDate !== null && containersSelected.length !== 0 && destinationPort !== null) {
+            if (departureDate !== null && containersSelection.map((elm: any) => elm.container).length !== 0 && portDestination !== null) {
+                setContainersSelected(containersSelection.map((elm: any) => elm.container));
                 getPriceRequests();
                 setActiveStep((prevActiveStep) => prevActiveStep + 1);
                 setSkipped(newSkipped);
@@ -338,9 +339,9 @@ function Request(props: any) {
                     setTotalPrice(seafreightPrices);
                 }
                 
-                console.log("Haulage : ", [selectedHaulage]);
-                console.log("SeaFreight : ", [selectedSeafreight]);
-                console.log("Misc : ", [selectedMisc]);
+                // console.log("Haulage : ", [selectedHaulage]);
+                // console.log("SeaFreight : ", [selectedSeafreight]);
+                // console.log("Misc : ", [selectedMisc]);
 
                 setActiveStep((prevActiveStep) => prevActiveStep + 1);
                 setSkipped(newSkipped);
@@ -395,9 +396,9 @@ function Request(props: any) {
     };
     
     useEffect(() => {
-        //loadRequest();
+        // loadRequest();
+        // getPorts();
         getContainers();
-        getPorts();
         getCities();
         getProducts();
         getAssignees();
@@ -409,11 +410,12 @@ function Request(props: any) {
             const response = await (context as BackendService<any>).getSingle(protectedResources.apiLisQuotes.endPoint+"/Assignee");
             if (response !== null && response.code !== undefined) {
                 if (response.code === 200) {
+                    console.log("Assignees", response.data);
                     setAssignees(response.data);
                     setLoadAssignees(false);
 
-                    // Now i can load the user
-                    loadRequest();
+                    // Now i can load the ports (who loads the request later)
+                    getPorts();
                 }
                 else {
                     setLoadAssignees(false);
@@ -422,18 +424,20 @@ function Request(props: any) {
         }
     }
     
-    const loadRequest = async () => {
+    const loadRequest = async (allPorts: any) => {
         if (context) {
             setLoad(true);
             const response = await (context as BackendService<any>).getSingle(protectedResources.apiLisQuotes.endPoint+"/Request/"+id);
             if (response !== null && response.code !== undefined) {
                 if (response.code === 200) {
+                    console.log("Request", response.data);
+                    
                     setEmail(response.data.email);
                     setPhone(response.data.whatsapp);
                     setDeparture(response.data.departure);
                     setArrival(response.data.arrival);
-                    setDepartureTown(convertStringToObject(response.data.departure));
-                    setArrivalTown(convertStringToObject(response.data.arrival));
+                    // setDepartureTown(convertStringToObject(response.data.departure));
+                    // setArrivalTown(convertStringToObject(response.data.arrival));
                     setStatus(response.data.status);
                     setCargoType(String(cargoTypes.indexOf(response.data.cargoType)));
                     setQuantity(response.data.quantity);
@@ -441,10 +445,18 @@ function Request(props: any) {
                     setTags(response.data.tags !== null ? response.data.tags.split(",") : []);
                     setAssignedManager(response.data.assigneeId);
                     setTrackingNumber(response.data.trackingNumber);
-                    setLoad(false);
+                    
+                    // Here we initialize the values of ports fields in main screen and generate price screen
+                    var auxDeparture = convertStringToObject(response.data.departure);
+                    var auxArrival = convertStringToObject(response.data.arrival);
+                    auxDeparture = allPorts.find((elm: any) => elm.portName === auxDeparture.portName && elm.country === auxDeparture.country);
+                    auxArrival = allPorts.find((elm: any) => elm.portName === auxArrival.portName && elm.country === auxArrival.country);
+                    setDepartureTown(auxDeparture);
+                    setPortDeparture(auxDeparture);
+                    setArrivalTown(auxArrival);
+                    setPortDestination(auxArrival);
 
-                    // Now i can get assignees (for synchronisation problems)
-                    //getAssignees();
+                    setLoad(false);
                 }
                 else {
                     setLoad(false);
@@ -492,7 +504,7 @@ function Request(props: any) {
                 whatsapp: phone,
                 departure: departure,
                 arrival: arrival,
-                cargoType: 0,
+                cargoType: Number(cargoType),
                 quantity: quantity,
                 detail: message,
                 tags: tags.length !== 0 ? tags.join(",") : null,
@@ -571,7 +583,7 @@ function Request(props: any) {
             const response = await (context as BackendService<any>).getSingle(protectedResources.apiLisQuotes.endPoint+"/RequestQuoteNotes?requestQuoteId="+idRequest);
             if (response !== null && response.code !== undefined) {
                 if (response.code === 200) {
-                    console.log(response.data);
+                    // console.log(response.data);
                     setNotes(response.data);
                     setLoadNotes(false);
                 }
@@ -598,9 +610,9 @@ function Request(props: any) {
     }
 
     const getPriceRequests = async () => {
-        if (departureDate !== null && containersSelected.length !== 0 && destinationPort !== null) {
+        if (departureDate !== null && containersSelection.map((elm: any) => elm.container).length !== 0 && portDestination !== null) {
             // alert(containersSelected);
-            console.log(containers.map((elm: any) => elm.packageName));
+            // console.log(containers.map((elm: any) => elm.packageName));
             setLoadResults(true);
             getSeaFreightPriceOffers();
             getMiscellaneousPriceOffers();
@@ -636,7 +648,7 @@ function Request(props: any) {
             const response = await (context as BackendService<any>).getWithToken(urlSent, token);
             setLoadResults(false);
             setHaulages(response);
-            console.log(response);  
+            // console.log(response);  
         }
     }
     
@@ -659,15 +671,15 @@ function Request(props: any) {
                 });
             });
             
-            console.log(containersSelected);
+            // console.log(containersSelected);
             var containersFormatted = containersSelected.join("&ContainerTypesId=");
-            console.log(containersFormatted);
+            // console.log(containersFormatted);
             
-            var urlSent = createGetRequestUrl2(protectedResources.apiLisPricing.endPoint+"/Pricing/SeaFreightsOffersRequest?", portDeparture.portId, destinationPort.portId, departureDate?.toISOString(), containersFormatted);
+            var urlSent = createGetRequestUrl2(protectedResources.apiLisPricing.endPoint+"/Pricing/SeaFreightsOffersRequest?", portDeparture.portId, portDestination.portId, departureDate?.toISOString(), containersFormatted);
             const response = await (context as BackendService<any>).getWithToken(urlSent, token);
             setLoadResults(false);
             setSeafreights(response);
-            console.log(response);  
+            // console.log(response);  
         }
     }
     
@@ -692,10 +704,10 @@ function Request(props: any) {
             
             var containersFormatted = containersSelected.join("&ContainerTypesId=");
             
-            var urlSent = createGetRequestUrl2(protectedResources.apiLisPricing.endPoint+"/Pricing/MiscellaneoussOffersRequest?", portDeparture.portId, destinationPort.portId, departureDate?.toISOString(), containersFormatted);
+            var urlSent = createGetRequestUrl2(protectedResources.apiLisPricing.endPoint+"/Pricing/MiscellaneoussOffersRequest?", portDeparture.portId, portDestination.portId, departureDate?.toISOString(), containersFormatted);
             const response = await (context as BackendService<any>).getWithToken(urlSent, token);
             setMiscs(response);
-            console.log(response);  
+            // console.log(response);  
         }
     }
     
@@ -719,7 +731,7 @@ function Request(props: any) {
             );
             
             const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Package/Containers", token);
-            console.log("Containers", response);
+            // console.log("Containers", response);
             if (response !== null && response !== undefined) {
                 setContainers(response);
             }  
@@ -746,9 +758,12 @@ function Request(props: any) {
             );
             
             const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Port/Ports", token);
-            console.log(response);
+            console.log("Ports", response);
             if (response !== null && response !== undefined) {
                 setPorts(response);
+
+                // Here i can load the request informations
+                loadRequest(response);
             }  
         }
     }
@@ -773,7 +788,7 @@ function Request(props: any) {
             );
             
             const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/City/Cities", token);
-            console.log(response);
+            // console.log(response);
             if (response !== null && response !== undefined) {
                 setCities(response);
             }  
@@ -800,7 +815,7 @@ function Request(props: any) {
             );
             
             const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Product/Products", token);
-            console.log(response);
+            // console.log(response);
             if (response !== null && response !== undefined) {
                 setProducts(response);
             }  
@@ -864,9 +879,9 @@ function Request(props: any) {
                     "seaFreight": {
                         "id": selectedSeafreight.seaFreightId,
                         "departurePortId": portDeparture.portId,
-                        "destinationPortId": destinationPort.portId,
+                        "destinationPortId": portDestination.portId,
                         "departurePortName": selectedSeafreight.departurePortName,
-                        "destinationPortName": destinationPort.portName,
+                        "destinationPortName": portDestination.portName,
                         "carrierId": 0,
                         "carrierName": selectedSeafreight.carrierName,
                         "carrierAgentId": 0,
@@ -883,7 +898,7 @@ function Request(props: any) {
                     "containers": containersSelection.map((elm: any) => { return { "containerId": elm.container, quantity: elm.quantity } }),
                     "departureDate": departureDate,
                     "departurePortId": portDeparture.portId,
-                    "destinationPortId": destinationPort.portId,
+                    "destinationPortId": portDestination.portId,
                     // "haulageType": haulageType,
                     // "plannedLoadingDate": "2023-07-14T08:18:24.720Z",
                     // "loadingCityId": 0,
@@ -914,42 +929,86 @@ function Request(props: any) {
             <SnackbarProvider />
             <Box py={4}>
                 <Typography variant="h5" mt={3} mx={5}><b>Manage a request for quote N° {id}</b></Typography>
-                <Box>
-                    {
-                        !load ? 
-                        <Grid container spacing={2} mt={1} px={5}>
-                            <Grid item xs={12}>
-                                <Typography variant="body2" color="dodgerblue" sx={{ fontWeight: "bold" }}>Tracking N° {trackingNumber}</Typography>
+                    <Box>
+                        {
+                            !load ? 
+                            <Grid container spacing={2} mt={1} px={5}>
+                                <Grid item xs={12}>
+                                    <Typography variant="body2" color="dodgerblue" sx={{ fontWeight: "bold" }}>Tracking N° {trackingNumber}</Typography>
+                                </Grid>
+                                <Grid item xs={12}>
+                                    <Alert 
+                                        severity="info" 
+                                        sx={{ display: "flex", alignItems: "center", justifyContent: "left" }}
+                                        action={<Button variant="contained" color="inherit" sx={{ background: "#fff", color: "#333", float: "right", textTransform: "none", position: "relative", bottom: "2px" }} onClick={() => { setModal(true); }}>Ask for more informations</Button>}
+                                    >
+                                        <Typography variant="subtitle1" display="inline">Do you think this request need more informations?</Typography>
+                                    </Alert>
+                                </Grid>
+                                <Grid item xs={12} md={6} mt={1}>
+                                <InputLabel htmlFor="departure" sx={inputLabelStyles}>Where do you want us to pickup your products?</InputLabel>
+                                {/* <AutocompleteSearch id="departure" value={departureTown} onChange={(e: any) => { setDepartureTown(convertStringToObject(e.target.innerText)); setDeparture(e.target.innerText); }} fullWidth /> */}
+                                {
+                                    ports !== null ?
+                                    <Autocomplete
+                                        disablePortal
+                                        id="departure"
+                                        options={ports}
+                                        renderOption={(props, option, i) => {
+                                            return (
+                                                <li {...props} key={option.portId}>
+                                                    {option.portName+", "+option.country}
+                                                </li>
+                                            );
+                                        }}
+                                        getOptionLabel={(option: any) => { 
+                                            if (option !== null && option !== undefined) {
+                                                return option.portName+', '+option.country;
+                                            }
+                                            return ""; 
+                                        }}
+                                        value={departureTown}
+                                        sx={{ mt: 1 }}
+                                        renderInput={(params) => <TextField {...params} />}
+                                        onChange={(e: any, value: any) => { setDepartureTown(value); }}
+                                        fullWidth
+                                    /> : <Skeleton />
+                                }
                             </Grid>
-                            <Grid item xs={12}>
-                                <Alert 
-                                    severity="info" 
-                                    sx={{ display: "flex", alignItems: "center", justifyContent: "left" }}
-                                    action={<Button variant="contained" color="inherit" sx={{ background: "#fff", color: "#333", float: "right", textTransform: "none", position: "relative", bottom: "2px" }} onClick={() => { setModal(true); }}>Ask for more informations</Button>}
-                                >
-                                    <Typography variant="subtitle1" display="inline">Do you think this request need more informations?</Typography>
-                                </Alert>
+                            <Grid item xs={12} md={6} mt={1}>
+                                <InputLabel htmlFor="arrival" sx={inputLabelStyles}>Where do you want to transport your products?</InputLabel>
+                                {/* <AutocompleteSearch id="arrival" value={arrivalTown} onChange={(e: any) => { setArrivalTown(convertStringToObject(e.target.innerText)); setArrival(e.target.innerText); }} fullWidth /> */}
+                                {
+                                    ports !== null ?
+                                    <Autocomplete
+                                        disablePortal
+                                        id="arrival"
+                                        options={ports}
+                                        renderOption={(props, option, i) => {
+                                            return (
+                                                <li {...props} key={option.portId}>
+                                                    {option.portName+", "+option.country}
+                                                </li>
+                                            );
+                                        }}
+                                        getOptionLabel={(option: any) => { 
+                                            if (option !== null && option !== undefined) {
+                                                return option.portName+', '+option.country;
+                                            }
+                                            return ""; 
+                                        }}
+                                        value={arrivalTown}
+                                        sx={{ mt: 1 }}
+                                        renderInput={(params) => <TextField {...params} />}
+                                        onChange={(e: any, value: any) => { setArrivalTown(value); }}
+                                        fullWidth
+                                    /> : <Skeleton />
+                                }
                             </Grid>
-                            <Grid item xs={6}>
-                                <InputLabel htmlFor="whatsapp-phone-number" sx={inputLabelStyles}>Whatsapp number</InputLabel>
-                                <MuiTelInput id="whatsapp-phone-number" value={phone} onChange={setPhone} defaultCountry="CM" preferredCountries={["CM", "BE", "KE"]} sx={{ mt: 1, paddingLeft: "4px" }} fullWidth /*disabled={status === "Valider"}*/ />
-                            </Grid>
-                            <Grid item xs={6}>
-                                <InputLabel htmlFor="request-email" sx={inputLabelStyles}>Email</InputLabel>
-                                <BootstrapInput id="request-email" type="email" value={email} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)} fullWidth disabled />
-                            </Grid>
-                            <Grid item xs={6}>
-                                <InputLabel htmlFor="departure" sx={inputLabelStyles}>City and country of departure of the goods</InputLabel>
-                                <AutocompleteSearch id="departure" value={departureTown} onChange={(e: any) => { setDepartureTown(convertStringToObject(e.target.innerText)); setDeparture(e.target.innerText); }} fullWidth /*disabled={status === "Valider"}*/ />
-                            </Grid>
-                            <Grid item xs={6}>
-                                <InputLabel htmlFor="arrival" sx={inputLabelStyles}>City and country of arrival of the goods</InputLabel>
-                                <AutocompleteSearch id="arrival" value={arrivalTown} onChange={(e: any) => { setArrivalTown(convertStringToObject(e.target.innerText)); setArrival(e.target.innerText); }} fullWidth /*disabled={status === "Valider"}*/ />
-                            </Grid>
-                            {/* <Grid item xs={6}>
-                                <InputLabel htmlFor="cargo-type" sx={inputLabelStyles}>Type of cargo</InputLabel>
+                            <Grid item xs={12} md={6} mt={1}>
+                                <InputLabel htmlFor="cargo-type" sx={inputLabelStyles}>In what type of cargo do you want to transport your goods?</InputLabel>
                                 <NativeSelect
-                                    id="cargo-type"
+                                    id="demo-customized-select-native"
                                     value={cargoType}
                                     onChange={handleChangeCargoType}
                                     input={<BootstrapInput />}
@@ -959,9 +1018,28 @@ function Request(props: any) {
                                     <option value="1">Conventional</option>
                                     <option value="2">Roll-on/Roll-off</option>
                                 </NativeSelect>
-                            </Grid> */}
-                            <Grid item xs={6}>
-                                <InputLabel htmlFor="cargo-products" sx={inputLabelStyles}>Type of products</InputLabel>
+                            </Grid>
+                            <Grid item xs={12} md={6} mt={1}>
+                                <InputLabel htmlFor="quantity" sx={inputLabelStyles}>How many units of cargo do you want to transport?</InputLabel>
+                                <BootstrapInput id="quantity" type="number" inputProps={{ min: 0, max: 100 }} value={quantity} onChange={(e: any) => {setQuantity(e.target.value)}} fullWidth />
+                            </Grid>
+                            <Grid item xs={12}>
+                                <InputLabel htmlFor="tags" sx={inputLabelStyles}>Tags</InputLabel>
+                                <MuiChipsInput 
+                                    id="tags" 
+                                    placeholder="Type some key words of your request" 
+                                    value={tags} variant="outlined" 
+                                    onChange={(elm: MuiChipsInputChip[]) => { setTags(elm); }} 
+                                    fullWidth 
+                                    sx={tagInputStyles} 
+                                    renderChip={(Component, key, props) => {
+                                        return <Component {...props} key={key} sx={{ mt: .75 }} />
+                                    }}
+                                />
+                            </Grid>
+                        
+                            {/* <Grid item xs={6}>
+                            <InputLabel htmlFor="cargo-products" sx={inputLabelStyles}>Type of products</InputLabel>
                                 {
                                     products !== null ?
                                     <Autocomplete
@@ -997,95 +1075,12 @@ function Request(props: any) {
                                         <option key={"elm1-"+i} value={elm}>{elm}</option>
                                     ))}
                                 </NativeSelect>
-                            </Grid>
+                            </Grid> */}
                             
-                            <Grid item xs={6}>
-                                <InputLabel htmlFor="container-type" sx={inputLabelStyles}>Container Type</InputLabel>
-                                {
-                                    containers !== null ?
-                                    <NativeSelect
-                                        id="container-type"
-                                        value={containerType}
-                                        onChange={(event: { target: { value: any } }) => { setContainerType(Number(event.target.value)); }}
-                                        input={<BootstrapInput />}
-                                        fullWidth
-                                    >
-                                        <option key={"elm1-x"} value={0}>Not defined</option>
-                                        {containers.map((elm: any, i: number) => (
-                                            <option key={"elm1-"+i} value={elm.packageId}>{elm.packageName}</option>
-                                        ))}
-                                    </NativeSelect>
-                                    : <Skeleton />
-                                }
-                            </Grid>
-                            <Grid item xs={4}>
-                                <InputLabel htmlFor="quantity" sx={inputLabelStyles}>Quantity</InputLabel>
-                                <BootstrapInput id="quantity" type="number" inputProps={{ min: 0, max: 100 }} value={quantity} onChange={(e: any) => {console.log(e); setQuantity(e.target.value)}} fullWidth /*disabled={status === "Valider"}*/ />
-                            </Grid>
-                            <Grid item xs={2}>
-                                <Button 
-                                    variant="contained" color="inherit" fullWidth sx={whiteButtonStyles} 
-                                    style={{ marginTop: "30px", height: "42px", float: "right" }} 
-                                    onClick={() => {
-                                        if (containerType !== 0 && quantity > 0) {
-                                            setContainersSelection((prevItems: any) => [...prevItems, { container: containerType, quantity: quantity }]);
-                                            setContainerType(0); setQuantity(1);
-                                        } 
-                                        else {
-                                            enqueueSnackbar("You need to select a container type and a good value for quantity.", { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
-                                        }
-                                    }} 
-                                >
-                                    Add the container
-                                </Button>
-                            </Grid>
-                            <Grid item xs={12}>
-                                {
-                                    containersSelection !== undefined && containersSelection !== null && containersSelection.length !== 0 && containers !== null ? 
-                                        <List>
-                                            {
-                                                containersSelection.map((item: any, index: number) => (
-                                                    <ListItem
-                                                        key={"listitem1-"+index}
-                                                        sx={{ border: "1px solid #e5e5e5" }}
-                                                        secondaryAction={
-                                                            <IconButton edge="end" onClick={() => {
-                                                                setContainersSelection((prevItems: any) => prevItems.filter((item: any, i: number) => i !== index));
-                                                            }}>
-                                                                <DeleteIcon />
-                                                            </IconButton>
-                                                        }
-                                                    >
-                                                        <ListItemText primary={
-                                                            containers.find((elm: any) => elm.packageId === item.container) !== undefined ?
-                                                            "Container : "+containers.find((elm: any) => elm.packageId === item.container).packageName+" | Quantity : "+item.quantity
-                                                            : "Container : "+item.container+" | Quantity : "+item.quantity
-                                                        } />
-                                                    </ListItem>
-                                                ))
-                                            }
-                                        </List>
-                                    : null  
-                                }
-                            </Grid>
                             
-                            <Grid item xs={12}>
-                                <InputLabel htmlFor="tags" sx={inputLabelStyles}>Tags</InputLabel>
-                                <MuiChipsInput 
-                                    id="tags" 
-                                    placeholder="Type some key words of your request" 
-                                    value={tags} variant="outlined" 
-                                    onChange={(elm: MuiChipsInputChip[]) => { setTags(elm); }} 
-                                    fullWidth 
-                                    sx={tagInputStyles} 
-                                    renderChip={(Component, key, props) => {
-                                        return <Component {...props} key={key} sx={{ mt: .75 }} />
-                                    }}
-                                />
-                            </Grid>
                             <Grid item xs={6} mt={.5}>
                                 <InputLabel htmlFor="request-message" sx={inputLabelStyles}>Other details about your need (Optional)</InputLabel>
-                                <BootstrapInput id="request-message" type="text" multiline rows={3.5} value={message} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setMessage(e.target.value)} fullWidth /*disabled={status === "Valider"}*/ />
+                                <BootstrapInput id="request-message" type="text" multiline rows={3.5} value={message} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setMessage(e.target.value)} fullWidth />
                             </Grid>
                             <Grid item xs={6} mt={1}>
                                 <InputLabel htmlFor="assigned-manager" sx={inputLabelStyles}>Assigned manager</InputLabel>
@@ -1123,10 +1118,10 @@ function Request(props: any) {
                                     style={{ float: "right", marginRight: "10px" }} 
                                     onClick={() => { 
                                         setModal5(true);
-                                        console.log("Containers", containers);
-                                        console.log("Containers selection", containersSelection);
-                                        console.log("Containers selected", containersSelected);
-                                        setContainersSelected(containersSelection.map((elm: any) => elm.container));
+                                        // console.log("Containers", containers);
+                                        // console.log("Containers selection", containersSelection);
+                                        // console.log("Containers selected", containersSelected);
+                                        // setContainersSelected(containersSelection.map((elm: any) => elm.container));
                                     }}
                                 >
                                     Generate price offer
@@ -1155,7 +1150,7 @@ function Request(props: any) {
                     <Grid container spacing={2} mt={1} px={2}>
                         <Grid item xs={12}>
                             <InputLabel htmlFor="mail-subject" sx={inputLabelStyles}>Subject</InputLabel>
-                            <BootstrapInput id="mail-subject" type="text" inputProps={{ min: 0, max: 100 }} value={mailSubject} onChange={(e: any) => {console.log(e); setMailSubject(e.target.value)}} fullWidth />
+                            <BootstrapInput id="mail-subject" type="text" inputProps={{ min: 0, max: 100 }} value={mailSubject} onChange={(e: any) => {setMailSubject(e.target.value)}} fullWidth />
                         </Grid>
                         <Grid item xs={12} mt={1}>
                             <InputLabel htmlFor="mail-content" sx={inputLabelStyles}>Content</InputLabel>
@@ -1356,7 +1351,79 @@ function Request(props: any) {
                                 {
                                     activeStep === 0 ?
                                     <Grid container spacing={2} mt={1} px={2}>
-                                        <Grid item xs={6} mt={1}>
+                                        <Grid item xs={4}>
+                                            <InputLabel htmlFor="container-type" sx={inputLabelStyles}>Container Type</InputLabel>
+                                            {
+                                                containers !== null ?
+                                                <NativeSelect
+                                                    id="container-type"
+                                                    value={containerType}
+                                                    onChange={(event: { target: { value: any } }) => { setContainerType(Number(event.target.value)); }}
+                                                    input={<BootstrapInput />}
+                                                    fullWidth
+                                                >
+                                                    <option key={"elm1-x"} value={0}>Not defined</option>
+                                                    {containers.map((elm: any, i: number) => (
+                                                        <option key={"elm1-"+i} value={elm.packageId}>{elm.packageName}</option>
+                                                    ))}
+                                                </NativeSelect>
+                                                : <Skeleton />
+                                            }
+                                        </Grid>
+                                        <Grid item xs={4}>
+                                            <InputLabel htmlFor="quantity" sx={inputLabelStyles}>Quantity</InputLabel>
+                                            <BootstrapInput id="quantity" type="number" inputProps={{ min: 0, max: 100 }} value={quantity} onChange={(e: any) => {setQuantity(e.target.value)}} fullWidth /*disabled={status === "Valider"}*/ />
+                                        </Grid>
+                                        <Grid item xs={4}>
+                                            <Button 
+                                                variant="contained" color="inherit" fullWidth sx={whiteButtonStyles} 
+                                                style={{ marginTop: "30px", height: "42px", float: "right" }} 
+                                                onClick={() => {
+                                                    if (containerType !== 0 && quantity > 0) {
+                                                        setContainersSelection((prevItems: any) => [...prevItems, { container: containerType, quantity: quantity }]);
+                                                        setContainerType(0); setQuantity(1);
+                                                    } 
+                                                    else {
+                                                        enqueueSnackbar("You need to select a container type and a good value for quantity.", { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                                                    }
+                                                }} 
+                                            >
+                                                Add the container
+                                            </Button>
+                                        </Grid>
+                                        <Grid item xs={12}>
+                                            {
+                                                containersSelection !== undefined && containersSelection !== null && containersSelection.length !== 0 && containers !== null ? 
+                                                    <Grid container spacing={2}>
+                                                        {
+                                                            containersSelection.map((item: any, index: number) => (
+                                                                <Grid item xs={4}>
+                                                                    <ListItem
+                                                                        key={"listitem1-"+index}
+                                                                        sx={{ border: "1px solid #e5e5e5" }}
+                                                                        secondaryAction={
+                                                                            <IconButton edge="end" onClick={() => {
+                                                                                setContainersSelection((prevItems: any) => prevItems.filter((item: any, i: number) => i !== index));
+                                                                            }}>
+                                                                                <DeleteIcon />
+                                                                            </IconButton>
+                                                                        }
+                                                                    >
+                                                                        <ListItemText primary={
+                                                                            containers.find((elm: any) => elm.packageId === item.container) !== undefined ?
+                                                                            "Container : "+containers.find((elm: any) => elm.packageId === item.container).packageName+" | Quantity : "+item.quantity
+                                                                            : "Container : "+item.container+" | Quantity : "+item.quantity
+                                                                        } />
+                                                                    </ListItem>
+                                                                </Grid>
+                                                            ))
+                                                        }
+                                                    </Grid>
+                                                : null  
+                                            }
+                                        </Grid>
+                                        
+                                        <Grid item xs={4} mt={1}>
                                             <InputLabel htmlFor="departure-date" sx={inputLabelStyles}>Departure date</InputLabel>
                                             <LocalizationProvider dateAdapter={AdapterDayjs}>
                                                 <DateTimePicker 
@@ -1366,7 +1433,7 @@ function Request(props: any) {
                                                 />
                                             </LocalizationProvider>
                                         </Grid>
-                                        <Grid item xs={6} mt={1}>
+                                        {/* <Grid item xs={4} mt={1}>
                                             <InputLabel htmlFor="request-containerss" sx={inputLabelStyles}>Containers</InputLabel>
                                             {
                                                 containers !== null ?
@@ -1392,8 +1459,8 @@ function Request(props: any) {
                                                 </Select>
                                                 : <Skeleton />
                                             }
-                                        </Grid>
-                                        <Grid item xs={6} mt={1}>
+                                        </Grid> */}
+                                        <Grid item xs={4} mt={1}>
                                             <InputLabel htmlFor="port-departure" sx={inputLabelStyles}>Departure port</InputLabel>
                                             {
                                                 ports !== null ?
@@ -1422,7 +1489,7 @@ function Request(props: any) {
                                                 /> : <Skeleton />
                                             }
                                         </Grid>
-                                        <Grid item xs={6} mt={1}>
+                                        <Grid item xs={4} mt={1}>
                                             <InputLabel htmlFor="destination-port" sx={inputLabelStyles}>Destination port</InputLabel>
                                             {
                                                 ports !== null ?
@@ -1443,15 +1510,15 @@ function Request(props: any) {
                                                         }
                                                         return ""; 
                                                     }}
-                                                    value={destinationPort}
+                                                    value={portDestination}
                                                     sx={{ mt: 1 }}
                                                     renderInput={(params) => <TextField {...params} />}
-                                                    onChange={(e: any, value: any) => { setDestinationPort(value); }}
+                                                    onChange={(e: any, value: any) => { setPortDestination(value); }}
                                                     fullWidth
                                                 /> : <Skeleton />
                                             }
                                         </Grid>
-                                        <Grid item xs={6} mt={1}>
+                                        <Grid item xs={4} mt={1}>
                                             <InputLabel htmlFor="loading-date" sx={inputLabelStyles}>Loading date</InputLabel>
                                             <LocalizationProvider dateAdapter={AdapterDayjs}>
                                                 <DateTimePicker 
@@ -1461,7 +1528,7 @@ function Request(props: any) {
                                                 />
                                             </LocalizationProvider>
                                         </Grid>
-                                        <Grid item xs={6} mt={1}>
+                                        <Grid item xs={4} mt={1}>
                                             <InputLabel htmlFor="loading-city" sx={inputLabelStyles}>Loading city (empty if no haulage)</InputLabel>
                                             {
                                                 cities !== null ?
@@ -1483,7 +1550,7 @@ function Request(props: any) {
                                                 /> : <Skeleton />
                                             }
                                         </Grid>
-                                        <Grid item xs={6} mt={1}>
+                                        <Grid item xs={4} mt={1}>
                                             <InputLabel htmlFor="haulage-type" sx={inputLabelStyles}>Haulage type (loading timing)</InputLabel>
                                             <NativeSelect
                                                 id="haulage-type"

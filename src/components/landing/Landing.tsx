@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Alert, Box, Button, Card, CardActions, CardContent, Checkbox, DialogActions, DialogContent, DialogTitle, Fab, Grid, IconButton, InputLabel, ListItemText, MenuItem, NativeSelect, Popover, Select, SelectChangeEvent, Typography } from '@mui/material';
+import React, { useEffect, useState } from 'react';
+import { Alert, Autocomplete, Box, Button, Card, CardActions, CardContent, Checkbox, DialogActions, DialogContent, DialogTitle, Fab, Grid, IconButton, InputLabel, ListItemText, MenuItem, NativeSelect, Popover, Select, SelectChangeEvent, Skeleton, TextField, Typography } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import FaceIcon from '@mui/icons-material/Face';
 import WhatsAppIcon from '@mui/icons-material/WhatsApp';
@@ -21,12 +21,6 @@ import { useAuthorizedBackendApi } from '../../api/api';
 import { DialogTitleProps, MailData } from '../../models/models';
 // import { AuthenticationResult } from '@azure/msal-browser';
 
-function convertStringToObject(str: string): { city: string, country: string } {
-    const [city, ...countryArr] = str.split(', ');
-    const country = countryArr.join(', ');
-    return { city, country };
-}
-
 function Landing() {
     const isAuthenticated = useIsAuthenticated();
     const [modal, setModal] = useState<boolean>(false);
@@ -41,11 +35,14 @@ function Landing() {
     const [subjects, setSubjects] = useState<string[]>([]);
     const [quantity, setQuantity] = useState<number>(1);
     const [cargoType, setCargoType] = useState<string>("0");
-    const [departureTown, setDepartureTown] = useState<any>(convertStringToObject("Antwerp, Belgium"));
-    const [arrivalTown, setArrivalTown] = useState<any>(convertStringToObject("Douala, Cameroon"));
+    const [departurePort, setDeparturePort] = useState<any>({portId: 1, portName: "ANTWERP", country: "Belgium"});
+    const [arrivalPort, setArrivalPort] = useState<any>({portId: 2, portName: "DOUALA", country: "Cameroon"});
     const [departure, setDeparture] = useState<string>("Antwerp, Belgium");
     const [arrival, setArrival] = useState<string>("Douala, Cameroon");
-    const [tags, setTags] = useState<MuiChipsInputChip[]>([]);
+    // const [tags, setTags] = useState<MuiChipsInputChip[]>([]);
+    const [tags, setTags] = useState<any>([]);
+    const [ports, setPorts] = useState<any>(null);
+    const [products, setProducts] = useState<any>(null);
     const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
     
     const { instance } = useMsal();
@@ -87,6 +84,37 @@ function Landing() {
         setCaptcha(value);
     }
 
+    useEffect(() => {
+        getPorts();
+        getProducts();
+    }, []);
+    
+    const getPorts = async () => {
+        try {
+            const response = await fetch(protectedResources.apiLisTransport.endPoint+"/Port/Ports");
+            if (!response.ok) {
+              throw new Error('Network response was not ok');
+            }
+            const data = await response.json();
+            setPorts(data);
+        } catch (error) {
+            console.error('Error fetching data:', error);
+        }
+    }
+    
+    const getProducts = async () => {
+        try {
+            const response = await fetch(protectedResources.apiLisTransport.endPoint+"/Product/Products");
+            if (!response.ok) {
+              throw new Error('Network response was not ok');
+            }
+            const data = await response.json();
+            setProducts(data);
+        } catch (error) {
+            console.error('Error fetching data:', error);
+        }
+    }
+    
     function validMail(mail: string) {
         return /^(([^<>()\[\]\.,;:\s@\"]+(\.[^<>()\[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()\.,;\s@\"]+\.{0,1})+([^<>()\.,;:\s@\"]{2,}|[\d\.]+))$/.test(mail);
     }
@@ -182,7 +210,7 @@ function Landing() {
 
     function sendQuotationForm() {
         if (captcha !== null) {
-                if ((phone !== "" && arrival !== "" && departure !== "") || (email !== "" && arrival !== "" && departure !== "")) {
+                if ((phone !== "" && arrivalPort !== null && departurePort !== null) || (email !== "" && arrivalPort !== null && departurePort !== null)) {
                     if (email === "" || email !== "" && validMail(email)) {
                         setLoad(true);
                         var myHeaders = new Headers();
@@ -190,7 +218,16 @@ function Landing() {
                         myHeaders.append("Content-Type", "application/json");
                         fetch(protectedResources.apiLisQuotes.endPoint+"/Request", {
                             method: "POST",
-                            body: JSON.stringify({ Whatsapp: phone, Email: email, Departure: departure, Arrival: arrival, CargoType: Number(cargoType), Quantity: quantity, Detail: message, Tags: tags.join(",") }),
+                            body: JSON.stringify({ 
+                                Whatsapp: phone, 
+                                Email: email, 
+                                Departure: departurePort.portName+', '+departurePort.country, 
+                                Arrival: arrivalPort.portName+', '+arrivalPort.country, 
+                                CargoType: Number(cargoType), 
+                                Quantity: quantity, 
+                                Detail: message, 
+                                Tags: tags.length !== 0 ? tags.map((elm: any) => elm.productName).join(',') : null 
+                            }),
                             headers: myHeaders
                         })
                         .then((response: any) => response.json())
@@ -363,19 +400,71 @@ function Landing() {
                             <MuiTelInput id="whatsapp-phone-number" value={phone} onChange={setPhone} defaultCountry="CM" preferredCountries={["CM", "BE", "KE"]} fullWidth sx={{ mt: 1 }} />
                         </Grid>
                         <Grid item xs={12} md={6}>
-                            <InputLabel htmlFor="request-email" sx={inputLabelStyles}>Email</InputLabel>
+                            <InputLabel htmlFor="request-email" sx={inputLabelStyles}>Your email address</InputLabel>
                             <BootstrapInput id="request-email" type="email" value={email} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)} fullWidth />
                         </Grid>
                         <Grid item xs={12} md={6}>
-                            <InputLabel htmlFor="departure" sx={inputLabelStyles}>City and country of departure of the goods</InputLabel>
-                            <AutocompleteSearch id="departure" value={departureTown} onChange={(e: any) => { setDepartureTown(convertStringToObject(e.target.innerText)); setDeparture(e.target.innerText); }} fullWidth />
+                            <InputLabel htmlFor="departure" sx={inputLabelStyles}>Where do you want us to pickup your products?</InputLabel>
+                            {/* <AutocompleteSearch id="departure" value={departureTown} onChange={(e: any) => { setDepartureTown(convertStringToObject(e.target.innerText)); setDeparture(e.target.innerText); }} fullWidth /> */}
+                            {
+                                ports !== null ?
+                                <Autocomplete
+                                    disablePortal
+                                    id="departure"
+                                    options={ports}
+                                    renderOption={(props, option, i) => {
+                                        return (
+                                            <li {...props} key={option.portId}>
+                                                {option.portName+", "+option.country}
+                                            </li>
+                                        );
+                                    }}
+                                    getOptionLabel={(option: any) => { 
+                                        if (option !== null && option !== undefined) {
+                                            return option.portName+', '+option.country;
+                                        }
+                                        return ""; 
+                                    }}
+                                    value={departurePort}
+                                    sx={{ mt: 1 }}
+                                    renderInput={(params) => <TextField {...params} />}
+                                    onChange={(e: any, value: any) => { setDeparturePort(value); }}
+                                    fullWidth
+                                /> : <Skeleton />
+                            }
                         </Grid>
                         <Grid item xs={12} md={6}>
-                            <InputLabel htmlFor="arrival" sx={inputLabelStyles}>City and country of arrival of the goods</InputLabel>
-                            <AutocompleteSearch id="arrival" value={arrivalTown} onChange={(e: any) => { setArrivalTown(convertStringToObject(e.target.innerText)); setArrival(e.target.innerText); }} fullWidth />
+                            <InputLabel htmlFor="arrival" sx={inputLabelStyles}>Where do you want to transport your products?</InputLabel>
+                            {/* <AutocompleteSearch id="arrival" value={arrivalTown} onChange={(e: any) => { setArrivalTown(convertStringToObject(e.target.innerText)); setArrival(e.target.innerText); }} fullWidth /> */}
+                            {
+                                ports !== null ?
+                                <Autocomplete
+                                    disablePortal
+                                    id="arrival"
+                                    options={ports}
+                                    renderOption={(props, option, i) => {
+                                        return (
+                                            <li {...props} key={option.portId}>
+                                                {option.portName+", "+option.country}
+                                            </li>
+                                        );
+                                    }}
+                                    getOptionLabel={(option: any) => { 
+                                        if (option !== null && option !== undefined) {
+                                            return option.portName+', '+option.country;
+                                        }
+                                        return ""; 
+                                    }}
+                                    value={arrivalPort}
+                                    sx={{ mt: 1 }}
+                                    renderInput={(params) => <TextField {...params} />}
+                                    onChange={(e: any, value: any) => { setArrivalPort(value); }}
+                                    fullWidth
+                                /> : <Skeleton />
+                            }
                         </Grid>
                         <Grid item xs={12} md={6}>
-                            <InputLabel htmlFor="cargo-type" sx={inputLabelStyles}>Type of cargo</InputLabel>
+                            <InputLabel htmlFor="cargo-type" sx={inputLabelStyles}>In what type of cargo do you want to transport your goods?</InputLabel>
                             <NativeSelect
                                 id="demo-customized-select-native"
                                 value={cargoType}
@@ -389,12 +478,12 @@ function Landing() {
                             </NativeSelect>
                         </Grid>
                         <Grid item xs={12} md={6}>
-                            <InputLabel htmlFor="quantity" sx={inputLabelStyles}>Quantity</InputLabel>
+                            <InputLabel htmlFor="quantity" sx={inputLabelStyles}>How many units of cargo do you want to transport?</InputLabel>
                             <BootstrapInput id="quantity" type="number" inputProps={{ min: 0, max: 100 }} value={quantity} onChange={(e: any) => {console.log(e); setQuantity(e.target.value)}} fullWidth />
                         </Grid>
                         <Grid item xs={12} mt={1}>
                             <InputLabel htmlFor="tags" sx={inputLabelStyles}>Tags</InputLabel>
-                            <MuiChipsInput 
+                            {/* <MuiChipsInput 
                                 id="tags" 
                                 placeholder="Type some key words of your request" 
                                 value={tags} variant="outlined" 
@@ -417,10 +506,31 @@ function Landing() {
                                 renderChip={(Component, key, props) => {
                                     return <Component {...props} key={key} sx={{ mt: .75 }} />
                                 }}
-                            />
+                            /> */}
+                            {
+                                products !== null ?
+                                <Autocomplete
+                                    multiple    
+                                    disablePortal
+                                    id="cargo-products"
+                                    placeholder="Machinery, Household goods, etc"
+                                    options={products}
+                                    getOptionLabel={(option: any) => { 
+                                        if (option !== null && option !== undefined) {
+                                            return option.productName;
+                                        }
+                                        return ""; 
+                                    }}
+                                    value={tags}
+                                    sx={{ mt: 1 }}
+                                    renderInput={(params) => <TextField {...params} sx={{ textTransform: "lowercase" }} />}
+                                    onChange={(e: any, value: any) => { setTags(value); }}
+                                    fullWidth
+                                /> : <Skeleton />
+                            }
                         </Grid>
                         <Grid item xs={12} mt={1}>
-                            <InputLabel htmlFor="request-message" sx={inputLabelStyles}>Other details about your need (Optional)</InputLabel>
+                            <InputLabel htmlFor="request-message" sx={inputLabelStyles}>Do you want to share other details regarding your needs?</InputLabel>
                             <BootstrapInput id="request-message" type="text" multiline rows={3} value={message} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setMessage(e.target.value)} fullWidth />
                         </Grid>
                         <Grid item xs={12}>
