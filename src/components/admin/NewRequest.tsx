@@ -31,6 +31,7 @@ function NewRequest(props: any) {
     const [quantity, setQuantity] = useState<number>(1);
     const [cargoType, setCargoType] = useState<string>("0");
     const [packingType, setPackingType] = useState<string>("FCL");
+    const [clientNumber, setClientNumber] = useState<string>("");
     const [departurePort, setDeparturePort] = useState<any>(null);
     const [arrivalPort, setArrivalPort] = useState<any>(null);
     const [departure, setDeparture] = useState<string>("");
@@ -325,11 +326,14 @@ function NewRequest(props: any) {
                                 <option value="Unit RoRo" disabled>Unit RoRo</option>
                             </NativeSelect>
                         </Grid>
-                        <Grid item xs={12} md={6} mt={1}>
+                        {/* <Grid item xs={12} md={6} mt={1}>
                             <InputLabel htmlFor="quantity" sx={inputLabelStyles}>How many units of cargo do you want to transport?</InputLabel>
                             <BootstrapInput id="quantity" type="number" inputProps={{ min: 0, max: 100 }} value={quantity} onChange={(e: any) => {console.log(e); setQuantity(e.target.value)}} fullWidth />
+                        </Grid> */}
+                        <Grid item xs={12} md={6} mt={1}>
+                            
                         </Grid>
-                        <Grid item xs={12} mt={1} mb={1}>
+                        <Grid item xs={12} md={6} mt={1} mb={1}>
                             <InputLabel htmlFor="tags" sx={inputLabelStyles}>Specifics</InputLabel>
                             {
                                 products !== null ?
@@ -353,6 +357,11 @@ function NewRequest(props: any) {
                                 /> : <Skeleton />
                             }
                         </Grid>
+                        <Grid item xs={12} md={6} mt={1}>
+                                <InputLabel htmlFor="client-number" sx={inputLabelStyles}>Client number</InputLabel>
+                                <BootstrapInput id="client-number" value={clientNumber} onChange={(e: any) => {setClientNumber(e.target.value)}} fullWidth />
+                        </Grid>
+
                         <Grid item xs={6} mt={.5}>
                             <InputLabel htmlFor="request-message" sx={inputLabelStyles}>Other details about your need (Optional)</InputLabel>
                             <BootstrapInput id="request-message" type="text" multiline rows={3.5} value={message} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setMessage(e.target.value)} fullWidth />

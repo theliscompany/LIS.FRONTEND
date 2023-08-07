@@ -228,6 +228,7 @@ function Landing() {
                                 Email: email, 
                                 Departure: departurePort.portName+', '+departurePort.country, 
                                 Arrival: arrivalPort.portName+', '+arrivalPort.country, 
+                                CargoType: 0,
                                 PackingType: packingType,
                                 Quantity: quantity, 
                                 Detail: message, 
@@ -469,7 +470,8 @@ function Landing() {
                             }
                         </Grid>
                         <Grid item xs={12} md={3}>
-                            <InputLabel htmlFor="packing-type" sx={inputLabelStyles}>In what type of packing do you want to transport your goods?</InputLabel>
+                            {/* <InputLabel htmlFor="packing-type" sx={inputLabelStyles}>In what type of packing do you want to transport your goods?</InputLabel> */}
+                            <InputLabel htmlFor="packing-type" sx={inputLabelStyles}>Packing type</InputLabel>
                             <NativeSelect
                                 id="packing-type"
                                 value={packingType}

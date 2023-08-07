@@ -128,6 +128,7 @@ function Request(props: any) {
     const [cargoType, setCargoType] = useState<string>("0");
     const [cargoProducts, setCargoProducts] = useState<any>([]);
     const [packingType, setPackingType] = useState<string>("FCL");
+    const [clientNumber, setClientNumber] = useState<string>("");
     const [departureTown, setDepartureTown] = useState<any>(null);
     const [arrivalTown, setArrivalTown] = useState<any>(null);
     const [departure, setDeparture] = useState<string>("");
@@ -420,6 +421,7 @@ function Request(props: any) {
                     setStatus(response.data.status);
                     // setCargoType(String(cargoTypes.indexOf(response.data.cargoType)));
                     // setPackingType(response.data.packingType !== null ? response.data.packingType : "FCL");
+                    // setClientNumber(response.data.clientNumber !== null ? response.data.clientNumber : "");
                     setQuantity(response.data.quantity);
                     setMessage(response.data.detail);
                     // setTags(response.data.tags !== null ? response.data.tags.split(",") : []);
@@ -478,7 +480,6 @@ function Request(props: any) {
     
     const editRequest = async () => {
         if(context) {
-            console.log(packingType);
             const body: RequestDto = {
                 id: Number(id),
                 email: email,
@@ -933,160 +934,175 @@ function Request(props: any) {
                                         <Typography variant="subtitle1" display="inline">Do you think this request need more informations?</Typography>
                                     </Alert>
                                 </Grid>
+                                <Grid item xs={12} md={6}>
+                                    <InputLabel htmlFor="whatsapp-phone-number" sx={inputLabelStyles}>Whatsapp number</InputLabel>
+                                    <MuiTelInput id="whatsapp-phone-number" value={phone} onChange={setPhone} defaultCountry="CM" preferredCountries={["CM", "BE", "KE"]} fullWidth sx={{ mt: 1 }} />
+                                </Grid>
+                                <Grid item xs={12} md={6}>
+                                    <InputLabel htmlFor="request-email" sx={inputLabelStyles}>Your email address</InputLabel>
+                                    <BootstrapInput id="request-email" type="email" value={email} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)} fullWidth />
+                                </Grid>
                                 <Grid item xs={12} md={6} mt={1}>
-                                <InputLabel htmlFor="departure" sx={inputLabelStyles}>From (city, country)</InputLabel>
-                                {/* <AutocompleteSearch id="departure" value={departureTown} onChange={(e: any) => { setDepartureTown(convertStringToObject(e.target.innerText)); setDeparture(e.target.innerText); }} fullWidth /> */}
-                                {
-                                    ports !== null ?
-                                    <Autocomplete
-                                        disablePortal
-                                        id="departure"
-                                        options={ports}
-                                        renderOption={(props, option, i) => {
-                                            return (
-                                                <li {...props} key={option.portId}>
-                                                    {option.portName+", "+option.country}
-                                                </li>
-                                            );
-                                        }}
-                                        getOptionLabel={(option: any) => { 
-                                            if (option !== null && option !== undefined) {
-                                                return option.portName+', '+option.country;
-                                            }
-                                            return ""; 
-                                        }}
-                                        value={departureTown}
-                                        sx={{ mt: 1 }}
-                                        renderInput={(params) => <TextField {...params} />}
-                                        onChange={(e: any, value: any) => { setDepartureTown(value); }}
-                                        fullWidth
-                                    /> : <Skeleton />
-                                }
-                            </Grid>
-                            <Grid item xs={12} md={6} mt={1}>
-                                <InputLabel htmlFor="arrival" sx={inputLabelStyles}>To (city, country)</InputLabel>
-                                {/* <AutocompleteSearch id="arrival" value={arrivalTown} onChange={(e: any) => { setArrivalTown(convertStringToObject(e.target.innerText)); setArrival(e.target.innerText); }} fullWidth /> */}
-                                {
-                                    ports !== null ?
-                                    <Autocomplete
-                                        disablePortal
-                                        id="arrival"
-                                        options={ports}
-                                        renderOption={(props, option, i) => {
-                                            return (
-                                                <li {...props} key={option.portId}>
-                                                    {option.portName+", "+option.country}
-                                                </li>
-                                            );
-                                        }}
-                                        getOptionLabel={(option: any) => { 
-                                            if (option !== null && option !== undefined) {
-                                                return option.portName+', '+option.country;
-                                            }
-                                            return ""; 
-                                        }}
-                                        value={arrivalTown}
-                                        sx={{ mt: 1 }}
-                                        renderInput={(params) => <TextField {...params} />}
-                                        onChange={(e: any, value: any) => { setArrivalTown(value); }}
-                                        fullWidth
-                                    /> : <Skeleton />
-                                }
-                            </Grid>
-                            <Grid item xs={12} md={6} mt={1}>
-                                <InputLabel htmlFor="packing-type" sx={inputLabelStyles}>Packing Type</InputLabel>
-                                <NativeSelect
-                                    id="packing-type"
-                                    value={packingType}
-                                    onChange={handleChangePackingType}
-                                    input={<BootstrapInput />}
-                                    fullWidth
-                                >
-                                    <option value="">...</option>
-                                    <option value="FCL">FCL</option>
-                                    <option value="Breakbulk/LCL" disabled>Breakbulk/LCL</option>
-                                    <option value="Unit RoRo" disabled>Unit RoRo</option>
-                                </NativeSelect>
-                            </Grid>
-                            <Grid item xs={12} md={6} mt={1}>
-                                <InputLabel htmlFor="quantity" sx={inputLabelStyles}>How many units of cargo do you want to transport?</InputLabel>
-                                <BootstrapInput id="quantity" type="number" inputProps={{ min: 0, max: 100 }} value={quantity} onChange={(e: any) => {setQuantity(e.target.value)}} fullWidth />
-                            </Grid>
-                            
-                            <Grid item xs={12}>
-                                <InputLabel htmlFor="tags" sx={inputLabelStyles}>Specifics</InputLabel>
-                                {
-                                    products !== null ?
-                                    <Autocomplete
-                                        multiple    
-                                        disablePortal
-                                        id="tags"
-                                        placeholder="Machinery, Household goods, etc"
-                                        options={products}
-                                        getOptionLabel={(option: any) => { 
-                                            if (option !== null && option !== undefined) {
-                                                return option.productName !== undefined ? option.productName : option;
-                                            }
-                                            return ""; 
-                                        }}
-                                        value={tags}
-                                        sx={{ mt: 1 }}
-                                        renderInput={(params) => <TextField {...params} sx={{ textTransform: "lowercase" }} />}
-                                        onChange={(e: any, value: any) => { setTags(value); }}
-                                        fullWidth
-                                    /> : <Skeleton />
-                                }
-                            </Grid>
-                            
-                            
-                            <Grid item xs={6} mt={.5}>
-                                <InputLabel htmlFor="request-message" sx={inputLabelStyles}>Other details about your need (Optional)</InputLabel>
-                                <BootstrapInput id="request-message" type="text" multiline rows={3.5} value={message} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setMessage(e.target.value)} fullWidth />
-                            </Grid>
-                            <Grid item xs={6} mt={1}>
-                                <InputLabel htmlFor="assigned-manager" sx={inputLabelStyles}>Assigned manager</InputLabel>
-                                {
-                                    !loadAssignees ? 
-                                    <>
-                                        <NativeSelect
-                                            id="assigned-manager"
-                                            value={assignedManager}
-                                            onChange={handleChangeAssignedManager}
-                                            input={<BootstrapInput />}
+                                    <InputLabel htmlFor="departure" sx={inputLabelStyles}>From (city, country)</InputLabel>
+                                    {/* <AutocompleteSearch id="departure" value={departureTown} onChange={(e: any) => { setDepartureTown(convertStringToObject(e.target.innerText)); setDeparture(e.target.innerText); }} fullWidth /> */}
+                                    {
+                                        ports !== null ?
+                                        <Autocomplete
+                                            disablePortal
+                                            id="departure"
+                                            options={ports}
+                                            renderOption={(props, option, i) => {
+                                                return (
+                                                    <li {...props} key={option.portId}>
+                                                        {option.portName+", "+option.country}
+                                                    </li>
+                                                );
+                                            }}
+                                            getOptionLabel={(option: any) => { 
+                                                if (option !== null && option !== undefined) {
+                                                    return option.portName+', '+option.country;
+                                                }
+                                                return ""; 
+                                            }}
+                                            value={departureTown}
+                                            sx={{ mt: 1 }}
+                                            renderInput={(params) => <TextField {...params} />}
+                                            onChange={(e: any, value: any) => { setDepartureTown(value); }}
                                             fullWidth
-                                        >
-                                            <option value="">No agent assigned</option>
-                                            {
-                                                assignees.map((row: any, i: number) => (
-                                                    <option key={"assigneeId-"+i} value={String(row.id)}>{row.name}</option>
-                                                ))
-                                            }
-                                        </NativeSelect>
-                                        <Button variant="contained" color="inherit" sx={whiteButtonStyles} style={{ marginRight: "10px" }} onClick={assignManager} >Update the manager</Button>
-                                        <Button variant="contained" color="inherit" sx={whiteButtonStyles} onClick={removeManager} >Remove the manager</Button>
-                                    </> : <Skeleton sx={{ mt: 3 }} />   
-                                }
-                            </Grid>
-                            <Grid item xs={12}>
-                                <Button variant="contained" color="primary" sx={{ mt: 2, mr: 2, textTransform: "none" }} onClick={editRequest} >Edit the request</Button>
-                                <Button variant="contained" color="inherit" sx={whiteButtonStyles} onClick={() => { setModal2(true); }} >Change the status</Button>
-                                <Button variant="contained" color="inherit" sx={whiteButtonStyles} style={{ float: "right" }} onClick={() => { setModal3(true); }} >Add a comment/note</Button>
-                                <Button variant="contained" color="inherit" sx={whiteButtonStyles} style={{ float: "right", marginRight: "10px" }} onClick={() => { setModal4(true); getNotes(id); }} >List of notes</Button>
-                                <Button 
-                                    variant="contained" color="success" 
-                                    sx={{ mt: 2, mr: 2, textTransform: "none" }} 
-                                    style={{ float: "right", marginRight: "10px" }} 
-                                    onClick={() => { 
-                                        setModal5(true);
-                                        // console.log("Containers", containers);
-                                        // console.log("Containers selection", containersSelection);
-                                        // console.log("Containers selected", containersSelected);
-                                        // setContainersSelected(containersSelection.map((elm: any) => elm.container));
-                                    }}
-                                >
-                                    Generate price offer
-                                </Button>
-                            </Grid>
+                                        /> : <Skeleton />
+                                    }
+                                </Grid>
+                                <Grid item xs={12} md={6} mt={1}>
+                                    <InputLabel htmlFor="arrival" sx={inputLabelStyles}>To (city, country)</InputLabel>
+                                    {/* <AutocompleteSearch id="arrival" value={arrivalTown} onChange={(e: any) => { setArrivalTown(convertStringToObject(e.target.innerText)); setArrival(e.target.innerText); }} fullWidth /> */}
+                                    {
+                                        ports !== null ?
+                                        <Autocomplete
+                                            disablePortal
+                                            id="arrival"
+                                            options={ports}
+                                            renderOption={(props, option, i) => {
+                                                return (
+                                                    <li {...props} key={option.portId}>
+                                                        {option.portName+", "+option.country}
+                                                    </li>
+                                                );
+                                            }}
+                                            getOptionLabel={(option: any) => { 
+                                                if (option !== null && option !== undefined) {
+                                                    return option.portName+', '+option.country;
+                                                }
+                                                return ""; 
+                                            }}
+                                            value={arrivalTown}
+                                            sx={{ mt: 1 }}
+                                            renderInput={(params) => <TextField {...params} />}
+                                            onChange={(e: any, value: any) => { setArrivalTown(value); }}
+                                            fullWidth
+                                        /> : <Skeleton />
+                                    }
+                                </Grid>
+                                <Grid item xs={12} md={6} mt={1}>
+                                    <InputLabel htmlFor="packing-type" sx={inputLabelStyles}>Packing Type</InputLabel>
+                                    <NativeSelect
+                                        id="packing-type"
+                                        value={packingType}
+                                        onChange={handleChangePackingType}
+                                        input={<BootstrapInput />}
+                                        fullWidth
+                                    >
+                                        <option value="">...</option>
+                                        <option value="FCL">FCL</option>
+                                        <option value="Breakbulk/LCL" disabled>Breakbulk/LCL</option>
+                                        <option value="Unit RoRo" disabled>Unit RoRo</option>
+                                    </NativeSelect>
+                                </Grid>
+                                {/* <Grid item xs={12} md={6} mt={1}>
+                                    <InputLabel htmlFor="quantity" sx={inputLabelStyles}>How many units of cargo do you want to transport?</InputLabel>
+                                    <BootstrapInput id="quantity" type="number" inputProps={{ min: 0, max: 100 }} value={quantity} onChange={(e: any) => {setQuantity(e.target.value)}} fullWidth />
+                                </Grid> */}
+                                <Grid item xs={12} md={6} mt={1}>
+                                
+                                </Grid>    
+                                
+                                
+                                <Grid item xs={6} mt={1}>
+                                    <InputLabel htmlFor="tags" sx={inputLabelStyles}>Specifics</InputLabel>
+                                    {
+                                        products !== null ?
+                                        <Autocomplete
+                                            multiple    
+                                            disablePortal
+                                            id="tags"
+                                            placeholder="Machinery, Household goods, etc"
+                                            options={products}
+                                            getOptionLabel={(option: any) => { 
+                                                if (option !== null && option !== undefined) {
+                                                    return option.productName !== undefined ? option.productName : option;
+                                                }
+                                                return ""; 
+                                            }}
+                                            value={tags}
+                                            sx={{ mt: 1 }}
+                                            renderInput={(params) => <TextField {...params} sx={{ textTransform: "lowercase" }} />}
+                                            onChange={(e: any, value: any) => { setTags(value); }}
+                                            fullWidth
+                                        /> : <Skeleton />
+                                    }
+                                </Grid>
+                                <Grid item xs={12} md={6} mt={1}>
+                                    <InputLabel htmlFor="client-number" sx={inputLabelStyles}>Client number</InputLabel>
+                                    <BootstrapInput id="client-number" value={clientNumber} onChange={(e: any) => {setClientNumber(e.target.value)}} fullWidth />
+                                </Grid>
+                                
+                                <Grid item xs={6} mt={.5}>
+                                    <InputLabel htmlFor="request-message" sx={inputLabelStyles}>Other details about your need (Optional)</InputLabel>
+                                    <BootstrapInput id="request-message" type="text" multiline rows={3.5} value={message} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setMessage(e.target.value)} fullWidth />
+                                </Grid>
+                                <Grid item xs={6} mt={1}>
+                                    <InputLabel htmlFor="assigned-manager" sx={inputLabelStyles}>Assigned manager</InputLabel>
+                                    {
+                                        !loadAssignees ? 
+                                        <>
+                                            <NativeSelect
+                                                id="assigned-manager"
+                                                value={assignedManager}
+                                                onChange={handleChangeAssignedManager}
+                                                input={<BootstrapInput />}
+                                                fullWidth
+                                            >
+                                                <option value="">No agent assigned</option>
+                                                {
+                                                    assignees.map((row: any, i: number) => (
+                                                        <option key={"assigneeId-"+i} value={String(row.id)}>{row.name}</option>
+                                                    ))
+                                                }
+                                            </NativeSelect>
+                                            <Button variant="contained" color="inherit" sx={whiteButtonStyles} style={{ marginRight: "10px" }} onClick={assignManager} >Update the manager</Button>
+                                            <Button variant="contained" color="inherit" sx={whiteButtonStyles} onClick={removeManager} >Remove the manager</Button>
+                                        </> : <Skeleton sx={{ mt: 3 }} />   
+                                    }
+                                </Grid>
+                                <Grid item xs={12}>
+                                    <Button variant="contained" color="primary" sx={{ mt: 2, mr: 2, textTransform: "none" }} onClick={editRequest} >Edit the request</Button>
+                                    <Button variant="contained" color="inherit" sx={whiteButtonStyles} onClick={() => { setModal2(true); }} >Change the status</Button>
+                                    <Button variant="contained" color="inherit" sx={whiteButtonStyles} style={{ float: "right" }} onClick={() => { setModal3(true); }} >Add a comment/note</Button>
+                                    <Button variant="contained" color="inherit" sx={whiteButtonStyles} style={{ float: "right", marginRight: "10px" }} onClick={() => { setModal4(true); getNotes(id); }} >List of notes</Button>
+                                    <Button 
+                                        variant="contained" color="success" 
+                                        sx={{ mt: 2, mr: 2, textTransform: "none" }} 
+                                        style={{ float: "right", marginRight: "10px" }} 
+                                        onClick={() => { 
+                                            setModal5(true);
+                                            // console.log("Containers", containers);
+                                            // console.log("Containers selection", containersSelection);
+                                            // console.log("Containers selected", containersSelected);
+                                            // setContainersSelected(containersSelection.map((elm: any) => elm.container));
+                                        }}
+                                    >
+                                        Generate price offer
+                                    </Button>
+                                </Grid>
                         </Grid> : <Skeleton sx={{ mx: 5, mt: 3 }} />
                     }
                 </Box>
