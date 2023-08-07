@@ -23,7 +23,6 @@ import axios from 'axios';
 //@ts-ignore
 // import crypto from 'crypto-browserify';
 import CryptoJS from 'crypto-js';
-import { v4 as uuidv4 } from 'uuid';
 
 //let statusTypes = ["EnAttente", "Valider", "Rejeter"];
 let cargoTypes = ["Container", "Conventional", "RollOnRollOff"];
@@ -51,15 +50,6 @@ let statusTypes = [
     { type: "EnAttenteDeFacturation", value: "En attente de facturation", description: "En attente de facturation après livraison "} 
 ];
 
-function transformId(id: string | undefined) {
-    // const hash = crypto.createHash('sha256').update(id).digest('hex');
-    const hash = CryptoJS.SHA256(id);
-    const hashHex = hash.toString(CryptoJS.enc.Hex);
-    let output = hashHex.substring(0, 8);
-    output = 'OMNI-' + output.substring(0, 6);
-    return output;  
-}
-  
 function convertStringToObject(str: string): { portName: string, country: string } {
     if (str !== undefined) {
         const [portName, ...countryArr] = str.split(', ');
@@ -137,7 +127,7 @@ function Request(props: any) {
     const [containersSelection, setContainersSelection] = useState<any>([]);
     const [cargoType, setCargoType] = useState<string>("0");
     const [cargoProducts, setCargoProducts] = useState<any>([]);
-    const [packingType, setPackingType] = useState<string>("");
+    const [packingType, setPackingType] = useState<string>("FCL");
     const [departureTown, setDepartureTown] = useState<any>(null);
     const [arrivalTown, setArrivalTown] = useState<any>(null);
     const [departure, setDeparture] = useState<string>("");
@@ -153,7 +143,7 @@ function Request(props: any) {
     const [statusMessage, setStatusMessage] = useState<string>("");
     const [generalNote, setGeneralNote] = useState<string>("");
     const [selectedStatus, setSelectedStatus] = React.useState('EnAttente');
-    const [assignedManager, setAssignedManager] = useState<string>("null");
+    const [assignedManager, setAssignedManager] = useState<string>("");
     const [assignees, setAssignees] = useState<any>(null);
     const [notes, setNotes] = useState<any>(null);
     const [idUser, setIdUser] = useState<any>(null);
@@ -238,22 +228,13 @@ function Request(props: any) {
         }, width: 200 },
     ];
     
-    const handleChangeContainers = (event: SelectChangeEvent<typeof containersSelected>) => {
-        const {
-           target: { value },
-        } = event;
-        setContainersSelected(
-            // On autofill we get a stringified value.
-            typeof value === 'string' ? value.split(',') : value,
-        );
-    };
-
     const handleChangeHaulageType = (event: { target: { value: string } }) => {
         setHaulageType(event.target.value);
     };
     
-    const handleChangeCargoType = (event: { target: { value: string } }) => {
-        setCargoType(event.target.value);
+    const handleChangePackingType = (event: { target: { value: string } }) => {
+        console.log(event.target.value);
+        setPackingType(event.target.value);
     };
     
     const handleChangeAssignedManager = (event: { target: { value: string } }) => {
@@ -396,11 +377,9 @@ function Request(props: any) {
     };
     
     useEffect(() => {
-        // loadRequest();
-        // getPorts();
         getContainers();
         getCities();
-        getProducts();
+        // Get everything essential too (Products, Ports, Request info)
         getAssignees();
     }, [context]);
     
@@ -424,7 +403,7 @@ function Request(props: any) {
         }
     }
     
-    const loadRequest = async (allPorts: any) => {
+    const loadRequest = async (allPorts: any, allProducts: any) => {
         if (context) {
             setLoad(true);
             const response = await (context as BackendService<any>).getSingle(protectedResources.apiLisQuotes.endPoint+"/Request/"+id);
@@ -439,11 +418,13 @@ function Request(props: any) {
                     // setDepartureTown(convertStringToObject(response.data.departure));
                     // setArrivalTown(convertStringToObject(response.data.arrival));
                     setStatus(response.data.status);
-                    setCargoType(String(cargoTypes.indexOf(response.data.cargoType)));
+                    // setCargoType(String(cargoTypes.indexOf(response.data.cargoType)));
+                    // setPackingType(response.data.packingType !== null ? response.data.packingType : "FCL");
                     setQuantity(response.data.quantity);
                     setMessage(response.data.detail);
-                    setTags(response.data.tags !== null ? response.data.tags.split(",") : []);
-                    setAssignedManager(response.data.assigneeId);
+                    // setTags(response.data.tags !== null ? response.data.tags.split(",") : []);
+                    setTags(allProducts.filter((elm: any) => response.data.tags.includes(elm.productName)));
+                    setAssignedManager(response.data.assigneeId || "");
                     setTrackingNumber(response.data.trackingNumber);
                     
                     // Here we initialize the values of ports fields in main screen and generate price screen
@@ -497,17 +478,19 @@ function Request(props: any) {
     
     const editRequest = async () => {
         if(context) {
+            console.log(packingType);
             const body: RequestDto = {
                 id: Number(id),
                 email: email,
                 status: status,
                 whatsapp: phone,
-                departure: departure,
-                arrival: arrival,
-                cargoType: Number(cargoType),
+                departure: departureTown.portName+", "+departureTown.country,
+                arrival: arrivalTown.portName+", "+arrivalTown.country,
+                cargoType: 0,
+                packingType: packingType,
                 quantity: quantity,
                 detail: message,
-                tags: tags.length !== 0 ? tags.join(",") : null,
+                tags: tags.length !== 0 ? tags.map((elm: any) => elm.productName).join(',') : null,
                 assigneeId: Number(assignedManager)
             };
 
@@ -762,8 +745,8 @@ function Request(props: any) {
             if (response !== null && response !== undefined) {
                 setPorts(response);
 
-                // Here i can load the request informations
-                loadRequest(response);
+                // Here i can get the products
+                getProducts(response);
             }  
         }
     }
@@ -795,7 +778,7 @@ function Request(props: any) {
         }
     }
     
-    const getProducts = async () => {
+    const getProducts = async (allPorts: any) => {
         if (context && account) {
             const token = await instance.acquireTokenSilent({
                 scopes: transportRequest.scopes,
@@ -818,6 +801,9 @@ function Request(props: any) {
             // console.log(response);
             if (response !== null && response !== undefined) {
                 setProducts(response);
+
+                // Here i can load the request information
+                loadRequest(allPorts, response);
             }  
         }
     }
@@ -934,19 +920,21 @@ function Request(props: any) {
                             !load ? 
                             <Grid container spacing={2} mt={1} px={5}>
                                 <Grid item xs={12}>
-                                    <Typography variant="body2" color="dodgerblue" sx={{ fontWeight: "bold" }}>Tracking N° {trackingNumber}</Typography>
+                                    <Typography variant="body2" color="dodgerblue" sx={{ fontWeight: "bold" }}>
+                                        Tracking N° {trackingNumber} / {departureTown.portName+', '+departureTown.country} - {arrivalTown.portName+', '+arrivalTown.country} / Your price request
+                                    </Typography>
                                 </Grid>
                                 <Grid item xs={12}>
                                     <Alert 
                                         severity="info" 
                                         sx={{ display: "flex", alignItems: "center", justifyContent: "left" }}
-                                        action={<Button variant="contained" color="inherit" sx={{ background: "#fff", color: "#333", float: "right", textTransform: "none", position: "relative", bottom: "2px" }} onClick={() => { setModal(true); }}>Ask for more informations</Button>}
+                                        action={<Button variant="contained" color="inherit" sx={{ background: "#fff", color: "#333", float: "right", textTransform: "none", position: "relative", bottom: "2px" }} onClick={() => { setModal(true); }}>Ask for more information</Button>}
                                     >
                                         <Typography variant="subtitle1" display="inline">Do you think this request need more informations?</Typography>
                                     </Alert>
                                 </Grid>
                                 <Grid item xs={12} md={6} mt={1}>
-                                <InputLabel htmlFor="departure" sx={inputLabelStyles}>Where do you want us to pickup your products?</InputLabel>
+                                <InputLabel htmlFor="departure" sx={inputLabelStyles}>From (city, country)</InputLabel>
                                 {/* <AutocompleteSearch id="departure" value={departureTown} onChange={(e: any) => { setDepartureTown(convertStringToObject(e.target.innerText)); setDeparture(e.target.innerText); }} fullWidth /> */}
                                 {
                                     ports !== null ?
@@ -976,7 +964,7 @@ function Request(props: any) {
                                 }
                             </Grid>
                             <Grid item xs={12} md={6} mt={1}>
-                                <InputLabel htmlFor="arrival" sx={inputLabelStyles}>Where do you want to transport your products?</InputLabel>
+                                <InputLabel htmlFor="arrival" sx={inputLabelStyles}>To (city, country)</InputLabel>
                                 {/* <AutocompleteSearch id="arrival" value={arrivalTown} onChange={(e: any) => { setArrivalTown(convertStringToObject(e.target.innerText)); setArrival(e.target.innerText); }} fullWidth /> */}
                                 {
                                     ports !== null ?
@@ -1006,76 +994,49 @@ function Request(props: any) {
                                 }
                             </Grid>
                             <Grid item xs={12} md={6} mt={1}>
-                                <InputLabel htmlFor="cargo-type" sx={inputLabelStyles}>In what type of cargo do you want to transport your goods?</InputLabel>
+                                <InputLabel htmlFor="packing-type" sx={inputLabelStyles}>Packing Type</InputLabel>
                                 <NativeSelect
-                                    id="demo-customized-select-native"
-                                    value={cargoType}
-                                    onChange={handleChangeCargoType}
+                                    id="packing-type"
+                                    value={packingType}
+                                    onChange={handleChangePackingType}
                                     input={<BootstrapInput />}
                                     fullWidth
                                 >
-                                    <option value="0">Container</option>
-                                    <option value="1">Conventional</option>
-                                    <option value="2">Roll-on/Roll-off</option>
+                                    <option value="">...</option>
+                                    <option value="FCL">FCL</option>
+                                    <option value="Breakbulk/LCL" disabled>Breakbulk/LCL</option>
+                                    <option value="Unit RoRo" disabled>Unit RoRo</option>
                                 </NativeSelect>
                             </Grid>
                             <Grid item xs={12} md={6} mt={1}>
                                 <InputLabel htmlFor="quantity" sx={inputLabelStyles}>How many units of cargo do you want to transport?</InputLabel>
                                 <BootstrapInput id="quantity" type="number" inputProps={{ min: 0, max: 100 }} value={quantity} onChange={(e: any) => {setQuantity(e.target.value)}} fullWidth />
                             </Grid>
+                            
                             <Grid item xs={12}>
-                                <InputLabel htmlFor="tags" sx={inputLabelStyles}>Tags</InputLabel>
-                                <MuiChipsInput 
-                                    id="tags" 
-                                    placeholder="Type some key words of your request" 
-                                    value={tags} variant="outlined" 
-                                    onChange={(elm: MuiChipsInputChip[]) => { setTags(elm); }} 
-                                    fullWidth 
-                                    sx={tagInputStyles} 
-                                    renderChip={(Component, key, props) => {
-                                        return <Component {...props} key={key} sx={{ mt: .75 }} />
-                                    }}
-                                />
-                            </Grid>
-                        
-                            {/* <Grid item xs={6}>
-                            <InputLabel htmlFor="cargo-products" sx={inputLabelStyles}>Type of products</InputLabel>
+                                <InputLabel htmlFor="tags" sx={inputLabelStyles}>Specifics</InputLabel>
                                 {
                                     products !== null ?
                                     <Autocomplete
                                         multiple    
                                         disablePortal
-                                        id="cargo-products"
+                                        id="tags"
                                         placeholder="Machinery, Household goods, etc"
                                         options={products}
                                         getOptionLabel={(option: any) => { 
                                             if (option !== null && option !== undefined) {
-                                                return option.productName;
+                                                return option.productName !== undefined ? option.productName : option;
                                             }
                                             return ""; 
                                         }}
-                                        value={cargoProducts}
+                                        value={tags}
                                         sx={{ mt: 1 }}
                                         renderInput={(params) => <TextField {...params} sx={{ textTransform: "lowercase" }} />}
-                                        onChange={(e: any, value: any) => { setCargoProducts(value); }}
+                                        onChange={(e: any, value: any) => { setTags(value); }}
                                         fullWidth
                                     /> : <Skeleton />
                                 }
                             </Grid>
-                            <Grid item xs={6}>
-                                <InputLabel htmlFor="packing-type" sx={inputLabelStyles}>Type of packing</InputLabel>
-                                <NativeSelect
-                                    id="packing-type"
-                                    value={packingType}
-                                    onChange={(event: { target: { value: string } }) => { setPackingType(event.target.value); }}
-                                    input={<BootstrapInput />}
-                                    fullWidth
-                                >
-                                    {packingTypes.map((elm: any, i: number) => (
-                                        <option key={"elm1-"+i} value={elm}>{elm}</option>
-                                    ))}
-                                </NativeSelect>
-                            </Grid> */}
                             
                             
                             <Grid item xs={6} mt={.5}>
@@ -1093,7 +1054,6 @@ function Request(props: any) {
                                             onChange={handleChangeAssignedManager}
                                             input={<BootstrapInput />}
                                             fullWidth
-                                            /*disabled={status === "Valider"}*/
                                         >
                                             <option value="">No agent assigned</option>
                                             {
@@ -1132,7 +1092,7 @@ function Request(props: any) {
                 </Box>
             </Box>
             
-            {/* Ask for informations */}
+            {/* Ask for information */}
             <BootstrapDialog
                 onClose={() => setModal(false)}
                 aria-labelledby="custom-dialog-title"
@@ -1141,7 +1101,7 @@ function Request(props: any) {
                 fullWidth
             >
                 <BootstrapDialogTitle id="custom-dialog-title" onClose={() => setModal(false)}>
-                    <b>Ask for informations</b>
+                    <b>Ask for information</b>
                 </BootstrapDialogTitle>
                 <DialogContent dividers>
                     <Typography variant="subtitle1" gutterBottom px={2}>

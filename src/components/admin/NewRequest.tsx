@@ -30,6 +30,7 @@ function NewRequest(props: any) {
     const [message, setMessage] = useState<string>("");
     const [quantity, setQuantity] = useState<number>(1);
     const [cargoType, setCargoType] = useState<string>("0");
+    const [packingType, setPackingType] = useState<string>("FCL");
     const [departurePort, setDeparturePort] = useState<any>(null);
     const [arrivalPort, setArrivalPort] = useState<any>(null);
     const [departure, setDeparture] = useState<string>("");
@@ -53,6 +54,10 @@ function NewRequest(props: any) {
     
     const handleChangeCargoType = (event: { target: { value: string } }) => {
         setCargoType(event.target.value);
+    };
+
+    const handleChangePackingType = (event: { target: { value: string } }) => {
+        setPackingType(event.target.value);
     };
 
     const handleChangeAssignedManager = (event: { target: { value: string } }) => {
@@ -193,7 +198,8 @@ function NewRequest(props: any) {
                         whatsapp: phone,
                         departure: departurePort.portName+', '+departurePort.country,
                         arrival: arrivalPort.portName+', '+arrivalPort.country,
-                        cargoType: Number(cargoType),
+                        cargoType: 0,
+                        packingType: packingType,
                         quantity: Number(quantity),
                         detail: message,
                         tags: tags.length !== 0 ? tags.map((elm: any) => elm.productName).join(',') : null,
@@ -246,7 +252,7 @@ function NewRequest(props: any) {
                             <BootstrapInput id="request-email" type="email" value={email} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)} fullWidth />
                         </Grid>
                         <Grid item xs={12} md={6} mt={1}>
-                            <InputLabel htmlFor="departure" sx={inputLabelStyles}>Where do you want us to pickup your products?</InputLabel>
+                            <InputLabel htmlFor="departure" sx={inputLabelStyles}>From (city, country)</InputLabel>
                             {/* <AutocompleteSearch id="departure" value={departurePort} onChange={(e: any) => { setDeparturePort(convertStringToObject(e.target.innerText)); setDeparture(e.target.innerText); }} fullWidth /> */}
                             {
                                 ports !== null ?
@@ -276,7 +282,7 @@ function NewRequest(props: any) {
                             }
                         </Grid>
                         <Grid item xs={12} md={6} mt={1}>
-                            <InputLabel htmlFor="arrival" sx={inputLabelStyles}>Where do you want to transport your products?</InputLabel>
+                            <InputLabel htmlFor="arrival" sx={inputLabelStyles}>To (city, country)</InputLabel>
                             {/* <AutocompleteSearch id="arrival" value={arrivalPort} onChange={(e: any) => { setArrivalPort(convertStringToObject(e.target.innerText)); setArrival(e.target.innerText); }} fullWidth /> */}
                             {
                                 ports !== null ?
@@ -306,17 +312,17 @@ function NewRequest(props: any) {
                             }
                         </Grid>
                         <Grid item xs={12} md={6} mt={1}>
-                            <InputLabel htmlFor="cargo-type" sx={inputLabelStyles}>In what type of cargo do you want to transport your goods?</InputLabel>
+                            <InputLabel htmlFor="packing-type" sx={inputLabelStyles}>Packing Type</InputLabel>
                             <NativeSelect
-                                id="demo-customized-select-native"
-                                value={cargoType}
-                                onChange={handleChangeCargoType}
+                                id="packing-type"
+                                value={packingType}
+                                onChange={handleChangePackingType}
                                 input={<BootstrapInput />}
                                 fullWidth
                             >
-                                <option value="0">Container</option>
-                                <option value="1">Conventional</option>
-                                <option value="2">Roll-on/Roll-off</option>
+                                <option value="FCL">FCL</option>
+                                <option value="Breakbulk/LCL" disabled>Breakbulk/LCL</option>
+                                <option value="Unit RoRo" disabled>Unit RoRo</option>
                             </NativeSelect>
                         </Grid>
                         <Grid item xs={12} md={6} mt={1}>
@@ -324,31 +330,7 @@ function NewRequest(props: any) {
                             <BootstrapInput id="quantity" type="number" inputProps={{ min: 0, max: 100 }} value={quantity} onChange={(e: any) => {console.log(e); setQuantity(e.target.value)}} fullWidth />
                         </Grid>
                         <Grid item xs={12} mt={1} mb={1}>
-                            <InputLabel htmlFor="tags" sx={inputLabelStyles}>Tags</InputLabel>
-                            {/* <MuiChipsInput 
-                                id="tags" 
-                                placeholder="Type some key words of your request" 
-                                value={tags} variant="outlined" 
-                                onChange={(elm: MuiChipsInputChip[]) => { setTags(elm); }} 
-                                fullWidth 
-                                sx={{ 
-                                    mt: 1,
-                                    borderRadius: 4,
-                                    '& .MuiInputBase-root input': {
-                                        border: '1px solid #ced4da',
-                                        padding: '10.5px 16px'
-                                    },
-                                    '& input': {
-                                        position: 'relative',
-                                        backgroundColor: '#fcfcfb',
-                                        fontSize: 16,
-                                        fontFamily: ['-apple-system','BlinkMacSystemFont','"Segoe UI"','Roboto','"Helvetica Neue"','Arial','sans-serif','"Apple Color Emoji"','"Segoe UI Emoji"','"Segoe UI Symbol"',].join(','),
-                                    }, 
-                                }} 
-                                renderChip={(Component, key, props) => {
-                                    return <Component {...props} key={key} sx={{ mt: .75 }} />
-                                }}
-                            /> */}
+                            <InputLabel htmlFor="tags" sx={inputLabelStyles}>Specifics</InputLabel>
                             {
                                 products !== null ?
                                 <Autocomplete

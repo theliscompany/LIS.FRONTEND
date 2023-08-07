@@ -35,6 +35,7 @@ function Landing() {
     const [subjects, setSubjects] = useState<string[]>([]);
     const [quantity, setQuantity] = useState<number>(1);
     const [cargoType, setCargoType] = useState<string>("0");
+    const [packingType, setPackingType] = useState<string>("FCL");
     const [departurePort, setDeparturePort] = useState<any>({portId: 1, portName: "ANTWERP", country: "Belgium"});
     const [arrivalPort, setArrivalPort] = useState<any>({portId: 2, portName: "DOUALA", country: "Cameroon"});
     const [departure, setDeparture] = useState<string>("Antwerp, Belgium");
@@ -75,6 +76,10 @@ function Landing() {
         );
     };
 
+    const handleChangePackingType = (event: { target: { value: string } }) => {
+        setCargoType(event.target.value);
+    };
+    
     const handleChangeCargoType = (event: { target: { value: string } }) => {
         setCargoType(event.target.value);
     };
@@ -223,7 +228,7 @@ function Landing() {
                                 Email: email, 
                                 Departure: departurePort.portName+', '+departurePort.country, 
                                 Arrival: arrivalPort.portName+', '+arrivalPort.country, 
-                                CargoType: Number(cargoType), 
+                                PackingType: packingType,
                                 Quantity: quantity, 
                                 Detail: message, 
                                 Tags: tags.length !== 0 ? tags.map((elm: any) => elm.productName).join(',') : null 
@@ -392,7 +397,7 @@ function Landing() {
                 </BootstrapDialogTitle>
                 <DialogContent dividers>
                     <Typography variant="subtitle1" gutterBottom px={2}>
-                        Please fill in the form and click the button to send a request for a quote.
+                        It's ease, just fill in the form and click “continue” at the bottom right to send a request for a quote.
                     </Typography>
                     <Grid container spacing={2} mt={1} px={2}>
                         <Grid item xs={12} md={6}>
@@ -463,50 +468,26 @@ function Landing() {
                                 /> : <Skeleton />
                             }
                         </Grid>
-                        <Grid item xs={12} md={6}>
-                            <InputLabel htmlFor="cargo-type" sx={inputLabelStyles}>In what type of cargo do you want to transport your goods?</InputLabel>
+                        <Grid item xs={12} md={3}>
+                            <InputLabel htmlFor="packing-type" sx={inputLabelStyles}>In what type of packing do you want to transport your goods?</InputLabel>
                             <NativeSelect
-                                id="demo-customized-select-native"
-                                value={cargoType}
-                                onChange={handleChangeCargoType}
+                                id="packing-type"
+                                value={packingType}
+                                onChange={handleChangePackingType}
                                 input={<BootstrapInput />}
                                 fullWidth
                             >
-                                <option value="0">Container</option>
-                                <option value="1">Conventional</option>
-                                <option value="2">Roll-on/Roll-off</option>
+                                <option value="FCL">FCL</option>
+                                <option value="Breakbulk/LCL" disabled>Breakbulk/LCL</option>
+                                <option value="Unit RoRo" disabled>Unit RoRo</option>
                             </NativeSelect>
                         </Grid>
-                        <Grid item xs={12} md={6}>
+                        {/* <Grid item xs={12} md={3}>
                             <InputLabel htmlFor="quantity" sx={inputLabelStyles}>How many units of cargo do you want to transport?</InputLabel>
                             <BootstrapInput id="quantity" type="number" inputProps={{ min: 0, max: 100 }} value={quantity} onChange={(e: any) => {console.log(e); setQuantity(e.target.value)}} fullWidth />
-                        </Grid>
+                        </Grid> */}
                         <Grid item xs={12} mt={1}>
-                            <InputLabel htmlFor="tags" sx={inputLabelStyles}>Tags</InputLabel>
-                            {/* <MuiChipsInput 
-                                id="tags" 
-                                placeholder="Type some key words of your request" 
-                                value={tags} variant="outlined" 
-                                onChange={(elm: MuiChipsInputChip[]) => { setTags(elm); }} 
-                                fullWidth 
-                                sx={{ 
-                                    mt: 1,
-                                    borderRadius: 4,
-                                    '& .MuiInputBase-root input': {
-                                        border: '1px solid #ced4da',
-                                        padding: '10.5px 16px'
-                                    },
-                                    '& input': {
-                                        position: 'relative',
-                                        backgroundColor: '#fcfcfb',
-                                        fontSize: 16,
-                                        fontFamily: ['-apple-system','BlinkMacSystemFont','"Segoe UI"','Roboto','"Helvetica Neue"','Arial','sans-serif','"Apple Color Emoji"','"Segoe UI Emoji"','"Segoe UI Symbol"',].join(','),
-                                    }, 
-                                }} 
-                                renderChip={(Component, key, props) => {
-                                    return <Component {...props} key={key} sx={{ mt: .75 }} />
-                                }}
-                            /> */}
+                            <InputLabel htmlFor="tags" sx={inputLabelStyles}>Specifics</InputLabel>
                             {
                                 products !== null ?
                                 <Autocomplete
@@ -661,7 +642,10 @@ function Landing() {
                 </BootstrapDialogTitle>
                 <DialogContent dividers>
                     <Alert severity="success" sx={{ mb: 3 }}>
-                        <Typography variant="subtitle1" gutterBottom px={2}>Your request has been successfully sent, please check your email or your spam to get your tracking number.</Typography>
+                        <Typography variant="subtitle1" gutterBottom px={2}>
+                            Your request has been successfully sent, please check your email or your spam to get your tracking number.
+                            We will revert to you soon with the cost and best options for your shipment.
+                        </Typography>
                     </Alert>
                     {/* <img src="/img/checkemail.jpg" style={{ width: "300px", display: "block", margin: "0 auto" }} alt="check email" /> */}
                 </DialogContent>

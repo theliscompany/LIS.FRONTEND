@@ -17,7 +17,6 @@ import NewRequest from './components/admin/NewRequest';
 import UsersAssigment from './components/admin/UsersAssignment';
 import Histories from './components/admin/Histories';
 import MyRequests from './components/admin/MyRequests';
-import RequestTest from './components/admin/RequestTest';
 import PriceOffers from './components/admin/PriceOffers';
 import ManagePriceOffer from './components/admin/ManagePriceOffer';
 import ApproveOffer from './components/admin/ApproveOffer';
@@ -42,7 +41,6 @@ const App = () => {
                 <Route path="quote-offers" element={<PriceOffers />} />
                 <Route path="quote-offers/:id" element={<ManagePriceOffer />} />
                 <Route path="users" element={<UsersAssigment />} />
-                <Route path="test" element={<RequestTest />} />
               </Route> 
               <Route path="/" element={<Landing />} />
               <Route path="landing" element={<Landing />} />
