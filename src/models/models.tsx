@@ -5,7 +5,8 @@ export interface RequestDto {
     departure: string;
     arrival: string;
     status?: string|number|null|undefined;
-    cargoType: string|number;
+    cargoType?: string|number;
+    packingType: string;
     quantity: number;
     detail: string;
     createdAt?: string;

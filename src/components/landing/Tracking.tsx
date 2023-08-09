@@ -60,10 +60,13 @@ function Tracking() {
                         load ? <Skeleton sx={{ mt: 3 }} /> : 
                         trackingData !== null && trackingData !== undefined ? 
                         <Box>
-                            {
+                            {/* {
                                 trackingData.assignee !== null ? 
                                 <Alert severity="info">Your request has been assigned to the agent : {trackingData.assignee.name}. You can contact her/him at this email : {trackingData.assignee.email} </Alert> : <Alert severity="warning">There is no agent assigned for the moment. For questions, please contact contact-assign@omnifreight.eu </Alert>
-                            }
+                            } */}
+                            <Alert severity='info'>
+                                We are working on your request and will revert to you soon with the cost and best options for your shipment.
+                            </Alert>
                             <Typography sx={{ mt: 3 }}>Request status : <Chip size="small" label={trackingData.status} color={trackingData.status === "EnAttente" ? "warning" : trackingData.status === "Valider" ? "success" : "error"} sx={{ ml: 1 }} /> </Typography>
                             <List sx={{ my: 3, border: "1px #e2e2e2 solid" }} dense>
                                 <ListItem>
@@ -98,7 +101,7 @@ function Tracking() {
                                     <ListItemText primary="Request date" secondary={(new Date(trackingData.requestQuoteData.createdAt)).toLocaleString()} />
                                 </ListItem>
                             </List>
-                            <Typography sx={{ mt: 3 }}>You have received the following messages : </Typography>
+                            {/* <Typography sx={{ mt: 3 }}>You have received the following messages : </Typography>
                             <List sx={{ my: 3, border: "1px #e2e2e2 solid" }} dense>
                                 {
                                     trackingData.notes.map((elm: any) => {
@@ -110,7 +113,7 @@ function Tracking() {
                                         </>;
                                     })
                                 }
-                            </List>
+                            </List> */}
                         </Box> 
                         : <Typography sx={{ mt: 3 }}>The tracking code is not defined. </Typography>
                     }

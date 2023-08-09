@@ -169,7 +169,7 @@ function Layout(props: {children?: React.ReactNode}) {
         <React.Fragment>
             <Box sx={{ display: 'flex' }}>
                 <CssBaseline />
-                <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1, backgroundColor: "#fff", boxShadow: 0, borderBottom: "1px solid rgb(241, 242, 246)" }}>
+                <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1, backgroundColor: "#fff", boxShadow: 0, borderBottom: "1px solid rgb(241, 242, 246)", display: { xs: 'none', md: 'flex' } }}>
                     <Container style={{ maxWidth: "2000px" }}>
                         <Toolbar disableGutters>
                             <Typography variant="h6" noWrap component="a" href="/admin/">
@@ -308,7 +308,8 @@ function Layout(props: {children?: React.ReactNode}) {
                     sx={{
                         width: drawerWidth,
                         flexShrink: 0,
-                        boxSizing: 'border-box'
+                        boxSizing: 'border-box',
+                        display: { xs: 'none', md: 'flex' }
                     }}
                     PaperProps={{ sx: { borderRight: open ? "1px solid rgb(241, 242, 246)" : 0 } }}
                 >
@@ -389,34 +390,6 @@ function Layout(props: {children?: React.ReactNode}) {
                             </NavLink>
                         </List>
                         
-                        {/* <Divider color="#F1F2F6" style={{ borderBottom: "1px solid rgb(241, 242, 246)" }} />
-                        <List dense>
-                            <NavLink to="/admin/wizard" className={({ isActive }) => isActive ? "cs-navlink-active" : "cs-navlink"}>
-                                <ListItem className="cs-listitem" key={"Wizard"} disablePadding disableGutters>
-                                    <DarkTooltip title="Wizard" placement="right" arrow>
-                                        <ListItemButton className="cs-listitembutton">
-                                            <ListItemIcon className="cs-listitemicon">
-                                                <AutoFixHighIcon fontSize="small" />
-                                            </ListItemIcon>
-                                            <ListItemText primary={"Wizard"} />
-                                        </ListItemButton>
-                                    </DarkTooltip>
-                                </ListItem>
-                            </NavLink>
-                            <NavLink to="/admin/simulation" className={({ isActive }) => isActive ? "cs-navlink-active" : "cs-navlink"}>
-                                <ListItem className="cs-listitem" key={"Simulation"} disablePadding disableGutters>
-                                    <DarkTooltip title="Simulation" placement="right" arrow>
-                                        <ListItemButton className="cs-listitembutton">
-                                            <ListItemIcon className="cs-listitemicon">
-                                                <AppRegistrationIcon fontSize="small" />
-                                            </ListItemIcon>
-                                            <ListItemText primary={"Simulation"} />
-                                        </ListItemButton>
-                                    </DarkTooltip>
-                                </ListItem>
-                            </NavLink>
-                        </List> */}
-
                         <List dense sx={{ position: "absolute", bottom: "0px", left: "10px", right: "10px" }}>
                             <ListItem className="cs-listitem" key={"Collapse"} disablePadding disableGutters>
                                 <DarkTooltip title="Collapse" placement="right" arrow>
