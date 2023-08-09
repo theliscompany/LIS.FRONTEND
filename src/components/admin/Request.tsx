@@ -940,7 +940,7 @@ function Request(props: any) {
                                 </Grid>
                                 <Grid item xs={12} md={6}>
                                     <InputLabel htmlFor="request-email" sx={inputLabelStyles}>Your email address</InputLabel>
-                                    <BootstrapInput id="request-email" type="email" value={email} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)} fullWidth />
+                                    <BootstrapInput id="request-email" type="email" value={email} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)} fullWidth disabled />
                                 </Grid>
                                 <Grid item xs={12} md={6} mt={1}>
                                     <InputLabel htmlFor="departure" sx={inputLabelStyles}>From (city, country)</InputLabel>

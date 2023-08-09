@@ -469,7 +469,7 @@ function Landing() {
                                 /> : <Skeleton />
                             }
                         </Grid>
-                        <Grid item xs={12} md={3}>
+                        <Grid item xs={12} md={6}>
                             {/* <InputLabel htmlFor="packing-type" sx={inputLabelStyles}>In what type of packing do you want to transport your goods?</InputLabel> */}
                             <InputLabel htmlFor="packing-type" sx={inputLabelStyles}>Packing type</InputLabel>
                             <NativeSelect
@@ -484,10 +484,10 @@ function Landing() {
                                 <option value="Unit RoRo" disabled>Unit RoRo</option>
                             </NativeSelect>
                         </Grid>
-                        {/* <Grid item xs={12} md={3}>
+                        <Grid item xs={12} md={6}>
                             <InputLabel htmlFor="quantity" sx={inputLabelStyles}>How many units of cargo do you want to transport?</InputLabel>
                             <BootstrapInput id="quantity" type="number" inputProps={{ min: 0, max: 100 }} value={quantity} onChange={(e: any) => {console.log(e); setQuantity(e.target.value)}} fullWidth />
-                        </Grid> */}
+                        </Grid>
                         <Grid item xs={12} mt={1}>
                             <InputLabel htmlFor="tags" sx={inputLabelStyles}>Specifics</InputLabel>
                             {
