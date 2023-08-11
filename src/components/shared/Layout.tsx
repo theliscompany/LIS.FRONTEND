@@ -167,9 +167,13 @@ function Layout(props: {children?: React.ReactNode}) {
     
     return (
         <React.Fragment>
-            <Box sx={{ display: 'flex' }}>
+            <Container sx={{ display: { xs: 'none', md: 'flex'}, maxWidth: "100vw !important", padding: "0px !important", m: 0 }}>
                 <CssBaseline />
-                <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1, backgroundColor: "#fff", boxShadow: 0, borderBottom: "1px solid rgb(241, 242, 246)", display: { xs: 'none', md: 'flex' } }}>
+                <AppBar position="fixed" sx={{ 
+                    zIndex: (theme) => theme.zIndex.drawer + 1, backgroundColor: "#fff", 
+                    boxShadow: 0, borderBottom: "1px solid rgb(241, 242, 246)", 
+                    display: { xs: 'none', md: 'flex' } }}
+                >
                     <Container style={{ maxWidth: "2000px" }}>
                         <Toolbar disableGutters>
                             <Typography variant="h6" noWrap component="a" href="/admin/">
@@ -408,7 +412,12 @@ function Layout(props: {children?: React.ReactNode}) {
                     <Toolbar />
                     <Outlet />
                 </Box>
-            </Box>
+            </Container>
+            <Container component="div" sx={{ display: { xs: 'flex', md: 'none' }, maxWidth: "100vw !important", padding: "0px !important", m: 0 }}>
+                <Box sx={{ background: "#f9fafb", minHeight: "100vh" }}>
+                    <Outlet />
+                </Box>
+            </Container>
         </React.Fragment>
     );
 }

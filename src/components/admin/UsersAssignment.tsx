@@ -181,48 +181,50 @@ function UsersAssigment(props: any) {
                         <Grid item xs={12}>
                             {
                                 users !== null && users !== undefined && assignees !== null ?
-                                <TableContainer component={Paper}>
-                                    <Table sx={{ minWidth: 650 }} aria-label="simple table">
-                                        <TableHead>
-                                            <TableRow>
-                                                <TableCell align="left" sx={{ fontSize: 16, fontWeight: "bolder" }}>Identifier</TableCell>
-                                                <TableCell align="left" sx={{ fontSize: 16, fontWeight: "bolder" }}>Name</TableCell>
-                                                <TableCell align="left" sx={{ fontSize: 16, fontWeight: "bolder" }}>Email address</TableCell>
-                                                <TableCell align="left" sx={{ fontSize: 16, fontWeight: "bolder" }}>Status</TableCell>
-                                                <TableCell align="left"><b></b></TableCell>
-                                            </TableRow>
-                                        </TableHead>
-                                        <TableBody>
-                                            {
-                                                users.map((row: any, i: number) => (
-                                                    <TableRow key={row.id} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-                                                        <TableCell align="left">{ "OmniMember-"+i}</TableCell>
-                                                        <TableCell align="left">{row.displayName}</TableCell>
-                                                        <TableCell align="left">{row.mail}</TableCell>
-                                                        <TableCell align="left">
-                                                            { assignees.some((user: any) => user.email === row.mail) ? <Chip label="Can assign" color="success" /> : <Chip label="Cannot assign"  /> }
-                                                        </TableCell>
-                                                        <TableCell align="left">
-                                                            <DarkTooltip title={ assignees.some((user: any) => user.email === row.mail) ? "Cancel assign role" : "Assign as manager"} placement="right" arrow>
-                                                                <IconButton 
-                                                                    size="medium" 
-                                                                    onClick={() => { 
-                                                                        // assignAsManager(row.displayName, row.mail, row.id);
-                                                                        assignees.some((user: any) => user.email === row.mail) ?
-                                                                        removeAsManager(row.mail) : 
-                                                                        assignAsManager(row.displayName, row.mail, row.id)
-                                                                    }}
-                                                                >
-                                                                    { assignees.some((user: any) => user.email === row.mail) ? <AssignmentReturnIcon /> : <AssignmentIndIcon /> }
-                                                                </IconButton>
-                                                            </DarkTooltip>
-                                                        </TableCell>
-                                                    </TableRow>
-                                                ))
-                                            }
-                                        </TableBody>
-                                    </Table>
-                                </TableContainer> : !showAlert ? <Skeleton sx={{ mt: 3 }} /> : null
+                                <Box sx={{ overflow: "auto" }}>
+                                    <Box sx={{ width: "100%", display: "table", tableLayout: "fixed" }}>
+                                        <Table aria-label="simple table">
+                                            <TableHead>
+                                                <TableRow>
+                                                    <TableCell align="left" sx={{ fontSize: 16, fontWeight: "bolder" }}>Identifier</TableCell>
+                                                    <TableCell align="left" sx={{ fontSize: 16, fontWeight: "bolder" }}>Name</TableCell>
+                                                    <TableCell align="left" sx={{ fontSize: 16, fontWeight: "bolder" }}>Email address</TableCell>
+                                                    <TableCell align="left" sx={{ fontSize: 16, fontWeight: "bolder" }}>Status</TableCell>
+                                                    <TableCell align="left"><b></b></TableCell>
+                                                </TableRow>
+                                            </TableHead>
+                                            <TableBody>
+                                                {
+                                                    users.map((row: any, i: number) => (
+                                                        <TableRow key={row.id} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                                                            <TableCell align="left">{ "OmniMember-"+i}</TableCell>
+                                                            <TableCell align="left">{row.displayName}</TableCell>
+                                                            <TableCell align="left">{row.mail}</TableCell>
+                                                            <TableCell align="left">
+                                                                { assignees.some((user: any) => user.email === row.mail) ? <Chip label="Can assign" color="success" /> : <Chip label="Cannot assign"  /> }
+                                                            </TableCell>
+                                                            <TableCell align="left">
+                                                                <DarkTooltip title={ assignees.some((user: any) => user.email === row.mail) ? "Cancel assign role" : "Assign as manager"} placement="right" arrow>
+                                                                    <IconButton 
+                                                                        size="medium" 
+                                                                        onClick={() => { 
+                                                                            // assignAsManager(row.displayName, row.mail, row.id);
+                                                                            assignees.some((user: any) => user.email === row.mail) ?
+                                                                            removeAsManager(row.mail) : 
+                                                                            assignAsManager(row.displayName, row.mail, row.id)
+                                                                        }}
+                                                                    >
+                                                                        { assignees.some((user: any) => user.email === row.mail) ? <AssignmentReturnIcon /> : <AssignmentIndIcon /> }
+                                                                    </IconButton>
+                                                                </DarkTooltip>
+                                                            </TableCell>
+                                                        </TableRow>
+                                                    ))
+                                                }
+                                            </TableBody>
+                                        </Table>
+                                    </Box>
+                                </Box> : !showAlert ? <Skeleton sx={{ mt: 3 }} /> : null
                             }
                             {
                                 showAlert ?

@@ -1,8 +1,8 @@
-import { Alert, Autocomplete, Box, Button, Grid, InputLabel, NativeSelect, Skeleton, TextField, Typography } from '@mui/material';
+import { Alert, Autocomplete, Box, Button, Grid, InputLabel, NativeSelect, Skeleton, TextField, Typography, ListItem, ListItemText, IconButton } from '@mui/material';
 import { MuiTelInput } from 'mui-tel-input';
 import React, { useEffect, useState } from 'react';
 import '../../App.css';
-import AutocompleteSearch from '../shared/AutocompleteSearch';
+import DeleteIcon from '@mui/icons-material/Delete';
 import { inputLabelStyles, BootstrapInput, whiteButtonStyles } from '../../misc/styles';
 import { enqueueSnackbar, SnackbarProvider } from 'notistack';
 import { protectedResources, transportRequest } from '../../authConfig';
@@ -28,7 +28,6 @@ function NewRequest(props: any) {
     const [status, setStatus] = useState<string | null>(null);
     const [phone, setPhone] = useState<string>("");
     const [message, setMessage] = useState<string>("");
-    const [quantity, setQuantity] = useState<number>(1);
     const [cargoType, setCargoType] = useState<string>("0");
     const [packingType, setPackingType] = useState<string>("FCL");
     const [clientNumber, setClientNumber] = useState<string>("");
@@ -45,6 +44,23 @@ function NewRequest(props: any) {
     const [assignedManager, setAssignedManager] = useState<string>("null");
     const [assignees, setAssignees] = useState<any>(null);
     
+    const [containerType, setContainerType] = useState<number>(8);
+    const [quantity, setQuantity] = useState<number>(1);
+    const [containersSelection, setContainersSelection] = useState<any>([]);
+    
+    const [unitName, setUnitName] = useState<string>("");
+    const [unitDimensions, setUnitDimensions] = useState<string>("");
+    const [unitWeight, setUnitWeight] = useState<number>(0);
+    const [unitQuantity, setUnitQuantity] = useState<number>(1);
+    const [unitsSelection, setUnitsSelection] = useState<any>([]);
+
+    const [packageName, setPackageName] = useState<string>("");
+    const [packageDimensions, setPackageDimensions] = useState<string>("");
+    const [packageWeight, setPackageWeight] = useState<number>(0);
+    const [packageQuantity, setPackageQuantity] = useState<number>(1);
+    const [packagesSelection, setPackagesSelection] = useState<any>([]);
+    
+    const [containers, setContainers] = useState<any>(null);
     const [ports, setPorts] = useState<any>(null);
     const [products, setProducts] = useState<any>(null);
     //let { id } = useParams();
@@ -119,8 +135,35 @@ function NewRequest(props: any) {
         }
     }
     
+    const getContainers = async () => {
+        if (context && account) {
+            const token = await instance.acquireTokenSilent({
+                scopes: transportRequest.scopes,
+                account: account
+            })
+            .then((response: AuthenticationResult) => {
+                return response.accessToken;
+            })
+            .catch(() => {
+                return instance.acquireTokenPopup({
+                    ...transportRequest,
+                    account: account
+                    }).then((response) => {
+                        return response.accessToken;
+                    });
+                }
+            );
+            
+            const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Package/Containers", token);
+            if (response !== null && response !== undefined) {
+                setContainers(response);
+            }  
+        }
+    }
+    
     useEffect(() => {
         getPorts();
+        getContainers();
         getProducts();
         getAssignees();
     }, [instance, account, context]);
@@ -312,7 +355,7 @@ function NewRequest(props: any) {
                                 /> : <Skeleton />
                             }
                         </Grid>
-                        <Grid item xs={12} md={6} mt={1}>
+                        <Grid item xs={12} md={3} mt={1}>
                             <InputLabel htmlFor="packing-type" sx={inputLabelStyles}>Packing Type</InputLabel>
                             <NativeSelect
                                 id="packing-type"
@@ -322,17 +365,225 @@ function NewRequest(props: any) {
                                 fullWidth
                             >
                                 <option value="FCL">FCL</option>
-                                <option value="Breakbulk/LCL" disabled>Breakbulk/LCL</option>
-                                <option value="Unit RoRo" disabled>Unit RoRo</option>
+                                <option value="Breakbulk/LCL">Breakbulk/LCL</option>
+                                <option value="Unit RoRo">Unit RoRo</option>
                             </NativeSelect>
                         </Grid>
-                        {/* <Grid item xs={12} md={6} mt={1}>
-                            <InputLabel htmlFor="quantity" sx={inputLabelStyles}>How many units of cargo do you want to transport?</InputLabel>
-                            <BootstrapInput id="quantity" type="number" inputProps={{ min: 0, max: 100 }} value={quantity} onChange={(e: any) => {console.log(e); setQuantity(e.target.value)}} fullWidth />
-                        </Grid> */}
-                        <Grid item xs={12} md={6} mt={1}>
-                            
-                        </Grid>
+                        {
+                            packingType === "FCL" ?
+                            <>
+                            <Grid item xs={12} md={3} mt={1}>
+                                <InputLabel htmlFor="container-type" sx={inputLabelStyles}>Container Type</InputLabel>
+                                {
+                                    containers !== null ?
+                                    <NativeSelect
+                                        id="container-type"
+                                        value={containerType}
+                                        onChange={(event: { target: { value: any } }) => { setContainerType(Number(event.target.value)); }}
+                                        input={<BootstrapInput />}
+                                        fullWidth
+                                    >
+                                        <option key={"elm1-x"} value={0}>Not defined</option>
+                                        {containers.filter((elm: any) => ["20' Dry"]).map((elm: any, i: number) => (
+                                            <option key={"elm1-"+i} value={elm.packageId}>{elm.packageName}</option>
+                                        ))}
+                                    </NativeSelect>
+                                    : <Skeleton />
+                                }
+                            </Grid>
+                            <Grid item xs={12} md={3} mt={1}>
+                                <InputLabel htmlFor="quantity" sx={inputLabelStyles}>Quantity</InputLabel>
+                                <BootstrapInput id="quantity" type="number" inputProps={{ min: 1, max: 100 }} value={quantity} onChange={(e: any) => {setQuantity(e.target.value)}} fullWidth />
+                            </Grid>
+                            <Grid item xs={12} md={3} mt={1}>
+                                <Button 
+                                    variant="contained" color="inherit" fullWidth sx={whiteButtonStyles} 
+                                    style={{ marginTop: "30px", height: "42px", float: "right" }} 
+                                    onClick={() => {
+                                        if (containerType !== 0 && quantity > 0) {
+                                            setContainersSelection((prevItems: any) => [...prevItems, { container: containerType, quantity: quantity }]);
+                                            setContainerType(0); setQuantity(1);
+                                        } 
+                                        else {
+                                            enqueueSnackbar("You need to select a container type and a good value for quantity.", { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                                        }
+                                    }} 
+                                >
+                                    Add the container
+                                </Button>
+                            </Grid>
+                            <Grid item xs={12}>
+                                {
+                                    containersSelection !== undefined && containersSelection !== null && containersSelection.length !== 0 && containers !== null ? 
+                                        <Grid container spacing={2}>
+                                            {
+                                                containersSelection.map((item: any, index: number) => (
+                                                    <Grid item xs={4}>
+                                                        <ListItem
+                                                            key={"listitem1-"+index}
+                                                            sx={{ border: "1px solid #e5e5e5" }}
+                                                            secondaryAction={
+                                                                <IconButton edge="end" onClick={() => {
+                                                                    setContainersSelection((prevItems: any) => prevItems.filter((item: any, i: number) => i !== index));
+                                                                }}>
+                                                                    <DeleteIcon />
+                                                                </IconButton>
+                                                            }
+                                                        >
+                                                            <ListItemText primary={
+                                                                containers.find((elm: any) => elm.packageId === item.container) !== undefined ?
+                                                                "Container : "+containers.find((elm: any) => elm.packageId === item.container).packageName+" | Quantity : "+item.quantity
+                                                                : "Container : "+item.container+" | Quantity : "+item.quantity
+                                                            } />
+                                                        </ListItem>
+                                                    </Grid>
+                                                ))
+                                            }
+                                        </Grid>
+                                    : null  
+                                }
+                            </Grid>
+                            </> : null
+                        }
+                        {
+                            packingType === "Breakbulk/LCL" ?
+                            <>
+                            <Grid item xs={12} md={3} mt={1}>
+                                <InputLabel htmlFor="package-name" sx={inputLabelStyles}>Package Name</InputLabel>
+                                <BootstrapInput id="package-name" type="text" value={packageName} onChange={(e: any) => {setPackageName(e.target.value)}} fullWidth />
+                            </Grid>
+                            <Grid item xs={12} md={1} mt={1}>
+                                <InputLabel htmlFor="package-quantity" sx={inputLabelStyles}>Quantity</InputLabel>
+                                <BootstrapInput id="package-quantity" type="number" inputProps={{ min: 1, max: 100 }} value={packageQuantity} onChange={(e: any) => {setPackageQuantity(e.target.value)}} fullWidth />
+                            </Grid>
+                            <Grid item xs={12} md={2} mt={1}>
+                                <InputLabel htmlFor="package-dimensions" sx={inputLabelStyles}>Dimensions</InputLabel>
+                                <BootstrapInput id="package-dimensions" type="text" value={packageDimensions} onChange={(e: any) => {setPackageDimensions(e.target.value)}} fullWidth />
+                            </Grid>
+                            <Grid item xs={12} md={2} mt={1}>
+                                <InputLabel htmlFor="package-weight" sx={inputLabelStyles}>Weight (in Kg)</InputLabel>
+                                <BootstrapInput id="package-weight" type="number" inputProps={{ min: 0, max: 100 }} value={packageWeight} onChange={(e: any) => {setPackageWeight(e.target.value)}} fullWidth />
+                            </Grid>
+                            <Grid item xs={12} md={1} mt={1}>
+                                <Button
+                                    variant="contained" color="inherit" fullWidth sx={whiteButtonStyles} 
+                                    style={{ marginTop: "30px", height: "42px", float: "right" }} 
+                                    onClick={() => {
+                                        if (packageName !== "" && packageQuantity > 0 && packageWeight > 0 && packageDimensions !== "") {
+                                            setPackagesSelection((prevItems: any) => [...prevItems, { 
+                                                name: packageName, quantity: packageQuantity, dimensions: packageDimensions, weight: packageWeight
+                                            }]);
+                                            setPackageName(""); setPackageQuantity(1); setPackageDimensions(""); setPackageWeight(0);
+                                        } 
+                                        else {
+                                            enqueueSnackbar("You need to fill the fields package name, weight and dimensions.", { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                                        }
+                                    }} 
+                                >
+                                    Add
+                                </Button>
+                            </Grid>
+                            <Grid item xs={12}>
+                            {
+                                    packagesSelection !== undefined && packagesSelection !== null && packagesSelection.length !== 0 ? 
+                                        <Grid container spacing={2}>
+                                            {
+                                                packagesSelection.map((item: any, index: number) => (
+                                                    <Grid item xs={12} md={6}>
+                                                        <ListItem
+                                                            key={"unititem1-"+index}
+                                                            sx={{ border: "1px solid #e5e5e5" }}
+                                                            secondaryAction={
+                                                                <IconButton edge="end" onClick={() => {
+                                                                    setPackagesSelection((prevItems: any) => prevItems.filter((item: any, i: number) => i !== index));
+                                                                }}>
+                                                                    <DeleteIcon />
+                                                                </IconButton>
+                                                            }
+                                                        >
+                                                            <ListItemText primary={
+                                                                "Name : "+item.name+" | Quantity : "+item.quantity+" | Dimensions : "+item.dimensions+" | Weight : "+item.weight+" Kg"
+                                                            } />
+                                                        </ListItem>
+                                                    </Grid>
+                                                ))
+                                            }
+                                        </Grid>
+                                    : null  
+                                }
+                            </Grid>
+                            </> : null
+                        }
+                        {
+                            packingType === "Unit RoRo" ?
+                            <>
+                            <Grid item xs={12} md={3} mt={1}>
+                                <InputLabel htmlFor="unit-name" sx={inputLabelStyles}>Unit Name</InputLabel>
+                                <BootstrapInput id="unit-name" type="text" value={unitName} onChange={(e: any) => {setUnitName(e.target.value)}} fullWidth />
+                            </Grid>
+                            <Grid item xs={12} md={1} mt={1}>
+                                <InputLabel htmlFor="unit-quantity" sx={inputLabelStyles}>Quantity</InputLabel>
+                                <BootstrapInput id="unit-quantity" type="number" inputProps={{ min: 1, max: 100 }} value={unitQuantity} onChange={(e: any) => {setUnitQuantity(e.target.value)}} fullWidth />
+                            </Grid>
+                            <Grid item xs={12} md={2} mt={1}>
+                                <InputLabel htmlFor="unit-dimensions" sx={inputLabelStyles}>Dimensions</InputLabel>
+                                <BootstrapInput id="unit-dimensions" type="text" value={unitDimensions} onChange={(e: any) => {setUnitDimensions(e.target.value)}} fullWidth />
+                            </Grid>
+                            <Grid item xs={12} md={2} mt={1}>
+                                <InputLabel htmlFor="unit-weight" sx={inputLabelStyles}>Weight (in Kg)</InputLabel>
+                                <BootstrapInput id="unit-weight" type="number" inputProps={{ min: 0, max: 100 }} value={unitWeight} onChange={(e: any) => {setUnitWeight(e.target.value)}} fullWidth />
+                            </Grid>
+                            <Grid item xs={12} md={1} mt={1}>
+                                <Button
+                                    variant="contained" color="inherit" fullWidth sx={whiteButtonStyles} 
+                                    style={{ marginTop: "30px", height: "42px", float: "right" }} 
+                                    onClick={() => {
+                                        if (unitName !== "" && unitQuantity > 0 && unitWeight > 0 && unitDimensions !== "") {
+                                            setUnitsSelection((prevItems: any) => [...prevItems, { 
+                                                name: unitName, quantity: unitQuantity, dimensions: unitDimensions, weight: unitWeight
+                                            }]);
+                                            setUnitName(""); setUnitQuantity(1); setUnitDimensions(""); setUnitWeight(0);
+                                        } 
+                                        else {
+                                            enqueueSnackbar("You need to fill the fields unit name, weight and dimensions.", { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                                        }
+                                    }} 
+                                >
+                                    Add
+                                </Button>
+                            </Grid>
+                            <Grid item xs={12}>
+                            {
+                                    unitsSelection !== undefined && unitsSelection !== null && unitsSelection.length !== 0 ? 
+                                        <Grid container spacing={2}>
+                                            {
+                                                unitsSelection.map((item: any, index: number) => (
+                                                    <Grid item xs={12} md={6}>
+                                                        <ListItem
+                                                            key={"unititem1-"+index}
+                                                            sx={{ border: "1px solid #e5e5e5" }}
+                                                            secondaryAction={
+                                                                <IconButton edge="end" onClick={() => {
+                                                                    setUnitsSelection((prevItems: any) => prevItems.filter((item: any, i: number) => i !== index));
+                                                                }}>
+                                                                    <DeleteIcon />
+                                                                </IconButton>
+                                                            }
+                                                        >
+                                                            <ListItemText primary={
+                                                                "Name : "+item.name+" | Quantity : "+item.quantity+" | Dimensions : "+item.dimensions+" | Weight : "+item.weight+" Kg"
+                                                            } />
+                                                        </ListItem>
+                                                    </Grid>
+                                                ))
+                                            }
+                                        </Grid>
+                                    : null  
+                                }
+                            </Grid>
+                            </> : null
+                        }
+
                         <Grid item xs={12} md={6} mt={1} mb={1}>
                             <InputLabel htmlFor="tags" sx={inputLabelStyles}>Specifics</InputLabel>
                             {
@@ -358,15 +609,15 @@ function NewRequest(props: any) {
                             }
                         </Grid>
                         <Grid item xs={12} md={6} mt={1}>
-                                <InputLabel htmlFor="client-number" sx={inputLabelStyles}>Client number</InputLabel>
-                                <BootstrapInput id="client-number" value={clientNumber} onChange={(e: any) => {setClientNumber(e.target.value)}} fullWidth />
+                            <InputLabel htmlFor="client-number" sx={inputLabelStyles}>Client number</InputLabel>
+                            <BootstrapInput id="client-number" value={clientNumber} onChange={(e: any) => {setClientNumber(e.target.value)}} fullWidth />
                         </Grid>
 
-                        <Grid item xs={6} mt={.5}>
+                        <Grid item xs={12} md={6} mt={.5}>
                             <InputLabel htmlFor="request-message" sx={inputLabelStyles}>Other details about your need (Optional)</InputLabel>
                             <BootstrapInput id="request-message" type="text" multiline rows={3.5} value={message} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setMessage(e.target.value)} fullWidth />
                         </Grid>
-                        <Grid item xs={6} mt={1}>
+                        <Grid item xs={12} md={6} mt={1}>
                             <InputLabel htmlFor="assigned-manager" sx={inputLabelStyles}>Assigned manager</InputLabel>
                             {
                                 !loadUser ? 

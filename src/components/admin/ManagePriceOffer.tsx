@@ -278,15 +278,15 @@ return (
                         />
                     </Grid> : null
                 }
-                <Grid item xs={4} sx={{ mt: 2 }}>
+                <Grid item xs={12} md={4} sx={{ mt: 2 }}>
                     <InputLabel htmlFor="margin" sx={inputLabelStyles}>Margin (in %)</InputLabel>
                     <BootstrapInput id="margin" type="number" value={margin} onChange={(e: any) => setMargin(e.target.value)} fullWidth />
                 </Grid>
-                <Grid item xs={4} sx={{ mt: 2 }}>
+                <Grid item xs={12} md={4} sx={{ mt: 2 }}>
                     <InputLabel htmlFor="reduction" sx={inputLabelStyles}>Reduction (in %)</InputLabel>
                     <BootstrapInput id="reduction" type="number" value={reduction} onChange={(e: any) => setReduction(e.target.value)} fullWidth />
                 </Grid>
-                <Grid item xs={4} sx={{ mt: 2 }}>
+                <Grid item xs={12} md={4} sx={{ mt: 2 }}>
                     <InputLabel htmlFor="adding" sx={inputLabelStyles}>Extra Fee (in {offer.seaFreight !== null ? offer.seaFreight.currency : null})</InputLabel>
                     <BootstrapInput id="adding" type="number" value={adding} onChange={(e: any) => setAdding(e.target.value)} fullWidth />
                 </Grid>
@@ -306,13 +306,13 @@ return (
                       }
                   </Typography>
               </Grid>
-              <Grid item xs={6}>
+              <Grid item xs={12} md={6}>
                 <Alert severity="info">
                   The status of this offer is : <div>- <strong>{statusLabel(offer.status)}</strong> by Omnifreight</div>
                   {offer.status === "Accepted" ? <div>- <strong>{offer.clientApproval}</strong> by the client</div> : null}
                 </Alert>
               </Grid>
-              <Grid item xs={6} sx={{ pt: 1.5, display: "flex", alignItems: "center", justifyContent: "end" }}>
+              <Grid item xs={12} md={6} sx={{ pt: 1.5, display: "flex", alignItems: "center", justifyContent: "end" }}>
                 <Button variant="contained" color="primary" sx={{ mr: 1, textTransform: "none" }} onClick={updateOffer}>Update the offer</Button>
                 <Button variant="contained" color="success" sx={{ mr: 1, textTransform: "none" }} onClick={acceptOffer}>Approve the offer</Button>
                 <Button variant="contained" color="secondary" sx={{ mr: 1, textTransform: "none" }} onClick={rejectOffer}>Reject the offer</Button>

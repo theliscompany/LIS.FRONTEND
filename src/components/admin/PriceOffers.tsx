@@ -127,55 +127,57 @@ function PriceOffers() {
                                 <Grid item xs={12}>
                                     {
                                         offers !== null && ports !== null ?
-                                        <TableContainer component={Paper}>
-                                            <Table sx={{ minWidth: 650 }} aria-label="simple table">
-                                                <TableHead>
-                                                    <TableRow>
-                                                        <TableCell align="left" sx={{ fontSize: 16, fontWeight: "bolder" }}>Offer Id</TableCell>
-                                                        <TableCell align="left" sx={{ fontSize: 16, fontWeight: "bolder" }}>Request Id</TableCell>
-                                                        <TableCell align="left" sx={{ fontSize: 16, fontWeight: "bolder" }}>Created date</TableCell>
-                                                        <TableCell align="left" sx={{ fontSize: 16, fontWeight: "bolder" }}>Departure</TableCell>
-                                                        <TableCell align="left" sx={{ fontSize: 16, fontWeight: "bolder" }}>Arrival</TableCell>
-                                                        {/* <TableCell align="left" sx={{ fontSize: 16, fontWeight: "bolder" }}>Haulage?</TableCell>
-                                                        <TableCell align="left" sx={{ fontSize: 16, fontWeight: "bolder" }}>Misc?</TableCell> */}
-                                                        <TableCell align="left" sx={{ fontSize: 16, fontWeight: "bolder" }}>Status</TableCell>
-                                                        <TableCell align="left" sx={{ fontSize: 16, fontWeight: "bolder" }}>Client approval</TableCell>
-                                                        <TableCell align="left" sx={{ fontSize: 16, fontWeight: "bolder" }}>Total price</TableCell>
-                                                        <TableCell align="left"><b></b></TableCell>
-                                                    </TableRow>
-                                                </TableHead>
-                                                <TableBody>
-                                                    {
-                                                        offers.map((row: any, i: number) => (
-                                                            <React.Fragment key={"offer-"+row.id}>
-                                                                <TableRow sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-                                                                    <TableCell align="left">{row.quoteOfferNumber}</TableCell>
-                                                                    <TableCell align="left">
-                                                                        <Link to={"/admin/request/"+row.requestQuoteId}>{row.requestQuoteId}</Link>
-                                                                    </TableCell>
-                                                                    <TableCell align="left">{(new Date(row.created)).toLocaleString()}</TableCell>
-                                                                    <TableCell align="left">{ports.find((elm: any) => elm.portId === row.departurePortId).portName}</TableCell>
-                                                                    <TableCell align="left">{ports.find((elm: any) => elm.portId === row.destinationPortId).portName}</TableCell>
-                                                                    {/* <TableCell align="left">{row.haulage !== null ? <Chip label="Yes" color="success" /> : <Chip label="No" />}</TableCell>
-                                                                    <TableCell align="left">{row.miscellaneousList !== null ? <Chip label="Yes" color="success" /> : <Chip label="No" />}</TableCell> */}
-                                                                    <TableCell align="left"><Chip label={statusLabel(row.status)} color={colors(row.status)} /></TableCell>
-                                                                    <TableCell align="left">{row.status !== "Accepted" && row.clientApproval === "Pending" ? <Chip label={"No email"} /> : <Chip label={row.clientApproval} color={colors(row.clientApproval)} />}</TableCell>
-                                                                    <TableCell align="left">{Number(row.totalPrice+row.totalPrice*row.margin/100-row.totalPrice*row.reduction/100+row.extraFee*1).toFixed(2)} {row.seaFreight.currency}</TableCell>
-                                                                    <TableCell align="left">
-                                                                        <IconButton href={"/admin/quote-offers/"+row.id} sx={{ mr: 1 }}>
-                                                                            <EditIcon fontSize="small" />
-                                                                        </IconButton>
-                                                                        <IconButton onClick={() => { setCurrentId(row.id); setModal(true); }}>
-                                                                            <DeleteIcon fontSize="small" />
-                                                                        </IconButton>
-                                                                    </TableCell>
-                                                                </TableRow>
-                                                            </React.Fragment>
-                                                        ))
-                                                    }
-                                                </TableBody>
-                                            </Table>
-                                        </TableContainer> : <Skeleton sx={{ mt: 3 }} />
+                                        <Box sx={{ overflow: "auto" }}>
+                                            <Box sx={{ width: "100%", display: "table", tableLayout: "fixed" }}>
+                                                <Table sx={{ minWidth: 650 }} aria-label="simple table">
+                                                    <TableHead>
+                                                        <TableRow>
+                                                            <TableCell align="left" sx={{ fontSize: 16, fontWeight: "bolder" }}>Offer Id</TableCell>
+                                                            <TableCell align="left" sx={{ fontSize: 16, fontWeight: "bolder" }}>Request Id</TableCell>
+                                                            <TableCell align="left" sx={{ fontSize: 16, fontWeight: "bolder" }}>Created date</TableCell>
+                                                            <TableCell align="left" sx={{ fontSize: 16, fontWeight: "bolder" }}>Departure</TableCell>
+                                                            <TableCell align="left" sx={{ fontSize: 16, fontWeight: "bolder" }}>Arrival</TableCell>
+                                                            {/* <TableCell align="left" sx={{ fontSize: 16, fontWeight: "bolder" }}>Haulage?</TableCell>
+                                                            <TableCell align="left" sx={{ fontSize: 16, fontWeight: "bolder" }}>Misc?</TableCell> */}
+                                                            <TableCell align="left" sx={{ fontSize: 16, fontWeight: "bolder" }}>Status</TableCell>
+                                                            <TableCell align="left" sx={{ fontSize: 16, fontWeight: "bolder" }}>Client approval</TableCell>
+                                                            <TableCell align="left" sx={{ fontSize: 16, fontWeight: "bolder" }}>Total price</TableCell>
+                                                            <TableCell align="left"><b></b></TableCell>
+                                                        </TableRow>
+                                                    </TableHead>
+                                                    <TableBody>
+                                                        {
+                                                            offers.map((row: any, i: number) => (
+                                                                <React.Fragment key={"offer-"+row.id}>
+                                                                    <TableRow sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                                                                        <TableCell align="left">{row.quoteOfferNumber}</TableCell>
+                                                                        <TableCell align="left">
+                                                                            <Link to={"/admin/request/"+row.requestQuoteId}>{row.requestQuoteId}</Link>
+                                                                        </TableCell>
+                                                                        <TableCell align="left">{(new Date(row.created)).toLocaleString()}</TableCell>
+                                                                        <TableCell align="left">{ports.find((elm: any) => elm.portId === row.departurePortId).portName}</TableCell>
+                                                                        <TableCell align="left">{ports.find((elm: any) => elm.portId === row.destinationPortId).portName}</TableCell>
+                                                                        {/* <TableCell align="left">{row.haulage !== null ? <Chip label="Yes" color="success" /> : <Chip label="No" />}</TableCell>
+                                                                        <TableCell align="left">{row.miscellaneousList !== null ? <Chip label="Yes" color="success" /> : <Chip label="No" />}</TableCell> */}
+                                                                        <TableCell align="left"><Chip label={statusLabel(row.status)} color={colors(row.status)} /></TableCell>
+                                                                        <TableCell align="left">{row.status !== "Accepted" && row.clientApproval === "Pending" ? <Chip label={"No email"} /> : <Chip label={row.clientApproval} color={colors(row.clientApproval)} />}</TableCell>
+                                                                        <TableCell align="left">{Number(row.totalPrice+row.totalPrice*row.margin/100-row.totalPrice*row.reduction/100+row.extraFee*1).toFixed(2)} {row.seaFreight.currency}</TableCell>
+                                                                        <TableCell align="left">
+                                                                            <IconButton href={"/admin/quote-offers/"+row.id} sx={{ mr: 1 }}>
+                                                                                <EditIcon fontSize="small" />
+                                                                            </IconButton>
+                                                                            <IconButton onClick={() => { setCurrentId(row.id); setModal(true); }}>
+                                                                                <DeleteIcon fontSize="small" />
+                                                                            </IconButton>
+                                                                        </TableCell>
+                                                                    </TableRow>
+                                                                </React.Fragment>
+                                                            ))
+                                                        }
+                                                    </TableBody>
+                                                </Table>
+                                            </Box>
+                                        </Box> : <Skeleton sx={{ mt: 3 }} />
                                     }
                                 </Grid>
                             </Grid> : <Skeleton sx={{ mx: 5, mt: 3 }} />

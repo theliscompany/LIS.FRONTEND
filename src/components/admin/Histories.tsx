@@ -94,16 +94,16 @@ function Histories(props: any) {
                 <Typography variant="h5" mt={3} px={5}><b>General timeline of the requests</b></Typography>
                 <Box>
                     <Grid container spacing={1} px={5} mt={2}>
-                        <Grid item xs={2}>
+                        <Grid item xs={12} md={2}>
                             <InputLabel htmlFor="assignee" sx={inputLabelStyles}>Assignee id</InputLabel>
                             <BootstrapInput id="assignee" type="text" value={assigneeId} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setAssigneeId(e.target.value)} fullWidth />
                         </Grid>
-                        <Grid item xs={2}>
+                        <Grid item xs={12} md={2}>
                             <InputLabel htmlFor="request" sx={inputLabelStyles}>Request quote id</InputLabel>
                             <BootstrapInput id="request" type="text" value={requestQuoteId} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setRequestQuoteId(e.target.value)} fullWidth />
                         </Grid>
                         
-                        <Grid item xs={3}>
+                        <Grid item xs={12} md={3}>
                             <InputLabel htmlFor="assigned-date-start" sx={inputLabelStyles}>Assigned date</InputLabel>
                             <LocalizationProvider dateAdapter={AdapterDayjs}>
                                 <DateTimePicker 
@@ -113,7 +113,7 @@ function Histories(props: any) {
                                 />
                             </LocalizationProvider>
                         </Grid>
-                        <Grid item xs={3}>
+                        <Grid item xs={12} md={3}>
                             <InputLabel htmlFor="assigned-date-end" sx={inputLabelStyles}>Unassigned date</InputLabel>
                             <LocalizationProvider dateAdapter={AdapterDayjs}>
                                 <DateTimePicker 
@@ -123,7 +123,7 @@ function Histories(props: any) {
                                 />
                             </LocalizationProvider>
                         </Grid>
-                        <Grid item xs={2} mt={1} sx={{ display: "flex", alignItems: "end" }}>
+                        <Grid item xs={12} md={2} mt={1} sx={{ display: "flex", alignItems: "end" }}>
                         <Button 
                             variant="contained" 
                             color="inherit"
@@ -139,37 +139,39 @@ function Histories(props: any) {
                         <Grid item xs={12}>
                             {
                                 !load && histories !== null ?
-                                <TableContainer component={Paper}>
-                                    <Table sx={{ minWidth: 650 }} aria-label="simple table">
-                                        <TableHead>
-                                            <TableRow>
-                                                <TableCell align="left" sx={{ fontSize: 16, fontWeight: "bolder" }}>Id</TableCell>
-                                                <TableCell align="left" sx={{ fontSize: 16, fontWeight: "bolder" }}>Request id</TableCell>
-                                                <TableCell align="left" sx={{ fontSize: 16, fontWeight: "bolder" }}>Assignee</TableCell>
-                                                <TableCell align="left" sx={{ fontSize: 16, fontWeight: "bolder" }}>Assignee email</TableCell>
-                                                <TableCell align="left" sx={{ fontSize: 16, fontWeight: "bolder" }}>Assign date</TableCell>
-                                                <TableCell align="left" sx={{ fontSize: 16, fontWeight: "bolder" }}>Unassign date</TableCell>
-                                                <TableCell align="left"><b></b></TableCell>
-                                            </TableRow>
-                                        </TableHead>
-                                        <TableBody>
-                                            {
-                                                histories.map((row: any, i: number) => (
-                                                    <TableRow key={"history-"+row.id} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-                                                        <TableCell align="left">{row.id}</TableCell>
-                                                        <TableCell align="left">
-                                                            <Link to={"/admin/request/"+row.requestQuoteId}>{row.requestQuoteId}</Link>
-                                                        </TableCell>
-                                                        <TableCell align="left">{row.assignee !== null ? row.assignee.name+" (#"+row.assignee.id+")" : "Not defined"}</TableCell>
-                                                        <TableCell align="left">{row.assignee !== null ? row.assignee.email : "Not defined"}</TableCell>
-                                                        <TableCell align="left">{row.assignedAt !== null ? (new Date(row.assignedAt)).toLocaleString() : <Chip label="Currently assigned" color="success" />}</TableCell>
-                                                        <TableCell align="left">{row.unassignedAt !== null ? (new Date(row.unassignedAt)).toLocaleString() : <Chip label="Currently assigned" color="success" />}</TableCell>
-                                                    </TableRow>
-                                                ))
-                                            }
-                                        </TableBody>
-                                    </Table>
-                                </TableContainer> : <Skeleton sx={{ mt: 3 }} />
+                                <Box sx={{ overflow: "auto" }}>
+                                    <Box sx={{ width: "100%", display: "table", tableLayout: "fixed" }}>
+                                        <Table aria-label="simple table">
+                                            <TableHead>
+                                                <TableRow>
+                                                    <TableCell align="left" sx={{ fontSize: 16, fontWeight: "bolder" }}>Id</TableCell>
+                                                    <TableCell align="left" sx={{ fontSize: 16, fontWeight: "bolder" }}>Request id</TableCell>
+                                                    <TableCell align="left" sx={{ fontSize: 16, fontWeight: "bolder" }}>Assignee</TableCell>
+                                                    <TableCell align="left" sx={{ fontSize: 16, fontWeight: "bolder" }}>Assignee email</TableCell>
+                                                    <TableCell align="left" sx={{ fontSize: 16, fontWeight: "bolder" }}>Assign date</TableCell>
+                                                    <TableCell align="left" sx={{ fontSize: 16, fontWeight: "bolder" }}>Unassign date</TableCell>
+                                                    <TableCell align="left"><b></b></TableCell>
+                                                </TableRow>
+                                            </TableHead>
+                                            <TableBody>
+                                                {
+                                                    histories.map((row: any, i: number) => (
+                                                        <TableRow key={"history-"+row.id} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                                                            <TableCell align="left">{row.id}</TableCell>
+                                                            <TableCell align="left">
+                                                                <Link to={"/admin/request/"+row.requestQuoteId}>{row.requestQuoteId}</Link>
+                                                            </TableCell>
+                                                            <TableCell align="left">{row.assignee !== null ? row.assignee.name+" (#"+row.assignee.id+")" : "Not defined"}</TableCell>
+                                                            <TableCell align="left">{row.assignee !== null ? row.assignee.email : "Not defined"}</TableCell>
+                                                            <TableCell align="left">{row.assignedAt !== null ? (new Date(row.assignedAt)).toLocaleString() : <Chip label="Currently assigned" color="success" />}</TableCell>
+                                                            <TableCell align="left">{row.unassignedAt !== null ? (new Date(row.unassignedAt)).toLocaleString() : <Chip label="Currently assigned" color="success" />}</TableCell>
+                                                        </TableRow>
+                                                    ))
+                                                }
+                                            </TableBody>
+                                        </Table>
+                                    </Box>
+                                </Box> : <Skeleton sx={{ mt: 3 }} />
                             }
                         </Grid>
                     </Grid>
