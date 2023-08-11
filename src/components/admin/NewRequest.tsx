@@ -243,6 +243,7 @@ function NewRequest(props: any) {
                         departure: departurePort.portName+', '+departurePort.country,
                         arrival: arrivalPort.portName+', '+arrivalPort.country,
                         cargoType: 0,
+                        clientNumber: clientNumber,
                         packingType: packingType,
                         quantity: Number(quantity),
                         detail: message,

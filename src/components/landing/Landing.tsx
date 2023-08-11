@@ -440,7 +440,7 @@ function Landing() {
                             }
                         </Grid>
                         <Grid item xs={12} md={6}>
-                            <InputLabel htmlFor="arrival" sx={inputLabelStyles}>Where do you want to transport your products?</InputLabel>
+                            <InputLabel htmlFor="arrival" sx={inputLabelStyles}>Where do you want us to deliver your cargo?</InputLabel>
                             {/* <AutocompleteSearch id="arrival" value={arrivalTown} onChange={(e: any) => { setArrivalTown(convertStringToObject(e.target.innerText)); setArrival(e.target.innerText); }} fullWidth /> */}
                             {
                                 ports !== null ?
@@ -527,7 +527,7 @@ function Landing() {
                 </DialogContent>
                 <DialogActions>
                     <Button variant="contained" color={!load ? "primary" : "info"} className="mr-3" onClick={sendQuotationForm} disabled={load === true} sx={{ textTransform: "none" }}>Continue</Button>
-                    <Button variant="contained" onClick={() => { setModal(false); }} sx={buttonCloseStyles}>Close</Button>
+                    {/* <Button variant="contained" onClick={() => { setModal(false); }} sx={buttonCloseStyles}>Close</Button> */}
                 </DialogActions>
             </BootstrapDialog>
             
@@ -543,7 +543,7 @@ function Landing() {
                 </BootstrapDialogTitle>
                 <DialogContent dividers>
                     <Typography variant="subtitle1" gutterBottom px={2}>
-                        Please fill in the form and click the button to send a request for a quote.
+                        Please provide your whatsapp number and /or your email address
                     </Typography>
                     <Grid container spacing={2} mt={1} px={2}>
                         <Grid item xs={12} md={6}>

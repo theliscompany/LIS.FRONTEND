@@ -6,6 +6,7 @@ export interface RequestDto {
     arrival: string;
     status?: string|number|null|undefined;
     cargoType?: string|number;
+    clientNumber?: string;
     packingType: string;
     quantity: number;
     detail: string;
