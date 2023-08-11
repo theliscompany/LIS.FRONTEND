@@ -3,14 +3,10 @@ import ListItem from '@mui/material/ListItem';
 import ListItemText from '@mui/material/ListItemText';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
-import dayjs, { Dayjs } from 'dayjs';
-import { DemoContainer, DemoItem } from '@mui/x-date-pickers/internals/demo';
+import { Dayjs } from 'dayjs';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
-import { MobileDateTimePicker } from '@mui/x-date-pickers/MobileDateTimePicker';
-import { DesktopDateTimePicker } from '@mui/x-date-pickers/DesktopDateTimePicker';
-import { StaticDateTimePicker } from '@mui/x-date-pickers/StaticDateTimePicker';
 import React, { useEffect } from 'react';
 import { NavLink, Link } from 'react-router-dom';
 import '../../App.css';
@@ -96,6 +92,7 @@ function Requests() {
     const [load, setLoad] = React.useState<boolean>(true);
     const [status, setStatus] = React.useState<string>("");
     const [cargoType, setCargoType] = React.useState<string>("");
+    const [packingType, setPackingType] = React.useState<string>("");
     const [departureTown, setDepartureTown] = React.useState<any>(null);
     const [arrivalTown, setArrivalTown] = React.useState<any>(null);
     const [departure, setDeparture] = React.useState<string>("");
@@ -108,8 +105,8 @@ function Requests() {
 
     const context = useAuthorizedBackendApi();
     
-    const handleChangeCargoType = (event: { target: { value: string } }) => {
-        setCargoType(event.target.value);
+    const handleChangePackingType = (event: { target: { value: string } }) => {
+        setPackingType(event.target.value);
     };
 
     const handleChangeStatus = (event: { target: { value: string } }) => {
@@ -156,42 +153,38 @@ function Requests() {
     }
 
     return (
-        <div style={{ background: "#fff", borderTopLeftRadius: 20, borderTopRightRadius: 20, overflowX: "hidden" }}>
+        <div style={{ background: "#fff", borderTopLeftRadius: 20, borderTopRightRadius: 20 }}>
             <SnackbarProvider />
             <Box py={4}>
-                <Typography variant="h5" mt={3} px={5}>
-                    {
-                        search !== undefined ? <b>Search result for : {search}</b> : <b>List of requests for quote</b>
-                    }
-                </Typography>
+                <Typography variant="h5" mt={3} px={5}><b>List of requests for quote</b></Typography>
                 <Grid container spacing={1} px={5} mt={2}>
-                    <Grid item xs={3}>
+                    <Grid item xs={12} md={3}>
                         <InputLabel htmlFor="departure" sx={inputLabelStyles}>Departure location</InputLabel>
                         <AutocompleteSearch id="departure" value={departureTown} onChange={(e: any) => { setDepartureTown(convertStringToObject(e.target.innerText)); setDeparture(e.target.innerText); }} fullWidth disabled={status === "Valider"} />
                     </Grid>
-                    <Grid item xs={3}>
+                    <Grid item xs={12} md={3}>
                         <InputLabel htmlFor="arrival" sx={inputLabelStyles}>Arrival location</InputLabel>
                         <AutocompleteSearch id="arrival" value={arrivalTown} onChange={(e: any) => { setArrivalTown(convertStringToObject(e.target.innerText)); setArrival(e.target.innerText); }} fullWidth disabled={status === "Valider"} />
                     </Grid>
-                    <Grid item xs={3}>
-                        <InputLabel htmlFor="cargo-type" sx={inputLabelStyles}>Type of cargo</InputLabel>
+                    <Grid item xs={12} md={3}>
+                        <InputLabel htmlFor="packing-type" sx={inputLabelStyles}>Packing type</InputLabel>
                         <NativeSelect
-                            id="demo-customized-select-native"
-                            value={cargoType}
-                            onChange={handleChangeCargoType}
+                            id="packing-type"
+                            value={packingType}
+                            onChange={handleChangePackingType}
                             input={<BootstrapInput />}
                             fullWidth
                         >
                             <option value="">All types</option>
-                            <option value="0">Container</option>
-                            <option value="1">Conventional</option>
-                            <option value="2">Roll-on/Roll-off</option>
+                            <option value="FCL">FCL</option>
+                            <option value="Breakbulk/LCL">Breakbulk/LCL</option>
+                            <option value="Unit RoRo">Unit RoRo</option>
                         </NativeSelect>
                     </Grid>
-                    <Grid item xs={3}>
-                        <InputLabel htmlFor="cargo-type" sx={inputLabelStyles}>Status</InputLabel>
+                    <Grid item xs={12} md={3}>
+                        <InputLabel htmlFor="status" sx={inputLabelStyles}>Status</InputLabel>
                         <NativeSelect
-                            id="demo-customized-select-native2"
+                            id="status"
                             value={status}
                             onChange={handleChangeStatus}
                             input={<BootstrapInput />}
@@ -203,7 +196,7 @@ function Requests() {
                             <option value="2">Rejeté</option>
                         </NativeSelect>
                     </Grid>
-                    <Grid item xs={3} mt={1}>
+                    <Grid item xs={12} md={3} mt={1}>
                         <InputLabel htmlFor="created-date-start" sx={inputLabelStyles}>Created date start</InputLabel>
                         <LocalizationProvider dateAdapter={AdapterDayjs}>
                             <DateTimePicker 
@@ -213,7 +206,7 @@ function Requests() {
                             />
                         </LocalizationProvider>
                     </Grid>
-                    <Grid item xs={3} mt={1}>
+                    <Grid item xs={12} md={3} mt={1}>
                         <InputLabel htmlFor="created-date-end" sx={inputLabelStyles}>Created date end</InputLabel>
                         <LocalizationProvider dateAdapter={AdapterDayjs}>
                             <DateTimePicker 
@@ -223,7 +216,7 @@ function Requests() {
                             />
                         </LocalizationProvider>
                     </Grid>
-                    <Grid item xs={3} mt={1}>
+                    <Grid item xs={12} md={3} mt={1}>
                         <InputLabel htmlFor="updated-date-start" sx={inputLabelStyles}>Updated date start</InputLabel>
                         <LocalizationProvider dateAdapter={AdapterDayjs}>
                             <DateTimePicker 
@@ -233,7 +226,7 @@ function Requests() {
                             />
                         </LocalizationProvider>
                     </Grid>
-                    <Grid item xs={3} mt={1}>
+                    <Grid item xs={12} md={3} mt={1}>
                         <InputLabel htmlFor="updated-date-end" sx={inputLabelStyles}>Updated date end</InputLabel>
                         <LocalizationProvider dateAdapter={AdapterDayjs}>
                             <DateTimePicker 
@@ -243,7 +236,7 @@ function Requests() {
                             />
                         </LocalizationProvider>
                     </Grid>
-                    <Grid item xs={2} mt={1} sx={{ display: "flex", alignItems: "end" }}>
+                    <Grid item xs={12} md={2} mt={1} sx={{ display: "flex", alignItems: "end" }}>
                         <Button 
                             variant="contained" 
                             color="inherit"
@@ -258,57 +251,56 @@ function Requests() {
                     </Grid>
                 </Grid>
 
-                {
-                    !load ? 
-                        requests !== null ? 
-                        <List sx={{ 
-                            mt: 3 
-                        }}>
-                            {
-                                requests.map((item: any, i: number) => {
-                                    return (
-                                        <ListItem
-                                            key={"request-"+i}
-                                            component={NavLink}
-                                            to={"/admin/request/" + item.id}
-                                            sx={{ 
-                                                '&:hover': {
-                                                    backgroundColor: "#fbfbfb"
-                                                },
-                                                borderTop: "1px solid #e6e6e6", 
-                                                px: 5, pt: 1.25, pb: 2 
-                                            }}
-                                        >
-                                            <Grid container sx={{ maxWidth: "600px", color: "#333" }}>
-                                                <Grid item xs={12}>
-                                                    <ListItemText
-                                                        primary={<Typography variant="subtitle1" color="#333"><b>{"#" + item.id + " New quote request" + " from : " + item.email}</b></Typography>}
-                                                    />        
+                <Grid container>
+                    <Grid item xs={12}>
+                    {
+                        !load ? 
+                            requests !== null ? 
+                            <List sx={{ mt: 3 }}>
+                                {
+                                    requests.map((item: any, i: number) => {
+                                        return (
+                                            <ListItem
+                                                key={"request-"+i}
+                                                component={NavLink}
+                                                to={"/admin/request/" + item.id}
+                                                sx={{ 
+                                                    '&:hover': { backgroundColor: "#fbfbfb" },
+                                                    borderTop: "1px solid #e6e6e6", 
+                                                    px: { xs: 5, md: 5 }, pt: 1.25, pb: 2 
+                                                }}
+                                            >
+                                                <Grid container sx={{ maxWidth: "600px", color: "#333" }}>
+                                                    <Grid item xs={12}>
+                                                        <ListItemText
+                                                            primary={<Typography variant="subtitle1" color="#333"><b>{"#" + item.id + " New quote request" + " from : " + item.email}</b></Typography>}
+                                                        />        
+                                                    </Grid>
+                                                    <Grid item xs={12}>
+                                                        {dateTimeDiff(item.createdAt)} <Chip size="small" label={item.status} color={item.status === "EnAttente" ? "warning" : item.status === "Valider" ? "success" : "secondary"} sx={{ ml: 1 }} />
+                                                    </Grid>
+                                                    <Grid item xs={12} md={6} mt={1}>
+                                                        <Typography variant="subtitle1" display="flex" alignItems="center" justifyContent="left" fontSize={15}>Departure location</Typography>
+                                                        <Typography variant="subtitle2" display="flex" alignItems="center" justifyContent="left" fontSize={14}>
+                                                            <PlaceIcon sx={{ position: "relative", right: "4px" }} /> <span>{item.departure}</span>
+                                                        </Typography>
+                                                    </Grid>
+                                                    <Grid item xs={12} md={6} mt={1}>
+                                                        <Typography variant="subtitle1" display="flex" alignItems="center" justifyContent="left" fontSize={15}>Arrival location</Typography>
+                                                        <Typography variant="subtitle2" display="flex" alignItems="center" justifyContent="left" fontSize={14}>
+                                                            <PlaceIcon sx={{ position: "relative", right: "4px" }} /> <span>{item.arrival}</span>
+                                                        </Typography>
+                                                    </Grid>
                                                 </Grid>
-                                                <Grid item xs={12}>
-                                                    {dateTimeDiff(item.createdAt)} <Chip size="small" label={item.status} color={item.status === "EnAttente" ? "warning" : item.status === "Valider" ? "success" : "secondary"} sx={{ ml: 1 }} />
-                                                </Grid>
-                                                <Grid item xs={6} mt={1}>
-                                                    <Typography variant="subtitle1" display="flex" alignItems="center" justifyContent="left" fontSize={15}>Departure location</Typography>
-                                                    <Typography variant="subtitle2" display="flex" alignItems="center" justifyContent="left" fontSize={14}>
-                                                        <PlaceIcon sx={{ position: "relative", right: "4px" }} /> <span>{item.departure}</span>
-                                                    </Typography>
-                                                </Grid>
-                                                <Grid item xs={6} mt={1}>
-                                                    <Typography variant="subtitle1" display="flex" alignItems="center" justifyContent="left" fontSize={15}>Arrival location</Typography>
-                                                    <Typography variant="subtitle2" display="flex" alignItems="center" justifyContent="left" fontSize={14}>
-                                                        <PlaceIcon sx={{ position: "relative", right: "4px" }} /> <span>{item.arrival}</span>
-                                                    </Typography>
-                                                </Grid>
-                                            </Grid>
-                                        </ListItem>
-                                    )
-                                })
-                            }
-                        </List> : <Typography variant="subtitle1" mx={5} my={3}>Error during the loading of the data</Typography>
-                    : <Skeleton sx={{ mx: 5, mt: 3 }} />
-                }
-                
+                                            </ListItem>
+                                        )
+                                    })
+                                }
+                            </List> : <Typography variant="subtitle1" my={3}>Error during the loading of the data</Typography>
+                        : <Skeleton sx={{ mt: 3 }} />
+                    }
+                    </Grid>
+                </Grid>
             </Box>
         </div>
     );

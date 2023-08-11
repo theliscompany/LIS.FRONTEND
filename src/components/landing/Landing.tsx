@@ -480,8 +480,8 @@ function Landing() {
                                 fullWidth
                             >
                                 <option value="FCL">FCL</option>
-                                <option value="Breakbulk/LCL" disabled>Breakbulk/LCL</option>
-                                <option value="Unit RoRo" disabled>Unit RoRo</option>
+                                <option value="Breakbulk/LCL">Breakbulk/LCL</option>
+                                <option value="Unit RoRo">Unit RoRo</option>
                             </NativeSelect>
                         </Grid>
                         <Grid item xs={12} md={6}>
