@@ -248,8 +248,7 @@ function Layout(props: {children?: React.ReactNode}) {
                                     } 
                                     onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
                                         if (e.key === "Enter") {
-                                            // window.location.href = "/admin/search/"+searchText;
-                                            redirect("/admin/search/"+searchText);
+                                            navigate("/admin/search/"+searchText);
                                             e.preventDefault();
                                         }
                                     }}
@@ -278,12 +277,12 @@ function Layout(props: {children?: React.ReactNode}) {
                                 sx={{ ml: 5, minWidth: { md: "400px" } }} 
                                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchText(e.target.value)} endAdornment={
                                     <InputAdornment position="end">
-                                        <IconButton href={"/admin/search/"+searchText} edge="end"><Search /></IconButton>
+                                        <IconButton component={Link} to={"/admin/search/"+searchText} edge="end"><Search /></IconButton>
                                     </InputAdornment>
                                 } 
                                 onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
                                     if (e.key === "Enter") {
-                                        window.location.href = "/admin/search/"+searchText;
+                                        navigate("/admin/search/"+searchText);
                                         e.preventDefault();
                                     }
                                 }}

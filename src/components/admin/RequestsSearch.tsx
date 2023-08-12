@@ -98,7 +98,7 @@ function RequestsSearch() {
 
     useEffect(() => {
         loadRequests();
-    }, [context]);
+    }, [context, search]);
 
     const loadRequests = async () => {
         if (context) {
@@ -145,8 +145,8 @@ function RequestsSearch() {
                         search !== undefined ? <b>Search results for : {search}</b> : <b>List of requests for quote</b>
                     }
                 </Typography>
-                <Grid container spacing={1} mx={4} mt={2}>
-                <Grid item xs={12} md={3}>
+                <Grid container spacing={1} px={5} mt={2}>
+                    <Grid item xs={12} md={3}>
                         <InputLabel htmlFor="departure" sx={inputLabelStyles}>Departure location</InputLabel>
                         <BootstrapInput id="departure" type="text" value={departure} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setDeparture(e.target.value)} fullWidth />
                     </Grid>
@@ -224,7 +224,7 @@ function RequestsSearch() {
                                                     />        
                                                 </Grid>
                                                 <Grid item xs={12}>
-                                                    {dateTimeDiff(item.createdAt)} <Chip size="small" label={item.status} color={item.status === "EnAttente" ? "warning" : item.status === "Valider" ? "success" : "error"} sx={{ ml: 1 }} />
+                                                    {dateTimeDiff(item.createdAt)} <Chip size="small" label={item.status} color={item.status === "EnAttente" ? "warning" : item.status === "Valider" ? "success" : "secondary"} sx={{ ml: 1 }} />
                                                 </Grid>
                                                 <Grid item xs={12} md={6} mt={1}>
                                                     <Typography variant="subtitle1" display="flex" alignItems="center" justifyContent="left" fontSize={15}>Departure location</Typography>
