@@ -35,6 +35,7 @@ const App = () => {
                 <Route path="simulation" element={<Simulation />} />
                 <Route path="requests" element={<Requests />} />
                 <Route path="search/:search" element={<RequestsSearch />} />
+                <Route path="search" element={<RequestsSearch />} />
                 <Route path="request/:id" element={<Request />} />
                 <Route path="new-request" element={<NewRequest />} />
                 <Route path="my-requests" element={<MyRequests />} />
