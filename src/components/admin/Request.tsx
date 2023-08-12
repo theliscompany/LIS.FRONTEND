@@ -923,8 +923,8 @@ function Request(props: any) {
     return (
         <div style={{ background: "#fff", borderTopLeftRadius: 20, borderTopRightRadius: 20 }}>
             <SnackbarProvider />
-            <Box py={4}>
-                <Typography variant="h5" mt={3} mx={5}><b>Manage a request for quote N° {id}</b></Typography>
+            <Box py={2.5}>
+                <Typography variant="h5" sx={{mt: {xs: 4, md: 1.5, lg: 1.5 }}} mx={5}><b>Manage a request for quote N° {id}</b></Typography>
                     <Box>
                         {
                             !load ? 
@@ -1075,9 +1075,8 @@ function Request(props: any) {
                                                 <Grid container spacing={2}>
                                                     {
                                                         containersSelection.map((item: any, index: number) => (
-                                                            <Grid item xs={4}>
+                                                            <Grid key={"listitem1-"+index} item xs={12} md={4}>
                                                                 <ListItem
-                                                                    key={"listitem1-"+index}
                                                                     sx={{ border: "1px solid #e5e5e5" }}
                                                                     secondaryAction={
                                                                         <IconButton edge="end" onClick={() => {
@@ -1146,9 +1145,8 @@ function Request(props: any) {
                                                 <Grid container spacing={2}>
                                                     {
                                                         packagesSelection.map((item: any, index: number) => (
-                                                            <Grid item xs={12} md={6}>
+                                                            <Grid key={"packageitem1-"+index} item xs={12} md={6}>
                                                                 <ListItem
-                                                                    key={"unititem1-"+index}
                                                                     sx={{ border: "1px solid #e5e5e5" }}
                                                                     secondaryAction={
                                                                         <IconButton edge="end" onClick={() => {
@@ -1215,9 +1213,8 @@ function Request(props: any) {
                                                 <Grid container spacing={2}>
                                                     {
                                                         unitsSelection.map((item: any, index: number) => (
-                                                            <Grid item xs={12} md={6}>
+                                                            <Grid key={"unititem1-"+index} item xs={12} md={6}>
                                                                 <ListItem
-                                                                    key={"unititem1-"+index}
                                                                     sx={{ border: "1px solid #e5e5e5" }}
                                                                     secondaryAction={
                                                                         <IconButton edge="end" onClick={() => {
@@ -1538,83 +1535,10 @@ function Request(props: any) {
                             </React.Fragment>
                         ) : (
                             <React.Fragment>
-                                {/* <Typography sx={{ mt: 2, mb: 1 }}>Step {activeStep + 1}</Typography> */}
                                 {
                                     activeStep === 0 ?
                                     <Grid container spacing={2} mt={1} px={2}>
-                                        {/* <Grid item xs={4}>
-                                            <InputLabel htmlFor="container-type" sx={inputLabelStyles}>Container Type</InputLabel>
-                                            {
-                                                containers !== null ?
-                                                <NativeSelect
-                                                    id="container-type"
-                                                    value={containerType}
-                                                    onChange={(event: { target: { value: any } }) => { setContainerType(Number(event.target.value)); }}
-                                                    input={<BootstrapInput />}
-                                                    fullWidth
-                                                >
-                                                    <option key={"elm1-x"} value={0}>Not defined</option>
-                                                    {containers.map((elm: any, i: number) => (
-                                                        <option key={"elm1-"+i} value={elm.packageId}>{elm.packageName}</option>
-                                                    ))}
-                                                </NativeSelect>
-                                                : <Skeleton />
-                                            }
-                                        </Grid>
-                                        <Grid item xs={4}>
-                                            <InputLabel htmlFor="quantity" sx={inputLabelStyles}>Quantity</InputLabel>
-                                            <BootstrapInput id="quantity" type="number" inputProps={{ min: 0, max: 100 }} value={quantity} onChange={(e: any) => {setQuantity(e.target.value)}} fullWidth />
-                                        </Grid>
-                                        <Grid item xs={4}>
-                                            <Button 
-                                                variant="contained" color="inherit" fullWidth sx={whiteButtonStyles} 
-                                                style={{ marginTop: "30px", height: "42px", float: "right" }} 
-                                                onClick={() => {
-                                                    if (containerType !== 0 && quantity > 0) {
-                                                        setContainersSelection((prevItems: any) => [...prevItems, { container: containerType, quantity: quantity }]);
-                                                        setContainerType(0); setQuantity(1);
-                                                    } 
-                                                    else {
-                                                        enqueueSnackbar("You need to select a container type and a good value for quantity.", { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
-                                                    }
-                                                }} 
-                                            >
-                                                Add the container
-                                            </Button>
-                                        </Grid> */}
-                                        {/* <Grid item xs={12}>
-                                            {
-                                                containersSelection !== undefined && containersSelection !== null && containersSelection.length !== 0 && containers !== null ? 
-                                                    <Grid container spacing={2}>
-                                                        {
-                                                            containersSelection.map((item: any, index: number) => (
-                                                                <Grid item xs={4}>
-                                                                    <ListItem
-                                                                        key={"listitem1-"+index}
-                                                                        sx={{ border: "1px solid #e5e5e5" }}
-                                                                        secondaryAction={
-                                                                            <IconButton edge="end" onClick={() => {
-                                                                                setContainersSelection((prevItems: any) => prevItems.filter((item: any, i: number) => i !== index));
-                                                                            }}>
-                                                                                <DeleteIcon />
-                                                                            </IconButton>
-                                                                        }
-                                                                    >
-                                                                        <ListItemText primary={
-                                                                            containers.find((elm: any) => elm.packageId === item.container) !== undefined ?
-                                                                            "Container : "+containers.find((elm: any) => elm.packageId === item.container).packageName+" | Quantity : "+item.quantity
-                                                                            : "Container : "+item.container+" | Quantity : "+item.quantity
-                                                                        } />
-                                                                    </ListItem>
-                                                                </Grid>
-                                                            ))
-                                                        }
-                                                    </Grid>
-                                                : null  
-                                            }
-                                        </Grid> */}
-                                        
-                                        <Grid item xs={4} mt={1}>
+                                        <Grid item xs={12} md={4} mt={1}>
                                             <InputLabel htmlFor="departure-date" sx={inputLabelStyles}>Departure date</InputLabel>
                                             <LocalizationProvider dateAdapter={AdapterDayjs}>
                                                 <DateTimePicker 
@@ -1624,34 +1548,7 @@ function Request(props: any) {
                                                 />
                                             </LocalizationProvider>
                                         </Grid>
-                                        {/* <Grid item xs={4} mt={1}>
-                                            <InputLabel htmlFor="request-containerss" sx={inputLabelStyles}>Containers</InputLabel>
-                                            {
-                                                containers !== null ?
-                                                <Select
-                                                    // labelId="request-containers"
-                                                    id="request-containers"
-                                                    multiple
-                                                    value={containersSelected}
-                                                    onChange={handleChangeContainers}
-                                                    input={<BootstrapInput />}
-                                                    renderValue={(selected) => {
-                                                        return getPackageNamesByIds(selected, containers).join(', ');
-                                                    }}
-                                                    disabled
-                                                    fullWidth
-                                                >
-                                                    {containers.map((item: any, i: number) => (
-                                                        <MenuItem key={"container-"+i} value={item.packageId}>
-                                                            <Checkbox checked={containersSelected.indexOf(item.packageId) > -1} />
-                                                            <ListItemText primary={item.packageName} />
-                                                        </MenuItem>
-                                                    ))}
-                                                </Select>
-                                                : <Skeleton />
-                                            }
-                                        </Grid> */}
-                                        <Grid item xs={4} mt={1}>
+                                        <Grid item xs={12} md={4} mt={1}>
                                             <InputLabel htmlFor="port-departure" sx={inputLabelStyles}>Departure port</InputLabel>
                                             {
                                                 ports !== null ?
@@ -1680,7 +1577,7 @@ function Request(props: any) {
                                                 /> : <Skeleton />
                                             }
                                         </Grid>
-                                        <Grid item xs={4} mt={1}>
+                                        <Grid item xs={12} md={4} mt={1}>
                                             <InputLabel htmlFor="destination-port" sx={inputLabelStyles}>Destination port</InputLabel>
                                             {
                                                 ports !== null ?
@@ -1709,7 +1606,7 @@ function Request(props: any) {
                                                 /> : <Skeleton />
                                             }
                                         </Grid>
-                                        <Grid item xs={4} mt={1}>
+                                        <Grid item xs={12} md={4} mt={1}>
                                             <InputLabel htmlFor="loading-date" sx={inputLabelStyles}>Loading date</InputLabel>
                                             <LocalizationProvider dateAdapter={AdapterDayjs}>
                                                 <DateTimePicker 
@@ -1719,7 +1616,7 @@ function Request(props: any) {
                                                 />
                                             </LocalizationProvider>
                                         </Grid>
-                                        <Grid item xs={4} mt={1}>
+                                        <Grid item xs={12} md={4} mt={1}>
                                             <InputLabel htmlFor="loading-city" sx={inputLabelStyles}>Loading city (empty if no haulage)</InputLabel>
                                             {
                                                 cities !== null ?
@@ -1741,7 +1638,7 @@ function Request(props: any) {
                                                 /> : <Skeleton />
                                             }
                                         </Grid>
-                                        <Grid item xs={4} mt={1}>
+                                        <Grid item xs={12} md={4} mt={1}>
                                             <InputLabel htmlFor="haulage-type" sx={inputLabelStyles}>Haulage type (loading timing)</InputLabel>
                                             <NativeSelect
                                                 id="haulage-type"
@@ -1876,15 +1773,15 @@ function Request(props: any) {
                                                 />
                                             </Grid> : null
                                         }
-                                        <Grid item xs={4}>
+                                        <Grid item xs={12} md={4}>
                                             <InputLabel htmlFor="margin" sx={inputLabelStyles}>Margin (in %)</InputLabel>
                                             <BootstrapInput id="margin" type="number" value={margin} onChange={(e: any) => setMargin(e.target.value)} fullWidth />
                                         </Grid>
-                                        <Grid item xs={4}>
+                                        <Grid item xs={12} md={4}>
                                             <InputLabel htmlFor="reduction" sx={inputLabelStyles}>Reduction (in %)</InputLabel>
                                             <BootstrapInput id="reduction" type="number" value={reduction} onChange={(e: any) => setReduction(e.target.value)} fullWidth />
                                         </Grid>
-                                        <Grid item xs={4}>
+                                        <Grid item xs={12} md={4}>
                                             <InputLabel htmlFor="adding" sx={inputLabelStyles}>Extra Fee (in {selectedSeafreight !== null ? selectedSeafreight.currency : null})</InputLabel>
                                             <BootstrapInput id="adding" type="number" value={adding} onChange={(e: any) => setAdding(e.target.value)} fullWidth />
                                         </Grid>

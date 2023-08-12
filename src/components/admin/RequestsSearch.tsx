@@ -37,7 +37,7 @@ function createGetRequestUrl(variable1: string, variable2: string, variable3: st
       url += 'arrival=' + encodeURIComponent(variable2) + '&';
     }
     if (variable3) {
-      url += 'cargoType=' + encodeURIComponent(variable3) + '&';
+      url += 'packingType=' + encodeURIComponent(variable3) + '&';
     }
     if (variable4) {
       url += 'status=' + encodeURIComponent(variable4) + '&';
@@ -75,6 +75,7 @@ function RequestsSearch() {
     const [load, setLoad] = React.useState<boolean>(true);
     const [status, setStatus] = React.useState<string>("");
     const [cargoType, setCargoType] = React.useState<string>("");
+    const [packingType, setPackingType] = React.useState<string>("");
     const [departureTown, setDepartureTown] = React.useState<any>(null);
     const [arrivalTown, setArrivalTown] = React.useState<any>(null);
     const [departure, setDeparture] = React.useState<string>("");
@@ -85,6 +86,10 @@ function RequestsSearch() {
     
     const handleChangeCargoType = (event: { target: { value: string } }) => {
         setCargoType(event.target.value);
+    };
+
+    const handleChangePackingType = (event: { target: { value: string } }) => {
+        setPackingType(event.target.value);
     };
 
     const handleChangeStatus = (event: { target: { value: string } }) => {
@@ -132,42 +137,42 @@ function RequestsSearch() {
     }
 
     return (
-        <div style={{ background: "#fff", borderTopLeftRadius: 20, borderTopRightRadius: 20, overflowX: "hidden" }}>
+        <div style={{ background: "#fff", borderTopLeftRadius: 20, borderTopRightRadius: 20 }}>
             <SnackbarProvider />
-            <Box py={4}>
-                <Typography variant="h5" mt={3} mx={5}>
+            <Box py={2.5}>
+                <Typography variant="h5" sx={{mt: {xs: 4, md: 1.5, lg: 1.5 }}} mx={5}>
                     {
-                        search !== undefined ? <b>Search result for : {search}</b> : <b>List of requests for quote</b>
+                        search !== undefined ? <b>Search results for : {search}</b> : <b>List of requests for quote</b>
                     }
                 </Typography>
                 <Grid container spacing={1} mx={4} mt={2}>
-                    <Grid item xs={3}>
+                <Grid item xs={12} md={3}>
                         <InputLabel htmlFor="departure" sx={inputLabelStyles}>Departure location</InputLabel>
-                        <AutocompleteSearch id="departure" value={departureTown} onChange={(e: any) => { setDepartureTown(convertStringToObject(e.target.innerText)); setDeparture(e.target.innerText); }} fullWidth disabled={status === "Valider"} />
+                        <BootstrapInput id="departure" type="text" value={departure} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setDeparture(e.target.value)} fullWidth />
                     </Grid>
-                    <Grid item xs={3}>
+                    <Grid item xs={12} md={3}>
                         <InputLabel htmlFor="arrival" sx={inputLabelStyles}>Arrival location</InputLabel>
-                        <AutocompleteSearch id="arrival" value={arrivalTown} onChange={(e: any) => { setArrivalTown(convertStringToObject(e.target.innerText)); setArrival(e.target.innerText); }} fullWidth disabled={status === "Valider"} />
+                        <BootstrapInput id="arrival" type="text" value={arrival} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setArrival(e.target.value)} fullWidth />
                     </Grid>
-                    <Grid item xs={2}>
-                        <InputLabel htmlFor="cargo-type" sx={inputLabelStyles}>Type of cargo</InputLabel>
+                    <Grid item xs={12} md={3}>
+                        <InputLabel htmlFor="packing-type" sx={inputLabelStyles}>Packing type</InputLabel>
                         <NativeSelect
-                            id="demo-customized-select-native"
-                            value={cargoType}
-                            onChange={handleChangeCargoType}
+                            id="packing-type"
+                            value={packingType}
+                            onChange={handleChangePackingType}
                             input={<BootstrapInput />}
                             fullWidth
                         >
                             <option value="">All types</option>
-                            <option value="0">Container</option>
-                            <option value="1">Conventional</option>
-                            <option value="2">Roll-on/Roll-off</option>
+                            <option value="FCL">FCL</option>
+                            <option value="Breakbulk/LCL">Breakbulk/LCL</option>
+                            <option value="Unit RoRo">Unit RoRo</option>
                         </NativeSelect>
                     </Grid>
-                    <Grid item xs={2}>
-                        <InputLabel htmlFor="cargo-type" sx={inputLabelStyles}>Status</InputLabel>
+                    <Grid item xs={12} md={2}>
+                        <InputLabel htmlFor="status" sx={inputLabelStyles}>Status</InputLabel>
                         <NativeSelect
-                            id="demo-customized-select-native2"
+                            id="status"
                             value={status}
                             onChange={handleChangeStatus}
                             input={<BootstrapInput />}
@@ -179,7 +184,7 @@ function RequestsSearch() {
                             <option value="2">Rejeté</option>
                         </NativeSelect>
                     </Grid>
-                    <Grid item xs={2} sx={{ display: "flex", alignItems: "end" }}>
+                    <Grid item xs={12} md={2} sx={{ display: "flex", alignItems: "end" }}>
                         <Button 
                             variant="contained" 
                             color="inherit"
@@ -196,9 +201,7 @@ function RequestsSearch() {
                 {
                     !load ? 
                         notifications !== null ? 
-                        <List sx={{ 
-                            mt: 3 
-                        }}>
+                        <List sx={{ mt: 3 }}>
                             {
                                 notifications.map((item: any, i: number) => {
                                     return (
@@ -223,13 +226,13 @@ function RequestsSearch() {
                                                 <Grid item xs={12}>
                                                     {dateTimeDiff(item.createdAt)} <Chip size="small" label={item.status} color={item.status === "EnAttente" ? "warning" : item.status === "Valider" ? "success" : "error"} sx={{ ml: 1 }} />
                                                 </Grid>
-                                                <Grid item xs={6} mt={1}>
+                                                <Grid item xs={12} md={6} mt={1}>
                                                     <Typography variant="subtitle1" display="flex" alignItems="center" justifyContent="left" fontSize={15}>Departure location</Typography>
                                                     <Typography variant="subtitle2" display="flex" alignItems="center" justifyContent="left" fontSize={14}>
                                                         <PlaceIcon sx={{ position: "relative", right: "4px" }} /> <span>{item.departure}</span>
                                                     </Typography>
                                                 </Grid>
-                                                <Grid item xs={6} mt={1}>
+                                                <Grid item xs={12} md={6} mt={1}>
                                                     <Typography variant="subtitle1" display="flex" alignItems="center" justifyContent="left" fontSize={15}>Arrival location</Typography>
                                                     <Typography variant="subtitle2" display="flex" alignItems="center" justifyContent="left" fontSize={14}>
                                                         <PlaceIcon sx={{ position: "relative", right: "4px" }} /> <span>{item.arrival}</span>

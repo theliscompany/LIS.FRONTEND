@@ -410,7 +410,7 @@ function Landing() {
                             <BootstrapInput id="request-email" type="email" value={email} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)} fullWidth />
                         </Grid>
                         <Grid item xs={12} md={6}>
-                            <InputLabel htmlFor="departure" sx={inputLabelStyles}>Where do you want us to pickup your products?</InputLabel>
+                            <InputLabel htmlFor="departure" sx={inputLabelStyles}>Where do you want us to pickup your cargo?</InputLabel>
                             {/* <AutocompleteSearch id="departure" value={departureTown} onChange={(e: any) => { setDepartureTown(convertStringToObject(e.target.innerText)); setDeparture(e.target.innerText); }} fullWidth /> */}
                             {
                                 ports !== null ?
@@ -471,7 +471,7 @@ function Landing() {
                         </Grid>
                         <Grid item xs={12} md={6}>
                             {/* <InputLabel htmlFor="packing-type" sx={inputLabelStyles}>In what type of packing do you want to transport your goods?</InputLabel> */}
-                            <InputLabel htmlFor="packing-type" sx={inputLabelStyles}>Packing type</InputLabel>
+                            <InputLabel htmlFor="packing-type" sx={inputLabelStyles}>Which type of cargo do you want to ship?</InputLabel>
                             <NativeSelect
                                 id="packing-type"
                                 value={packingType}
@@ -485,7 +485,7 @@ function Landing() {
                             </NativeSelect>
                         </Grid>
                         <Grid item xs={12} md={6}>
-                            <InputLabel htmlFor="quantity" sx={inputLabelStyles}>How many units of cargo do you want to transport?</InputLabel>
+                            <InputLabel htmlFor="quantity" sx={inputLabelStyles}>How many units of do you want to ship?</InputLabel>
                             <BootstrapInput id="quantity" type="number" inputProps={{ min: 0, max: 100 }} value={quantity} onChange={(e: any) => {console.log(e); setQuantity(e.target.value)}} fullWidth />
                         </Grid>
                         <Grid item xs={12} mt={1}>
@@ -513,7 +513,7 @@ function Landing() {
                             }
                         </Grid>
                         <Grid item xs={12} mt={1}>
-                            <InputLabel htmlFor="request-message" sx={inputLabelStyles}>Do you want to share other details regarding your needs?</InputLabel>
+                            <InputLabel htmlFor="request-message" sx={inputLabelStyles}>Do you want to share other details regarding your needs? (Optional)</InputLabel>
                             <BootstrapInput id="request-message" type="text" multiline rows={3} value={message} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setMessage(e.target.value)} fullWidth />
                         </Grid>
                         <Grid item xs={12}>

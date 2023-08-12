@@ -4,6 +4,7 @@ import MuiDrawer from '@mui/material/Drawer';
 import AppBar from '@mui/material/AppBar';
 import CssBaseline from '@mui/material/CssBaseline';
 import Toolbar from '@mui/material/Toolbar';
+import Grid from '@mui/material/Grid';
 import List from '@mui/material/List';
 import Typography from '@mui/material/Typography';
 import Divider from '@mui/material/Divider';
@@ -12,6 +13,7 @@ import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import SettingsIcon from '@mui/icons-material/Settings';
+import MenuIcon from '@mui/icons-material/Menu';
 import PeopleIcon from '@mui/icons-material/PeopleAltOutlined';
 import AddIcon from '@mui/icons-material/AddCircleOutline';
 import HomeIcon from '@mui/icons-material/Home';
@@ -41,6 +43,7 @@ import { BackendService } from '../../services/fetch';
 import { BootstrapInput, DarkTooltip } from '../../misc/styles';
 import Search from '@mui/icons-material/Search';
 
+import { redirect, useNavigate } from 'react-router-dom';
 
 function stringToColor(string: string) {
     let hash = 0;
@@ -120,6 +123,18 @@ function Layout(props: {children?: React.ReactNode}) {
     const [searchText, setSearchText] = useState<string>("");
     const account = useAccount(accounts[0] || {});
 
+    const [anchorElNav, setAnchorElNav] = React.useState(null);
+    
+    const handleOpenNavMenu = (event: any) => {
+        setAnchorElNav(event.currentTarget);
+    };
+    
+    const handleCloseNavMenu = () => {
+        setAnchorElNav(null);
+    };
+
+    const navigate = useNavigate();
+
     const context = useAuthorizedBackendApi();
 
     const handleLogout = () => {
@@ -167,8 +182,84 @@ function Layout(props: {children?: React.ReactNode}) {
     
     return (
         <React.Fragment>
-            <Container sx={{ display: { xs: 'none', md: 'flex'}, maxWidth: "100vw !important", padding: "0px !important", m: 0 }}>
-                <CssBaseline />
+            <Container component="div" sx={{ display: 'flex', maxWidth: "100vw !important", padding: "0px !important", m: 0, marginTop: { xs: "0px !important", md: "60px !important;", lg: "60px !important" } }}>
+                {/* App bar for mobile version */}
+                <AppBar position="fixed" sx={{ 
+                    zIndex: (theme) => theme.zIndex.drawer + 1, backgroundColor: "#fff", 
+                    boxShadow: 0, borderBottom: "1px solid rgb(241, 242, 246)",
+                    display: { xs: 'flex', md: 'none' }
+                }}>
+                    <Toolbar disableGutters>
+                        <Grid container spacing={0}>
+                            <Grid item xs={6}>
+                                <Typography variant="h6" noWrap component={Link} to="/admin/" sx={{ ml: 5 }}>
+                                    <img src="/img/logolisquotes.png" className="img-fluid" style={{ maxHeight: "50px", marginTop: "10px" }} alt="lisquotes" />
+                                </Typography>
+                            </Grid>
+                            <Grid item xs={6}>
+                                <IconButton
+                                    size="large"
+                                    onClick={handleOpenNavMenu}
+                                    sx={{ color: "#333", alignItems: "center", justifyContent: "end", height: "100%", float: "right", mr: 5 }}
+                                >
+                                    <MenuIcon />
+                                </IconButton>
+                                <Menu
+                                    id="menu-appbar"
+                                    anchorEl={anchorElNav}
+                                    anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+                                    keepMounted
+                                    transformOrigin={{ vertical: 'top', horizontal: 'left' }}
+                                    open={Boolean(anchorElNav)}
+                                    onClose={handleCloseNavMenu}
+                                    sx={{ display: { xs: 'block', md: 'none' } }}
+                                    PaperProps={{ sx: { width: "200px" } }}
+                                >
+                                    <MenuItem onClick={() => { navigate('/admin/'); handleCloseNavMenu(); }}>
+                                        <Typography textAlign="center">Overview</Typography>
+                                    </MenuItem>
+                                    <MenuItem onClick={() => { navigate('/admin/users'); handleCloseNavMenu(); }}>
+                                        <Typography textAlign="center">Users</Typography>
+                                    </MenuItem>
+                                    <MenuItem onClick={() => { navigate('/admin/new-request'); handleCloseNavMenu(); }}>
+                                        <Typography textAlign="center">New request</Typography>
+                                    </MenuItem>
+                                    <MenuItem onClick={() => { navigate('/admin/my-requests'); handleCloseNavMenu(); }}>
+                                        <Typography textAlign="center">My requests</Typography>
+                                    </MenuItem>
+                                    <MenuItem onClick={() => { navigate('/admin/requests'); handleCloseNavMenu(); }}>
+                                        <Typography textAlign="center">Requests</Typography>
+                                    </MenuItem>
+                                    <MenuItem onClick={() => { navigate('/admin/quote-offers'); handleCloseNavMenu(); }}>
+                                        <Typography textAlign="center">Price offers</Typography>
+                                    </MenuItem>
+                                </Menu>
+                            </Grid>
+                            <Grid item xs={12}>
+                                <BootstrapInput 
+                                    type="text" 
+                                    value={searchText}
+                                    placeholder="Type something to search..."
+                                    sx={{ ml: 5, pb: 1, minWidth: { xs: "calc(100vw - 90px)", md: "400px" } }} 
+                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchText(e.target.value)} endAdornment={
+                                        <InputAdornment position="end">
+                                            <IconButton component={Link} to={"/admin/search/"+searchText} edge="end"><Search /></IconButton>
+                                        </InputAdornment>
+                                    } 
+                                    onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
+                                        if (e.key === "Enter") {
+                                            // window.location.href = "/admin/search/"+searchText;
+                                            redirect("/admin/search/"+searchText);
+                                            e.preventDefault();
+                                        }
+                                    }}
+                                /> 
+                            </Grid>
+                        </Grid>
+                    </Toolbar>
+                </AppBar>
+                
+                {/* App bar for laptop version */}
                 <AppBar position="fixed" sx={{ 
                     zIndex: (theme) => theme.zIndex.drawer + 1, backgroundColor: "#fff", 
                     boxShadow: 0, borderBottom: "1px solid rgb(241, 242, 246)", 
@@ -306,6 +397,8 @@ function Layout(props: {children?: React.ReactNode}) {
                         </Toolbar>
                     </Container>
                 </AppBar>
+                
+                {/* Drawer for laptop version */}
                 <Drawer
                     variant="permanent"
                     open={open}
@@ -408,13 +501,12 @@ function Layout(props: {children?: React.ReactNode}) {
                         </List>
                     </Box>
                 </Drawer>
-                <Box component="main" sx={{ flexGrow: 1, p: 3, background: "#f9fafb", minHeight: "100vh" }}>
-                    <Toolbar />
-                    <Outlet />
-                </Box>
-            </Container>
-            <Container component="div" sx={{ display: { xs: 'flex', md: 'none' }, maxWidth: "100vw !important", padding: "0px !important", m: 0 }}>
-                <Box sx={{ background: "#f9fafb", minHeight: "100vh" }}>
+                
+                <Box sx={{ 
+                    mt: { xs: 10, md: 0 }, 
+                    flexGrow: { xs: 0, md: 1 }, p: { xs: 0, md: 3 },
+                    background: "#f9fafb", minHeight: "100vh" 
+                }}>
                     <Outlet />
                 </Box>
             </Container>
