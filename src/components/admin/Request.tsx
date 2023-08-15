@@ -429,8 +429,8 @@ function Request(props: any) {
                     // setArrivalTown(convertStringToObject(response.data.arrival));
                     setStatus(response.data.status);
                     // setCargoType(String(cargoTypes.indexOf(response.data.cargoType)));
-                    // setPackingType(response.data.packingType !== null ? response.data.packingType : "FCL");
-                    // setClientNumber(response.data.clientNumber !== null ? response.data.clientNumber : "");
+                    setPackingType(response.data.packingType !== null ? response.data.packingType : "FCL");
+                    setClientNumber(response.data.clientNumber !== null ? response.data.clientNumber : "");
                     setQuantity(response.data.quantity);
                     setMessage(response.data.detail);
                     // setTags(response.data.tags !== null ? response.data.tags.split(",") : []);
@@ -488,8 +488,16 @@ function Request(props: any) {
     }
     
     const editRequest = async () => {
+        var auxUnits = [];
+        if (packingType === "Breakbulk/LCL") {
+            auxUnits = packagesSelection;
+        }
+        else if (packingType === "Unit RoRo") {
+            auxUnits = unitsSelection;
+        }
+        
         if(context) {
-            const body: RequestDto = {
+            const body: any = {
                 id: Number(id),
                 email: email,
                 status: status,
@@ -497,10 +505,24 @@ function Request(props: any) {
                 departure: departureTown.portName+", "+departureTown.country,
                 arrival: arrivalTown.portName+", "+arrivalTown.country,
                 cargoType: 0,
-                clientNumber: clientNumber,
                 packingType: packingType,
+                container: containersSelection.map((elm: any, i: number) => { return { 
+                    id: i, 
+                    containers: containers.find((item: any) => item.packageId === elm.container).packageName, 
+                    quantity: elm.quantity, 
+                    requestQuote: {}, 
+                    requestQuoteId: Number(id) 
+                } }),
+                unit: auxUnits.map((elm: any, i: number) => { return { 
+                    id: i, 
+                    name: elm.name, 
+                    weight: elm.weight, 
+                    dimension: elm.dimensions, 
+                    quantity: elm.quantity, 
+                } }),
                 quantity: quantity,
                 detail: message,
+                clientNumber: clientNumber,
                 tags: tags.length !== 0 ? tags.map((elm: any) => elm.productName).join(',') : null,
                 assigneeId: Number(assignedManager)
             };
@@ -1157,7 +1179,7 @@ function Request(props: any) {
                                                                     }
                                                                 >
                                                                     <ListItemText primary={
-                                                                        "Name : "+item.name+" | Quantity : "+item.quantity+" | Dimensions : "+item.dimensions+" | Weight : "+item.weight+" Kg"+" Kg"
+                                                                        "Name : "+item.name+" | Quantity : "+item.quantity+" | Dimensions : "+item.dimensions+" | Weight : "+item.weight+" Kg"
                                                                     } />
                                                                 </ListItem>
                                                             </Grid>
@@ -1225,7 +1247,7 @@ function Request(props: any) {
                                                                     }
                                                                 >
                                                                     <ListItemText primary={
-                                                                        "Name : "+item.name+" | Quantity : "+item.quantity+" | Dimensions : "+item.dimensions+" | Weight : "+item.weight+" Kg"+" Kg"
+                                                                        "Name : "+item.name+" | Quantity : "+item.quantity+" | Dimensions : "+item.dimensions+" | Weight : "+item.weight+" Kg"
                                                                     } />
                                                                 </ListItem>
                                                             </Grid>
