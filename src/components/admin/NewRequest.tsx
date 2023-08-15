@@ -231,7 +231,14 @@ function NewRequest(props: any) {
         if (phone !== "" && email !== "" && arrivalPort !== null && departurePort !== null) {
             if (email === "" || email !== "" && validMail(email)) {
                 setLoad(true);
-                // console.log(tags.map((elm: any) => elm.productName).join(','));
+                var auxUnits = [];
+                if (packingType === "Breakbulk/LCL") {
+                    auxUnits = packagesSelection;
+                }
+                else if (packingType === "Unit RoRo") {
+                    auxUnits = unitsSelection;
+                }
+                
                 var myHeaders = new Headers();
                 myHeaders.append('Accept', '');
                 myHeaders.append("Content-Type", "application/json");
@@ -243,7 +250,22 @@ function NewRequest(props: any) {
                         departure: departurePort.portName+', '+departurePort.country,
                         arrival: arrivalPort.portName+', '+arrivalPort.country,
                         cargoType: 0,
+                        clientNumber: clientNumber,
                         packingType: packingType,
+                        container: containersSelection.map((elm: any, i: number) => { return { 
+                            id: i, 
+                            containers: containers.find((item: any) => item.packageId === elm.container).packageName, 
+                            quantity: elm.quantity, 
+                            // requestQuote: {}, 
+                            // requestQuoteId: Number(id) 
+                        } }),
+                        unit: auxUnits.map((elm: any, i: number) => { return { 
+                            id: i, 
+                            name: elm.name, 
+                            weight: elm.weight, 
+                            dimension: elm.dimensions, 
+                            quantity: elm.quantity, 
+                        } }),
                         quantity: Number(quantity),
                         detail: message,
                         tags: tags.length !== 0 ? tags.map((elm: any) => elm.productName).join(',') : null,
@@ -283,8 +305,8 @@ function NewRequest(props: any) {
     return (
         <div style={{ background: "#fff", borderTopLeftRadius: 20, borderTopRightRadius: 20 }}>
             <SnackbarProvider />
-            <Box py={4}>
-                <Typography variant="h5" mt={3} px={5}><b>Create a new request</b></Typography>
+            <Box py={2.5}>
+                <Typography variant="h5" sx={{mt: {xs: 4, md: 1.5, lg: 1.5 }}} px={5}><b>Create a new request</b></Typography>
                 <Box>
                     <Grid container spacing={1} px={5} mt={2}>
                         <Grid item xs={12} md={6}>
@@ -418,7 +440,7 @@ function NewRequest(props: any) {
                                         <Grid container spacing={2}>
                                             {
                                                 containersSelection.map((item: any, index: number) => (
-                                                    <Grid item xs={4}>
+                                                    <Grid item xs={12} md={4}>
                                                         <ListItem
                                                             key={"listitem1-"+index}
                                                             sx={{ border: "1px solid #e5e5e5" }}

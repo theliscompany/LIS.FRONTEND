@@ -42,7 +42,7 @@ function createGetRequestUrl(variable1: string, variable2: string, variable3: st
       url += 'arrival=' + encodeURIComponent(variable2) + '&';
     }
     if (variable3) {
-      url += 'cargoType=' + encodeURIComponent(variable3) + '&';
+      url += 'packingType=' + encodeURIComponent(variable3) + '&';
     }
     if (variable4) {
       url += 'status=' + encodeURIComponent(variable4) + '&';
@@ -105,6 +105,10 @@ function Requests() {
 
     const context = useAuthorizedBackendApi();
     
+    const handleChangeCargoType = (event: { target: { value: string } }) => {
+        setPackingType(event.target.value);
+    };
+
     const handleChangePackingType = (event: { target: { value: string } }) => {
         setPackingType(event.target.value);
     };
@@ -137,7 +141,7 @@ function Requests() {
     const searchRequests = async () => {
         if (context) {
             setLoad(true);
-            var requestFormatted = createGetRequestUrl(departure, arrival, cargoType, status, createdDateStart, createdDateEnd, updatedDateStart, updatedDateEnd);
+            var requestFormatted = createGetRequestUrl(departure, arrival, packingType, status, createdDateStart, createdDateEnd, updatedDateStart, updatedDateEnd);
             const response: RequestResponseDto = await (context as BackendService<any>).getSingle(requestFormatted);
             if (response !== null && response.code !== undefined && response.data !== undefined) {
                 if (response.code === 200) {
@@ -155,16 +159,16 @@ function Requests() {
     return (
         <div style={{ background: "#fff", borderTopLeftRadius: 20, borderTopRightRadius: 20 }}>
             <SnackbarProvider />
-            <Box py={4}>
-                <Typography variant="h5" mt={3} px={5}><b>List of requests for quote</b></Typography>
+            <Box py={2.5}>
+                <Typography variant="h5" sx={{mt: {xs: 4, md: 1.5, lg: 1.5 }}} px={5}><b>List of requests for quote</b></Typography>
                 <Grid container spacing={1} px={5} mt={2}>
                     <Grid item xs={12} md={3}>
                         <InputLabel htmlFor="departure" sx={inputLabelStyles}>Departure location</InputLabel>
-                        <AutocompleteSearch id="departure" value={departureTown} onChange={(e: any) => { setDepartureTown(convertStringToObject(e.target.innerText)); setDeparture(e.target.innerText); }} fullWidth disabled={status === "Valider"} />
+                        <BootstrapInput id="departure" type="text" value={departure} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setDeparture(e.target.value)} fullWidth />
                     </Grid>
                     <Grid item xs={12} md={3}>
                         <InputLabel htmlFor="arrival" sx={inputLabelStyles}>Arrival location</InputLabel>
-                        <AutocompleteSearch id="arrival" value={arrivalTown} onChange={(e: any) => { setArrivalTown(convertStringToObject(e.target.innerText)); setArrival(e.target.innerText); }} fullWidth disabled={status === "Valider"} />
+                        <BootstrapInput id="arrival" type="text" value={arrival} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setArrival(e.target.value)} fullWidth />
                     </Grid>
                     <Grid item xs={12} md={3}>
                         <InputLabel htmlFor="packing-type" sx={inputLabelStyles}>Packing type</InputLabel>

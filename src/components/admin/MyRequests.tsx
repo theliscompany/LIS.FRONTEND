@@ -45,7 +45,7 @@ function createGetRequestUrl(variable1: string, variable2: string, variable3: st
       url += 'arrival=' + encodeURIComponent(variable2) + '&';
     }
     if (variable3) {
-      url += 'cargoType=' + encodeURIComponent(variable3) + '&';
+      url += 'packingType=' + encodeURIComponent(variable3) + '&';
     }
     if (variable4) {
       url += 'status=' + encodeURIComponent(variable4) + '&';
@@ -97,6 +97,7 @@ function MyRequests() {
     const [currentUser, setCurrentUser] = useState<any>();
     const [status, setStatus] = useState<string>("");
     const [cargoType, setCargoType] = useState<string>("");
+    const [packingType, setPackingType] = useState<string>("");
     const [departureTown, setDepartureTown] = useState<any>(null);
     const [arrivalTown, setArrivalTown] = useState<any>(null);
     const [departure, setDeparture] = useState<string>("");
@@ -116,6 +117,10 @@ function MyRequests() {
         setCargoType(event.target.value);
     };
 
+    const handleChangePackingType = (event: { target: { value: string } }) => {
+        setPackingType(event.target.value);
+    };
+
     const handleChangeStatus = (event: { target: { value: string } }) => {
         setStatus(event.target.value);
     };
@@ -130,11 +135,8 @@ function MyRequests() {
             const response = await (context as BackendService<any>).getSingle(protectedResources.apiLisQuotes.endPoint+"/Assignee");
             if (response !== null && response.code !== undefined) {
                 if (response.code === 200) {
-                    //console.log(response.data);
                     setAssignees(response.data);
-                    //console.log(account);
                     setCurrentUser(response.data.find((elm: any) => elm.email === account?.username));
-                    //setLoad(false);
 
                     // Then I can load requests
                     loadRequests(response.data);
@@ -174,7 +176,7 @@ function MyRequests() {
         if (context) {
             setLoad(true);
             var idAssignee = currentUser.id;
-            var requestFormatted = createGetRequestUrl(departure, arrival, cargoType, status, createdDateStart, createdDateEnd, updatedDateStart, updatedDateEnd, idAssignee);
+            var requestFormatted = createGetRequestUrl(departure, arrival, packingType, status, createdDateStart, createdDateEnd, updatedDateStart, updatedDateEnd, idAssignee);
             const response: RequestResponseDto = await (context as BackendService<any>).getSingle(requestFormatted);
             if (response !== null && response.code !== undefined && response.data !== undefined) {
                 if (response.code === 200) {
@@ -192,33 +194,33 @@ function MyRequests() {
     return (
         <div style={{ background: "#fff", borderTopLeftRadius: 20, borderTopRightRadius: 20, overflowX: "hidden" }}>
             <SnackbarProvider />
-            <Box py={4}>
-                <Typography variant="h5" mt={3} px={5}><b>My requests : {account?.name}</b></Typography>
+            <Box py={2.5}>
+                <Typography variant="h5" sx={{mt: {xs: 4, md: 1.5, lg: 1.5 }}} px={5}><b>My requests : {account?.name}</b></Typography>
                 <Grid container spacing={1} px={5} mt={2}>
-                    <Grid item xs={3}>
+                    <Grid item xs={12} md={3}>
                         <InputLabel htmlFor="departure" sx={inputLabelStyles}>Departure location</InputLabel>
-                        <AutocompleteSearch id="departure" value={departureTown} onChange={(e: any) => { setDepartureTown(convertStringToObject(e.target.innerText)); setDeparture(e.target.innerText); }} fullWidth disabled={status === "Valider"} />
+                        <BootstrapInput id="departure" type="text" value={departure} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setDeparture(e.target.value)} fullWidth />
                     </Grid>
-                    <Grid item xs={3}>
+                    <Grid item xs={12} md={3}>
                         <InputLabel htmlFor="arrival" sx={inputLabelStyles}>Arrival location</InputLabel>
-                        <AutocompleteSearch id="arrival" value={arrivalTown} onChange={(e: any) => { setArrivalTown(convertStringToObject(e.target.innerText)); setArrival(e.target.innerText); }} fullWidth disabled={status === "Valider"} />
+                        <BootstrapInput id="arrival" type="text" value={arrival} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setArrival(e.target.value)} fullWidth />
                     </Grid>
-                    <Grid item xs={3}>
-                        <InputLabel htmlFor="cargo-type" sx={inputLabelStyles}>Type of cargo</InputLabel>
+                    <Grid item xs={12} md={3}>
+                        <InputLabel htmlFor="packing-type" sx={inputLabelStyles}>Packing type</InputLabel>
                         <NativeSelect
-                            id="cargo-type"
-                            value={cargoType}
-                            onChange={handleChangeCargoType}
+                            id="packing-type"
+                            value={packingType}
+                            onChange={handleChangePackingType}
                             input={<BootstrapInput />}
                             fullWidth
                         >
                             <option value="">All types</option>
-                            <option value="0">Container</option>
-                            <option value="1">Conventional</option>
-                            <option value="2">Roll-on/Roll-off</option>
+                            <option value="FCL">FCL</option>
+                            <option value="Breakbulk/LCL">Breakbulk/LCL</option>
+                            <option value="Unit RoRo">Unit RoRo</option>
                         </NativeSelect>
                     </Grid>
-                    <Grid item xs={3}>
+                    <Grid item xs={12} md={3}>
                         <InputLabel htmlFor="status-id" sx={inputLabelStyles}>Status</InputLabel>
                         <NativeSelect
                             id="status-id"
@@ -233,7 +235,7 @@ function MyRequests() {
                             <option value="2">Rejeté</option>
                         </NativeSelect>
                     </Grid>
-                    <Grid item xs={3} mt={1}>
+                    <Grid item xs={12} md={3} mt={1}>
                         <InputLabel htmlFor="created-date-start" sx={inputLabelStyles}>Created date start</InputLabel>
                         <LocalizationProvider dateAdapter={AdapterDayjs}>
                             <DateTimePicker 
@@ -243,7 +245,7 @@ function MyRequests() {
                             />
                         </LocalizationProvider>
                     </Grid>
-                    <Grid item xs={3} mt={1}>
+                    <Grid item xs={12} md={3} mt={1}>
                         <InputLabel htmlFor="created-date-end" sx={inputLabelStyles}>Created date end</InputLabel>
                         <LocalizationProvider dateAdapter={AdapterDayjs}>
                             <DateTimePicker 
@@ -253,7 +255,7 @@ function MyRequests() {
                             />
                         </LocalizationProvider>
                     </Grid>
-                    <Grid item xs={3} mt={1}>
+                    <Grid item xs={12} md={3} mt={1}>
                         <InputLabel htmlFor="updated-date-start" sx={inputLabelStyles}>Updated date start</InputLabel>
                         <LocalizationProvider dateAdapter={AdapterDayjs}>
                             <DateTimePicker 
@@ -263,7 +265,7 @@ function MyRequests() {
                             />
                         </LocalizationProvider>
                     </Grid>
-                    <Grid item xs={3} mt={1}>
+                    <Grid item xs={12} md={3} mt={1}>
                         <InputLabel htmlFor="updated-date-end" sx={inputLabelStyles}>Updated date end</InputLabel>
                         <LocalizationProvider dateAdapter={AdapterDayjs}>
                             <DateTimePicker 
@@ -273,7 +275,7 @@ function MyRequests() {
                             />
                         </LocalizationProvider>
                     </Grid>
-                    <Grid item xs={2} mt={1} sx={{ display: "flex", alignItems: "end" }}>
+                    <Grid item xs={12} md={2} mt={1} sx={{ display: "flex", alignItems: "end" }}>
                         <Button 
                             variant="contained" 
                             color="inherit"
@@ -318,13 +320,13 @@ function MyRequests() {
                                                 <Grid item xs={12}>
                                                     {dateTimeDiff(item.createdAt)} <Chip size="small" label={item.status} color={item.status === "EnAttente" ? "warning" : item.status === "Valider" ? "success" : "secondary"} sx={{ ml: 1 }} />
                                                 </Grid>
-                                                <Grid item xs={6} mt={1}>
+                                                <Grid item xs={12} md={6} mt={1}>
                                                     <Typography variant="subtitle1" display="flex" alignItems="center" justifyContent="left" fontSize={15}>Departure location</Typography>
                                                     <Typography variant="subtitle2" display="flex" alignItems="center" justifyContent="left" fontSize={14}>
                                                         <PlaceIcon sx={{ position: "relative", right: "4px" }} /> <span>{item.departure}</span>
                                                     </Typography>
                                                 </Grid>
-                                                <Grid item xs={6} mt={1}>
+                                                <Grid item xs={12} md={6} mt={1}>
                                                     <Typography variant="subtitle1" display="flex" alignItems="center" justifyContent="left" fontSize={15}>Arrival location</Typography>
                                                     <Typography variant="subtitle2" display="flex" alignItems="center" justifyContent="left" fontSize={14}>
                                                         <PlaceIcon sx={{ position: "relative", right: "4px" }} /> <span>{item.arrival}</span>
@@ -335,8 +337,8 @@ function MyRequests() {
                                     )
                                 })
                             }
-                        </List> : <Typography variant="subtitle1" mx={5} my={3}>No requests has been found.</Typography>
-                    : <Skeleton sx={{ mx: 5, mt: 3 }} />
+                        </List> : <Typography variant="subtitle1" px={5} my={3}>No requests have been found.</Typography>
+                    : <Skeleton sx={{ mt: 3 }} />
                 }
                 
             </Box>

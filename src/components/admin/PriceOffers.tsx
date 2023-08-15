@@ -118,8 +118,8 @@ function PriceOffers() {
     return (
         <div style={{ background: "#fff", borderTopLeftRadius: 20, borderTopRightRadius: 20 }}>
             <SnackbarProvider />
-                <Box py={4}>
-                    <Typography variant="h5" mt={3} mx={5}><b>Generated price offers</b></Typography>
+                <Box py={2.5}>
+                    <Typography variant="h5" sx={{mt: {xs: 4, md: 1.5, lg: 1.5 }}} mx={5}><b>Generated price offers</b></Typography>
                     <Box>
                         {
                             !load ? 

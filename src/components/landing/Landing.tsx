@@ -410,7 +410,7 @@ function Landing() {
                             <BootstrapInput id="request-email" type="email" value={email} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)} fullWidth />
                         </Grid>
                         <Grid item xs={12} md={6}>
-                            <InputLabel htmlFor="departure" sx={inputLabelStyles}>Where do you want us to pickup your products?</InputLabel>
+                            <InputLabel htmlFor="departure" sx={inputLabelStyles}>Where do you want us to pickup your cargo?</InputLabel>
                             {/* <AutocompleteSearch id="departure" value={departureTown} onChange={(e: any) => { setDepartureTown(convertStringToObject(e.target.innerText)); setDeparture(e.target.innerText); }} fullWidth /> */}
                             {
                                 ports !== null ?
@@ -440,7 +440,7 @@ function Landing() {
                             }
                         </Grid>
                         <Grid item xs={12} md={6}>
-                            <InputLabel htmlFor="arrival" sx={inputLabelStyles}>Where do you want to transport your products?</InputLabel>
+                            <InputLabel htmlFor="arrival" sx={inputLabelStyles}>Where do you want us to deliver your cargo?</InputLabel>
                             {/* <AutocompleteSearch id="arrival" value={arrivalTown} onChange={(e: any) => { setArrivalTown(convertStringToObject(e.target.innerText)); setArrival(e.target.innerText); }} fullWidth /> */}
                             {
                                 ports !== null ?
@@ -471,7 +471,7 @@ function Landing() {
                         </Grid>
                         <Grid item xs={12} md={6}>
                             {/* <InputLabel htmlFor="packing-type" sx={inputLabelStyles}>In what type of packing do you want to transport your goods?</InputLabel> */}
-                            <InputLabel htmlFor="packing-type" sx={inputLabelStyles}>Packing type</InputLabel>
+                            <InputLabel htmlFor="packing-type" sx={inputLabelStyles}>Which type of cargo do you want to ship?</InputLabel>
                             <NativeSelect
                                 id="packing-type"
                                 value={packingType}
@@ -485,7 +485,7 @@ function Landing() {
                             </NativeSelect>
                         </Grid>
                         <Grid item xs={12} md={6}>
-                            <InputLabel htmlFor="quantity" sx={inputLabelStyles}>How many units of cargo do you want to transport?</InputLabel>
+                            <InputLabel htmlFor="quantity" sx={inputLabelStyles}>How many units of do you want to ship?</InputLabel>
                             <BootstrapInput id="quantity" type="number" inputProps={{ min: 0, max: 100 }} value={quantity} onChange={(e: any) => {console.log(e); setQuantity(e.target.value)}} fullWidth />
                         </Grid>
                         <Grid item xs={12} mt={1}>
@@ -513,7 +513,7 @@ function Landing() {
                             }
                         </Grid>
                         <Grid item xs={12} mt={1}>
-                            <InputLabel htmlFor="request-message" sx={inputLabelStyles}>Do you want to share other details regarding your needs?</InputLabel>
+                            <InputLabel htmlFor="request-message" sx={inputLabelStyles}>Do you want to share other details regarding your needs? (Optional)</InputLabel>
                             <BootstrapInput id="request-message" type="text" multiline rows={3} value={message} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setMessage(e.target.value)} fullWidth />
                         </Grid>
                         <Grid item xs={12}>
@@ -527,7 +527,7 @@ function Landing() {
                 </DialogContent>
                 <DialogActions>
                     <Button variant="contained" color={!load ? "primary" : "info"} className="mr-3" onClick={sendQuotationForm} disabled={load === true} sx={{ textTransform: "none" }}>Continue</Button>
-                    <Button variant="contained" onClick={() => { setModal(false); }} sx={buttonCloseStyles}>Close</Button>
+                    {/* <Button variant="contained" onClick={() => { setModal(false); }} sx={buttonCloseStyles}>Close</Button> */}
                 </DialogActions>
             </BootstrapDialog>
             
@@ -543,7 +543,7 @@ function Landing() {
                 </BootstrapDialogTitle>
                 <DialogContent dividers>
                     <Typography variant="subtitle1" gutterBottom px={2}>
-                        Please fill in the form and click the button to send a request for a quote.
+                        Please provide your whatsapp number and /or your email address
                     </Typography>
                     <Grid container spacing={2} mt={1} px={2}>
                         <Grid item xs={12} md={6}>

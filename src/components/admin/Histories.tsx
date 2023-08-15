@@ -90,8 +90,8 @@ function Histories(props: any) {
     return (
         <div style={{ background: "#fff", borderTopLeftRadius: 20, borderTopRightRadius: 20 }}>
             <SnackbarProvider />
-            <Box py={4}>
-                <Typography variant="h5" mt={3} px={5}><b>General timeline of the requests</b></Typography>
+            <Box py={2.5}>
+                <Typography variant="h5" sx={{mt: {xs: 4, md: 1.5, lg: 1.5 }}} px={5}><b>General timeline of the requests</b></Typography>
                 <Box>
                     <Grid container spacing={1} px={5} mt={2}>
                         <Grid item xs={12} md={2}>

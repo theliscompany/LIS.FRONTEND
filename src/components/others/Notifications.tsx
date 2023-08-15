@@ -27,7 +27,7 @@ function Notifications() {
     return (
         <div style={{ background: "#fff", borderTopLeftRadius: 20, borderTopRightRadius: 20 }}>
             <Box py={4} sx={{  }}>
-                <Typography variant="h5" mt={3} mx={3}><b>Notifications</b></Typography>
+                <Typography variant="h5" sx={{mt: {xs: 4, md: 1.5, lg: 1.5 }}} mx={3}><b>Notifications</b></Typography>
                 
                 {
                     notifications != null ? 
