@@ -256,8 +256,8 @@ function NewRequest(props: any) {
                             id: i, 
                             containers: containers.find((item: any) => item.packageId === elm.container).packageName, 
                             quantity: elm.quantity, 
-                            requestQuote: {}, 
-                            requestQuoteId: Number(id) 
+                            // requestQuote: {}, 
+                            // requestQuoteId: Number(id) 
                         } }),
                         unit: auxUnits.map((elm: any, i: number) => { return { 
                             id: i, 
