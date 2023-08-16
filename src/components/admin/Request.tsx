@@ -434,7 +434,7 @@ function Request(props: any) {
                     setQuantity(response.data.quantity);
                     setMessage(response.data.detail);
                     // setTags(response.data.tags !== null ? response.data.tags.split(",") : []);
-                    setTags(allProducts.filter((elm: any) => response.data.tags.includes(elm.productName)));
+                    setTags(response.data.tags !== null ? allProducts.filter((elm: any) => response.data.tags.includes(elm.productName)) : []);
                     setAssignedManager(response.data.assigneeId || "");
                     setTrackingNumber(response.data.trackingNumber);
                     
@@ -962,7 +962,7 @@ function Request(props: any) {
                                         sx={{ display: { xs: "block", md: "flex" }, alignItems: "center", justifyContent: "left" }}
                                         action={<Button variant="contained" color="inherit" sx={{ background: "#fff", color: "#333", float: "right", textTransform: "none", position: "relative", bottom: "2px" }} onClick={() => { setModal(true); }}>Ask for more information</Button>}
                                     >
-                                        <Typography variant="subtitle1" display="inline">Do you think this request need more informations?</Typography>
+                                        <Typography variant="subtitle1" display="inline">Do you think this request need more information?</Typography>
                                     </Alert>
                                 </Grid>
                                 <Grid item xs={12} md={6}>

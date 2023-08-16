@@ -194,7 +194,7 @@ function Landing() {
                         setEmail("");
                         setSubjects([]);
                         setMessage("");
-                        enqueueSnackbar("Thanks, we have received your informations.", { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                        enqueueSnackbar("Thanks, we have received your information.", { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
                     }).catch(error => { 
                         setLoad(false);
                         enqueueSnackbar("An error occured. Please refresh the page or check your internet connection.", { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
