@@ -434,7 +434,7 @@ function Request(props: any) {
                     setQuantity(response.data.quantity);
                     setMessage(response.data.detail);
                     // setTags(response.data.tags !== null ? response.data.tags.split(",") : []);
-                    setTags(allProducts.filter((elm: any) => response.data.tags.includes(elm.productName)));
+                    setTags(response.data.tags !== null ? allProducts.filter((elm: any) => response.data.tags.includes(elm.productName)) : []);
                     setAssignedManager(response.data.assigneeId || "");
                     setTrackingNumber(response.data.trackingNumber);
                     
