@@ -252,14 +252,12 @@ function NewRequest(props: any) {
                         cargoType: 0,
                         clientNumber: clientNumber,
                         packingType: packingType,
-                        container: containersSelection.map((elm: any, i: number) => { return { 
+                        containers: containersSelection.map((elm: any, i: number) => { return { 
                             id: i, 
                             containers: containers.find((item: any) => item.packageId === elm.container).packageName, 
                             quantity: elm.quantity, 
-                            // requestQuote: {}, 
-                            // requestQuoteId: Number(id) 
                         } }),
-                        unit: auxUnits.map((elm: any, i: number) => { return { 
+                        units: auxUnits.map((elm: any, i: number) => { return { 
                             id: i, 
                             name: elm.name, 
                             weight: elm.weight, 
