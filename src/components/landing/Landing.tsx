@@ -42,6 +42,10 @@ function Landing() {
     const [arrival, setArrival] = useState<string>("Douala, Cameroon");
     // const [tags, setTags] = useState<MuiChipsInputChip[]>([]);
     const [tags, setTags] = useState<any>([]);
+    
+    const [mailSubject, setMailSubject] = useState<string>("");
+    const [mailContent, setMailContent] = useState<string>("");
+    
     const [ports, setPorts] = useState<any>(null);
     const [products, setProducts] = useState<any>(null);
     const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
@@ -129,11 +133,37 @@ function Landing() {
         const data = await (context as BackendService<any>).postForm(protectedResources.apiLisQuotes.endPoint+"/Email", body);
         console.log(data);
         if (data?.status === 200) {
-            enqueueSnackbar("The document has been sent to your email.", { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
+            enqueueSnackbar("The message has been sent.", { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
         }
         else {
             enqueueSnackbar("An error occured. Please refresh the page or check your internet connection.", { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
         }
+    }
+
+    async function testEmail() {
+        var footer = `
+        <body style="font-family: Verdana, sans-serif; font-size: 14px; color: #333;">
+            <div style="background-color: #f2f2f2; padding: 20px;">
+                <h1 style="color: #000; margin-bottom: 20px;">New request for quote</h1>
+                <p style="margin-bottom: 20px;">You have received a new request for quote in LIS Quotes.</p>
+                <a href="https://lisquotes-ui.azurewebsites.net/login" style="display: inline-block; background-color: #008089; color: #fff; padding: 10px 20px; text-decoration: none;">Login to LIS Quotes</a>
+                <p style="margin-top: 20px;">Please, click the button up to login to LIS Quotes and manage this quote.</p>
+                <div style="font-family: Verdana; padding-top: 60px;">
+                    <div><a target="_blank" href="www.omnifreight.eu">www.omnifreight.eu</a></div>
+                    <div style="padding-bottom: 10px;"><a target="_blank" href="http://www.facebook.com/omnifreight">http://www.facebook.com/omnifreight</a></div>
+                    <div>Italiëlei 211</div>
+                    <div>2000 Antwerpen</div>
+                    <div>Belgium</div>
+                    <div>E-mail: transport@omnifreight.eu</div>
+                    <div>Tel +32.3.295.38.82</div>
+                    <div>Fax +32.3.295.38.77</div>
+                    <div>Whatsapp +32.494.40.24.25</div>
+                    <img src="http://www.omnifreight.eu/Images/omnifreight_logo.jpg" style="max-width: 200px;">
+                </div>
+            </div>
+        </body>
+        `;
+        postEmail("cyrille.penaye@omnifreight.eu", "penayecyrille@gmail.com", mailSubject, mailContent+footer);
     }
       
     function sendContactFormRedirect() {
@@ -225,7 +255,7 @@ function Landing() {
                             method: "POST",
                             body: JSON.stringify({ 
                                 Whatsapp: phone, 
-                                Email: email, 
+                                Email: email !== "" ? email : "emailexample@gmail.com", 
                                 Departure: departurePort.portName+', '+departurePort.country, 
                                 Arrival: arrivalPort.portName+', '+arrivalPort.country, 
                                 CargoType: 0,
@@ -269,13 +299,7 @@ function Landing() {
         }
     }
 
-    const defaultSubjects = [
-        'Sea shipments',
-        'Air shipments',
-        'Become a reseller',
-        'Job opportunities',
-    ];
-
+    const defaultSubjects = ['Sea shipments', 'Air shipments', 'Become a reseller', 'Job opportunities'];
     
     return (
         <div className="App" style={{ overflowX: "hidden" }}>
@@ -624,10 +648,19 @@ function Landing() {
                                 onChange={onChangeCaptcha}
                             />
                         </Grid>
+                        {/* <Grid item xs={12} md={12}>
+                            <InputLabel htmlFor="mail-subject" sx={inputLabelStyles}>Subject</InputLabel>
+                            <BootstrapInput id="mail-subject" type="text" value={mailSubject} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setMailSubject(e.target.value)} fullWidth />
+                        </Grid>
+                        <Grid item xs={12} md={12}>
+                            <InputLabel htmlFor="mail-content" sx={inputLabelStyles}>Content</InputLabel>
+                            <TextField id="mail-content" type="text" multiline rows={6} value={mailContent} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setMailContent(e.target.value)} fullWidth />
+                        </Grid> */}    
                     </Grid>
                 </DialogContent>
                 <DialogActions>
                     <Button variant="contained" color={!load ? "primary" : "info"} className="mr-3" onClick={sendContactFormRedirect} disabled={email === "" || !validMail(email)} sx={{ textTransform: "none" }}>Download</Button>
+                    {/* <Button variant="contained" color="success" className="mr-3" sx={{ textTransform: "none" }} onClick={testEmail}>Test email</Button> */}
                 </DialogActions>
             </BootstrapDialog>         
 

@@ -421,7 +421,7 @@ function Request(props: any) {
                 if (response.code === 200) {
                     console.log("Request", response.data);
                     
-                    setEmail(response.data.email);
+                    setEmail(response.data.email !== "emailexample@gmail.com" ? response.data.email : "");
                     setPhone(response.data.whatsapp);
                     setDeparture(response.data.departure);
                     setArrival(response.data.arrival);
