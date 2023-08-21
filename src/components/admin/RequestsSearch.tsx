@@ -220,7 +220,7 @@ function RequestsSearch() {
                                             <Grid container sx={{ maxWidth: "600px", color: "#333" }}>
                                                 <Grid item xs={12}>
                                                     <ListItemText
-                                                        primary={<Typography variant="subtitle1" color="#333"><b>{"#" + item.id + " New quote request" + " from : " + item.email}</b></Typography>}
+                                                        primary={<Typography variant="subtitle1" color="#333"><b>{item.email !== "emailexample@gmail.com" ? "#" + item.id + " New quote request" + " from : " + item.email : "New quote request"}</b></Typography>}
                                                     />        
                                                 </Grid>
                                                 <Grid item xs={12}>

@@ -421,7 +421,7 @@ function Request(props: any) {
                 if (response.code === 200) {
                     console.log("Request", response.data);
                     
-                    setEmail(response.data.email);
+                    setEmail(response.data.email !== "emailexample@gmail.com" ? response.data.email : "");
                     setPhone(response.data.whatsapp);
                     setDeparture(response.data.departure);
                     setArrival(response.data.arrival);
@@ -431,6 +431,16 @@ function Request(props: any) {
                     // setCargoType(String(cargoTypes.indexOf(response.data.cargoType)));
                     setPackingType(response.data.packingType !== null ? response.data.packingType : "FCL");
                     setClientNumber(response.data.clientNumber !== null ? response.data.clientNumber : "");
+                    setContainersSelection(response.data.containers.map((elm: any) => { return {
+                        container: elm.containers, 
+                        quantity: elm.quantity 
+                    } }) || []);
+                    setUnitsSelection(response.data.units.map((elm: any) => { return {
+                        name: elm.name,
+                        weight: elm.weight,
+                        dimensions: elm.dimension,
+                        quantity: elm.quantity
+                    }}) || []);
                     setQuantity(response.data.quantity);
                     setMessage(response.data.detail);
                     // setTags(response.data.tags !== null ? response.data.tags.split(",") : []);
@@ -506,14 +516,12 @@ function Request(props: any) {
                 arrival: arrivalTown.portName+", "+arrivalTown.country,
                 cargoType: 0,
                 packingType: packingType,
-                container: containersSelection.map((elm: any, i: number) => { return { 
+                containers: containersSelection.map((elm: any, i: number) => { return { 
                     id: i, 
                     containers: containers.find((item: any) => item.packageId === elm.container).packageName, 
                     quantity: elm.quantity, 
-                    requestQuote: {}, 
-                    requestQuoteId: Number(id) 
                 } }),
-                unit: auxUnits.map((elm: any, i: number) => { return { 
+                units: auxUnits.map((elm: any, i: number) => { return { 
                     id: i, 
                     name: elm.name, 
                     weight: elm.weight, 
