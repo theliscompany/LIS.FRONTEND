@@ -13,6 +13,7 @@ import { MailData } from '../../models/models';
 import { useAccount, useMsal } from '@azure/msal-react';
 import { Link } from 'react-router-dom';
 import { AuthenticationResult } from '@azure/msal-browser';
+import AutocompleteSearch from '../shared/AutocompleteSearch';
 
 //let statusTypes = ["EnAttente", "Valider", "Rejeter"];
 let cargoTypes = ["Container", "Conventional", "RollOnRollOff"];
@@ -33,8 +34,8 @@ function NewRequest(props: any) {
     const [clientNumber, setClientNumber] = useState<string>("");
     const [departurePort, setDeparturePort] = useState<any>(null);
     const [arrivalPort, setArrivalPort] = useState<any>(null);
-    const [departure, setDeparture] = useState<string>("");
-    const [arrival, setArrival] = useState<string>("");
+    const [departure, setDeparture] = useState<any>(null);
+    const [arrival, setArrival] = useState<any>(null);
     // const [tags, setTags] = useState<MuiChipsInputChip[]>([]);
     const [tags, setTags] = useState<any>([]);
     const [modal, setModal] = useState<boolean>(false);
@@ -228,7 +229,7 @@ function NewRequest(props: any) {
     }
 
     function sendQuotationForm() {
-        if (phone !== "" && email !== "" && arrivalPort !== null && departurePort !== null) {
+        if (phone !== "" && email !== "" && arrival !== null && departure !== null) {
             if (email === "" || email !== "" && validMail(email)) {
                 setLoad(true);
                 var auxUnits = [];
@@ -247,8 +248,10 @@ function NewRequest(props: any) {
                     body: JSON.stringify({ 
                         email: email,
                         whatsapp: phone,
-                        departure: departurePort.portName+', '+departurePort.country,
-                        arrival: arrivalPort.portName+', '+arrivalPort.country,
+                        // departure: departurePort.portName+', '+departurePort.country,
+                        // arrival: arrivalPort.portName+', '+arrivalPort.country,
+                        departure: departure !== null && departure !== undefined ? departure.city.toUpperCase()+', '+departure.country+', '+departure.latitude+', '+departure.longitude : "",
+                        arrival: arrival !== null && arrival !== undefined ? arrival.city.toUpperCase()+', '+arrival.country+', '+arrival.latitude+', '+arrival.longitude : "",
                         cargoType: 0,
                         clientNumber: clientNumber,
                         packingType: packingType,
@@ -317,8 +320,8 @@ function NewRequest(props: any) {
                         </Grid>
                         <Grid item xs={12} md={6} mt={1}>
                             <InputLabel htmlFor="departure" sx={inputLabelStyles}>From (city, country)</InputLabel>
-                            {/* <AutocompleteSearch id="departure" value={departurePort} onChange={(e: any) => { setDeparturePort(convertStringToObject(e.target.innerText)); setDeparture(e.target.innerText); }} fullWidth /> */}
-                            {
+                            <AutocompleteSearch id="departure" value={departure} onChange={setDeparture} fullWidth />
+                            {/* {
                                 ports !== null ?
                                 <Autocomplete
                                     disablePortal
@@ -343,12 +346,12 @@ function NewRequest(props: any) {
                                     onChange={(e: any, value: any) => { setDeparturePort(value); }}
                                     fullWidth
                                 /> : <Skeleton />
-                            }
+                            } */}
                         </Grid>
                         <Grid item xs={12} md={6} mt={1}>
                             <InputLabel htmlFor="arrival" sx={inputLabelStyles}>To (city, country)</InputLabel>
-                            {/* <AutocompleteSearch id="arrival" value={arrivalPort} onChange={(e: any) => { setArrivalPort(convertStringToObject(e.target.innerText)); setArrival(e.target.innerText); }} fullWidth /> */}
-                            {
+                            <AutocompleteSearch id="arrival" value={arrival} onChange={setArrival} fullWidth />
+                            {/* {
                                 ports !== null ?
                                 <Autocomplete
                                     disablePortal
@@ -373,7 +376,7 @@ function NewRequest(props: any) {
                                     onChange={(e: any, value: any) => { setArrivalPort(value); }}
                                     fullWidth
                                 /> : <Skeleton />
-                            }
+                            } */}
                         </Grid>
                         <Grid item xs={12} md={3} mt={1}>
                             <InputLabel htmlFor="packing-type" sx={inputLabelStyles}>Packing Type</InputLabel>

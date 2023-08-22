@@ -18,6 +18,10 @@ import { Dayjs } from 'dayjs';
 import { useAccount, useMsal } from '@azure/msal-react';
 import { AuthenticationResult } from '@azure/msal-browser';
 
+// @ts-ignore
+import { JSON as seaPorts } from 'sea-ports';
+// @ts-ignore
+
 import { DataGrid, GridColDef, GridEventListener, GridRenderCellParams, GridValueFormatterParams, GridValueGetterParams } from '@mui/x-data-grid';
 
 //let statusTypes = ["EnAttente", "Valider", "Rejeter"];
@@ -106,6 +110,69 @@ function getPackageNamesByIds(ids: string[], packages: any) {
 }
 
 
+function parseLocation(inputString: string) {
+    const parts = inputString.split(', ');
+    
+    const city = parts[0];
+    const country = parts[1];
+    const latitude = parseFloat(parts[2]);
+    const longitude = parseFloat(parts[3]);
+    
+    const locationObject = {
+        city: city,
+        country: country,
+        latitude: latitude,
+        longitude: longitude
+    };
+    
+    return locationObject;
+}
+
+function removeAccents(input: string) {
+    return input.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+}
+
+function calculateDistance(coord1: any, coord2: any) {
+    const [lat1, lon1] = coord1;
+    const [lon2, lat2] = coord2;
+    const R = 6371; // Radius of the Earth in km
+    const dLat = (lat2 - lat1) * (Math.PI / 180);
+    const dLon = (lon2 - lon1) * (Math.PI / 180);
+    const a =
+        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    const distance = R * c;
+    return distance;
+}
+
+function findClosestSeaPort(myPort: any, seaPorts: any) {
+    const myCoordinates = [myPort.latitude, myPort.longitude];
+    let closestPort = null;
+    let minDistance = Infinity;
+    
+    if (seaPorts !== null && seaPorts !== undefined) {
+        const matchingNamePort = seaPorts.find((seaPort: any) => seaPort.portName.toUpperCase() === removeAccents(myPort.city).toUpperCase());
+        if (matchingNamePort) {
+            return matchingNamePort;
+        }
+    }
+
+    for (const seaPort of seaPorts) {
+        const seaPortCoordinates = seaPort.coordinates;
+        if (seaPortCoordinates !== undefined) {
+            const distance = calculateDistance(myCoordinates, seaPortCoordinates);
+            
+            if (distance < minDistance) {
+                minDistance = distance;
+                closestPort = seaPort;
+            }
+        }
+    }
+
+    return closestPort;
+}
+
 const steps = ['Search for offers', 'List of offers', 'Send an offer'];
 
 function Request(props: any) {
@@ -124,8 +191,8 @@ function Request(props: any) {
     const [clientNumber, setClientNumber] = useState<string>("");
     const [departureTown, setDepartureTown] = useState<any>(null);
     const [arrivalTown, setArrivalTown] = useState<any>(null);
-    const [departure, setDeparture] = useState<string>("");
-    const [arrival, setArrival] = useState<string>("");
+    const [departure, setDeparture] = useState<any>(null);
+    const [arrival, setArrival] = useState<any>(null);
     const [tags, setTags] = useState<MuiChipsInputChip[]>([]);
     const [modal, setModal] = useState<boolean>(false);
     const [modal2, setModal2] = useState<boolean>(false);
@@ -181,6 +248,9 @@ function Request(props: any) {
     const [adding, setAdding] = useState<number>(0);
     const [details, setDetails] = useState<string>("");
     const [totalPrice, setTotalPrice] = useState<number>(0);
+
+    const [allSeaPorts, setAllSeaPorts] = useState<any>();
+    
     let { id } = useParams();
 
     const { instance, accounts } = useMsal();
@@ -385,8 +455,64 @@ function Request(props: any) {
     const handleRowMiscsClick: GridEventListener<'rowClick'> = (params: any) => {
         setSelectedMisc(params.row);
     };
+
+    
+    function similar(str1: string, str2: string) {
+        const cleanStr1 = str1.replace(/[\s-]/g, '').toLowerCase();
+        const cleanStr2 = str2.replace(/[\s-]/g, '').toLowerCase();
+    
+        return cleanStr1 === cleanStr2;
+    }
+    
+    
+    function initializeSeaPorts() {
+        var auxArray = [];
+        for (const [key, value] of Object.entries(seaPorts)) {
+            if (value) {
+                let result = value as any;
+                auxArray.push({
+                    name: result.name,
+                    city: result.city,
+                    country: result.country,
+                    province: result.province,
+                    coordinates: result.coordinates
+                });
+            }
+        }
+        setAllSeaPorts(auxArray);
+        return auxArray;
+    }
+    
+    function addCoordinatesToPorts(selectedPorts: any) {
+        var allMySeaPorts = initializeSeaPorts();
+        const updatedLisPorts = selectedPorts.map((lisPort: any) => {
+            const matchingSeaPort = allMySeaPorts.find((seaPort: any) => (seaPort.name.toUpperCase().includes(lisPort.portName.toUpperCase()) || lisPort.portName.toUpperCase().includes(seaPort.name.toUpperCase()) || similar(seaPort.name, lisPort.portName)));
+            if (matchingSeaPort) {
+                return { ...lisPort, name: matchingSeaPort.name, coordinates: matchingSeaPort.coordinates };
+            }
+            return lisPort;
+        });
+        console.log(updatedLisPorts);
+        setPorts(updatedLisPorts);
+    }
+    
+    function addedCoordinatesToPorts(selectedPorts: any) {
+        var allMySeaPorts = initializeSeaPorts();
+        const updatedLisPorts = selectedPorts.map((lisPort: any) => {
+            const matchingSeaPort = allMySeaPorts.find((seaPort: any) => (seaPort.name.toUpperCase().includes(lisPort.portName.toUpperCase()) || lisPort.portName.toUpperCase().includes(seaPort.name.toUpperCase()) || similar(seaPort.name, lisPort.portName)));
+            if (matchingSeaPort) {
+                return { ...lisPort, name: matchingSeaPort.name, coordinates: matchingSeaPort.coordinates };
+            }
+            return lisPort;
+        });
+        
+        return updatedLisPorts;
+    }
     
     useEffect(() => {
+        // Here i initialize the sea ports
+        initializeSeaPorts();
+
         getContainers();
         getCities();
         // Get everything essential too (Products, Ports, Request info)
@@ -423,8 +549,8 @@ function Request(props: any) {
                     
                     setEmail(response.data.email !== "emailexample@gmail.com" ? response.data.email : "");
                     setPhone(response.data.whatsapp);
-                    setDeparture(response.data.departure);
-                    setArrival(response.data.arrival);
+                    setDeparture(parseLocation(response.data.departure));
+                    setArrival(parseLocation(response.data.arrival));
                     // setDepartureTown(convertStringToObject(response.data.departure));
                     // setArrivalTown(convertStringToObject(response.data.arrival));
                     setStatus(response.data.status);
@@ -448,15 +574,17 @@ function Request(props: any) {
                     setAssignedManager(response.data.assigneeId || "");
                     setTrackingNumber(response.data.trackingNumber);
                     
+                    const closestDeparturePort = findClosestSeaPort(parseLocation(response.data.departure), allPorts);
+                    const closestArrivalPort = findClosestSeaPort(parseLocation(response.data.arrival), allPorts);
                     // Here we initialize the values of ports fields in main screen and generate price screen
-                    var auxDeparture = convertStringToObject(response.data.departure);
-                    var auxArrival = convertStringToObject(response.data.arrival);
-                    auxDeparture = allPorts.find((elm: any) => elm.portName === auxDeparture.portName && elm.country === auxDeparture.country);
-                    auxArrival = allPorts.find((elm: any) => elm.portName === auxArrival.portName && elm.country === auxArrival.country);
-                    setDepartureTown(auxDeparture);
-                    setPortDeparture(auxDeparture);
-                    setArrivalTown(auxArrival);
-                    setPortDestination(auxArrival);
+                    // var auxDeparture = convertStringToObject(response.data.departure);
+                    // var auxArrival = convertStringToObject(response.data.arrival);
+                    // auxDeparture = allPorts.find((elm: any) => elm.portName === auxDeparture.portName && elm.country === auxDeparture.country);
+                    // auxArrival = allPorts.find((elm: any) => elm.portName === auxArrival.portName && elm.country === auxArrival.country);
+                    setPortDeparture(closestDeparturePort);
+                    setPortDestination(closestArrivalPort);
+                    // setArrivalTown(auxArrival);
+                    // setPortDestination(auxArrival);
 
                     setLoad(false);
                 }
@@ -512,8 +640,10 @@ function Request(props: any) {
                 email: email,
                 status: status,
                 whatsapp: phone,
-                departure: departureTown.portName+", "+departureTown.country,
-                arrival: arrivalTown.portName+", "+arrivalTown.country,
+                // departure: departureTown.portName+", "+departureTown.country,
+                // arrival: arrivalTown.portName+", "+arrivalTown.country,
+                departure: departure !== null && departure !== undefined ? departure.city.toUpperCase()+', '+departure.country+', '+departure.latitude+', '+departure.longitude : "",
+                arrival: arrival !== null && arrival !== undefined ? arrival.city.toUpperCase()+', '+arrival.country+', '+arrival.latitude+', '+arrival.longitude : "",
                 cargoType: 0,
                 packingType: packingType,
                 containers: containersSelection.map((elm: any, i: number) => { return { 
@@ -781,12 +911,14 @@ function Request(props: any) {
             );
             
             const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Port/Ports", token);
-            console.log("Ports", response);
             if (response !== null && response !== undefined) {
-                setPorts(response);
+                var addedCoordinatesPorts = addedCoordinatesToPorts(response);
+                console.log("Ports", addedCoordinatesPorts);
+                setPorts(addedCoordinatesPorts);
+                // addCoordinatesToPorts(response);
 
                 // Here i can get the products
-                getProducts(response);
+                getProducts(addedCoordinatesPorts);
             }  
         }
     }
@@ -950,6 +1082,20 @@ function Request(props: any) {
         }
     }
     
+    function getClosestDeparture(value: any) {
+        if (value !== null && value !== undefined) {
+            const closest = findClosestSeaPort(value, ports);
+            setPortDeparture(closest);
+        }
+    }
+
+    function getClosestArrival(value: any) {
+        if (value !== null && value !== undefined) {
+            const closest = findClosestSeaPort(value, ports);
+            setPortDestination(closest);
+        }
+    }
+
     return (
         <div style={{ background: "#fff", borderTopLeftRadius: 20, borderTopRightRadius: 20 }}>
             <SnackbarProvider />
@@ -961,7 +1107,7 @@ function Request(props: any) {
                             <Grid container spacing={2} mt={1} px={5}>
                                 <Grid item xs={12}>
                                     <Typography variant="body2" color="dodgerblue" sx={{ fontWeight: "bold" }}>
-                                        Tracking N° {trackingNumber} / {departureTown.portName+', '+departureTown.country} - {arrivalTown.portName+', '+arrivalTown.country} / Your price request
+                                        Tracking N° {trackingNumber}
                                     </Typography>
                                 </Grid>
                                 <Grid item xs={12}>
@@ -983,8 +1129,8 @@ function Request(props: any) {
                                 </Grid>
                                 <Grid item xs={12} md={6} mt={1}>
                                     <InputLabel htmlFor="departure" sx={inputLabelStyles}>From (city, country)</InputLabel>
-                                    {/* <AutocompleteSearch id="departure" value={departureTown} onChange={(e: any) => { setDepartureTown(convertStringToObject(e.target.innerText)); setDeparture(e.target.innerText); }} fullWidth /> */}
-                                    {
+                                    <AutocompleteSearch id="departure" value={departure} onChange={setDeparture} callBack={getClosestDeparture} fullWidth />
+                                    {/* {
                                         ports !== null ?
                                         <Autocomplete
                                             disablePortal
@@ -1009,12 +1155,12 @@ function Request(props: any) {
                                             onChange={(e: any, value: any) => { setDepartureTown(value); }}
                                             fullWidth
                                         /> : <Skeleton />
-                                    }
+                                    } */}
                                 </Grid>
                                 <Grid item xs={12} md={6} mt={1}>
                                     <InputLabel htmlFor="arrival" sx={inputLabelStyles}>To (city, country)</InputLabel>
-                                    {/* <AutocompleteSearch id="arrival" value={arrivalTown} onChange={(e: any) => { setArrivalTown(convertStringToObject(e.target.innerText)); setArrival(e.target.innerText); }} fullWidth /> */}
-                                    {
+                                    <AutocompleteSearch id="arrival" value={arrival} onChange={setArrival} callBack={getClosestArrival} fullWidth />
+                                    {/* {
                                         ports !== null ?
                                         <Autocomplete
                                             disablePortal
@@ -1039,7 +1185,7 @@ function Request(props: any) {
                                             onChange={(e: any, value: any) => { setArrivalTown(value); }}
                                             fullWidth
                                         /> : <Skeleton />
-                                    }
+                                    } */}
                                 </Grid>
                                 <Grid item xs={12} md={3} mt={1}>
                                     <InputLabel htmlFor="packing-type" sx={inputLabelStyles}>Packing Type</InputLabel>

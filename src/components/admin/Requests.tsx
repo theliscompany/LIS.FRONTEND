@@ -195,9 +195,9 @@ function Requests() {
                             fullWidth
                         >
                             <option value="">All status</option>
-                            <option value="0">En Attente</option>
-                            <option value="1">Validé</option>
-                            <option value="2">Rejeté</option>
+                            <option value="0">Pending</option>
+                            <option value="1">Validated</option>
+                            <option value="2">Rejected</option>
                         </NativeSelect>
                     </Grid>
                     <Grid item xs={12} md={3} mt={1}>
@@ -277,7 +277,7 @@ function Requests() {
                                                 <Grid container sx={{ maxWidth: "600px", color: "#333" }}>
                                                     <Grid item xs={12}>
                                                         <ListItemText
-                                                            primary={<Typography variant="subtitle1" color="#333"><b>{item.email !== "emailexample@gmail.com" ? "#" + item.id + " New quote request" + " from : " + item.email : "New quote request"}</b></Typography>}
+                                                            primary={<Typography variant="subtitle1" color="#333"><b>{item.email !== "emailexample@gmail.com" ? "#" + item.id + " New quote request" + " from : " + item.email : "#" + item.id + " New quote request"}</b></Typography>}
                                                         />        
                                                     </Grid>
                                                     <Grid item xs={12}>
@@ -286,13 +286,13 @@ function Requests() {
                                                     <Grid item xs={12} md={6} mt={1}>
                                                         <Typography variant="subtitle1" display="flex" alignItems="center" justifyContent="left" fontSize={15}>Departure location</Typography>
                                                         <Typography variant="subtitle2" display="flex" alignItems="center" justifyContent="left" fontSize={14}>
-                                                            <PlaceIcon sx={{ position: "relative", right: "4px" }} /> <span>{item.departure}</span>
+                                                            <PlaceIcon sx={{ position: "relative", right: "4px" }} /> <span>{item.departure.split(', ').slice(0,2).join(', ')}</span>
                                                         </Typography>
                                                     </Grid>
                                                     <Grid item xs={12} md={6} mt={1}>
                                                         <Typography variant="subtitle1" display="flex" alignItems="center" justifyContent="left" fontSize={15}>Arrival location</Typography>
                                                         <Typography variant="subtitle2" display="flex" alignItems="center" justifyContent="left" fontSize={14}>
-                                                            <PlaceIcon sx={{ position: "relative", right: "4px" }} /> <span>{item.arrival}</span>
+                                                            <PlaceIcon sx={{ position: "relative", right: "4px" }} /> <span>{item.arrival.split(', ').slice(0,2).join(', ')}</span>
                                                         </Typography>
                                                     </Grid>
                                                 </Grid>

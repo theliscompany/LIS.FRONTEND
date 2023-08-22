@@ -9,9 +9,10 @@ interface LocationAutocompleteProps {
     onChange: (value: any) => void;
     fullWidth?: boolean;
     disabled?: boolean;
+    callBack?: (value: any) => void;
 }
 
-const AutocompleteSearch: React.FC<LocationAutocompleteProps> = ({ id, value, onChange, fullWidth, disabled }) => {
+const AutocompleteSearch: React.FC<LocationAutocompleteProps> = ({ id, value, onChange, fullWidth, disabled, callBack }) => {
     const [loading, setLoading] = useState(false);
     const [options, setOptions] = useState<any[]>([]);
 
@@ -43,13 +44,18 @@ const AutocompleteSearch: React.FC<LocationAutocompleteProps> = ({ id, value, on
             options={options}
             loading={loading}
             getOptionLabel={(option) => { 
-                if (option.city !== "" && option.country !== "") {
+                if (option !== undefined && option !== null && option.city !== "" && option.country !== "") {
                     return `${option.city}, ${option.country}`;
                 }
                 return "";
             }}
             value={value}
-            onChange={onChange}
+            onChange={(event, newValue) => {
+                onChange(newValue);
+                if (callBack) {
+                    callBack(newValue);
+                }
+            }}
             disabled={disabled}
             renderInput={(params) => (
                 <TextField
