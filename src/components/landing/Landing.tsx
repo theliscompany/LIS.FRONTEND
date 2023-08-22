@@ -38,8 +38,8 @@ function Landing() {
     const [packingType, setPackingType] = useState<string>("FCL");
     const [departurePort, setDeparturePort] = useState<any>({portId: 1, portName: "ANTWERP", country: "Belgium"});
     const [arrivalPort, setArrivalPort] = useState<any>({portId: 2, portName: "DOUALA", country: "Cameroon"});
-    const [departure, setDeparture] = useState<string>("Antwerp, Belgium");
-    const [arrival, setArrival] = useState<string>("Douala, Cameroon");
+    const [departure, setDeparture] = useState<any>(null);
+    const [arrival, setArrival] = useState<any>(null);
     // const [tags, setTags] = useState<MuiChipsInputChip[]>([]);
     const [tags, setTags] = useState<any>([]);
     
@@ -245,7 +245,7 @@ function Landing() {
 
     function sendQuotationForm() {
         if (captcha !== null) {
-                if ((phone !== "" && arrivalPort !== null && departurePort !== null) || (email !== "" && arrivalPort !== null && departurePort !== null)) {
+                if ((phone !== "" && arrival !== null && departure !== null) || (email !== "" && arrival !== null && departure !== null)) {
                     if (email === "" || email !== "" && validMail(email)) {
                         setLoad(true);
                         var myHeaders = new Headers();
@@ -256,8 +256,10 @@ function Landing() {
                             body: JSON.stringify({ 
                                 Whatsapp: phone, 
                                 Email: email !== "" ? email : "emailexample@gmail.com", 
-                                Departure: departurePort.portName+', '+departurePort.country, 
-                                Arrival: arrivalPort.portName+', '+arrivalPort.country, 
+                                // Departure: departurePort.portName+', '+departurePort.country, 
+                                // Arrival: arrivalPort.portName+', '+arrivalPort.country, 
+                                Departure: departure !== null && departure !== undefined ? departure.city.toUpperCase()+', '+departure.country+', '+departure.latitude+', '+departure.longitude : "",
+                                Arrival: arrival !== null && arrival !== undefined ? arrival.city.toUpperCase()+', '+arrival.country+', '+arrival.latitude+', '+arrival.longitude : "",
                                 CargoType: 0,
                                 PackingType: packingType,
                                 Quantity: quantity, 
@@ -435,8 +437,8 @@ function Landing() {
                         </Grid>
                         <Grid item xs={12} md={6}>
                             <InputLabel htmlFor="departure" sx={inputLabelStyles}>Where do you want us to pickup your cargo?</InputLabel>
-                            {/* <AutocompleteSearch id="departure" value={departureTown} onChange={(e: any) => { setDepartureTown(convertStringToObject(e.target.innerText)); setDeparture(e.target.innerText); }} fullWidth /> */}
-                            {
+                            <AutocompleteSearch id="departure" value={departure} onChange={setDeparture} fullWidth />
+                            {/* {
                                 ports !== null ?
                                 <Autocomplete
                                     disablePortal
@@ -461,12 +463,12 @@ function Landing() {
                                     onChange={(e: any, value: any) => { setDeparturePort(value); }}
                                     fullWidth
                                 /> : <Skeleton />
-                            }
+                            } */}
                         </Grid>
                         <Grid item xs={12} md={6}>
                             <InputLabel htmlFor="arrival" sx={inputLabelStyles}>Where do you want us to deliver your cargo?</InputLabel>
-                            {/* <AutocompleteSearch id="arrival" value={arrivalTown} onChange={(e: any) => { setArrivalTown(convertStringToObject(e.target.innerText)); setArrival(e.target.innerText); }} fullWidth /> */}
-                            {
+                            <AutocompleteSearch id="arrival" value={arrival} onChange={setArrival} fullWidth />
+                            {/* {
                                 ports !== null ?
                                 <Autocomplete
                                     disablePortal
@@ -491,7 +493,7 @@ function Landing() {
                                     onChange={(e: any, value: any) => { setArrivalPort(value); }}
                                     fullWidth
                                 /> : <Skeleton />
-                            }
+                            } */}
                         </Grid>
                         <Grid item xs={12} md={6}>
                             {/* <InputLabel htmlFor="packing-type" sx={inputLabelStyles}>In what type of packing do you want to transport your goods?</InputLabel> */}
