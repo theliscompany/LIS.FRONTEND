@@ -58,7 +58,7 @@ const AutocompleteSearch: React.FC<LocationAutocompleteProps> = ({ id, value, on
                 }
             }}
             disabled={disabled}
-            renderInput={(params) => (
+            renderInput={(params: any) => (
                 <TextField
                     {...params}
                     //label="Departure Location"

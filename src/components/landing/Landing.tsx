@@ -81,7 +81,7 @@ function Landing() {
     };
 
     const handleChangePackingType = (event: { target: { value: string } }) => {
-        setCargoType(event.target.value);
+        setPackingType(event.target.value);
     };
     
     const handleChangeCargoType = (event: { target: { value: string } }) => {
@@ -459,7 +459,7 @@ function Landing() {
                                     }}
                                     value={departurePort}
                                     sx={{ mt: 1 }}
-                                    renderInput={(params) => <TextField {...params} />}
+                                    renderInput={(params: any) => <TextField {...params} />}
                                     onChange={(e: any, value: any) => { setDeparturePort(value); }}
                                     fullWidth
                                 /> : <Skeleton />
@@ -489,7 +489,7 @@ function Landing() {
                                     }}
                                     value={arrivalPort}
                                     sx={{ mt: 1 }}
-                                    renderInput={(params) => <TextField {...params} />}
+                                    renderInput={(params: any) => <TextField {...params} />}
                                     onChange={(e: any, value: any) => { setArrivalPort(value); }}
                                     fullWidth
                                 /> : <Skeleton />
@@ -532,7 +532,7 @@ function Landing() {
                                     }}
                                     value={tags}
                                     sx={{ mt: 1 }}
-                                    renderInput={(params) => <TextField {...params} sx={{ textTransform: "lowercase" }} />}
+                                    renderInput={(params: any) => <TextField {...params} sx={{ textTransform: "lowercase" }} />}
                                     onChange={(e: any, value: any) => { setTags(value); }}
                                     fullWidth
                                 /> : <Skeleton />

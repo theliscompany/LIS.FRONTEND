@@ -23,6 +23,7 @@ import Tooltip, { TooltipProps, tooltipClasses } from '@mui/material/Tooltip';
 import MenuItem from '@mui/material/MenuItem';
 import Menu from '@mui/material/Menu';
 import IconButton from '@mui/material/IconButton';
+import Button from '@mui/material/Button';
 import LastPageIcon from '@mui/icons-material/LastPage';
 import AutoFixHighIcon from '@mui/icons-material/AutoFixHigh';
 import AppRegistrationIcon from '@mui/icons-material/AppRegistration';
@@ -44,6 +45,7 @@ import { BootstrapInput, DarkTooltip } from '../../misc/styles';
 import Search from '@mui/icons-material/Search';
 
 import { redirect, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 function stringToColor(string: string) {
     let hash = 0;
@@ -117,6 +119,7 @@ const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' 
 function Layout(props: {children?: React.ReactNode}) {
     const { instance, accounts } = useMsal();
     const [anchorElUser, setAnchorElUser] = useState<null | HTMLElement>(null);
+    const [anchorElLang, setAnchorElLang] = useState<null | HTMLElement>(null);
     const [anchorElNotifications, setAnchorElNotifications] = useState<null | HTMLElement>(null);
     const [open, setOpen] = useState(true);
     const [notifications, setNotifications] = useState<any>(null);
@@ -124,6 +127,8 @@ function Layout(props: {children?: React.ReactNode}) {
     const account = useAccount(accounts[0] || {});
 
     const [anchorElNav, setAnchorElNav] = React.useState(null);
+
+    const { t, i18n } = useTranslation();
     
     const handleOpenNavMenu = (event: any) => {
         setAnchorElNav(event.currentTarget);
@@ -147,6 +152,14 @@ function Layout(props: {children?: React.ReactNode}) {
 
     const handleCloseUserMenu = () => {
         setAnchorElUser(null);
+    };
+
+    const handleOpenLangMenu = (event: React.MouseEvent<HTMLElement>) => {
+        setAnchorElLang(event.currentTarget);
+    };
+
+    const handleCloseLangMenu = () => {
+        setAnchorElLang(null);
     };
 
     const handleOpenNotificationsMenu = (event: React.MouseEvent<HTMLElement>) => {
@@ -205,7 +218,6 @@ function Layout(props: {children?: React.ReactNode}) {
                                     <MenuIcon />
                                 </IconButton>
                                 <Menu
-                                    id="menu-appbar"
                                     anchorEl={anchorElNav}
                                     anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
                                     keepMounted
@@ -216,7 +228,7 @@ function Layout(props: {children?: React.ReactNode}) {
                                     PaperProps={{ sx: { width: "200px" } }}
                                 >
                                     <MenuItem onClick={() => { navigate('/admin/'); handleCloseNavMenu(); }}>
-                                        <Typography textAlign="center">Overview</Typography>
+                                        <Typography textAlign="center">{t('overview')}</Typography>
                                     </MenuItem>
                                     <MenuItem onClick={() => { navigate('/admin/users'); handleCloseNavMenu(); }}>
                                         <Typography textAlign="center">Users</Typography>
@@ -338,6 +350,41 @@ function Layout(props: {children?: React.ReactNode}) {
                                     : null
                                 }
                                 
+                                <DarkTooltip title={t('changeLanguage')}>
+                                    <Button sx={{ mr: 3, border: 1, borderColor: "#ced4da", borderRadius: 1, p: 1, width: "125px" }} onClick={handleOpenLangMenu}>
+                                        <Box sx={{ display: "flex", flexDirection: "row", justifyContent: "center", alignItems: "center" }}>
+                                            <img src={"/assets/img/flags/flag-"+i18n.language+".png"} alt="flag en" style={{ width: "16px", height: "16px" }} />
+                                            <Typography fontSize={14} sx={{ mx: 1, textTransform: "none", color: "#333" }}>{i18n.language === "en" ? "English" : "Français"}</Typography>
+                                        </Box>
+                                    </Button>
+                                </DarkTooltip>
+                                <Menu
+                                    sx={{ mt: '45px' }}
+                                    PaperProps={{ sx: { width: "160px" } }}
+                                    MenuListProps={{ sx: { paddingTop: "0px", paddingBottom: "0px" } }}
+                                    anchorEl={anchorElLang}
+                                    anchorOrigin={{
+                                        vertical: 'top',
+                                        horizontal: 'right',
+                                    }}
+                                    keepMounted
+                                    transformOrigin={{
+                                        vertical: 'top',
+                                        horizontal: 'right',
+                                    }}
+                                    open={Boolean(anchorElLang)}
+                                    onClose={handleCloseLangMenu}
+                                >
+                                    <MenuItem dense key={"x1-English"} title="English" onClick={() => { i18n.changeLanguage("en"); handleCloseLangMenu(); }}>
+                                        <img src="/assets/img/flags/flag-en.png" style={{ width: "12px" }} />
+                                        <ListItemText primary={"English"} sx={{ ml: 1 }} />
+                                    </MenuItem>
+                                    <MenuItem dense key={"x1-French"} title="Français" onClick={() => { i18n.changeLanguage("fr"); handleCloseLangMenu(); }}>
+                                        <img src="/assets/img/flags/flag-fr.png" style={{ width: "12px" }} />
+                                        <ListItemText primary={"Français"} sx={{ ml: 1 }} />
+                                    </MenuItem>
+                                </Menu>
+                                
                                 <DarkTooltip title={account?.name}>
                                     <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
                                         <Avatar alt={account?.name} {...stringAvatar(account?.name)} src="../cyrillepenaye.jpg" />
@@ -347,7 +394,6 @@ function Layout(props: {children?: React.ReactNode}) {
                                     sx={{ mt: '45px' }}
                                     PaperProps={{ sx: { width: "300px" } }}
                                     MenuListProps={{ sx: { paddingTop: "0px", paddingBottom: "0px" } }}
-                                    id="menu-appbar"
                                     anchorEl={anchorElUser}
                                     anchorOrigin={{
                                         vertical: 'top',
@@ -414,12 +460,12 @@ function Layout(props: {children?: React.ReactNode}) {
                         <List dense>
                             <NavLink to="/admin/" className={({ isActive }) => isActive ? "cs-navlink-active" : "cs-navlink"}>
                                 <ListItem className="cs-listitem" key={"Overview"} disablePadding disableGutters>
-                                <DarkTooltip title="Overview" placement="right" arrow>
+                                <DarkTooltip title={t('overview')} placement="right" arrow>
                                     <ListItemButton className="cs-listitembutton">
                                         <ListItemIcon className="cs-listitemicon">
                                             <HomeIcon fontSize="small" />
                                         </ListItemIcon>
-                                        <ListItemText primary={"Overview"} />
+                                        <ListItemText primary={t('overview')} />
                                     </ListItemButton>
                                 </DarkTooltip>
                                 </ListItem>

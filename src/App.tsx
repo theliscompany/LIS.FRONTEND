@@ -21,6 +21,9 @@ import PriceOffers from './components/admin/PriceOffers';
 import ManagePriceOffer from './components/admin/ManagePriceOffer';
 import ApproveOffer from './components/admin/ApproveOffer';
 
+// Remove if locales are not used
+import './locales/i18n';
+
 const App = () => {
   return (
     <>

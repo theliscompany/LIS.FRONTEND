@@ -1151,7 +1151,7 @@ function Request(props: any) {
                                             }}
                                             value={departureTown}
                                             sx={{ mt: 1 }}
-                                            renderInput={(params) => <TextField {...params} />}
+                                            renderInput={(params: any) => <TextField {...params} />}
                                             onChange={(e: any, value: any) => { setDepartureTown(value); }}
                                             fullWidth
                                         /> : <Skeleton />
@@ -1181,7 +1181,7 @@ function Request(props: any) {
                                             }}
                                             value={arrivalTown}
                                             sx={{ mt: 1 }}
-                                            renderInput={(params) => <TextField {...params} />}
+                                            renderInput={(params: any) => <TextField {...params} />}
                                             onChange={(e: any, value: any) => { setArrivalTown(value); }}
                                             fullWidth
                                         /> : <Skeleton />
@@ -1432,7 +1432,7 @@ function Request(props: any) {
                                             }}
                                             value={tags}
                                             sx={{ mt: 1 }}
-                                            renderInput={(params) => <TextField {...params} sx={{ textTransform: "lowercase" }} />}
+                                            renderInput={(params: any) => <TextField {...params} sx={{ textTransform: "lowercase" }} />}
                                             onChange={(e: any, value: any) => { setTags(value); }}
                                             fullWidth
                                         /> : <Skeleton />
@@ -1747,7 +1747,7 @@ function Request(props: any) {
                                                     }}
                                                     value={portDeparture}
                                                     sx={{ mt: 1 }}
-                                                    renderInput={(params) => <TextField {...params} />}
+                                                    renderInput={(params: any) => <TextField {...params} />}
                                                     onChange={(e: any, value: any) => { setPortDeparture(value); }}
                                                     fullWidth
                                                 /> : <Skeleton />
@@ -1776,7 +1776,7 @@ function Request(props: any) {
                                                     }}
                                                     value={portDestination}
                                                     sx={{ mt: 1 }}
-                                                    renderInput={(params) => <TextField {...params} />}
+                                                    renderInput={(params: any) => <TextField {...params} />}
                                                     onChange={(e: any, value: any) => { setPortDestination(value); }}
                                                     fullWidth
                                                 /> : <Skeleton />
@@ -1808,7 +1808,7 @@ function Request(props: any) {
                                                     }}
                                                     value={loadingCity}
                                                     sx={{ mt: 1 }}
-                                                    renderInput={(params) => <TextField {...params} />}
+                                                    renderInput={(params: any) => <TextField {...params} />}
                                                     onChange={(e: any, value: any) => { setLoadingCity(value); }}
                                                     fullWidth
                                                 /> : <Skeleton />

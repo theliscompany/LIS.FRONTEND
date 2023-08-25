@@ -60,7 +60,7 @@ export default function Asynchronous() {
             getOptionLabel={(option) => option.title}
             options={options}
             loading={loading}
-            renderInput={(params) => (
+            renderInput={(params: any) => (
                 <TextField
                     {...params}
                     label="Asynchronous"

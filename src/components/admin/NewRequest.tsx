@@ -342,7 +342,7 @@ function NewRequest(props: any) {
                                     }}
                                     value={departurePort}
                                     sx={{ mt: 1 }}
-                                    renderInput={(params) => <TextField {...params} />}
+                                    renderInput={(params: any) => <TextField {...params} />}
                                     onChange={(e: any, value: any) => { setDeparturePort(value); }}
                                     fullWidth
                                 /> : <Skeleton />
@@ -372,7 +372,7 @@ function NewRequest(props: any) {
                                     }}
                                     value={arrivalPort}
                                     sx={{ mt: 1 }}
-                                    renderInput={(params) => <TextField {...params} />}
+                                    renderInput={(params: any) => <TextField {...params} />}
                                     onChange={(e: any, value: any) => { setArrivalPort(value); }}
                                     fullWidth
                                 /> : <Skeleton />
@@ -625,7 +625,7 @@ function NewRequest(props: any) {
                                     }}
                                     value={tags}
                                     sx={{ mt: 1 }}
-                                    renderInput={(params) => <TextField {...params} sx={{ textTransform: "lowercase" }} />}
+                                    renderInput={(params: any) => <TextField {...params} sx={{ textTransform: "lowercase" }} />}
                                     onChange={(e: any, value: any) => { setTags(value); }}
                                     fullWidth
                                 /> : <Skeleton />
