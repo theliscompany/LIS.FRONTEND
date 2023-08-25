@@ -43,6 +43,7 @@ const AutocompleteSearch: React.FC<LocationAutocompleteProps> = ({ id, value, on
             disablePortal
             options={options}
             loading={loading}
+            noOptionsText="Type something..."
             getOptionLabel={(option) => { 
                 if (option !== undefined && option !== null && option.city !== "" && option.country !== "") {
                     return `${option.city}, ${option.country}`;

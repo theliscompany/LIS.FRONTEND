@@ -229,13 +229,13 @@ function RequestsSearch() {
                                                 <Grid item xs={12} md={6} mt={1}>
                                                     <Typography variant="subtitle1" display="flex" alignItems="center" justifyContent="left" fontSize={15}>Departure location</Typography>
                                                     <Typography variant="subtitle2" display="flex" alignItems="center" justifyContent="left" fontSize={14}>
-                                                        <PlaceIcon sx={{ position: "relative", right: "4px" }} /> <span>{item.departure}</span>
+                                                        <PlaceIcon sx={{ position: "relative", right: "4px" }} /> <span>{item.departure.split(', ').slice(0,2).join(', ')}</span>
                                                     </Typography>
                                                 </Grid>
                                                 <Grid item xs={12} md={6} mt={1}>
                                                     <Typography variant="subtitle1" display="flex" alignItems="center" justifyContent="left" fontSize={15}>Arrival location</Typography>
                                                     <Typography variant="subtitle2" display="flex" alignItems="center" justifyContent="left" fontSize={14}>
-                                                        <PlaceIcon sx={{ position: "relative", right: "4px" }} /> <span>{item.arrival}</span>
+                                                        <PlaceIcon sx={{ position: "relative", right: "4px" }} /> <span>{item.arrival.split(', ').slice(0,2).join(', ')}</span>
                                                     </Typography>
                                                 </Grid>
                                             </Grid>
