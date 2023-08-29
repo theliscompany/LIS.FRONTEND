@@ -2,8 +2,6 @@ import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import './App.css';
 import Layout from './components/shared/Layout';
 import Home from './components/admin/Home';
-import Wizard from './components/admin/Wizard';
-import Simulation from './components/admin/Simulation';
 import Landing from './components/landing/Landing';
 import Requests from './components/admin/Requests';
 import Privacy from './components/landing/Privacy';
@@ -34,8 +32,6 @@ const App = () => {
               <Route path='admin/*' element={<Layout />}>
                 <Route path="" element={<Histories />} />
                 <Route path="admin" element={<Histories />} />
-                <Route path="wizard" element={<Wizard />} />
-                <Route path="simulation" element={<Simulation />} />
                 <Route path="requests" element={<Requests />} />
                 <Route path="search/:search" element={<RequestsSearch />} />
                 <Route path="search" element={<RequestsSearch />} />

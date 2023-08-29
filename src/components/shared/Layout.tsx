@@ -231,19 +231,19 @@ function Layout(props: {children?: React.ReactNode}) {
                                         <Typography textAlign="center">{t('overview')}</Typography>
                                     </MenuItem>
                                     <MenuItem onClick={() => { navigate('/admin/users'); handleCloseNavMenu(); }}>
-                                        <Typography textAlign="center">Users</Typography>
+                                        <Typography textAlign="center">{t('users')}</Typography>
                                     </MenuItem>
                                     <MenuItem onClick={() => { navigate('/admin/new-request'); handleCloseNavMenu(); }}>
-                                        <Typography textAlign="center">New request</Typography>
+                                        <Typography textAlign="center">{t('newRequest')}</Typography>
                                     </MenuItem>
                                     <MenuItem onClick={() => { navigate('/admin/my-requests'); handleCloseNavMenu(); }}>
-                                        <Typography textAlign="center">My requests</Typography>
+                                        <Typography textAlign="center">{t('myRequests')}</Typography>
                                     </MenuItem>
                                     <MenuItem onClick={() => { navigate('/admin/requests'); handleCloseNavMenu(); }}>
-                                        <Typography textAlign="center">Requests</Typography>
+                                        <Typography textAlign="center">{t('requests')}</Typography>
                                     </MenuItem>
                                     <MenuItem onClick={() => { navigate('/admin/quote-offers'); handleCloseNavMenu(); }}>
-                                        <Typography textAlign="center">Price offers</Typography>
+                                        <Typography textAlign="center">{t('priceOffers')}</Typography>
                                     </MenuItem>
                                 </Menu>
                             </Grid>
@@ -477,7 +477,7 @@ function Layout(props: {children?: React.ReactNode}) {
                                         <ListItemIcon className="cs-listitemicon">
                                             <PeopleIcon fontSize="small" />
                                         </ListItemIcon>
-                                        <ListItemText primary={"Users"} />
+                                        <ListItemText primary={t('users')} />
                                     </ListItemButton>
                                 </DarkTooltip>
                                 </ListItem>
@@ -489,7 +489,7 @@ function Layout(props: {children?: React.ReactNode}) {
                                         <ListItemIcon className="cs-listitemicon">
                                             <AddIcon fontSize="small" />
                                         </ListItemIcon>
-                                        <ListItemText primary={"New request"} />
+                                        <ListItemText primary={t('newRequest')} />
                                     </ListItemButton>
                                 </DarkTooltip>
                                 </ListItem>
@@ -501,7 +501,7 @@ function Layout(props: {children?: React.ReactNode}) {
                                         <ListItemIcon className="cs-listitemicon">
                                             <AutoFixHighIcon fontSize="small" />
                                         </ListItemIcon>
-                                        <ListItemText primary={"My requests"} />
+                                        <ListItemText primary={t('myRequests')} />
                                     </ListItemButton>
                                 </DarkTooltip>
                                 </ListItem>
@@ -513,19 +513,19 @@ function Layout(props: {children?: React.ReactNode}) {
                                         <ListItemIcon className="cs-listitemicon">
                                             <NotificationsIcon fontSize="small" />
                                         </ListItemIcon>
-                                        <ListItemText primary={"Requests"} />
+                                        <ListItemText primary={t('requests')} />
                                     </ListItemButton>
                                 </DarkTooltip>
                                 </ListItem>
                             </NavLink>
                             <NavLink to="/admin/quote-offers" className={({ isActive }) => isActive ? "cs-navlink-active" : "cs-navlink"}>
-                                <ListItem className="cs-listitem" key={"Requests"} disablePadding disableGutters>
+                                <ListItem className="cs-listitem" key={"Price offers"} disablePadding disableGutters>
                                 <DarkTooltip title="Price offers" placement="right" arrow>
                                     <ListItemButton className="cs-listitembutton">
                                         <ListItemIcon className="cs-listitemicon">
                                             <PortraitIcon fontSize="small" />
                                         </ListItemIcon>
-                                        <ListItemText primary={"Price offers"} />
+                                        <ListItemText primary={t('priceOffers')} />
                                     </ListItemButton>
                                 </DarkTooltip>
                                 </ListItem>
@@ -539,7 +539,7 @@ function Layout(props: {children?: React.ReactNode}) {
                                         <ListItemIcon className="cs-listitemicon">
                                             {open ? <FirstPageIcon fontSize="small" /> : <LastPageIcon fontSize="small" />}
                                         </ListItemIcon>
-                                        <ListItemText primary={"Collapse"} />
+                                        <ListItemText primary={t('collapse')} />
                                     </ListItemButton>
                                 </DarkTooltip>
                             </ListItem>

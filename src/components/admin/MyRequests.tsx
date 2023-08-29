@@ -25,6 +25,9 @@ import { BackendService } from '../../services/fetch';
 import { useParams } from 'react-router-dom';
 import { RequestResponseDto } from '../../models/models';
 import { useAccount, useMsal } from '@azure/msal-react';
+import { NavLink } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+
 
 function convertStringToObject(str: string): { city: string, country: string } {
     console.log(str);
@@ -70,27 +73,6 @@ function createGetRequestUrl(variable1: string, variable2: string, variable3: st
     return url;
 }
 
-function dateTimeDiff(date_time: string) {
-    const now = new Date();
-    const datetime = new Date(date_time);
-    const diff = now.getTime() - datetime.getTime();
-    const diffInDays = Math.floor(diff / (1000 * 60 * 60 * 24));
-    const diffInHours = Math.floor(diff / (1000 * 60 * 60));
-    const diffInMinutes = Math.floor(diff / (1000 * 60));
-
-    if (diffInDays === 0) {
-        if (diffInHours === 0) {
-        return diffInMinutes === 0 ? "Just now" : diffInMinutes + " minutes ago";
-        } else {
-        return diffInHours + " hours ago";
-        }
-    } else if (diffInDays === 1) {
-        return "Yesterday";
-    } else {
-        return diffInDays + " days ago";
-    }
-}
-
 function MyRequests() {
     const [notifications, setNotifications] = useState<any>(null);
     const [load, setLoad] = useState<boolean>(true);
@@ -125,10 +107,33 @@ function MyRequests() {
         setStatus(event.target.value);
     };
 
+    const { t } = useTranslation();
+    
     useEffect(() => {
         getAssignees();
     }, [instance, account, context]);
 
+    function dateTimeDiff(date_time: string) {
+        const now = new Date();
+        const datetime = new Date(date_time);
+        const diff = now.getTime() - datetime.getTime();
+        const diffInDays = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const diffInHours = Math.floor(diff / (1000 * 60 * 60));
+        const diffInMinutes = Math.floor(diff / (1000 * 60));
+    
+        if (diffInDays === 0) {
+            if (diffInHours === 0) {
+                return diffInMinutes === 0 ? t('justNow') : diffInMinutes + " " + t('minutesAgo');
+            } else {
+                return diffInHours + " " + t('hoursAgo');
+            }
+        } else if (diffInDays === 1) {
+            return t('yesterday');
+        } else {
+            return diffInDays + " " + t('daysAgo');
+        }
+    }
+    
     const getAssignees = async () => {
         if (context) {
             setLoad(true);
@@ -195,18 +200,18 @@ function MyRequests() {
         <div style={{ background: "#fff", borderTopLeftRadius: 20, borderTopRightRadius: 20, overflowX: "hidden" }}>
             <SnackbarProvider />
             <Box py={2.5}>
-                <Typography variant="h5" sx={{mt: {xs: 4, md: 1.5, lg: 1.5 }}} px={5}><b>My requests : {account?.name}</b></Typography>
+                <Typography variant="h5" sx={{mt: {xs: 4, md: 1.5, lg: 1.5 }}} px={5}><b>{t('myRequests')} : {account?.name}</b></Typography>
                 <Grid container spacing={1} px={5} mt={2}>
                     <Grid item xs={12} md={3}>
-                        <InputLabel htmlFor="departure" sx={inputLabelStyles}>Departure location</InputLabel>
+                        <InputLabel htmlFor="departure" sx={inputLabelStyles}>{t('departure')}</InputLabel>
                         <BootstrapInput id="departure" type="text" value={departure} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setDeparture(e.target.value)} fullWidth />
                     </Grid>
                     <Grid item xs={12} md={3}>
-                        <InputLabel htmlFor="arrival" sx={inputLabelStyles}>Arrival location</InputLabel>
+                        <InputLabel htmlFor="arrival" sx={inputLabelStyles}>{t('arrival')}</InputLabel>
                         <BootstrapInput id="arrival" type="text" value={arrival} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setArrival(e.target.value)} fullWidth />
                     </Grid>
                     <Grid item xs={12} md={3}>
-                        <InputLabel htmlFor="packing-type" sx={inputLabelStyles}>Packing type</InputLabel>
+                        <InputLabel htmlFor="packing-type" sx={inputLabelStyles}>{t('packingType')}</InputLabel>
                         <NativeSelect
                             id="packing-type"
                             value={packingType}
@@ -236,7 +241,7 @@ function MyRequests() {
                         </NativeSelect>
                     </Grid>
                     <Grid item xs={12} md={3} mt={1}>
-                        <InputLabel htmlFor="created-date-start" sx={inputLabelStyles}>Created date start</InputLabel>
+                        <InputLabel htmlFor="created-date-start" sx={inputLabelStyles}>{t('createdDateStart')}</InputLabel>
                         <LocalizationProvider dateAdapter={AdapterDayjs}>
                             <DateTimePicker 
                                 value={createdDateStart} 
@@ -246,7 +251,7 @@ function MyRequests() {
                         </LocalizationProvider>
                     </Grid>
                     <Grid item xs={12} md={3} mt={1}>
-                        <InputLabel htmlFor="created-date-end" sx={inputLabelStyles}>Created date end</InputLabel>
+                        <InputLabel htmlFor="created-date-end" sx={inputLabelStyles}>{t('createdDateEnd')}</InputLabel>
                         <LocalizationProvider dateAdapter={AdapterDayjs}>
                             <DateTimePicker 
                                 value={createdDateEnd} 
@@ -256,7 +261,7 @@ function MyRequests() {
                         </LocalizationProvider>
                     </Grid>
                     <Grid item xs={12} md={3} mt={1}>
-                        <InputLabel htmlFor="updated-date-start" sx={inputLabelStyles}>Updated date start</InputLabel>
+                        <InputLabel htmlFor="updated-date-start" sx={inputLabelStyles}>{t('updatedDateStart')}</InputLabel>
                         <LocalizationProvider dateAdapter={AdapterDayjs}>
                             <DateTimePicker 
                                 value={updatedDateStart} 
@@ -266,7 +271,7 @@ function MyRequests() {
                         </LocalizationProvider>
                     </Grid>
                     <Grid item xs={12} md={3} mt={1}>
-                        <InputLabel htmlFor="updated-date-end" sx={inputLabelStyles}>Updated date end</InputLabel>
+                        <InputLabel htmlFor="updated-date-end" sx={inputLabelStyles}>{t('updatedDateEnd')}</InputLabel>
                         <LocalizationProvider dateAdapter={AdapterDayjs}>
                             <DateTimePicker 
                                 value={updatedDateEnd} 
@@ -285,7 +290,7 @@ function MyRequests() {
                             onClick={searchRequests}
                             fullWidth
                         >
-                            Search
+                            {t('search')}
                         </Button>
                     </Grid>
                 </Grid>
@@ -293,41 +298,37 @@ function MyRequests() {
                 {
                     !load ? 
                         notifications !== null ? 
-                        <List sx={{ 
-                            mt: 3 
-                        }}>
+                        <List sx={{ mt: 3  }}>
                             {
                                 notifications.map((item: any, i: number) => {
                                     return (
                                         <ListItem
                                             key={"request-"+i}
-                                            component="a"
-                                            href={"/admin/request/" + item.id}
+                                            component={NavLink}
+                                            to={"/admin/request/" + item.id}
                                             sx={{ 
-                                                '&:hover': {
-                                                    backgroundColor: "#fbfbfb"
-                                                },
+                                                '&:hover': { backgroundColor: "#fbfbfb" },
                                                 borderTop: "1px solid #e6e6e6", 
-                                                px: 5, pt: 1.25, pb: 2 
+                                                px: { xs: 5, md: 5 }, pt: 1.25, pb: 2 
                                             }}
                                         >
                                             <Grid container sx={{ maxWidth: "600px", color: "#333" }}>
                                                 <Grid item xs={12}>
                                                     <ListItemText
-                                                        primary={<Typography variant="subtitle1" color="#333"><b>{item.email !== "emailexample@gmail.com" ? "#" + item.id + " New quote request" + " from : " + item.email : "#" + item.id + " New quote request"}</b></Typography>}
+                                                        primary={<Typography variant="subtitle1" color="#333"><b>{item.email !== "emailexample@gmail.com" ? "#" + item.id + " "+ t('newQuoteRequest') + " from : " + item.email : "#" + item.id + " " + t('newQuoteRequest')}</b></Typography>}
                                                     />        
                                                 </Grid>
                                                 <Grid item xs={12}>
                                                     {dateTimeDiff(item.createdAt)} <Chip size="small" label={item.status} color={item.status === "EnAttente" ? "warning" : item.status === "Valider" ? "success" : "secondary"} sx={{ ml: 1 }} />
                                                 </Grid>
                                                 <Grid item xs={12} md={6} mt={1}>
-                                                    <Typography variant="subtitle1" display="flex" alignItems="center" justifyContent="left" fontSize={15}>Departure location</Typography>
+                                                    <Typography variant="subtitle1" display="flex" alignItems="center" justifyContent="left" fontSize={15}>{t('departure')}</Typography>
                                                     <Typography variant="subtitle2" display="flex" alignItems="center" justifyContent="left" fontSize={14}>
                                                         <PlaceIcon sx={{ position: "relative", right: "4px" }} /> <span>{item.departure.split(', ').slice(0,2).join(', ')}</span>
                                                     </Typography>
                                                 </Grid>
                                                 <Grid item xs={12} md={6} mt={1}>
-                                                    <Typography variant="subtitle1" display="flex" alignItems="center" justifyContent="left" fontSize={15}>Arrival location</Typography>
+                                                    <Typography variant="subtitle1" display="flex" alignItems="center" justifyContent="left" fontSize={15}>{t('arrival')}</Typography>
                                                     <Typography variant="subtitle2" display="flex" alignItems="center" justifyContent="left" fontSize={14}>
                                                         <PlaceIcon sx={{ position: "relative", right: "4px" }} /> <span>{item.arrival.split(', ').slice(0,2).join(', ')}</span>
                                                     </Typography>
