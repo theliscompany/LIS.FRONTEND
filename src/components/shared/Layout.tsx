@@ -23,6 +23,7 @@ import Tooltip, { TooltipProps, tooltipClasses } from '@mui/material/Tooltip';
 import MenuItem from '@mui/material/MenuItem';
 import Menu from '@mui/material/Menu';
 import IconButton from '@mui/material/IconButton';
+import Button from '@mui/material/Button';
 import LastPageIcon from '@mui/icons-material/LastPage';
 import AutoFixHighIcon from '@mui/icons-material/AutoFixHigh';
 import AppRegistrationIcon from '@mui/icons-material/AppRegistration';
@@ -44,6 +45,7 @@ import { BootstrapInput, DarkTooltip } from '../../misc/styles';
 import Search from '@mui/icons-material/Search';
 
 import { redirect, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 function stringToColor(string: string) {
     let hash = 0;
@@ -117,6 +119,7 @@ const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' 
 function Layout(props: {children?: React.ReactNode}) {
     const { instance, accounts } = useMsal();
     const [anchorElUser, setAnchorElUser] = useState<null | HTMLElement>(null);
+    const [anchorElLang, setAnchorElLang] = useState<null | HTMLElement>(null);
     const [anchorElNotifications, setAnchorElNotifications] = useState<null | HTMLElement>(null);
     const [open, setOpen] = useState(true);
     const [notifications, setNotifications] = useState<any>(null);
@@ -124,6 +127,8 @@ function Layout(props: {children?: React.ReactNode}) {
     const account = useAccount(accounts[0] || {});
 
     const [anchorElNav, setAnchorElNav] = React.useState(null);
+
+    const { t, i18n } = useTranslation();
     
     const handleOpenNavMenu = (event: any) => {
         setAnchorElNav(event.currentTarget);
@@ -147,6 +152,14 @@ function Layout(props: {children?: React.ReactNode}) {
 
     const handleCloseUserMenu = () => {
         setAnchorElUser(null);
+    };
+
+    const handleOpenLangMenu = (event: React.MouseEvent<HTMLElement>) => {
+        setAnchorElLang(event.currentTarget);
+    };
+
+    const handleCloseLangMenu = () => {
+        setAnchorElLang(null);
     };
 
     const handleOpenNotificationsMenu = (event: React.MouseEvent<HTMLElement>) => {
@@ -205,7 +218,6 @@ function Layout(props: {children?: React.ReactNode}) {
                                     <MenuIcon />
                                 </IconButton>
                                 <Menu
-                                    id="menu-appbar"
                                     anchorEl={anchorElNav}
                                     anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
                                     keepMounted
@@ -216,22 +228,22 @@ function Layout(props: {children?: React.ReactNode}) {
                                     PaperProps={{ sx: { width: "200px" } }}
                                 >
                                     <MenuItem onClick={() => { navigate('/admin/'); handleCloseNavMenu(); }}>
-                                        <Typography textAlign="center">Overview</Typography>
+                                        <Typography textAlign="center">{t('overview')}</Typography>
                                     </MenuItem>
                                     <MenuItem onClick={() => { navigate('/admin/users'); handleCloseNavMenu(); }}>
-                                        <Typography textAlign="center">Users</Typography>
+                                        <Typography textAlign="center">{t('users')}</Typography>
                                     </MenuItem>
                                     <MenuItem onClick={() => { navigate('/admin/new-request'); handleCloseNavMenu(); }}>
-                                        <Typography textAlign="center">New request</Typography>
+                                        <Typography textAlign="center">{t('newRequest')}</Typography>
                                     </MenuItem>
                                     <MenuItem onClick={() => { navigate('/admin/my-requests'); handleCloseNavMenu(); }}>
-                                        <Typography textAlign="center">My requests</Typography>
+                                        <Typography textAlign="center">{t('myRequests')}</Typography>
                                     </MenuItem>
                                     <MenuItem onClick={() => { navigate('/admin/requests'); handleCloseNavMenu(); }}>
-                                        <Typography textAlign="center">Requests</Typography>
+                                        <Typography textAlign="center">{t('requests')}</Typography>
                                     </MenuItem>
                                     <MenuItem onClick={() => { navigate('/admin/quote-offers'); handleCloseNavMenu(); }}>
-                                        <Typography textAlign="center">Price offers</Typography>
+                                        <Typography textAlign="center">{t('priceOffers')}</Typography>
                                     </MenuItem>
                                 </Menu>
                             </Grid>
@@ -239,7 +251,7 @@ function Layout(props: {children?: React.ReactNode}) {
                                 <BootstrapInput 
                                     type="text" 
                                     value={searchText}
-                                    placeholder="Type something to search..."
+                                    placeholder={t('typeSomethingSearch')}
                                     sx={{ ml: 5, pb: 1, minWidth: { xs: "calc(100vw - 90px)", md: "400px" } }} 
                                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchText(e.target.value)} endAdornment={
                                         <InputAdornment position="end">
@@ -273,7 +285,7 @@ function Layout(props: {children?: React.ReactNode}) {
                                 id="searchText" 
                                 type="text" 
                                 value={searchText}
-                                placeholder="Type something to search..."
+                                placeholder={t('typeSomethingSearch')}
                                 sx={{ ml: 5, minWidth: { md: "400px" } }} 
                                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchText(e.target.value)} endAdornment={
                                     <InputAdornment position="end">
@@ -306,15 +318,9 @@ function Layout(props: {children?: React.ReactNode}) {
                                             MenuListProps={{ sx: { paddingTop: "0px", paddingBottom: "0px" } }}
                                             id="menu-notifications"
                                             anchorEl={anchorElNotifications}
-                                            anchorOrigin={{
-                                                vertical: 'top',
-                                                horizontal: 'right',
-                                            }}
+                                            anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
                                             keepMounted
-                                            transformOrigin={{
-                                                vertical: 'top',
-                                                horizontal: 'right',
-                                            }}
+                                            transformOrigin={{ vertical: 'top', horizontal: 'right' }}
                                             open={Boolean(anchorElNotifications)}
                                             onClose={handleCloseNotificationsMenu}
                                         >
@@ -338,26 +344,48 @@ function Layout(props: {children?: React.ReactNode}) {
                                     : null
                                 }
                                 
+                                <DarkTooltip title={t('changeLanguage')}>
+                                    <Button sx={{ mr: 3, border: 1, borderColor: "#ced4da", borderRadius: 1, p: 1, width: "125px" }} onClick={handleOpenLangMenu}>
+                                        <Box sx={{ display: "flex", flexDirection: "row", justifyContent: "center", alignItems: "center" }}>
+                                            <img src={"/assets/img/flags/flag-"+i18n.language+".png"} alt="flag en" style={{ width: "16px", height: "16px" }} />
+                                            <Typography fontSize={14} sx={{ mx: 1, textTransform: "none", color: "#333" }}>{i18n.language === "en" ? "English" : "Français"}</Typography>
+                                        </Box>
+                                    </Button>
+                                </DarkTooltip>
+                                <Menu
+                                    sx={{ mt: '45px' }}
+                                    PaperProps={{ sx: { width: "160px" } }}
+                                    MenuListProps={{ sx: { paddingTop: "0px", paddingBottom: "0px" } }}
+                                    anchorEl={anchorElLang}
+                                    anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+                                    keepMounted
+                                    transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+                                    open={Boolean(anchorElLang)}
+                                    onClose={handleCloseLangMenu}
+                                >
+                                    <MenuItem dense key={"x1-English"} title="English" onClick={() => { i18n.changeLanguage("en"); handleCloseLangMenu(); }}>
+                                        <img src="/assets/img/flags/flag-en.png" style={{ width: "12px" }} />
+                                        <ListItemText primary={"English"} sx={{ ml: 1 }} />
+                                    </MenuItem>
+                                    <MenuItem dense key={"x1-French"} title="Français" onClick={() => { i18n.changeLanguage("fr"); handleCloseLangMenu(); }}>
+                                        <img src="/assets/img/flags/flag-fr.png" style={{ width: "12px" }} />
+                                        <ListItemText primary={"Français"} sx={{ ml: 1 }} />
+                                    </MenuItem>
+                                </Menu>
+                                
                                 <DarkTooltip title={account?.name}>
                                     <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                                        <Avatar alt={account?.name} {...stringAvatar(account?.name)} src="../cyrillepenaye.jpg" />
+                                        <Avatar alt={account?.name} {...stringAvatar(account?.name)} />
                                     </IconButton>
                                 </DarkTooltip>
                                 <Menu
                                     sx={{ mt: '45px' }}
                                     PaperProps={{ sx: { width: "300px" } }}
                                     MenuListProps={{ sx: { paddingTop: "0px", paddingBottom: "0px" } }}
-                                    id="menu-appbar"
                                     anchorEl={anchorElUser}
-                                    anchorOrigin={{
-                                        vertical: 'top',
-                                        horizontal: 'right',
-                                    }}
+                                    anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
                                     keepMounted
-                                    transformOrigin={{
-                                        vertical: 'top',
-                                        horizontal: 'right',
-                                    }}
+                                    transformOrigin={{ vertical: 'top', horizontal: 'right' }}
                                     open={Boolean(anchorElUser)}
                                     onClose={handleCloseUserMenu}
                                 >
@@ -414,72 +442,72 @@ function Layout(props: {children?: React.ReactNode}) {
                         <List dense>
                             <NavLink to="/admin/" className={({ isActive }) => isActive ? "cs-navlink-active" : "cs-navlink"}>
                                 <ListItem className="cs-listitem" key={"Overview"} disablePadding disableGutters>
-                                <DarkTooltip title="Overview" placement="right" arrow>
+                                <DarkTooltip title={t('overview')} placement="right" arrow>
                                     <ListItemButton className="cs-listitembutton">
                                         <ListItemIcon className="cs-listitemicon">
                                             <HomeIcon fontSize="small" />
                                         </ListItemIcon>
-                                        <ListItemText primary={"Overview"} />
+                                        <ListItemText primary={t('overview')} />
                                     </ListItemButton>
                                 </DarkTooltip>
                                 </ListItem>
                             </NavLink>
                             <NavLink to="/admin/users" className={({ isActive }) => isActive ? "cs-navlink-active" : "cs-navlink"}>
                                 <ListItem className="cs-listitem" key={"Users"} disablePadding disableGutters>
-                                <DarkTooltip title="Users" placement="right" arrow>
+                                <DarkTooltip title={t('users')} placement="right" arrow>
                                     <ListItemButton className="cs-listitembutton">
                                         <ListItemIcon className="cs-listitemicon">
                                             <PeopleIcon fontSize="small" />
                                         </ListItemIcon>
-                                        <ListItemText primary={"Users"} />
+                                        <ListItemText primary={t('users')} />
                                     </ListItemButton>
                                 </DarkTooltip>
                                 </ListItem>
                             </NavLink>
                             <NavLink to="/admin/new-request" className={({ isActive }) => isActive ? "cs-navlink-active" : "cs-navlink"}>
                                 <ListItem className="cs-listitem" key={"New request"} disablePadding disableGutters>
-                                <DarkTooltip title="New request" placement="right" arrow>
+                                <DarkTooltip title={t('newRequest')} placement="right" arrow>
                                     <ListItemButton className="cs-listitembutton">
                                         <ListItemIcon className="cs-listitemicon">
                                             <AddIcon fontSize="small" />
                                         </ListItemIcon>
-                                        <ListItemText primary={"New request"} />
+                                        <ListItemText primary={t('newRequest')} />
                                     </ListItemButton>
                                 </DarkTooltip>
                                 </ListItem>
                             </NavLink>
                             <NavLink to="/admin/my-requests" className={({ isActive }) => isActive ? "cs-navlink-active" : "cs-navlink"}>
                                 <ListItem className="cs-listitem" key={"My requests"} disablePadding disableGutters>
-                                <DarkTooltip title="My requests" placement="right" arrow>
+                                <DarkTooltip title={t('myRequests')} placement="right" arrow>
                                     <ListItemButton className="cs-listitembutton">
                                         <ListItemIcon className="cs-listitemicon">
                                             <AutoFixHighIcon fontSize="small" />
                                         </ListItemIcon>
-                                        <ListItemText primary={"My requests"} />
+                                        <ListItemText primary={t('myRequests')} />
                                     </ListItemButton>
                                 </DarkTooltip>
                                 </ListItem>
                             </NavLink>
                             <NavLink to="/admin/requests" className={({ isActive }) => isActive ? "cs-navlink-active" : "cs-navlink"}>
                                 <ListItem className="cs-listitem" key={"Requests"} disablePadding disableGutters>
-                                <DarkTooltip title="Requests" placement="right" arrow>
+                                <DarkTooltip title={t('requests')} placement="right" arrow>
                                     <ListItemButton className="cs-listitembutton">
                                         <ListItemIcon className="cs-listitemicon">
                                             <NotificationsIcon fontSize="small" />
                                         </ListItemIcon>
-                                        <ListItemText primary={"Requests"} />
+                                        <ListItemText primary={t('requests')} />
                                     </ListItemButton>
                                 </DarkTooltip>
                                 </ListItem>
                             </NavLink>
                             <NavLink to="/admin/quote-offers" className={({ isActive }) => isActive ? "cs-navlink-active" : "cs-navlink"}>
-                                <ListItem className="cs-listitem" key={"Requests"} disablePadding disableGutters>
-                                <DarkTooltip title="Price offers" placement="right" arrow>
+                                <ListItem className="cs-listitem" key={"Price offers"} disablePadding disableGutters>
+                                <DarkTooltip title={t('priceOffers')} placement="right" arrow>
                                     <ListItemButton className="cs-listitembutton">
                                         <ListItemIcon className="cs-listitemicon">
                                             <PortraitIcon fontSize="small" />
                                         </ListItemIcon>
-                                        <ListItemText primary={"Price offers"} />
+                                        <ListItemText primary={t('priceOffers')} />
                                     </ListItemButton>
                                 </DarkTooltip>
                                 </ListItem>
@@ -488,12 +516,12 @@ function Layout(props: {children?: React.ReactNode}) {
                         
                         <List dense sx={{ position: "absolute", bottom: "0px", left: "10px", right: "10px" }}>
                             <ListItem className="cs-listitem" key={"Collapse"} disablePadding disableGutters>
-                                <DarkTooltip title="Collapse" placement="right" arrow>
+                                <DarkTooltip title={t('collapse')} placement="right" arrow>
                                     <ListItemButton className="cs-listitembutton" onClick={open ? handleDrawerClose : handleDrawerOpen}>
                                         <ListItemIcon className="cs-listitemicon">
                                             {open ? <FirstPageIcon fontSize="small" /> : <LastPageIcon fontSize="small" />}
                                         </ListItemIcon>
-                                        <ListItemText primary={"Collapse"} />
+                                        <ListItemText primary={t('collapse')} />
                                     </ListItemButton>
                                 </DarkTooltip>
                             </ListItem>

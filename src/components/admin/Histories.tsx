@@ -16,6 +16,7 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DateTimePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { Dayjs } from 'dayjs';
 import { RequestResponseDto } from '../../models/models';
+import { useTranslation } from 'react-i18next';
 
 function createGetRequestUrl(variable1: Dayjs|null, variable2: Dayjs|null, variable3: string, variable4: string) {
     let url = protectedResources.apiLisQuotes.endPoint+'/RequestQuoteHistory?';
@@ -47,6 +48,8 @@ function Histories(props: any) {
     const [assignedDateEnd, setAssignedDateEnd] = useState<Dayjs | null>(null);
 
     const context = useAuthorizedBackendApi();
+    
+    const { t } = useTranslation();
     
     useEffect(() => {
         getHistories();
@@ -91,20 +94,20 @@ function Histories(props: any) {
         <div style={{ background: "#fff", borderTopLeftRadius: 20, borderTopRightRadius: 20 }}>
             <SnackbarProvider />
             <Box py={2.5}>
-                <Typography variant="h5" sx={{mt: {xs: 4, md: 1.5, lg: 1.5 }}} px={5}><b>General timeline of the requests</b></Typography>
+                <Typography variant="h5" sx={{mt: {xs: 4, md: 1.5, lg: 1.5 }}} px={5}><b>{t('overviewTitle')}</b></Typography>
                 <Box>
                     <Grid container spacing={1} px={5} mt={2}>
                         <Grid item xs={12} md={2}>
-                            <InputLabel htmlFor="assignee" sx={inputLabelStyles}>Assignee id</InputLabel>
+                            <InputLabel htmlFor="assignee" sx={inputLabelStyles}>{t('assigneeId')}</InputLabel>
                             <BootstrapInput id="assignee" type="text" value={assigneeId} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setAssigneeId(e.target.value)} fullWidth />
                         </Grid>
                         <Grid item xs={12} md={2}>
-                            <InputLabel htmlFor="request" sx={inputLabelStyles}>Request quote id</InputLabel>
+                            <InputLabel htmlFor="request" sx={inputLabelStyles}>{t('requestQuoteId')}</InputLabel>
                             <BootstrapInput id="request" type="text" value={requestQuoteId} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setRequestQuoteId(e.target.value)} fullWidth />
                         </Grid>
                         
                         <Grid item xs={12} md={3}>
-                            <InputLabel htmlFor="assigned-date-start" sx={inputLabelStyles}>Assigned date</InputLabel>
+                            <InputLabel htmlFor="assigned-date-start" sx={inputLabelStyles}>{t('assignDate')}</InputLabel>
                             <LocalizationProvider dateAdapter={AdapterDayjs}>
                                 <DateTimePicker 
                                     value={assignedDateStart} 
@@ -114,7 +117,7 @@ function Histories(props: any) {
                             </LocalizationProvider>
                         </Grid>
                         <Grid item xs={12} md={3}>
-                            <InputLabel htmlFor="assigned-date-end" sx={inputLabelStyles}>Unassigned date</InputLabel>
+                            <InputLabel htmlFor="assigned-date-end" sx={inputLabelStyles}>{t('unassignDate')}</InputLabel>
                             <LocalizationProvider dateAdapter={AdapterDayjs}>
                                 <DateTimePicker 
                                     value={assignedDateEnd} 
@@ -133,7 +136,7 @@ function Histories(props: any) {
                             onClick={searchHistories}
                             fullWidth
                         >
-                            Search
+                            {t('search')}
                         </Button>
                     </Grid>
                         <Grid item xs={12}>
@@ -145,11 +148,11 @@ function Histories(props: any) {
                                             <TableHead>
                                                 <TableRow>
                                                     <TableCell align="left" sx={{ fontSize: 16, fontWeight: "bolder" }}>Id</TableCell>
-                                                    <TableCell align="left" sx={{ fontSize: 16, fontWeight: "bolder" }}>Request id</TableCell>
-                                                    <TableCell align="left" sx={{ fontSize: 16, fontWeight: "bolder" }}>Assignee</TableCell>
-                                                    <TableCell align="left" sx={{ fontSize: 16, fontWeight: "bolder" }}>Assignee email</TableCell>
-                                                    <TableCell align="left" sx={{ fontSize: 16, fontWeight: "bolder" }}>Assign date</TableCell>
-                                                    <TableCell align="left" sx={{ fontSize: 16, fontWeight: "bolder" }}>Unassign date</TableCell>
+                                                    <TableCell align="left" sx={{ fontSize: 16, fontWeight: "bolder" }}>{t('requestQuoteId')}</TableCell>
+                                                    <TableCell align="left" sx={{ fontSize: 16, fontWeight: "bolder" }}>{t('assignee')}</TableCell>
+                                                    <TableCell align="left" sx={{ fontSize: 16, fontWeight: "bolder" }}>{t('assigneeEmail')}</TableCell>
+                                                    <TableCell align="left" sx={{ fontSize: 16, fontWeight: "bolder" }}>{t('assignDate')}</TableCell>
+                                                    <TableCell align="left" sx={{ fontSize: 16, fontWeight: "bolder" }}>{t('unassignDate')}</TableCell>
                                                     <TableCell align="left"><b></b></TableCell>
                                                 </TableRow>
                                             </TableHead>
@@ -163,8 +166,8 @@ function Histories(props: any) {
                                                             </TableCell>
                                                             <TableCell align="left">{row.assignee !== null ? row.assignee.name+" (#"+row.assignee.id+")" : "Not defined"}</TableCell>
                                                             <TableCell align="left">{row.assignee !== null ? row.assignee.email : "Not defined"}</TableCell>
-                                                            <TableCell align="left">{row.assignedAt !== null ? (new Date(row.assignedAt)).toLocaleString() : <Chip label="Currently assigned" color="success" />}</TableCell>
-                                                            <TableCell align="left">{row.unassignedAt !== null ? (new Date(row.unassignedAt)).toLocaleString() : <Chip label="Currently assigned" color="success" />}</TableCell>
+                                                            <TableCell align="left">{row.assignedAt !== null ? (new Date(row.assignedAt)).toLocaleString() : <Chip label={t('currentlyAssigned')} color="success" />}</TableCell>
+                                                            <TableCell align="left">{row.unassignedAt !== null ? (new Date(row.unassignedAt)).toLocaleString() : <Chip label={t('currentlyAssigned')} color="success" />}</TableCell>
                                                         </TableRow>
                                                     ))
                                                 }

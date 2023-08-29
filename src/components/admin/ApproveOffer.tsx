@@ -10,6 +10,7 @@ import { protectedResources, transportRequest } from '../../authConfig';
 import { BackendService } from '../../services/fetch';
 import { BootstrapInput, inputLabelStyles } from '../../misc/styles';
 import { DataGrid, GridRenderCellParams, GridValueFormatterParams, GridValueGetterParams } from '@mui/x-data-grid';
+import { useTranslation } from 'react-i18next';
 
 function ApproveOffer(props: any) {
     const [load, setLoad] = useState<boolean>(true);
@@ -27,6 +28,8 @@ function ApproveOffer(props: any) {
     const { instance, accounts } = useMsal();
     const account = useAccount(accounts[0] || {});
     const context = useAuthorizedBackendApi();
+
+    const { t } = useTranslation();
         
     useEffect(() => {
         getContainers();
@@ -141,13 +144,13 @@ function ApproveOffer(props: any) {
                 !load ? 
                 <Grid container my={5} sx={{ px: { md: 0, xs: 2 } }}>
                     <Grid item xs={12} fontSize={16} my={3}>
-                        <Typography variant="h4" fontWeight="bold">Approve a price offer</Typography>
+                        <Typography variant="h4" fontWeight="bold">{t('approvePriceOffer')}</Typography>
                     </Grid>
                     <Grid item xs={12} sx={{ mb: 2 }}>
-                        <Alert severity="info">You can see the details about our price offer down below</Alert>
+                        <Alert severity="info">{t('youSeeDetailsPriceOffer')}</Alert>
                     </Grid>
                     <Grid item xs={12}>
-                        <Typography variant="h5" sx={{ my: 1, fontSize: 19, fontWeight: "bold" }}>Selected containers</Typography>
+                        <Typography variant="h5" sx={{ my: 1, fontSize: 19, fontWeight: "bold" }}>{t('selectedContainers')}</Typography>
                         {
                             offer.containers !== undefined && offer.containers !== null && offer.containers.length !== 0 && containers !== null ? 
                                 <List>
@@ -159,8 +162,8 @@ function ApproveOffer(props: any) {
                                             >
                                                 <ListItemText primary={
                                                     containers.find((elm: any) => elm.packageId === item.containerId) !== undefined ?
-                                                    "Container : "+containers.find((elm: any) => elm.packageId === item.containerId).packageName+" | Quantity : "+item.quantity
-                                                    : "Container : "+item.containerId+" | Quantity : "+item.quantity
+                                                    t('container')+" : "+containers.find((elm: any) => elm.packageId === item.containerId).packageName+" | "+t('quantity')+" : "+item.quantity
+                                                    : t('container')+" : "+item.containerId+" | "+t('quantity')+" : "+item.quantity
                                                 } />
                                             </ListItem>
                                         ))
@@ -170,17 +173,17 @@ function ApproveOffer(props: any) {
                         }
                     </Grid>
                     <Grid item xs={12}>
-                        <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>Selected sea freight</Typography>
+                        <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>{t('selectedSeafreight')}</Typography>
                         <DataGrid
                             rows={[offer.seaFreight]}
                             columns={
                             [
-                                { field: 'carrierName', headerName: 'Carrier', width: 175 },
-                                { field: 'carrierAgentName', headerName: 'Carrier agent', width: 175 },
-                                { field: 'departurePortName', headerName: 'Departure port', width: 125 },
-                                { field: 'frequency', headerName: 'Frequency', valueFormatter: (params: GridValueFormatterParams) => `${params.value || ''} / day`, },
-                                { field: 'transitTime', headerName: 'Transit time', valueFormatter: (params: GridValueFormatterParams) => `${params.value || ''} days` },
-                                { field: 'currency', headerName: 'Prices', renderCell: (params: GridRenderCellParams) => {
+                                { field: 'carrierName', headerName: t('carrier'), width: 175 },
+                                { field: 'carrierAgentName', headerName: t('carrierAgent'), width: 175 },
+                                { field: 'departurePortName', headerName: t('departurePort'), width: 125 },
+                                { field: 'frequency', headerName: t('frequency'), valueFormatter: (params: GridValueFormatterParams) => `${params.value || ''} / `+t('day'), },
+                                { field: 'transitTime', headerName: t('transitTime'), valueFormatter: (params: GridValueFormatterParams) => `${params.value || ''} `+t('days') },
+                                { field: 'currency', headerName: t('prices'), renderCell: (params: GridRenderCellParams) => {
                                     return (
                                         <Box sx={{ my: 1, mr: 1 }}>
                                             <Box sx={{ my: 1 }} hidden={params.row.price20Dry === 0 || !getPackageNamesByIds(containersId, containers).includes("20' Dry")}>{"20' Dry : "+params.row.price20Dry+" "+params.row.currency}</Box>
@@ -203,22 +206,22 @@ function ApproveOffer(props: any) {
                     {
                         offer.haulage !== null && offer.haulage !== undefined ? 
                         <Grid item xs={12}>
-                            <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>Selected haulage</Typography>
+                            <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>{t('selectedHaulage')}</Typography>
                             <DataGrid
                                 rows={[offer.haulage]}
                                 columns={
                                 [
-                                    { field: 'haulierName', headerName: 'Haulier', width: 175 },
-                                    { field: 'loadingPort', headerName: 'Loading port', renderCell: (params: GridRenderCellParams) => {
+                                    { field: 'haulierName', headerName: t('haulier'), width: 175 },
+                                    { field: 'loadingPort', headerName: t('loadingPort'), renderCell: (params: GridRenderCellParams) => {
                                         return (
                                             <Box sx={{ my: 2 }}>{params.row.loadingPort}</Box>
                                         );
                                     }, width: 175 },
-                                    { field: 'freeTime', headerName: 'Free time', valueFormatter: (params: GridValueFormatterParams) => `${params.value || ''} days`, width: 125 },
-                                    { field: 'multiStop', headerName: 'Multi stop', valueGetter: (params: GridValueGetterParams) => `${params.row.multiStop || ''} ${params.row.currency}` },
-                                    { field: 'overtimeTariff', headerName: 'Overtime tariff', valueGetter: (params: GridValueGetterParams) => `${params.row.overtimeTariff || ''} ${params.row.currency}` },
-                                    { field: 'unitTariff', headerName: 'Unit tariff', valueGetter: (params: GridValueGetterParams) => `${params.row.unitTariff || ''} ${params.row.currency}` },
-                                    { field: 'validUntil', headerName: 'Valid until', valueFormatter: (params: GridValueFormatterParams) => `${(new Date(params.value)).toLocaleString() || ''}`, width: 200 },
+                                    { field: 'freeTime', headerName: t('freeTime'), valueFormatter: (params: GridValueFormatterParams) => `${params.value || ''} days`, width: 125 },
+                                    { field: 'multiStop', headerName: t('multiStop'), valueGetter: (params: GridValueGetterParams) => `${params.row.multiStop || ''} ${params.row.currency}` },
+                                    { field: 'overtimeTariff', headerName: t('overtimeTariff'), valueGetter: (params: GridValueGetterParams) => `${params.row.overtimeTariff || ''} ${params.row.currency}` },
+                                    { field: 'unitTariff', headerName: t('unitTariff'), valueGetter: (params: GridValueGetterParams) => `${params.row.unitTariff || ''} ${params.row.currency}` },
+                                    { field: 'validUntil', headerName: t('validUntil'), valueFormatter: (params: GridValueFormatterParams) => `${(new Date(params.value)).toLocaleString() || ''}`, width: 200 },
                                 ]
                                 }
                                 hideFooter
@@ -232,16 +235,16 @@ function ApproveOffer(props: any) {
                     {
                         offer.miscellaneousList !== null && offer.miscellaneousList[0] !== null ? 
                         <Grid item xs={12}>
-                            <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>Selected miscellaneous</Typography>
+                            <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>{t('selectedMisc')}</Typography>
                             <DataGrid
                                 density="standard"
                                 rows={offer.miscellaneousList}
                                 columns={
                                 [
-                                    { field: 'supplierName', headerName: 'Supplier', width: 175 },
-                                    { field: 'departurePortName', headerName: 'Departure port', width: 175, valueFormatter: (params: GridValueFormatterParams) => `${offer.seaFreight.departurePortName || ''}`, },
-                                    { field: 'destinationPortName', headerName: 'Destination port', width: 325, valueFormatter: (params: GridValueFormatterParams) => `${offer.seaFreight.destinationPortName || ''}`, },
-                                    { field: 'currency', headerName: 'Prices', renderCell: (params: GridRenderCellParams) => {
+                                    { field: 'supplierName', headerName: t('supplier'), width: 175 },
+                                    { field: 'departurePortName', headerName: t('departurePort'), width: 175, valueFormatter: (params: GridValueFormatterParams) => `${offer.seaFreight.departurePortName || ''}`, },
+                                    { field: 'destinationPortName', headerName: t('destinationPort'), width: 325, valueFormatter: (params: GridValueFormatterParams) => `${offer.seaFreight.destinationPortName || ''}`, },
+                                    { field: 'currency', headerName: t('prices'), renderCell: (params: GridRenderCellParams) => {
                                         return (
                                             <Box sx={{ my: 1, mr: 1 }}>
                                                 <Box sx={{ my: 1 }} hidden={params.row.price20Dry === 0 || !getPackageNamesByIds(containersId, containers).includes("20' Dry")}>{"20' Dry : "+params.row.price20Dry+" "+params.row.currency}</Box>
@@ -263,7 +266,7 @@ function ApproveOffer(props: any) {
                         </Grid> : null
                     }
                     <Grid item xs={12} sx={{ mt: 2 }}>
-                        <InputLabel htmlFor="details" sx={inputLabelStyles}>Comment to send back</InputLabel>
+                        <InputLabel htmlFor="details" sx={inputLabelStyles}>{t('sentBackComment')}</InputLabel>
                         <BootstrapInput id="details" type="text" multiline rows={3} value={details} onChange={(e: any) => setDetails(e.target.value)} fullWidth />
                     </Grid>
                     <Grid item xs={12} sx={{ my: 2 }}>
@@ -271,7 +274,7 @@ function ApproveOffer(props: any) {
                             { 
                                 offer.seaFreight !== null ? 
                                 <Chip variant="outlined" size="medium"
-                                    label={"TOTAL PRICE : "+ Number(offer.totalPrice+offer.totalPrice*margin/100-offer.totalPrice*reduction/100+adding*1).toString()+" "+offer.seaFreight.currency}
+                                    label={t('totalPrice').toUpperCase()+" : "+ Number(offer.totalPrice+offer.totalPrice*margin/100-offer.totalPrice*reduction/100+adding*1).toString()+" "+offer.seaFreight.currency}
                                     sx={{ fontWeight: "bold", fontSize: 16, py: 3 }} 
                                 /> : null
                             }
@@ -279,12 +282,12 @@ function ApproveOffer(props: any) {
                     </Grid>
                     <Grid item xs={12}>
                         <Alert severity={"info"}>
-                            The status of this offer is : <strong>{offer.clientApproval}</strong>
+                            {t('statusOfferIs')} : <strong>{offer.clientApproval}</strong>
                         </Alert>
                     </Grid>
                     <Grid item xs={12} sx={{ pt: 1.5, display: "flex", alignItems: "center", justifyContent: "end" }}>
-                        <Button variant="contained" color="success" sx={{ mr: 1, textTransform: "none" }} onClick={acceptOffer}>Accept the offer</Button>
-                        <Button variant="contained" color="secondary" sx={{ mr: 1, textTransform: "none" }} onClick={rejectOffer}>Reject the offer</Button>
+                        <Button variant="contained" color="success" sx={{ mr: 1, textTransform: "none" }} onClick={acceptOffer}>{t('acceptOffer')}</Button>
+                        <Button variant="contained" color="secondary" sx={{ mr: 1, textTransform: "none" }} onClick={rejectOffer}>{t('rejectOffer')}</Button>
                     </Grid>
                 </Grid> : <Skeleton sx={{ mx: 5, mt: 3 }} />
             }

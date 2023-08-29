@@ -11,6 +11,7 @@ import { BackendService } from '../../services/fetch';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { BootstrapDialog, BootstrapDialogTitle, buttonCloseStyles } from '../../misc/styles';
+import { useTranslation } from 'react-i18next';
 
 function colors(value: string) {
     switch (value) {
@@ -51,6 +52,8 @@ function PriceOffers() {
     useEffect(() => {
         getPorts();
     }, []);
+    
+    const { t } = useTranslation();
     
     const getPriceOffers = async () => {
         if (context) {
@@ -119,7 +122,7 @@ function PriceOffers() {
         <div style={{ background: "#fff", borderTopLeftRadius: 20, borderTopRightRadius: 20 }}>
             <SnackbarProvider />
                 <Box py={2.5}>
-                    <Typography variant="h5" sx={{mt: {xs: 4, md: 1.5, lg: 1.5 }}} mx={5}><b>Generated price offers</b></Typography>
+                    <Typography variant="h5" sx={{mt: {xs: 4, md: 1.5, lg: 1.5 }}} mx={5}><b>{t('generatedPriceOffers')}</b></Typography>
                     <Box>
                         {
                             !load ? 
@@ -132,16 +135,16 @@ function PriceOffers() {
                                                 <Table sx={{ minWidth: 650 }} aria-label="simple table">
                                                     <TableHead>
                                                         <TableRow>
-                                                            <TableCell align="left" sx={{ fontSize: 16, fontWeight: "bolder" }}>Offer Id</TableCell>
-                                                            <TableCell align="left" sx={{ fontSize: 16, fontWeight: "bolder" }}>Request Id</TableCell>
-                                                            <TableCell align="left" sx={{ fontSize: 16, fontWeight: "bolder" }}>Created date</TableCell>
-                                                            <TableCell align="left" sx={{ fontSize: 16, fontWeight: "bolder" }}>Departure</TableCell>
-                                                            <TableCell align="left" sx={{ fontSize: 16, fontWeight: "bolder" }}>Arrival</TableCell>
+                                                            <TableCell align="left" sx={{ fontSize: 16, fontWeight: "bolder" }}>{t('offerId')}</TableCell>
+                                                            <TableCell align="left" sx={{ fontSize: 16, fontWeight: "bolder" }}>{t('requestQuoteId')}</TableCell>
+                                                            <TableCell align="left" sx={{ fontSize: 16, fontWeight: "bolder" }}>{t('createdDate')}</TableCell>
+                                                            <TableCell align="left" sx={{ fontSize: 16, fontWeight: "bolder" }}>{t('departure')}</TableCell>
+                                                            <TableCell align="left" sx={{ fontSize: 16, fontWeight: "bolder" }}>{t('arrival')}</TableCell>
                                                             {/* <TableCell align="left" sx={{ fontSize: 16, fontWeight: "bolder" }}>Haulage?</TableCell>
                                                             <TableCell align="left" sx={{ fontSize: 16, fontWeight: "bolder" }}>Misc?</TableCell> */}
-                                                            <TableCell align="left" sx={{ fontSize: 16, fontWeight: "bolder" }}>Status</TableCell>
-                                                            <TableCell align="left" sx={{ fontSize: 16, fontWeight: "bolder" }}>Client approval</TableCell>
-                                                            <TableCell align="left" sx={{ fontSize: 16, fontWeight: "bolder" }}>Total price</TableCell>
+                                                            <TableCell align="left" sx={{ fontSize: 16, fontWeight: "bolder" }}>{t('status')}</TableCell>
+                                                            <TableCell align="left" sx={{ fontSize: 16, fontWeight: "bolder" }}>{t('clientApproval')}</TableCell>
+                                                            <TableCell align="left" sx={{ fontSize: 16, fontWeight: "bolder" }}>{t('totalPrice')}</TableCell>
                                                             <TableCell align="left"><b></b></TableCell>
                                                         </TableRow>
                                                     </TableHead>
@@ -160,7 +163,7 @@ function PriceOffers() {
                                                                         {/* <TableCell align="left">{row.haulage !== null ? <Chip label="Yes" color="success" /> : <Chip label="No" />}</TableCell>
                                                                         <TableCell align="left">{row.miscellaneousList !== null ? <Chip label="Yes" color="success" /> : <Chip label="No" />}</TableCell> */}
                                                                         <TableCell align="left"><Chip label={statusLabel(row.status)} color={colors(row.status)} /></TableCell>
-                                                                        <TableCell align="left">{row.status !== "Accepted" && row.clientApproval === "Pending" ? <Chip label={"No email"} /> : <Chip label={row.clientApproval} color={colors(row.clientApproval)} />}</TableCell>
+                                                                        <TableCell align="left">{row.status !== "Accepted" && row.clientApproval === "Pending" ? <Chip label={t('noEmail')} /> : <Chip label={row.clientApproval} color={colors(row.clientApproval)} />}</TableCell>
                                                                         <TableCell align="left">{Number(row.totalPrice+row.totalPrice*row.margin/100-row.totalPrice*row.reduction/100+row.extraFee*1).toFixed(2)} {row.seaFreight.currency}</TableCell>
                                                                         <TableCell align="left">
                                                                             <IconButton href={"/admin/quote-offers/"+row.id} sx={{ mr: 1 }}>
@@ -201,7 +204,7 @@ function PriceOffers() {
                     </DialogContent>
                     <DialogActions>
                         <Button variant="contained" color="secondary" className="mr-3" onClick={() => { deleteOffer(currentId); }} sx={{ textTransform: "none" }}>Delete</Button>
-                        <Button variant="contained" onClick={() => setModal(false)} sx={buttonCloseStyles}>Close</Button>
+                        <Button variant="contained" onClick={() => setModal(false)} sx={buttonCloseStyles}>{t('close')}</Button>
                     </DialogActions>
                 </BootstrapDialog>
         </div>

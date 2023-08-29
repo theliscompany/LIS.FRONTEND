@@ -14,6 +14,7 @@ import { useAccount, useMsal } from '@azure/msal-react';
 import { Link } from 'react-router-dom';
 import { AuthenticationResult } from '@azure/msal-browser';
 import AutocompleteSearch from '../shared/AutocompleteSearch';
+import { useTranslation } from 'react-i18next';
 
 //let statusTypes = ["EnAttente", "Valider", "Rejeter"];
 let cargoTypes = ["Container", "Conventional", "RollOnRollOff"];
@@ -69,6 +70,8 @@ function NewRequest(props: any) {
     const account = useAccount(accounts[0] || {});
     
     const context = useAuthorizedBackendApi();
+
+    const { t } = useTranslation();
     
     const handleChangeCargoType = (event: { target: { value: string } }) => {
         setCargoType(event.target.value);
@@ -307,19 +310,19 @@ function NewRequest(props: any) {
         <div style={{ background: "#fff", borderTopLeftRadius: 20, borderTopRightRadius: 20 }}>
             <SnackbarProvider />
             <Box py={2.5}>
-                <Typography variant="h5" sx={{mt: {xs: 4, md: 1.5, lg: 1.5 }}} px={5}><b>Create a new request</b></Typography>
+                <Typography variant="h5" sx={{mt: {xs: 4, md: 1.5, lg: 1.5 }}} px={5}><b>{t('createNewRequest')}</b></Typography>
                 <Box>
                     <Grid container spacing={1} px={5} mt={2}>
                         <Grid item xs={12} md={6}>
-                            <InputLabel htmlFor="whatsapp-phone-number" sx={inputLabelStyles}>Whatsapp number</InputLabel>
+                            <InputLabel htmlFor="whatsapp-phone-number" sx={inputLabelStyles}>{t('whatsappNumber')}</InputLabel>
                             <MuiTelInput id="whatsapp-phone-number" value={phone} onChange={setPhone} defaultCountry="CM" preferredCountries={["CM", "BE", "KE"]} fullWidth sx={{ mt: 1 }} />
                         </Grid>
                         <Grid item xs={12} md={6}>
-                            <InputLabel htmlFor="request-email" sx={inputLabelStyles}>Your email address</InputLabel>
+                            <InputLabel htmlFor="request-email" sx={inputLabelStyles}>{t('emailAddress')}</InputLabel>
                             <BootstrapInput id="request-email" type="email" value={email} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)} fullWidth />
                         </Grid>
                         <Grid item xs={12} md={6} mt={1}>
-                            <InputLabel htmlFor="departure" sx={inputLabelStyles}>From (city, country)</InputLabel>
+                            <InputLabel htmlFor="departure" sx={inputLabelStyles}>{t('departure')}</InputLabel>
                             <AutocompleteSearch id="departure" value={departure} onChange={setDeparture} fullWidth />
                             {/* {
                                 ports !== null ?
@@ -342,14 +345,14 @@ function NewRequest(props: any) {
                                     }}
                                     value={departurePort}
                                     sx={{ mt: 1 }}
-                                    renderInput={(params) => <TextField {...params} />}
+                                    renderInput={(params: any) => <TextField {...params} />}
                                     onChange={(e: any, value: any) => { setDeparturePort(value); }}
                                     fullWidth
                                 /> : <Skeleton />
                             } */}
                         </Grid>
                         <Grid item xs={12} md={6} mt={1}>
-                            <InputLabel htmlFor="arrival" sx={inputLabelStyles}>To (city, country)</InputLabel>
+                            <InputLabel htmlFor="arrival" sx={inputLabelStyles}>{t('arrival')}</InputLabel>
                             <AutocompleteSearch id="arrival" value={arrival} onChange={setArrival} fullWidth />
                             {/* {
                                 ports !== null ?
@@ -372,14 +375,14 @@ function NewRequest(props: any) {
                                     }}
                                     value={arrivalPort}
                                     sx={{ mt: 1 }}
-                                    renderInput={(params) => <TextField {...params} />}
+                                    renderInput={(params: any) => <TextField {...params} />}
                                     onChange={(e: any, value: any) => { setArrivalPort(value); }}
                                     fullWidth
                                 /> : <Skeleton />
                             } */}
                         </Grid>
                         <Grid item xs={12} md={3} mt={1}>
-                            <InputLabel htmlFor="packing-type" sx={inputLabelStyles}>Packing Type</InputLabel>
+                            <InputLabel htmlFor="packing-type" sx={inputLabelStyles}>{t('packingType')}</InputLabel>
                             <NativeSelect
                                 id="packing-type"
                                 value={packingType}
@@ -396,7 +399,7 @@ function NewRequest(props: any) {
                             packingType === "FCL" ?
                             <>
                             <Grid item xs={12} md={3} mt={1}>
-                                <InputLabel htmlFor="container-type" sx={inputLabelStyles}>Container Type</InputLabel>
+                                <InputLabel htmlFor="container-type" sx={inputLabelStyles}>{t('containerType')}</InputLabel>
                                 {
                                     containers !== null ?
                                     <NativeSelect
@@ -406,7 +409,7 @@ function NewRequest(props: any) {
                                         input={<BootstrapInput />}
                                         fullWidth
                                     >
-                                        <option key={"elm1-x"} value={0}>Not defined</option>
+                                        <option key={"elm1-x"} value={0}>{t('notDefined')}</option>
                                         {containers.filter((elm: any) => ["20' Dry"]).map((elm: any, i: number) => (
                                             <option key={"elm1-"+i} value={elm.packageId}>{elm.packageName}</option>
                                         ))}
@@ -415,7 +418,7 @@ function NewRequest(props: any) {
                                 }
                             </Grid>
                             <Grid item xs={12} md={3} mt={1}>
-                                <InputLabel htmlFor="quantity" sx={inputLabelStyles}>Quantity</InputLabel>
+                                <InputLabel htmlFor="quantity" sx={inputLabelStyles}>{t('quantity')}</InputLabel>
                                 <BootstrapInput id="quantity" type="number" inputProps={{ min: 1, max: 100 }} value={quantity} onChange={(e: any) => {setQuantity(e.target.value)}} fullWidth />
                             </Grid>
                             <Grid item xs={12} md={3} mt={1}>
@@ -432,7 +435,7 @@ function NewRequest(props: any) {
                                         }
                                     }} 
                                 >
-                                    Add the container
+                                    {t('addContainer')}
                                 </Button>
                             </Grid>
                             <Grid item xs={12}>
@@ -455,8 +458,8 @@ function NewRequest(props: any) {
                                                         >
                                                             <ListItemText primary={
                                                                 containers.find((elm: any) => elm.packageId === item.container) !== undefined ?
-                                                                "Container : "+containers.find((elm: any) => elm.packageId === item.container).packageName+" | Quantity : "+item.quantity
-                                                                : "Container : "+item.container+" | Quantity : "+item.quantity
+                                                                t('container')+" : "+containers.find((elm: any) => elm.packageId === item.container).packageName+" | "+t('quantity')+" : "+item.quantity
+                                                                : t('container')+" : "+item.container+" | "+t('quantity')+" : "+item.quantity
                                                             } />
                                                         </ListItem>
                                                     </Grid>
@@ -472,19 +475,19 @@ function NewRequest(props: any) {
                             packingType === "Breakbulk/LCL" ?
                             <>
                             <Grid item xs={12} md={3} mt={1}>
-                                <InputLabel htmlFor="package-name" sx={inputLabelStyles}>Package Name</InputLabel>
+                                <InputLabel htmlFor="package-name" sx={inputLabelStyles}>{t('packageName')}</InputLabel>
                                 <BootstrapInput id="package-name" type="text" value={packageName} onChange={(e: any) => {setPackageName(e.target.value)}} fullWidth />
                             </Grid>
                             <Grid item xs={12} md={1} mt={1}>
-                                <InputLabel htmlFor="package-quantity" sx={inputLabelStyles}>Quantity</InputLabel>
+                                <InputLabel htmlFor="package-quantity" sx={inputLabelStyles}>{t('quantity')}</InputLabel>
                                 <BootstrapInput id="package-quantity" type="number" inputProps={{ min: 1, max: 100 }} value={packageQuantity} onChange={(e: any) => {setPackageQuantity(e.target.value)}} fullWidth />
                             </Grid>
                             <Grid item xs={12} md={2} mt={1}>
-                                <InputLabel htmlFor="package-dimensions" sx={inputLabelStyles}>Dimensions</InputLabel>
+                                <InputLabel htmlFor="package-dimensions" sx={inputLabelStyles}>{t('dimensions')}</InputLabel>
                                 <BootstrapInput id="package-dimensions" type="text" value={packageDimensions} onChange={(e: any) => {setPackageDimensions(e.target.value)}} fullWidth />
                             </Grid>
                             <Grid item xs={12} md={2} mt={1}>
-                                <InputLabel htmlFor="package-weight" sx={inputLabelStyles}>Weight (in Kg)</InputLabel>
+                                <InputLabel htmlFor="package-weight" sx={inputLabelStyles}>{t('weight')} (Kg)</InputLabel>
                                 <BootstrapInput id="package-weight" type="number" inputProps={{ min: 0, max: 100 }} value={packageWeight} onChange={(e: any) => {setPackageWeight(e.target.value)}} fullWidth />
                             </Grid>
                             <Grid item xs={12} md={1} mt={1}>
@@ -503,7 +506,7 @@ function NewRequest(props: any) {
                                         }
                                     }} 
                                 >
-                                    Add
+                                    {t('add')}
                                 </Button>
                             </Grid>
                             <Grid item xs={12}>
@@ -525,7 +528,7 @@ function NewRequest(props: any) {
                                                             }
                                                         >
                                                             <ListItemText primary={
-                                                                "Name : "+item.name+" | Quantity : "+item.quantity+" | Dimensions : "+item.dimensions+" | Weight : "+item.weight+" Kg"
+                                                                t('name')+" : "+item.name+" | "+t('quantity')+" : "+item.quantity+" | "+t('dimensions')+" : "+item.dimensions+" | "+t('weight')+" : "+item.weight+" Kg"
                                                             } />
                                                         </ListItem>
                                                     </Grid>
@@ -541,19 +544,19 @@ function NewRequest(props: any) {
                             packingType === "Unit RoRo" ?
                             <>
                             <Grid item xs={12} md={3} mt={1}>
-                                <InputLabel htmlFor="unit-name" sx={inputLabelStyles}>Unit Name</InputLabel>
+                                <InputLabel htmlFor="unit-name" sx={inputLabelStyles}>{t('unitName')}</InputLabel>
                                 <BootstrapInput id="unit-name" type="text" value={unitName} onChange={(e: any) => {setUnitName(e.target.value)}} fullWidth />
                             </Grid>
                             <Grid item xs={12} md={1} mt={1}>
-                                <InputLabel htmlFor="unit-quantity" sx={inputLabelStyles}>Quantity</InputLabel>
+                                <InputLabel htmlFor="unit-quantity" sx={inputLabelStyles}>{t('quantity')}</InputLabel>
                                 <BootstrapInput id="unit-quantity" type="number" inputProps={{ min: 1, max: 100 }} value={unitQuantity} onChange={(e: any) => {setUnitQuantity(e.target.value)}} fullWidth />
                             </Grid>
                             <Grid item xs={12} md={2} mt={1}>
-                                <InputLabel htmlFor="unit-dimensions" sx={inputLabelStyles}>Dimensions</InputLabel>
+                                <InputLabel htmlFor="unit-dimensions" sx={inputLabelStyles}>{t('dimensions')}</InputLabel>
                                 <BootstrapInput id="unit-dimensions" type="text" value={unitDimensions} onChange={(e: any) => {setUnitDimensions(e.target.value)}} fullWidth />
                             </Grid>
                             <Grid item xs={12} md={2} mt={1}>
-                                <InputLabel htmlFor="unit-weight" sx={inputLabelStyles}>Weight (in Kg)</InputLabel>
+                                <InputLabel htmlFor="unit-weight" sx={inputLabelStyles}>{t('weight')} (Kg)</InputLabel>
                                 <BootstrapInput id="unit-weight" type="number" inputProps={{ min: 0, max: 100 }} value={unitWeight} onChange={(e: any) => {setUnitWeight(e.target.value)}} fullWidth />
                             </Grid>
                             <Grid item xs={12} md={1} mt={1}>
@@ -572,7 +575,7 @@ function NewRequest(props: any) {
                                         }
                                     }} 
                                 >
-                                    Add
+                                    {t('add')}
                                 </Button>
                             </Grid>
                             <Grid item xs={12}>
@@ -594,7 +597,7 @@ function NewRequest(props: any) {
                                                             }
                                                         >
                                                             <ListItemText primary={
-                                                                "Name : "+item.name+" | Quantity : "+item.quantity+" | Dimensions : "+item.dimensions+" | Weight : "+item.weight+" Kg"
+                                                                t('name')+" : "+item.name+" | "+t('quantity')+" : "+item.quantity+" | "+t('dimensions')+" : "+item.dimensions+" | "+t('weight')+" : "+item.weight+" Kg"
                                                             } />
                                                         </ListItem>
                                                     </Grid>
@@ -608,7 +611,7 @@ function NewRequest(props: any) {
                         }
 
                         <Grid item xs={12} md={6} mt={1} mb={1}>
-                            <InputLabel htmlFor="tags" sx={inputLabelStyles}>Specifics</InputLabel>
+                            <InputLabel htmlFor="tags" sx={inputLabelStyles}>{t('specifics')}</InputLabel>
                             {
                                 products !== null ?
                                 <Autocomplete
@@ -625,23 +628,23 @@ function NewRequest(props: any) {
                                     }}
                                     value={tags}
                                     sx={{ mt: 1 }}
-                                    renderInput={(params) => <TextField {...params} sx={{ textTransform: "lowercase" }} />}
+                                    renderInput={(params: any) => <TextField {...params} sx={{ textTransform: "lowercase" }} />}
                                     onChange={(e: any, value: any) => { setTags(value); }}
                                     fullWidth
                                 /> : <Skeleton />
                             }
                         </Grid>
                         <Grid item xs={12} md={6} mt={1}>
-                            <InputLabel htmlFor="client-number" sx={inputLabelStyles}>Client number</InputLabel>
+                            <InputLabel htmlFor="client-number" sx={inputLabelStyles}>{t('clientNumber')}</InputLabel>
                             <BootstrapInput id="client-number" value={clientNumber} onChange={(e: any) => {setClientNumber(e.target.value)}} fullWidth />
                         </Grid>
 
                         <Grid item xs={12} md={6} mt={.5}>
-                            <InputLabel htmlFor="request-message" sx={inputLabelStyles}>Other details about your need (Optional)</InputLabel>
+                            <InputLabel htmlFor="request-message" sx={inputLabelStyles}>{t('details')}</InputLabel>
                             <BootstrapInput id="request-message" type="text" multiline rows={3.5} value={message} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setMessage(e.target.value)} fullWidth />
                         </Grid>
                         <Grid item xs={12} md={6} mt={1}>
-                            <InputLabel htmlFor="assigned-manager" sx={inputLabelStyles}>Assigned manager</InputLabel>
+                            <InputLabel htmlFor="assigned-manager" sx={inputLabelStyles}>{t('assignedManager')}</InputLabel>
                             {
                                 !loadUser ? 
                                 <>
@@ -652,7 +655,7 @@ function NewRequest(props: any) {
                                         input={<BootstrapInput />}
                                         fullWidth
                                     >
-                                        <option value="">No agent assigned</option>
+                                        <option value="">{t('noAgentAssigned')}</option>
                                         {
                                             assignees.map((row: any, i: number) => (
                                                 <option key={"assigneeId-"+i} value={String(row.id)}>{row.name}</option>
@@ -664,13 +667,13 @@ function NewRequest(props: any) {
                             {
                                 !loadUser ? 
                                 currentUser !== null && currentUser !== undefined ? 
-                                <Alert severity="info" sx={{ mt: 1 }}>This request will be assigned to the current user {account?.name} by default.</Alert> : 
-                                <Alert severity="warning" sx={{ mt: 1 }}>This request will not be assigned to the current user, you need to grant him the permission in <Link to="/admin/users" style={{ textDecoration: "none" }}>Users</Link>.</Alert>
+                                <Alert severity="info" sx={{ mt: 1 }}>{t('requestAssignedTo')} {account?.name} {t('byDefault')}</Alert> : 
+                                <Alert severity="warning" sx={{ mt: 1 }}>{t('requestNotAssignedCurrentUser')} <Link to="/admin/users" style={{ textDecoration: "none" }}>{t('users')}</Link>.</Alert>
                                 : <Skeleton sx={{ my: 1 }} />
                             }            
                         </Grid>
                         <Grid item xs={12}>
-                            <Button variant="contained" color={!load ? "primary" : "info"} className="mr-3" onClick={sendQuotationForm} disabled={load === true} sx={{ textTransform: "none" }}>Create the request</Button>
+                            <Button variant="contained" color={!load ? "primary" : "info"} className="mr-3" onClick={sendQuotationForm} disabled={load === true} sx={{ textTransform: "none" }}>{t('createRequest')}</Button>
                         </Grid>
                     </Grid>
                 </Box>

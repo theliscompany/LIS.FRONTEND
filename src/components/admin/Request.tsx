@@ -17,6 +17,7 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { Dayjs } from 'dayjs';
 import { useAccount, useMsal } from '@azure/msal-react';
 import { AuthenticationResult } from '@azure/msal-browser';
+import { useTranslation } from 'react-i18next';
 
 // @ts-ignore
 import { JSON as seaPorts } from 'sea-ports';
@@ -173,8 +174,6 @@ function findClosestSeaPort(myPort: any, seaPorts: any) {
     return closestPort;
 }
 
-const steps = ['Search for offers', 'List of offers', 'Send an offer'];
-
 function Request(props: any) {
     const [load, setLoad] = useState<boolean>(true);
     const [loadAssignees, setLoadAssignees] = useState<boolean>(true);
@@ -257,14 +256,18 @@ function Request(props: any) {
     const account = useAccount(accounts[0] || {});
         
     const context = useAuthorizedBackendApi();
+
+    const { t } = useTranslation();
     
+    const steps = [t('searchOffers'), t('listOffers'), t('sendOffer')];
+
     const columnsSeafreights: GridColDef[] = [
-        { field: 'carrierName', headerName: 'Carrier', width: 200 },
-        { field: 'carrierAgentName', headerName: 'Carrier agent', width: 275 },
-        { field: 'departurePortName', headerName: 'Departure port', width: 125 },
-        { field: 'frequency', headerName: 'Frequency', valueFormatter: (params: GridValueFormatterParams) => `${params.value || ''} / day`, },
-        { field: 'transitTime', headerName: 'Transit time', valueFormatter: (params: GridValueFormatterParams) => `${params.value || ''} days` },
-        { field: 'currency', headerName: 'Prices', renderCell: (params: GridRenderCellParams) => {
+        { field: 'carrierName', headerName: t('carrier'), width: 200 },
+        { field: 'carrierAgentName', headerName: t('carrierAgent'), width: 275 },
+        { field: 'departurePortName', headerName: t('departurePort'), width: 125 },
+        { field: 'frequency', headerName: t('frequency'), valueFormatter: (params: GridValueFormatterParams) => `${params.value || ''} / day`, },
+        { field: 'transitTime', headerName: t('transitTime'), valueFormatter: (params: GridValueFormatterParams) => `${params.value || ''} days` },
+        { field: 'currency', headerName: t('prices'), renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box sx={{ my: 1, mr: 1 }}>
                     <Box sx={{ my: 1 }} hidden={params.row.price20dry === 0 || !getPackageNamesByIds(containersSelected, containers).includes("20' Dry")}>{"20' Dry : "+params.row.price20dry+" "+params.row.currency}</Box>
@@ -278,24 +281,24 @@ function Request(props: any) {
     ];
     
     const columnsHaulages: GridColDef[] = [
-        { field: 'haulierName', headerName: 'Haulier', width: 200 },
-        { field: 'loadingPort', headerName: 'Loading port', renderCell: (params: GridRenderCellParams) => {
+        { field: 'haulierName', headerName: t('haulier'), width: 200 },
+        { field: 'loadingPort', headerName: t('loadingPort'), renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box sx={{ my: 2 }}>{params.row.loadingPort}</Box>
             );
         }, width: 275 },
-        { field: 'freeTime', headerName: 'Free time', valueFormatter: (params: GridValueFormatterParams) => `${params.value || ''} days`, width: 125 },
-        { field: 'multiStop', headerName: 'Multi stop', valueGetter: (params: GridValueGetterParams) => `${params.row.multiStop || ''} ${params.row.currency}` },
-        { field: 'overtimeTariff', headerName: 'Overtime tariff', valueGetter: (params: GridValueGetterParams) => `${params.row.overtimeTariff || ''} ${params.row.currency}` },
-        { field: 'unitTariff', headerName: 'Unit tariff', valueGetter: (params: GridValueGetterParams) => `${params.row.unitTariff || ''} ${params.row.currency}` },
-        { field: 'validUntil', headerName: 'Valid until', valueFormatter: (params: GridValueFormatterParams) => `${(new Date(params.value)).toLocaleString() || ''}`, width: 200 },
+        { field: 'freeTime', headerName: t('freeTime'), valueFormatter: (params: GridValueFormatterParams) => `${params.value || ''} days`, width: 125 },
+        { field: 'multiStop', headerName: t('multiStop'), valueGetter: (params: GridValueGetterParams) => `${params.row.multiStop || ''} ${params.row.currency}` },
+        { field: 'overtimeTariff', headerName: t('overtimeTariff'), valueGetter: (params: GridValueGetterParams) => `${params.row.overtimeTariff || ''} ${params.row.currency}` },
+        { field: 'unitTariff', headerName: t('unitTariff'), valueGetter: (params: GridValueGetterParams) => `${params.row.unitTariff || ''} ${params.row.currency}` },
+        { field: 'validUntil', headerName: t('validUntil'), valueFormatter: (params: GridValueFormatterParams) => `${(new Date(params.value)).toLocaleString() || ''}`, width: 200 },
     ];
     
     const columnsMiscs: GridColDef[] = [
-        { field: 'supplierName', headerName: 'Supplier', width: 200 },
-        { field: 'departurePortName', headerName: 'Departure port', width: 275, valueFormatter: (params: GridValueFormatterParams) => `${portDeparture.portName || ''}`, },
-        { field: 'destinationPortName', headerName: 'Destination port', width: 325, valueFormatter: (params: GridValueFormatterParams) => `${portDestination.portName || ''}`, },
-        { field: 'currency', headerName: 'Prices', renderCell: (params: GridRenderCellParams) => {
+        { field: 'supplierName', headerName: t('supplier'), width: 200 },
+        { field: 'departurePortName', headerName: t('departurePort'), width: 275, valueFormatter: (params: GridValueFormatterParams) => `${portDeparture.portName || ''}`, },
+        { field: 'destinationPortName', headerName: t('destinationPort'), width: 325, valueFormatter: (params: GridValueFormatterParams) => `${portDestination.portName || ''}`, },
+        { field: 'currency', headerName: t('prices'), renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box sx={{ my: 1, mr: 1 }}>
                     <Box sx={{ my: 1 }} hidden={params.row.price20dry === 0 || !getPackageNamesByIds(containersSelected, containers).includes("20' Dry")}>{"20' Dry : "+params.row.price20dry+" "+params.row.currency}</Box>
@@ -1100,7 +1103,7 @@ function Request(props: any) {
         <div style={{ background: "#fff", borderTopLeftRadius: 20, borderTopRightRadius: 20 }}>
             <SnackbarProvider />
             <Box py={2.5}>
-                <Typography variant="h5" sx={{mt: {xs: 4, md: 1.5, lg: 1.5 }}} mx={5}><b>Manage a request for quote N° {id}</b></Typography>
+                <Typography variant="h5" sx={{mt: {xs: 4, md: 1.5, lg: 1.5 }}} mx={5}><b>{t('manageRequestQuote')} {id}</b></Typography>
                     <Box>
                         {
                             !load ? 
@@ -1114,21 +1117,21 @@ function Request(props: any) {
                                     <Alert 
                                         severity="info" 
                                         sx={{ display: { xs: "block", md: "flex" }, alignItems: "center", justifyContent: "left" }}
-                                        action={<Button variant="contained" color="inherit" sx={{ background: "#fff", color: "#333", float: "right", textTransform: "none", position: "relative", bottom: "2px" }} onClick={() => { setModal(true); }}>Ask for more information</Button>}
+                                        action={<Button variant="contained" color="inherit" sx={{ background: "#fff", color: "#333", float: "right", textTransform: "none", position: "relative", bottom: "2px" }} onClick={() => { setModal(true); }}>{t('askMoreInformation')}</Button>}
                                     >
-                                        <Typography variant="subtitle1" display="inline">Do you think this request need more information?</Typography>
+                                        <Typography variant="subtitle1" display="inline">{t('doYouThinkInformation')}</Typography>
                                     </Alert>
                                 </Grid>
                                 <Grid item xs={12} md={6}>
-                                    <InputLabel htmlFor="whatsapp-phone-number" sx={inputLabelStyles}>Whatsapp number</InputLabel>
+                                    <InputLabel htmlFor="whatsapp-phone-number" sx={inputLabelStyles}>{t('whatsappNumber')}</InputLabel>
                                     <MuiTelInput id="whatsapp-phone-number" value={phone} onChange={setPhone} defaultCountry="CM" preferredCountries={["CM", "BE", "KE"]} fullWidth sx={{ mt: 1 }} />
                                 </Grid>
                                 <Grid item xs={12} md={6}>
-                                    <InputLabel htmlFor="request-email" sx={inputLabelStyles}>Your email address</InputLabel>
+                                    <InputLabel htmlFor="request-email" sx={inputLabelStyles}>{t('emailAddress')}</InputLabel>
                                     <BootstrapInput id="request-email" type="email" value={email} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)} fullWidth disabled />
                                 </Grid>
                                 <Grid item xs={12} md={6} mt={1}>
-                                    <InputLabel htmlFor="departure" sx={inputLabelStyles}>From (city, country)</InputLabel>
+                                    <InputLabel htmlFor="departure" sx={inputLabelStyles}>{t('departure')}</InputLabel>
                                     <AutocompleteSearch id="departure" value={departure} onChange={setDeparture} callBack={getClosestDeparture} fullWidth />
                                     {/* {
                                         ports !== null ?
@@ -1151,14 +1154,14 @@ function Request(props: any) {
                                             }}
                                             value={departureTown}
                                             sx={{ mt: 1 }}
-                                            renderInput={(params) => <TextField {...params} />}
+                                            renderInput={(params: any) => <TextField {...params} />}
                                             onChange={(e: any, value: any) => { setDepartureTown(value); }}
                                             fullWidth
                                         /> : <Skeleton />
                                     } */}
                                 </Grid>
                                 <Grid item xs={12} md={6} mt={1}>
-                                    <InputLabel htmlFor="arrival" sx={inputLabelStyles}>To (city, country)</InputLabel>
+                                    <InputLabel htmlFor="arrival" sx={inputLabelStyles}>{t('arrival')}</InputLabel>
                                     <AutocompleteSearch id="arrival" value={arrival} onChange={setArrival} callBack={getClosestArrival} fullWidth />
                                     {/* {
                                         ports !== null ?
@@ -1181,14 +1184,14 @@ function Request(props: any) {
                                             }}
                                             value={arrivalTown}
                                             sx={{ mt: 1 }}
-                                            renderInput={(params) => <TextField {...params} />}
+                                            renderInput={(params: any) => <TextField {...params} />}
                                             onChange={(e: any, value: any) => { setArrivalTown(value); }}
                                             fullWidth
                                         /> : <Skeleton />
                                     } */}
                                 </Grid>
                                 <Grid item xs={12} md={3} mt={1}>
-                                    <InputLabel htmlFor="packing-type" sx={inputLabelStyles}>Packing Type</InputLabel>
+                                    <InputLabel htmlFor="packing-type" sx={inputLabelStyles}>{t('packingType')}</InputLabel>
                                     <NativeSelect
                                         id="packing-type"
                                         value={packingType}
@@ -1206,7 +1209,7 @@ function Request(props: any) {
                                     packingType === "FCL" ?
                                     <>
                                     <Grid item xs={12} md={3} mt={1}>
-                                        <InputLabel htmlFor="container-type" sx={inputLabelStyles}>Container Type</InputLabel>
+                                        <InputLabel htmlFor="container-type" sx={inputLabelStyles}>{t('containerType')}</InputLabel>
                                         {
                                             containers !== null ?
                                             <NativeSelect
@@ -1216,7 +1219,7 @@ function Request(props: any) {
                                                 input={<BootstrapInput />}
                                                 fullWidth
                                             >
-                                                <option key={"elm1-x"} value={0}>Not defined</option>
+                                                <option key={"elm1-x"} value={0}>{t('notDefined')}</option>
                                                 {containers.filter((elm: any) => ["20' Dry"]).map((elm: any, i: number) => (
                                                     <option key={"elm1-"+i} value={elm.packageId}>{elm.packageName}</option>
                                                 ))}
@@ -1225,7 +1228,7 @@ function Request(props: any) {
                                         }
                                     </Grid>
                                     <Grid item xs={12} md={3} mt={1}>
-                                        <InputLabel htmlFor="quantity" sx={inputLabelStyles}>Quantity</InputLabel>
+                                        <InputLabel htmlFor="quantity" sx={inputLabelStyles}>{t('quantity')}</InputLabel>
                                         <BootstrapInput id="quantity" type="number" inputProps={{ min: 1, max: 100 }} value={quantity} onChange={(e: any) => {setQuantity(e.target.value)}} fullWidth />
                                     </Grid>
                                     <Grid item xs={12} md={3} mt={1}>
@@ -1242,7 +1245,7 @@ function Request(props: any) {
                                                 }
                                             }} 
                                         >
-                                            Add the container
+                                            {t('addContainer')}
                                         </Button>
                                     </Grid>
                                     <Grid item xs={12}>
@@ -1264,8 +1267,8 @@ function Request(props: any) {
                                                                 >
                                                                     <ListItemText primary={
                                                                         containers.find((elm: any) => elm.packageId === item.container) !== undefined ?
-                                                                        "Container : "+containers.find((elm: any) => elm.packageId === item.container).packageName+" | Quantity : "+item.quantity
-                                                                        : "Container : "+item.container+" | Quantity : "+item.quantity
+                                                                        t('container')+" : "+containers.find((elm: any) => elm.packageId === item.container).packageName+" | "+t('quantity')+" : "+item.quantity
+                                                                        : t('container')+" : "+item.container+" | "+t('quantity')+" : "+item.quantity
                                                                     } />
                                                                 </ListItem>
                                                             </Grid>
@@ -1281,19 +1284,19 @@ function Request(props: any) {
                                     packingType === "Breakbulk/LCL" ?
                                     <>
                                     <Grid item xs={12} md={3} mt={1}>
-                                        <InputLabel htmlFor="package-name" sx={inputLabelStyles}>Package Name</InputLabel>
+                                        <InputLabel htmlFor="package-name" sx={inputLabelStyles}>{t('packageName')}</InputLabel>
                                         <BootstrapInput id="package-name" type="text" value={packageName} onChange={(e: any) => {setPackageName(e.target.value)}} fullWidth />
                                     </Grid>
                                     <Grid item xs={12} md={1} mt={1}>
-                                        <InputLabel htmlFor="package-quantity" sx={inputLabelStyles}>Quantity</InputLabel>
+                                        <InputLabel htmlFor="package-quantity" sx={inputLabelStyles}>{t('quantity')}</InputLabel>
                                         <BootstrapInput id="package-quantity" type="number" inputProps={{ min: 1, max: 100 }} value={packageQuantity} onChange={(e: any) => {setPackageQuantity(e.target.value)}} fullWidth />
                                     </Grid>
                                     <Grid item xs={12} md={2} mt={1}>
-                                        <InputLabel htmlFor="package-dimensions" sx={inputLabelStyles}>Dimensions</InputLabel>
+                                        <InputLabel htmlFor="package-dimensions" sx={inputLabelStyles}>{t('dimensions')}</InputLabel>
                                         <BootstrapInput id="package-dimensions" type="text" value={packageDimensions} onChange={(e: any) => {setPackageDimensions(e.target.value)}} fullWidth />
                                     </Grid>
                                     <Grid item xs={12} md={2} mt={1}>
-                                        <InputLabel htmlFor="package-weight" sx={inputLabelStyles}>Weight (in Kg)</InputLabel>
+                                        <InputLabel htmlFor="package-weight" sx={inputLabelStyles}>{t('weight')} (Kg)</InputLabel>
                                         <BootstrapInput id="package-weight" type="number" inputProps={{ min: 0, max: 100 }} value={packageWeight} onChange={(e: any) => {setPackageWeight(e.target.value)}} fullWidth />
                                     </Grid>
                                     <Grid item xs={12} md={1} mt={1}>
@@ -1312,7 +1315,7 @@ function Request(props: any) {
                                                 }
                                             }} 
                                         >
-                                            Add
+                                            {t('add')}
                                         </Button>
                                     </Grid>
                                     <Grid item xs={12}>
@@ -1333,7 +1336,7 @@ function Request(props: any) {
                                                                     }
                                                                 >
                                                                     <ListItemText primary={
-                                                                        "Name : "+item.name+" | Quantity : "+item.quantity+" | Dimensions : "+item.dimensions+" | Weight : "+item.weight+" Kg"
+                                                                        t('name')+" : "+item.name+" | "+t('quantity')+" : "+item.quantity+" | "+t('dimensions')+" : "+item.dimensions+" | "+t('weight')+" : "+item.weight+" Kg"
                                                                     } />
                                                                 </ListItem>
                                                             </Grid>
@@ -1349,19 +1352,19 @@ function Request(props: any) {
                                     packingType === "Unit RoRo" ?
                                     <>
                                     <Grid item xs={12} md={3} mt={1}>
-                                        <InputLabel htmlFor="unit-name" sx={inputLabelStyles}>Unit Name</InputLabel>
+                                        <InputLabel htmlFor="unit-name" sx={inputLabelStyles}>{t('unitName')}</InputLabel>
                                         <BootstrapInput id="unit-name" type="text" value={unitName} onChange={(e: any) => {setUnitName(e.target.value)}} fullWidth />
                                     </Grid>
                                     <Grid item xs={12} md={1} mt={1}>
-                                        <InputLabel htmlFor="unit-quantity" sx={inputLabelStyles}>Quantity</InputLabel>
+                                        <InputLabel htmlFor="unit-quantity" sx={inputLabelStyles}>{t('quantity')}</InputLabel>
                                         <BootstrapInput id="unit-quantity" type="number" inputProps={{ min: 1, max: 100 }} value={unitQuantity} onChange={(e: any) => {setUnitQuantity(e.target.value)}} fullWidth />
                                     </Grid>
                                     <Grid item xs={12} md={2} mt={1}>
-                                        <InputLabel htmlFor="unit-dimensions" sx={inputLabelStyles}>Dimensions</InputLabel>
+                                        <InputLabel htmlFor="unit-dimensions" sx={inputLabelStyles}>{t('dimensions')}</InputLabel>
                                         <BootstrapInput id="unit-dimensions" type="text" value={unitDimensions} onChange={(e: any) => {setUnitDimensions(e.target.value)}} fullWidth />
                                     </Grid>
                                     <Grid item xs={12} md={2} mt={1}>
-                                        <InputLabel htmlFor="unit-weight" sx={inputLabelStyles}>Weight (in Kg)</InputLabel>
+                                        <InputLabel htmlFor="unit-weight" sx={inputLabelStyles}>{t('weight')} (Kg)</InputLabel>
                                         <BootstrapInput id="unit-weight" type="number" inputProps={{ min: 0, max: 100 }} value={unitWeight} onChange={(e: any) => {setUnitWeight(e.target.value)}} fullWidth />
                                     </Grid>
                                     <Grid item xs={12} md={1} mt={1}>
@@ -1380,11 +1383,11 @@ function Request(props: any) {
                                                 }
                                             }} 
                                         >
-                                            Add
+                                            {t('add')}
                                         </Button>
                                     </Grid>
                                     <Grid item xs={12}>
-                                    {
+                                        {
                                             unitsSelection !== undefined && unitsSelection !== null && unitsSelection.length !== 0 ? 
                                                 <Grid container spacing={2}>
                                                     {
@@ -1401,7 +1404,7 @@ function Request(props: any) {
                                                                     }
                                                                 >
                                                                     <ListItemText primary={
-                                                                        "Name : "+item.name+" | Quantity : "+item.quantity+" | Dimensions : "+item.dimensions+" | Weight : "+item.weight+" Kg"
+                                                                        t('name')+" : "+item.name+" | "+t('quantity')+" : "+item.quantity+" | "+t('dimensions')+" : "+item.dimensions+" | "+t('weight')+" : "+item.weight+" Kg"
                                                                     } />
                                                                 </ListItem>
                                                             </Grid>
@@ -1415,7 +1418,7 @@ function Request(props: any) {
                                 }
 
                                 <Grid item xs={12} md={6} mt={1}>
-                                    <InputLabel htmlFor="tags" sx={inputLabelStyles}>Specifics</InputLabel>
+                                    <InputLabel htmlFor="tags" sx={inputLabelStyles}>{t('specifics')}</InputLabel>
                                     {
                                         products !== null ?
                                         <Autocomplete
@@ -1432,23 +1435,23 @@ function Request(props: any) {
                                             }}
                                             value={tags}
                                             sx={{ mt: 1 }}
-                                            renderInput={(params) => <TextField {...params} sx={{ textTransform: "lowercase" }} />}
+                                            renderInput={(params: any) => <TextField {...params} sx={{ textTransform: "lowercase" }} />}
                                             onChange={(e: any, value: any) => { setTags(value); }}
                                             fullWidth
                                         /> : <Skeleton />
                                     }
                                 </Grid>
                                 <Grid item xs={12} md={6} mt={1}>
-                                    <InputLabel htmlFor="client-number" sx={inputLabelStyles}>Client number</InputLabel>
+                                    <InputLabel htmlFor="client-number" sx={inputLabelStyles}>{t('clientNumber')}</InputLabel>
                                     <BootstrapInput id="client-number" value={clientNumber} onChange={(e: any) => {setClientNumber(e.target.value)}} fullWidth />
                                 </Grid>
                                 
                                 <Grid item xs={12} md={6} mt={.5}>
-                                    <InputLabel htmlFor="request-message" sx={inputLabelStyles}>Other details about your need (Optional)</InputLabel>
+                                    <InputLabel htmlFor="request-message" sx={inputLabelStyles}>{t('details')}</InputLabel>
                                     <BootstrapInput id="request-message" type="text" multiline rows={3.5} value={message} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setMessage(e.target.value)} fullWidth />
                                 </Grid>
                                 <Grid item xs={12} md={6} mt={1}>
-                                    <InputLabel htmlFor="assigned-manager" sx={inputLabelStyles}>Assigned manager</InputLabel>
+                                    <InputLabel htmlFor="assigned-manager" sx={inputLabelStyles}>{t('assignedManager')}</InputLabel>
                                     {
                                         !loadAssignees ? 
                                         <>
@@ -1459,23 +1462,23 @@ function Request(props: any) {
                                                 input={<BootstrapInput />}
                                                 fullWidth
                                             >
-                                                <option value="">No agent assigned</option>
+                                                <option value="">{t('noAgentAssigned')}</option>
                                                 {
                                                     assignees.map((row: any, i: number) => (
                                                         <option key={"assigneeId-"+i} value={String(row.id)}>{row.name}</option>
                                                     ))
                                                 }
                                             </NativeSelect>
-                                            <Button variant="contained" color="inherit" sx={whiteButtonStyles} style={{ marginRight: "10px" }} onClick={assignManager} >Update the manager</Button>
-                                            <Button variant="contained" color="inherit" sx={whiteButtonStyles} onClick={removeManager} >Remove the manager</Button>
+                                            <Button variant="contained" color="inherit" sx={whiteButtonStyles} style={{ marginRight: "10px" }} onClick={assignManager} >{t('updateManager')}</Button>
+                                            <Button variant="contained" color="inherit" sx={whiteButtonStyles} onClick={removeManager} >{t('removeManager')}</Button>
                                         </> : <Skeleton sx={{ mt: 3 }} />   
                                     }
                                 </Grid>
                                 <Grid item xs={12}>
-                                    <Button variant="contained" color="primary" sx={{ mt: 2, mr: 2, textTransform: "none" }} onClick={editRequest} >Edit the request</Button>
-                                    <Button variant="contained" color="inherit" sx={whiteButtonStyles} onClick={() => { setModal2(true); }} >Change the status</Button>
-                                    <Button variant="contained" color="inherit" sx={whiteButtonStyles} style={{ float: "right" }} onClick={() => { setModal3(true); }} >Add a comment/note</Button>
-                                    <Button variant="contained" color="inherit" sx={whiteButtonStyles} style={{ float: "right", marginRight: "10px" }} onClick={() => { setModal4(true); getNotes(id); }} >List of notes</Button>
+                                    <Button variant="contained" color="primary" sx={{ mt: 2, mr: 2, textTransform: "none" }} onClick={editRequest} >{t('editRequest')}</Button>
+                                    <Button variant="contained" color="inherit" sx={whiteButtonStyles} onClick={() => { setModal2(true); }} >{t('changeStatus')}</Button>
+                                    <Button variant="contained" color="inherit" sx={whiteButtonStyles} style={{ float: "right" }} onClick={() => { setModal3(true); }} >{t('addCommentNote')}</Button>
+                                    <Button variant="contained" color="inherit" sx={whiteButtonStyles} style={{ float: "right", marginRight: "10px" }} onClick={() => { setModal4(true); getNotes(id); }} >{t('listNotes')}</Button>
                                     <Button 
                                         variant="contained" color="success" 
                                         sx={{ mt: 2, mr: 2, textTransform: "none" }} 
@@ -1488,7 +1491,7 @@ function Request(props: any) {
                                             // setContainersSelected(containersSelection.map((elm: any) => elm.container));
                                         }}
                                     >
-                                        Generate price offer
+                                        {t('generatePriceOffer')}
                                     </Button>
                                 </Grid>
                         </Grid> : <Skeleton sx={{ mx: 5, mt: 3 }} />
@@ -1505,26 +1508,26 @@ function Request(props: any) {
                 fullWidth
             >
                 <BootstrapDialogTitle id="custom-dialog-title" onClose={() => setModal(false)}>
-                    <b>Ask for information</b>
+                    <b>{t('askInformation')}</b>
                 </BootstrapDialogTitle>
                 <DialogContent dividers>
                     <Typography variant="subtitle1" gutterBottom px={2}>
-                        Please fill in the form and click the button to send your message.
+                        {t('pleaseFillForm')}
                     </Typography>
                     <Grid container spacing={2} mt={1} px={2}>
                         <Grid item xs={12}>
-                            <InputLabel htmlFor="mail-subject" sx={inputLabelStyles}>Subject</InputLabel>
+                            <InputLabel htmlFor="mail-subject" sx={inputLabelStyles}>{t('subject')}</InputLabel>
                             <BootstrapInput id="mail-subject" type="text" inputProps={{ min: 0, max: 100 }} value={mailSubject} onChange={(e: any) => {setMailSubject(e.target.value)}} fullWidth />
                         </Grid>
                         <Grid item xs={12} mt={1}>
-                            <InputLabel htmlFor="mail-content" sx={inputLabelStyles}>Content</InputLabel>
+                            <InputLabel htmlFor="mail-content" sx={inputLabelStyles}>{t('content')}</InputLabel>
                             <BootstrapInput id="mail-content" type="text" multiline rows={4} value={mailContent} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setMailContent(e.target.value)} fullWidth />
                         </Grid>
                     </Grid>
                 </DialogContent>
                 <DialogActions>
-                    <Button variant="contained" color={!load ? "primary" : "info"} className="mr-3" onClick={askInformations} disabled={load === true} sx={{ textTransform: "none" }}>Send</Button>
-                    <Button variant="contained" onClick={() => setModal(false)} sx={buttonCloseStyles}>Close</Button>
+                    <Button variant="contained" color={!load ? "primary" : "info"} className="mr-3" onClick={askInformations} disabled={load === true} sx={{ textTransform: "none" }}>{t('send')}</Button>
+                    <Button variant="contained" onClick={() => setModal(false)} sx={buttonCloseStyles}>{t('close')}</Button>
                 </DialogActions>
             </BootstrapDialog>
             
@@ -1537,16 +1540,16 @@ function Request(props: any) {
                 fullWidth
             >
                 <BootstrapDialogTitle id="custom-dialog-title2" onClose={() => setModal2(false)}>
-                    <b>Change the request status</b>
+                    <b>{t('changeRequestStatus')}</b>
                 </BootstrapDialogTitle>
                 <DialogContent dividers>
                     <Typography variant="subtitle1" gutterBottom px={2}>
-                        Please choose of the following options as the status of the request.
+                        {t('pleaseChooseOptions')}
                     </Typography>
                     <Grid container spacing={2} mt={1} px={2}>
                         <Grid item xs={12}>
                             <FormControl>
-                                <FormLabel id="demo-controlled-radio-buttons-group" sx={{ color: "#333" }}>Status list</FormLabel>
+                                <FormLabel id="demo-controlled-radio-buttons-group" sx={{ color: "#333" }}>{t('statusList')}</FormLabel>
                                 <RadioGroup
                                     aria-labelledby="demo-controlled-radio-buttons-group"
                                     name="controlled-radio-buttons-group"
@@ -1561,14 +1564,14 @@ function Request(props: any) {
                             </FormControl>
                         </Grid>
                         <Grid item xs={12} mt={1}>
-                            <InputLabel htmlFor="status-message" sx={inputLabelStyles}>Status message (this message will be sent to the requester, leave empty to not send a mail)</InputLabel>
+                            <InputLabel htmlFor="status-message" sx={inputLabelStyles}>{t('statusMessage')}</InputLabel>
                             <BootstrapInput id="status-message" type="text" multiline rows={4} value={statusMessage} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setStatusMessage(e.target.value)} fullWidth />
                         </Grid>
                     </Grid>
                 </DialogContent>
                 <DialogActions>
-                    <Button variant="contained" color={!load ? "primary" : "info"} className="mr-3" onClick={changeStatusRequest} disabled={load === true} sx={{ textTransform: "none" }}>Validate</Button>
-                    <Button variant="contained" onClick={() => setModal2(false)} sx={buttonCloseStyles}>Close</Button>
+                    <Button variant="contained" color={!load ? "primary" : "info"} className="mr-3" onClick={changeStatusRequest} disabled={load === true} sx={{ textTransform: "none" }}>{t('validate')}</Button>
+                    <Button variant="contained" onClick={() => setModal2(false)} sx={buttonCloseStyles}>{t('close')}</Button>
                 </DialogActions>
             </BootstrapDialog>
             
@@ -1581,22 +1584,22 @@ function Request(props: any) {
                 fullWidth
             >
                 <BootstrapDialogTitle id="custom-dialog-title3" onClose={() => setModal3(false)}>
-                    <b>Add a comment/note</b>
+                    <b>{t('addCommentNote')}</b>
                 </BootstrapDialogTitle>
                 <DialogContent dividers>
                     <Typography variant="subtitle1" gutterBottom px={2}>
-                        Please fill in the field below and click the button to add note.
+                        {t('pleaseFillAddNote')}
                     </Typography>
                     <Grid container spacing={2} mt={1} px={2}>
                         <Grid item xs={12} mt={1}>
-                            <InputLabel htmlFor="general-note" sx={inputLabelStyles}>General note</InputLabel>
+                            <InputLabel htmlFor="general-note" sx={inputLabelStyles}>{t('generalNote')}</InputLabel>
                             <BootstrapInput id="general-note" type="text" multiline rows={4} value={generalNote} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setGeneralNote(e.target.value)} fullWidth />
                         </Grid>
                     </Grid>
                 </DialogContent>
                 <DialogActions>
-                    <Button variant="contained" color={!load ? "primary" : "info"} className="mr-3" onClick={addRequestNote} disabled={load === true} sx={{ textTransform: "none" }}>Validate</Button>
-                    <Button variant="contained" onClick={() => setModal3(false)} sx={buttonCloseStyles}>Close</Button>
+                    <Button variant="contained" color={!load ? "primary" : "info"} className="mr-3" onClick={addRequestNote} disabled={load === true} sx={{ textTransform: "none" }}>{t('validate')}</Button>
+                    <Button variant="contained" onClick={() => setModal3(false)} sx={buttonCloseStyles}>{t('close')}</Button>
                 </DialogActions>
             </BootstrapDialog>
 
@@ -1609,7 +1612,7 @@ function Request(props: any) {
                 fullWidth
             >
                 <BootstrapDialogTitle id="custom-dialog-title4" onClose={() => setModal4(false)}>
-                    <b>List of notes of request N° {id}</b>
+                    <b>{t('listNotesRequest')} {id}</b>
                 </BootstrapDialogTitle>
                 <DialogContent dividers>
                     <Grid container spacing={2} mt={1} px={2}>
@@ -1620,11 +1623,11 @@ function Request(props: any) {
                                     <Table sx={{ minWidth: 650 }} aria-label="simple table" size="small">
                                         <TableHead>
                                             <TableRow>
-                                                <TableCell align="left" sx={{ fontSize: 16, fontWeight: "bolder" }}>Id</TableCell>
-                                                <TableCell align="left" sx={{ fontSize: 16, fontWeight: "bolder" }}>Content</TableCell>
-                                                <TableCell align="left" sx={{ fontSize: 16, fontWeight: "bolder" }}>Date</TableCell>
+                                                <TableCell align="left" sx={{ fontSize: 16, fontWeight: "bolder" }}>{t('id')}</TableCell>
+                                                <TableCell align="left" sx={{ fontSize: 16, fontWeight: "bolder" }}>{t('content')}</TableCell>
+                                                <TableCell align="left" sx={{ fontSize: 16, fontWeight: "bolder" }}>{t('date')}</TableCell>
                                                 {/* <TableCell align="left" sx={{ fontSize: 16, fontWeight: "bolder" }}>Request id</TableCell> */}
-                                                <TableCell align="left" sx={{ fontSize: 16, fontWeight: "bolder" }}>Note type</TableCell>
+                                                <TableCell align="left" sx={{ fontSize: 16, fontWeight: "bolder" }}>{t('noteType')}</TableCell>
                                                 <TableCell align="left"><b></b></TableCell>
                                             </TableRow>
                                         </TableHead>
@@ -1640,7 +1643,7 @@ function Request(props: any) {
                                                             <Chip label={row.noteType} color={row.noteType === "General" ? "primary" : "warning" } />
                                                         </TableCell>
                                                         <TableCell align="left">
-                                                            <DarkTooltip title="Delete this note" placement="right" arrow>
+                                                            <DarkTooltip title={t('deleteNote')} placement="right" arrow>
                                                                 <IconButton 
                                                                     size="medium" 
                                                                     onClick={() => { deleteNote(row.id); }}
@@ -1661,7 +1664,7 @@ function Request(props: any) {
                     </Grid>
                 </DialogContent>
                 <DialogActions>
-                    <Button variant="contained" onClick={() => setModal4(false)} sx={buttonCloseStyles}>Close</Button>
+                    <Button variant="contained" onClick={() => setModal4(false)} sx={buttonCloseStyles}>{t('close')}</Button>
                 </DialogActions>
             </BootstrapDialog>
 
@@ -1674,7 +1677,7 @@ function Request(props: any) {
                 fullWidth
             >
                 <BootstrapDialogTitle id="custom-dialog-title5" onClose={() => setModal5(false)}>
-                    <b>Generate a price offer</b>
+                    <b>{t('generatePriceOffer')}</b>
                 </BootstrapDialogTitle>
                 <DialogContent dividers>
                     <Box sx={{ width: '100%' }}>
@@ -1715,7 +1718,7 @@ function Request(props: any) {
                                     activeStep === 0 ?
                                     <Grid container spacing={2} mt={1} px={2}>
                                         <Grid item xs={12} md={4} mt={1}>
-                                            <InputLabel htmlFor="departure-date" sx={inputLabelStyles}>Departure date</InputLabel>
+                                            <InputLabel htmlFor="departure-date" sx={inputLabelStyles}>{t('departureDate')}</InputLabel>
                                             <LocalizationProvider dateAdapter={AdapterDayjs}>
                                                 <DateTimePicker 
                                                     value={departureDate} 
@@ -1725,7 +1728,7 @@ function Request(props: any) {
                                             </LocalizationProvider>
                                         </Grid>
                                         <Grid item xs={12} md={4} mt={1}>
-                                            <InputLabel htmlFor="port-departure" sx={inputLabelStyles}>Departure port</InputLabel>
+                                            <InputLabel htmlFor="port-departure" sx={inputLabelStyles}>{t('departure')}</InputLabel>
                                             {
                                                 ports !== null ?
                                                 <Autocomplete
@@ -1747,14 +1750,14 @@ function Request(props: any) {
                                                     }}
                                                     value={portDeparture}
                                                     sx={{ mt: 1 }}
-                                                    renderInput={(params) => <TextField {...params} />}
+                                                    renderInput={(params: any) => <TextField {...params} />}
                                                     onChange={(e: any, value: any) => { setPortDeparture(value); }}
                                                     fullWidth
                                                 /> : <Skeleton />
                                             }
                                         </Grid>
                                         <Grid item xs={12} md={4} mt={1}>
-                                            <InputLabel htmlFor="destination-port" sx={inputLabelStyles}>Destination port</InputLabel>
+                                            <InputLabel htmlFor="destination-port" sx={inputLabelStyles}>{t('arrival')}</InputLabel>
                                             {
                                                 ports !== null ?
                                                 <Autocomplete
@@ -1776,14 +1779,14 @@ function Request(props: any) {
                                                     }}
                                                     value={portDestination}
                                                     sx={{ mt: 1 }}
-                                                    renderInput={(params) => <TextField {...params} />}
+                                                    renderInput={(params: any) => <TextField {...params} />}
                                                     onChange={(e: any, value: any) => { setPortDestination(value); }}
                                                     fullWidth
                                                 /> : <Skeleton />
                                             }
                                         </Grid>
                                         <Grid item xs={12} md={4} mt={1}>
-                                            <InputLabel htmlFor="loading-date" sx={inputLabelStyles}>Loading date</InputLabel>
+                                            <InputLabel htmlFor="loading-date" sx={inputLabelStyles}>{t('loadingDate')}</InputLabel>
                                             <LocalizationProvider dateAdapter={AdapterDayjs}>
                                                 <DateTimePicker 
                                                     value={loadingDate} 
@@ -1793,7 +1796,7 @@ function Request(props: any) {
                                             </LocalizationProvider>
                                         </Grid>
                                         <Grid item xs={12} md={4} mt={1}>
-                                            <InputLabel htmlFor="loading-city" sx={inputLabelStyles}>Loading city (empty if no haulage)</InputLabel>
+                                            <InputLabel htmlFor="loading-city" sx={inputLabelStyles}>{t('loadingCity')}</InputLabel>
                                             {
                                                 cities !== null ?
                                                 <Autocomplete
@@ -1808,14 +1811,14 @@ function Request(props: any) {
                                                     }}
                                                     value={loadingCity}
                                                     sx={{ mt: 1 }}
-                                                    renderInput={(params) => <TextField {...params} />}
+                                                    renderInput={(params: any) => <TextField {...params} />}
                                                     onChange={(e: any, value: any) => { setLoadingCity(value); }}
                                                     fullWidth
                                                 /> : <Skeleton />
                                             }
                                         </Grid>
                                         <Grid item xs={12} md={4} mt={1}>
-                                            <InputLabel htmlFor="haulage-type" sx={inputLabelStyles}>Haulage type (loading timing)</InputLabel>
+                                            <InputLabel htmlFor="haulage-type" sx={inputLabelStyles}>{t('haulageType')}</InputLabel>
                                             <NativeSelect
                                                 id="haulage-type"
                                                 value={haulageType}
@@ -1823,7 +1826,7 @@ function Request(props: any) {
                                                 input={<BootstrapInput />}
                                                 fullWidth
                                             >
-                                                <option key={"kdq-"} value="">Any type</option>
+                                                <option key={"kdq-"} value="">{t('anyType')}</option>
                                                 {
                                                     haulageTypes.map((item: any, i: number) => (
                                                         <option key={"kdq"+i} value={item}>{item}</option>
@@ -1837,12 +1840,12 @@ function Request(props: any) {
                                     activeStep === 1 ?
                                     <Grid container spacing={2} mt={1} px={2}>
                                         <Grid item xs={12}>
-                                            <Alert severity="info" sx={{ mb: 2 }}>You can select an offer by clicking on his row. You have to select at least one seafreight for your offer.</Alert>
+                                            <Alert severity="info" sx={{ mb: 2 }}>{t('selectOfferMessage')}</Alert>
                                             {
                                                 !loadResults ? 
                                                 seafreights !== null && seafreights.length !== 0 ?
                                                     <Box>
-                                                        <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>List of sea freights pricing offers</Typography>
+                                                        <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>{t('listSeaFreightsPricingOffers')}</Typography>
                                                         <DataGrid
                                                             rows={seafreights}
                                                             columns={columnsSeafreights}
@@ -1851,7 +1854,6 @@ function Request(props: any) {
                                                             getRowHeight={() => "auto" }
                                                             sx={{ height: "auto" }}
                                                             onRowClick={handleRowSeafreightsClick}
-                                                            // checkboxSelection
                                                         />
                                                     </Box>
                                                     : null
@@ -1861,7 +1863,7 @@ function Request(props: any) {
                                                 !loadResults ? 
                                                 haulages !== null && haulages.length !== 0 ?
                                                     <Box>
-                                                        <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>List of haulages pricing offers</Typography>
+                                                        <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>{t('listHaulagesPricingOffers')}</Typography>
                                                         <DataGrid
                                                             rows={haulages}
                                                             columns={columnsHaulages}
@@ -1870,7 +1872,6 @@ function Request(props: any) {
                                                             getRowHeight={() => "auto" }
                                                             sx={{ height: "auto" }}
                                                             onRowClick={handleRowHaulagesClick}
-                                                            // checkboxSelection
                                                         />
                                                     </Box>
                                                     : null
@@ -1880,7 +1881,7 @@ function Request(props: any) {
                                                 !loadResults ? 
                                                 miscs !== null && miscs.length !== 0 ?
                                                     <Box>
-                                                        <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>List of miscellaneous pricing offers</Typography>
+                                                        <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>{t('listMiscPricingOffers')}</Typography>
                                                         <DataGrid
                                                             rows={miscs}
                                                             columns={columnsMiscs}
@@ -1902,7 +1903,7 @@ function Request(props: any) {
                                     activeStep === 2 ?
                                     <Grid container spacing={2} mt={1} px={2}>
                                         <Grid item xs={12}>
-                                            <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>Selected sea freight</Typography>
+                                            <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>{t('selectedSeafreight')}</Typography>
                                             <DataGrid
                                                 rows={[selectedSeafreight]}
                                                 columns={columnsSeafreights}
@@ -1918,7 +1919,7 @@ function Request(props: any) {
                                         {
                                             selectedHaulage !== null ? 
                                             <Grid item xs={12}>
-                                                <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>Selected haulage</Typography>
+                                                <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>{t('selectedHaulage')}</Typography>
                                                 <DataGrid
                                                     rows={[selectedHaulage]}
                                                     columns={columnsHaulages}
@@ -1927,15 +1928,13 @@ function Request(props: any) {
                                                     getRowHeight={() => "auto" }
                                                     sx={{ height: "auto" }}
                                                     isRowSelectable={(params: any) => false}
-                                                    //onRowClick={handleRowSeafreightsClick}
-                                                    // checkboxSelection
                                                 />
                                             </Grid> : null
                                         }
                                         {
                                             selectedMisc !== null ? 
                                             <Grid item xs={12}>
-                                                <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>Selected miscellaneous</Typography>
+                                                <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>{t('selectedMisc')}</Typography>
                                                 <DataGrid
                                                     rows={[selectedMisc]}
                                                     columns={columnsMiscs}
@@ -1944,25 +1943,23 @@ function Request(props: any) {
                                                     getRowHeight={() => "auto" }
                                                     sx={{ height: "auto" }}
                                                     isRowSelectable={(params: any) => false}
-                                                    //onRowClick={handleRowSeafreightsClick}
-                                                    // checkboxSelection
                                                 />
                                             </Grid> : null
                                         }
                                         <Grid item xs={12} md={4}>
-                                            <InputLabel htmlFor="margin" sx={inputLabelStyles}>Margin (in %)</InputLabel>
+                                            <InputLabel htmlFor="margin" sx={inputLabelStyles}>{t('margin')} (%)</InputLabel>
                                             <BootstrapInput id="margin" type="number" value={margin} onChange={(e: any) => setMargin(e.target.value)} fullWidth />
                                         </Grid>
                                         <Grid item xs={12} md={4}>
-                                            <InputLabel htmlFor="reduction" sx={inputLabelStyles}>Reduction (in %)</InputLabel>
+                                            <InputLabel htmlFor="reduction" sx={inputLabelStyles}>{t('reduction')} (%)</InputLabel>
                                             <BootstrapInput id="reduction" type="number" value={reduction} onChange={(e: any) => setReduction(e.target.value)} fullWidth />
                                         </Grid>
                                         <Grid item xs={12} md={4}>
-                                            <InputLabel htmlFor="adding" sx={inputLabelStyles}>Extra Fee (in {selectedSeafreight !== null ? selectedSeafreight.currency : null})</InputLabel>
+                                            <InputLabel htmlFor="adding" sx={inputLabelStyles}>{t('extraFee')} ({selectedSeafreight !== null ? selectedSeafreight.currency : null})</InputLabel>
                                             <BootstrapInput id="adding" type="number" value={adding} onChange={(e: any) => setAdding(e.target.value)} fullWidth />
                                         </Grid>
                                         <Grid item xs={12}>
-                                            <InputLabel htmlFor="details" sx={inputLabelStyles}>Details of the offer</InputLabel>
+                                            <InputLabel htmlFor="details" sx={inputLabelStyles}>{t('detailsOffer')}</InputLabel>
                                             <BootstrapInput id="details" type="text" multiline rows={3} value={details} onChange={(e: any) => setDetails(e.target.value)} fullWidth />
                                         </Grid>
                                         <Grid item xs={12}>
@@ -1970,7 +1967,7 @@ function Request(props: any) {
                                                 { 
                                                     selectedSeafreight !== null ? 
                                                     <Chip variant="outlined" size="medium"
-                                                        label={"TOTAL PRICE : "+ Number(totalPrice+totalPrice*margin/100-totalPrice*reduction/100+adding*1).toFixed(2).toString()+" "+selectedSeafreight.currency}
+                                                        label={t('totalPrice').toUpperCase()+" : "+ Number(totalPrice+totalPrice*margin/100-totalPrice*reduction/100+adding*1).toFixed(2).toString()+" "+selectedSeafreight.currency}
                                                         sx={{ fontWeight: "bold", fontSize: 16, py: 3 }} 
                                                     /> : null
                                                 }
@@ -1988,16 +1985,16 @@ function Request(props: any) {
                                         disabled={activeStep === 0}
                                         onClick={handleBack}
                                     >
-                                        Back
+                                        {t('back')}
                                     </Button>
                                     <Box sx={{ flex: '1 1 auto' }} />
                                     {isStepOptional(activeStep) && (
                                     <Button variant="contained" color="inherit" sx={whiteButtonStyles} onClick={handleSkip}>
-                                        Skip
+                                        {t('skip')}
                                     </Button>
                                     )}
                                     <Button variant="contained" color="inherit" sx={whiteButtonStyles} onClick={handleNext}>
-                                        {activeStep === steps.length - 1 ? 'Send the offer to validation' : 'Next step'}
+                                        {activeStep === steps.length - 1 ? t('sendOfferValidation') : t('nextStep')}
                                     </Button>
                                 </Box>
                             </React.Fragment>
@@ -2006,7 +2003,7 @@ function Request(props: any) {
                 </DialogContent>
                 <DialogActions>
                     {/* <Button variant="contained" color={!load ? "primary" : "info"} className="mr-3" onClick={() => { getPriceRequests(); }} sx={{ textTransform: "none" }}>Generate the offer</Button> */}
-                    <Button variant="contained" onClick={() => setModal5(false)} sx={buttonCloseStyles}>Close</Button>
+                    <Button variant="contained" onClick={() => setModal5(false)} sx={buttonCloseStyles}>{t('close')}</Button>
                 </DialogActions>
             </BootstrapDialog>
         </div>
