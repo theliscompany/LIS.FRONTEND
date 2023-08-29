@@ -251,7 +251,7 @@ function Layout(props: {children?: React.ReactNode}) {
                                 <BootstrapInput 
                                     type="text" 
                                     value={searchText}
-                                    placeholder="Type something to search..."
+                                    placeholder={t('typeSomethingSearch')}
                                     sx={{ ml: 5, pb: 1, minWidth: { xs: "calc(100vw - 90px)", md: "400px" } }} 
                                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchText(e.target.value)} endAdornment={
                                         <InputAdornment position="end">
@@ -285,7 +285,7 @@ function Layout(props: {children?: React.ReactNode}) {
                                 id="searchText" 
                                 type="text" 
                                 value={searchText}
-                                placeholder="Type something to search..."
+                                placeholder={t('typeSomethingSearch')}
                                 sx={{ ml: 5, minWidth: { md: "400px" } }} 
                                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchText(e.target.value)} endAdornment={
                                     <InputAdornment position="end">
@@ -318,15 +318,9 @@ function Layout(props: {children?: React.ReactNode}) {
                                             MenuListProps={{ sx: { paddingTop: "0px", paddingBottom: "0px" } }}
                                             id="menu-notifications"
                                             anchorEl={anchorElNotifications}
-                                            anchorOrigin={{
-                                                vertical: 'top',
-                                                horizontal: 'right',
-                                            }}
+                                            anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
                                             keepMounted
-                                            transformOrigin={{
-                                                vertical: 'top',
-                                                horizontal: 'right',
-                                            }}
+                                            transformOrigin={{ vertical: 'top', horizontal: 'right' }}
                                             open={Boolean(anchorElNotifications)}
                                             onClose={handleCloseNotificationsMenu}
                                         >
@@ -363,15 +357,9 @@ function Layout(props: {children?: React.ReactNode}) {
                                     PaperProps={{ sx: { width: "160px" } }}
                                     MenuListProps={{ sx: { paddingTop: "0px", paddingBottom: "0px" } }}
                                     anchorEl={anchorElLang}
-                                    anchorOrigin={{
-                                        vertical: 'top',
-                                        horizontal: 'right',
-                                    }}
+                                    anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
                                     keepMounted
-                                    transformOrigin={{
-                                        vertical: 'top',
-                                        horizontal: 'right',
-                                    }}
+                                    transformOrigin={{ vertical: 'top', horizontal: 'right' }}
                                     open={Boolean(anchorElLang)}
                                     onClose={handleCloseLangMenu}
                                 >
@@ -387,7 +375,7 @@ function Layout(props: {children?: React.ReactNode}) {
                                 
                                 <DarkTooltip title={account?.name}>
                                     <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                                        <Avatar alt={account?.name} {...stringAvatar(account?.name)} src="../cyrillepenaye.jpg" />
+                                        <Avatar alt={account?.name} {...stringAvatar(account?.name)} />
                                     </IconButton>
                                 </DarkTooltip>
                                 <Menu
@@ -395,15 +383,9 @@ function Layout(props: {children?: React.ReactNode}) {
                                     PaperProps={{ sx: { width: "300px" } }}
                                     MenuListProps={{ sx: { paddingTop: "0px", paddingBottom: "0px" } }}
                                     anchorEl={anchorElUser}
-                                    anchorOrigin={{
-                                        vertical: 'top',
-                                        horizontal: 'right',
-                                    }}
+                                    anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
                                     keepMounted
-                                    transformOrigin={{
-                                        vertical: 'top',
-                                        horizontal: 'right',
-                                    }}
+                                    transformOrigin={{ vertical: 'top', horizontal: 'right' }}
                                     open={Boolean(anchorElUser)}
                                     onClose={handleCloseUserMenu}
                                 >
@@ -472,7 +454,7 @@ function Layout(props: {children?: React.ReactNode}) {
                             </NavLink>
                             <NavLink to="/admin/users" className={({ isActive }) => isActive ? "cs-navlink-active" : "cs-navlink"}>
                                 <ListItem className="cs-listitem" key={"Users"} disablePadding disableGutters>
-                                <DarkTooltip title="Users" placement="right" arrow>
+                                <DarkTooltip title={t('users')} placement="right" arrow>
                                     <ListItemButton className="cs-listitembutton">
                                         <ListItemIcon className="cs-listitemicon">
                                             <PeopleIcon fontSize="small" />
@@ -484,7 +466,7 @@ function Layout(props: {children?: React.ReactNode}) {
                             </NavLink>
                             <NavLink to="/admin/new-request" className={({ isActive }) => isActive ? "cs-navlink-active" : "cs-navlink"}>
                                 <ListItem className="cs-listitem" key={"New request"} disablePadding disableGutters>
-                                <DarkTooltip title="New request" placement="right" arrow>
+                                <DarkTooltip title={t('newRequest')} placement="right" arrow>
                                     <ListItemButton className="cs-listitembutton">
                                         <ListItemIcon className="cs-listitemicon">
                                             <AddIcon fontSize="small" />
@@ -496,7 +478,7 @@ function Layout(props: {children?: React.ReactNode}) {
                             </NavLink>
                             <NavLink to="/admin/my-requests" className={({ isActive }) => isActive ? "cs-navlink-active" : "cs-navlink"}>
                                 <ListItem className="cs-listitem" key={"My requests"} disablePadding disableGutters>
-                                <DarkTooltip title="My requests" placement="right" arrow>
+                                <DarkTooltip title={t('myRequests')} placement="right" arrow>
                                     <ListItemButton className="cs-listitembutton">
                                         <ListItemIcon className="cs-listitemicon">
                                             <AutoFixHighIcon fontSize="small" />
@@ -508,7 +490,7 @@ function Layout(props: {children?: React.ReactNode}) {
                             </NavLink>
                             <NavLink to="/admin/requests" className={({ isActive }) => isActive ? "cs-navlink-active" : "cs-navlink"}>
                                 <ListItem className="cs-listitem" key={"Requests"} disablePadding disableGutters>
-                                <DarkTooltip title="Requests" placement="right" arrow>
+                                <DarkTooltip title={t('requests')} placement="right" arrow>
                                     <ListItemButton className="cs-listitembutton">
                                         <ListItemIcon className="cs-listitemicon">
                                             <NotificationsIcon fontSize="small" />
@@ -520,7 +502,7 @@ function Layout(props: {children?: React.ReactNode}) {
                             </NavLink>
                             <NavLink to="/admin/quote-offers" className={({ isActive }) => isActive ? "cs-navlink-active" : "cs-navlink"}>
                                 <ListItem className="cs-listitem" key={"Price offers"} disablePadding disableGutters>
-                                <DarkTooltip title="Price offers" placement="right" arrow>
+                                <DarkTooltip title={t('priceOffers')} placement="right" arrow>
                                     <ListItemButton className="cs-listitembutton">
                                         <ListItemIcon className="cs-listitemicon">
                                             <PortraitIcon fontSize="small" />
@@ -534,7 +516,7 @@ function Layout(props: {children?: React.ReactNode}) {
                         
                         <List dense sx={{ position: "absolute", bottom: "0px", left: "10px", right: "10px" }}>
                             <ListItem className="cs-listitem" key={"Collapse"} disablePadding disableGutters>
-                                <DarkTooltip title="Collapse" placement="right" arrow>
+                                <DarkTooltip title={t('collapse')} placement="right" arrow>
                                     <ListItemButton className="cs-listitembutton" onClick={open ? handleDrawerClose : handleDrawerOpen}>
                                         <ListItemIcon className="cs-listitemicon">
                                             {open ? <FirstPageIcon fontSize="small" /> : <LastPageIcon fontSize="small" />}

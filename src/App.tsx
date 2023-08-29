@@ -1,7 +1,6 @@
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import './App.css';
 import Layout from './components/shared/Layout';
-import Home from './components/admin/Home';
 import Landing from './components/landing/Landing';
 import Requests from './components/admin/Requests';
 import Privacy from './components/landing/Privacy';
@@ -12,7 +11,7 @@ import { AuthorizedBackendApiProvider } from './api/api';
 import RequestsSearch from './components/admin/RequestsSearch';
 import Tracking from './components/landing/Tracking';
 import NewRequest from './components/admin/NewRequest';
-import UsersAssigment from './components/admin/UsersAssignment';
+import UsersAssignment from './components/admin/UsersAssignment';
 import Histories from './components/admin/Histories';
 import MyRequests from './components/admin/MyRequests';
 import PriceOffers from './components/admin/PriceOffers';
@@ -40,7 +39,7 @@ const App = () => {
                 <Route path="my-requests" element={<MyRequests />} />
                 <Route path="quote-offers" element={<PriceOffers />} />
                 <Route path="quote-offers/:id" element={<ManagePriceOffer />} />
-                <Route path="users" element={<UsersAssigment />} />
+                <Route path="users" element={<UsersAssignment />} />
               </Route> 
               <Route path="/" element={<Landing />} />
               <Route path="landing" element={<Landing />} />

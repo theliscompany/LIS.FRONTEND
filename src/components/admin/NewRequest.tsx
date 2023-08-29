@@ -409,7 +409,7 @@ function NewRequest(props: any) {
                                         input={<BootstrapInput />}
                                         fullWidth
                                     >
-                                        <option key={"elm1-x"} value={0}>Not defined</option>
+                                        <option key={"elm1-x"} value={0}>{t('notDefined')}</option>
                                         {containers.filter((elm: any) => ["20' Dry"]).map((elm: any, i: number) => (
                                             <option key={"elm1-"+i} value={elm.packageId}>{elm.packageName}</option>
                                         ))}
@@ -435,7 +435,7 @@ function NewRequest(props: any) {
                                         }
                                     }} 
                                 >
-                                    Add the container
+                                    {t('addContainer')}
                                 </Button>
                             </Grid>
                             <Grid item xs={12}>
@@ -458,8 +458,8 @@ function NewRequest(props: any) {
                                                         >
                                                             <ListItemText primary={
                                                                 containers.find((elm: any) => elm.packageId === item.container) !== undefined ?
-                                                                "Container : "+containers.find((elm: any) => elm.packageId === item.container).packageName+" | Quantity : "+item.quantity
-                                                                : "Container : "+item.container+" | Quantity : "+item.quantity
+                                                                t('container')+" : "+containers.find((elm: any) => elm.packageId === item.container).packageName+" | "+t('quantity')+" : "+item.quantity
+                                                                : t('container')+" : "+item.container+" | "+t('quantity')+" : "+item.quantity
                                                             } />
                                                         </ListItem>
                                                     </Grid>
@@ -506,7 +506,7 @@ function NewRequest(props: any) {
                                         }
                                     }} 
                                 >
-                                    Add
+                                    {t('add')}
                                 </Button>
                             </Grid>
                             <Grid item xs={12}>
@@ -528,7 +528,7 @@ function NewRequest(props: any) {
                                                             }
                                                         >
                                                             <ListItemText primary={
-                                                                "Name : "+item.name+" | Quantity : "+item.quantity+" | Dimensions : "+item.dimensions+" | Weight : "+item.weight+" Kg"
+                                                                t('name')+" : "+item.name+" | "+t('quantity')+" : "+item.quantity+" | "+t('dimensions')+" : "+item.dimensions+" | "+t('weight')+" : "+item.weight+" Kg"
                                                             } />
                                                         </ListItem>
                                                     </Grid>
@@ -575,7 +575,7 @@ function NewRequest(props: any) {
                                         }
                                     }} 
                                 >
-                                    Add
+                                    {t('add')}
                                 </Button>
                             </Grid>
                             <Grid item xs={12}>
@@ -597,7 +597,7 @@ function NewRequest(props: any) {
                                                             }
                                                         >
                                                             <ListItemText primary={
-                                                                "Name : "+item.name+" | Quantity : "+item.quantity+" | Dimensions : "+item.dimensions+" | Weight : "+item.weight+" Kg"
+                                                                t('name')+" : "+item.name+" | "+t('quantity')+" : "+item.quantity+" | "+t('dimensions')+" : "+item.dimensions+" | "+t('weight')+" : "+item.weight+" Kg"
                                                             } />
                                                         </ListItem>
                                                     </Grid>
@@ -667,13 +667,13 @@ function NewRequest(props: any) {
                             {
                                 !loadUser ? 
                                 currentUser !== null && currentUser !== undefined ? 
-                                <Alert severity="info" sx={{ mt: 1 }}>This request will be assigned to the current user {account?.name} by default.</Alert> : 
-                                <Alert severity="warning" sx={{ mt: 1 }}>This request will not be assigned to the current user, you need to grant him the permission in <Link to="/admin/users" style={{ textDecoration: "none" }}>Users</Link>.</Alert>
+                                <Alert severity="info" sx={{ mt: 1 }}>{t('requestAssignedTo')} {account?.name} {t('byDefault')}</Alert> : 
+                                <Alert severity="warning" sx={{ mt: 1 }}>{t('requestNotAssignedCurrentUser')} <Link to="/admin/users" style={{ textDecoration: "none" }}>{t('users')}</Link>.</Alert>
                                 : <Skeleton sx={{ my: 1 }} />
                             }            
                         </Grid>
                         <Grid item xs={12}>
-                            <Button variant="contained" color={!load ? "primary" : "info"} className="mr-3" onClick={sendQuotationForm} disabled={load === true} sx={{ textTransform: "none" }}>Create the request</Button>
+                            <Button variant="contained" color={!load ? "primary" : "info"} className="mr-3" onClick={sendQuotationForm} disabled={load === true} sx={{ textTransform: "none" }}>{t('createRequest')}</Button>
                         </Grid>
                     </Grid>
                 </Box>

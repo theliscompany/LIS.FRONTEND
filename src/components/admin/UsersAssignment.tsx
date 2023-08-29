@@ -10,8 +10,9 @@ import { useAuthorizedBackendApi } from '../../api/api';
 import { BackendService } from '../../services/fetch';
 import { useAccount, useMsal } from '@azure/msal-react';
 import { AuthenticationResult } from '@azure/msal-browser';
+import { useTranslation } from 'react-i18next';
 
-function UsersAssigment(props: any) {
+function UsersAssignment(props: any) {
     const [load, setLoad] = useState<boolean>(false);
     const [showAlert, setShowAlert] = useState<boolean>(false);
     const [users, setUsers] = useState<any>(null);
@@ -22,6 +23,7 @@ function UsersAssigment(props: any) {
     
     const context = useAuthorizedBackendApi();
     
+    const { t } = useTranslation();
     
     useEffect(() => {
         getAssignees();
@@ -175,7 +177,7 @@ function UsersAssigment(props: any) {
         <div style={{ background: "#fff", borderTopLeftRadius: 20, borderTopRightRadius: 20 }}>
             <SnackbarProvider />
             <Box py={2.5}>
-                <Typography variant="h5" sx={{mt: {xs: 4, md: 1.5, lg: 1.5 }}} px={5}><b>Manage users who can assign</b></Typography>
+                <Typography variant="h5" sx={{mt: {xs: 4, md: 1.5, lg: 1.5 }}} px={5}><b>{t('userAssignmentTitle')}</b></Typography>
                 <Box>
                     <Grid container spacing={1} px={5} mt={2}>
                         <Grid item xs={12}>
@@ -186,10 +188,10 @@ function UsersAssigment(props: any) {
                                         <Table aria-label="simple table">
                                             <TableHead>
                                                 <TableRow>
-                                                    <TableCell align="left" sx={{ fontSize: 16, fontWeight: "bolder" }}>Identifier</TableCell>
-                                                    <TableCell align="left" sx={{ fontSize: 16, fontWeight: "bolder" }}>Name</TableCell>
-                                                    <TableCell align="left" sx={{ fontSize: 16, fontWeight: "bolder" }}>Email address</TableCell>
-                                                    <TableCell align="left" sx={{ fontSize: 16, fontWeight: "bolder" }}>Status</TableCell>
+                                                    <TableCell align="left" sx={{ fontSize: 16, fontWeight: "bolder" }}>{t('id')}</TableCell>
+                                                    <TableCell align="left" sx={{ fontSize: 16, fontWeight: "bolder" }}>{t('name')}</TableCell>
+                                                    <TableCell align="left" sx={{ fontSize: 16, fontWeight: "bolder" }}>{t('email')}</TableCell>
+                                                    <TableCell align="left" sx={{ fontSize: 16, fontWeight: "bolder" }}>{t('status')}</TableCell>
                                                     <TableCell align="left"><b></b></TableCell>
                                                 </TableRow>
                                             </TableHead>
@@ -201,14 +203,13 @@ function UsersAssigment(props: any) {
                                                             <TableCell align="left">{row.displayName}</TableCell>
                                                             <TableCell align="left">{row.mail}</TableCell>
                                                             <TableCell align="left">
-                                                                { assignees.some((user: any) => user.email === row.mail) ? <Chip label="Can assign" color="success" /> : <Chip label="Cannot assign"  /> }
+                                                                { assignees.some((user: any) => user.email === row.mail) ? <Chip label={t('canAssign')} color="success" /> : <Chip label={t('cannotAssign')} /> }
                                                             </TableCell>
                                                             <TableCell align="left">
-                                                                <DarkTooltip title={ assignees.some((user: any) => user.email === row.mail) ? "Cancel assign role" : "Assign as manager"} placement="right" arrow>
+                                                                <DarkTooltip title={ assignees.some((user: any) => user.email === row.mail) ? t('cancelAssign') : t('assignAsManager')} placement="right" arrow>
                                                                     <IconButton 
                                                                         size="medium" 
                                                                         onClick={() => { 
-                                                                            // assignAsManager(row.displayName, row.mail, row.id);
                                                                             assignees.some((user: any) => user.email === row.mail) ?
                                                                             removeAsManager(row.mail) : 
                                                                             assignAsManager(row.displayName, row.mail, row.id)
@@ -228,7 +229,7 @@ function UsersAssigment(props: any) {
                             }
                             {
                                 showAlert ?
-                                <Alert severity="warning">You cant manage the users because you are not an administrator. Please contact the administrator so he can grant you the desired role.</Alert> : null
+                                <Alert severity="warning">{t('notAdministratorForAssign')}</Alert> : null
                             }
                         </Grid>
                     </Grid>
@@ -238,4 +239,4 @@ function UsersAssigment(props: any) {
     );
 }
 
-export default UsersAssigment;
+export default UsersAssignment;

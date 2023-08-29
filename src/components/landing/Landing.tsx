@@ -20,6 +20,7 @@ import { BackendService } from '../../services/fetch';
 import { useAuthorizedBackendApi } from '../../api/api';
 import { DialogTitleProps, MailData } from '../../models/models';
 // import { AuthenticationResult } from '@azure/msal-browser';
+import { useTranslation } from 'react-i18next';
 
 function Landing() {
     const isAuthenticated = useIsAuthenticated();
@@ -93,6 +94,8 @@ function Landing() {
         setCaptcha(value);
     }
 
+    const { t } = useTranslation();
+    
     useEffect(() => {
         getPorts();
         getProducts();
@@ -553,7 +556,7 @@ function Landing() {
                 </DialogContent>
                 <DialogActions>
                     <Button variant="contained" color={!load ? "primary" : "info"} className="mr-3" onClick={sendQuotationForm} disabled={load === true} sx={{ textTransform: "none" }}>Continue</Button>
-                    {/* <Button variant="contained" onClick={() => { setModal(false); }} sx={buttonCloseStyles}>Close</Button> */}
+                    {/* <Button variant="contained" onClick={() => { setModal(false); }} sx={buttonCloseStyles}>{t('close')}</Button> */}
                 </DialogActions>
             </BootstrapDialog>
             
@@ -616,7 +619,7 @@ function Landing() {
                 </DialogContent>
                 <DialogActions>
                     <Button variant="contained" color={!load ? "primary" : "info"} onClick={sendContactForm} disabled={load === true} sx={{ textTransform: "none" }}>Continue</Button>
-                    <Button variant="contained" onClick={() => setModal2(false)} sx={buttonCloseStyles}>Close</Button>
+                    <Button variant="contained" onClick={() => setModal2(false)} sx={buttonCloseStyles}>{t('close')}</Button>
                 </DialogActions>
             </BootstrapDialog>
             

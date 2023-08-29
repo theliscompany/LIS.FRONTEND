@@ -10,6 +10,7 @@ import { protectedResources, transportRequest } from '../../authConfig';
 import { BackendService } from '../../services/fetch';
 import { BootstrapInput, inputLabelStyles } from '../../misc/styles';
 import { DataGrid, GridRenderCellParams, GridValueFormatterParams, GridValueGetterParams } from '@mui/x-data-grid';
+import { useTranslation } from 'react-i18next';
 
 function statusLabel(value: string) {
   if (value === "Accepted")
@@ -33,6 +34,8 @@ function ManagePriceOffer(props: any) {
   const { instance, accounts } = useMsal();
   const account = useAccount(accounts[0] || {});
   const context = useAuthorizedBackendApi();
+
+  const { t } = useTranslation();
     
   useEffect(() => {
     getContainers();
@@ -191,12 +194,12 @@ return (
                         rows={[offer.seaFreight]}
                         columns={
                           [
-                            { field: 'carrierName', headerName: 'Carrier', width: 175 },
-                            { field: 'carrierAgentName', headerName: 'Carrier agent', width: 175 },
-                            { field: 'departurePortName', headerName: 'Departure port', width: 125 },
-                            { field: 'frequency', headerName: 'Frequency', valueFormatter: (params: GridValueFormatterParams) => `${params.value || ''} / day`, },
-                            { field: 'transitTime', headerName: 'Transit time', valueFormatter: (params: GridValueFormatterParams) => `${params.value || ''} days` },
-                            { field: 'currency', headerName: 'Prices', renderCell: (params: GridRenderCellParams) => {
+                            { field: 'carrierName', headerName: t('carrier'), width: 175 },
+                            { field: 'carrierAgentName', headerName: t('carrierAgent'), width: 175 },
+                            { field: 'departurePortName', headerName: t('departurePort'), width: 125 },
+                            { field: 'frequency', headerName: t('frequency'), valueFormatter: (params: GridValueFormatterParams) => `${params.value || ''} / day`, },
+                            { field: 'transitTime', headerName: t('transitTime'), valueFormatter: (params: GridValueFormatterParams) => `${params.value || ''} days` },
+                            { field: 'currency', headerName: t('prices'), renderCell: (params: GridRenderCellParams) => {
                                 return (
                                     <Box sx={{ my: 1, mr: 1 }}>
                                         <Box sx={{ my: 1 }} hidden={params.row.price20Dry === 0 || !getPackageNamesByIds(containersId, containers).includes("20' Dry")}>{"20' Dry : "+params.row.price20Dry+" "+params.row.currency}</Box>
@@ -224,17 +227,17 @@ return (
                             rows={[offer.haulage]}
                             columns={
                               [
-                                { field: 'haulierName', headerName: 'Haulier', width: 175 },
-                                { field: 'loadingPort', headerName: 'Loading port', renderCell: (params: GridRenderCellParams) => {
+                                { field: 'haulierName', headerName: t('haulier'), width: 175 },
+                                { field: 'loadingPort', headerName: t('loadingPort'), renderCell: (params: GridRenderCellParams) => {
                                     return (
                                         <Box sx={{ my: 2 }}>{params.row.loadingPort}</Box>
                                     );
                                 }, width: 175 },
-                                { field: 'freeTime', headerName: 'Free time', valueFormatter: (params: GridValueFormatterParams) => `${params.value || ''} days`, width: 125 },
-                                { field: 'multiStop', headerName: 'Multi stop', valueGetter: (params: GridValueGetterParams) => `${params.row.multiStop || ''} ${params.row.currency}` },
-                                { field: 'overtimeTariff', headerName: 'Overtime tariff', valueGetter: (params: GridValueGetterParams) => `${params.row.overtimeTariff || ''} ${params.row.currency}` },
-                                { field: 'unitTariff', headerName: 'Unit tariff', valueGetter: (params: GridValueGetterParams) => `${params.row.unitTariff || ''} ${params.row.currency}` },
-                                { field: 'validUntil', headerName: 'Valid until', valueFormatter: (params: GridValueFormatterParams) => `${(new Date(params.value)).toLocaleString() || ''}`, width: 200 },
+                                { field: 'freeTime', headerName: t('freeTime'), valueFormatter: (params: GridValueFormatterParams) => `${params.value || ''} days`, width: 125 },
+                                { field: 'multiStop', headerName: t('multiStop'), valueGetter: (params: GridValueGetterParams) => `${params.row.multiStop || ''} ${params.row.currency}` },
+                                { field: 'overtimeTariff', headerName: t('overtimeTariff'), valueGetter: (params: GridValueGetterParams) => `${params.row.overtimeTariff || ''} ${params.row.currency}` },
+                                { field: 'unitTariff', headerName: t('unitTariff'), valueGetter: (params: GridValueGetterParams) => `${params.row.unitTariff || ''} ${params.row.currency}` },
+                                { field: 'validUntil', headerName: t('validUntil'), valueFormatter: (params: GridValueFormatterParams) => `${(new Date(params.value)).toLocaleString() || ''}`, width: 200 },
                               ]
                             }
                             hideFooter
@@ -254,10 +257,10 @@ return (
                             rows={offer.miscellaneousList}
                             columns={
                               [
-                                { field: 'supplierName', headerName: 'Supplier', width: 175 },
-                                { field: 'departurePortName', headerName: 'Departure port', width: 175, valueFormatter: (params: GridValueFormatterParams) => `${offer.seaFreight.departurePortName || ''}`, },
-                                { field: 'destinationPortName', headerName: 'Destination port', width: 325, valueFormatter: (params: GridValueFormatterParams) => `${offer.seaFreight.destinationPortName || ''}`, },
-                                { field: 'currency', headerName: 'Prices', renderCell: (params: GridRenderCellParams) => {
+                                { field: 'supplierName', headerName: t('supplier'), width: 175 },
+                                { field: 'departurePortName', headerName: t('departurePort'), width: 175, valueFormatter: (params: GridValueFormatterParams) => `${offer.seaFreight.departurePortName || ''}`, },
+                                { field: 'destinationPortName', headerName: t('destinationPort'), width: 325, valueFormatter: (params: GridValueFormatterParams) => `${offer.seaFreight.destinationPortName || ''}`, },
+                                { field: 'currency', headerName: t('prices'), renderCell: (params: GridRenderCellParams) => {
                                     return (
                                         <Box sx={{ my: 1, mr: 1 }}>
                                             <Box sx={{ my: 1 }} hidden={params.row.price20Dry === 0 || !getPackageNamesByIds(containersId, containers).includes("20' Dry")}>{"20' Dry : "+params.row.price20Dry+" "+params.row.currency}</Box>

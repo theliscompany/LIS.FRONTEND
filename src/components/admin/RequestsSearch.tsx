@@ -156,14 +156,14 @@ function RequestsSearch() {
                             input={<BootstrapInput />}
                             fullWidth
                         >
-                            <option value="">All types</option>
+                            <option value="">{t('allTypes')}</option>
                             <option value="FCL">FCL</option>
                             <option value="Breakbulk/LCL">Breakbulk/LCL</option>
                             <option value="Unit RoRo">Unit RoRo</option>
                         </NativeSelect>
                     </Grid>
                     <Grid item xs={12} md={3}>
-                        <InputLabel htmlFor="status-id" sx={inputLabelStyles}>Status</InputLabel>
+                        <InputLabel htmlFor="status-id" sx={inputLabelStyles}>{t('status')}</InputLabel>
                         <NativeSelect
                             id="status-id"
                             value={status}
@@ -171,7 +171,7 @@ function RequestsSearch() {
                             input={<BootstrapInput />}
                             fullWidth
                         >
-                            <option value="">All status</option>
+                            <option value="">{t('allStatus')}</option>
                             <option value="0">En Attente</option>
                             <option value="1">Validé</option>
                             <option value="2">Rejeté</option>
@@ -251,7 +251,7 @@ function RequestsSearch() {
                                             <Grid container sx={{ maxWidth: "600px", color: "#333" }}>
                                                 <Grid item xs={12}>
                                                     <ListItemText
-                                                        primary={<Typography variant="subtitle1" color="#333"><b>{item.email !== "emailexample@gmail.com" ? "#" + item.id + " "+ t('newQuoteRequest') + " from : " + item.email : "#" + item.id + " " + t('newQuoteRequest')}</b></Typography>}
+                                                        primary={<Typography variant="subtitle1" color="#333"><b>{item.email !== "emailexample@gmail.com" ? "#" + item.id + " "+ t('newQuoteRequest') + t('fromDotted') + item.email : "#" + item.id + " " + t('newQuoteRequest')}</b></Typography>}
                                                     />        
                                                 </Grid>
                                                 <Grid item xs={12}>
