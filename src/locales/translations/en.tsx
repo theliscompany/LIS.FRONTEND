@@ -146,5 +146,6 @@ export const en = {
   listOffers: "List of offers",
   sendOffer: "Send an offer",
   typeSomething: "Type something...",
-  typeSomethingSearch: "Type something to search..."
+  typeSomethingSearch: "Type something to search...",
+  generatedPriceOffers: "Generated price offers"
 };

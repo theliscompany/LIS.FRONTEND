@@ -146,5 +146,6 @@ export const fr = {
   listOffers: "Liste des offres",
   sendOffer: "Envoyer une offre",
   typeSomething: "Tapez quelque chose...",
-  typeSomethingSearch: "Tapez quelque chose pour rechercher..."
+  typeSomethingSearch: "Tapez quelque chose pour rechercher...",
+  generatedPriceOffers: "Offres de prix créées"
 };
