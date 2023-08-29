@@ -177,7 +177,7 @@ function RequestsSearch() {
                             <option value="2">Rejeté</option>
                         </NativeSelect>
                     </Grid>
-                    <Grid item xs={12} md={3} mt={1}>
+                    {/* <Grid item xs={12} md={3} mt={1}>
                         <InputLabel htmlFor="created-date-start" sx={inputLabelStyles}>{t('createdDateStart')}</InputLabel>
                         <LocalizationProvider dateAdapter={AdapterDayjs}>
                             <DateTimePicker 
@@ -216,7 +216,7 @@ function RequestsSearch() {
                                 slotProps={{ textField: { id: "updated-date-end", fullWidth: true, sx: datetimeStyles }, inputAdornment: { sx: { position: "relative", right: "11.5px" } } }}
                             />
                         </LocalizationProvider>
-                    </Grid>
+                    </Grid> */}
                     <Grid item xs={12} md={2} sx={{ display: "flex", alignItems: "end" }}>
                         <Button 
                             variant="contained" 
