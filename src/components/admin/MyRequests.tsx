@@ -3,41 +3,24 @@ import ListItem from '@mui/material/ListItem';
 import ListItemText from '@mui/material/ListItemText';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
-import dayjs, { Dayjs } from 'dayjs';
-import { DemoContainer, DemoItem } from '@mui/x-date-pickers/internals/demo';
+import { Dayjs } from 'dayjs';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
-import { MobileDateTimePicker } from '@mui/x-date-pickers/MobileDateTimePicker';
-import { DesktopDateTimePicker } from '@mui/x-date-pickers/DesktopDateTimePicker';
-import { StaticDateTimePicker } from '@mui/x-date-pickers/StaticDateTimePicker';
 import React, { useEffect, useState } from 'react';
 import '../../App.css';
 import { Button, Chip, Grid, InputLabel, NativeSelect, Skeleton } from '@mui/material';
 import PlaceIcon from '@mui/icons-material/Place';
 import SearchIcon from '@mui/icons-material/Search';
-import AutocompleteSearch from '../shared/AutocompleteSearch';
 import { BootstrapInput, datetimeStyles, inputLabelStyles } from '../../misc/styles';
 import { protectedResources } from '../../authConfig';
 import { enqueueSnackbar, SnackbarProvider } from 'notistack';
 import { useAuthorizedBackendApi } from '../../api/api';
 import { BackendService } from '../../services/fetch';
-import { useParams } from 'react-router-dom';
 import { RequestResponseDto } from '../../models/models';
 import { useAccount, useMsal } from '@azure/msal-react';
 import { NavLink } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-
-
-function convertStringToObject(str: string): { city: string, country: string } {
-    console.log(str);
-    if (str !== undefined) {
-        const [city, ...countryArr] = str.split(', ');
-        const country = countryArr.join(', ');
-        return { city, country };
-    }
-    return { city: "", country: "" };
-}
 
 function createGetRequestUrl(variable1: string, variable2: string, variable3: string, variable4: string, variable5: Dayjs|null, variable6: Dayjs|null, variable7: Dayjs|null, variable8: Dayjs|null, assigneeId: number) {
     let url = protectedResources.apiLisQuotes.endPoint+'/Request?';
@@ -78,27 +61,19 @@ function MyRequests() {
     const [load, setLoad] = useState<boolean>(true);
     const [currentUser, setCurrentUser] = useState<any>();
     const [status, setStatus] = useState<string>("");
-    const [cargoType, setCargoType] = useState<string>("");
     const [packingType, setPackingType] = useState<string>("");
-    const [departureTown, setDepartureTown] = useState<any>(null);
-    const [arrivalTown, setArrivalTown] = useState<any>(null);
     const [departure, setDeparture] = useState<string>("");
     const [arrival, setArrival] = useState<string>("");
     const [createdDateStart, setCreatedDateStart] = useState<Dayjs | null>(null);
     const [createdDateEnd, setCreatedDateEnd] = useState<Dayjs | null>(null);
     const [updatedDateStart, setUpdatedDateStart] = useState<Dayjs | null>(null);
     const [updatedDateEnd, setUpdatedDateEnd] = useState<Dayjs | null>(null);
-    const [assignees, setAssignees] = useState<any>(null);
     //let { search } = useParams();
     const { instance, accounts } = useMsal();
     const account = useAccount(accounts[0] || {});
     
     const context = useAuthorizedBackendApi();
     
-    const handleChangeCargoType = (event: { target: { value: string } }) => {
-        setCargoType(event.target.value);
-    };
-
     const handleChangePackingType = (event: { target: { value: string } }) => {
         setPackingType(event.target.value);
     };
@@ -140,7 +115,6 @@ function MyRequests() {
             const response = await (context as BackendService<any>).getSingle(protectedResources.apiLisQuotes.endPoint+"/Assignee");
             if (response !== null && response.code !== undefined) {
                 if (response.code === 200) {
-                    setAssignees(response.data);
                     setCurrentUser(response.data.find((elm: any) => elm.email === account?.username));
 
                     // Then I can load requests
@@ -166,13 +140,13 @@ function MyRequests() {
                     }
                     else {
                         setLoad(false);
-                        enqueueSnackbar("Error during the loading of the data", { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                        enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
                     }
                 }  
             }
             else {
                 setLoad(false);
-                enqueueSnackbar("We cant find a request assigned to you", { variant: "warning", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                enqueueSnackbar(t('cantFindRequestAssigned'), { variant: "warning", anchorOrigin: { horizontal: "right", vertical: "top"} });
             }
         }
     }
@@ -190,7 +164,7 @@ function MyRequests() {
                 }
                 else {
                     setLoad(false);
-                    enqueueSnackbar("Error during the loading of the data.", { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                    enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
                 }
             }  
         }
@@ -338,7 +312,7 @@ function MyRequests() {
                                     )
                                 })
                             }
-                        </List> : <Typography variant="subtitle1" px={5} my={3}>No requests have been found.</Typography>
+                        </List> : <Typography variant="subtitle1" px={5} my={3}>{t('noRequests')}</Typography>
                     : <Skeleton sx={{ mt: 3 }} />
                 }
                 

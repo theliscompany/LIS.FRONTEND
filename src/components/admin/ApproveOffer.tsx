@@ -97,11 +97,11 @@ function ApproveOffer(props: any) {
 
             const data = await (context as BackendService<any>).put(protectedResources.apiLisOffer.endPoint+"/QuoteOffer/"+id+"/approval?newStatus=Accepted&comment="+details, body);
             if (data?.status === 200) {
-                enqueueSnackbar("Your price offer has been approved with success.", { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                enqueueSnackbar(t('priceOfferApproved'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
                 loadOffer();
             }
             else {
-                enqueueSnackbar("An error happened during the operation.", { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
             }
         }
     }
@@ -115,11 +115,11 @@ function ApproveOffer(props: any) {
 
             const data = await (context as BackendService<any>).put(protectedResources.apiLisOffer.endPoint+"/QuoteOffer/"+id+"/approval?newStatus=Rejected", body);
             if (data?.status === 200) {
-                enqueueSnackbar("Your price offer has been rejected with success.", { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                enqueueSnackbar(t('priceOfferRejected'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
                 loadOffer();
             }
             else {
-                enqueueSnackbar("An error happened during the operation.", { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
             }
         }
     }
@@ -217,7 +217,7 @@ function ApproveOffer(props: any) {
                                             <Box sx={{ my: 2 }}>{params.row.loadingPort}</Box>
                                         );
                                     }, width: 175 },
-                                    { field: 'freeTime', headerName: t('freeTime'), valueFormatter: (params: GridValueFormatterParams) => `${params.value || ''} days`, width: 125 },
+                                    { field: 'freeTime', headerName: t('freeTime'), valueFormatter: (params: GridValueFormatterParams) => `${params.value || ''} `+t('days'), width: 125 },
                                     { field: 'multiStop', headerName: t('multiStop'), valueGetter: (params: GridValueGetterParams) => `${params.row.multiStop || ''} ${params.row.currency}` },
                                     { field: 'overtimeTariff', headerName: t('overtimeTariff'), valueGetter: (params: GridValueGetterParams) => `${params.row.overtimeTariff || ''} ${params.row.currency}` },
                                     { field: 'unitTariff', headerName: t('unitTariff'), valueGetter: (params: GridValueGetterParams) => `${params.row.unitTariff || ''} ${params.row.currency}` },

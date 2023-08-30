@@ -2,11 +2,11 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { AuthenticationResult } from '@azure/msal-browser';
 import { useAccount, useMsal } from '@azure/msal-react';
-import { Typography, Box, Grid, TableCell, TableHead, Paper, Table, TableBody, TableContainer, TableRow, Chip, IconButton, Button, DialogContent, DialogActions } from '@mui/material';
+import { Typography, Box, Grid, TableCell, TableHead, Table, TableBody, TableRow, Chip, IconButton, Button, DialogContent, DialogActions } from '@mui/material';
 import Skeleton from '@mui/material/Skeleton';
 import { SnackbarProvider, enqueueSnackbar } from 'notistack';
 import { useAuthorizedBackendApi } from '../../api/api';
-import { pricingRequest, protectedResources, transportRequest } from '../../authConfig';
+import { protectedResources, transportRequest } from '../../authConfig';
 import { BackendService } from '../../services/fetch';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -107,12 +107,12 @@ function PriceOffers() {
             const response = await (context as any).delete(protectedResources.apiLisOffer.endPoint+"/QuoteOffer/"+id);
             if (response !== null && response.code !== undefined) {
                 if (response.code === 200) {
-                    enqueueSnackbar("The offer has been deleted with success.", { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                    enqueueSnackbar(t('offerDeleted'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
                     setModal(false);
                     getPriceOffers();
                 }
                 else {
-                    enqueueSnackbar("An error happened during this operation.", { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                    enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
                 }
             }  
         }
@@ -195,15 +195,15 @@ function PriceOffers() {
                     fullWidth
                 >
                     <BootstrapDialogTitle id="custom-dialog-title" onClose={() => setModal(false)}>
-                        <b>Confirm the deletion</b>
+                        <b>{t('confirmDeletion')}</b>
                     </BootstrapDialogTitle>
                     <DialogContent dividers>
                         <Typography variant="subtitle1" gutterBottom px={2}>
-                            Are you sure you want to delete this offer? This operation cant be cancelled.
+                            {t('areYouSureDelete')}
                         </Typography>
                     </DialogContent>
                     <DialogActions>
-                        <Button variant="contained" color="secondary" className="mr-3" onClick={() => { deleteOffer(currentId); }} sx={{ textTransform: "none" }}>Delete</Button>
+                        <Button variant="contained" color="secondary" className="mr-3" onClick={() => { deleteOffer(currentId); }} sx={{ textTransform: "none" }}>{t('delete')}</Button>
                         <Button variant="contained" onClick={() => setModal(false)} sx={buttonCloseStyles}>{t('close')}</Button>
                     </DialogActions>
                 </BootstrapDialog>

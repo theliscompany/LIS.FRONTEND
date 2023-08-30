@@ -1,16 +1,12 @@
-import { Box, Button, Chip, Grid, IconButton, InputLabel, Paper, Skeleton, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@mui/material';
+import { Box, Button, Chip, Grid, InputLabel, Skeleton, Table, TableBody, TableCell, TableHead, TableRow, Typography } from '@mui/material';
 import { useEffect, useState } from 'react';
 import '../../App.css';
-import { BootstrapInput, DarkTooltip, datetimeStyles, inputLabelStyles } from '../../misc/styles';
+import { BootstrapInput, datetimeStyles, inputLabelStyles } from '../../misc/styles';
 import { enqueueSnackbar, SnackbarProvider } from 'notistack';
-import AssignmentIndIcon from '@mui/icons-material/AssignmentInd';
-import AssignmentReturnIcon from '@mui/icons-material/AssignmentReturn';
 import SearchIcon from '@mui/icons-material/Search';
-import { graphRequest, protectedResources } from '../../authConfig';
+import { protectedResources } from '../../authConfig';
 import { useAuthorizedBackendApi } from '../../api/api';
 import { BackendService } from '../../services/fetch';
-import { useAccount, useMsal } from '@azure/msal-react';
-import { AuthenticationResult } from '@azure/msal-browser';
 import { Link } from 'react-router-dom';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DateTimePicker, LocalizationProvider } from '@mui/x-date-pickers';
@@ -84,7 +80,7 @@ function Histories(props: any) {
                 }
                 else {
                     setLoad(false);
-                    enqueueSnackbar("Error during the loading of the data.", { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                    enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
                 }
             }  
         }

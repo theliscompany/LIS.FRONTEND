@@ -2,7 +2,6 @@ import * as React from 'react';
 import Box from '@mui/material/Box';
 import MuiDrawer from '@mui/material/Drawer';
 import AppBar from '@mui/material/AppBar';
-import CssBaseline from '@mui/material/CssBaseline';
 import Toolbar from '@mui/material/Toolbar';
 import Grid from '@mui/material/Grid';
 import List from '@mui/material/List';
@@ -12,39 +11,32 @@ import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
-import SettingsIcon from '@mui/icons-material/Settings';
 import MenuIcon from '@mui/icons-material/Menu';
 import PeopleIcon from '@mui/icons-material/PeopleAltOutlined';
 import AddIcon from '@mui/icons-material/AddCircleOutline';
 import HomeIcon from '@mui/icons-material/Home';
 import FirstPageIcon from '@mui/icons-material/FirstPage';
 import Avatar from '@mui/material/Avatar';
-import Tooltip, { TooltipProps, tooltipClasses } from '@mui/material/Tooltip';
 import MenuItem from '@mui/material/MenuItem';
 import Menu from '@mui/material/Menu';
 import IconButton from '@mui/material/IconButton';
 import Button from '@mui/material/Button';
 import LastPageIcon from '@mui/icons-material/LastPage';
 import AutoFixHighIcon from '@mui/icons-material/AutoFixHigh';
-import AppRegistrationIcon from '@mui/icons-material/AppRegistration';
 import PortraitIcon from '@mui/icons-material/Portrait';
 import GroupsIcon from '@mui/icons-material/Groups';
 import LogoutIcon from '@mui/icons-material/Logout';
 import NotificationsIcon from '@mui/icons-material/Notifications';
-import RequestQuoteIcon from '@mui/icons-material/RequestQuote';
-import { Badge, Container, InputAdornment } from '@mui/material';
+import { Container, InputAdornment } from '@mui/material';
 import { Outlet, NavLink, Link } from 'react-router-dom';
 import { styled, Theme, CSSObject } from '@mui/material/styles';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useAccount, useMsal } from '@azure/msal-react';
 import '../../App.css';
-import { protectedResources } from '../../authConfig';
-import { useAuthorizedBackendApi } from '../../api/api';
-import { BackendService } from '../../services/fetch';
 import { BootstrapInput, DarkTooltip } from '../../misc/styles';
 import Search from '@mui/icons-material/Search';
 
-import { redirect, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
 function stringToColor(string: string) {
@@ -120,9 +112,9 @@ function Layout(props: {children?: React.ReactNode}) {
     const { instance, accounts } = useMsal();
     const [anchorElUser, setAnchorElUser] = useState<null | HTMLElement>(null);
     const [anchorElLang, setAnchorElLang] = useState<null | HTMLElement>(null);
-    const [anchorElNotifications, setAnchorElNotifications] = useState<null | HTMLElement>(null);
+    // const [anchorElNotifications, setAnchorElNotifications] = useState<null | HTMLElement>(null);
     const [open, setOpen] = useState(true);
-    const [notifications, setNotifications] = useState<any>(null);
+    // const [notifications, setNotifications] = useState<any>(null);
     const [searchText, setSearchText] = useState<string>("");
     const account = useAccount(accounts[0] || {});
 
@@ -139,8 +131,6 @@ function Layout(props: {children?: React.ReactNode}) {
     };
 
     const navigate = useNavigate();
-
-    const context = useAuthorizedBackendApi();
 
     const handleLogout = () => {
         instance.logoutRedirect();
@@ -162,13 +152,13 @@ function Layout(props: {children?: React.ReactNode}) {
         setAnchorElLang(null);
     };
 
-    const handleOpenNotificationsMenu = (event: React.MouseEvent<HTMLElement>) => {
-        setAnchorElNotifications(event.currentTarget);
-    };
+    // const handleOpenNotificationsMenu = (event: React.MouseEvent<HTMLElement>) => {
+    //     setAnchorElNotifications(event.currentTarget);
+    // };
 
-    const handleCloseNotificationsMenu = () => {
-        setAnchorElNotifications(null);
-    };
+    // const handleCloseNotificationsMenu = () => {
+    //     setAnchorElNotifications(null);
+    // };
 
     const handleDrawerOpen = () => {
         setOpen(true);
@@ -178,16 +168,16 @@ function Layout(props: {children?: React.ReactNode}) {
         setOpen(false);
     };
 
-    const loadRequests = async () => {
-        if (context) {
-            const response = await (context as BackendService<any>).getSingle(protectedResources.apiLisQuotes.endPoint+"/Request");
-            if (response !== null && response.code !== undefined) {
-                if (response.code === 200) {
-                    setNotifications(response.data.filter((elm: any) => { return elm.status === "EnAttente" }).reverse());
-                }
-            }  
-        }
-    }
+    // const loadRequests = async () => {
+    //     if (context) {
+    //         const response = await (context as BackendService<any>).getSingle(protectedResources.apiLisQuotes.endPoint+"/Request");
+    //         if (response !== null && response.code !== undefined) {
+    //             if (response.code === 200) {
+    //                 setNotifications(response.data.filter((elm: any) => { return elm.status === "EnAttente" }).reverse());
+    //             }
+    //         }  
+    //     }
+    // }
 
     // useEffect(() => {
     //     loadRequests();
@@ -302,7 +292,7 @@ function Layout(props: {children?: React.ReactNode}) {
 
                             <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }} />
                             <Box sx={{ flexGrow: 0 }}>
-                                {
+                                {/* {
                                     notifications != null ?
                                     <React.Fragment>
                                         <DarkTooltip title="Notifications">
@@ -342,7 +332,7 @@ function Layout(props: {children?: React.ReactNode}) {
 
                                     </React.Fragment>
                                     : null
-                                }
+                                } */}
                                 
                                 <DarkTooltip title={t('changeLanguage')}>
                                     <Button sx={{ mr: 3, border: 1, borderColor: "#ced4da", borderRadius: 1, p: 1, width: "125px" }} onClick={handleOpenLangMenu}>
@@ -364,11 +354,11 @@ function Layout(props: {children?: React.ReactNode}) {
                                     onClose={handleCloseLangMenu}
                                 >
                                     <MenuItem dense key={"x1-English"} title="English" onClick={() => { i18n.changeLanguage("en"); handleCloseLangMenu(); }}>
-                                        <img src="/assets/img/flags/flag-en.png" style={{ width: "12px" }} />
+                                        <img src="/assets/img/flags/flag-en.png" style={{ width: "12px" }} alt="flag english" />
                                         <ListItemText primary={"English"} sx={{ ml: 1 }} />
                                     </MenuItem>
                                     <MenuItem dense key={"x1-French"} title="Français" onClick={() => { i18n.changeLanguage("fr"); handleCloseLangMenu(); }}>
-                                        <img src="/assets/img/flags/flag-fr.png" style={{ width: "12px" }} />
+                                        <img src="/assets/img/flags/flag-fr.png" style={{ width: "12px" }} alt="flag french" />
                                         <ListItemText primary={"Français"} sx={{ ml: 1 }} />
                                     </MenuItem>
                                 </Menu>
@@ -394,23 +384,23 @@ function Layout(props: {children?: React.ReactNode}) {
                                         <Typography variant="subtitle2" sx={{ fontWeight: "bolder" }}>{account?.name}</Typography >
                                         <Typography variant="caption">{account?.username}</Typography>
                                     </div>
-                                    <MenuItem dense key={"x1-View Profile"} title="View Profile" onClick={handleCloseUserMenu}>
+                                    <MenuItem dense key={"x1-View Profile"} title={t('viewProfile')} onClick={handleCloseUserMenu}>
                                         <ListItemIcon className="cs-listitemicon">
                                             <PortraitIcon fontSize="small" />
                                         </ListItemIcon>
-                                        <ListItemText primary={"View Profile"} />
+                                        <ListItemText primary={t('viewProfile')} />
                                     </MenuItem>
-                                    <MenuItem dense key={"x1-My Requests"} title="My Requests" component="a" href="/admin/my-requests">
+                                    <MenuItem dense key={"x1-My Requests"} title={t('myRequests')} component="a" href="/admin/my-requests">
                                         <ListItemIcon className="cs-listitemicon">
                                             <AutoFixHighIcon fontSize="small" />
                                         </ListItemIcon>
-                                        <ListItemText primary={"My Requests"} />
+                                        <ListItemText primary={t('myRequests')} />
                                     </MenuItem>
-                                    <MenuItem dense key={"x1-Invite Members"} title="Invite Members" onClick={handleCloseUserMenu}>
+                                    <MenuItem dense key={"x1-Invite Members"} title={t('inviteMembers')} onClick={handleCloseUserMenu}>
                                         <ListItemIcon className="cs-listitemicon">
                                             <GroupsIcon fontSize="small" />
                                         </ListItemIcon>
-                                        <ListItemText primary={"Invite Members"} />
+                                        <ListItemText primary={t('inviteMembers')} />
                                     </MenuItem>
                                     <Divider />
                                     <MenuItem dense key={"x1-Logout"} title="Logout" onClick={handleLogout}>
