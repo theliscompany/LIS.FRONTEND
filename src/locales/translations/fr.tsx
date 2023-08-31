@@ -249,5 +249,6 @@ export const fr = {
   itsEaseFillForm: "C'est simple, il vous suffit de remplir le formulaire et de cliquer sur \"continuer\" en bas à droite pour envoyer une demande de devis.",
   requestSuccessSent: "Votre demande a été envoyée avec succès.",
   searchResultsFor: "Résultats de recherche pour",
-  listRequestsQuote: "Liste des demandes de devis"
+  listRequestsQuote: "Liste des demandes de devis",
+  allRightsReserved: "Tous droits réservés"
 };

@@ -249,5 +249,6 @@ export const en = {
   itsEaseFillForm: "It's ease, just fill in the form and click “continue” at the bottom right to send a request for a quote.",
   requestSuccessSent: "Your request has been sent with success.",
   searchResultsFor: "Search results for",
-  listRequestsQuote: "List of requests for quote"
+  listRequestsQuote: "List of requests for quote",
+  allRightsReserved: "All rights reserved"
 };

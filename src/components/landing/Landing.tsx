@@ -131,7 +131,7 @@ function Landing() {
     }
     
     function validMail(mail: string) {
-        return /^(([^<>()\[\]\.,;:\s@\"]+(\.[^<>()\[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()\.,;\s@\"]+\.{0,1})+([^<>()\.,;:\s@\"]{2,}|[\d\.]+))$/.test(mail);
+        return /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/.test(mail);
     }
   
     const postEmail = async(from: string, to: string, subject: string, htmlContent: string) => {
@@ -379,8 +379,8 @@ function Landing() {
                     </MenuItem>
                 </Menu>
                 
-                <Grid container px={1} sx={{ py: { xs: 2, md: 5 } }}>
-                    <Grid item xs={12} md={12} sx={{ maxWidth: { xs: "280px", md: "915px" }, mt: 5, mb: 0, mx: "auto", backgroundColor: "#fff" }}>
+                <Grid container px={1} sx={{ py: { xs: 2, md: 4 } }}>
+                    <Grid item xs={12} md={12} sx={{ maxWidth: { xs: "280px", md: "915px" }, mt: 4, mb: 0, mx: "auto", backgroundColor: "#fff" }}>
                         <img src={"/assets/img/logo-omnifreight-big.png"} className="logo-front" alt="omnifreight pro" />
                     </Grid>
                 </Grid>

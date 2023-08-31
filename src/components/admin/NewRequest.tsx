@@ -8,7 +8,7 @@ import { enqueueSnackbar, SnackbarProvider } from 'notistack';
 import { protectedResources, transportRequest } from '../../authConfig';
 import { useAuthorizedBackendApi } from '../../api/api';
 import { BackendService } from '../../services/fetch';
-import { MailData } from '../../models/models';
+// import { MailData } from '../../models/models';
 import { useAccount, useMsal } from '@azure/msal-react';
 import { Link } from 'react-router-dom';
 import { AuthenticationResult } from '@azure/msal-browser';
@@ -19,21 +19,21 @@ import { useTranslation } from 'react-i18next';
 // let cargoTypes = ["Container", "Conventional", "RollOnRollOff"];
 
 function validMail(mail: string) {
-    return /^(([^<>()\[\]\.,;:\s@\"]+(\.[^<>()\[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()\.,;\s@\"]+\.{0,1})+([^<>()\.,;:\s@\"]{2,}|[\d\.]+))$/.test(mail);
+    return /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/.test(mail);
 }
 
 function NewRequest(props: any) {
     const [load, setLoad] = useState<boolean>(false);
     const [loadUser, setLoadUser] = useState<boolean>(true);
     const [email, setEmail] = useState<string>("");
-    const [status, setStatus] = useState<string | null>(null);
+    // const [status, setStatus] = useState<string | null>(null);
     const [phone, setPhone] = useState<string>("");
     const [message, setMessage] = useState<string>("");
-    const [cargoType, setCargoType] = useState<string>("0");
+    // const [cargoType, setCargoType] = useState<string>("0");
     const [packingType, setPackingType] = useState<string>("FCL");
     const [clientNumber, setClientNumber] = useState<string>("");
-    const [departurePort, setDeparturePort] = useState<any>(null);
-    const [arrivalPort, setArrivalPort] = useState<any>(null);
+    // const [departurePort, setDeparturePort] = useState<any>(null);
+    // const [arrivalPort, setArrivalPort] = useState<any>(null);
     const [departure, setDeparture] = useState<any>(null);
     const [arrival, setArrival] = useState<any>(null);
     // const [tags, setTags] = useState<MuiChipsInputChip[]>([]);
@@ -59,7 +59,7 @@ function NewRequest(props: any) {
     const [packagesSelection, setPackagesSelection] = useState<any>([]);
     
     const [containers, setContainers] = useState<any>(null);
-    const [ports, setPorts] = useState<any>(null);
+    // const [ports, setPorts] = useState<any>(null);
     const [products, setProducts] = useState<any>(null);
     //let { id } = useParams();
     const { instance, accounts } = useMsal();
@@ -180,21 +180,21 @@ function NewRequest(props: any) {
         }
     }
 
-    const postEmail = async(from: string, to: string, subject: string, htmlContent: string) => {
-        const body: MailData = { from: from, to: to, subject: subject, htmlContent: htmlContent };
-        const data = await (context as BackendService<any>).postForm(protectedResources.apiLisQuotes.endPoint+"/Email", body);
-        console.log(data);
-        if (data?.status === 200) {
-            enqueueSnackbar(t('messageSuccessSent'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
-        }
-        else {
-            enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
-        }
-    }
+    // const postEmail = async(from: string, to: string, subject: string, htmlContent: string) => {
+    //     const body: MailData = { from: from, to: to, subject: subject, htmlContent: htmlContent };
+    //     const data = await (context as BackendService<any>).postForm(protectedResources.apiLisQuotes.endPoint+"/Email", body);
+    //     console.log(data);
+    //     if (data?.status === 200) {
+    //         enqueueSnackbar(t('messageSuccessSent'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
+    //     }
+    //     else {
+    //         enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+    //     }
+    // }
 
     function sendQuotationForm() {
         if (phone !== "" && email !== "" && arrival !== null && departure !== null) {
-            if (email === "" || email !== "" && validMail(email)) {
+            if (email === "" || (email !== "" && validMail(email))) {
                 setLoad(true);
                 var auxUnits = [];
                 if (packingType === "Breakbulk/LCL") {
