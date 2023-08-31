@@ -350,7 +350,7 @@ function Landing() {
                         position: "absolute",
                         '&:hover': { background: "#fff" },
                         top: { xs: "20px", md: "26px"},
-                        right: { xs: "0px", md: "70px"}
+                        right: { xs: "140px", md: "70px"}
                     }} onClick={handleOpenLangMenu}
                 >
                     <Box sx={{ display: "flex", flexDirection: "row", justifyContent: "center", alignItems: "center" }}>
