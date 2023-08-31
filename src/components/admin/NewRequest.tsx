@@ -132,7 +132,7 @@ function NewRequest(props: any) {
     
     useEffect(() => {
         getContainers();
-        getProducts();
+        getProducts(); 
         getAssignees();
     }, [instance, account, context]);
 
