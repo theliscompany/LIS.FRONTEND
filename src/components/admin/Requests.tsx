@@ -8,12 +8,11 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 import React, { useEffect } from 'react';
-import { NavLink, Link } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 import '../../App.css';
 import { Button, Chip, Grid, InputLabel, NativeSelect, Skeleton } from '@mui/material';
 import PlaceIcon from '@mui/icons-material/Place';
 import SearchIcon from '@mui/icons-material/Search';
-import AutocompleteSearch from '../shared/AutocompleteSearch';
 import { BootstrapInput, datetimeStyles, inputLabelStyles } from '../../misc/styles';
 import { protectedResources } from '../../authConfig';
 import { enqueueSnackbar, SnackbarProvider } from 'notistack';
@@ -60,10 +59,9 @@ function Requests() {
     const [requests, setRequests] = React.useState<any>(null);
     const [load, setLoad] = React.useState<boolean>(true);
     const [status, setStatus] = React.useState<string>("");
-    const [cargoType, setCargoType] = React.useState<string>("");
     const [packingType, setPackingType] = React.useState<string>("");
-    const [departureTown, setDepartureTown] = React.useState<any>(null);
-    const [arrivalTown, setArrivalTown] = React.useState<any>(null);
+    // const [departureTown, setDepartureTown] = React.useState<any>(null);
+    // const [arrivalTown, setArrivalTown] = React.useState<any>(null);
     const [departure, setDeparture] = React.useState<string>("");
     const [arrival, setArrival] = React.useState<string>("");
     const [createdDateStart, setCreatedDateStart] = React.useState<Dayjs | null>(null);
@@ -76,10 +74,6 @@ function Requests() {
 
     const { t } = useTranslation();
     
-    const handleChangeCargoType = (event: { target: { value: string } }) => {
-        setPackingType(event.target.value);
-    };
-
     const handleChangePackingType = (event: { target: { value: string } }) => {
         setPackingType(event.target.value);
     };
@@ -124,7 +118,7 @@ function Requests() {
                 }
                 else {
                     setLoad(false);
-                    enqueueSnackbar("Error during the loading of the data", { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                    enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
                 }
             }  
         }
@@ -142,7 +136,7 @@ function Requests() {
                 }
                 else {
                     setLoad(false);
-                    enqueueSnackbar("Error during the loading of the data.", { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                    enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
                 }
             }  
         }
@@ -292,7 +286,7 @@ function Requests() {
                                         )
                                     })
                                 }
-                            </List> : <Typography variant="subtitle1" my={3}>Error during the loading of the data</Typography>
+                            </List> : <Typography variant="subtitle1" my={3}>{t('errorHappened')}</Typography>
                         : <Skeleton sx={{ mt: 3 }} />
                     }
                     </Grid>

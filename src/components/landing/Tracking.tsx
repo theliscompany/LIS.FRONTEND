@@ -1,16 +1,19 @@
-import { Alert, Box, Button, Chip, Divider, Grid, InputLabel, List, ListItem, ListItemText, Typography } from '@mui/material';
+import { Alert, Box, Button, Chip, Divider, Grid, List, ListItem, ListItemText, Typography } from '@mui/material';
 import Skeleton from '@mui/material/Skeleton';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import '../../App.css';
 import { protectedResources } from '../../authConfig';
-import { BootstrapInput, inputLabelStyles } from '../../misc/styles';
+import { BootstrapInput } from '../../misc/styles';
 import { useParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 function Tracking() {
     const { id } = useParams();
     const [trackingNumber, setTrackingNumber] = useState<string>(id !== undefined ? id : "");
     const [load, setLoad] = useState<boolean>(false);
     const [trackingData, setTrackingData] = useState<any>(null);
+
+    const { t } = useTranslation();
 
     useEffect(() => {
         if (id !== undefined) {
@@ -47,13 +50,13 @@ function Tracking() {
         <Box sx={{ maxWidth: "lg", margin: "0 auto" }}>
             <Grid container my={5} sx={{ px: { md: 0, xs: 2 } }}>
                 <Grid item xs={12} fontSize={16} my={3}>
-                    <Typography variant="h4" fontWeight="bold">Request tracking</Typography>
+                    <Typography variant="h4" fontWeight="bold">{t('requestTracking')}</Typography>
                 </Grid>
                 <Grid item xs={12} md={6} mt={2}>
-                    <BootstrapInput id="tracking-number" type="text" placeholder="Tracking number" value={trackingNumber} onChange={(e: any) => { setTrackingNumber(e.target.value); }} fullWidth />
+                    <BootstrapInput id="tracking-number" type="text" placeholder={t('trackingNumber')} value={trackingNumber} onChange={(e: any) => { setTrackingNumber(e.target.value); }} fullWidth />
                 </Grid>
                 <Grid item xs={12} md={6} mt={2}>
-                    <Button variant="contained" color={!load ? "primary" : "info"} size="large" className="mr-3" onClick={loadRequest}  sx={{ textTransform: "none", ml: { md: 3, xs: 0 } }}>Track my request</Button>
+                    <Button variant="contained" color={!load ? "primary" : "info"} size="large" className="mr-3" onClick={loadRequest}  sx={{ textTransform: "none", ml: { md: 3, xs: 0 } }}>{t('trackMyRequest')}</Button>
                 </Grid>
                 <Grid item xs={12} md={12} mt={2}>
                     {
@@ -65,40 +68,40 @@ function Tracking() {
                                 <Alert severity="info">Your request has been assigned to the agent : {trackingData.assignee.name}. You can contact her/him at this email : {trackingData.assignee.email} </Alert> : <Alert severity="warning">There is no agent assigned for the moment. For questions, please contact contact-assign@omnifreight.eu </Alert>
                             } */}
                             <Alert severity='info'>
-                                We are working on your request and will revert to you soon with the cost and best options for your shipment.
+                                {t('weAreWorkingOnRequest')}
                             </Alert>
-                            <Typography sx={{ mt: 3 }}>Request status : <Chip size="small" label={trackingData.status} color={trackingData.status === "EnAttente" ? "warning" : trackingData.status === "Valider" ? "success" : "error"} sx={{ ml: 1 }} /> </Typography>
+                            <Typography sx={{ mt: 3 }}>{t('requestStatus')} : <Chip size="small" label={trackingData.status} color={trackingData.status === "EnAttente" ? "warning" : trackingData.status === "Valider" ? "success" : "error"} sx={{ ml: 1 }} /> </Typography>
                             <List sx={{ my: 3, border: "1px #e2e2e2 solid" }} dense>
                                 <ListItem>
-                                    <ListItemText primary="Phone number" secondary={trackingData.requestQuoteData.whatsapp} />
+                                    <ListItemText primary={t(('WhatsappNumber'))} secondary={trackingData.requestQuoteData.whatsapp} />
                                 </ListItem>
                                 <Divider />
                                 <ListItem>
-                                    <ListItemText primary="Email address" secondary={trackingData.requestQuoteData.email} />
+                                    <ListItemText primary={t('email')} secondary={trackingData.requestQuoteData.email} />
                                 </ListItem>
                                 <Divider />
                                 <ListItem>
-                                    <ListItemText primary="Departure location" secondary={trackingData.requestQuoteData.departure} />
+                                    <ListItemText primary={t('departure')} secondary={trackingData.requestQuoteData.departure} />
                                 </ListItem>
                                 <Divider />
                                 <ListItem>
-                                    <ListItemText primary="Arrival location" secondary={trackingData.requestQuoteData.arrival} />
+                                    <ListItemText primary={t('arrival')} secondary={trackingData.requestQuoteData.arrival} />
                                 </ListItem>
                                 <Divider />
                                 <ListItem>
-                                    <ListItemText primary="Cargo Type" secondary={trackingData.requestQuoteData.cargoType} />
+                                    <ListItemText primary={t('cargoType')} secondary={trackingData.requestQuoteData.cargoType} />
                                 </ListItem>
                                 <Divider />
                                 <ListItem>
-                                    <ListItemText primary="Quantity" secondary={trackingData.requestQuoteData.quantity} />
+                                    <ListItemText primary={t('quantity')} secondary={trackingData.requestQuoteData.quantity} />
                                 </ListItem>
                                 <Divider />
                                 <ListItem>
-                                    <ListItemText primary="Detail" secondary={trackingData.requestQuoteData.detail} />
+                                    <ListItemText primary={t('detail')} secondary={trackingData.requestQuoteData.detail} />
                                 </ListItem>
                                 <Divider />
                                 <ListItem>
-                                    <ListItemText primary="Request date" secondary={(new Date(trackingData.requestQuoteData.createdAt)).toLocaleString()} />
+                                    <ListItemText primary={t('requestDate')} secondary={(new Date(trackingData.requestQuoteData.createdAt)).toLocaleString()} />
                                 </ListItem>
                             </List>
                             {/* <Typography sx={{ mt: 3 }}>You have received the following messages : </Typography>
@@ -115,31 +118,9 @@ function Tracking() {
                                 }
                             </List> */}
                         </Box> 
-                        : <Typography sx={{ mt: 3 }}>The tracking code is not defined. </Typography>
+                        : <Typography sx={{ mt: 3 }}>{t('trackingCodeNotDefined')}</Typography>
                     }
                 </Grid>
-                {/* <Grid item xs={12} md={12} mt={2}>
-                    {
-                        load ? <Skeleton sx={{ mt: 3 }} /> : 
-                        trackingData !== null && trackingData !== undefined ? 
-                        <Box>
-                            <Typography sx={{ mt: 3 }}>You have received the following messages : </Typography>
-                            <List sx={{ my: 3, border: "1px #e2e2e2 solid" }} dense>
-                                {
-                                    trackingData.notes.map((elm: any) => {
-                                        return <>
-                                            <ListItem>
-                                                <ListItemText primary={"Date : " + (new Date(elm.createdAt)).toLocaleString()} secondary={elm.content} />
-                                            </ListItem>
-                                            <Divider />
-                                        </>;
-                                    })
-                                }
-                            </List>
-                        </Box> 
-                        : null
-                    }
-                </Grid> */}
             </Grid>
         </Box>
     );

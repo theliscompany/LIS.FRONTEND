@@ -8,8 +8,7 @@ import { enqueueSnackbar, SnackbarProvider } from 'notistack';
 import { protectedResources, transportRequest } from '../../authConfig';
 import { useAuthorizedBackendApi } from '../../api/api';
 import { BackendService } from '../../services/fetch';
-import { MuiChipsInput, MuiChipsInputChip } from 'mui-chips-input';
-import { MailData } from '../../models/models';
+// import { MailData } from '../../models/models';
 import { useAccount, useMsal } from '@azure/msal-react';
 import { Link } from 'react-router-dom';
 import { AuthenticationResult } from '@azure/msal-browser';
@@ -17,31 +16,28 @@ import AutocompleteSearch from '../shared/AutocompleteSearch';
 import { useTranslation } from 'react-i18next';
 
 //let statusTypes = ["EnAttente", "Valider", "Rejeter"];
-let cargoTypes = ["Container", "Conventional", "RollOnRollOff"];
+// let cargoTypes = ["Container", "Conventional", "RollOnRollOff"];
 
 function validMail(mail: string) {
-    return /^(([^<>()\[\]\.,;:\s@\"]+(\.[^<>()\[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()\.,;\s@\"]+\.{0,1})+([^<>()\.,;:\s@\"]{2,}|[\d\.]+))$/.test(mail);
+    return /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/.test(mail);
 }
 
 function NewRequest(props: any) {
     const [load, setLoad] = useState<boolean>(false);
     const [loadUser, setLoadUser] = useState<boolean>(true);
     const [email, setEmail] = useState<string>("");
-    const [status, setStatus] = useState<string | null>(null);
+    // const [status, setStatus] = useState<string | null>(null);
     const [phone, setPhone] = useState<string>("");
     const [message, setMessage] = useState<string>("");
-    const [cargoType, setCargoType] = useState<string>("0");
+    // const [cargoType, setCargoType] = useState<string>("0");
     const [packingType, setPackingType] = useState<string>("FCL");
     const [clientNumber, setClientNumber] = useState<string>("");
-    const [departurePort, setDeparturePort] = useState<any>(null);
-    const [arrivalPort, setArrivalPort] = useState<any>(null);
+    // const [departurePort, setDeparturePort] = useState<any>(null);
+    // const [arrivalPort, setArrivalPort] = useState<any>(null);
     const [departure, setDeparture] = useState<any>(null);
     const [arrival, setArrival] = useState<any>(null);
     // const [tags, setTags] = useState<MuiChipsInputChip[]>([]);
     const [tags, setTags] = useState<any>([]);
-    const [modal, setModal] = useState<boolean>(false);
-    const [mailSubject, setMailSubject] = useState<string>("");
-    const [mailContent, setMailContent] = useState<string>("");
     const [currentUser, setCurrentUser] = useState<any>(null);
     const [assignedManager, setAssignedManager] = useState<string>("null");
     const [assignees, setAssignees] = useState<any>(null);
@@ -63,7 +59,7 @@ function NewRequest(props: any) {
     const [packagesSelection, setPackagesSelection] = useState<any>([]);
     
     const [containers, setContainers] = useState<any>(null);
-    const [ports, setPorts] = useState<any>(null);
+    // const [ports, setPorts] = useState<any>(null);
     const [products, setProducts] = useState<any>(null);
     //let { id } = useParams();
     const { instance, accounts } = useMsal();
@@ -73,10 +69,6 @@ function NewRequest(props: any) {
 
     const { t } = useTranslation();
     
-    const handleChangeCargoType = (event: { target: { value: string } }) => {
-        setCargoType(event.target.value);
-    };
-
     const handleChangePackingType = (event: { target: { value: string } }) => {
         setPackingType(event.target.value);
     };
@@ -84,33 +76,6 @@ function NewRequest(props: any) {
     const handleChangeAssignedManager = (event: { target: { value: string } }) => {
         setAssignedManager(event.target.value);
     };
-    
-    const getPorts = async () => {
-        if (context && account) {
-            const token = await instance.acquireTokenSilent({
-                scopes: transportRequest.scopes,
-                account: account
-            })
-            .then((response: AuthenticationResult) => {
-                return response.accessToken;
-            })
-            .catch(() => {
-                return instance.acquireTokenPopup({
-                    ...transportRequest,
-                    account: account
-                    }).then((response) => {
-                        return response.accessToken;
-                    });
-                }
-            );
-            
-            const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Port/Ports", token);
-            console.log(response);
-            if (response !== null && response !== undefined) {
-                setPorts(response);
-            }  
-        }
-    }
     
     const getProducts = async () => {
         if (context && account) {
@@ -166,7 +131,6 @@ function NewRequest(props: any) {
     }
     
     useEffect(() => {
-        getPorts();
         getContainers();
         getProducts();
         getAssignees();
@@ -178,18 +142,18 @@ function NewRequest(props: any) {
                 const response = await (context as BackendService<any>).put(protectedResources.apiLisQuotes.endPoint+"/Assignee/"+idQuote+"/"+assignedManager, []);
                 if (response !== null) {
                     setLoad(false);
-                    enqueueSnackbar("Your request has been created and assigned with success.", { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                    enqueueSnackbar(t('requestCreatedAssigned'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
                     //enqueueSnackbar("The manager has been assigned to this request.", { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
                 }
                 else {
                     setLoad(false);
-                    enqueueSnackbar("An error happened during the operation.", { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                    enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
                 }
             }
         }
         else {
             setLoad(false);
-            enqueueSnackbar("Your request has been created  .", { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+            enqueueSnackbar(t('requestCreated'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
         }
     }
 
@@ -216,24 +180,21 @@ function NewRequest(props: any) {
         }
     }
 
-    const postEmail = async(from: string, to: string, subject: string, htmlContent: string) => {
-        const body: MailData = { from: from, to: to, subject: subject, htmlContent: htmlContent };
-        const data = await (context as BackendService<any>).postForm(protectedResources.apiLisQuotes.endPoint+"/Email", body);
-        console.log(data);
-        if (data?.status === 200) {
-            enqueueSnackbar("The message has been successfully sent.", { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
-            setMailSubject("");
-            setMailContent("");
-            setModal(false);
-        }
-        else {
-            enqueueSnackbar("An error occured. Please refresh the page or check your internet connection.", { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
-        }
-    }
+    // const postEmail = async(from: string, to: string, subject: string, htmlContent: string) => {
+    //     const body: MailData = { from: from, to: to, subject: subject, htmlContent: htmlContent };
+    //     const data = await (context as BackendService<any>).postForm(protectedResources.apiLisQuotes.endPoint+"/Email", body);
+    //     console.log(data);
+    //     if (data?.status === 200) {
+    //         enqueueSnackbar(t('messageSuccessSent'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
+    //     }
+    //     else {
+    //         enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+    //     }
+    // }
 
     function sendQuotationForm() {
         if (phone !== "" && email !== "" && arrival !== null && departure !== null) {
-            if (email === "" || email !== "" && validMail(email)) {
+            if (email === "" || (email !== "" && validMail(email))) {
                 setLoad(true);
                 var auxUnits = [];
                 if (packingType === "Breakbulk/LCL") {
@@ -289,20 +250,20 @@ function NewRequest(props: any) {
                     }
                     else {
                         setLoad(false);
-                        enqueueSnackbar("An error occured. Please refresh the page or check your internet connection.", { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                        enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
                     }
                 })
                 .catch(error => { 
                     setLoad(false);
-                    enqueueSnackbar("An error happened when we were sending your request.", { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                    enqueueSnackbar(t('errorHappenedRequest'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
                 });        
             }
             else {
-                enqueueSnackbar("The email is not valid, please verify it.", { variant: "info", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                enqueueSnackbar(t('emailNotValid'), { variant: "info", anchorOrigin: { horizontal: "right", vertical: "top"} });
             }
         }
         else {
-            enqueueSnackbar("One or many fields are empty, please verify the form.", { variant: "info", anchorOrigin: { horizontal: "right", vertical: "top"} });
+            enqueueSnackbar(t('fieldsEmpty'), { variant: "info", anchorOrigin: { horizontal: "right", vertical: "top"} });
         }
     }
 
@@ -571,7 +532,7 @@ function NewRequest(props: any) {
                                             setUnitName(""); setUnitQuantity(1); setUnitDimensions(""); setUnitWeight(0);
                                         } 
                                         else {
-                                            enqueueSnackbar("You need to fill the fields unit name, weight and dimensions.", { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                                            enqueueSnackbar(t('needFillFields'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
                                         }
                                     }} 
                                 >

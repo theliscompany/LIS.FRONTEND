@@ -1,4 +1,4 @@
-import { Alert, Box, Chip, Grid, IconButton, Paper, Skeleton, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@mui/material';
+import { Alert, Box, Chip, Grid, IconButton, Skeleton, Table, TableBody, TableCell, TableHead, TableRow, Typography } from '@mui/material';
 import { useEffect, useState } from 'react';
 import '../../App.css';
 import { DarkTooltip } from '../../misc/styles';
@@ -50,21 +50,21 @@ function UsersAssignment(props: any) {
         }
     }
 
-    const resetAssignees = async () => {
-        if (context) {
-            setLoad(true);
-            const response = await (context as BackendService<any>).getSingle(protectedResources.apiLisQuotes.endPoint+"/Assignee");
-            if (response !== null && response.code !== undefined) {
-                if (response.code === 200) {
-                    //console.log(response);
-                    setAssignees(response.data);
-                }
-                else {
-                    setLoad(false);
-                }
-            }  
-        }
-    }
+    // const resetAssignees = async () => {
+    //     if (context) {
+    //         setLoad(true);
+    //         const response = await (context as BackendService<any>).getSingle(protectedResources.apiLisQuotes.endPoint+"/Assignee");
+    //         if (response !== null && response.code !== undefined) {
+    //             if (response.code === 200) {
+    //                 //console.log(response);
+    //                 setAssignees(response.data);
+    //             }
+    //             else {
+    //                 setLoad(false);
+    //             }
+    //         }  
+    //     }
+    // }
 
     const getUsersFromAAD = (token: string) => {
         fetch("https://graph.microsoft.com/v1.0/users", {
@@ -123,7 +123,7 @@ function UsersAssignment(props: any) {
                 if (response !== null && response.code !== undefined) {
                     if (response.code === 200) {
                         //console.log(response);
-                        enqueueSnackbar("Your operation has been done with success.", { variant: "info", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                        enqueueSnackbar(t('operationSuccess'), { variant: "info", anchorOrigin: { horizontal: "right", vertical: "top"} });
 
                         // Here i refresh the assignees (to do a lot cleaner)
                         const response2 = await (context as BackendService<any>).getSingle(protectedResources.apiLisQuotes.endPoint+"/Assignee");
@@ -132,7 +132,7 @@ function UsersAssignment(props: any) {
                                 setAssignees(response2.data);
                             }
                             else {
-                                enqueueSnackbar("An error occured during the refresh of your operation.", { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                                enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
                             }
                         }  
                     }
@@ -153,7 +153,7 @@ function UsersAssignment(props: any) {
             const response = await (context as BackendService<any>).post(protectedResources.apiLisQuotes.endPoint+"/Assignee", content);
             if (response !== null && response.status === 201) {
                 //console.log(response);
-                enqueueSnackbar("Your new assignee has been created with success.", { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                enqueueSnackbar(t('assigneeCreatedSuccess'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
 
                 // Here i refresh the assignees (to do a lot cleaner)
                 const response2 = await (context as BackendService<any>).getSingle(protectedResources.apiLisQuotes.endPoint+"/Assignee");
@@ -162,12 +162,12 @@ function UsersAssignment(props: any) {
                         setAssignees(response2.data);
                     }
                     else {
-                        enqueueSnackbar("An error occured during the refresh of your operation.", { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                        enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
                     }
                 }  
             }
             else {
-                enqueueSnackbar("An error occured. Please refresh the page or check your internet connection.", { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
             }
         }
     }

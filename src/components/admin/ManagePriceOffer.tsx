@@ -122,10 +122,10 @@ function ManagePriceOffer(props: any) {
 
       const data = await (context as BackendService<any>).put(protectedResources.apiLisOffer.endPoint+"/QuoteOffer/"+id, body);
       if (data?.status === 200) {
-        enqueueSnackbar("Your price offer has been updated with success.", { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
+        enqueueSnackbar(t('priceOfferUpdated'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
       }
       else {
-        enqueueSnackbar("An error happened during the operation.", { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+        enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
       }
     }
   }
@@ -139,11 +139,11 @@ function ManagePriceOffer(props: any) {
 
       const data = await (context as BackendService<any>).put(protectedResources.apiLisOffer.endPoint+"/QuoteOffer/"+id+"/status?newStatus=Accepted", body);
       if (data?.status === 200) {
-        enqueueSnackbar("Your price offer has been approved with success.", { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
+        enqueueSnackbar(t('priceOfferApproved'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
         loadOffer();
       }
       else {
-        enqueueSnackbar("An error happened during the operation.", { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+        enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
       }
     }
   }
@@ -157,11 +157,11 @@ function ManagePriceOffer(props: any) {
 
       const data = await (context as BackendService<any>).put(protectedResources.apiLisOffer.endPoint+"/QuoteOffer/"+id+"/status?newStatus=Rejected", body);
       if (data?.status === 200) {
-        enqueueSnackbar("Your price offer has been rejected with success.", { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
+        enqueueSnackbar(t('priceOfferRejected'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
         loadOffer();
       }
       else {
-        enqueueSnackbar("An error happened during the operation.", { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+        enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
       }
     }
   }
@@ -183,13 +183,13 @@ return (
     <div style={{ background: "#fff", borderTopLeftRadius: 20, borderTopRightRadius: 20 }}>
       <SnackbarProvider />
       <Box py={2.5}>
-          <Typography variant="h5" sx={{mt: {xs: 4, md: 1.5, lg: 1.5 }}} mx={5}><b>Manage offer N° {id}</b></Typography>
+          <Typography variant="h5" sx={{mt: {xs: 4, md: 1.5, lg: 1.5 }}} mx={5}><b>{t('manageOffer')} N° {id}</b></Typography>
           <Box>
             {
               !load ? 
               <Grid container spacing={2} mt={1} px={5}>
                 <Grid item xs={12}>
-                    <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>Selected sea freight</Typography>
+                    <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>{t('selectedSeafreight')}</Typography>
                     <DataGrid
                         rows={[offer.seaFreight]}
                         columns={
@@ -197,8 +197,8 @@ return (
                             { field: 'carrierName', headerName: t('carrier'), width: 175 },
                             { field: 'carrierAgentName', headerName: t('carrierAgent'), width: 175 },
                             { field: 'departurePortName', headerName: t('departurePort'), width: 125 },
-                            { field: 'frequency', headerName: t('frequency'), valueFormatter: (params: GridValueFormatterParams) => `${params.value || ''} / day`, },
-                            { field: 'transitTime', headerName: t('transitTime'), valueFormatter: (params: GridValueFormatterParams) => `${params.value || ''} days` },
+                            { field: 'frequency', headerName: t('frequency'), valueFormatter: (params: GridValueFormatterParams) => `${params.value || ''} / `+t('day'), },
+                            { field: 'transitTime', headerName: t('transitTime'), valueFormatter: (params: GridValueFormatterParams) => `${params.value || ''} `+t('days') },
                             { field: 'currency', headerName: t('prices'), renderCell: (params: GridRenderCellParams) => {
                                 return (
                                     <Box sx={{ my: 1, mr: 1 }}>
@@ -222,7 +222,7 @@ return (
                 {
                     offer.haulage !== null && offer.haulage !== undefined ? 
                     <Grid item xs={12}>
-                        <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>Selected haulage</Typography>
+                        <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>{t('selectedHaulage')}</Typography>
                         <DataGrid
                             rows={[offer.haulage]}
                             columns={
@@ -233,7 +233,7 @@ return (
                                         <Box sx={{ my: 2 }}>{params.row.loadingPort}</Box>
                                     );
                                 }, width: 175 },
-                                { field: 'freeTime', headerName: t('freeTime'), valueFormatter: (params: GridValueFormatterParams) => `${params.value || ''} days`, width: 125 },
+                                { field: 'freeTime', headerName: t('freeTime'), valueFormatter: (params: GridValueFormatterParams) => `${params.value || ''} `+t('days'), width: 125 },
                                 { field: 'multiStop', headerName: t('multiStop'), valueGetter: (params: GridValueGetterParams) => `${params.row.multiStop || ''} ${params.row.currency}` },
                                 { field: 'overtimeTariff', headerName: t('overtimeTariff'), valueGetter: (params: GridValueGetterParams) => `${params.row.overtimeTariff || ''} ${params.row.currency}` },
                                 { field: 'unitTariff', headerName: t('unitTariff'), valueGetter: (params: GridValueGetterParams) => `${params.row.unitTariff || ''} ${params.row.currency}` },
@@ -251,7 +251,7 @@ return (
                 {
                     offer.miscellaneousList !== null && offer.miscellaneousList[0] !== null ? 
                     <Grid item xs={12}>
-                        <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>Selected miscellaneous</Typography>
+                        <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>{t('selectedMisc')}</Typography>
                         <DataGrid
                             density="standard"
                             rows={offer.miscellaneousList}
@@ -282,19 +282,19 @@ return (
                     </Grid> : null
                 }
                 <Grid item xs={12} md={4} sx={{ mt: 2 }}>
-                    <InputLabel htmlFor="margin" sx={inputLabelStyles}>Margin (in %)</InputLabel>
+                    <InputLabel htmlFor="margin" sx={inputLabelStyles}>{t('margin')} (%)</InputLabel>
                     <BootstrapInput id="margin" type="number" value={margin} onChange={(e: any) => setMargin(e.target.value)} fullWidth />
                 </Grid>
                 <Grid item xs={12} md={4} sx={{ mt: 2 }}>
-                    <InputLabel htmlFor="reduction" sx={inputLabelStyles}>Reduction (in %)</InputLabel>
+                    <InputLabel htmlFor="reduction" sx={inputLabelStyles}>{t('reduction')} (%)</InputLabel>
                     <BootstrapInput id="reduction" type="number" value={reduction} onChange={(e: any) => setReduction(e.target.value)} fullWidth />
                 </Grid>
                 <Grid item xs={12} md={4} sx={{ mt: 2 }}>
-                    <InputLabel htmlFor="adding" sx={inputLabelStyles}>Extra Fee (in {offer.seaFreight !== null ? offer.seaFreight.currency : null})</InputLabel>
+                    <InputLabel htmlFor="adding" sx={inputLabelStyles}>{t('extraFee')} ({offer.seaFreight !== null ? offer.seaFreight.currency : null})</InputLabel>
                     <BootstrapInput id="adding" type="number" value={adding} onChange={(e: any) => setAdding(e.target.value)} fullWidth />
                 </Grid>
                 <Grid item xs={12}>
-                    <InputLabel htmlFor="details" sx={inputLabelStyles}>Details of the offer</InputLabel>
+                    <InputLabel htmlFor="details" sx={inputLabelStyles}>{t('detailsOffer')}</InputLabel>
                     <BootstrapInput id="details" type="text" multiline rows={3} value={details} onChange={(e: any) => setDetails(e.target.value)} fullWidth />
                 </Grid>
                 <Grid item xs={12}>
@@ -303,7 +303,6 @@ return (
                         offer.seaFreight !== null ? 
                         <Chip variant="outlined" size="medium"
                             label={"TOTAL PRICE : "+ Number(offer.totalPrice+offer.totalPrice*margin/100-offer.totalPrice*reduction/100+adding*1).toString()+" "+offer.seaFreight.currency}
-                            // label={"TOTAL PRICE : "+offer.totalPrice+" "+offer.seaFreight.currency}
                             sx={{ fontWeight: "bold", fontSize: 16, py: 3 }} 
                         /> : null
                       }
@@ -311,14 +310,14 @@ return (
               </Grid>
               <Grid item xs={12} md={6}>
                 <Alert severity="info">
-                  The status of this offer is : <div>- <strong>{statusLabel(offer.status)}</strong> by Omnifreight</div>
-                  {offer.status === "Accepted" ? <div>- <strong>{offer.clientApproval}</strong> by the client</div> : null}
+                  {t('statusIs')} : <div>- <strong>{statusLabel(offer.status)}</strong> {t('byOmnifreight')}</div>
+                  {offer.status === "Accepted" ? <div>- <strong>{offer.clientApproval}</strong> {t('byClient')}</div> : null}
                 </Alert>
               </Grid>
               <Grid item xs={12} md={6} sx={{ pt: 1.5, display: "flex", alignItems: "center", justifyContent: "end" }}>
-                <Button variant="contained" color="primary" sx={{ mr: 1, textTransform: "none" }} onClick={updateOffer}>Update the offer</Button>
-                <Button variant="contained" color="success" sx={{ mr: 1, textTransform: "none" }} onClick={acceptOffer}>Approve the offer</Button>
-                <Button variant="contained" color="secondary" sx={{ mr: 1, textTransform: "none" }} onClick={rejectOffer}>Reject the offer</Button>
+                <Button variant="contained" color="primary" sx={{ mr: 1, textTransform: "none" }} onClick={updateOffer}>{t('updateOffer')}</Button>
+                <Button variant="contained" color="success" sx={{ mr: 1, textTransform: "none" }} onClick={acceptOffer}>{t('approveOffer')}</Button>
+                <Button variant="contained" color="secondary" sx={{ mr: 1, textTransform: "none" }} onClick={rejectOffer}>{t('rejectOffer')}</Button>
               </Grid>
               </Grid> : <Skeleton sx={{ mx: 5, mt: 3 }} />
             }

@@ -1,17 +1,16 @@
-import { Alert, Autocomplete, Box, Button, Checkbox, Chip, DialogActions, DialogContent, FormControl, FormControlLabel, FormLabel, Grid, IconButton, InputLabel, List, ListItem, ListItemText, MenuItem, NativeSelect, Paper, Radio, RadioGroup, Select, SelectChangeEvent, Skeleton, Step, StepLabel, Stepper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Typography } from '@mui/material';
+import { Alert, Autocomplete, Box, Button, Chip, DialogActions, DialogContent, FormControl, FormControlLabel, FormLabel, Grid, IconButton, InputLabel, ListItem, ListItemText, NativeSelect, Paper, Radio, RadioGroup, Skeleton, Step, StepLabel, Stepper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Typography } from '@mui/material';
 import { MuiTelInput } from 'mui-tel-input';
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import '../../App.css';
 import AutocompleteSearch from '../shared/AutocompleteSearch';
-import { inputLabelStyles, BootstrapInput, BootstrapDialogTitle, BootstrapDialog, buttonCloseStyles, DarkTooltip, tagInputStyles, whiteButtonStyles, datetimeStyles } from '../../misc/styles';
+import { inputLabelStyles, BootstrapInput, BootstrapDialogTitle, BootstrapDialog, buttonCloseStyles, DarkTooltip, whiteButtonStyles, datetimeStyles } from '../../misc/styles';
 import { enqueueSnackbar, SnackbarProvider } from 'notistack';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { pricingRequest, protectedResources, transportRequest } from '../../authConfig';
 import { useAuthorizedBackendApi } from '../../api/api';
 import { BackendService } from '../../services/fetch';
-import { MuiChipsInput, MuiChipsInputChip } from 'mui-chips-input';
-import { MailData, RequestDto } from '../../models/models';
+import { MuiChipsInputChip } from 'mui-chips-input';
 import { DateTimePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { Dayjs } from 'dayjs';
@@ -26,8 +25,8 @@ import { JSON as seaPorts } from 'sea-ports';
 import { DataGrid, GridColDef, GridEventListener, GridRenderCellParams, GridValueFormatterParams, GridValueGetterParams } from '@mui/x-data-grid';
 
 //let statusTypes = ["EnAttente", "Valider", "Rejeter"];
-let cargoTypes = ["Container", "Conventional", "RollOnRollOff"];
-let packingTypes = ["LCL", "Airfreight", "Cars", "Trucks", "Not containerised"];
+// let cargoTypes = ["Container", "Conventional", "RollOnRollOff"];
+// let packingTypes = ["LCL", "Airfreight", "Cars", "Trucks", "Not containerised"];
 
 let haulageTypes = [
     "On trailer, direct loading", 
@@ -50,15 +49,6 @@ let statusTypes = [
     { type: "Problème", value: "Problème", description: "Problème rencontré lors du transport, à résoudre" }, 
     { type: "EnAttenteDeFacturation", value: "En attente de facturation", description: "En attente de facturation après livraison "} 
 ];
-
-function convertStringToObject(str: string): { portName: string, country: string } {
-    if (str !== undefined) {
-        const [portName, ...countryArr] = str.split(', ');
-        const country = countryArr.join(', ');
-        return { portName, country };
-    }
-    return { portName: "", country: "" };
-}
 
 function createGetRequestUrl(url: string, variable1: string|undefined, variable2: string, variable3: string) {
     if (variable1) {
@@ -184,12 +174,12 @@ function Request(props: any) {
     const [trackingNumber, setTrackingNumber] = useState<string>("");
     const [phone, setPhone] = useState<string>("");
     const [message, setMessage] = useState<string>("");
-    const [cargoType, setCargoType] = useState<string>("0");
-    const [cargoProducts, setCargoProducts] = useState<any>([]);
+    // const [cargoType, setCargoType] = useState<string>("0");
+    // const [cargoProducts, setCargoProducts] = useState<any>([]);
     const [packingType, setPackingType] = useState<string>("FCL");
     const [clientNumber, setClientNumber] = useState<string>("");
-    const [departureTown, setDepartureTown] = useState<any>(null);
-    const [arrivalTown, setArrivalTown] = useState<any>(null);
+    // const [departureTown, setDepartureTown] = useState<any>(null);
+    // const [arrivalTown, setArrivalTown] = useState<any>(null);
     const [departure, setDeparture] = useState<any>(null);
     const [arrival, setArrival] = useState<any>(null);
     const [tags, setTags] = useState<MuiChipsInputChip[]>([]);
@@ -603,15 +593,15 @@ function Request(props: any) {
             if (context) {
                 const response = await (context as BackendService<any>).put(protectedResources.apiLisQuotes.endPoint+"/Assignee/"+id+"/"+assignedManager, []);
                 if (response !== null) {
-                    enqueueSnackbar("The manager has been assigned to this request.", { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                    enqueueSnackbar(t('managerAssignedRequest'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
                 }
                 else {
-                    enqueueSnackbar("An error happened during the operation.", { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                    enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
                 }
             }
         }
         else {
-            enqueueSnackbar("You must select a request manager first.", { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+            enqueueSnackbar(t('selectManagerFirst'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
         }
     }
 
@@ -619,11 +609,11 @@ function Request(props: any) {
         if (context) {
             const response = await (context as BackendService<any>).put(protectedResources.apiLisQuotes.endPoint+"/Assignee/unassign/"+id, []);
             if (response !== null) {
-                enqueueSnackbar("The manager has been removed from this request.", { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                enqueueSnackbar(t('managerRemovedRequest'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
                 setAssignedManager("");
             }
             else {
-                enqueueSnackbar("An error happened during the operation.", { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
             }
         }
     }
@@ -670,10 +660,10 @@ function Request(props: any) {
 
             const data = await (context as BackendService<any>).put(protectedResources.apiLisQuotes.endPoint+"/Request/"+id, body);
             if (data?.status === 200) {
-                enqueueSnackbar("Your request has been edited with success.", { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                enqueueSnackbar(t('requestEditedSuccess'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
             }
             else {
-                enqueueSnackbar("An error happened during the operation.", { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
             }
         }
     }
@@ -688,10 +678,10 @@ function Request(props: any) {
             const data = await (context as BackendService<any>).put(protectedResources.apiLisQuotes.endPoint+"/Request/"+id+"/changeStatus", body);
             if (data?.status === 200) {
                 setModal2(false);
-                enqueueSnackbar("Your request's status has been updated with success.", { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                enqueueSnackbar(t('requestStatusUpdated'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
             }
             else {
-                enqueueSnackbar("An error happened during the operation.", { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
             }
         }
     }
@@ -703,15 +693,15 @@ function Request(props: any) {
                 const response = await (context as BackendService<any>).post(protectedResources.apiLisQuotes.endPoint+"/RequestQuoteNotes", dataSent);
                 if (response !== null) {
                     setModal(false);
-                    enqueueSnackbar("The message has been successfully sent.", { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                    enqueueSnackbar(t('messageSuccessSent'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
                 }
                 else {
-                    enqueueSnackbar("An error happened during the operation.", { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                    enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
                 }
             }
         }
         else {
-            enqueueSnackbar("The content field is empty, please fill it.", { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+            enqueueSnackbar(t('contentEmpty'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
         }
     }
 
@@ -722,15 +712,15 @@ function Request(props: any) {
                 const response = await (context as BackendService<any>).post(protectedResources.apiLisQuotes.endPoint+"/RequestQuoteNotes", dataSent);
                 if (response !== null) {
                     setModal3(false);
-                    enqueueSnackbar("The comment/note has been successfully added.", { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                    enqueueSnackbar(t('commentSuccessAdded'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
                 }
                 else {
-                    enqueueSnackbar("An error happened during the operation.", { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                    enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
                 }
             }
         }
         else {
-            enqueueSnackbar("The content field is empty, please fill it.", { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+            enqueueSnackbar(t('contentEmpty'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
         }
     }
 
@@ -778,7 +768,7 @@ function Request(props: any) {
             }
         }
         else {
-            enqueueSnackbar("The fields departure date, containers and destination port cannot be empty, fill them.", { variant: "warning", anchorOrigin: { horizontal: "right", vertical: "top"} });
+            enqueueSnackbar(t('priceFieldsEmpty'), { variant: "warning", anchorOrigin: { horizontal: "right", vertical: "top"} });
         }
     }
     
@@ -1073,15 +1063,15 @@ function Request(props: any) {
                 
                 if (response !== null) {
                     setModal5(false);
-                    enqueueSnackbar("The offer has been successfully sent.", { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                    enqueueSnackbar(t('offerSuccessSent'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
                 }
                 else {
-                    enqueueSnackbar("An error happened during the operation.", { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                    enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
                 }
             }
         }
         else {
-            enqueueSnackbar("The content field is empty, please fill it.", { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+            enqueueSnackbar(t('contentEmpty'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
         }
     }
     
@@ -1728,7 +1718,7 @@ function Request(props: any) {
                                             </LocalizationProvider>
                                         </Grid>
                                         <Grid item xs={12} md={4} mt={1}>
-                                            <InputLabel htmlFor="port-departure" sx={inputLabelStyles}>{t('departure')}</InputLabel>
+                                            <InputLabel htmlFor="port-departure" sx={inputLabelStyles}>{t('departurePort')}</InputLabel>
                                             {
                                                 ports !== null ?
                                                 <Autocomplete
@@ -1757,7 +1747,7 @@ function Request(props: any) {
                                             }
                                         </Grid>
                                         <Grid item xs={12} md={4} mt={1}>
-                                            <InputLabel htmlFor="destination-port" sx={inputLabelStyles}>{t('arrival')}</InputLabel>
+                                            <InputLabel htmlFor="destination-port" sx={inputLabelStyles}>{t('arrivalPort')}</InputLabel>
                                             {
                                                 ports !== null ?
                                                 <Autocomplete

@@ -8,7 +8,6 @@ import '../../App.css';
 import { Button, Chip, Grid, InputLabel, NativeSelect, Skeleton } from '@mui/material';
 import PlaceIcon from '@mui/icons-material/Place';
 import SearchIcon from '@mui/icons-material/Search';
-import AutocompleteSearch from '../shared/AutocompleteSearch';
 import { BootstrapInput, inputLabelStyles } from '../../misc/styles';
 import { protectedResources } from '../../authConfig';
 import { enqueueSnackbar, SnackbarProvider } from 'notistack';
@@ -44,10 +43,10 @@ function RequestsSearch() {
     const [notifications, setNotifications] = React.useState<any>(null);
     const [load, setLoad] = React.useState<boolean>(true);
     const [status, setStatus] = React.useState<string>("");
-    const [cargoType, setCargoType] = React.useState<string>("");
+    // const [cargoType, setCargoType] = React.useState<string>("");
     const [packingType, setPackingType] = React.useState<string>("");
-    const [departureTown, setDepartureTown] = React.useState<any>(null);
-    const [arrivalTown, setArrivalTown] = React.useState<any>(null);
+    // const [departureTown, setDepartureTown] = React.useState<any>(null);
+    // const [arrivalTown, setArrivalTown] = React.useState<any>(null);
     const [departure, setDeparture] = React.useState<string>("");
     const [arrival, setArrival] = React.useState<string>("");
     let { search } = useParams();
@@ -56,10 +55,6 @@ function RequestsSearch() {
 
     const { t } = useTranslation();
     
-    const handleChangeCargoType = (event: { target: { value: string } }) => {
-        setCargoType(event.target.value);
-    };
-
     const handleChangePackingType = (event: { target: { value: string } }) => {
         setPackingType(event.target.value);
     };
@@ -105,7 +100,7 @@ function RequestsSearch() {
                 }
                 else {
                     setLoad(false);
-                    enqueueSnackbar("Error during the loading of the data", { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                    enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
                 }
             }  
         }
@@ -114,7 +109,7 @@ function RequestsSearch() {
     const searchRequests = async () => {
         if (context) {
             setLoad(true);
-            var requestFormatted = createGetRequestUrl(departure, arrival, cargoType, status);
+            var requestFormatted = createGetRequestUrl(departure, arrival, packingType, status);
             const response: RequestResponseDto = await (context as BackendService<any>).getSingle(requestFormatted);
             if (response !== null && response.code !== undefined && response.data !== undefined) {
                 if (response.code === 200) {
@@ -123,7 +118,7 @@ function RequestsSearch() {
                 }
                 else {
                     setLoad(false);
-                    enqueueSnackbar("Error during the loading of the data", { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                    enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
                 }
             }  
         }
@@ -135,7 +130,7 @@ function RequestsSearch() {
             <Box py={2.5}>
                 <Typography variant="h5" sx={{mt: {xs: 4, md: 1.5, lg: 1.5 }}} mx={5}>
                     {
-                        search !== undefined ? <b>Search results for : {search}</b> : <b>List of requests for quote</b>
+                        search !== undefined ? <b>{t('searchResultsFor')} : {search}</b> : <b>{t('listRequestsQuote')}</b>
                     }
                 </Typography>
                 <Grid container spacing={1} px={5} mt={2}>
@@ -274,7 +269,7 @@ function RequestsSearch() {
                                     )
                                 })
                             }
-                        </List> : <Typography variant="subtitle1" mx={5} my={3}>Error during the loading of the data</Typography>
+                        </List> : <Typography variant="subtitle1" mx={5} my={3}>{t('errorHappened')}</Typography>
                     : <Skeleton sx={{ mx: 5, mt: 3 }} />
                 }
                 

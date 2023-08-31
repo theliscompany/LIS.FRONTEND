@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Autocomplete, CircularProgress, InputBase, TextField } from "@mui/material";
+import { Autocomplete, CircularProgress, TextField } from "@mui/material";
 import { debounce } from "@mui/material/utils";
 import axios from "axios";
 import { useTranslation } from "react-i18next";
