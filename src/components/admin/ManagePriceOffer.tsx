@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { AuthenticationResult } from '@azure/msal-browser';
 import { useAccount, useMsal } from '@azure/msal-react';
-import { Typography, Box, Grid, Chip, InputLabel, Button, Alert } from '@mui/material';
+import { Typography, Box, Grid, Chip, InputLabel, Button, Alert, List, ListItem, ListItemText } from '@mui/material';
 import Skeleton from '@mui/material/Skeleton';
 import { SnackbarProvider, enqueueSnackbar } from 'notistack';
 import { useAuthorizedBackendApi } from '../../api/api';
@@ -188,6 +188,29 @@ return (
             {
               !load ? 
               <Grid container spacing={2} mt={1} px={5}>
+                <Grid item xs={12}>
+                    <Typography variant="h5" sx={{ my: 1, fontSize: 19, fontWeight: "bold" }}>{t('selectedContainers')}</Typography>
+                    {
+                        offer.containers !== undefined && offer.containers !== null && offer.containers.length !== 0 && containers !== null ? 
+                            <List>
+                                {
+                                    offer.containers.map((item: any, index: number) => (
+                                        <ListItem
+                                            key={"listitem1-"+index}
+                                            sx={{ border: "1px solid #e5e5e5" }}
+                                        >
+                                            <ListItemText primary={
+                                                containers.find((elm: any) => elm.packageId === item.containerId) !== undefined ?
+                                                t('container')+" : "+containers.find((elm: any) => elm.packageId === item.containerId).packageName+" | "+t('quantity')+" : "+item.quantity
+                                                : t('container')+" : "+item.containerId+" | "+t('quantity')+" : "+item.quantity
+                                            } />
+                                        </ListItem>
+                                    ))
+                                }
+                            </List>
+                        : null  
+                    }
+                </Grid>
                 <Grid item xs={12}>
                     <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>{t('selectedSeafreight')}</Typography>
                     <DataGrid

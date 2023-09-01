@@ -17,6 +17,10 @@ import { Dayjs } from 'dayjs';
 import { useAccount, useMsal } from '@azure/msal-react';
 import { AuthenticationResult } from '@azure/msal-browser';
 import { useTranslation } from 'react-i18next';
+import Accordion from '@mui/material/Accordion';
+import AccordionSummary from '@mui/material/AccordionSummary';
+import AccordionDetails from '@mui/material/AccordionDetails';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
 // @ts-ignore
 import { JSON as seaPorts } from 'sea-ports';
@@ -27,28 +31,6 @@ import { DataGrid, GridColDef, GridEventListener, GridRenderCellParams, GridValu
 //let statusTypes = ["EnAttente", "Valider", "Rejeter"];
 // let cargoTypes = ["Container", "Conventional", "RollOnRollOff"];
 // let packingTypes = ["LCL", "Airfreight", "Cars", "Trucks", "Not containerised"];
-
-let haulageTypes = [
-    "On trailer, direct loading", 
-    "On trailer, Loading with Interval", 
-    "Side loader, direct loading", 
-    "Side loader, Loading with Interval, from trailer to floor", 
-    "Side loader, Loading with Interval, from floor to trailer"
-];
-let statusTypes = [
-    { type: "EnAttente", value: "En attente", description: "En attente de traitement" }, 
-    { type: "Valider", value: "Validé", description: "Devis validé par l'employé" }, 
-    { type: "Rejeter", value: "Rejeté", description: "Devis rejeté par l'employé" }, 
-    { type: "EnCoursDeTraitement", value: "En cours de traitement", description: "Devis en cours de traitement" }, 
-    { type: "EnTransit", value: "En transit", description: "Marchandise en cours de transport" }, 
-    { type: "EnDouane", value: "En douane", description: "Marchandise en cours de dédouanement" }, 
-    { type: "LivraisonEnCours", value: "Livraison en cours", description: "Marchandise en cours de livraison" }, 
-    { type: "Livre", value: "Livré", description: "Marchandise livrée au client" }, 
-    { type: "Annule", value: "Annulé", description: "La demande de devis a été annulée" }, 
-    { type: "Retour", value: "Retourné", description: "Marchandise retournée à l'expéditeur" }, 
-    { type: "Problème", value: "Problème", description: "Problème rencontré lors du transport, à résoudre" }, 
-    { type: "EnAttenteDeFacturation", value: "En attente de facturation", description: "En attente de facturation après livraison "} 
-];
 
 function createGetRequestUrl(url: string, variable1: string|undefined, variable2: string, variable3: string) {
     if (variable1) {
@@ -96,7 +78,7 @@ function getPackageNamesByIds(ids: string[], packages: any) {
             packageNames.push(foundPackage.packageName);
         }
     }
-  
+    
     return packageNames;
 }
 
@@ -198,7 +180,7 @@ function Request(props: any) {
     const [notes, setNotes] = useState<any>(null);
     const [idUser, setIdUser] = useState<any>(null);
 
-    const [containerType, setContainerType] = useState<number>(8);
+    const [containerType, setContainerType] = useState<string>("20' Dry");
     const [quantity, setQuantity] = useState<number>(1);
     const [containersSelection, setContainersSelection] = useState<any>([]);
     
@@ -250,11 +232,26 @@ function Request(props: any) {
     const { t } = useTranslation();
     
     const steps = [t('searchOffers'), t('listOffers'), t('sendOffer')];
+    const haulageTypes = [t('haulageType1'), t('haulageType2'), t('haulageType3'), t('haulageType4'), t('haulageType5')];
+    const statusTypes = [
+        { type: "EnAttente", value: "En attente", description: t('descriptionEnAttente') }, 
+        { type: "Valider", value: "Validé", description: t('descriptionValider') }, 
+        { type: "Rejeter", value: "Rejeté", description: t('descriptionRejeter') }, 
+        { type: "EnCoursDeTraitement", value: "En cours de traitement", description: t('descriptionEnCoursDeTraitement') }, 
+        { type: "EnTransit", value: "En transit", description: t('descriptionEnTransit') }, 
+        { type: "EnDouane", value: "En douane", description: t('descriptionEnDouane') }, 
+        { type: "LivraisonEnCours", value: "Livraison en cours", description: t('descriptionLivraisonEnCours') }, 
+        { type: "Livre", value: "Livré", description: t('descriptionLivre') }, 
+        { type: "Annule", value: "Annulé", description: t('descriptionAnnule') }, 
+        { type: "Retour", value: "Retourné", description: t('descriptionRetour') }, 
+        { type: "Problème", value: "Problème", description: t('descriptionProbleme') }, 
+        { type: "EnAttenteDeFacturation", value: "En attente de facturation", description: t('descriptionEnAttenteDeFacturation') } 
+    ];
 
     const columnsSeafreights: GridColDef[] = [
-        { field: 'carrierName', headerName: t('carrier'), width: 200 },
-        { field: 'carrierAgentName', headerName: t('carrierAgent'), width: 275 },
-        { field: 'departurePortName', headerName: t('departurePort'), width: 125 },
+        { field: 'carrierName', headerName: t('carrier'), width: 150 },
+        { field: 'carrierAgentName', headerName: t('carrierAgent'), width: 200 },
+        { field: 'departurePortName', headerName: t('departurePort'), width: 100 },
         { field: 'frequency', headerName: t('frequency'), valueFormatter: (params: GridValueFormatterParams) => `${params.value || ''} / day`, },
         { field: 'transitTime', headerName: t('transitTime'), valueFormatter: (params: GridValueFormatterParams) => `${params.value || ''} days` },
         { field: 'currency', headerName: t('prices'), renderCell: (params: GridRenderCellParams) => {
@@ -271,23 +268,23 @@ function Request(props: any) {
     ];
     
     const columnsHaulages: GridColDef[] = [
-        { field: 'haulierName', headerName: t('haulier'), width: 200 },
+        { field: 'haulierName', headerName: t('haulier'), width: 150 },
         { field: 'loadingPort', headerName: t('loadingPort'), renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box sx={{ my: 2 }}>{params.row.loadingPort}</Box>
             );
         }, width: 275 },
-        { field: 'freeTime', headerName: t('freeTime'), valueFormatter: (params: GridValueFormatterParams) => `${params.value || ''} days`, width: 125 },
+        { field: 'freeTime', headerName: t('freeTime'), valueFormatter: (params: GridValueFormatterParams) => `${params.value || ''} days`, width: 100 },
         { field: 'multiStop', headerName: t('multiStop'), valueGetter: (params: GridValueGetterParams) => `${params.row.multiStop || ''} ${params.row.currency}` },
         { field: 'overtimeTariff', headerName: t('overtimeTariff'), valueGetter: (params: GridValueGetterParams) => `${params.row.overtimeTariff || ''} ${params.row.currency}` },
         { field: 'unitTariff', headerName: t('unitTariff'), valueGetter: (params: GridValueGetterParams) => `${params.row.unitTariff || ''} ${params.row.currency}` },
-        { field: 'validUntil', headerName: t('validUntil'), valueFormatter: (params: GridValueFormatterParams) => `${(new Date(params.value)).toLocaleString() || ''}`, width: 200 },
+        { field: 'validUntil', headerName: t('validUntil'), valueFormatter: (params: GridValueFormatterParams) => `${(new Date(params.value)).toLocaleString() || ''}`, width: 150 },
     ];
     
     const columnsMiscs: GridColDef[] = [
-        { field: 'supplierName', headerName: t('supplier'), width: 200 },
-        { field: 'departurePortName', headerName: t('departurePort'), width: 275, valueFormatter: (params: GridValueFormatterParams) => `${portDeparture.portName || ''}`, },
-        { field: 'destinationPortName', headerName: t('destinationPort'), width: 325, valueFormatter: (params: GridValueFormatterParams) => `${portDestination.portName || ''}`, },
+        { field: 'supplierName', headerName: t('supplier'), width: 150 },
+        { field: 'departurePortName', headerName: t('departurePort'), width: 200, valueFormatter: (params: GridValueFormatterParams) => `${portDeparture.portName || ''}`, },
+        { field: 'destinationPortName', headerName: t('destinationPort'), width: 300, valueFormatter: (params: GridValueFormatterParams) => `${portDestination.portName || ''}`, },
         { field: 'currency', headerName: t('prices'), renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box sx={{ my: 1, mr: 1 }}>
@@ -337,8 +334,9 @@ function Request(props: any) {
             newSkipped.delete(activeStep);
         }
         if (activeStep === 0) {
-            if (departureDate !== null && containersSelection.map((elm: any) => elm.container).length !== 0 && portDestination !== null) {
-                setContainersSelected(containersSelection.map((elm: any) => elm.container));
+            if (containersSelection.map((elm: any) => elm.container).length !== 0 && portDestination !== null) {
+                console.log(containersSelection);
+                setContainersSelected(containersSelection.map((elm: any) => elm.id));
                 getPriceRequests();
                 setActiveStep((prevActiveStep) => prevActiveStep + 1);
                 setSkipped(newSkipped);
@@ -352,19 +350,19 @@ function Request(props: any) {
                 // Here we calculate the total price of the offer
                 var seafreightPrices = 0;
                 if (selectedSeafreight.price20dry !== 0 && getPackageNamesByIds(containersSelected, containers).includes("20' Dry")) {
-                    seafreightPrices += selectedSeafreight.price20dry*containersSelection.find((elm: any) => elm.container === 8).quantity;
+                    seafreightPrices += selectedSeafreight.price20dry*containersSelection.find((elm: any) => elm.id === 8).quantity;
                 }
                 if (selectedSeafreight.price20rf !== 0 && getPackageNamesByIds(containersSelected, containers).includes("20' Rf")) {
-                    seafreightPrices += selectedSeafreight.price20rf*containersSelection.find((elm: any) => elm.container === 13).quantity;
+                    seafreightPrices += selectedSeafreight.price20rf*containersSelection.find((elm: any) => elm.id === 13).quantity;
                 }
                 if (selectedSeafreight.price40dry !== 0 && getPackageNamesByIds(containersSelected, containers).includes("40' Dry")) {
-                    seafreightPrices += selectedSeafreight.price40dry*containersSelection.find((elm: any) => elm.container === 9).quantity;
+                    seafreightPrices += selectedSeafreight.price40dry*containersSelection.find((elm: any) => elm.id === 9).quantity;
                 }
                 if (selectedSeafreight.price40hc !== 0 && getPackageNamesByIds(containersSelected, containers).includes("40' Hc")) {
-                    seafreightPrices += selectedSeafreight.price40hc*containersSelection.find((elm: any) => elm.container === 10).quantity;
+                    seafreightPrices += selectedSeafreight.price40hc*containersSelection.find((elm: any) => elm.id === 10).quantity;
                 }
                 if (selectedSeafreight.price40hcrf !== 0 && getPackageNamesByIds(containersSelected, containers).includes("40' HcRf")) {
-                    seafreightPrices += selectedSeafreight.price40hcrf*containersSelection.find((elm: any) => elm.container === 15).quantity;
+                    seafreightPrices += selectedSeafreight.price40hcrf*containersSelection.find((elm: any) => elm.id === 15).quantity;
                 }
                 
                 if (selectedHaulage !== null) {
@@ -373,19 +371,19 @@ function Request(props: any) {
                 
                 if (selectedMisc !== null) {
                     if (selectedMisc.price20dry !== 0 && getPackageNamesByIds(containersSelected, containers).includes("20' Dry")) {
-                        seafreightPrices += selectedMisc.price20dry*containersSelection.find((elm: any) => elm.container === 8).quantity;
+                        seafreightPrices += selectedMisc.price20dry*containersSelection.find((elm: any) => elm.id === 8).quantity;
                     }
                     if (selectedMisc.price20rf !== 0 && getPackageNamesByIds(containersSelected, containers).includes("20' Rf")) {
-                        seafreightPrices += selectedMisc.price20rf*containersSelection.find((elm: any) => elm.container === 13).quantity;
+                        seafreightPrices += selectedMisc.price20rf*containersSelection.find((elm: any) => elm.id === 13).quantity;
                     }
                     if (selectedMisc.price40dry !== 0 && getPackageNamesByIds(containersSelected, containers).includes("40' Dry")) {
-                        seafreightPrices += selectedMisc.price40dry*containersSelection.find((elm: any) => elm.container === 9).quantity;
+                        seafreightPrices += selectedMisc.price40dry*containersSelection.find((elm: any) => elm.id === 9).quantity;
                     }
                     if (selectedMisc.price40hc !== 0 && getPackageNamesByIds(containersSelected, containers).includes("40' Hc")) {
-                        seafreightPrices += selectedMisc.price40hc*containersSelection.find((elm: any) => elm.container === 10).quantity;
+                        seafreightPrices += selectedMisc.price40hc*containersSelection.find((elm: any) => elm.id === 10).quantity;
                     }
                     if (selectedMisc.price40hcrf !== 0 && getPackageNamesByIds(containersSelected, containers).includes("40' HcRf")) {
-                        seafreightPrices += selectedMisc.price40hcrf*containersSelection.find((elm: any) => elm.container === 15).quantity;
+                        seafreightPrices += selectedMisc.price40hcrf*containersSelection.find((elm: any) => elm.id === 15).quantity;
                     }
                     setTotalPrice(seafreightPrices);
                 }
@@ -476,19 +474,6 @@ function Request(props: any) {
         return auxArray;
     }
     
-    function addCoordinatesToPorts(selectedPorts: any) {
-        var allMySeaPorts = initializeSeaPorts();
-        const updatedLisPorts = selectedPorts.map((lisPort: any) => {
-            const matchingSeaPort = allMySeaPorts.find((seaPort: any) => (seaPort.name.toUpperCase().includes(lisPort.portName.toUpperCase()) || lisPort.portName.toUpperCase().includes(seaPort.name.toUpperCase()) || similar(seaPort.name, lisPort.portName)));
-            if (matchingSeaPort) {
-                return { ...lisPort, name: matchingSeaPort.name, coordinates: matchingSeaPort.coordinates };
-            }
-            return lisPort;
-        });
-        console.log(updatedLisPorts);
-        setPorts(updatedLisPorts);
-    }
-    
     function addedCoordinatesToPorts(selectedPorts: any) {
         var allMySeaPorts = initializeSeaPorts();
         const updatedLisPorts = selectedPorts.map((lisPort: any) => {
@@ -551,6 +536,7 @@ function Request(props: any) {
                     setPackingType(response.data.packingType !== null ? response.data.packingType : "FCL");
                     setClientNumber(response.data.clientNumber !== null ? response.data.clientNumber : "");
                     setContainersSelection(response.data.containers.map((elm: any) => { return {
+                        id: elm.id,
                         container: elm.containers, 
                         quantity: elm.quantity 
                     } }) || []);
@@ -640,8 +626,8 @@ function Request(props: any) {
                 cargoType: 0,
                 packingType: packingType,
                 containers: containersSelection.map((elm: any, i: number) => { return { 
-                    id: i, 
-                    containers: containers.find((item: any) => item.packageId === elm.container).packageName, 
+                    id: containers.find((item: any) => item.packageName === elm.container).packageId, 
+                    containers: elm.container, 
                     quantity: elm.quantity, 
                 } }),
                 units: auxUnits.map((elm: any, i: number) => { return { 
@@ -757,7 +743,7 @@ function Request(props: any) {
     }
 
     const getPriceRequests = async () => {
-        if (departureDate !== null && containersSelection.map((elm: any) => elm.container).length !== 0 && portDestination !== null) {
+        if (containersSelection.map((elm: any) => elm.container).length !== 0 && portDestination !== null) {
             // alert(containersSelected);
             // console.log(containers.map((elm: any) => elm.packageName));
             setLoadResults(true);
@@ -879,6 +865,7 @@ function Request(props: any) {
             
             const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Package/Containers", token);
             if (response !== null && response !== undefined) {
+                console.log(response);
                 setContainers(response);
             }  
         }
@@ -1046,8 +1033,8 @@ function Request(props: any) {
                         "price40Hc": selectedSeafreight.price40hc,
                         "price40HcRf": selectedSeafreight.price40hcrf
                     },
-                    "containers": containersSelection.map((elm: any) => { return { "containerId": elm.container, quantity: elm.quantity } }),
-                    "departureDate": departureDate,
+                    "containers": containersSelection.map((elm: any) => { return { "containerId": elm.id, quantity: elm.quantity } }),
+                    "departureDate": departureDate || (new Date("01/01/2022")).toISOString(),
                     "departurePortId": portDeparture.portId,
                     "destinationPortId": portDestination.portId,
                     // "haulageType": haulageType,
@@ -1189,9 +1176,9 @@ function Request(props: any) {
                                         input={<BootstrapInput />}
                                         fullWidth
                                     >
-                                        <option value="FCL">FCL</option>
-                                        <option value="Breakbulk/LCL">Breakbulk/LCL</option>
-                                        <option value="Unit RoRo">Unit RoRo</option>
+                                        <option value="FCL">{t('fcl')}</option>
+                                        <option value="Breakbulk/LCL">{t('breakbulk')}</option>
+                                        <option value="Unit RoRo">{t('roro')}</option>
                                     </NativeSelect>
                                 </Grid>
 
@@ -1205,13 +1192,14 @@ function Request(props: any) {
                                             <NativeSelect
                                                 id="container-type"
                                                 value={containerType}
-                                                onChange={(event: { target: { value: any } }) => { setContainerType(Number(event.target.value)); }}
+                                                // onChange={(event: { target: { value: any } }) => { setContainerType(Number(event.target.value)); }}
+                                                onChange={(e: any) => { setContainerType(e.target.value) }}
                                                 input={<BootstrapInput />}
                                                 fullWidth
                                             >
-                                                <option key={"elm1-x"} value={0}>{t('notDefined')}</option>
-                                                {containers.filter((elm: any) => ["20' Dry"]).map((elm: any, i: number) => (
-                                                    <option key={"elm1-"+i} value={elm.packageId}>{elm.packageName}</option>
+                                                <option key={"elm1-x"} value="">{t('notDefined')}</option>
+                                                {containers.map((elm: any, i: number) => (
+                                                    <option key={"elm1-"+i} value={elm.packageName}>{elm.packageName}</option>
                                                 ))}
                                             </NativeSelect>
                                             : <Skeleton />
@@ -1226,9 +1214,9 @@ function Request(props: any) {
                                             variant="contained" color="inherit" fullWidth sx={whiteButtonStyles} 
                                             style={{ marginTop: "30px", height: "42px", float: "right" }} 
                                             onClick={() => {
-                                                if (containerType !== 0 && quantity > 0) {
-                                                    setContainersSelection((prevItems: any) => [...prevItems, { container: containerType, quantity: quantity }]);
-                                                    setContainerType(0); setQuantity(1);
+                                                if (containerType !== "" && quantity > 0) {
+                                                    setContainersSelection((prevItems: any) => [...prevItems, { container: containerType, quantity: quantity, id: containers.find((item: any) => item.packageName === containerType).packageId }]);
+                                                    setContainerType(""); setQuantity(1);
                                                 } 
                                                 else {
                                                     enqueueSnackbar("You need to select a container type and a good value for quantity.", { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
@@ -1256,9 +1244,7 @@ function Request(props: any) {
                                                                     }
                                                                 >
                                                                     <ListItemText primary={
-                                                                        containers.find((elm: any) => elm.packageId === item.container) !== undefined ?
-                                                                        t('container')+" : "+containers.find((elm: any) => elm.packageId === item.container).packageName+" | "+t('quantity')+" : "+item.quantity
-                                                                        : t('container')+" : "+item.container+" | "+t('quantity')+" : "+item.quantity
+                                                                        t('container')+" : "+item.container+" | "+t('quantity')+" : "+item.quantity
                                                                     } />
                                                                 </ListItem>
                                                             </Grid>
@@ -1465,24 +1451,344 @@ function Request(props: any) {
                                     }
                                 </Grid>
                                 <Grid item xs={12}>
+                                    <Accordion>
+                                        <AccordionSummary
+                                            expandIcon={<ExpandMoreIcon />}
+                                            aria-controls="panel1a-content"
+                                            id="panel1a-header"
+                                        >
+                                            <Typography>{t('generatePriceOffer')}</Typography>
+                                        </AccordionSummary>
+                                        <AccordionDetails>
+                                            <Box sx={{ px: 0 }}>
+                                                <Typography variant="h5" sx={{ mb: 3 }}><b>{t('generatePriceOffer')}</b></Typography>
+                                                <Stepper activeStep={activeStep}>
+                                                    {steps.map((label, index) => {
+                                                    const stepProps: { completed?: boolean } = {};
+                                                    const labelProps: {
+                                                        optional?: React.ReactNode;
+                                                    } = {};
+                                                    if (isStepOptional(index)) {
+                                                        labelProps.optional = (
+                                                        <Typography variant="caption">Optional</Typography>
+                                                        );
+                                                    }
+                                                    if (isStepSkipped(index)) {
+                                                        stepProps.completed = false;
+                                                    }
+                                                    return (
+                                                        <Step key={label} {...stepProps}>
+                                                            <StepLabel {...labelProps}>{label}</StepLabel>
+                                                        </Step>
+                                                    );
+                                                    })}
+                                                </Stepper>
+                                                {activeStep === steps.length ? (
+                                                    <React.Fragment>
+                                                        <Typography sx={{ mt: 2, mb: 1 }}>
+                                                            All steps completed - you&apos;re finished
+                                                        </Typography>
+                                                        <Box sx={{ display: 'flex', flexDirection: 'row', pt: 2 }}>
+                                                            <Box sx={{ flex: '1 1 auto' }} />
+                                                            <Button onClick={handleReset}>Reset</Button>
+                                                        </Box>
+                                                    </React.Fragment>
+                                                ) : (
+                                                    <React.Fragment>
+                                                        {
+                                                            activeStep === 0 ?
+                                                            <Grid container spacing={2} mt={1} px={2}>
+                                                                <Grid item xs={12} md={4} mt={1}>
+                                                                    <InputLabel htmlFor="departure-date" sx={inputLabelStyles}>{t('departureDate')}</InputLabel>
+                                                                    <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                                                        <DateTimePicker 
+                                                                            value={departureDate} 
+                                                                            onChange={(value: any) => { setDepartureDate(value) }}
+                                                                            slotProps={{ textField: { id: "departure-date", fullWidth: true, sx: datetimeStyles }, inputAdornment: { sx: { position: "relative", right: "11.5px" } } }}
+                                                                        />
+                                                                    </LocalizationProvider>
+                                                                </Grid>
+                                                                <Grid item xs={12} md={4} mt={1}>
+                                                                    <InputLabel htmlFor="port-departure" sx={inputLabelStyles}>{t('departurePort')}</InputLabel>
+                                                                    {
+                                                                        ports !== null ?
+                                                                        <Autocomplete
+                                                                            disablePortal
+                                                                            id="port-departure"
+                                                                            options={ports}
+                                                                            renderOption={(props, option, i) => {
+                                                                                return (
+                                                                                    <li {...props} key={option.portId}>
+                                                                                        {option.portName+", "+option.country}
+                                                                                    </li>
+                                                                                );
+                                                                            }}
+                                                                            getOptionLabel={(option: any) => { 
+                                                                                if (option !== null && option !== undefined) {
+                                                                                    return option.portName+', '+option.country;
+                                                                                }
+                                                                                return ""; 
+                                                                            }}
+                                                                            value={portDeparture}
+                                                                            sx={{ mt: 1 }}
+                                                                            renderInput={(params: any) => <TextField {...params} />}
+                                                                            onChange={(e: any, value: any) => { setPortDeparture(value); }}
+                                                                            fullWidth
+                                                                        /> : <Skeleton />
+                                                                    }
+                                                                </Grid>
+                                                                <Grid item xs={12} md={4} mt={1}>
+                                                                    <InputLabel htmlFor="destination-port" sx={inputLabelStyles}>{t('arrivalPort')}</InputLabel>
+                                                                    {
+                                                                        ports !== null ?
+                                                                        <Autocomplete
+                                                                            disablePortal
+                                                                            id="destination-port"
+                                                                            options={ports}
+                                                                            renderOption={(props, option, i) => {
+                                                                                return (
+                                                                                    <li {...props} key={option.portId}>
+                                                                                        {option.portName+", "+option.country}
+                                                                                    </li>
+                                                                                );
+                                                                            }}
+                                                                            getOptionLabel={(option: any) => { 
+                                                                                if (option !== null && option !== undefined) {
+                                                                                    return option.portName+', '+option.country;
+                                                                                }
+                                                                                return ""; 
+                                                                            }}
+                                                                            value={portDestination}
+                                                                            sx={{ mt: 1 }}
+                                                                            renderInput={(params: any) => <TextField {...params} />}
+                                                                            onChange={(e: any, value: any) => { setPortDestination(value); }}
+                                                                            fullWidth
+                                                                        /> : <Skeleton />
+                                                                    }
+                                                                </Grid>
+                                                                <Grid item xs={12} md={4} mt={1}>
+                                                                    <InputLabel htmlFor="loading-date" sx={inputLabelStyles}>{t('loadingDate')}</InputLabel>
+                                                                    <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                                                        <DateTimePicker 
+                                                                            value={loadingDate} 
+                                                                            onChange={(value: any) => { setLoadingDate(value) }}
+                                                                            slotProps={{ textField: { id: "loading-date", fullWidth: true, sx: datetimeStyles }, inputAdornment: { sx: { position: "relative", right: "11.5px" } } }}
+                                                                        />
+                                                                    </LocalizationProvider>
+                                                                </Grid>
+                                                                <Grid item xs={12} md={4} mt={1}>
+                                                                    <InputLabel htmlFor="loading-city" sx={inputLabelStyles}>{t('loadingCity')}</InputLabel>
+                                                                    {
+                                                                        cities !== null ?
+                                                                        <Autocomplete
+                                                                            disablePortal
+                                                                            id="loading-city"
+                                                                            options={cities}
+                                                                            getOptionLabel={(option: any) => { 
+                                                                                if (option !== null && option !== undefined) {
+                                                                                    return option.name+', '+option.country;
+                                                                                }
+                                                                                return ""; 
+                                                                            }}
+                                                                            value={loadingCity}
+                                                                            sx={{ mt: 1 }}
+                                                                            renderInput={(params: any) => <TextField {...params} />}
+                                                                            onChange={(e: any, value: any) => { setLoadingCity(value); }}
+                                                                            fullWidth
+                                                                        /> : <Skeleton />
+                                                                    }
+                                                                </Grid>
+                                                                <Grid item xs={12} md={4} mt={1}>
+                                                                    <InputLabel htmlFor="haulage-type" sx={inputLabelStyles}>{t('haulageType')}</InputLabel>
+                                                                    <NativeSelect
+                                                                        id="haulage-type"
+                                                                        value={haulageType}
+                                                                        onChange={handleChangeHaulageType}
+                                                                        input={<BootstrapInput />}
+                                                                        fullWidth
+                                                                    >
+                                                                        <option key={"kdq-"} value="">{t('anyType')}</option>
+                                                                        {
+                                                                            haulageTypes.map((item: any, i: number) => (
+                                                                                <option key={"kdq"+i} value={item}>{item}</option>
+                                                                            ))
+                                                                        }
+                                                                    </NativeSelect>
+                                                                </Grid>
+                                                            </Grid> : null
+                                                        }
+                                                        {
+                                                            activeStep === 1 ?
+                                                            <Grid container spacing={2} mt={1} px={2}>
+                                                                <Grid item xs={12}>
+                                                                    <Alert severity="info" sx={{ mb: 2 }}>{t('selectOfferMessage')}</Alert>
+                                                                    {
+                                                                        !loadResults ? 
+                                                                        seafreights !== null && seafreights.length !== 0 ?
+                                                                            <Box>
+                                                                                <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>{t('listSeaFreightsPricingOffers')}</Typography>
+                                                                                <DataGrid
+                                                                                    rows={seafreights}
+                                                                                    columns={columnsSeafreights}
+                                                                                    hideFooter
+                                                                                    getRowId={(row: any) => row?.seaFreightId}
+                                                                                    getRowHeight={() => "auto" }
+                                                                                    sx={{ height: "auto" }}
+                                                                                    onRowClick={handleRowSeafreightsClick}
+                                                                                />
+                                                                            </Box>
+                                                                            : null
+                                                                        : <Skeleton />
+                                                                    }
+                                                                    {
+                                                                        !loadResults ? 
+                                                                        haulages !== null && haulages.length !== 0 ?
+                                                                            <Box>
+                                                                                <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>{t('listHaulagesPricingOffers')}</Typography>
+                                                                                <DataGrid
+                                                                                    rows={haulages}
+                                                                                    columns={columnsHaulages}
+                                                                                    hideFooter
+                                                                                    getRowId={(row: any) => row?.id}
+                                                                                    getRowHeight={() => "auto" }
+                                                                                    sx={{ height: "auto" }}
+                                                                                    onRowClick={handleRowHaulagesClick}
+                                                                                />
+                                                                            </Box>
+                                                                            : null
+                                                                        : <Skeleton />
+                                                                    }
+                                                                    {
+                                                                        !loadResults ? 
+                                                                        miscs !== null && miscs.length !== 0 ?
+                                                                            <Box>
+                                                                                <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>{t('listMiscPricingOffers')}</Typography>
+                                                                                <DataGrid
+                                                                                    rows={miscs}
+                                                                                    columns={columnsMiscs}
+                                                                                    hideFooter
+                                                                                    getRowId={(row: any) => row?.id}
+                                                                                    getRowHeight={() => "auto" }
+                                                                                    sx={{ height: "auto" }}
+                                                                                    onRowClick={handleRowMiscsClick}
+                                                                                    // checkboxSelection
+                                                                                />
+                                                                            </Box>
+                                                                            : null
+                                                                        : <Skeleton />
+                                                                    }
+                                                                </Grid>
+                                                            </Grid> : null
+                                                        }
+                                                        {
+                                                            activeStep === 2 ?
+                                                            <Grid container spacing={2} mt={1} px={2}>
+                                                                <Grid item xs={12}>
+                                                                    <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>{t('selectedSeafreight')}</Typography>
+                                                                    <DataGrid
+                                                                        rows={[selectedSeafreight]}
+                                                                        columns={columnsSeafreights}
+                                                                        hideFooter
+                                                                        getRowId={(row: any) => row?.seaFreightId}
+                                                                        getRowHeight={() => "auto" }
+                                                                        sx={{ height: "auto" }}
+                                                                        isRowSelectable={(params: any) => false}
+                                                                        // onRowClick={handleRowSeafreightsClick}
+                                                                        // checkboxSelection
+                                                                    />
+                                                                </Grid>
+                                                                {
+                                                                    selectedHaulage !== null ? 
+                                                                    <Grid item xs={12}>
+                                                                        <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>{t('selectedHaulage')}</Typography>
+                                                                        <DataGrid
+                                                                            rows={[selectedHaulage]}
+                                                                            columns={columnsHaulages}
+                                                                            hideFooter
+                                                                            getRowId={(row: any) => row?.id}
+                                                                            getRowHeight={() => "auto" }
+                                                                            sx={{ height: "auto" }}
+                                                                            isRowSelectable={(params: any) => false}
+                                                                        />
+                                                                    </Grid> : null
+                                                                }
+                                                                {
+                                                                    selectedMisc !== null ? 
+                                                                    <Grid item xs={12}>
+                                                                        <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>{t('selectedMisc')}</Typography>
+                                                                        <DataGrid
+                                                                            rows={[selectedMisc]}
+                                                                            columns={columnsMiscs}
+                                                                            hideFooter
+                                                                            getRowId={(row: any) => row?.id}
+                                                                            getRowHeight={() => "auto" }
+                                                                            sx={{ height: "auto" }}
+                                                                            isRowSelectable={(params: any) => false}
+                                                                        />
+                                                                    </Grid> : null
+                                                                }
+                                                                <Grid item xs={12} md={4}>
+                                                                    <InputLabel htmlFor="margin" sx={inputLabelStyles}>{t('margin')} (%)</InputLabel>
+                                                                    <BootstrapInput id="margin" type="number" value={margin} onChange={(e: any) => setMargin(e.target.value)} fullWidth />
+                                                                </Grid>
+                                                                <Grid item xs={12} md={4}>
+                                                                    <InputLabel htmlFor="reduction" sx={inputLabelStyles}>{t('reduction')} (%)</InputLabel>
+                                                                    <BootstrapInput id="reduction" type="number" value={reduction} onChange={(e: any) => setReduction(e.target.value)} fullWidth />
+                                                                </Grid>
+                                                                <Grid item xs={12} md={4}>
+                                                                    <InputLabel htmlFor="adding" sx={inputLabelStyles}>{t('extraFee')} ({selectedSeafreight !== null ? selectedSeafreight.currency : null})</InputLabel>
+                                                                    <BootstrapInput id="adding" type="number" value={adding} onChange={(e: any) => setAdding(e.target.value)} fullWidth />
+                                                                </Grid>
+                                                                <Grid item xs={12}>
+                                                                    <InputLabel htmlFor="details" sx={inputLabelStyles}>{t('detailsOffer')}</InputLabel>
+                                                                    <BootstrapInput id="details" type="text" multiline rows={3} value={details} onChange={(e: any) => setDetails(e.target.value)} fullWidth />
+                                                                </Grid>
+                                                                <Grid item xs={12}>
+                                                                    <Typography variant="h6">
+                                                                        { 
+                                                                            selectedSeafreight !== null ? 
+                                                                            <Chip variant="outlined" size="medium"
+                                                                                label={t('totalPrice').toUpperCase()+" : "+ Number(totalPrice+totalPrice*margin/100-totalPrice*reduction/100+adding*1).toFixed(2).toString()+" "+selectedSeafreight.currency}
+                                                                                sx={{ fontWeight: "bold", fontSize: 16, py: 3 }} 
+                                                                            /> : null
+                                                                        }
+                                                                    </Typography>
+                                                                </Grid>
+                                                            </Grid>
+                                                            : null
+                                                        }
+
+                                                        <Box sx={{ display: 'flex', flexDirection: 'row', pt: 2, px: 2 }}>
+                                                            <Button
+                                                                variant="contained" 
+                                                                color="inherit" 
+                                                                sx={whiteButtonStyles}
+                                                                disabled={activeStep === 0}
+                                                                onClick={handleBack}
+                                                            >
+                                                                {t('back')}
+                                                            </Button>
+                                                            <Box sx={{ flex: '1 1 auto' }} />
+                                                            {isStepOptional(activeStep) && (
+                                                            <Button variant="contained" color="inherit" sx={whiteButtonStyles} onClick={handleSkip}>
+                                                                {t('skip')}
+                                                            </Button>
+                                                            )}
+                                                            <Button variant="contained" color="inherit" sx={whiteButtonStyles} onClick={handleNext}>
+                                                                {activeStep === steps.length - 1 ? t('sendOfferValidation') : t('nextStep')}
+                                                            </Button>
+                                                        </Box>
+                                                    </React.Fragment>
+                                                )}
+                                            </Box>
+                                        </AccordionDetails>
+                                    </Accordion>
+                                </Grid>
+                                <Grid item xs={12}>
                                     <Button variant="contained" color="primary" sx={{ mt: 2, mr: 2, textTransform: "none" }} onClick={editRequest} >{t('editRequest')}</Button>
                                     <Button variant="contained" color="inherit" sx={whiteButtonStyles} onClick={() => { setModal2(true); }} >{t('changeStatus')}</Button>
                                     <Button variant="contained" color="inherit" sx={whiteButtonStyles} style={{ float: "right" }} onClick={() => { setModal3(true); }} >{t('addCommentNote')}</Button>
                                     <Button variant="contained" color="inherit" sx={whiteButtonStyles} style={{ float: "right", marginRight: "10px" }} onClick={() => { setModal4(true); getNotes(id); }} >{t('listNotes')}</Button>
-                                    <Button 
-                                        variant="contained" color="success" 
-                                        sx={{ mt: 2, mr: 2, textTransform: "none" }} 
-                                        style={{ float: "right", marginRight: "10px" }} 
-                                        onClick={() => { 
-                                            setModal5(true);
-                                            // console.log("Containers", containers);
-                                            // console.log("Containers selection", containersSelection);
-                                            // console.log("Containers selected", containersSelected);
-                                            // setContainersSelected(containersSelection.map((elm: any) => elm.container));
-                                        }}
-                                    >
-                                        {t('generatePriceOffer')}
-                                    </Button>
                                 </Grid>
                         </Grid> : <Skeleton sx={{ mx: 5, mt: 3 }} />
                     }
@@ -1670,326 +1976,6 @@ function Request(props: any) {
                     <b>{t('generatePriceOffer')}</b>
                 </BootstrapDialogTitle>
                 <DialogContent dividers>
-                    <Box sx={{ width: '100%' }}>
-                        <Stepper activeStep={activeStep}>
-                            {steps.map((label, index) => {
-                            const stepProps: { completed?: boolean } = {};
-                            const labelProps: {
-                                optional?: React.ReactNode;
-                            } = {};
-                            if (isStepOptional(index)) {
-                                labelProps.optional = (
-                                <Typography variant="caption">Optional</Typography>
-                                );
-                            }
-                            if (isStepSkipped(index)) {
-                                stepProps.completed = false;
-                            }
-                            return (
-                                <Step key={label} {...stepProps}>
-                                    <StepLabel {...labelProps}>{label}</StepLabel>
-                                </Step>
-                            );
-                            })}
-                        </Stepper>
-                        {activeStep === steps.length ? (
-                            <React.Fragment>
-                                <Typography sx={{ mt: 2, mb: 1 }}>
-                                    All steps completed - you&apos;re finished
-                                </Typography>
-                                <Box sx={{ display: 'flex', flexDirection: 'row', pt: 2 }}>
-                                    <Box sx={{ flex: '1 1 auto' }} />
-                                    <Button onClick={handleReset}>Reset</Button>
-                                </Box>
-                            </React.Fragment>
-                        ) : (
-                            <React.Fragment>
-                                {
-                                    activeStep === 0 ?
-                                    <Grid container spacing={2} mt={1} px={2}>
-                                        <Grid item xs={12} md={4} mt={1}>
-                                            <InputLabel htmlFor="departure-date" sx={inputLabelStyles}>{t('departureDate')}</InputLabel>
-                                            <LocalizationProvider dateAdapter={AdapterDayjs}>
-                                                <DateTimePicker 
-                                                    value={departureDate} 
-                                                    onChange={(value: any) => { setDepartureDate(value) }}
-                                                    slotProps={{ textField: { id: "departure-date", fullWidth: true, sx: datetimeStyles }, inputAdornment: { sx: { position: "relative", right: "11.5px" } } }}
-                                                />
-                                            </LocalizationProvider>
-                                        </Grid>
-                                        <Grid item xs={12} md={4} mt={1}>
-                                            <InputLabel htmlFor="port-departure" sx={inputLabelStyles}>{t('departurePort')}</InputLabel>
-                                            {
-                                                ports !== null ?
-                                                <Autocomplete
-                                                    disablePortal
-                                                    id="port-departure"
-                                                    options={ports}
-                                                    renderOption={(props, option, i) => {
-                                                        return (
-                                                            <li {...props} key={option.portId}>
-                                                                {option.portName+", "+option.country}
-                                                            </li>
-                                                        );
-                                                    }}
-                                                    getOptionLabel={(option: any) => { 
-                                                        if (option !== null && option !== undefined) {
-                                                            return option.portName+', '+option.country;
-                                                        }
-                                                        return ""; 
-                                                    }}
-                                                    value={portDeparture}
-                                                    sx={{ mt: 1 }}
-                                                    renderInput={(params: any) => <TextField {...params} />}
-                                                    onChange={(e: any, value: any) => { setPortDeparture(value); }}
-                                                    fullWidth
-                                                /> : <Skeleton />
-                                            }
-                                        </Grid>
-                                        <Grid item xs={12} md={4} mt={1}>
-                                            <InputLabel htmlFor="destination-port" sx={inputLabelStyles}>{t('arrivalPort')}</InputLabel>
-                                            {
-                                                ports !== null ?
-                                                <Autocomplete
-                                                    disablePortal
-                                                    id="destination-port"
-                                                    options={ports}
-                                                    renderOption={(props, option, i) => {
-                                                        return (
-                                                            <li {...props} key={option.portId}>
-                                                                {option.portName+", "+option.country}
-                                                            </li>
-                                                        );
-                                                    }}
-                                                    getOptionLabel={(option: any) => { 
-                                                        if (option !== null && option !== undefined) {
-                                                            return option.portName+', '+option.country;
-                                                        }
-                                                        return ""; 
-                                                    }}
-                                                    value={portDestination}
-                                                    sx={{ mt: 1 }}
-                                                    renderInput={(params: any) => <TextField {...params} />}
-                                                    onChange={(e: any, value: any) => { setPortDestination(value); }}
-                                                    fullWidth
-                                                /> : <Skeleton />
-                                            }
-                                        </Grid>
-                                        <Grid item xs={12} md={4} mt={1}>
-                                            <InputLabel htmlFor="loading-date" sx={inputLabelStyles}>{t('loadingDate')}</InputLabel>
-                                            <LocalizationProvider dateAdapter={AdapterDayjs}>
-                                                <DateTimePicker 
-                                                    value={loadingDate} 
-                                                    onChange={(value: any) => { setLoadingDate(value) }}
-                                                    slotProps={{ textField: { id: "loading-date", fullWidth: true, sx: datetimeStyles }, inputAdornment: { sx: { position: "relative", right: "11.5px" } } }}
-                                                />
-                                            </LocalizationProvider>
-                                        </Grid>
-                                        <Grid item xs={12} md={4} mt={1}>
-                                            <InputLabel htmlFor="loading-city" sx={inputLabelStyles}>{t('loadingCity')}</InputLabel>
-                                            {
-                                                cities !== null ?
-                                                <Autocomplete
-                                                    disablePortal
-                                                    id="loading-city"
-                                                    options={cities}
-                                                    getOptionLabel={(option: any) => { 
-                                                        if (option !== null && option !== undefined) {
-                                                            return option.name+', '+option.country;
-                                                        }
-                                                        return ""; 
-                                                    }}
-                                                    value={loadingCity}
-                                                    sx={{ mt: 1 }}
-                                                    renderInput={(params: any) => <TextField {...params} />}
-                                                    onChange={(e: any, value: any) => { setLoadingCity(value); }}
-                                                    fullWidth
-                                                /> : <Skeleton />
-                                            }
-                                        </Grid>
-                                        <Grid item xs={12} md={4} mt={1}>
-                                            <InputLabel htmlFor="haulage-type" sx={inputLabelStyles}>{t('haulageType')}</InputLabel>
-                                            <NativeSelect
-                                                id="haulage-type"
-                                                value={haulageType}
-                                                onChange={handleChangeHaulageType}
-                                                input={<BootstrapInput />}
-                                                fullWidth
-                                            >
-                                                <option key={"kdq-"} value="">{t('anyType')}</option>
-                                                {
-                                                    haulageTypes.map((item: any, i: number) => (
-                                                        <option key={"kdq"+i} value={item}>{item}</option>
-                                                    ))
-                                                }
-                                            </NativeSelect>
-                                        </Grid>
-                                    </Grid> : null
-                                }
-                                {
-                                    activeStep === 1 ?
-                                    <Grid container spacing={2} mt={1} px={2}>
-                                        <Grid item xs={12}>
-                                            <Alert severity="info" sx={{ mb: 2 }}>{t('selectOfferMessage')}</Alert>
-                                            {
-                                                !loadResults ? 
-                                                seafreights !== null && seafreights.length !== 0 ?
-                                                    <Box>
-                                                        <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>{t('listSeaFreightsPricingOffers')}</Typography>
-                                                        <DataGrid
-                                                            rows={seafreights}
-                                                            columns={columnsSeafreights}
-                                                            hideFooter
-                                                            getRowId={(row: any) => row?.seaFreightId}
-                                                            getRowHeight={() => "auto" }
-                                                            sx={{ height: "auto" }}
-                                                            onRowClick={handleRowSeafreightsClick}
-                                                        />
-                                                    </Box>
-                                                    : null
-                                                : <Skeleton />
-                                            }
-                                            {
-                                                !loadResults ? 
-                                                haulages !== null && haulages.length !== 0 ?
-                                                    <Box>
-                                                        <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>{t('listHaulagesPricingOffers')}</Typography>
-                                                        <DataGrid
-                                                            rows={haulages}
-                                                            columns={columnsHaulages}
-                                                            hideFooter
-                                                            getRowId={(row: any) => row?.id}
-                                                            getRowHeight={() => "auto" }
-                                                            sx={{ height: "auto" }}
-                                                            onRowClick={handleRowHaulagesClick}
-                                                        />
-                                                    </Box>
-                                                    : null
-                                                : <Skeleton />
-                                            }
-                                            {
-                                                !loadResults ? 
-                                                miscs !== null && miscs.length !== 0 ?
-                                                    <Box>
-                                                        <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>{t('listMiscPricingOffers')}</Typography>
-                                                        <DataGrid
-                                                            rows={miscs}
-                                                            columns={columnsMiscs}
-                                                            hideFooter
-                                                            getRowId={(row: any) => row?.id}
-                                                            getRowHeight={() => "auto" }
-                                                            sx={{ height: "auto" }}
-                                                            onRowClick={handleRowMiscsClick}
-                                                            // checkboxSelection
-                                                        />
-                                                    </Box>
-                                                    : null
-                                                : <Skeleton />
-                                            }
-                                        </Grid>
-                                    </Grid> : null
-                                }
-                                {
-                                    activeStep === 2 ?
-                                    <Grid container spacing={2} mt={1} px={2}>
-                                        <Grid item xs={12}>
-                                            <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>{t('selectedSeafreight')}</Typography>
-                                            <DataGrid
-                                                rows={[selectedSeafreight]}
-                                                columns={columnsSeafreights}
-                                                hideFooter
-                                                getRowId={(row: any) => row?.seaFreightId}
-                                                getRowHeight={() => "auto" }
-                                                sx={{ height: "auto" }}
-                                                isRowSelectable={(params: any) => false}
-                                                // onRowClick={handleRowSeafreightsClick}
-                                                // checkboxSelection
-                                            />
-                                        </Grid>
-                                        {
-                                            selectedHaulage !== null ? 
-                                            <Grid item xs={12}>
-                                                <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>{t('selectedHaulage')}</Typography>
-                                                <DataGrid
-                                                    rows={[selectedHaulage]}
-                                                    columns={columnsHaulages}
-                                                    hideFooter
-                                                    getRowId={(row: any) => row?.id}
-                                                    getRowHeight={() => "auto" }
-                                                    sx={{ height: "auto" }}
-                                                    isRowSelectable={(params: any) => false}
-                                                />
-                                            </Grid> : null
-                                        }
-                                        {
-                                            selectedMisc !== null ? 
-                                            <Grid item xs={12}>
-                                                <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>{t('selectedMisc')}</Typography>
-                                                <DataGrid
-                                                    rows={[selectedMisc]}
-                                                    columns={columnsMiscs}
-                                                    hideFooter
-                                                    getRowId={(row: any) => row?.id}
-                                                    getRowHeight={() => "auto" }
-                                                    sx={{ height: "auto" }}
-                                                    isRowSelectable={(params: any) => false}
-                                                />
-                                            </Grid> : null
-                                        }
-                                        <Grid item xs={12} md={4}>
-                                            <InputLabel htmlFor="margin" sx={inputLabelStyles}>{t('margin')} (%)</InputLabel>
-                                            <BootstrapInput id="margin" type="number" value={margin} onChange={(e: any) => setMargin(e.target.value)} fullWidth />
-                                        </Grid>
-                                        <Grid item xs={12} md={4}>
-                                            <InputLabel htmlFor="reduction" sx={inputLabelStyles}>{t('reduction')} (%)</InputLabel>
-                                            <BootstrapInput id="reduction" type="number" value={reduction} onChange={(e: any) => setReduction(e.target.value)} fullWidth />
-                                        </Grid>
-                                        <Grid item xs={12} md={4}>
-                                            <InputLabel htmlFor="adding" sx={inputLabelStyles}>{t('extraFee')} ({selectedSeafreight !== null ? selectedSeafreight.currency : null})</InputLabel>
-                                            <BootstrapInput id="adding" type="number" value={adding} onChange={(e: any) => setAdding(e.target.value)} fullWidth />
-                                        </Grid>
-                                        <Grid item xs={12}>
-                                            <InputLabel htmlFor="details" sx={inputLabelStyles}>{t('detailsOffer')}</InputLabel>
-                                            <BootstrapInput id="details" type="text" multiline rows={3} value={details} onChange={(e: any) => setDetails(e.target.value)} fullWidth />
-                                        </Grid>
-                                        <Grid item xs={12}>
-                                            <Typography variant="h6">
-                                                { 
-                                                    selectedSeafreight !== null ? 
-                                                    <Chip variant="outlined" size="medium"
-                                                        label={t('totalPrice').toUpperCase()+" : "+ Number(totalPrice+totalPrice*margin/100-totalPrice*reduction/100+adding*1).toFixed(2).toString()+" "+selectedSeafreight.currency}
-                                                        sx={{ fontWeight: "bold", fontSize: 16, py: 3 }} 
-                                                    /> : null
-                                                }
-                                            </Typography>
-                                        </Grid>
-                                    </Grid>
-                                    : null
-                                }
-
-                                <Box sx={{ display: 'flex', flexDirection: 'row', pt: 2, px: 2 }}>
-                                    <Button
-                                        variant="contained" 
-                                        color="inherit" 
-                                        sx={whiteButtonStyles}
-                                        disabled={activeStep === 0}
-                                        onClick={handleBack}
-                                    >
-                                        {t('back')}
-                                    </Button>
-                                    <Box sx={{ flex: '1 1 auto' }} />
-                                    {isStepOptional(activeStep) && (
-                                    <Button variant="contained" color="inherit" sx={whiteButtonStyles} onClick={handleSkip}>
-                                        {t('skip')}
-                                    </Button>
-                                    )}
-                                    <Button variant="contained" color="inherit" sx={whiteButtonStyles} onClick={handleNext}>
-                                        {activeStep === steps.length - 1 ? t('sendOfferValidation') : t('nextStep')}
-                                    </Button>
-                                </Box>
-                            </React.Fragment>
-                        )}
-                    </Box>
                 </DialogContent>
                 <DialogActions>
                     {/* <Button variant="contained" color={!load ? "primary" : "info"} className="mr-3" onClick={() => { getPriceRequests(); }} sx={{ textTransform: "none" }}>Generate the offer</Button> */}
