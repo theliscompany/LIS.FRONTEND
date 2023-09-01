@@ -42,7 +42,7 @@ function NewRequest(props: any) {
     const [assignedManager, setAssignedManager] = useState<string>("null");
     const [assignees, setAssignees] = useState<any>(null);
     
-    const [containerType, setContainerType] = useState<number>(8);
+    const [containerType, setContainerType] = useState<string>("20' Dry");
     const [quantity, setQuantity] = useState<number>(1);
     const [containersSelection, setContainersSelection] = useState<any>([]);
     
@@ -220,8 +220,8 @@ function NewRequest(props: any) {
                         clientNumber: clientNumber,
                         packingType: packingType,
                         containers: containersSelection.map((elm: any, i: number) => { return { 
-                            id: i, 
-                            containers: containers.find((item: any) => item.packageId === elm.container).packageName, 
+                            id: containers.find((item: any) => item.packageName === elm.container).packageName, 
+                            containers: elm.container, 
                             quantity: elm.quantity, 
                         } }),
                         units: auxUnits.map((elm: any, i: number) => { return { 
@@ -351,9 +351,9 @@ function NewRequest(props: any) {
                                 input={<BootstrapInput />}
                                 fullWidth
                             >
-                                <option value="FCL">FCL</option>
-                                <option value="Breakbulk/LCL">Breakbulk/LCL</option>
-                                <option value="Unit RoRo">Unit RoRo</option>
+                                <option value="FCL">{t('fcl')}</option>
+                                <option value="Breakbulk/LCL">{t('breakbulk')}</option>
+                                <option value="Unit RoRo">{t('roro')}</option>
                             </NativeSelect>
                         </Grid>
                         {
@@ -366,13 +366,14 @@ function NewRequest(props: any) {
                                     <NativeSelect
                                         id="container-type"
                                         value={containerType}
-                                        onChange={(event: { target: { value: any } }) => { setContainerType(Number(event.target.value)); }}
+                                        // onChange={(event: { target: { value: any } }) => { setContainerType(Number(event.target.value)); }}
+                                        onChange={(e: any) => { setContainerType(e.target.value) }}
                                         input={<BootstrapInput />}
                                         fullWidth
                                     >
-                                        <option key={"elm1-x"} value={0}>{t('notDefined')}</option>
-                                        {containers.filter((elm: any) => ["20' Dry"]).map((elm: any, i: number) => (
-                                            <option key={"elm1-"+i} value={elm.packageId}>{elm.packageName}</option>
+                                        <option key={"elm1-x"} value="">{t('notDefined')}</option>
+                                        {containers.map((elm: any, i: number) => (
+                                            <option key={"elm1-"+i} value={elm.packageName}>{elm.packageName}</option>
                                         ))}
                                     </NativeSelect>
                                     : <Skeleton />
@@ -387,9 +388,9 @@ function NewRequest(props: any) {
                                     variant="contained" color="inherit" fullWidth sx={whiteButtonStyles} 
                                     style={{ marginTop: "30px", height: "42px", float: "right" }} 
                                     onClick={() => {
-                                        if (containerType !== 0 && quantity > 0) {
-                                            setContainersSelection((prevItems: any) => [...prevItems, { container: containerType, quantity: quantity }]);
-                                            setContainerType(0); setQuantity(1);
+                                        if (containerType !== "" && quantity > 0) {
+                                            setContainersSelection((prevItems: any) => [...prevItems, { container: containerType, quantity: quantity, id: containers.find((item: any) => item.packageName === containerType).packageId }]);
+                                            setContainerType(""); setQuantity(1);
                                         } 
                                         else {
                                             enqueueSnackbar("You need to select a container type and a good value for quantity.", { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
@@ -405,9 +406,8 @@ function NewRequest(props: any) {
                                         <Grid container spacing={2}>
                                             {
                                                 containersSelection.map((item: any, index: number) => (
-                                                    <Grid item xs={12} md={4}>
+                                                    <Grid key={"listitem1-"+index} item xs={12} md={4}>
                                                         <ListItem
-                                                            key={"listitem1-"+index}
                                                             sx={{ border: "1px solid #e5e5e5" }}
                                                             secondaryAction={
                                                                 <IconButton edge="end" onClick={() => {
@@ -418,9 +418,7 @@ function NewRequest(props: any) {
                                                             }
                                                         >
                                                             <ListItemText primary={
-                                                                containers.find((elm: any) => elm.packageId === item.container) !== undefined ?
-                                                                t('container')+" : "+containers.find((elm: any) => elm.packageId === item.container).packageName+" | "+t('quantity')+" : "+item.quantity
-                                                                : t('container')+" : "+item.container+" | "+t('quantity')+" : "+item.quantity
+                                                                t('container')+" : "+item.container+" | "+t('quantity')+" : "+item.quantity
                                                             } />
                                                         </ListItem>
                                                     </Grid>

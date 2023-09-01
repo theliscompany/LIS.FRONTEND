@@ -547,9 +547,9 @@ function Landing() {
                                 input={<BootstrapInput />}
                                 fullWidth
                             >
-                                <option value="FCL">FCL</option>
-                                <option value="Breakbulk/LCL">Breakbulk/LCL</option>
-                                <option value="Unit RoRo">Unit RoRo</option>
+                                <option value="FCL">{t('fcl')}</option>
+                                <option value="Breakbulk/LCL">{t('breakbulk')}</option>
+                                <option value="Unit RoRo">{t('roro')}</option>
                             </NativeSelect>
                         </Grid>
                         <Grid item xs={12} md={6}>

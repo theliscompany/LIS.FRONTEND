@@ -11,6 +11,7 @@ import { BackendService } from '../../services/fetch';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { BootstrapDialog, BootstrapDialogTitle, buttonCloseStyles } from '../../misc/styles';
+import { NavLink } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
 function colors(value: string) {
@@ -61,7 +62,7 @@ function PriceOffers() {
             if (response !== null && response.code !== undefined) {
                 if (response.code === 200) {
                     console.log(response.data);
-                    setOffers(response.data);
+                    setOffers(response.data.reverse());
                     setLoad(false);
                 }
                 else {
@@ -166,7 +167,7 @@ function PriceOffers() {
                                                                         <TableCell align="left">{row.status !== "Accepted" && row.clientApproval === "Pending" ? <Chip label={t('noEmail')} /> : <Chip label={row.clientApproval} color={colors(row.clientApproval)} />}</TableCell>
                                                                         <TableCell align="left">{Number(row.totalPrice+row.totalPrice*row.margin/100-row.totalPrice*row.reduction/100+row.extraFee*1).toFixed(2)} {row.seaFreight.currency}</TableCell>
                                                                         <TableCell align="left">
-                                                                            <IconButton href={"/admin/quote-offers/"+row.id} sx={{ mr: 1 }}>
+                                                                            <IconButton component={NavLink} to={"/admin/quote-offers/"+row.id} sx={{ mr: 1 }}>
                                                                                 <EditIcon fontSize="small" />
                                                                             </IconButton>
                                                                             <IconButton onClick={() => { setCurrentId(row.id); setModal(true); }}>
