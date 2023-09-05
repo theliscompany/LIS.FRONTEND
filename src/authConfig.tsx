@@ -51,5 +51,8 @@ export const protectedResources = {
   },
   apiLisOffer: {
     endPoint: "https://lis-offer.azurewebsites.net/api"
+  },
+  apiLisClient: {
+    endPoint: "https://liscrm-dev.azurewebsites.net"
   }
 }
