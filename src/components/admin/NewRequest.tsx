@@ -14,6 +14,7 @@ import { Link } from 'react-router-dom';
 import { AuthenticationResult } from '@azure/msal-browser';
 import AutocompleteSearch from '../shared/AutocompleteSearch';
 import { useTranslation } from 'react-i18next';
+import ClientSearch from '../shared/ClientSearch';
 
 //let statusTypes = ["EnAttente", "Valider", "Rejeter"];
 // let cargoTypes = ["Container", "Conventional", "RollOnRollOff"];
@@ -31,7 +32,7 @@ function NewRequest(props: any) {
     const [message, setMessage] = useState<string>("");
     // const [cargoType, setCargoType] = useState<string>("0");
     const [packingType, setPackingType] = useState<string>("FCL");
-    const [clientNumber, setClientNumber] = useState<string>("");
+    const [clientNumber, setClientNumber] = useState<any>(null);
     // const [departurePort, setDeparturePort] = useState<any>(null);
     // const [arrivalPort, setArrivalPort] = useState<any>(null);
     const [departure, setDeparture] = useState<any>(null);
@@ -217,7 +218,7 @@ function NewRequest(props: any) {
                         departure: departure !== null && departure !== undefined ? departure.city.toUpperCase()+', '+departure.country+', '+departure.latitude+', '+departure.longitude : "",
                         arrival: arrival !== null && arrival !== undefined ? arrival.city.toUpperCase()+', '+arrival.country+', '+arrival.latitude+', '+arrival.longitude : "",
                         cargoType: 0,
-                        clientNumber: clientNumber,
+                        clientNumber: clientNumber !== null ? String(clientNumber.contactId) : null,
                         packingType: packingType,
                         containers: containersSelection.map((elm: any, i: number) => { return { 
                             id: containers.find((item: any) => item.packageName === elm.container).packageName, 
@@ -595,7 +596,8 @@ function NewRequest(props: any) {
                         </Grid>
                         <Grid item xs={12} md={6} mt={1}>
                             <InputLabel htmlFor="client-number" sx={inputLabelStyles}>{t('clientNumber')}</InputLabel>
-                            <BootstrapInput id="client-number" value={clientNumber} onChange={(e: any) => {setClientNumber(e.target.value)}} fullWidth />
+                            {/* <BootstrapInput id="client-number" value={clientNumber} onChange={(e: any) => {setClientNumber(e.target.value)}} fullWidth /> */}
+                            <ClientSearch id="client-number" value={clientNumber} onChange={setClientNumber} callBack={() => console.log(clientNumber)} fullWidth />
                         </Grid>
 
                         <Grid item xs={12} md={6} mt={.5}>

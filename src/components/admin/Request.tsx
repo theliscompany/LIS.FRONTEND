@@ -27,6 +27,7 @@ import { JSON as seaPorts } from 'sea-ports';
 // @ts-ignore
 
 import { DataGrid, GridColDef, GridEventListener, GridRenderCellParams, GridValueFormatterParams, GridValueGetterParams } from '@mui/x-data-grid';
+import ClientSearch from '../shared/ClientSearch';
 
 //let statusTypes = ["EnAttente", "Valider", "Rejeter"];
 // let cargoTypes = ["Container", "Conventional", "RollOnRollOff"];
@@ -159,7 +160,7 @@ function Request(props: any) {
     // const [cargoType, setCargoType] = useState<string>("0");
     // const [cargoProducts, setCargoProducts] = useState<any>([]);
     const [packingType, setPackingType] = useState<string>("FCL");
-    const [clientNumber, setClientNumber] = useState<string>("");
+    const [clientNumber, setClientNumber] = useState<any>(null);
     // const [departureTown, setDepartureTown] = useState<any>(null);
     // const [arrivalTown, setArrivalTown] = useState<any>(null);
     const [departure, setDeparture] = useState<any>(null);
@@ -207,6 +208,7 @@ function Request(props: any) {
     const [cities, setCities] = useState<any>(null);
     const [ports, setPorts] = useState<any>(null);
     const [containers, setContainers] = useState<any>(null);
+    const [clients, setClients] = useState<any>(null);
     const [miscs, setMiscs] = useState<any>(null);
     const [haulages, setHaulages] = useState<any>(null);
     const [seafreights, setSeafreights] = useState<any>(null);
@@ -231,7 +233,8 @@ function Request(props: any) {
 
     const { t } = useTranslation();
     
-    const steps = [t('searchOffers'), t('listOffers'), t('sendOffer')];
+    // const steps = [t('searchOffers'), t('listOffers'), t('sendOffer')];
+    const steps = ["Select seafreight", "Select haulage", "Select misc", "Send and offer"];
     const haulageTypes = [t('haulageType1'), t('haulageType2'), t('haulageType3'), t('haulageType4'), t('haulageType5')];
     const statusTypes = [
         { type: "EnAttente", value: "En attente", description: t('descriptionEnAttente') }, 
@@ -440,7 +443,12 @@ function Request(props: any) {
     };
     
     const handleRowSeafreightsClick: GridEventListener<'rowClick'> = (params: any) => {
-        setSelectedSeafreight(params.row);
+        if (params.row === selectedSeafreight) {
+            setSelectedSeafreight(null);
+        }
+        else {
+            setSelectedSeafreight(params.row);
+        }
     };
     
     const handleRowMiscsClick: GridEventListener<'rowClick'> = (params: any) => {
@@ -534,7 +542,7 @@ function Request(props: any) {
                     setStatus(response.data.status);
                     // setCargoType(String(cargoTypes.indexOf(response.data.cargoType)));
                     setPackingType(response.data.packingType !== null ? response.data.packingType : "FCL");
-                    setClientNumber(response.data.clientNumber !== null ? response.data.clientNumber : "");
+                    setClientNumber(response.data.clientNumber !== null && response.data.clientNumber !== "" ? { contactId: Number(response.data.clientNumber) } : "");
                     setContainersSelection(response.data.containers.map((elm: any) => { return {
                         id: elm.id,
                         container: elm.containers, 
@@ -639,7 +647,7 @@ function Request(props: any) {
                 } }),
                 quantity: quantity,
                 detail: message,
-                clientNumber: clientNumber,
+                clientNumber: clientNumber !== null ? String(clientNumber.contactId) : null,
                 tags: tags.length !== 0 ? tags.map((elm: any) => elm.productName).join(',') : null,
                 assigneeId: Number(assignedManager)
             };
@@ -1419,7 +1427,8 @@ function Request(props: any) {
                                 </Grid>
                                 <Grid item xs={12} md={6} mt={1}>
                                     <InputLabel htmlFor="client-number" sx={inputLabelStyles}>{t('clientNumber')}</InputLabel>
-                                    <BootstrapInput id="client-number" value={clientNumber} onChange={(e: any) => {setClientNumber(e.target.value)}} fullWidth />
+                                    {/* <BootstrapInput id="client-number" value={clientNumber} onChange={(e: any) => {setClientNumber(e.target.value)}} fullWidth /> */}
+                                    <ClientSearch id="client-number" value={clientNumber} onChange={setClientNumber} callBack={() => console.log(clientNumber)} fullWidth />
                                 </Grid>
                                 
                                 <Grid item xs={12} md={6} mt={.5}>
@@ -1457,12 +1466,11 @@ function Request(props: any) {
                                             aria-controls="panel1a-content"
                                             id="panel1a-header"
                                         >
-                                            <Typography>{t('generatePriceOffer')}</Typography>
+                                            <Typography variant="h5" sx={{ mx: 2 }}><b>{t('generatePriceOffer')}</b></Typography>
                                         </AccordionSummary>
                                         <AccordionDetails>
                                             <Box sx={{ px: 0 }}>
-                                                <Typography variant="h5" sx={{ mb: 3 }}><b>{t('generatePriceOffer')}</b></Typography>
-                                                <Stepper activeStep={activeStep}>
+                                                <Stepper activeStep={activeStep} sx={{ px: 1 }}>
                                                     {steps.map((label, index) => {
                                                     const stepProps: { completed?: boolean } = {};
                                                     const labelProps: {
@@ -1498,7 +1506,7 @@ function Request(props: any) {
                                                         {
                                                             activeStep === 0 ?
                                                             <Grid container spacing={2} mt={1} px={2}>
-                                                                <Grid item xs={12} md={4} mt={1}>
+                                                                {/* <Grid item xs={12} md={4} mt={1}>
                                                                     <InputLabel htmlFor="departure-date" sx={inputLabelStyles}>{t('departureDate')}</InputLabel>
                                                                     <LocalizationProvider dateAdapter={AdapterDayjs}>
                                                                         <DateTimePicker 
@@ -1507,7 +1515,7 @@ function Request(props: any) {
                                                                             slotProps={{ textField: { id: "departure-date", fullWidth: true, sx: datetimeStyles }, inputAdornment: { sx: { position: "relative", right: "11.5px" } } }}
                                                                         />
                                                                     </LocalizationProvider>
-                                                                </Grid>
+                                                                </Grid> */}
                                                                 <Grid item xs={12} md={4} mt={1}>
                                                                     <InputLabel htmlFor="port-departure" sx={inputLabelStyles}>{t('departurePort')}</InputLabel>
                                                                     {
@@ -1566,7 +1574,7 @@ function Request(props: any) {
                                                                         /> : <Skeleton />
                                                                     }
                                                                 </Grid>
-                                                                <Grid item xs={12} md={4} mt={1}>
+                                                                {/* <Grid item xs={12} md={4} mt={1}>
                                                                     <InputLabel htmlFor="loading-date" sx={inputLabelStyles}>{t('loadingDate')}</InputLabel>
                                                                     <LocalizationProvider dateAdapter={AdapterDayjs}>
                                                                         <DateTimePicker 
@@ -1575,7 +1583,7 @@ function Request(props: any) {
                                                                             slotProps={{ textField: { id: "loading-date", fullWidth: true, sx: datetimeStyles }, inputAdornment: { sx: { position: "relative", right: "11.5px" } } }}
                                                                         />
                                                                     </LocalizationProvider>
-                                                                </Grid>
+                                                                </Grid> */}
                                                                 <Grid item xs={12} md={4} mt={1}>
                                                                     <InputLabel htmlFor="loading-city" sx={inputLabelStyles}>{t('loadingCity')}</InputLabel>
                                                                     {
@@ -1598,7 +1606,7 @@ function Request(props: any) {
                                                                         /> : <Skeleton />
                                                                     }
                                                                 </Grid>
-                                                                <Grid item xs={12} md={4} mt={1}>
+                                                                {/* <Grid item xs={12} md={4} mt={1}>
                                                                     <InputLabel htmlFor="haulage-type" sx={inputLabelStyles}>{t('haulageType')}</InputLabel>
                                                                     <NativeSelect
                                                                         id="haulage-type"
@@ -1614,7 +1622,7 @@ function Request(props: any) {
                                                                             ))
                                                                         }
                                                                     </NativeSelect>
-                                                                </Grid>
+                                                                </Grid> */}
                                                             </Grid> : null
                                                         }
                                                         {

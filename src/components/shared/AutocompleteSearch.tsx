@@ -21,7 +21,6 @@ const AutocompleteSearch: React.FC<LocationAutocompleteProps> = ({ id, value, on
         setLoading(true);
         try {
             const response = await axios.get(
-                //`https://wft-geo-db.p.rapidapi.com/v1/geo/cities?limit=5&namePrefix=${value}`,
                 `https://wft-geo-db.p.rapidapi.com/v1/geo/cities?limit=5&namePrefix=${value}&sort=-population&languageCode=en`,
                 {
                     headers: {
@@ -64,8 +63,6 @@ const AutocompleteSearch: React.FC<LocationAutocompleteProps> = ({ id, value, on
             renderInput={(params: any) => (
                 <TextField
                     {...params}
-                    //label="Departure Location"
-                    //variant="outlined"
                     onChange={(event) => {
                         debouncedSearch(event.target.value);
                     }}
