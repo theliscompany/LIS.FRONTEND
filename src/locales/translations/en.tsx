@@ -252,9 +252,9 @@ export const en = {
   searchResultsFor: "Search results for",
   listRequestsQuote: "List of requests for quote",
   allRightsReserved: "All rights reserved",
-  fcl: "Containers",
-  breakbulk: "Breakbulk",
-  roro: "Rolling",
+  fcl: "FCL",
+  breakbulk: "Breakbulk/LCL",
+  roro: "Unit RoRo",
   descriptionEnAttente: "Awaiting processing",
   descriptionValider: "Quote approved by employee",
   descriptionRejeter: "Quote rejected by employee",
@@ -271,5 +271,11 @@ export const en = {
   haulageType2: "On trailer, Loading with Interval",
   haulageType3: "Side loader, direct loading",
   haulageType4: "Side loader, Loading with Interval, from trailer to floor",
-  haulageType5: "Side loader, Loading with Interval, from floor to trailer"
+  haulageType5: "Side loader, Loading with Interval, from floor to trailer",
+  searchSeafreight: "Search seafreight",
+  selectSeafreight: "Select seafreight",
+  searchHaulage: "Search haulage",
+  selectHaulage: "Select haulage",
+  selectMisc: "Select miscellaneous",
+  optional: "Optional"
 };

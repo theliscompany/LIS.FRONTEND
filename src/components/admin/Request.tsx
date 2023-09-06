@@ -120,6 +120,31 @@ function calculateDistance(coord1: any, coord2: any) {
     return distance;
 }
 
+function sortByCloseness(myPort: any, seaPorts: any) {
+    const myCoordinates = [myPort.latitude, myPort.longitude];
+
+    // Calculate distances and add them to the sea ports
+    seaPorts.forEach((seaPort: any) => {
+        const seaPortCoordinates = seaPort.coordinates;
+        if (seaPortCoordinates !== undefined) {
+            const distance = calculateDistance(myCoordinates, seaPortCoordinates);
+            seaPort.distance = distance; // Add the distance to each sea port
+        } else {
+            seaPort.distance = Infinity; // Ports without coordinates are considered farthest
+        }
+    });
+
+    // Sort the sea ports by distance
+    seaPorts.sort((a: any, b: any) => a.distance - b.distance);
+
+    // Remove the "distance" property from the sorted ports
+    seaPorts.forEach((seaPort: any) => {
+        delete seaPort.distance;
+    });
+
+    return seaPorts;
+}
+
 function findClosestSeaPort(myPort: any, seaPorts: any) {
     const myCoordinates = [myPort.latitude, myPort.longitude];
     let closestPort = null;
@@ -207,6 +232,8 @@ function Request(props: any) {
     const [products, setProducts] = useState<any>(null);
     const [cities, setCities] = useState<any>(null);
     const [ports, setPorts] = useState<any>(null);
+    const [ports1, setPorts1] = useState<any>(null);
+    const [ports2, setPorts2] = useState<any>(null);
     const [containers, setContainers] = useState<any>(null);
     const [clients, setClients] = useState<any>(null);
     const [miscs, setMiscs] = useState<any>(null);
@@ -234,7 +261,7 @@ function Request(props: any) {
     const { t } = useTranslation();
     
     // const steps = [t('searchOffers'), t('listOffers'), t('sendOffer')];
-    const steps = ["Select seafreight", "Select haulage", "Select misc", "Send and offer"];
+    const steps = [t('searchSeafreight'), t('selectSeafreight'), t('searchHaulage'), t('selectHaulage'), t('selectMisc'), t('sendOffer')];
     const haulageTypes = [t('haulageType1'), t('haulageType2'), t('haulageType3'), t('haulageType4'), t('haulageType5')];
     const statusTypes = [
         { type: "EnAttente", value: "En attente", description: t('descriptionEnAttente') }, 
@@ -276,7 +303,7 @@ function Request(props: any) {
             return (
                 <Box sx={{ my: 2 }}>{params.row.loadingPort}</Box>
             );
-        }, width: 275 },
+        }, width: 200 },
         { field: 'freeTime', headerName: t('freeTime'), valueFormatter: (params: GridValueFormatterParams) => `${params.value || ''} days`, width: 100 },
         { field: 'multiStop', headerName: t('multiStop'), valueGetter: (params: GridValueGetterParams) => `${params.row.multiStop || ''} ${params.row.currency}` },
         { field: 'overtimeTariff', headerName: t('overtimeTariff'), valueGetter: (params: GridValueGetterParams) => `${params.row.overtimeTariff || ''} ${params.row.currency}` },
@@ -323,7 +350,7 @@ function Request(props: any) {
     const [skipped, setSkipped] = React.useState(new Set<number>());
 
     const isStepOptional = (step: number) => {
-        return step === 5;
+        return step === 2 || step === 3 || step === 4;
     };
 
     const isStepSkipped = (step: number) => {
@@ -338,9 +365,12 @@ function Request(props: any) {
         }
         if (activeStep === 0) {
             if (containersSelection.map((elm: any) => elm.container).length !== 0 && portDestination !== null) {
-                console.log(containersSelection);
+                // console.log(containersSelection);
                 setContainersSelected(containersSelection.map((elm: any) => elm.id));
-                getPriceRequests();
+                if (selectedSeafreight === null) {
+                    setLoadResults(true);
+                    getSeaFreightPriceOffers();
+                }
                 setActiveStep((prevActiveStep) => prevActiveStep + 1);
                 setSkipped(newSkipped);
             }
@@ -368,36 +398,7 @@ function Request(props: any) {
                     seafreightPrices += selectedSeafreight.price40hcrf*containersSelection.find((elm: any) => elm.id === 15).quantity;
                 }
                 
-                if (selectedHaulage !== null) {
-                    seafreightPrices = seafreightPrices + selectedHaulage.unitTariff*containersSelection.reduce((total: any, obj: any) => total + Number(obj.quantity), 0);
-                }
-                
-                if (selectedMisc !== null) {
-                    if (selectedMisc.price20dry !== 0 && getPackageNamesByIds(containersSelected, containers).includes("20' Dry")) {
-                        seafreightPrices += selectedMisc.price20dry*containersSelection.find((elm: any) => elm.id === 8).quantity;
-                    }
-                    if (selectedMisc.price20rf !== 0 && getPackageNamesByIds(containersSelected, containers).includes("20' Rf")) {
-                        seafreightPrices += selectedMisc.price20rf*containersSelection.find((elm: any) => elm.id === 13).quantity;
-                    }
-                    if (selectedMisc.price40dry !== 0 && getPackageNamesByIds(containersSelected, containers).includes("40' Dry")) {
-                        seafreightPrices += selectedMisc.price40dry*containersSelection.find((elm: any) => elm.id === 9).quantity;
-                    }
-                    if (selectedMisc.price40hc !== 0 && getPackageNamesByIds(containersSelected, containers).includes("40' Hc")) {
-                        seafreightPrices += selectedMisc.price40hc*containersSelection.find((elm: any) => elm.id === 10).quantity;
-                    }
-                    if (selectedMisc.price40hcrf !== 0 && getPackageNamesByIds(containersSelected, containers).includes("40' HcRf")) {
-                        seafreightPrices += selectedMisc.price40hcrf*containersSelection.find((elm: any) => elm.id === 15).quantity;
-                    }
-                    setTotalPrice(seafreightPrices);
-                }
-                else {
-                    setTotalPrice(seafreightPrices);
-                }
-                
-                // console.log("Haulage : ", [selectedHaulage]);
-                // console.log("SeaFreight : ", [selectedSeafreight]);
-                // console.log("Misc : ", [selectedMisc]);
-
+                setTotalPrice(seafreightPrices);
                 setActiveStep((prevActiveStep) => prevActiveStep + 1);
                 setSkipped(newSkipped);
             }
@@ -406,16 +407,75 @@ function Request(props: any) {
             }
         }
         if (activeStep === 2) {
+            if (selectedHaulage === null) {
+                if (loadingCity !== null && haulageType !== "") {
+                    setLoadResults(true);
+                    getHaulagePriceOffers();
+                    setActiveStep((prevActiveStep) => prevActiveStep + 1);
+                }
+                else {
+                    enqueueSnackbar("You need to fill the fields loading city and haulage type.", { variant: "warning", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                }
+            }
+            
+            setSkipped(newSkipped);
+        }
+        if (activeStep === 3) {
+            if (selectedMisc === null) {
+                setLoadResults(true);
+                getMiscellaneousPriceOffers();
+            }
+            
+            var seafreightPrices = 0;
+            if (selectedHaulage !== null) {
+                seafreightPrices = seafreightPrices + selectedHaulage.unitTariff*containersSelection.reduce((total: any, obj: any) => total + Number(obj.quantity), 0);
+            }    
+            setTotalPrice(totalPrice+seafreightPrices);
+            setActiveStep((prevActiveStep) => prevActiveStep + 1);
+            setSkipped(newSkipped);
+        }
+        if (activeStep === 4) {
+            var seafreightPrices = 0;
+            if (selectedMisc !== null) {
+                if (selectedMisc.price20dry !== 0 && getPackageNamesByIds(containersSelected, containers).includes("20' Dry")) {
+                    seafreightPrices += selectedMisc.price20dry*containersSelection.find((elm: any) => elm.id === 8).quantity;
+                }
+                if (selectedMisc.price20rf !== 0 && getPackageNamesByIds(containersSelected, containers).includes("20' Rf")) {
+                    seafreightPrices += selectedMisc.price20rf*containersSelection.find((elm: any) => elm.id === 13).quantity;
+                }
+                if (selectedMisc.price40dry !== 0 && getPackageNamesByIds(containersSelected, containers).includes("40' Dry")) {
+                    seafreightPrices += selectedMisc.price40dry*containersSelection.find((elm: any) => elm.id === 9).quantity;
+                }
+                if (selectedMisc.price40hc !== 0 && getPackageNamesByIds(containersSelected, containers).includes("40' Hc")) {
+                    seafreightPrices += selectedMisc.price40hc*containersSelection.find((elm: any) => elm.id === 10).quantity;
+                }
+                if (selectedMisc.price40hcrf !== 0 && getPackageNamesByIds(containersSelected, containers).includes("40' HcRf")) {
+                    seafreightPrices += selectedMisc.price40hcrf*containersSelection.find((elm: any) => elm.id === 15).quantity;
+                }
+                setTotalPrice(totalPrice+seafreightPrices);
+            }
+            else {
+                setTotalPrice(totalPrice+seafreightPrices);
+            }
+            setActiveStep((prevActiveStep) => prevActiveStep + 1);
+            setSkipped(newSkipped);
+        }
+        if (activeStep === 5) {
             createNewOffer();
         }
     };
 
     const handleBack = () => {
-        if (activeStep === 2) {
-            setSelectedHaulage(null);
+        if (activeStep === 1) {
             setSelectedSeafreight(null);
+        }
+        if (activeStep === 3) {
+            setSelectedHaulage(null);
+        }
+        if (activeStep === 4) {
             setSelectedMisc(null);
         }
+        
         setActiveStep((prevActiveStep) => prevActiveStep - 1);
     };
 
@@ -443,12 +503,7 @@ function Request(props: any) {
     };
     
     const handleRowSeafreightsClick: GridEventListener<'rowClick'> = (params: any) => {
-        if (params.row === selectedSeafreight) {
-            setSelectedSeafreight(null);
-        }
-        else {
-            setSelectedSeafreight(params.row);
-        }
+        setSelectedSeafreight(params.row);
     };
     
     const handleRowMiscsClick: GridEventListener<'rowClick'> = (params: any) => {
@@ -563,16 +618,11 @@ function Request(props: any) {
                     
                     const closestDeparturePort = findClosestSeaPort(parseLocation(response.data.departure), allPorts);
                     const closestArrivalPort = findClosestSeaPort(parseLocation(response.data.arrival), allPorts);
-                    // Here we initialize the values of ports fields in main screen and generate price screen
-                    // var auxDeparture = convertStringToObject(response.data.departure);
-                    // var auxArrival = convertStringToObject(response.data.arrival);
-                    // auxDeparture = allPorts.find((elm: any) => elm.portName === auxDeparture.portName && elm.country === auxDeparture.country);
-                    // auxArrival = allPorts.find((elm: any) => elm.portName === auxArrival.portName && elm.country === auxArrival.country);
                     setPortDeparture(closestDeparturePort);
                     setPortDestination(closestArrivalPort);
-                    // setArrivalTown(auxArrival);
-                    // setPortDestination(auxArrival);
-
+                    setPorts1(sortByCloseness(parseLocation(response.data.departure), allPorts).slice(0, 5));
+                    setPorts2(sortByCloseness(parseLocation(response.data.arrival), allPorts).slice(0, 5));
+                    
                     setLoad(false);
                 }
                 else {
@@ -627,8 +677,6 @@ function Request(props: any) {
                 email: email,
                 status: status,
                 whatsapp: phone,
-                // departure: departureTown.portName+", "+departureTown.country,
-                // arrival: arrivalTown.portName+", "+arrivalTown.country,
                 departure: departure !== null && departure !== undefined ? departure.city.toUpperCase()+', '+departure.country+', '+departure.latitude+', '+departure.longitude : "",
                 arrival: arrival !== null && arrival !== undefined ? arrival.city.toUpperCase()+', '+arrival.country+', '+arrival.latitude+', '+arrival.longitude : "",
                 cargoType: 0,
@@ -785,7 +833,8 @@ function Request(props: any) {
                 });
             });
             
-            var urlSent = createGetRequestUrl(protectedResources.apiLisPricing.endPoint+"/Pricing/HaulagesOfferRequest?", loadingDate?.toISOString(), haulageType, loadingCity.id);
+            // I removed the loadingDate
+            var urlSent = createGetRequestUrl(protectedResources.apiLisPricing.endPoint+"/Pricing/HaulagesOfferRequest?", (new Date("01/01/2022"))?.toISOString(), haulageType, loadingCity.id);
             const response = await (context as BackendService<any>).getWithToken(urlSent, token);
             setLoadResults(false);
             setHaulages(response);
@@ -847,6 +896,7 @@ function Request(props: any) {
             
             var urlSent = createGetRequestUrl2(protectedResources.apiLisPricing.endPoint+"/Pricing/MiscellaneoussOffersRequest?", portDeparture.portId, portDestination.portId, departureDate?.toISOString(), containersFormatted);
             const response = await (context as BackendService<any>).getWithToken(urlSent, token);
+            setLoadResults(false);
             setMiscs(response);
             // console.log(response);  
         }
@@ -1074,6 +1124,7 @@ function Request(props: any) {
         if (value !== null && value !== undefined) {
             const closest = findClosestSeaPort(value, ports);
             setPortDeparture(closest);
+            setPorts1(sortByCloseness(value, ports).slice(0, 5));
         }
     }
 
@@ -1081,6 +1132,7 @@ function Request(props: any) {
         if (value !== null && value !== undefined) {
             const closest = findClosestSeaPort(value, ports);
             setPortDestination(closest);
+            setPorts2(sortByCloseness(value, ports).slice(0, 5));
         }
     }
 
@@ -1118,62 +1170,10 @@ function Request(props: any) {
                                 <Grid item xs={12} md={6} mt={1}>
                                     <InputLabel htmlFor="departure" sx={inputLabelStyles}>{t('departure')}</InputLabel>
                                     <AutocompleteSearch id="departure" value={departure} onChange={setDeparture} callBack={getClosestDeparture} fullWidth />
-                                    {/* {
-                                        ports !== null ?
-                                        <Autocomplete
-                                            disablePortal
-                                            id="departure"
-                                            options={ports}
-                                            renderOption={(props, option, i) => {
-                                                return (
-                                                    <li {...props} key={option.portId}>
-                                                        {option.portName+", "+option.country}
-                                                    </li>
-                                                );
-                                            }}
-                                            getOptionLabel={(option: any) => { 
-                                                if (option !== null && option !== undefined) {
-                                                    return option.portName+', '+option.country;
-                                                }
-                                                return ""; 
-                                            }}
-                                            value={departureTown}
-                                            sx={{ mt: 1 }}
-                                            renderInput={(params: any) => <TextField {...params} />}
-                                            onChange={(e: any, value: any) => { setDepartureTown(value); }}
-                                            fullWidth
-                                        /> : <Skeleton />
-                                    } */}
                                 </Grid>
                                 <Grid item xs={12} md={6} mt={1}>
                                     <InputLabel htmlFor="arrival" sx={inputLabelStyles}>{t('arrival')}</InputLabel>
                                     <AutocompleteSearch id="arrival" value={arrival} onChange={setArrival} callBack={getClosestArrival} fullWidth />
-                                    {/* {
-                                        ports !== null ?
-                                        <Autocomplete
-                                            disablePortal
-                                            id="arrival"
-                                            options={ports}
-                                            renderOption={(props, option, i) => {
-                                                return (
-                                                    <li {...props} key={option.portId}>
-                                                        {option.portName+", "+option.country}
-                                                    </li>
-                                                );
-                                            }}
-                                            getOptionLabel={(option: any) => { 
-                                                if (option !== null && option !== undefined) {
-                                                    return option.portName+', '+option.country;
-                                                }
-                                                return ""; 
-                                            }}
-                                            value={arrivalTown}
-                                            sx={{ mt: 1 }}
-                                            renderInput={(params: any) => <TextField {...params} />}
-                                            onChange={(e: any, value: any) => { setArrivalTown(value); }}
-                                            fullWidth
-                                        /> : <Skeleton />
-                                    } */}
                                 </Grid>
                                 <Grid item xs={12} md={3} mt={1}>
                                     <InputLabel htmlFor="packing-type" sx={inputLabelStyles}>{t('packingType')}</InputLabel>
@@ -1200,7 +1200,6 @@ function Request(props: any) {
                                             <NativeSelect
                                                 id="container-type"
                                                 value={containerType}
-                                                // onChange={(event: { target: { value: any } }) => { setContainerType(Number(event.target.value)); }}
                                                 onChange={(e: any) => { setContainerType(e.target.value) }}
                                                 input={<BootstrapInput />}
                                                 fullWidth
@@ -1466,7 +1465,7 @@ function Request(props: any) {
                                             aria-controls="panel1a-content"
                                             id="panel1a-header"
                                         >
-                                            <Typography variant="h5" sx={{ mx: 2 }}><b>{t('generatePriceOffer')}</b></Typography>
+                                            <Typography variant="h6" sx={{ mx: 0 }}><b>{t('generatePriceOffer')}</b></Typography>
                                         </AccordionSummary>
                                         <AccordionDetails>
                                             <Box sx={{ px: 0 }}>
@@ -1478,7 +1477,7 @@ function Request(props: any) {
                                                     } = {};
                                                     if (isStepOptional(index)) {
                                                         labelProps.optional = (
-                                                        <Typography variant="caption">Optional</Typography>
+                                                        <Typography variant="caption">{t('optional')}</Typography>
                                                         );
                                                     }
                                                     if (isStepSkipped(index)) {
@@ -1506,24 +1505,14 @@ function Request(props: any) {
                                                         {
                                                             activeStep === 0 ?
                                                             <Grid container spacing={2} mt={1} px={2}>
-                                                                {/* <Grid item xs={12} md={4} mt={1}>
-                                                                    <InputLabel htmlFor="departure-date" sx={inputLabelStyles}>{t('departureDate')}</InputLabel>
-                                                                    <LocalizationProvider dateAdapter={AdapterDayjs}>
-                                                                        <DateTimePicker 
-                                                                            value={departureDate} 
-                                                                            onChange={(value: any) => { setDepartureDate(value) }}
-                                                                            slotProps={{ textField: { id: "departure-date", fullWidth: true, sx: datetimeStyles }, inputAdornment: { sx: { position: "relative", right: "11.5px" } } }}
-                                                                        />
-                                                                    </LocalizationProvider>
-                                                                </Grid> */}
-                                                                <Grid item xs={12} md={4} mt={1}>
+                                                                <Grid item xs={12} md={6} mt={1}>
                                                                     <InputLabel htmlFor="port-departure" sx={inputLabelStyles}>{t('departurePort')}</InputLabel>
                                                                     {
                                                                         ports !== null ?
                                                                         <Autocomplete
                                                                             disablePortal
                                                                             id="port-departure"
-                                                                            options={ports}
+                                                                            options={ports1}
                                                                             renderOption={(props, option, i) => {
                                                                                 return (
                                                                                     <li {...props} key={option.portId}>
@@ -1545,14 +1534,14 @@ function Request(props: any) {
                                                                         /> : <Skeleton />
                                                                     }
                                                                 </Grid>
-                                                                <Grid item xs={12} md={4} mt={1}>
+                                                                <Grid item xs={12} md={6} mt={1}>
                                                                     <InputLabel htmlFor="destination-port" sx={inputLabelStyles}>{t('arrivalPort')}</InputLabel>
                                                                     {
                                                                         ports !== null ?
                                                                         <Autocomplete
                                                                             disablePortal
                                                                             id="destination-port"
-                                                                            options={ports}
+                                                                            options={ports2}
                                                                             renderOption={(props, option, i) => {
                                                                                 return (
                                                                                     <li {...props} key={option.portId}>
@@ -1574,55 +1563,6 @@ function Request(props: any) {
                                                                         /> : <Skeleton />
                                                                     }
                                                                 </Grid>
-                                                                {/* <Grid item xs={12} md={4} mt={1}>
-                                                                    <InputLabel htmlFor="loading-date" sx={inputLabelStyles}>{t('loadingDate')}</InputLabel>
-                                                                    <LocalizationProvider dateAdapter={AdapterDayjs}>
-                                                                        <DateTimePicker 
-                                                                            value={loadingDate} 
-                                                                            onChange={(value: any) => { setLoadingDate(value) }}
-                                                                            slotProps={{ textField: { id: "loading-date", fullWidth: true, sx: datetimeStyles }, inputAdornment: { sx: { position: "relative", right: "11.5px" } } }}
-                                                                        />
-                                                                    </LocalizationProvider>
-                                                                </Grid> */}
-                                                                <Grid item xs={12} md={4} mt={1}>
-                                                                    <InputLabel htmlFor="loading-city" sx={inputLabelStyles}>{t('loadingCity')}</InputLabel>
-                                                                    {
-                                                                        cities !== null ?
-                                                                        <Autocomplete
-                                                                            disablePortal
-                                                                            id="loading-city"
-                                                                            options={cities}
-                                                                            getOptionLabel={(option: any) => { 
-                                                                                if (option !== null && option !== undefined) {
-                                                                                    return option.name+', '+option.country;
-                                                                                }
-                                                                                return ""; 
-                                                                            }}
-                                                                            value={loadingCity}
-                                                                            sx={{ mt: 1 }}
-                                                                            renderInput={(params: any) => <TextField {...params} />}
-                                                                            onChange={(e: any, value: any) => { setLoadingCity(value); }}
-                                                                            fullWidth
-                                                                        /> : <Skeleton />
-                                                                    }
-                                                                </Grid>
-                                                                {/* <Grid item xs={12} md={4} mt={1}>
-                                                                    <InputLabel htmlFor="haulage-type" sx={inputLabelStyles}>{t('haulageType')}</InputLabel>
-                                                                    <NativeSelect
-                                                                        id="haulage-type"
-                                                                        value={haulageType}
-                                                                        onChange={handleChangeHaulageType}
-                                                                        input={<BootstrapInput />}
-                                                                        fullWidth
-                                                                    >
-                                                                        <option key={"kdq-"} value="">{t('anyType')}</option>
-                                                                        {
-                                                                            haulageTypes.map((item: any, i: number) => (
-                                                                                <option key={"kdq"+i} value={item}>{item}</option>
-                                                                            ))
-                                                                        }
-                                                                    </NativeSelect>
-                                                                </Grid> */}
                                                             </Grid> : null
                                                         }
                                                         {
@@ -1648,6 +1588,78 @@ function Request(props: any) {
                                                                             : null
                                                                         : <Skeleton />
                                                                     }
+                                                                </Grid>
+                                                            </Grid> : null
+                                                        }
+                                                        {
+                                                            activeStep === 2 ? 
+                                                            <Grid container spacing={2} mt={1} px={2}>
+                                                                {/* <Grid item xs={12} md={4} mt={1}>
+                                                                    <InputLabel htmlFor="departure-date" sx={inputLabelStyles}>{t('departureDate')}</InputLabel>
+                                                                    <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                                                        <DateTimePicker 
+                                                                            value={departureDate} 
+                                                                            onChange={(value: any) => { setDepartureDate(value) }}
+                                                                            slotProps={{ textField: { id: "departure-date", fullWidth: true, sx: datetimeStyles }, inputAdornment: { sx: { position: "relative", right: "11.5px" } } }}
+                                                                        />
+                                                                    </LocalizationProvider>
+                                                                </Grid> */}
+                                                                {/* <Grid item xs={12} md={4} mt={1}>
+                                                                    <InputLabel htmlFor="loading-date" sx={inputLabelStyles}>{t('loadingDate')}</InputLabel>
+                                                                    <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                                                        <DateTimePicker 
+                                                                            value={loadingDate} 
+                                                                            onChange={(value: any) => { setLoadingDate(value) }}
+                                                                            slotProps={{ textField: { id: "loading-date", fullWidth: true, sx: datetimeStyles }, inputAdornment: { sx: { position: "relative", right: "11.5px" } } }}
+                                                                        />
+                                                                    </LocalizationProvider>
+                                                                </Grid> */}
+                                                                <Grid item xs={12} md={6} mt={1}>
+                                                                    <InputLabel htmlFor="loading-city" sx={inputLabelStyles}>{t('loadingCity')}</InputLabel>
+                                                                    {
+                                                                        cities !== null ?
+                                                                        <Autocomplete
+                                                                            disablePortal
+                                                                            id="loading-city"
+                                                                            options={cities}
+                                                                            getOptionLabel={(option: any) => { 
+                                                                                if (option !== null && option !== undefined) {
+                                                                                    return option.name+', '+option.country;
+                                                                                }
+                                                                                return ""; 
+                                                                            }}
+                                                                            value={loadingCity}
+                                                                            sx={{ mt: 1 }}
+                                                                            renderInput={(params: any) => <TextField {...params} />}
+                                                                            onChange={(e: any, value: any) => { setLoadingCity(value); }}
+                                                                            fullWidth
+                                                                        /> : <Skeleton />
+                                                                    }
+                                                                </Grid>
+                                                                <Grid item xs={12} md={6} mt={1}>
+                                                                    <InputLabel htmlFor="haulage-type" sx={inputLabelStyles}>{t('haulageType')}</InputLabel>
+                                                                    <NativeSelect
+                                                                        id="haulage-type"
+                                                                        value={haulageType}
+                                                                        onChange={handleChangeHaulageType}
+                                                                        input={<BootstrapInput />}
+                                                                        fullWidth
+                                                                    >
+                                                                        <option key={"kdq-"} value="">{t('anyType')}</option>
+                                                                        {
+                                                                            haulageTypes.map((item: any, i: number) => (
+                                                                                <option key={"kdq"+i} value={item}>{item}</option>
+                                                                            ))
+                                                                        }
+                                                                    </NativeSelect>
+                                                                </Grid>
+                                                            </Grid>
+                                                            : null
+                                                        }
+                                                        {
+                                                            activeStep === 3 ? 
+                                                            <Grid container spacing={2} mt={1} px={2}>
+                                                                <Grid item xs={12}>
                                                                     {
                                                                         !loadResults ? 
                                                                         haulages !== null && haulages.length !== 0 ?
@@ -1666,6 +1678,14 @@ function Request(props: any) {
                                                                             : null
                                                                         : <Skeleton />
                                                                     }
+                                                                </Grid>
+                                                            </Grid>
+                                                            : null
+                                                        }
+                                                        {
+                                                            activeStep === 4 ? 
+                                                            <Grid container spacing={2} mt={1} px={2}>
+                                                                <Grid item xs={12}>
                                                                     {
                                                                         !loadResults ? 
                                                                         miscs !== null && miscs.length !== 0 ?
@@ -1679,17 +1699,17 @@ function Request(props: any) {
                                                                                     getRowHeight={() => "auto" }
                                                                                     sx={{ height: "auto" }}
                                                                                     onRowClick={handleRowMiscsClick}
-                                                                                    // checkboxSelection
                                                                                 />
                                                                             </Box>
                                                                             : null
                                                                         : <Skeleton />
                                                                     }
                                                                 </Grid>
-                                                            </Grid> : null
+                                                            </Grid>
+                                                            : null
                                                         }
                                                         {
-                                                            activeStep === 2 ?
+                                                            activeStep === 5 ?
                                                             <Grid container spacing={2} mt={1} px={2}>
                                                                 <Grid item xs={12}>
                                                                     <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>{t('selectedSeafreight')}</Typography>
@@ -1701,8 +1721,6 @@ function Request(props: any) {
                                                                         getRowHeight={() => "auto" }
                                                                         sx={{ height: "auto" }}
                                                                         isRowSelectable={(params: any) => false}
-                                                                        // onRowClick={handleRowSeafreightsClick}
-                                                                        // checkboxSelection
                                                                     />
                                                                 </Grid>
                                                                 {
@@ -1778,7 +1796,7 @@ function Request(props: any) {
                                                             </Button>
                                                             <Box sx={{ flex: '1 1 auto' }} />
                                                             {isStepOptional(activeStep) && (
-                                                            <Button variant="contained" color="inherit" sx={whiteButtonStyles} onClick={handleSkip}>
+                                                            <Button variant="contained" color="inherit" sx={whiteButtonStyles} onClick={handleSkip} style={{ marginRight: "10px" }}>
                                                                 {t('skip')}
                                                             </Button>
                                                             )}
