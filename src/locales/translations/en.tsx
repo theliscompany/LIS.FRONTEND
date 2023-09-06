@@ -271,5 +271,11 @@ export const en = {
   haulageType2: "On trailer, Loading with Interval",
   haulageType3: "Side loader, direct loading",
   haulageType4: "Side loader, Loading with Interval, from trailer to floor",
-  haulageType5: "Side loader, Loading with Interval, from floor to trailer"
+  haulageType5: "Side loader, Loading with Interval, from floor to trailer",
+  searchSeafreight: "Search seafreight",
+  selectSeafreight: "Select seafreight",
+  searchHaulage: "Search haulage",
+  selectHaulage: "Select haulage",
+  selectMisc: "Select miscellaneous",
+  optional: "Optional"
 };

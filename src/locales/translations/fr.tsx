@@ -271,5 +271,11 @@ export const fr = {
   haulageType2: "Sur remorque, chargement avec intervalle",
   haulageType3: "Chargeur latéral, chargement direct",
   haulageType4: "Chargeur latéral, chargement avec intervalle, de la remorque au sol",
-  haulageType5: "Chargeur latéral, chargement avec intervalle, du sol à la remorque"
+  haulageType5: "Chargeur latéral, chargement avec intervalle, du sol à la remorque",
+  searchSeafreight: "Chercher fret",
+  selectSeafreight: "Choisir fret",
+  searchHaulage: "Chercher transport",
+  selectHaulage: "Choisir transport",
+  selectMisc: "Choisir divers",
+  optional: "Optionnel"
 };

@@ -120,6 +120,31 @@ function calculateDistance(coord1: any, coord2: any) {
     return distance;
 }
 
+function sortByCloseness(myPort: any, seaPorts: any) {
+    const myCoordinates = [myPort.latitude, myPort.longitude];
+
+    // Calculate distances and add them to the sea ports
+    seaPorts.forEach((seaPort: any) => {
+        const seaPortCoordinates = seaPort.coordinates;
+        if (seaPortCoordinates !== undefined) {
+            const distance = calculateDistance(myCoordinates, seaPortCoordinates);
+            seaPort.distance = distance; // Add the distance to each sea port
+        } else {
+            seaPort.distance = Infinity; // Ports without coordinates are considered farthest
+        }
+    });
+
+    // Sort the sea ports by distance
+    seaPorts.sort((a: any, b: any) => a.distance - b.distance);
+
+    // Remove the "distance" property from the sorted ports
+    seaPorts.forEach((seaPort: any) => {
+        delete seaPort.distance;
+    });
+
+    return seaPorts;
+}
+
 function findClosestSeaPort(myPort: any, seaPorts: any) {
     const myCoordinates = [myPort.latitude, myPort.longitude];
     let closestPort = null;
@@ -207,6 +232,8 @@ function Request(props: any) {
     const [products, setProducts] = useState<any>(null);
     const [cities, setCities] = useState<any>(null);
     const [ports, setPorts] = useState<any>(null);
+    const [ports1, setPorts1] = useState<any>(null);
+    const [ports2, setPorts2] = useState<any>(null);
     const [containers, setContainers] = useState<any>(null);
     const [clients, setClients] = useState<any>(null);
     const [miscs, setMiscs] = useState<any>(null);
@@ -234,7 +261,7 @@ function Request(props: any) {
     const { t } = useTranslation();
     
     // const steps = [t('searchOffers'), t('listOffers'), t('sendOffer')];
-    const steps = ["Search seafreight", "Select seafreight", "Search haulage", "Select haulage", "Select miscellaneous", "Send an offer"];
+    const steps = [t('searchSeafreight'), t('selectSeafreight'), t('searchHaulage'), t('selectHaulage'), t('selectMisc'), t('sendOffer')];
     const haulageTypes = [t('haulageType1'), t('haulageType2'), t('haulageType3'), t('haulageType4'), t('haulageType5')];
     const statusTypes = [
         { type: "EnAttente", value: "En attente", description: t('descriptionEnAttente') }, 
@@ -476,12 +503,6 @@ function Request(props: any) {
     };
     
     const handleRowSeafreightsClick: GridEventListener<'rowClick'> = (params: any) => {
-        // if (params.row === selectedSeafreight) {
-        //     setSelectedSeafreight(null);
-        // }
-        // else {
-        //     setSelectedSeafreight(params.row);
-        // }
         setSelectedSeafreight(params.row);
     };
     
@@ -597,16 +618,11 @@ function Request(props: any) {
                     
                     const closestDeparturePort = findClosestSeaPort(parseLocation(response.data.departure), allPorts);
                     const closestArrivalPort = findClosestSeaPort(parseLocation(response.data.arrival), allPorts);
-                    // Here we initialize the values of ports fields in main screen and generate price screen
-                    // var auxDeparture = convertStringToObject(response.data.departure);
-                    // var auxArrival = convertStringToObject(response.data.arrival);
-                    // auxDeparture = allPorts.find((elm: any) => elm.portName === auxDeparture.portName && elm.country === auxDeparture.country);
-                    // auxArrival = allPorts.find((elm: any) => elm.portName === auxArrival.portName && elm.country === auxArrival.country);
                     setPortDeparture(closestDeparturePort);
                     setPortDestination(closestArrivalPort);
-                    // setArrivalTown(auxArrival);
-                    // setPortDestination(auxArrival);
-
+                    setPorts1(sortByCloseness(parseLocation(response.data.departure), allPorts).slice(0, 5));
+                    setPorts2(sortByCloseness(parseLocation(response.data.arrival), allPorts).slice(0, 5));
+                    
                     setLoad(false);
                 }
                 else {
@@ -1108,6 +1124,7 @@ function Request(props: any) {
         if (value !== null && value !== undefined) {
             const closest = findClosestSeaPort(value, ports);
             setPortDeparture(closest);
+            setPorts1(sortByCloseness(value, ports).slice(0, 5));
         }
     }
 
@@ -1115,6 +1132,7 @@ function Request(props: any) {
         if (value !== null && value !== undefined) {
             const closest = findClosestSeaPort(value, ports);
             setPortDestination(closest);
+            setPorts2(sortByCloseness(value, ports).slice(0, 5));
         }
     }
 
@@ -1152,62 +1170,10 @@ function Request(props: any) {
                                 <Grid item xs={12} md={6} mt={1}>
                                     <InputLabel htmlFor="departure" sx={inputLabelStyles}>{t('departure')}</InputLabel>
                                     <AutocompleteSearch id="departure" value={departure} onChange={setDeparture} callBack={getClosestDeparture} fullWidth />
-                                    {/* {
-                                        ports !== null ?
-                                        <Autocomplete
-                                            disablePortal
-                                            id="departure"
-                                            options={ports}
-                                            renderOption={(props, option, i) => {
-                                                return (
-                                                    <li {...props} key={option.portId}>
-                                                        {option.portName+", "+option.country}
-                                                    </li>
-                                                );
-                                            }}
-                                            getOptionLabel={(option: any) => { 
-                                                if (option !== null && option !== undefined) {
-                                                    return option.portName+', '+option.country;
-                                                }
-                                                return ""; 
-                                            }}
-                                            value={departureTown}
-                                            sx={{ mt: 1 }}
-                                            renderInput={(params: any) => <TextField {...params} />}
-                                            onChange={(e: any, value: any) => { setDepartureTown(value); }}
-                                            fullWidth
-                                        /> : <Skeleton />
-                                    } */}
                                 </Grid>
                                 <Grid item xs={12} md={6} mt={1}>
                                     <InputLabel htmlFor="arrival" sx={inputLabelStyles}>{t('arrival')}</InputLabel>
                                     <AutocompleteSearch id="arrival" value={arrival} onChange={setArrival} callBack={getClosestArrival} fullWidth />
-                                    {/* {
-                                        ports !== null ?
-                                        <Autocomplete
-                                            disablePortal
-                                            id="arrival"
-                                            options={ports}
-                                            renderOption={(props, option, i) => {
-                                                return (
-                                                    <li {...props} key={option.portId}>
-                                                        {option.portName+", "+option.country}
-                                                    </li>
-                                                );
-                                            }}
-                                            getOptionLabel={(option: any) => { 
-                                                if (option !== null && option !== undefined) {
-                                                    return option.portName+', '+option.country;
-                                                }
-                                                return ""; 
-                                            }}
-                                            value={arrivalTown}
-                                            sx={{ mt: 1 }}
-                                            renderInput={(params: any) => <TextField {...params} />}
-                                            onChange={(e: any, value: any) => { setArrivalTown(value); }}
-                                            fullWidth
-                                        /> : <Skeleton />
-                                    } */}
                                 </Grid>
                                 <Grid item xs={12} md={3} mt={1}>
                                     <InputLabel htmlFor="packing-type" sx={inputLabelStyles}>{t('packingType')}</InputLabel>
@@ -1234,7 +1200,6 @@ function Request(props: any) {
                                             <NativeSelect
                                                 id="container-type"
                                                 value={containerType}
-                                                // onChange={(event: { target: { value: any } }) => { setContainerType(Number(event.target.value)); }}
                                                 onChange={(e: any) => { setContainerType(e.target.value) }}
                                                 input={<BootstrapInput />}
                                                 fullWidth
@@ -1512,7 +1477,7 @@ function Request(props: any) {
                                                     } = {};
                                                     if (isStepOptional(index)) {
                                                         labelProps.optional = (
-                                                        <Typography variant="caption">Optional</Typography>
+                                                        <Typography variant="caption">{t('optional')}</Typography>
                                                         );
                                                     }
                                                     if (isStepSkipped(index)) {
@@ -1547,7 +1512,7 @@ function Request(props: any) {
                                                                         <Autocomplete
                                                                             disablePortal
                                                                             id="port-departure"
-                                                                            options={ports}
+                                                                            options={ports1}
                                                                             renderOption={(props, option, i) => {
                                                                                 return (
                                                                                     <li {...props} key={option.portId}>
@@ -1576,7 +1541,7 @@ function Request(props: any) {
                                                                         <Autocomplete
                                                                             disablePortal
                                                                             id="destination-port"
-                                                                            options={ports}
+                                                                            options={ports2}
                                                                             renderOption={(props, option, i) => {
                                                                                 return (
                                                                                     <li {...props} key={option.portId}>
