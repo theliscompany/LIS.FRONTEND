@@ -372,7 +372,6 @@ function Request(props: any) {
                 }
                 
                 setTotalPrice(seafreightPrices);
-                console.log(totalPrice+seafreightPrices);
                 setActiveStep((prevActiveStep) => prevActiveStep + 1);
                 setSkipped(newSkipped);
             }
@@ -385,13 +384,13 @@ function Request(props: any) {
                 if (loadingCity !== null && haulageType !== "") {
                     setLoadResults(true);
                     getHaulagePriceOffers();
+                    setActiveStep((prevActiveStep) => prevActiveStep + 1);
                 }
                 else {
                     enqueueSnackbar("You need to fill the fields loading city and haulage type.", { variant: "warning", anchorOrigin: { horizontal: "right", vertical: "top"} });
                 }
             }
             
-            setActiveStep((prevActiveStep) => prevActiveStep + 1);
             setSkipped(newSkipped);
         }
         if (activeStep === 3) {
@@ -405,7 +404,6 @@ function Request(props: any) {
                 seafreightPrices = seafreightPrices + selectedHaulage.unitTariff*containersSelection.reduce((total: any, obj: any) => total + Number(obj.quantity), 0);
             }    
             setTotalPrice(totalPrice+seafreightPrices);
-            console.log(totalPrice+seafreightPrices);
             setActiveStep((prevActiveStep) => prevActiveStep + 1);
             setSkipped(newSkipped);
         }
@@ -432,7 +430,6 @@ function Request(props: any) {
             else {
                 setTotalPrice(totalPrice+seafreightPrices);
             }
-            console.log(totalPrice+seafreightPrices);
             setActiveStep((prevActiveStep) => prevActiveStep + 1);
             setSkipped(newSkipped);
         }
@@ -1834,7 +1831,7 @@ function Request(props: any) {
                                                             </Button>
                                                             <Box sx={{ flex: '1 1 auto' }} />
                                                             {isStepOptional(activeStep) && (
-                                                            <Button variant="contained" color="inherit" sx={whiteButtonStyles} onClick={handleSkip}>
+                                                            <Button variant="contained" color="inherit" sx={whiteButtonStyles} onClick={handleSkip} style={{ marginRight: "10px" }}>
                                                                 {t('skip')}
                                                             </Button>
                                                             )}
