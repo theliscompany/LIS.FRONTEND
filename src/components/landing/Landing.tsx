@@ -17,12 +17,14 @@ import { BackendService } from '../../services/fetch';
 import { useAuthorizedBackendApi } from '../../api/api';
 import { MailData } from '../../models/models';
 // import { AuthenticationResult } from '@azure/msal-browser';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
 function Landing() {
     const isAuthenticated = useIsAuthenticated();
-    const [modal, setModal] = useState<boolean>(false);
+    const { lang } = useParams();
+    
+    const [modal, setModal] = useState<boolean>(lang !== undefined && lang !== null ? true : false);
     const [modal2, setModal2] = useState<boolean>(false);
     const [modal3, setModal3] = useState<boolean>(false);
     const [modal4, setModal4] = useState<boolean>(false);
@@ -92,11 +94,12 @@ function Landing() {
     }
 
     const navigate = useNavigate();
-    
     const { i18n, t } = useTranslation();
     
     useEffect(() => {
-        console.log(window.history.state);
+        if (lang !== undefined && lang !== null) {
+            i18n.changeLanguage(lang);
+        }
 
         getProducts();
     }, []);

@@ -221,7 +221,7 @@ function NewRequest(props: any) {
                         clientNumber: clientNumber !== null ? String(clientNumber.contactId) : null,
                         packingType: packingType,
                         containers: containersSelection.map((elm: any, i: number) => { return { 
-                            id: containers.find((item: any) => item.packageName === elm.container).packageName, 
+                            id: containers.find((item: any) => item.packageName === elm.container).packageId, 
                             containers: elm.container, 
                             quantity: elm.quantity, 
                         } }),
