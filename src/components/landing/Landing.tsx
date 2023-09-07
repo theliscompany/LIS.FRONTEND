@@ -79,13 +79,8 @@ function Landing() {
     // const id = open ? 'simple-popover' : undefined;
     
     const handleChangeSubject = (event: SelectChangeEvent<typeof subjects>) => {
-        const {
-           target: { value },
-        } = event;
-        setSubjects(
-            // On autofill we get a stringified value.
-            typeof value === 'string' ? value.split(',') : value,
-        );
+        const { target: { value },} = event;
+        setSubjects(typeof value === 'string' ? value.split(',') : value,);
     };
 
     const handleChangePackingType = (event: { target: { value: string } }) => {
@@ -101,6 +96,8 @@ function Landing() {
     const { i18n, t } = useTranslation();
     
     useEffect(() => {
+        console.log(window.history.state);
+
         getProducts();
     }, []);
     
@@ -262,8 +259,6 @@ function Landing() {
                             body: JSON.stringify({ 
                                 Whatsapp: phone, 
                                 Email: email !== "" ? email : "emailexample@gmail.com", 
-                                // Departure: departurePort.portName+', '+departurePort.country, 
-                                // Arrival: arrivalPort.portName+', '+arrivalPort.country, 
                                 Departure: departure !== null && departure !== undefined ? departure.city.toUpperCase()+', '+departure.country+', '+departure.latitude+', '+departure.longitude : "",
                                 Arrival: arrival !== null && arrival !== undefined ? arrival.city.toUpperCase()+', '+arrival.country+', '+arrival.latitude+', '+arrival.longitude : "",
                                 CargoType: 0,
@@ -434,26 +429,6 @@ function Landing() {
             <Testimonies />
             <Footer />
 
-            {/* <Fab aria-describedby={id} color="default" onClick={handleClick} sx={{ backgroundColor: "#fff", position: "fixed", right: "20px", bottom: "20px", width: "64px", height: "64px" }}>
-                <WhatsAppIcon fontSize="large" sx={{ color: "#59CE72", width: "36px", height: "36px" }} />
-            </Fab>
-            <Popover
-                id={id} 
-                open={open} 
-                anchorEl={anchorEl}
-                onClose={handleClose}   
-                anchorOrigin={{
-                    vertical: 'top',
-                    horizontal: 'right',
-                }}
-                transformOrigin={{
-                    vertical: 'bottom',
-                    horizontal: 'right',
-                }}
-            >
-                <iframe title="whatsapp form" src="https://whatsform.com/dRTy_6"  width="100%" height="600" frameBorder="0"></iframe>
-            </Popover>
-            */}
             <BootstrapDialog
                 onClose={() => setModal(false)}
                 aria-labelledby="custom-dialog-title"
@@ -480,62 +455,10 @@ function Landing() {
                         <Grid item xs={12} md={6}>
                             <InputLabel htmlFor="departure" sx={inputLabelStyles}>{t('cargoPickup')}</InputLabel>
                             <AutocompleteSearch id="departure" value={departure} onChange={setDeparture} fullWidth />
-                            {/* {
-                                ports !== null ?
-                                <Autocomplete
-                                    disablePortal
-                                    id="departure"
-                                    options={ports}
-                                    renderOption={(props, option, i) => {
-                                        return (
-                                            <li {...props} key={option.portId}>
-                                                {option.portName+", "+option.country}
-                                            </li>
-                                        );
-                                    }}
-                                    getOptionLabel={(option: any) => { 
-                                        if (option !== null && option !== undefined) {
-                                            return option.portName+', '+option.country;
-                                        }
-                                        return ""; 
-                                    }}
-                                    value={departurePort}
-                                    sx={{ mt: 1 }}
-                                    renderInput={(params: any) => <TextField {...params} />}
-                                    onChange={(e: any, value: any) => { setDeparturePort(value); }}
-                                    fullWidth
-                                /> : <Skeleton />
-                            } */}
                         </Grid>
                         <Grid item xs={12} md={6}>
                             <InputLabel htmlFor="arrival" sx={inputLabelStyles}>{t('cargoDeliver')}</InputLabel>
                             <AutocompleteSearch id="arrival" value={arrival} onChange={setArrival} fullWidth />
-                            {/* {
-                                ports !== null ?
-                                <Autocomplete
-                                    disablePortal
-                                    id="arrival"
-                                    options={ports}
-                                    renderOption={(props, option, i) => {
-                                        return (
-                                            <li {...props} key={option.portId}>
-                                                {option.portName+", "+option.country}
-                                            </li>
-                                        );
-                                    }}
-                                    getOptionLabel={(option: any) => { 
-                                        if (option !== null && option !== undefined) {
-                                            return option.portName+', '+option.country;
-                                        }
-                                        return ""; 
-                                    }}
-                                    value={arrivalPort}
-                                    sx={{ mt: 1 }}
-                                    renderInput={(params: any) => <TextField {...params} />}
-                                    onChange={(e: any, value: any) => { setArrivalPort(value); }}
-                                    fullWidth
-                                /> : <Skeleton />
-                            } */}
                         </Grid>
                         <Grid item xs={12} md={6}>
                             {/* <InputLabel htmlFor="packing-type" sx={inputLabelStyles}>In what type of packing do you want to transport your goods?</InputLabel> */}
