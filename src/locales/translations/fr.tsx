@@ -131,15 +131,15 @@ export const fr = {
   arrivalPort: "Port d'arrivée",
   frequency: "Fréquence",
   transitTime: "Temps de transit",
-  day: "Jour",
-  days: "Jours",
-  prices: "Prix",
+  day: "jour",
+  days: "jours",
+  prices: "Fret par unité",
   haulier: "Transporteur routier",
   loadingPort: "Port de chargement",
   freeTime: "Temps libre",
   multiStop: "Multi-arrêts",
   overtimeTariff: "Tarif des heures supplémentaires",
-  unitTariff: "Tarif unitaire",
+  unitTariff: "Transport par unité",
   validUntil: "Valide jusqu'au",
   destinationPort: "Port de destination",
   supplier: "Fournisseur",
@@ -277,5 +277,7 @@ export const fr = {
   searchHaulage: "Chercher transport",
   selectHaulage: "Choisir transport",
   selectMisc: "Choisir divers",
-  optional: "Optionnel"
+  optional: "Optionnel",
+  hour: "heure",
+  hours: "heures"
 };
