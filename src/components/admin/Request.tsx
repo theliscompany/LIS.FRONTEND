@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import '../../App.css';
 import AutocompleteSearch from '../shared/AutocompleteSearch';
-import { inputLabelStyles, BootstrapInput, BootstrapDialogTitle, BootstrapDialog, buttonCloseStyles, DarkTooltip, whiteButtonStyles, datetimeStyles } from '../../misc/styles';
+import { inputLabelStyles, BootstrapInput, BootstrapDialogTitle, BootstrapDialog, buttonCloseStyles, DarkTooltip, whiteButtonStyles, datetimeStyles, gridStyles } from '../../misc/styles';
 import { enqueueSnackbar, SnackbarProvider } from 'notistack';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { pricingRequest, protectedResources, transportRequest } from '../../authConfig';
@@ -26,7 +26,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { JSON as seaPorts } from 'sea-ports';
 // @ts-ignore
 
-import { DataGrid, GridColDef, GridEventListener, GridRenderCellParams, GridValueFormatterParams, GridValueGetterParams } from '@mui/x-data-grid';
+import { DataGrid, GridColDef, GridEventListener, GridRenderCellParams, GridValueFormatterParams, GridValueGetterParams, GridRowSelectionModel } from '@mui/x-data-grid';
 import ClientSearch from '../shared/ClientSearch';
 
 //let statusTypes = ["EnAttente", "Valider", "Rejeter"];
@@ -172,7 +172,7 @@ function findClosestSeaPort(myPort: any, seaPorts: any) {
     return closestPort;
 }
 
-function Request(props: any) {
+function Request() {
     const [load, setLoad] = useState<boolean>(true);
     const [loadAssignees, setLoadAssignees] = useState<boolean>(true);
     const [loadNotes, setLoadNotes] = useState<boolean>(true);
@@ -235,7 +235,6 @@ function Request(props: any) {
     const [ports1, setPorts1] = useState<any>(null);
     const [ports2, setPorts2] = useState<any>(null);
     const [containers, setContainers] = useState<any>(null);
-    const [clients, setClients] = useState<any>(null);
     const [miscs, setMiscs] = useState<any>(null);
     const [haulages, setHaulages] = useState<any>(null);
     const [seafreights, setSeafreights] = useState<any>(null);
@@ -250,6 +249,10 @@ function Request(props: any) {
     const [totalPrice, setTotalPrice] = useState<number>(0);
 
     const [allSeaPorts, setAllSeaPorts] = useState<any>();
+    
+    const [rowSelectionModel, setRowSelectionModel] = React.useState<GridRowSelectionModel>([]);
+    const [rowSelectionModel2, setRowSelectionModel2] = React.useState<GridRowSelectionModel>([]);
+    const [rowSelectionModel3, setRowSelectionModel3] = React.useState<GridRowSelectionModel>([]);
     
     let { id } = useParams();
 
@@ -592,6 +595,7 @@ function Request(props: any) {
                     setPhone(response.data.whatsapp);
                     setDeparture(parseLocation(response.data.departure));
                     setArrival(parseLocation(response.data.arrival));
+                    setLoadingCity(parseLocation(response.data.departure));
                     // setDepartureTown(convertStringToObject(response.data.departure));
                     // setArrivalTown(convertStringToObject(response.data.arrival));
                     setStatus(response.data.status);
@@ -620,8 +624,8 @@ function Request(props: any) {
                     const closestArrivalPort = findClosestSeaPort(parseLocation(response.data.arrival), allPorts);
                     setPortDeparture(closestDeparturePort);
                     setPortDestination(closestArrivalPort);
-                    setPorts1(sortByCloseness(parseLocation(response.data.departure), allPorts).slice(0, 50));
-                    setPorts2(sortByCloseness(parseLocation(response.data.arrival), allPorts).slice(0, 50));
+                    setPorts1(sortByCloseness(parseLocation(response.data.departure), allPorts).slice(0, 10));
+                    setPorts2(sortByCloseness(parseLocation(response.data.arrival), allPorts).slice(0, 10));
                     
                     setLoad(false);
                 }
@@ -1035,7 +1039,8 @@ function Request(props: any) {
                         "overtimeTariff": selectedHaulage.overtimeTariff,
                         "unitTariff": selectedHaulage.unitTariff,
                         "haulageType": haulageType,
-                        "loadingPort": loadingCity.name,
+                        // "loadingPort": loadingCity.name,
+                        "loadingPort": loadingCity.city,
                         "loadingPortId": loadingCity.id,
                         "containerNames": [null]
                     }
@@ -1124,7 +1129,8 @@ function Request(props: any) {
         if (value !== null && value !== undefined) {
             const closest = findClosestSeaPort(value, ports);
             setPortDeparture(closest);
-            setPorts1(sortByCloseness(value, ports).slice(0, 50));
+            setLoadingCity(value);
+            setPorts1(sortByCloseness(value, ports).slice(0, 10));
         }
     }
 
@@ -1132,7 +1138,7 @@ function Request(props: any) {
         if (value !== null && value !== undefined) {
             const closest = findClosestSeaPort(value, ports);
             setPortDestination(closest);
-            setPorts2(sortByCloseness(value, ports).slice(0, 50));
+            setPorts2(sortByCloseness(value, ports).slice(0, 10));
         }
     }
 
@@ -1459,7 +1465,7 @@ function Request(props: any) {
                                     }
                                 </Grid>
                                 <Grid item xs={12}>
-                                    <Accordion>
+                                    <Accordion sx={{ backgroundColor: "#fbfbfb" }}>
                                         <AccordionSummary
                                             expandIcon={<ExpandMoreIcon />}
                                             aria-controls="panel1a-content"
@@ -1471,23 +1477,21 @@ function Request(props: any) {
                                             <Box sx={{ px: 0 }}>
                                                 <Stepper activeStep={activeStep} sx={{ px: 1 }}>
                                                     {steps.map((label, index) => {
-                                                    const stepProps: { completed?: boolean } = {};
-                                                    const labelProps: {
-                                                        optional?: React.ReactNode;
-                                                    } = {};
-                                                    if (isStepOptional(index)) {
-                                                        labelProps.optional = (
-                                                        <Typography variant="caption">{t('optional')}</Typography>
+                                                        const stepProps: { completed?: boolean } = {};
+                                                        const labelProps: {
+                                                            optional?: React.ReactNode;
+                                                        } = {};
+                                                        if (isStepOptional(index)) {
+                                                            labelProps.optional = (<Typography variant="caption">{t('optional')}</Typography>);
+                                                        }
+                                                        if (isStepSkipped(index)) {
+                                                            stepProps.completed = false;
+                                                        }
+                                                        return (
+                                                            <Step key={label} {...stepProps}>
+                                                                <StepLabel {...labelProps}>{label}</StepLabel>
+                                                            </Step>
                                                         );
-                                                    }
-                                                    if (isStepSkipped(index)) {
-                                                        stepProps.completed = false;
-                                                    }
-                                                    return (
-                                                        <Step key={label} {...stepProps}>
-                                                            <StepLabel {...labelProps}>{label}</StepLabel>
-                                                        </Step>
-                                                    );
                                                     })}
                                                 </Stepper>
                                                 {activeStep === steps.length ? (
@@ -1581,11 +1585,15 @@ function Request(props: any) {
                                                                                     hideFooter
                                                                                     getRowId={(row: any) => row?.seaFreightId}
                                                                                     getRowHeight={() => "auto" }
-                                                                                    sx={{ height: "auto" }}
-                                                                                    onRowClick={handleRowSeafreightsClick}
+                                                                                    sx={gridStyles}
+                                                                                    onRowSelectionModelChange={(newRowSelectionModel) => {
+                                                                                        setRowSelectionModel(newRowSelectionModel);
+                                                                                        setSelectedSeafreight(newRowSelectionModel.length !== 0 ? seafreights.find((elm: any) => elm.seaFreightId === newRowSelectionModel[0]) : null);
+                                                                                    }}
+                                                                                    rowSelectionModel={rowSelectionModel}
+                                                                                    // onRowClick={handleRowSeafreightsClick}
                                                                                 />
-                                                                            </Box>
-                                                                            : null
+                                                                            </Box> : <Alert severity="error">{t('noResults')}</Alert>
                                                                         : <Skeleton />
                                                                     }
                                                                 </Grid>
@@ -1616,7 +1624,8 @@ function Request(props: any) {
                                                                 </Grid> */}
                                                                 <Grid item xs={12} md={6} mt={1}>
                                                                     <InputLabel htmlFor="loading-city" sx={inputLabelStyles}>{t('loadingCity')}</InputLabel>
-                                                                    {
+                                                                    <AutocompleteSearch id="loading-city" value={loadingCity} onChange={setLoadingCity} fullWidth />
+                                                                    {/* {
                                                                         cities !== null ?
                                                                         <Autocomplete
                                                                             disablePortal
@@ -1634,7 +1643,7 @@ function Request(props: any) {
                                                                             onChange={(e: any, value: any) => { setLoadingCity(value); }}
                                                                             fullWidth
                                                                         /> : <Skeleton />
-                                                                    }
+                                                                    } */}
                                                                 </Grid>
                                                                 <Grid item xs={12} md={6} mt={1}>
                                                                     <InputLabel htmlFor="haulage-type" sx={inputLabelStyles}>{t('haulageType')}</InputLabel>
@@ -1671,11 +1680,15 @@ function Request(props: any) {
                                                                                     hideFooter
                                                                                     getRowId={(row: any) => row?.id}
                                                                                     getRowHeight={() => "auto" }
-                                                                                    sx={{ height: "auto" }}
-                                                                                    onRowClick={handleRowHaulagesClick}
+                                                                                    sx={gridStyles}
+                                                                                    onRowSelectionModelChange={(newRowSelectionModel) => {
+                                                                                        setRowSelectionModel2(newRowSelectionModel);
+                                                                                        setSelectedHaulage(newRowSelectionModel.length !== 0 ? haulages.find((elm: any) => elm.id === newRowSelectionModel[0]) : null);
+                                                                                    }}
+                                                                                    rowSelectionModel={rowSelectionModel2}
+                                                                                    // onRowClick={handleRowHaulagesClick}
                                                                                 />
-                                                                            </Box>
-                                                                            : null
+                                                                            </Box> : <Alert severity="error">{t('noResults')}</Alert>
                                                                         : <Skeleton />
                                                                     }
                                                                 </Grid>
@@ -1697,11 +1710,15 @@ function Request(props: any) {
                                                                                     hideFooter
                                                                                     getRowId={(row: any) => row?.id}
                                                                                     getRowHeight={() => "auto" }
-                                                                                    sx={{ height: "auto" }}
-                                                                                    onRowClick={handleRowMiscsClick}
+                                                                                    sx={gridStyles}
+                                                                                    onRowSelectionModelChange={(newRowSelectionModel) => {
+                                                                                        setRowSelectionModel3(newRowSelectionModel);
+                                                                                        setSelectedMisc(newRowSelectionModel.length !== 0 ? miscs.find((elm: any) => elm.id === newRowSelectionModel[0]) : null);
+                                                                                    }}
+                                                                                    rowSelectionModel={rowSelectionModel3}
+                                                                                    // onRowClick={handleRowMiscsClick}
                                                                                 />
-                                                                            </Box>
-                                                                            : null
+                                                                            </Box> : <Alert severity="error">{t('noResults')}</Alert>
                                                                         : <Skeleton />
                                                                     }
                                                                 </Grid>
@@ -1719,7 +1736,7 @@ function Request(props: any) {
                                                                         hideFooter
                                                                         getRowId={(row: any) => row?.seaFreightId}
                                                                         getRowHeight={() => "auto" }
-                                                                        sx={{ height: "auto" }}
+                                                                        sx={gridStyles}
                                                                         isRowSelectable={(params: any) => false}
                                                                     />
                                                                 </Grid>
@@ -1733,7 +1750,7 @@ function Request(props: any) {
                                                                             hideFooter
                                                                             getRowId={(row: any) => row?.id}
                                                                             getRowHeight={() => "auto" }
-                                                                            sx={{ height: "auto" }}
+                                                                            sx={gridStyles}
                                                                             isRowSelectable={(params: any) => false}
                                                                         />
                                                                     </Grid> : null
@@ -1748,7 +1765,7 @@ function Request(props: any) {
                                                                             hideFooter
                                                                             getRowId={(row: any) => row?.id}
                                                                             getRowHeight={() => "auto" }
-                                                                            sx={{ height: "auto" }}
+                                                                            sx={gridStyles}
                                                                             isRowSelectable={(params: any) => false}
                                                                         />
                                                                     </Grid> : null

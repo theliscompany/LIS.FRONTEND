@@ -328,6 +328,7 @@ function Landing() {
                     color="inherit" 
                     size="large"
                     // to={!isAuthenticated ? undefined : "/admin/"}
+                    hidden={!isAuthenticated}
                     sx={{ 
                         textTransform: "inherit",
                         backgroundColor: "#fff",

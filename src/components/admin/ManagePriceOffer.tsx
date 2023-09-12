@@ -8,7 +8,7 @@ import { SnackbarProvider, enqueueSnackbar } from 'notistack';
 import { useAuthorizedBackendApi } from '../../api/api';
 import { protectedResources, transportRequest } from '../../authConfig';
 import { BackendService } from '../../services/fetch';
-import { BootstrapInput, inputLabelStyles } from '../../misc/styles';
+import { BootstrapInput, gridStyles, inputLabelStyles } from '../../misc/styles';
 import { DataGrid, GridRenderCellParams, GridValueFormatterParams, GridValueGetterParams } from '@mui/x-data-grid';
 import { useTranslation } from 'react-i18next';
 
@@ -238,7 +238,7 @@ return (
                         hideFooter
                         getRowId={(row: any) => row?.id}
                         getRowHeight={() => "auto" }
-                        sx={{ height: "auto" }}
+                        sx={gridStyles}
                         isRowSelectable={(params: any) => false}
                     />
                 </Grid>
@@ -266,7 +266,7 @@ return (
                             hideFooter
                             getRowId={(row: any) => row?.id}
                             getRowHeight={() => "auto" }
-                            sx={{ height: "auto" }}
+                            sx={gridStyles}
                             isRowSelectable={(params: any) => false}
                         />
                     </Grid> : null
@@ -299,7 +299,7 @@ return (
                             hideFooter
                             getRowId={(row: any) => row?.id}
                             getRowHeight={() => "auto" }
-                            sx={{ height: "auto" }}
+                            sx={gridStyles}
                             isRowSelectable={(params: any) => false}
                         />
                     </Grid> : null

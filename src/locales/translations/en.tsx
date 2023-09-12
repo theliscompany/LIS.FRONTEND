@@ -65,7 +65,7 @@ export const en = {
   addContainer: "Add the container",
   add: "Add",
   generatePriceOffer: "Generate price offer",
-  editRequest: "Update the request",
+  editRequest: "Save the request",
   changeStatus: "Change the status",
   addCommentNote: "Add a comment/note",
   listNotes: "List of notes",
@@ -111,7 +111,7 @@ export const en = {
   nextStep: "Next step",
   allTypes: "All types",
   allStatus: "All status",
-  requestAssignedTo: "This request will be assigned to the current user",
+  requestAssignedTo: "This request will be assigned to",
   byDefault: "by default.",
   createNewRequest: "Create a new request",
   manageRequestQuote: "Manage a request for quote N°",
@@ -146,7 +146,7 @@ export const en = {
   searchOffers: "Search for offers",
   listOffers: "List of offers",
   sendOffer: "Send an offer",
-  typeSomething: "Type something...",
+  typeSomething: "No results, type something...",
   typeSomethingSearch: "Type something to search...",
   generatedPriceOffers: "Generated price offers",
   errorHappened: "An error happened during the operation.",
@@ -279,5 +279,6 @@ export const en = {
   selectMisc: "Select miscellaneous",
   optional: "Optional",
   hour: "hour",
-  hours: "hours"
+  hours: "hours",
+  noResults: "No results found"
 };
