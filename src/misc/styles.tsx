@@ -119,6 +119,13 @@ export const whiteButtonStyles = {
   textTransform: "none" 
 }
 
+export const gridStyles = { 
+  "&.MuiDataGrid-root .MuiDataGrid-cell:focus-within": {
+      outline: "none !important",
+  },
+  height: "auto" 
+}
+
 export const BootstrapInput = styled(InputBase)(({ theme }) => ({
     'label + &': {
       marginTop: theme.spacing(1),

@@ -11523,3 +11523,6 @@ li.py-2.pointer.hover-light.list-group-item {
     }
 }
 */
+.MuiDataGrid-root .MuiDataGrid-cell:focus-within {
+  outline: none !important;
+}

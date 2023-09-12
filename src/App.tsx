@@ -20,6 +20,7 @@ import ApproveOffer from './components/admin/ApproveOffer';
 
 // Remove if locales are not used
 import './locales/i18n';
+import Login from './components/others/Login';
 
 const App = () => {
   return (
@@ -58,6 +59,7 @@ const App = () => {
             <Route path="admin/" element={<Landing />} />
             <Route path="admin/*" element={<Landing />} />
             <Route path="landing" element={<Landing />} />
+            <Route path="login" element={<Login />} />
             <Route path="privacy-policy" element={<Privacy />} />
             <Route path="tracking" element={<Tracking />}>
               <Route path=":id" element={<Tracking />} />

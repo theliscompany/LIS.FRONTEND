@@ -65,7 +65,7 @@ export const fr = {
   addContainer: "Ajouter le conteneur",
   add: "Ajouter",
   generatePriceOffer: "Génerer une offre de prix",
-  editRequest: "Modifier la demande",
+  editRequest: "Sauvegarder la demande",
   changeStatus: "Modifier le statut",
   addCommentNote: "Ajouter un commentaire/note",
   listNotes: "Liste des notes",
@@ -111,7 +111,7 @@ export const fr = {
   nextStep: "Étape suivante",
   allTypes: "Tous les types",
   allStatus: "Tous les statuts",
-  requestAssignedTo: "Cette demande sera assignée à l'utilisateur actuel",
+  requestAssignedTo: "Cette demande sera assignée à",
   byDefault: "par défaut.",
   createNewRequest: "Créer une nouvelle demande",
   manageRequestQuote: "Gérer une demande de devis N°",
@@ -146,7 +146,7 @@ export const fr = {
   searchOffers: "Rechercher des offres",
   listOffers: "Liste des offres",
   sendOffer: "Envoyer une offre",
-  typeSomething: "Tapez quelque chose...",
+  typeSomething: "Aucun résultat, tapez quelque chose...",
   typeSomethingSearch: "Tapez quelque chose pour rechercher...",
   generatedPriceOffers: "Offres de prix créées",
   errorHappened: "Une erreur s'est produite pendant l'opération.",
@@ -279,5 +279,6 @@ export const fr = {
   selectMisc: "Choisir divers",
   optional: "Optionnel",
   hour: "heure",
-  hours: "heures"
+  hours: "heures",
+  noResults: "Aucun résultat n'a été trouvé"
 };
