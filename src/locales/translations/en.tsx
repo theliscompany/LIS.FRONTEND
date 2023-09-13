@@ -91,7 +91,7 @@ export const en = {
   departureDate: "Departure date",
   arrivalDate: "Arrival date",
   loadingDate: "Loading date",
-  loadingCity: "Loading city (empty if no haulage)",
+  loadingCity: "Loading city",
   haulageType: "Haulage type (loading timing)",
   anyType: "Any type",
   selectOfferMessage: "You can select an offer by clicking on his row. You have to select at least one seafreight for your offer.",
@@ -280,5 +280,6 @@ export const en = {
   optional: "Optional",
   hour: "hour",
   hours: "hours",
-  noResults: "No results found"
+  noResults: "No results found",
+  every: "Every"
 };

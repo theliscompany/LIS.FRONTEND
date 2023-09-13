@@ -42,7 +42,7 @@ const App = () => {
                 <Route path="quote-offers/:id" element={<ManagePriceOffer />} />
                 <Route path="users" element={<UsersAssignment />} />
               </Route> 
-              <Route path="/" element={<Landing />} />
+              <Route path="/" element={<Layout children={<Requests />} />} />
               <Route path="landing" element={<Landing />} />
               <Route path="quote/:lang" element={<Landing />} />
               <Route path="privacy-policy" element={<Privacy />} />
@@ -56,8 +56,8 @@ const App = () => {
         <UnauthenticatedTemplate>
           <Routes>
             <Route path="/" element={<Landing />} />
-            <Route path="admin/" element={<Landing />} />
-            <Route path="admin/*" element={<Landing />} />
+            <Route path="admin/" element={<Login />} />
+            <Route path="admin/*" element={<Login />} />
             <Route path="landing" element={<Landing />} />
             <Route path="login" element={<Login />} />
             <Route path="privacy-policy" element={<Privacy />} />

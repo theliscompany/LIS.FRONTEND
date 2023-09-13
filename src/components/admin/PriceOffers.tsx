@@ -51,7 +51,8 @@ function PriceOffers() {
     const context = useAuthorizedBackendApi();
     
     useEffect(() => {
-        getPorts();
+        // getPorts();
+        getPriceOffers();
     }, []);
     
     const { t } = useTranslation();
@@ -69,6 +70,7 @@ function PriceOffers() {
                     setLoad(false);
                 }
             }
+            console.log(response);
         }
     }
     
@@ -130,7 +132,7 @@ function PriceOffers() {
                             <Grid container spacing={2} mt={1} px={5}>
                                 <Grid item xs={12}>
                                     {
-                                        offers !== null && ports !== null ?
+                                        offers !== null ?
                                         <Box sx={{ overflow: "auto" }}>
                                             <Box sx={{ width: "100%", display: "table", tableLayout: "fixed" }}>
                                                 <Table sx={{ minWidth: 650 }} aria-label="simple table">
@@ -159,8 +161,8 @@ function PriceOffers() {
                                                                             <Link to={"/admin/request/"+row.requestQuoteId}>{row.requestQuoteId}</Link>
                                                                         </TableCell>
                                                                         <TableCell align="left">{(new Date(row.created)).toLocaleString()}</TableCell>
-                                                                        <TableCell align="left">{ports.find((elm: any) => elm.portId === row.departurePortId).portName}</TableCell>
-                                                                        <TableCell align="left">{ports.find((elm: any) => elm.portId === row.destinationPortId).portName}</TableCell>
+                                                                        <TableCell align="left">{row.seaFreight.departurePortName}</TableCell>
+                                                                        <TableCell align="left">{row.seaFreight.destinationPortName}</TableCell>
                                                                         {/* <TableCell align="left">{row.haulage !== null ? <Chip label="Yes" color="success" /> : <Chip label="No" />}</TableCell>
                                                                         <TableCell align="left">{row.miscellaneousList !== null ? <Chip label="Yes" color="success" /> : <Chip label="No" />}</TableCell> */}
                                                                         <TableCell align="left"><Chip label={statusLabel(row.status)} color={colors(row.status)} /></TableCell>
