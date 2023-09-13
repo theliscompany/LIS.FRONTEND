@@ -35,11 +35,11 @@ const AutocompleteSearch: React.FC<LocationAutocompleteProps> = ({ id, value, on
             // );
             // setOptions(response.data.data);
             const response = await axios.get(
-                `http://api.geonames.org/postalCodeSearchJSON?formatted=true&postalcode=${value}&maxRows=500&username=blackstarmc97`
+                `https://secure.geonames.org/postalCodeSearchJSON?formatted=true&postalcode=${value}&maxRows=500&username=blackstarmc97`
             );
             if (response.data.postalCodes.length === 0) {
                 const response = await axios.get(
-                    `http://api.geonames.org/search?q=${value}&formatted=true&type=json&username=blackstarmc97`
+                    `https://secure.geonames.org/search?q=${value}&formatted=true&type=json&username=blackstarmc97`
                 );
                 setOptions(response.data.geonames.map((elm: any) => { return { id: elm.geonameId, city: elm.name, country: elm.countryName, postalCode: null, latitude: elm.lat, longitude: elm.lng }  }))
             }

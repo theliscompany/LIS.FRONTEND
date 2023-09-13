@@ -272,13 +272,13 @@ function Requests() {
                                                     <Grid item xs={12} md={6} mt={1}>
                                                         <Typography variant="subtitle1" display="flex" alignItems="center" justifyContent="left" fontSize={15}>{t('departure')}</Typography>
                                                         <Typography variant="subtitle2" display="flex" alignItems="center" justifyContent="left" fontSize={14}>
-                                                            <PlaceIcon sx={{ position: "relative", right: "4px" }} /> <span>{item.departure.split(', ').slice(0,2).join(', ')}</span>
+                                                            <PlaceIcon sx={{ position: "relative", right: "4px" }} /> <span>{[item.departure.split(', ').slice(0,1),item.departure.split(', ').slice(4,5)||"",item.departure.split(', ').slice(1,2)].filter((val) => { return val.length !== 0 }).join(', ')}</span>
                                                         </Typography>
                                                     </Grid>
                                                     <Grid item xs={12} md={6} mt={1}>
                                                         <Typography variant="subtitle1" display="flex" alignItems="center" justifyContent="left" fontSize={15}>{t('arrival')}</Typography>
                                                         <Typography variant="subtitle2" display="flex" alignItems="center" justifyContent="left" fontSize={14}>
-                                                            <PlaceIcon sx={{ position: "relative", right: "4px" }} /> <span>{item.arrival.split(', ').slice(0,2).join(', ')}</span>
+                                                            <PlaceIcon sx={{ position: "relative", right: "4px" }} /> <span>{[item.arrival.split(', ').slice(0,1),item.arrival.split(', ').slice(4,5)||"",item.arrival.split(', ').slice(1,2)].filter((val) => { return val.length !== 0 }).join(', ')}</span>
                                                         </Typography>
                                                     </Grid>
                                                 </Grid>
