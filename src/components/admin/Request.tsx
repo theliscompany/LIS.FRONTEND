@@ -838,7 +838,7 @@ function Request() {
             });
             
             // I removed the loadingDate
-            var urlSent = createGetRequestUrl(protectedResources.apiLisPricing.endPoint+"/Pricing/HaulagesOfferRequest?", (new Date("01/01/2022"))?.toISOString(), haulageType, loadingCity.id);
+            var urlSent = createGetRequestUrl(protectedResources.apiLisPricing.endPoint+"/Pricing/HaulagesOfferRequest?", (new Date("01/01/2022"))?.toISOString(), haulageType, loadingCity.city);
             const response = await (context as BackendService<any>).getWithToken(urlSent, token);
             setLoadResults(false);
             setHaulages(response);
@@ -1041,7 +1041,7 @@ function Request() {
                         "haulageType": haulageType,
                         // "loadingPort": loadingCity.name,
                         "loadingPort": loadingCity.city,
-                        "loadingPortId": loadingCity.id,
+                        // "loadingPortId": loadingCity.id,
                         "containerNames": [null]
                     }
                 }
