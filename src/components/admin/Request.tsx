@@ -41,7 +41,7 @@ function createGetRequestUrl(url: string, variable1: string|undefined, variable2
         url += 'HaulageType=' + encodeURIComponent(variable2) + '&';
     }
     if (variable3) {
-        url += 'LoadingCityId=' + encodeURIComponent(variable3) + '&';
+        url += 'LoadingCity=' + encodeURIComponent(variable3) + '&';
     }
     
     if (url.slice(-1) === '&') {
@@ -285,7 +285,7 @@ function Request() {
         { field: 'carrierName', headerName: t('carrier'), width: 150 },
         { field: 'carrierAgentName', headerName: t('carrierAgent'), width: 200 },
         { field: 'departurePortName', headerName: t('departurePort'), width: 150 },
-        { field: 'frequency', headerName: t('frequency'), valueFormatter: (params: GridValueFormatterParams) => `Every ${params.value || ''} `+t('days'), width: 125 },
+        { field: 'frequency', headerName: t('frequency'), valueFormatter: (params: GridValueFormatterParams) => `${t('every')} ${params.value || ''} `+t('days'), width: 125 },
         { field: 'transitTime', headerName: t('transitTime'), valueFormatter: (params: GridValueFormatterParams) => `${params.value || ''} `+t('days') },
         { field: 'currency', headerName: t('prices'), renderCell: (params: GridRenderCellParams) => {
             return (
@@ -838,7 +838,7 @@ function Request() {
             });
             
             // I removed the loadingDate
-            var urlSent = createGetRequestUrl(protectedResources.apiLisPricing.endPoint+"/Pricing/HaulagesOfferRequest?", (new Date("01/01/2022"))?.toISOString(), haulageType, loadingCity.city);
+            var urlSent = createGetRequestUrl(protectedResources.apiLisPricing.endPoint+"/Pricing/HaulagesOfferRequest?", (new Date("01/01/2022"))?.toISOString(), haulageType, loadingCity.city.toUpperCase());
             const response = await (context as BackendService<any>).getWithToken(urlSent, token);
             setLoadResults(false);
             setHaulages(response);
@@ -1623,7 +1623,7 @@ function Request() {
                                                                     </LocalizationProvider>
                                                                 </Grid> */}
                                                                 <Grid item xs={12} md={6} mt={1}>
-                                                                    <InputLabel htmlFor="loading-city" sx={inputLabelStyles}>{t('loadingCity')}</InputLabel>
+                                                                    <InputLabel htmlFor="loading-city" sx={inputLabelStyles}>{t('departure')} / {t('loadingCity')}</InputLabel>
                                                                     <AutocompleteSearch id="loading-city" value={loadingCity} onChange={setLoadingCity} fullWidth />
                                                                     {/* {
                                                                         cities !== null ?

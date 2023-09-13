@@ -220,7 +220,7 @@ return (
                             { field: 'carrierName', headerName: t('carrier'), width: 175 },
                             { field: 'carrierAgentName', headerName: t('carrierAgent'), width: 175 },
                             { field: 'departurePortName', headerName: t('departurePort'), width: 125 },
-                            { field: 'frequency', headerName: t('frequency'), valueFormatter: (params: GridValueFormatterParams) => `Every ${params.value || ''} `+t('days'), width: 125 },
+                            { field: 'frequency', headerName: t('frequency'), valueFormatter: (params: GridValueFormatterParams) => `${t('every')} ${params.value || ''} `+t('days'), width: 125 },
                             { field: 'transitTime', headerName: t('transitTime'), valueFormatter: (params: GridValueFormatterParams) => `${params.value || ''} `+t('days') },
                             { field: 'currency', headerName: t('prices'), renderCell: (params: GridRenderCellParams) => {
                                 return (

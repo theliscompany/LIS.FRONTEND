@@ -91,7 +91,7 @@ export const fr = {
   departureDate: "Date de départ",
   arrivalDate: "Date d'arrivée",
   loadingDate: "Date de chargement",
-  loadingCity: "Ville de chargement (vide s'il n'y a pas de transport)",
+  loadingCity: "Ville de chargement",
   haulageType: "Type de transport (timing de chargement)",
   anyType: "Tout type",
   selectOfferMessage: "Vous pouvez sélectionner une offre en cliquant sur sa ligne. Vous devez sélectionner au moins un fret maritime pour votre offre.",
@@ -280,5 +280,6 @@ export const fr = {
   optional: "Optionnel",
   hour: "heure",
   hours: "heures",
-  noResults: "Aucun résultat n'a été trouvé"
+  noResults: "Aucun résultat n'a été trouvé",
+  every: "Tous les"
 };
