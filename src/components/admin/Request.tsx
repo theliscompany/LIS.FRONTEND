@@ -91,12 +91,14 @@ function parseLocation(inputString: string) {
     const country = parts[1];
     const latitude = parseFloat(parts[2]);
     const longitude = parseFloat(parts[3]);
+    const postalCode = parts[4] || null; 
     
     const locationObject = {
         city: city,
         country: country,
         latitude: latitude,
-        longitude: longitude
+        longitude: longitude,
+        postalCode: postalCode
     };
     
     return locationObject;
@@ -675,14 +677,17 @@ function Request() {
             auxUnits = unitsSelection;
         }
         
-        if(context) {
+        if (context) {
+            var postcode1 = departure.postalCode !== null && departure.postalCode !== undefined ? departure.postalCode : "";
+            var postcode2 = arrival.postalCode !== null && arrival.postalCode !== undefined ? arrival.postalCode : "";
+
             const body: any = {
                 id: Number(id),
                 email: email,
                 status: status,
                 whatsapp: phone,
-                departure: departure !== null && departure !== undefined ? departure.city.toUpperCase()+', '+departure.country+', '+departure.latitude+', '+departure.longitude : "",
-                arrival: arrival !== null && arrival !== undefined ? arrival.city.toUpperCase()+', '+arrival.country+', '+arrival.latitude+', '+arrival.longitude : "",
+                departure: departure !== null && departure !== undefined ? [departure.city.toUpperCase(),departure.country,departure.latitude,departure.longitude,postcode1].filter((val: any) => { return val !== "" }).join(', ') : "",
+                arrival: arrival !== null && arrival !== undefined ? [arrival.city.toUpperCase(),arrival.country,arrival.latitude,arrival.longitude,postcode2].filter((val: any) => { return val !== "" }).join(', ') : "",
                 cargoType: 0,
                 packingType: packingType,
                 containers: containersSelection.map((elm: any, i: number) => { return { 
