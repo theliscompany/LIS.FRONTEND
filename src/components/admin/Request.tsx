@@ -318,8 +318,8 @@ function Request() {
     
     const columnsMiscs: GridColDef[] = [
         { field: 'supplierName', headerName: t('supplier'), width: 150 },
-        { field: 'departurePortName', headerName: t('departurePort'), width: 200, valueFormatter: (params: GridValueFormatterParams) => `${portDeparture.portName || ''}`, },
-        { field: 'destinationPortName', headerName: t('destinationPort'), width: 300, valueFormatter: (params: GridValueFormatterParams) => `${portDestination.portName || ''}`, },
+        { field: 'departurePortName', headerName: t('departurePort'), width: 175, valueFormatter: (params: GridValueFormatterParams) => `${portDeparture.portName || ''}`, },
+        { field: 'destinationPortName', headerName: t('destinationPort'), width: 175, valueFormatter: (params: GridValueFormatterParams) => `${portDestination.portName || ''}`, },
         { field: 'currency', headerName: t('prices'), renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box sx={{ my: 1, mr: 1 }}>
@@ -328,6 +328,19 @@ function Request() {
                     <Box sx={{ my: 1 }} hidden={params.row.price40dry === 0 || !getPackageNamesByIds(containersSelected, containers).includes("40' Dry")}>{params.row.price40dry !== 0 ? "40' Dry : "+params.row.price40dry+" "+params.row.currency : "40' Dry : N/A"}</Box>
                     <Box sx={{ my: 1 }} hidden={params.row.price40hc === 0 || !getPackageNamesByIds(containersSelected, containers).includes("40' Hc")}>{params.row.price40hc !== 0 ? "40' Hc : "+params.row.price40hc+" "+params.row.currency : "40' Hc : N/A"}</Box>
                     <Box sx={{ my: 1 }} hidden={params.row.price40hcrf === 0 || !getPackageNamesByIds(containersSelected, containers).includes("40' HcRf")}>{params.row.price40hcrf !== 0 ? "40' HcRf : "+params.row.price40hcrf+" "+params.row.currency : "40' HcRf : N/A"}</Box>
+                </Box>
+            );
+        }, width: 200 },
+        { field: 'services', headerName: 'Services', renderCell: (params: GridRenderCellParams) => {
+            return (
+                <Box sx={{ my: 1, mr: 1 }}>
+                    {params.row.services.map((elm: any, i: number) => {
+                        return (
+                            <Box key={"idServ"+i} sx={{ my: 1 }}>
+                                {elm.service.serviceName} : {elm.service.price} {params.row.currency}
+                            </Box>
+                        );
+                    })}
                 </Box>
             );
         }, width: 200 },

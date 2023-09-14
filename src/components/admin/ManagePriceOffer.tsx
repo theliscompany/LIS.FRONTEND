@@ -294,6 +294,19 @@ return (
                                       </Box>
                                     );
                                 }, width: 200 },
+                                { field: 'services', headerName: 'Services', renderCell: (params: GridRenderCellParams) => {
+                                  return (
+                                      <Box sx={{ my: 1, mr: 1 }}>
+                                          {params.row.services.map((elm: any, i: number) => {
+                                              return (
+                                                  <Box key={"idServ"+i} sx={{ my: 1 }}>
+                                                      {elm.service.serviceName} : {elm.service.price} {params.row.currency}
+                                                  </Box>
+                                              );
+                                          })}
+                                      </Box>
+                                  );
+                                }, width: 200 },
                               ]
                             }
                             hideFooter
