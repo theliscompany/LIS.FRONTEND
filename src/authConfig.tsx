@@ -45,6 +45,7 @@ export const protectedResources = {
   },
   apiLisPricing: {
     endPoint: "https://lis-pricing-dev.azurewebsites.net/api"
+    // endPoint: "https://localhost:7128/api"
   },
   apiLisTransport: {
     endPoint: "https://listransport.azurewebsites.net"
