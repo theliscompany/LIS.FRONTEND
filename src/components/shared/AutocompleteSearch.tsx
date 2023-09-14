@@ -41,7 +41,7 @@ const AutocompleteSearch: React.FC<LocationAutocompleteProps> = ({ id, value, on
                 const response = await axios.get(
                     `https://secure.geonames.org/search?q=${value}&formatted=true&type=json&username=blackstarmc97`
                 );
-                setOptions(response.data.geonames.map((elm: any) => { return { id: elm.geonameId, city: elm.name, country: elm.countryName, postalCode: null, latitude: elm.lat, longitude: elm.lng }  }))
+                setOptions(response.data.geonames.map((elm: any) => { return { id: elm.geonameId, region: elm.adminName1||"", city: elm.name, country: elm.countryName, postalCode: null, latitude: elm.lat, longitude: elm.lng }  }))
             }
             else {
                 setOptions(response.data.postalCodes.map((elm: any) => { return { city: elm.placeName, country: regionNames.of(elm.countryCode), postalCode: elm.postalCode, latitude: elm.lat, longitude: elm.lng }  }))
@@ -66,6 +66,9 @@ const AutocompleteSearch: React.FC<LocationAutocompleteProps> = ({ id, value, on
                 if (option !== undefined && option !== null && option.city !== "" && option.country !== "") {
                     if (option.postalCode !== null && option.postalCode !== undefined) {
                         return `${option.city.toUpperCase()}, ${option.postalCode}, ${option.country}`;
+                    }
+                    if (option.region !== null && option.region !== undefined) {
+                        return `${option.city.toUpperCase()}, ${option.country} - ${option.region}`;
                     }
                     return `${option.city.toUpperCase()}, ${option.country}`;
                 }

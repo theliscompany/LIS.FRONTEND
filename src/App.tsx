@@ -43,6 +43,7 @@ const App = () => {
                 <Route path="users" element={<UsersAssignment />} />
               </Route> 
               <Route path="/" element={<Layout children={<Requests />} />} />
+              <Route path="login" element={<Layout children={<Requests />} />} />
               <Route path="landing" element={<Landing />} />
               <Route path="quote/:lang" element={<Landing />} />
               <Route path="privacy-policy" element={<Privacy />} />
