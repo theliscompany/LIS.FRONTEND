@@ -284,22 +284,30 @@ function Request() {
     ];
 
     const columnsSeafreights: GridColDef[] = [
-        { field: 'carrierName', headerName: t('carrier'), width: 150 },
-        { field: 'carrierAgentName', headerName: t('carrierAgent'), width: 200 },
-        { field: 'departurePortName', headerName: t('departurePort'), width: 150 },
-        { field: 'frequency', headerName: t('frequency'), valueFormatter: (params: GridValueFormatterParams) => `${t('every')} ${params.value || ''} `+t('days'), width: 125 },
-        { field: 'transitTime', headerName: t('transitTime'), valueFormatter: (params: GridValueFormatterParams) => `${params.value || ''} `+t('days') },
+        { field: 'carrierName', headerName: t('carrier'), width: 125 },
+        { field: 'carrierAgentName', headerName: t('carrierAgent'), width: 150 },
+        { field: 'departurePortName', headerName: t('departurePort'), width: 125 },
+        { field: 'destinationPortName', headerName: t('destinationPort'), width: 125 },
+        { field: 'frequency', headerName: t('frequency'), valueFormatter: (params: GridValueFormatterParams) => `${t('every')} ${params.value || ''} `+t('days'), width: 100 },
+        { field: 'transitTime', headerName: t('transitTime'), valueFormatter: (params: GridValueFormatterParams) => `${params.value || ''} `+t('days'), width: 75 },
         { field: 'currency', headerName: t('prices'), renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box sx={{ my: 1, mr: 1 }}>
-                    <Box sx={{ my: 1 }} hidden={!getPackageNamesByIds(containersSelected, containers).includes("20' Dry")}>{params.row.price20dry !== 0 ? "20' Dry : "+params.row.price20dry+" "+params.row.currency : "20' Dry : N/A"}</Box>
-                    <Box sx={{ my: 1 }} hidden={!getPackageNamesByIds(containersSelected, containers).includes("20' Rf")}>{params.row.price20rf !== 0 ? "20' Rf : "+params.row.price20rf+" "+params.row.currency : "20' Rf : N/A"}</Box>
-                    <Box sx={{ my: 1 }} hidden={!getPackageNamesByIds(containersSelected, containers).includes("40' Dry")}>{params.row.price40dry !== 0 ? "40' Dry : "+params.row.price40dry+" "+params.row.currency : "40' Dry : N/A"}</Box>
-                    <Box sx={{ my: 1 }} hidden={!getPackageNamesByIds(containersSelected, containers).includes("40' Hc")}>{params.row.price40hc !== 0 ? "40' Hc : "+params.row.price40hc+" "+params.row.currency : "40' Hc : N/A"}</Box>
-                    <Box sx={{ my: 1 }} hidden={!getPackageNamesByIds(containersSelected, containers).includes("40' HcRf")}>{params.row.price40hcrf !== 0 ? "40' HcRf : "+params.row.price40hcrf+" "+params.row.currency : "40' HcRf : N/A"}</Box>
+                    <Box sx={{ my: 1 }} hidden={!getPackageNamesByIds(containersSelected, containers).includes("20' Dry")}>{params.row.price20dry !== 0 ? "20' Dry : "+params.row.price20dry+" "+t(params.row.currency) : "20' Dry : N/A"}</Box>
+                    <Box sx={{ my: 1 }} hidden={!getPackageNamesByIds(containersSelected, containers).includes("20' Rf")}>{params.row.price20rf !== 0 ? "20' Rf : "+params.row.price20rf+" "+t(params.row.currency) : "20' Rf : N/A"}</Box>
+                    <Box sx={{ my: 1 }} hidden={!getPackageNamesByIds(containersSelected, containers).includes("40' Dry")}>{params.row.price40dry !== 0 ? "40' Dry : "+params.row.price40dry+" "+t(params.row.currency) : "40' Dry : N/A"}</Box>
+                    <Box sx={{ my: 1 }} hidden={!getPackageNamesByIds(containersSelected, containers).includes("40' Hc")}>{params.row.price40hc !== 0 ? "40' Hc : "+params.row.price40hc+" "+t(params.row.currency) : "40' Hc : N/A"}</Box>
+                    <Box sx={{ my: 1 }} hidden={!getPackageNamesByIds(containersSelected, containers).includes("40' HcRf")}>{params.row.price40hcrf !== 0 ? "40' HcRf : "+params.row.price40hcrf+" "+t(params.row.currency) : "40' HcRf : N/A"}</Box>
                 </Box>
             );
-        }, width: 200 },
+        }, width: 125 },
+        { field: 'validUntil', headerName: t('validUntil'), renderCell: (params: GridRenderCellParams) => {
+            return (
+                <Box sx={{ my: 1, mr: 1 }}>
+                    <Chip label={(new Date(params.row.validUntil)).toLocaleDateString().slice(0,10)} color={(new Date()).getTime() - (new Date(params.row.validUntil)).getTime() > 0 ? "warning" : "success"}></Chip>
+                </Box>
+            );
+        }, width: 100 },
     ];
     
     const columnsHaulages: GridColDef[] = [
@@ -309,11 +317,17 @@ function Request() {
                 <Box sx={{ my: 2 }}>{params.row.loadingPort}</Box>
             );
         }, width: 200 },
-        { field: 'unitTariff', headerName: t('unitTariff'), valueGetter: (params: GridValueGetterParams) => `${params.row.unitTariff || ''} ${params.row.currency}` },
+        { field: 'unitTariff', headerName: t('unitTariff'), valueGetter: (params: GridValueGetterParams) => `${params.row.unitTariff || ''} ${t(params.row.currency)}` },
         { field: 'freeTime', headerName: t('freeTime'), valueFormatter: (params: GridValueFormatterParams) => `${params.value || ''} ${t('hours')}`, width: 100 },
-        { field: 'overtimeTariff', headerName: t('overtimeTariff'), valueGetter: (params: GridValueGetterParams) => `${params.row.overtimeTariff || ''} ${params.row.currency} / ${t('hour')}`, width: 150 },
-        { field: 'multiStop', headerName: t('multiStop'), valueGetter: (params: GridValueGetterParams) => `${params.row.multiStop || ''} ${params.row.currency}` },
-        { field: 'validUntil', headerName: t('validUntil'), valueFormatter: (params: GridValueFormatterParams) => `${(new Date(params.value)).toLocaleDateString().slice(0,10) || ''}`, width: 150 },
+        { field: 'overtimeTariff', headerName: t('overtimeTariff'), valueGetter: (params: GridValueGetterParams) => `${params.row.overtimeTariff || ''} ${t(params.row.currency)} / ${t('hour')}`, width: 150 },
+        { field: 'multiStop', headerName: t('multiStop'), valueGetter: (params: GridValueGetterParams) => `${params.row.multiStop || ''} ${t(params.row.currency)}` },
+        { field: 'validUntil', headerName: t('validUntil'), renderCell: (params: GridRenderCellParams) => {
+            return (
+                <Box sx={{ my: 1, mr: 1 }}>
+                    <Chip label={(new Date(params.row.validUntil)).toLocaleDateString().slice(0,10)} color={(new Date()).getTime() - (new Date(params.row.validUntil)).getTime() > 0 ? "warning" : "success"}></Chip>
+                </Box>
+            );
+        }, width: 150 },
     ];
     
     const columnsMiscs: GridColDef[] = [
@@ -323,11 +337,11 @@ function Request() {
         { field: 'currency', headerName: t('prices'), renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box sx={{ my: 1, mr: 1 }}>
-                    <Box sx={{ my: 1 }} hidden={params.row.price20dry === 0 || !getPackageNamesByIds(containersSelected, containers).includes("20' Dry")}>{params.row.price20dry !== 0 ? "20' Dry : "+params.row.price20dry+" "+params.row.currency : "20' Dry : N/A"}</Box>
-                    <Box sx={{ my: 1 }} hidden={params.row.price20rf === 0 || !getPackageNamesByIds(containersSelected, containers).includes("20' Rf")}>{params.row.price20rf !== 0 ? "20' Rf : "+params.row.price20rf+" "+params.row.currency : "20' Rf : N/A"}</Box>
-                    <Box sx={{ my: 1 }} hidden={params.row.price40dry === 0 || !getPackageNamesByIds(containersSelected, containers).includes("40' Dry")}>{params.row.price40dry !== 0 ? "40' Dry : "+params.row.price40dry+" "+params.row.currency : "40' Dry : N/A"}</Box>
-                    <Box sx={{ my: 1 }} hidden={params.row.price40hc === 0 || !getPackageNamesByIds(containersSelected, containers).includes("40' Hc")}>{params.row.price40hc !== 0 ? "40' Hc : "+params.row.price40hc+" "+params.row.currency : "40' Hc : N/A"}</Box>
-                    <Box sx={{ my: 1 }} hidden={params.row.price40hcrf === 0 || !getPackageNamesByIds(containersSelected, containers).includes("40' HcRf")}>{params.row.price40hcrf !== 0 ? "40' HcRf : "+params.row.price40hcrf+" "+params.row.currency : "40' HcRf : N/A"}</Box>
+                    <Box sx={{ my: 1 }} hidden={params.row.price20dry === 0 || !getPackageNamesByIds(containersSelected, containers).includes("20' Dry")}>{params.row.price20dry !== 0 ? "20' Dry : "+params.row.price20dry+" "+t(params.row.currency) : "20' Dry : N/A"}</Box>
+                    <Box sx={{ my: 1 }} hidden={params.row.price20rf === 0 || !getPackageNamesByIds(containersSelected, containers).includes("20' Rf")}>{params.row.price20rf !== 0 ? "20' Rf : "+params.row.price20rf+" "+t(params.row.currency) : "20' Rf : N/A"}</Box>
+                    <Box sx={{ my: 1 }} hidden={params.row.price40dry === 0 || !getPackageNamesByIds(containersSelected, containers).includes("40' Dry")}>{params.row.price40dry !== 0 ? "40' Dry : "+params.row.price40dry+" "+t(params.row.currency) : "40' Dry : N/A"}</Box>
+                    <Box sx={{ my: 1 }} hidden={params.row.price40hc === 0 || !getPackageNamesByIds(containersSelected, containers).includes("40' Hc")}>{params.row.price40hc !== 0 ? "40' Hc : "+params.row.price40hc+" "+t(params.row.currency) : "40' Hc : N/A"}</Box>
+                    <Box sx={{ my: 1 }} hidden={params.row.price40hcrf === 0 || !getPackageNamesByIds(containersSelected, containers).includes("40' HcRf")}>{params.row.price40hcrf !== 0 ? "40' HcRf : "+params.row.price40hcrf+" "+t(params.row.currency) : "40' HcRf : N/A"}</Box>
                 </Box>
             );
         }, width: 200 },
@@ -337,7 +351,7 @@ function Request() {
                     {params.row.services.map((elm: any, i: number) => {
                         return (
                             <Box key={"idServ"+i} sx={{ my: 1 }}>
-                                {elm.service.serviceName} : {elm.service.price} {params.row.currency}
+                                {elm.service.serviceName} : {elm.service.price} {t(params.row.currency)}
                             </Box>
                         );
                     })}

@@ -281,5 +281,6 @@ export const fr = {
   hour: "heure",
   hours: "heures",
   noResults: "Aucun résultat n'a été trouvé",
-  every: "Tous les"
+  every: "Tous les",
+  EUR: '€'
 };
