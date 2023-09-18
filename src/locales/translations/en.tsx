@@ -281,5 +281,6 @@ export const en = {
   hour: "hour",
   hours: "hours",
   noResults: "No results found",
-  every: "Every"
+  every: "Every",
+  EUR: '€'
 };

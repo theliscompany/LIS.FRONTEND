@@ -220,6 +220,7 @@ return (
                             { field: 'carrierName', headerName: t('carrier'), width: 175 },
                             { field: 'carrierAgentName', headerName: t('carrierAgent'), width: 175 },
                             { field: 'departurePortName', headerName: t('departurePort'), width: 125 },
+                            { field: 'destinationPortName', headerName: t('destinationPort'), width: 125 },
                             { field: 'frequency', headerName: t('frequency'), valueFormatter: (params: GridValueFormatterParams) => `${t('every')} ${params.value || ''} `+t('days'), width: 125 },
                             { field: 'transitTime', headerName: t('transitTime'), valueFormatter: (params: GridValueFormatterParams) => `${params.value || ''} `+t('days') },
                             { field: 'currency', headerName: t('prices'), renderCell: (params: GridRenderCellParams) => {
@@ -260,7 +261,13 @@ return (
                                 { field: 'freeTime', headerName: t('freeTime'), valueFormatter: (params: GridValueFormatterParams) => `${params.value || ''} `+t('hours'), width: 125 },
                                 { field: 'multiStop', headerName: t('multiStop'), valueGetter: (params: GridValueGetterParams) => `${params.row.multiStop || ''} ${params.row.currency}` },
                                 { field: 'overtimeTariff', headerName: t('overtimeTariff'), valueGetter: (params: GridValueGetterParams) => `${params.row.overtimeTariff || ''} ${params.row.currency} / ${t('hour')}` },
-                                { field: 'validUntil', headerName: t('validUntil'), valueFormatter: (params: GridValueFormatterParams) => `${(new Date(params.value)).toDateString() || ''}`, width: 200 },
+                                { field: 'validUntil', headerName: t('validUntil'), renderCell: (params: GridRenderCellParams) => {
+                                    return (
+                                        <Box sx={{ my: 1, mr: 1 }}>
+                                            <Chip label={(new Date(params.row.validUntil)).toLocaleDateString().slice(0,10)} color={(new Date()).getTime() - (new Date(params.row.validUntil)).getTime() > 0 ? "warning" : "success"}></Chip>
+                                        </Box>
+                                    );
+                                }, width: 150 },
                               ]
                             }
                             hideFooter
@@ -293,6 +300,19 @@ return (
                                           <Box sx={{ my: 1 }} hidden={!getPackageNamesByIds(containersId, containers).includes("40' HcRf")}>{params.row.price40hcrf !== 0 ? "40' HcRf : "+params.row.price40hcrf+" "+params.row.currency : "40' HcRf : N/A"}</Box>
                                       </Box>
                                     );
+                                }, width: 200 },
+                                { field: 'services', headerName: 'Services', renderCell: (params: GridRenderCellParams) => {
+                                  return (
+                                      <Box sx={{ my: 1, mr: 1 }}>
+                                          {params.row.services.map((elm: any, i: number) => {
+                                              return (
+                                                  <Box key={"idServ"+i} sx={{ my: 1 }}>
+                                                      {elm.service.serviceName} : {elm.service.price} {params.row.currency}
+                                                  </Box>
+                                              );
+                                          })}
+                                      </Box>
+                                  );
                                 }, width: 200 },
                               ]
                             }
