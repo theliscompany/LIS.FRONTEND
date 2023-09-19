@@ -41,10 +41,16 @@ const AutocompleteSearch: React.FC<LocationAutocompleteProps> = ({ id, value, on
                 const response = await axios.get(
                     `https://secure.geonames.org/search?q=${value}&formatted=true&type=json&username=blackstarmc97`
                 );
-                setOptions(response.data.geonames.map((elm: any) => { return { id: elm.geonameId, region: elm.adminName1||"", city: elm.name, country: elm.countryName, postalCode: null, latitude: elm.lat, longitude: elm.lng }  }))
+                
+                var auxResponse = response.data.geonames.map((elm: any) => { return { id: elm.geonameId, region: elm.adminName1||"", city: elm.name, country: elm.countryName, postalCode: null, latitude: elm.lat, longitude: elm.lng } });
+                let result = auxResponse.filter((e: any, i: number) => {
+                    return auxResponse.findIndex((x: any) => {
+                    return x.city == e.city && x.country == e.country && x.region == e.region;}) == i;
+                });
+                setOptions(result);
             }
             else {
-                setOptions(response.data.postalCodes.map((elm: any) => { return { city: elm.placeName, country: regionNames.of(elm.countryCode), postalCode: elm.postalCode, latitude: elm.lat, longitude: elm.lng }  }))
+                setOptions(response.data.postalCodes.map((elm: any, i: number) => { return { id: 'psCode-'+i, city: elm.placeName, country: regionNames.of(elm.countryCode), postalCode: elm.postalCode, latitude: elm.lat, longitude: elm.lng }  }))
             }
         } catch (error) {
             console.log(error);
@@ -74,6 +80,13 @@ const AutocompleteSearch: React.FC<LocationAutocompleteProps> = ({ id, value, on
                 }
                 return "";
             }}
+            // renderOption={(props, option) => {
+            //     return (
+            //       <li {...props} key={option.id}>
+            //         {option.city.toUpperCase()+", "+option.country}
+            //       </li>
+            //     );
+            // }}            
             value={value}
             onChange={(event, newValue) => {
                 onChange(newValue);
