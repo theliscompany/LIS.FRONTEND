@@ -103,7 +103,6 @@ function getPackageNamesByIds(ids: string[], packages: any) {
     return packageNames;
 }
 
-
 function parseLocation(inputString: string) {
     const parts = inputString.split(', ');
     
@@ -289,7 +288,7 @@ function Request() {
     const [details, setDetails] = useState<string>("");
     const [totalPrice, setTotalPrice] = useState<number>(0);
 
-    const [allSeaPorts, setAllSeaPorts] = useState<any>();
+    // const [allSeaPorts, setAllSeaPorts] = useState<any>();
     
     const [rowSelectionModel, setRowSelectionModel] = React.useState<GridRowSelectionModel>([]);
     const [rowSelectionModel2, setRowSelectionModel2] = React.useState<GridRowSelectionModel>([]);
@@ -310,27 +309,27 @@ function Request() {
     const steps = [t('searchSeafreight'), t('selectSeafreight'), t('searchHaulage'), t('selectHaulage'), t('selectMisc'), t('sendOffer')];
     const haulageTypes = [t('haulageType1'), t('haulageType2'), t('haulageType3'), t('haulageType4'), t('haulageType5')];
     const statusTypes = [
-        { type: "EnAttente", value: "En attente", description: t('descriptionEnAttente') }, 
-        { type: "Valider", value: "Validé", description: t('descriptionValider') }, 
-        { type: "Rejeter", value: "Rejeté", description: t('descriptionRejeter') }, 
-        { type: "EnCoursDeTraitement", value: "En cours de traitement", description: t('descriptionEnCoursDeTraitement') }, 
-        { type: "EnTransit", value: "En transit", description: t('descriptionEnTransit') }, 
-        { type: "EnDouane", value: "En douane", description: t('descriptionEnDouane') }, 
-        { type: "LivraisonEnCours", value: "Livraison en cours", description: t('descriptionLivraisonEnCours') }, 
-        { type: "Livre", value: "Livré", description: t('descriptionLivre') }, 
-        { type: "Annule", value: "Annulé", description: t('descriptionAnnule') }, 
-        { type: "Retour", value: "Retourné", description: t('descriptionRetour') }, 
-        { type: "Problème", value: "Problème", description: t('descriptionProbleme') }, 
-        { type: "EnAttenteDeFacturation", value: "En attente de facturation", description: t('descriptionEnAttenteDeFacturation') } 
+        { type: "EnAttente", label: t('labelEnAttente'), value: "En attente", description: t('descriptionEnAttente') }, 
+        { type: "Valider", label: t('labelValider'), value: "Validé", description: t('descriptionValider') }, 
+        { type: "Rejeter", label: t('labelRejeter'), value: "Rejeté", description: t('descriptionRejeter') }, 
+        { type: "EnCoursDeTraitement", label: t('labelEnCoursDeTraitement'), value: "En cours de traitement", description: t('descriptionEnCoursDeTraitement') }, 
+        { type: "EnTransit", label: t('labelEnTransit'), value: "En transit", description: t('descriptionEnTransit') }, 
+        { type: "EnDouane", label: t('labelEnDouane'), value: "En douane", description: t('descriptionEnDouane') }, 
+        { type: "LivraisonEnCours", label: t('labelLivraisonEnCours'), value: "Livraison en cours", description: t('descriptionLivraisonEnCours') }, 
+        { type: "Livre", label: t('labelLivre'), value: "Livré", description: t('descriptionLivre') }, 
+        { type: "Annule", label: t('labelAnnule'), value: "Annulé", description: t('descriptionAnnule') }, 
+        { type: "Retour", label: t('labelRetour'), value: "Retourné", description: t('descriptionRetour') }, 
+        { type: "Problème", label: t('labelProbleme'), value: "Problème", description: t('descriptionProbleme') }, 
+        { type: "EnAttenteDeFacturation", label: t('labelEnAttenteDeFacturation'), value: "En attente de facturation", description: t('descriptionEnAttenteDeFacturation') } 
     ];
 
    const columnsSeafreights: GridColDef[] = [
-        { field: 'carrierName', headerName: t('carrier'), width: 125 },
-        { field: 'carrierAgentName', headerName: t('carrierAgent'), width: 150 },
-        { field: 'departurePortName', headerName: t('departurePort'), width: 125 },
-        { field: 'destinationPortName', headerName: t('destinationPort'), width: 125 },
-        { field: 'frequency', headerName: t('frequency'), valueFormatter: (params: GridValueFormatterParams) => `${t('every')} ${params.value || ''} `+t('days'), width: 100 },
-        { field: 'transitTime', headerName: t('transitTime'), valueFormatter: (params: GridValueFormatterParams) => `${params.value || ''} `+t('days'), width: 75 },
+        { field: 'carrierName', headerName: t('carrier'), minWidth: 125 },
+        { field: 'carrierAgentName', headerName: t('carrierAgent'), minWidth: 150 },
+        { field: 'departurePortName', headerName: t('departurePort'), minWidth: 125 },
+        { field: 'destinationPortName', headerName: t('destinationPort'), minWidth: 125 },
+        { field: 'frequency', headerName: t('frequency'), valueFormatter: (params: GridValueFormatterParams) => `${t('every')} ${params.value || ''} `+t('days'), minWidth: 125 },
+        { field: 'transitTime', headerName: t('transitTime'), valueFormatter: (params: GridValueFormatterParams) => `${params.value || ''} `+t('days'), minWidth: 75 },
         { field: 'currency', headerName: t('prices'), renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box sx={{ my: 1, mr: 1 }}>
@@ -341,26 +340,26 @@ function Request() {
                     <Box sx={{ my: 1 }} hidden={!getPackageNamesByIds(containersSelected, containers).includes("40' HcRf")}>{params.row.price40hcrf !== 0 ? "40' HcRf : "+params.row.price40hcrf+" "+t(params.row.currency) : "40' HcRf : N/A"}</Box>
                 </Box>
             );
-        }, width: 125 },
+        }, minWidth: 150 },
         { field: 'validUntil', headerName: t('validUntil'), renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box sx={{ my: 1, mr: 1 }}>
                     <Chip label={(new Date(params.row.validUntil)).toLocaleDateString().slice(0,10)} color={(new Date()).getTime() - (new Date(params.row.validUntil)).getTime() > 0 ? "warning" : "success"}></Chip>
                 </Box>
             );
-        }, width: 100 },
+        }, minWidth: 100 },
     ];
     
     const columnsHaulages: GridColDef[] = [
-        { field: 'haulierName', headerName: t('haulier'), width: 150 },
+        { field: 'haulierName', headerName: t('haulier'), minWidth: 150 },
         { field: 'loadingPort', headerName: t('loadingPort'), renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box sx={{ my: 2 }}>{params.row.loadingPort}</Box>
             );
-        }, width: 150 },
-        { field: 'unitTariff', headerName: t('unitTariff'), valueGetter: (params: GridValueGetterParams) => `${params.row.unitTariff || ''} ${t(params.row.currency)}`, width: 150 },
-        { field: 'freeTime', headerName: t('freeTime'), valueFormatter: (params: GridValueFormatterParams) => `${params.value || ''} ${t('hours')}`, width: 100 },
-        { field: 'overtimeTariff', headerName: t('overtimeTariff'), valueGetter: (params: GridValueGetterParams) => `${params.row.overtimeTariff || ''} ${t(params.row.currency)} / ${t('hour')}`, width: 125 },
+        }, minWidth: 150 },
+        { field: 'unitTariff', headerName: t('unitTariff'), valueGetter: (params: GridValueGetterParams) => `${params.row.unitTariff || ''} ${t(params.row.currency)}`, minWidth: 150 },
+        { field: 'freeTime', headerName: t('freeTime'), valueFormatter: (params: GridValueFormatterParams) => `${params.value || ''} ${t('hours')}`, minWidth: 100 },
+        { field: 'overtimeTariff', headerName: t('overtimeTariff'), valueGetter: (params: GridValueGetterParams) => `${params.row.overtimeTariff || ''} ${t(params.row.currency)} / ${t('hour')}`, minWidth: 125 },
         { field: 'multiStop', headerName: t('multiStop'), valueGetter: (params: GridValueGetterParams) => `${params.row.multiStop || ''} ${t(params.row.currency)}` },
         { field: 'validUntil', headerName: t('validUntil'), renderCell: (params: GridRenderCellParams) => {
             return (
@@ -368,13 +367,13 @@ function Request() {
                     <Chip label={(new Date(params.row.validUntil)).toLocaleDateString().slice(0,10)} color={(new Date()).getTime() - (new Date(params.row.validUntil)).getTime() > 0 ? "warning" : "success"}></Chip>
                 </Box>
             );
-        }, width: 150 },
+        }, minWidth: 150 },
     ];
     
     const columnsMiscs: GridColDef[] = [
-        { field: 'supplierName', headerName: t('supplier'), width: 150 },
-        { field: 'departurePortName', headerName: t('departurePort'), width: 175, valueFormatter: (params: GridValueFormatterParams) => `${portDeparture.portName || ''}`, },
-        { field: 'destinationPortName', headerName: t('destinationPort'), width: 175, valueFormatter: (params: GridValueFormatterParams) => `${portDestination.portName || ''}`, },
+        { field: 'supplierName', headerName: t('supplier'), minWidth: 150 },
+        { field: 'departurePortName', headerName: t('departurePort'), valueFormatter: (params: GridValueFormatterParams) => `${portDeparture.portName || ''}`, minWidth: 175 },
+        { field: 'destinationPortName', headerName: t('destinationPort'), valueFormatter: (params: GridValueFormatterParams) => `${portDestination.portName || ''}`, minWidth: 175 },
         { field: 'currency', headerName: t('prices'), renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box sx={{ my: 1, mr: 1 }}>
@@ -385,7 +384,7 @@ function Request() {
                     <Box sx={{ my: 1 }} hidden={params.row.price40hcrf === 0 || !getPackageNamesByIds(containersSelected, containers).includes("40' HcRf")}>{params.row.price40hcrf !== 0 ? "40' HcRf : "+params.row.price40hcrf+" "+t(params.row.currency) : "40' HcRf : N/A"}</Box>
                 </Box>
             );
-        }, width: 200 },
+        }, minWidth: 200 },
         { field: 'services', headerName: 'Services', renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box sx={{ my: 1, mr: 1 }}>
@@ -398,7 +397,7 @@ function Request() {
                     })}
                 </Box>
             );
-        }, width: 200 },
+        }, minWidth: 200 },
     ];
     
     const handleChangeHaulageType = (event: { target: { value: string } }) => {
@@ -592,7 +591,6 @@ function Request() {
                 });
             }
         }
-        setAllSeaPorts(auxArray);
         return auxArray;
     }
     
@@ -2019,7 +2017,7 @@ function Request() {
                                     onChange={handleChangeStatus}
                                 >
                                     {
-                                        statusTypes.map((elm) => <DarkTooltip key={"StatusType-"+elm.type} title={elm.description} placement="right" arrow><FormControlLabel value={elm.type} control={<Radio />} label={elm.value} /></DarkTooltip>)
+                                        statusTypes.map((elm) => <DarkTooltip key={"StatusType-"+elm.type} title={elm.description} placement="right" arrow><FormControlLabel value={elm.type} control={<Radio />} label={elm.label} /></DarkTooltip>)
                                     }
                                 </RadioGroup>
                             </FormControl>
