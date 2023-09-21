@@ -104,7 +104,7 @@ export const en = {
   marginPercent: "Margin",
   reductionPercent: "Reduction",
   extraFee: "Extra Fee",
-  detailsOffer: "Details of the offer",
+  detailsOffer: "Content of the offer",
   back: "Back",
   skip: "Skip",
   sendOfferValidation: "Send the offer to validation",
@@ -158,7 +158,7 @@ export const en = {
   messageSuccessSent: "The message has been successfully sent.",
   contentEmpty: "The content field is empty, please fill it.",
   commentSuccessAdded: "The comment/note has been successfully added.",
-  priceFieldsEmpty: "The fields containers and destination port cannot be empty, fill them.",
+  priceFieldsEmpty: "You need to select containers first.",
   offerSuccessSent: "The offer has been successfully sent.",
   byOmnifreight: "by Omnifreight",
   byClient: "by the client",
@@ -282,5 +282,10 @@ export const en = {
   hours: "hours",
   noResults: "No results found",
   every: "Every",
-  EUR: '€'
+  EUR: '€',
+  length: "Length",
+  width: "Width",
+  height: "Height",
+  fieldNeedTobeFilled: "You need to fill the fields package name, quantity and weight",
+  clientName: "Client name"
 };

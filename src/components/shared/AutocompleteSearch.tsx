@@ -39,7 +39,7 @@ const AutocompleteSearch: React.FC<LocationAutocompleteProps> = ({ id, value, on
             );
             if (response.data.postalCodes.length === 0) {
                 const response = await axios.get(
-                    `https://secure.geonames.org/search?q=${value}&formatted=true&type=json&username=blackstarmc97`
+                    `https://secure.geonames.org/search?name_startsWith=${value}&formatted=true&type=json&username=blackstarmc97`
                 );
                 
                 var auxResponse = response.data.geonames.map((elm: any) => { return { id: elm.geonameId, region: elm.adminName1||"", city: elm.name, country: elm.countryName, postalCode: null, latitude: elm.lat, longitude: elm.lng } });
