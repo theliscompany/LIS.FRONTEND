@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { AuthenticationResult } from '@azure/msal-browser';
 import { useAccount, useMsal } from '@azure/msal-react';
@@ -11,6 +11,25 @@ import { BackendService } from '../../services/fetch';
 import { BootstrapInput, gridStyles, inputLabelStyles } from '../../misc/styles';
 import { DataGrid, GridRenderCellParams, GridValueFormatterParams, GridValueGetterParams } from '@mui/x-data-grid';
 import { useTranslation } from 'react-i18next';
+import StarterKit from "@tiptap/starter-kit";
+import {
+    MenuButtonBold,
+    MenuButtonItalic,
+    MenuControlsContainer,
+    MenuDivider,
+    MenuSelectHeading,
+    MenuButtonStrikethrough,
+    MenuButtonHorizontalRule,
+    MenuSelectTextAlign,
+    MenuButtonOrderedList,
+    MenuButtonBulletedList,
+    MenuButtonEditLink,
+    MenuButtonUnderline,
+    MenuButtonUndo,
+    MenuButtonRedo,
+    RichTextEditor,
+    type RichTextEditorRef,
+} from "mui-tiptap";
 
 function statusLabel(value: string) {
   if (value === "Accepted")
@@ -27,6 +46,7 @@ function ManagePriceOffer(props: any) {
   const [reduction, setReduction] = useState<number>(0);
   const [adding, setAdding] = useState<number>(0);
   const [details, setDetails] = useState<string>("");
+  const [clientName, setClientName] = useState<string>("");
   const [containers, setContainers] = useState<any>(null);
   const [containersId, setContainersId] = useState<any>([]);
   
@@ -35,6 +55,8 @@ function ManagePriceOffer(props: any) {
   const account = useAccount(accounts[0] || {});
   const context = useAuthorizedBackendApi();
 
+  const rteRef = useRef<RichTextEditorRef>(null);
+    
   const { t } = useTranslation();
     
   useEffect(() => {
@@ -290,7 +312,7 @@ return (
                                 { field: 'supplierName', headerName: t('supplier'), minWidth: 175 },
                                 { field: 'departurePortName', headerName: t('departurePort'), minWidth: 175, valueFormatter: (params: GridValueFormatterParams) => `${offer.seaFreight.departurePortName || ''}`, },
                                 { field: 'destinationPortName', headerName: t('destinationPort'), minWidth: 200, valueFormatter: (params: GridValueFormatterParams) => `${offer.seaFreight.destinationPortName || ''}`, },
-                                { field: 'currency', headerName: t('prices'), renderCell: (params: GridRenderCellParams) => {
+                                { field: 'currency', headerName: t('costPrices'), renderCell: (params: GridRenderCellParams) => {
                                     return (
                                       <Box sx={{ my: 1, mr: 1 }}>
                                           <Box sx={{ my: 1 }} hidden={!getPackageNamesByIds(containersId, containers).includes("20' Dry")}>{params.row.price20dry !== 0 ? "20' Dry : "+params.row.price20dry+" "+params.row.currency : "20' Dry : N/A"}</Box>
@@ -301,19 +323,19 @@ return (
                                       </Box>
                                     );
                                 }, minWidth: 200 },
-                                { field: 'services', headerName: 'Services', renderCell: (params: GridRenderCellParams) => {
-                                  return (
-                                      <Box sx={{ my: 1, mr: 1 }}>
-                                          {params.row.services.map((elm: any, i: number) => {
-                                              return (
-                                                  <Box key={"idServ"+i} sx={{ my: 1 }}>
-                                                      {elm.service.serviceName} : {elm.service.price} {params.row.currency}
-                                                  </Box>
-                                              );
-                                          })}
-                                      </Box>
-                                  );
-                                }, minWidth: 200 },
+                                // { field: 'services', headerName: 'Services', renderCell: (params: GridRenderCellParams) => {
+                                //   return (
+                                //       <Box sx={{ my: 1, mr: 1 }}>
+                                //           {params.row.services.map((elm: any, i: number) => {
+                                //               return (
+                                //                   <Box key={"idServ"+i} sx={{ my: 1 }}>
+                                //                       {elm.service.serviceName} : {elm.service.price} {params.row.currency}
+                                //                   </Box>
+                                //               );
+                                //           })}
+                                //       </Box>
+                                //   );
+                                // }, minWidth: 200 },
                               ]
                             }
                             hideFooter
@@ -324,21 +346,50 @@ return (
                         />
                     </Grid> : null
                 }
-                <Grid item xs={12} md={4} sx={{ mt: 2 }}>
+                <Grid item xs={12} md={6}>
+                    <InputLabel htmlFor="client-name" sx={inputLabelStyles}>{t('clientName')}</InputLabel>
+                    <BootstrapInput id="clien-name" type="text" value={clientName} onChange={(e: any) => setClientName(e.target.value)} fullWidth />
+                </Grid>
+                <Grid item xs={12} md={2}>
                     <InputLabel htmlFor="margin" sx={inputLabelStyles}>{t('margin')} (%)</InputLabel>
                     <BootstrapInput id="margin" type="number" value={margin} onChange={(e: any) => setMargin(e.target.value)} fullWidth />
                 </Grid>
-                <Grid item xs={12} md={4} sx={{ mt: 2 }}>
+                <Grid item xs={12} md={2}>
                     <InputLabel htmlFor="reduction" sx={inputLabelStyles}>{t('reduction')} (%)</InputLabel>
                     <BootstrapInput id="reduction" type="number" value={reduction} onChange={(e: any) => setReduction(e.target.value)} fullWidth />
                 </Grid>
-                <Grid item xs={12} md={4} sx={{ mt: 2 }}>
-                    <InputLabel htmlFor="adding" sx={inputLabelStyles}>{t('extraFee')} ({offer.seaFreight !== null ? offer.seaFreight.currency : null})</InputLabel>
+                <Grid item xs={12} md={2}>
+                    <InputLabel htmlFor="adding" sx={inputLabelStyles}>{t('extraFee')}</InputLabel>
                     <BootstrapInput id="adding" type="number" value={adding} onChange={(e: any) => setAdding(e.target.value)} fullWidth />
                 </Grid>
                 <Grid item xs={12}>
                     <InputLabel htmlFor="details" sx={inputLabelStyles}>{t('detailsOffer')}</InputLabel>
-                    <BootstrapInput id="details" type="text" multiline rows={3} value={details} onChange={(e: any) => setDetails(e.target.value)} fullWidth />
+                    {/* <BootstrapInput id="details" type="text" multiline rows={6} value={details} onChange={(e: any) => setDetails(e.target.value)} fullWidth /> */}
+                    <Box sx={{ mt: 2 }}>
+                      <RichTextEditor
+                          ref={rteRef}
+                          extensions={[StarterKit]}
+                          content={offer.comment}
+                          renderControls={() => (
+                          <MenuControlsContainer>
+                              <MenuSelectHeading />
+                              <MenuDivider />
+                              <MenuButtonBold />
+                              <MenuButtonItalic />
+                              {/* <MenuButtonUnderline /> */}
+                              <MenuButtonStrikethrough />
+                              <MenuButtonOrderedList />
+                              <MenuButtonBulletedList />
+                              <MenuSelectTextAlign />
+                              <MenuButtonEditLink />
+                              <MenuButtonHorizontalRule />
+                              <MenuButtonUndo />
+                              <MenuButtonRedo />
+                              {/* Add more controls of your choosing here */}
+                          </MenuControlsContainer>
+                          )}
+                      />
+                  </Box>
                 </Grid>
                 <Grid item xs={12}>
                   <Typography variant="h6">

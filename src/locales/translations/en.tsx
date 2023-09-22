@@ -5,7 +5,7 @@ export const en = {
   newRequest: "New request",
   myRequests: "My requests",
   requests: "Requests",
-  priceOffers: "Price offers",
+  priceOffers: "Sent offers",
   collapse: "Collapse",
   whatsappNumber: "Whatsapp number",
   emailAddress: "Your email address",
@@ -287,5 +287,6 @@ export const en = {
   width: "Width",
   height: "Height",
   fieldNeedTobeFilled: "You need to fill the fields package name, quantity and weight",
-  clientName: "Client name"
+  clientName: "Client name",
+  costPrices: "Cost per unit"
 };

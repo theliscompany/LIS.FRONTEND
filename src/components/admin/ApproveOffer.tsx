@@ -258,7 +258,7 @@ function ApproveOffer(props: any) {
                                     { field: 'supplierName', headerName: t('supplier'), minWidth: 175 },
                                     { field: 'departurePortName', headerName: t('departurePort'), minWidth: 175, valueFormatter: (params: GridValueFormatterParams) => `${offer.seaFreight.departurePortName || ''}`, },
                                     { field: 'destinationPortName', headerName: t('destinationPort'), minWidth: 325, valueFormatter: (params: GridValueFormatterParams) => `${offer.seaFreight.destinationPortName || ''}`, },
-                                    { field: 'currency', headerName: t('prices'), renderCell: (params: GridRenderCellParams) => {
+                                    { field: 'currency', headerName: t('costPrices'), renderCell: (params: GridRenderCellParams) => {
                                         return (
                                             <Box sx={{ my: 1, mr: 1 }}>
                                                 <Box sx={{ my: 1 }} hidden={!getPackageNamesByIds(containersId, containers).includes("20' Dry")}>{params.row.price20dry !== 0 ? "20' Dry : "+params.row.price20dry+" "+params.row.currency : "20' Dry : N/A"}</Box>

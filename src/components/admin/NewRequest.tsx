@@ -23,6 +23,8 @@ function validMail(mail: string) {
     return /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/.test(mail);
 }
 
+let packingOptions = ["Unit", "Bundle", "Bag", "Pallet", "Carton", "Lot", "Crate"];
+
 function NewRequest(props: any) {
     const [load, setLoad] = useState<boolean>(false);
     const [loadUser, setLoadUser] = useState<boolean>(true);
@@ -390,7 +392,19 @@ function NewRequest(props: any) {
                             <>
                             <Grid item xs={12} md={3} mt={1}>
                                 <InputLabel htmlFor="package-name" sx={inputLabelStyles}>{t('packageName')}</InputLabel>
-                                <BootstrapInput id="package-name" type="text" value={packageName} onChange={(e: any) => {setPackageName(e.target.value)}} fullWidth />
+                                {/* <BootstrapInput id="package-name" type="text" value={packageName} onChange={(e: any) => {setPackageName(e.target.value)}} fullWidth /> */}
+                                <NativeSelect
+                                    id="package-name"
+                                    value={packageName}
+                                    onChange={(e: any) => { setPackageName(e.target.value) }}
+                                    input={<BootstrapInput />}
+                                    fullWidth
+                                >
+                                    <option key={"option1-x"} value="">{t('notDefined')}</option>
+                                    {packingOptions.map((elm: any, i: number) => (
+                                        <option key={"elm11-"+i} value={elm}>{elm}</option>
+                                    ))}
+                                </NativeSelect>
                             </Grid>
                             <Grid item xs={12} md={1} mt={1}>
                                 <InputLabel htmlFor="package-quantity" sx={inputLabelStyles}>{t('quantity')}</InputLabel>
@@ -470,7 +484,19 @@ function NewRequest(props: any) {
                             <>
                             <Grid item xs={12} md={3} mt={1}>
                                 <InputLabel htmlFor="unit-name" sx={inputLabelStyles}>{t('unitName')}</InputLabel>
-                                <BootstrapInput id="unit-name" type="text" value={unitName} onChange={(e: any) => {setUnitName(e.target.value)}} fullWidth />
+                                {/* <BootstrapInput id="unit-name" type="text" value={unitName} onChange={(e: any) => {setUnitName(e.target.value)}} fullWidth /> */}
+                                <NativeSelect
+                                    id="unit-name"
+                                    value={unitName}
+                                    onChange={(e: any) => { setUnitName(e.target.value) }}
+                                    input={<BootstrapInput />}
+                                    fullWidth
+                                >
+                                    <option key={"option2-x"} value="">{t('notDefined')}</option>
+                                    {packingOptions.map((elm: any, i: number) => (
+                                        <option key={"elm22-"+i} value={elm}>{elm}</option>
+                                    ))}
+                                </NativeSelect>
                             </Grid>
                             <Grid item xs={12} md={1} mt={1}>
                                 <InputLabel htmlFor="unit-quantity" sx={inputLabelStyles}>{t('quantity')}</InputLabel>
@@ -545,7 +571,7 @@ function NewRequest(props: any) {
                             </Grid>
                             </> : null
                         }
-                        
+
                         <Grid item xs={12} md={6} mt={1} mb={1}>
                             <InputLabel htmlFor="tags" sx={inputLabelStyles}>{t('specifics')}</InputLabel>
                             {

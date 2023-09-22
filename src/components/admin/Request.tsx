@@ -374,7 +374,7 @@ function Request() {
         { field: 'supplierName', headerName: t('supplier'), minWidth: 150 },
         { field: 'departurePortName', headerName: t('departurePort'), valueFormatter: (params: GridValueFormatterParams) => `${portDeparture.portName || ''}`, minWidth: 175 },
         { field: 'destinationPortName', headerName: t('destinationPort'), valueFormatter: (params: GridValueFormatterParams) => `${portDestination.portName || ''}`, minWidth: 175 },
-        { field: 'currency', headerName: t('prices'), renderCell: (params: GridRenderCellParams) => {
+        { field: 'currency', headerName: t('costPrices'), renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box sx={{ my: 1, mr: 1 }}>
                     <Box sx={{ my: 1 }} hidden={params.row.price20dry === 0 || !getPackageNamesByIds(containersSelected, containers).includes("20' Dry")}>{params.row.price20dry !== 0 ? "20' Dry : "+params.row.price20dry+" "+t(params.row.currency) : "20' Dry : N/A"}</Box>
@@ -678,8 +678,8 @@ function Request() {
                     const closestArrivalPort = findClosestSeaPort(parseLocation(response.data.arrival), allPorts);
                     setPortDeparture(closestDeparturePort);
                     setPortDestination(closestArrivalPort);
-                    setPorts1(sortByCloseness(parseLocation(response.data.departure), allPorts).slice(0, 10));
-                    setPorts2(sortByCloseness(parseLocation(response.data.arrival), allPorts).slice(0, 10));
+                    setPorts1(sortByCloseness(parseLocation(response.data.departure), allPorts).slice(0, 15));
+                    setPorts2(sortByCloseness(parseLocation(response.data.arrival), allPorts).slice(0, 15));
                     
                     setLoad(false);
                 }
@@ -859,21 +859,21 @@ function Request() {
         }
     }
 
-    const getPriceRequests = async () => {
-        if (containersSelection.map((elm: any) => elm.container).length !== 0 && portDestination !== null) {
-            // alert(containersSelected);
-            // console.log(containers.map((elm: any) => elm.packageName));
-            setLoadResults(true);
-            getSeaFreightPriceOffers();
-            getMiscellaneousPriceOffers();
-            if (loadingCity !== null && haulageType !== "") {
-                getHaulagePriceOffers();
-            }
-        }
-        else {
-            enqueueSnackbar(t('priceFieldsEmpty'), { variant: "warning", anchorOrigin: { horizontal: "right", vertical: "top"} });
-        }
-    }
+    // const getPriceRequests = async () => {
+    //     if (containersSelection.map((elm: any) => elm.container).length !== 0 && portDestination !== null) {
+    //         // alert(containersSelected);
+    //         // console.log(containers.map((elm: any) => elm.packageName));
+    //         setLoadResults(true);
+    //         getSeaFreightPriceOffers();
+    //         getMiscellaneousPriceOffers();
+    //         if (loadingCity !== null && haulageType !== "") {
+    //             getHaulagePriceOffers();
+    //         }
+    //     }
+    //     else {
+    //         enqueueSnackbar(t('priceFieldsEmpty'), { variant: "warning", anchorOrigin: { horizontal: "right", vertical: "top"} });
+    //     }
+    // }
     
     const getHaulagePriceOffers = async () => {
         if (context && account) {
@@ -1125,7 +1125,7 @@ function Request() {
                 }
                 var dataSent = {
                     "requestQuoteId": Number(id),
-                    "comment": details,
+                    "comment": rteRef.current?.editor?.getHTML(),
                     // "quoteOfferNumber": transformId(uuidv4()),
                     "quoteOfferVm": 0,
                     "quoteOfferId": 10,
@@ -1187,7 +1187,7 @@ function Request() {
             const closest = findClosestSeaPort(value, ports);
             setPortDeparture(closest);
             setLoadingCity(value);
-            setPorts1(sortByCloseness(value, ports).slice(0, 10));
+            setPorts1(sortByCloseness(value, ports).slice(0, 15));
         }
     }
 
@@ -1195,7 +1195,7 @@ function Request() {
         if (value !== null && value !== undefined) {
             const closest = findClosestSeaPort(value, ports);
             setPortDestination(closest);
-            setPorts2(sortByCloseness(value, ports).slice(0, 10));
+            setPorts2(sortByCloseness(value, ports).slice(0, 15));
         }
     }
 
@@ -1331,7 +1331,19 @@ function Request() {
                                     <>
                                     <Grid item xs={12} md={3} mt={1}>
                                         <InputLabel htmlFor="package-name" sx={inputLabelStyles}>{t('packageName')}</InputLabel>
-                                        <BootstrapInput id="package-name" type="text" value={packageName} onChange={(e: any) => {setPackageName(e.target.value)}} fullWidth />
+                                        {/* <BootstrapInput id="package-name" type="text" value={packageName} onChange={(e: any) => {setPackageName(e.target.value)}} fullWidth /> */}
+                                        <NativeSelect
+                                            id="package-name"
+                                            value={packageName}
+                                            onChange={(e: any) => { setPackageName(e.target.value) }}
+                                            input={<BootstrapInput />}
+                                            fullWidth
+                                        >
+                                            <option key={"option1-x"} value="">{t('notDefined')}</option>
+                                            {packingOptions.map((elm: any, i: number) => (
+                                                <option key={"elm11-"+i} value={elm}>{elm}</option>
+                                            ))}
+                                        </NativeSelect>
                                     </Grid>
                                     <Grid item xs={12} md={1} mt={1}>
                                         <InputLabel htmlFor="package-quantity" sx={inputLabelStyles}>{t('quantity')}</InputLabel>
@@ -1411,7 +1423,19 @@ function Request() {
                                     <>
                                     <Grid item xs={12} md={3} mt={1}>
                                         <InputLabel htmlFor="unit-name" sx={inputLabelStyles}>{t('unitName')}</InputLabel>
-                                        <BootstrapInput id="unit-name" type="text" value={unitName} onChange={(e: any) => {setUnitName(e.target.value)}} fullWidth />
+                                        {/* <BootstrapInput id="unit-name" type="text" value={unitName} onChange={(e: any) => {setUnitName(e.target.value)}} fullWidth /> */}
+                                        <NativeSelect
+                                            id="unit-name"
+                                            value={unitName}
+                                            onChange={(e: any) => { setUnitName(e.target.value) }}
+                                            input={<BootstrapInput />}
+                                            fullWidth
+                                        >
+                                            <option key={"option2-x"} value="">{t('notDefined')}</option>
+                                            {packingOptions.map((elm: any, i: number) => (
+                                                <option key={"elm22-"+i} value={elm}>{elm}</option>
+                                            ))}
+                                        </NativeSelect>
                                     </Grid>
                                     <Grid item xs={12} md={1} mt={1}>
                                         <InputLabel htmlFor="unit-quantity" sx={inputLabelStyles}>{t('quantity')}</InputLabel>
