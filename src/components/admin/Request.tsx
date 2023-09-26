@@ -1,6 +1,6 @@
 import { Alert, Autocomplete, Box, Button, Chip, DialogActions, DialogContent, FormControl, FormControlLabel, FormLabel, Grid, IconButton, InputLabel, ListItem, ListItemText, NativeSelect, Paper, Radio, RadioGroup, Skeleton, Step, StepLabel, Stepper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Typography } from '@mui/material';
 import { MuiTelInput } from 'mui-tel-input';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import '../../App.css';
 import AutocompleteSearch from '../shared/AutocompleteSearch';
@@ -21,6 +21,25 @@ import Accordion from '@mui/material/Accordion';
 import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import StarterKit from "@tiptap/starter-kit";
+import {
+    MenuButtonBold,
+    MenuButtonItalic,
+    MenuControlsContainer,
+    MenuDivider,
+    MenuSelectHeading,
+    MenuButtonStrikethrough,
+    MenuButtonHorizontalRule,
+    MenuSelectTextAlign,
+    MenuButtonOrderedList,
+    MenuButtonBulletedList,
+    MenuButtonEditLink,
+    MenuButtonUnderline,
+    MenuButtonUndo,
+    MenuButtonRedo,
+    RichTextEditor,
+    type RichTextEditorRef,
+} from "mui-tiptap";
 
 // @ts-ignore
 import { JSON as seaPorts } from 'sea-ports';
@@ -32,6 +51,7 @@ import ClientSearch from '../shared/ClientSearch';
 //let statusTypes = ["EnAttente", "Valider", "Rejeter"];
 // let cargoTypes = ["Container", "Conventional", "RollOnRollOff"];
 // let packingTypes = ["LCL", "Airfreight", "Cars", "Trucks", "Not containerised"];
+let packingOptions = ["Unit", "Bundle", "Bag", "Pallet", "Carton", "Lot", "Crate"];
 
 function createGetRequestUrl(url: string, variable1: string|undefined, variable2: string, variable3: string) {
     if (variable1) {
@@ -83,7 +103,6 @@ function getPackageNamesByIds(ids: string[], packages: any) {
     return packageNames;
 }
 
-
 function parseLocation(inputString: string) {
     const parts = inputString.split(', ');
     
@@ -102,6 +121,18 @@ function parseLocation(inputString: string) {
     };
     
     return locationObject;
+}
+
+function displayContainers(value: any) {
+    var aux = value[0];
+    return aux.quantity+"x"+aux.container;
+}
+
+function displayServices(value: any) {
+    var aux = value.map((elm: any, i: number) => {
+        return elm.service.serviceName;
+    })
+    return aux.join(", ");
 }
 
 function removeAccents(input: string) {
@@ -182,6 +213,7 @@ function Request() {
     const [email, setEmail] = useState<string>("");
     const [status, setStatus] = useState<string | null>(null);
     const [trackingNumber, setTrackingNumber] = useState<string>("");
+    const [clientName, setClientName] = useState<string>("");
     const [phone, setPhone] = useState<string>("");
     const [message, setMessage] = useState<string>("");
     // const [cargoType, setCargoType] = useState<string>("0");
@@ -213,13 +245,19 @@ function Request() {
     const [containersSelection, setContainersSelection] = useState<any>([]);
     
     const [unitName, setUnitName] = useState<string>("");
-    const [unitDimensions, setUnitDimensions] = useState<string>("");
+    // const [unitDimensions, setUnitDimensions] = useState<string>("");
+    const [unitHeight, setUnitHeight] = useState<number>(0);
+    const [unitLength, setUnitLength] = useState<number>(0);
+    const [unitWidth, setUnitWidth] = useState<number>(0);
     const [unitWeight, setUnitWeight] = useState<number>(0);
     const [unitQuantity, setUnitQuantity] = useState<number>(1);
     const [unitsSelection, setUnitsSelection] = useState<any>([]);
 
     const [packageName, setPackageName] = useState<string>("");
-    const [packageDimensions, setPackageDimensions] = useState<string>("");
+    // const [packageDimensions, setPackageDimensions] = useState<string>("");
+    const [packageHeight, setPackageHeight] = useState<number>(0);
+    const [packageLength, setPackageLength] = useState<number>(0);
+    const [packageWidth, setPackageWidth] = useState<number>(0);
     const [packageWeight, setPackageWeight] = useState<number>(0);
     const [packageQuantity, setPackageQuantity] = useState<number>(1);
     const [packagesSelection, setPackagesSelection] = useState<any>([]);
@@ -228,11 +266,11 @@ function Request() {
     const [containersSelected, setContainersSelected] = useState<string[]>([]);
     const [portDestination, setPortDestination] = useState<any>(null);
     const [portDeparture, setPortDeparture] = useState<any>(null);
-    const [loadingDate, setLoadingDate] = useState<Dayjs | null>(null);
+    // const [loadingDate, setLoadingDate] = useState<Dayjs | null>(null);
     const [loadingCity, setLoadingCity] = useState<any>(null);
     const [haulageType, setHaulageType] = useState<string>("");
     const [products, setProducts] = useState<any>(null);
-    const [cities, setCities] = useState<any>(null);
+    // const [cities, setCities] = useState<any>(null);
     const [ports, setPorts] = useState<any>(null);
     const [ports1, setPorts1] = useState<any>(null);
     const [ports2, setPorts2] = useState<any>(null);
@@ -247,14 +285,16 @@ function Request() {
     const [margin, setMargin] = useState<number>(22);
     const [reduction, setReduction] = useState<number>(0);
     const [adding, setAdding] = useState<number>(0);
-    const [details, setDetails] = useState<string>("");
+    // const [details, setDetails] = useState<string>("");
     const [totalPrice, setTotalPrice] = useState<number>(0);
 
-    const [allSeaPorts, setAllSeaPorts] = useState<any>();
+    // const [allSeaPorts, setAllSeaPorts] = useState<any>();
     
     const [rowSelectionModel, setRowSelectionModel] = React.useState<GridRowSelectionModel>([]);
     const [rowSelectionModel2, setRowSelectionModel2] = React.useState<GridRowSelectionModel>([]);
     const [rowSelectionModel3, setRowSelectionModel3] = React.useState<GridRowSelectionModel>([]);
+
+    const rteRef = useRef<RichTextEditorRef>(null);
     
     let { id } = useParams();
 
@@ -265,31 +305,31 @@ function Request() {
 
     const { t } = useTranslation();
     
-    // const steps = [t('searchOffers'), t('listOffers'), t('sendOffer')];
     const steps = [t('searchSeafreight'), t('selectSeafreight'), t('searchHaulage'), t('selectHaulage'), t('selectMisc'), t('sendOffer')];
+    // const steps = [t('searchHaulage'), t('selectHaulage'), t('searchSeafreight'), t('selectSeafreight'), t('selectMisc'), t('sendOffer')];
     const haulageTypes = [t('haulageType1'), t('haulageType2'), t('haulageType3'), t('haulageType4'), t('haulageType5')];
     const statusTypes = [
-        { type: "EnAttente", value: "En attente", description: t('descriptionEnAttente') }, 
-        { type: "Valider", value: "Validé", description: t('descriptionValider') }, 
-        { type: "Rejeter", value: "Rejeté", description: t('descriptionRejeter') }, 
-        { type: "EnCoursDeTraitement", value: "En cours de traitement", description: t('descriptionEnCoursDeTraitement') }, 
-        { type: "EnTransit", value: "En transit", description: t('descriptionEnTransit') }, 
-        { type: "EnDouane", value: "En douane", description: t('descriptionEnDouane') }, 
-        { type: "LivraisonEnCours", value: "Livraison en cours", description: t('descriptionLivraisonEnCours') }, 
-        { type: "Livre", value: "Livré", description: t('descriptionLivre') }, 
-        { type: "Annule", value: "Annulé", description: t('descriptionAnnule') }, 
-        { type: "Retour", value: "Retourné", description: t('descriptionRetour') }, 
-        { type: "Problème", value: "Problème", description: t('descriptionProbleme') }, 
-        { type: "EnAttenteDeFacturation", value: "En attente de facturation", description: t('descriptionEnAttenteDeFacturation') } 
+        { type: "EnAttente", label: t('labelEnAttente'), value: "En attente", description: t('descriptionEnAttente') }, 
+        { type: "Valider", label: t('labelValider'), value: "Validé", description: t('descriptionValider') }, 
+        { type: "Rejeter", label: t('labelRejeter'), value: "Rejeté", description: t('descriptionRejeter') }, 
+        { type: "EnCoursDeTraitement", label: t('labelEnCoursDeTraitement'), value: "En cours de traitement", description: t('descriptionEnCoursDeTraitement') }, 
+        { type: "EnTransit", label: t('labelEnTransit'), value: "En transit", description: t('descriptionEnTransit') }, 
+        { type: "EnDouane", label: t('labelEnDouane'), value: "En douane", description: t('descriptionEnDouane') }, 
+        { type: "LivraisonEnCours", label: t('labelLivraisonEnCours'), value: "Livraison en cours", description: t('descriptionLivraisonEnCours') }, 
+        { type: "Livre", label: t('labelLivre'), value: "Livré", description: t('descriptionLivre') }, 
+        { type: "Annule", label: t('labelAnnule'), value: "Annulé", description: t('descriptionAnnule') }, 
+        { type: "Retour", label: t('labelRetour'), value: "Retourné", description: t('descriptionRetour') }, 
+        { type: "Problème", label: t('labelProbleme'), value: "Problème", description: t('descriptionProbleme') }, 
+        { type: "EnAttenteDeFacturation", label: t('labelEnAttenteDeFacturation'), value: "En attente de facturation", description: t('descriptionEnAttenteDeFacturation') } 
     ];
 
-    const columnsSeafreights: GridColDef[] = [
-        { field: 'carrierName', headerName: t('carrier'), width: 125 },
-        { field: 'carrierAgentName', headerName: t('carrierAgent'), width: 150 },
-        { field: 'departurePortName', headerName: t('departurePort'), width: 125 },
-        { field: 'destinationPortName', headerName: t('destinationPort'), width: 125 },
-        { field: 'frequency', headerName: t('frequency'), valueFormatter: (params: GridValueFormatterParams) => `${t('every')} ${params.value || ''} `+t('days'), width: 100 },
-        { field: 'transitTime', headerName: t('transitTime'), valueFormatter: (params: GridValueFormatterParams) => `${params.value || ''} `+t('days'), width: 75 },
+   const columnsSeafreights: GridColDef[] = [
+        { field: 'carrierName', headerName: t('carrier'), minWidth: 125 },
+        { field: 'carrierAgentName', headerName: t('carrierAgent'), minWidth: 125 },
+        { field: 'departurePortName', headerName: t('departurePort'), minWidth: 125 },
+        { field: 'destinationPortName', headerName: t('destinationPort'), minWidth: 125 },
+        { field: 'frequency', headerName: t('frequency'), valueFormatter: (params: GridValueFormatterParams) => `${t('every')} ${params.value || ''} `+t('days'), minWidth: 100 },
+        { field: 'transitTime', headerName: t('transitTime'), valueFormatter: (params: GridValueFormatterParams) => `${params.value || ''} `+t('days'), minWidth: 50 },
         { field: 'currency', headerName: t('prices'), renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box sx={{ my: 1, mr: 1 }}>
@@ -300,26 +340,26 @@ function Request() {
                     <Box sx={{ my: 1 }} hidden={!getPackageNamesByIds(containersSelected, containers).includes("40' HcRf")}>{params.row.price40hcrf !== 0 ? "40' HcRf : "+params.row.price40hcrf+" "+t(params.row.currency) : "40' HcRf : N/A"}</Box>
                 </Box>
             );
-        }, width: 125 },
+        }, minWidth: 125 },
         { field: 'validUntil', headerName: t('validUntil'), renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box sx={{ my: 1, mr: 1 }}>
                     <Chip label={(new Date(params.row.validUntil)).toLocaleDateString().slice(0,10)} color={(new Date()).getTime() - (new Date(params.row.validUntil)).getTime() > 0 ? "warning" : "success"}></Chip>
                 </Box>
             );
-        }, width: 100 },
+        }, minWidth: 100 },
     ];
     
     const columnsHaulages: GridColDef[] = [
-        { field: 'haulierName', headerName: t('haulier'), width: 150 },
+        { field: 'haulierName', headerName: t('haulier'), minWidth: 150 },
         { field: 'loadingPort', headerName: t('loadingPort'), renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box sx={{ my: 2 }}>{params.row.loadingPort}</Box>
             );
-        }, width: 200 },
-        { field: 'unitTariff', headerName: t('unitTariff'), valueGetter: (params: GridValueGetterParams) => `${params.row.unitTariff || ''} ${t(params.row.currency)}` },
-        { field: 'freeTime', headerName: t('freeTime'), valueFormatter: (params: GridValueFormatterParams) => `${params.value || ''} ${t('hours')}`, width: 100 },
-        { field: 'overtimeTariff', headerName: t('overtimeTariff'), valueGetter: (params: GridValueGetterParams) => `${params.row.overtimeTariff || ''} ${t(params.row.currency)} / ${t('hour')}`, width: 150 },
+        }, minWidth: 150 },
+        { field: 'unitTariff', headerName: t('unitTariff'), valueGetter: (params: GridValueGetterParams) => `${params.row.unitTariff || ''} ${t(params.row.currency)}`, minWidth: 150 },
+        { field: 'freeTime', headerName: t('freeTime'), valueFormatter: (params: GridValueFormatterParams) => `${params.value || ''} ${t('hours')}`, minWidth: 100 },
+        { field: 'overtimeTariff', headerName: t('overtimeTariff'), valueGetter: (params: GridValueGetterParams) => `${params.row.overtimeTariff || ''} ${t(params.row.currency)} / ${t('hour')}`, minWidth: 125 },
         { field: 'multiStop', headerName: t('multiStop'), valueGetter: (params: GridValueGetterParams) => `${params.row.multiStop || ''} ${t(params.row.currency)}` },
         { field: 'validUntil', headerName: t('validUntil'), renderCell: (params: GridRenderCellParams) => {
             return (
@@ -327,14 +367,14 @@ function Request() {
                     <Chip label={(new Date(params.row.validUntil)).toLocaleDateString().slice(0,10)} color={(new Date()).getTime() - (new Date(params.row.validUntil)).getTime() > 0 ? "warning" : "success"}></Chip>
                 </Box>
             );
-        }, width: 150 },
+        }, minWidth: 150 },
     ];
     
     const columnsMiscs: GridColDef[] = [
-        { field: 'supplierName', headerName: t('supplier'), width: 150 },
-        { field: 'departurePortName', headerName: t('departurePort'), width: 175, valueFormatter: (params: GridValueFormatterParams) => `${portDeparture.portName || ''}`, },
-        { field: 'destinationPortName', headerName: t('destinationPort'), width: 175, valueFormatter: (params: GridValueFormatterParams) => `${portDestination.portName || ''}`, },
-        { field: 'currency', headerName: t('prices'), renderCell: (params: GridRenderCellParams) => {
+        { field: 'supplierName', headerName: t('supplier'), minWidth: 150 },
+        { field: 'departurePortName', headerName: t('departurePort'), valueFormatter: (params: GridValueFormatterParams) => `${portDeparture.portName || ''}`, minWidth: 175 },
+        { field: 'destinationPortName', headerName: t('destinationPort'), valueFormatter: (params: GridValueFormatterParams) => `${portDestination.portName || ''}`, minWidth: 175 },
+        { field: 'currency', headerName: t('costPrices'), renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box sx={{ my: 1, mr: 1 }}>
                     <Box sx={{ my: 1 }} hidden={params.row.price20dry === 0 || !getPackageNamesByIds(containersSelected, containers).includes("20' Dry")}>{params.row.price20dry !== 0 ? "20' Dry : "+params.row.price20dry+" "+t(params.row.currency) : "20' Dry : N/A"}</Box>
@@ -344,7 +384,7 @@ function Request() {
                     <Box sx={{ my: 1 }} hidden={params.row.price40hcrf === 0 || !getPackageNamesByIds(containersSelected, containers).includes("40' HcRf")}>{params.row.price40hcrf !== 0 ? "40' HcRf : "+params.row.price40hcrf+" "+t(params.row.currency) : "40' HcRf : N/A"}</Box>
                 </Box>
             );
-        }, width: 200 },
+        }, minWidth: 200 },
         { field: 'services', headerName: 'Services', renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box sx={{ my: 1, mr: 1 }}>
@@ -357,7 +397,7 @@ function Request() {
                     })}
                 </Box>
             );
-        }, width: 200 },
+        }, minWidth: 200 },
     ];
     
     const handleChangeHaulageType = (event: { target: { value: string } }) => {
@@ -382,7 +422,8 @@ function Request() {
     const [skipped, setSkipped] = React.useState(new Set<number>());
 
     const isStepOptional = (step: number) => {
-        return step === 2 || step === 3 || step === 4;
+        // return step === 2 || step === 3 || step === 4;
+        return false;
     };
 
     const isStepSkipped = (step: number) => {
@@ -530,27 +571,13 @@ function Request() {
         setActiveStep(0);
     };
     
-    const handleRowHaulagesClick: GridEventListener<'rowClick'> = (params: any) => {
-        setSelectedHaulage(params.row);
-    };
-    
-    const handleRowSeafreightsClick: GridEventListener<'rowClick'> = (params: any) => {
-        setSelectedSeafreight(params.row);
-    };
-    
-    const handleRowMiscsClick: GridEventListener<'rowClick'> = (params: any) => {
-        setSelectedMisc(params.row);
-    };
-
-    
     function similar(str1: string, str2: string) {
         const cleanStr1 = str1.replace(/[\s-]/g, '').toLowerCase();
         const cleanStr2 = str2.replace(/[\s-]/g, '').toLowerCase();
     
         return cleanStr1 === cleanStr2;
     }
-    
-    
+       
     function initializeSeaPorts() {
         var auxArray = [];
         for (const [key, value] of Object.entries(seaPorts)) {
@@ -565,7 +592,6 @@ function Request() {
                 });
             }
         }
-        setAllSeaPorts(auxArray);
         return auxArray;
     }
     
@@ -587,7 +613,7 @@ function Request() {
         initializeSeaPorts();
 
         getContainers();
-        getCities();
+        // getCities();
         // Get everything essential too (Products, Ports, Request info)
         getAssignees();
     }, [context]);
@@ -646,15 +672,15 @@ function Request() {
                     setMessage(response.data.detail);
                     // setTags(response.data.tags !== null ? response.data.tags.split(",") : []);
                     setTags(response.data.tags !== null ? allProducts.filter((elm: any) => response.data.tags.includes(elm.productName)) : []);
-                    setAssignedManager(response.data.assigneeId || "");
+                    setAssignedManager(response.data.assigneeId !== null && response.data.assigneeId !== "" ? response.data.assigneeId : "");
                     setTrackingNumber(response.data.trackingNumber);
                     
                     const closestDeparturePort = findClosestSeaPort(parseLocation(response.data.departure), allPorts);
                     const closestArrivalPort = findClosestSeaPort(parseLocation(response.data.arrival), allPorts);
                     setPortDeparture(closestDeparturePort);
                     setPortDestination(closestArrivalPort);
-                    setPorts1(sortByCloseness(parseLocation(response.data.departure), allPorts).slice(0, 10));
-                    setPorts2(sortByCloseness(parseLocation(response.data.arrival), allPorts).slice(0, 10));
+                    setPorts1(sortByCloseness(parseLocation(response.data.departure), allPorts).slice(0, 15));
+                    setPorts2(sortByCloseness(parseLocation(response.data.arrival), allPorts).slice(0, 15));
                     
                     setLoad(false);
                 }
@@ -834,21 +860,21 @@ function Request() {
         }
     }
 
-    const getPriceRequests = async () => {
-        if (containersSelection.map((elm: any) => elm.container).length !== 0 && portDestination !== null) {
-            // alert(containersSelected);
-            // console.log(containers.map((elm: any) => elm.packageName));
-            setLoadResults(true);
-            getSeaFreightPriceOffers();
-            getMiscellaneousPriceOffers();
-            if (loadingCity !== null && haulageType !== "") {
-                getHaulagePriceOffers();
-            }
-        }
-        else {
-            enqueueSnackbar(t('priceFieldsEmpty'), { variant: "warning", anchorOrigin: { horizontal: "right", vertical: "top"} });
-        }
-    }
+    // const getPriceRequests = async () => {
+    //     if (containersSelection.map((elm: any) => elm.container).length !== 0 && portDestination !== null) {
+    //         // alert(containersSelected);
+    //         // console.log(containers.map((elm: any) => elm.packageName));
+    //         setLoadResults(true);
+    //         getSeaFreightPriceOffers();
+    //         getMiscellaneousPriceOffers();
+    //         if (loadingCity !== null && haulageType !== "") {
+    //             getHaulagePriceOffers();
+    //         }
+    //     }
+    //     else {
+    //         enqueueSnackbar(t('priceFieldsEmpty'), { variant: "warning", anchorOrigin: { horizontal: "right", vertical: "top"} });
+    //     }
+    // }
     
     const getHaulagePriceOffers = async () => {
         if (context && account) {
@@ -997,32 +1023,32 @@ function Request() {
         }
     }
     
-    const getCities = async () => {
-        if (context && account) {
-            const token = await instance.acquireTokenSilent({
-                scopes: transportRequest.scopes,
-                account: account
-            })
-            .then((response: AuthenticationResult) => {
-                return response.accessToken;
-            })
-            .catch(() => {
-                return instance.acquireTokenPopup({
-                    ...transportRequest,
-                    account: account
-                    }).then((response) => {
-                        return response.accessToken;
-                    });
-                }
-            );
+    // const getCities = async () => {
+    //     if (context && account) {
+    //         const token = await instance.acquireTokenSilent({
+    //             scopes: transportRequest.scopes,
+    //             account: account
+    //         })
+    //         .then((response: AuthenticationResult) => {
+    //             return response.accessToken;
+    //         })
+    //         .catch(() => {
+    //             return instance.acquireTokenPopup({
+    //                 ...transportRequest,
+    //                 account: account
+    //                 }).then((response) => {
+    //                     return response.accessToken;
+    //                 });
+    //             }
+    //         );
             
-            const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/City/Cities", token);
-            // console.log(response);
-            if (response !== null && response !== undefined) {
-                setCities(response);
-            }  
-        }
-    }
+    //         const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/City/Cities", token);
+    //         // console.log(response);
+    //         if (response !== null && response !== undefined) {
+    //             setCities(response);
+    //         }  
+    //     }
+    // }
     
     const getProducts = async (allPorts: any) => {
         if (context && account) {
@@ -1073,6 +1099,7 @@ function Request() {
                         "haulageType": haulageType,
                         // "loadingPort": loadingCity.name,
                         "loadingPort": loadingCity.city,
+                        "validUntil": selectedHaulage.validUntil,
                         // "loadingPortId": loadingCity.id,
                         "containerNames": [null]
                     }
@@ -1090,17 +1117,18 @@ function Request() {
                             "currency": selectedMisc.currency,
                             "price20": selectedMisc.price20,
                             "price40": selectedMisc.price40,
-                            "price20Dry": selectedMisc.price20dry,
-                            "price20Rf": selectedMisc.price20rf,
-                            "price40Dry": selectedMisc.price40dry,
-                            "price40Hc": selectedMisc.price40hc,
-                            "price40HcRf": selectedMisc.price40hcRf
+                            "price20dry": selectedMisc.price20dry,
+                            "price20rf": selectedMisc.price20rf,
+                            "price40dry": selectedMisc.price40dry,
+                            "price40hc": selectedMisc.price40hc,
+                            "price40hcrf": selectedMisc.price40hcRf,
+                            "validUntil": selectedMisc.validUntil,
                         }                      
                     ]
                 }
                 var dataSent = {
                     "requestQuoteId": Number(id),
-                    "comment": details,
+                    "comment": rteRef.current?.editor?.getHTML(),
                     // "quoteOfferNumber": transformId(uuidv4()),
                     "quoteOfferVm": 0,
                     "quoteOfferId": 10,
@@ -1122,11 +1150,12 @@ function Request() {
                         "currency": selectedSeafreight.currency,
                         "transitTime": selectedSeafreight.transitTime,
                         "frequency": selectedSeafreight.frequency,
-                        "price20Dry": selectedSeafreight.price20dry,
-                        "price20Rf": selectedSeafreight.price20rf,
-                        "price40Dry": selectedSeafreight.price40dry,
-                        "price40Hc": selectedSeafreight.price40hc,
-                        "price40HcRf": selectedSeafreight.price40hcrf
+                        "price20dry": selectedSeafreight.price20dry,
+                        "price20rf": selectedSeafreight.price20rf,
+                        "price40dry": selectedSeafreight.price40dry,
+                        "price40hc": selectedSeafreight.price40hc,
+                        "price40hcrf": selectedSeafreight.price40hcrf,
+                        "validUntil": selectedSeafreight.validUntil,
                     },
                     "containers": containersSelection.map((elm: any) => { return { "containerId": elm.id, quantity: elm.quantity } }),
                     "departureDate": departureDate || (new Date("01/01/2022")).toISOString(),
@@ -1162,7 +1191,7 @@ function Request() {
             const closest = findClosestSeaPort(value, ports);
             setPortDeparture(closest);
             setLoadingCity(value);
-            setPorts1(sortByCloseness(value, ports).slice(0, 10));
+            setPorts1(sortByCloseness(value, ports).slice(0, 15));
         }
     }
 
@@ -1170,7 +1199,7 @@ function Request() {
         if (value !== null && value !== undefined) {
             const closest = findClosestSeaPort(value, ports);
             setPortDestination(closest);
-            setPorts2(sortByCloseness(value, ports).slice(0, 10));
+            setPorts2(sortByCloseness(value, ports).slice(0, 15));
         }
     }
 
@@ -1185,7 +1214,7 @@ function Request() {
                             <Grid container spacing={2} mt={1} px={5}>
                                 <Grid item xs={12}>
                                     <Typography variant="body2" color="dodgerblue" sx={{ fontWeight: "bold" }}>
-                                        Tracking N° {trackingNumber}
+                                        {t('quoteNumber')} N° {trackingNumber}
                                     </Typography>
                                 </Grid>
                                 <Grid item xs={12}>
@@ -1213,7 +1242,7 @@ function Request() {
                                     <InputLabel htmlFor="arrival" sx={inputLabelStyles}>{t('arrival')}</InputLabel>
                                     <AutocompleteSearch id="arrival" value={arrival} onChange={setArrival} callBack={getClosestArrival} fullWidth />
                                 </Grid>
-                                <Grid item xs={12} md={3} mt={1}>
+                                <Grid item xs={12} md={2} mt={1}>
                                     <InputLabel htmlFor="packing-type" sx={inputLabelStyles}>{t('packingType')}</InputLabel>
                                     <NativeSelect
                                         id="packing-type"
@@ -1254,7 +1283,7 @@ function Request() {
                                         <InputLabel htmlFor="quantity" sx={inputLabelStyles}>{t('quantity')}</InputLabel>
                                         <BootstrapInput id="quantity" type="number" inputProps={{ min: 1, max: 100 }} value={quantity} onChange={(e: any) => {setQuantity(e.target.value)}} fullWidth />
                                     </Grid>
-                                    <Grid item xs={12} md={3} mt={1}>
+                                    <Grid item xs={12} md={4} mt={1}>
                                         <Button 
                                             variant="contained" color="inherit" fullWidth sx={whiteButtonStyles} 
                                             style={{ marginTop: "30px", height: "42px", float: "right" }} 
@@ -1306,15 +1335,39 @@ function Request() {
                                     <>
                                     <Grid item xs={12} md={3} mt={1}>
                                         <InputLabel htmlFor="package-name" sx={inputLabelStyles}>{t('packageName')}</InputLabel>
-                                        <BootstrapInput id="package-name" type="text" value={packageName} onChange={(e: any) => {setPackageName(e.target.value)}} fullWidth />
+                                        {/* <BootstrapInput id="package-name" type="text" value={packageName} onChange={(e: any) => {setPackageName(e.target.value)}} fullWidth /> */}
+                                        <NativeSelect
+                                            id="package-name"
+                                            value={packageName}
+                                            onChange={(e: any) => { setPackageName(e.target.value) }}
+                                            input={<BootstrapInput />}
+                                            fullWidth
+                                        >
+                                            <option key={"option1-x"} value="">{t('notDefined')}</option>
+                                            {packingOptions.map((elm: any, i: number) => (
+                                                <option key={"elm11-"+i} value={elm}>{elm}</option>
+                                            ))}
+                                        </NativeSelect>
                                     </Grid>
                                     <Grid item xs={12} md={1} mt={1}>
                                         <InputLabel htmlFor="package-quantity" sx={inputLabelStyles}>{t('quantity')}</InputLabel>
                                         <BootstrapInput id="package-quantity" type="number" inputProps={{ min: 1, max: 100 }} value={packageQuantity} onChange={(e: any) => {setPackageQuantity(e.target.value)}} fullWidth />
                                     </Grid>
-                                    <Grid item xs={12} md={2} mt={1}>
+                                    {/* <Grid item xs={12} md={2} mt={1}>
                                         <InputLabel htmlFor="package-dimensions" sx={inputLabelStyles}>{t('dimensions')}</InputLabel>
                                         <BootstrapInput id="package-dimensions" type="text" value={packageDimensions} onChange={(e: any) => {setPackageDimensions(e.target.value)}} fullWidth />
+                                    </Grid> */}
+                                    <Grid item xs={12} md={1} mt={1}>
+                                        <InputLabel htmlFor="package-length" sx={inputLabelStyles}>{t('length')}(cm)</InputLabel>
+                                        <BootstrapInput id="package-length" type="number" value={packageLength} onChange={(e: any) => {setPackageLength(e.target.value)}} fullWidth />
+                                    </Grid>
+                                    <Grid item xs={12} md={1} mt={1}>
+                                        <InputLabel htmlFor="package-width" sx={inputLabelStyles}>{t('width')}(cm)</InputLabel>
+                                        <BootstrapInput id="package-width" type="number" value={packageWidth} onChange={(e: any) => {setPackageWidth(e.target.value)}} fullWidth />
+                                    </Grid>
+                                    <Grid item xs={12} md={1} mt={1}>
+                                        <InputLabel htmlFor="package-height" sx={inputLabelStyles}>{t('height')}(cm)</InputLabel>
+                                        <BootstrapInput id="package-height" type="number" value={packageHeight} onChange={(e: any) => {setPackageHeight(e.target.value)}} fullWidth />
                                     </Grid>
                                     <Grid item xs={12} md={2} mt={1}>
                                         <InputLabel htmlFor="package-weight" sx={inputLabelStyles}>{t('weight')} (Kg)</InputLabel>
@@ -1325,14 +1378,14 @@ function Request() {
                                             variant="contained" color="inherit" fullWidth sx={whiteButtonStyles} 
                                             style={{ marginTop: "30px", height: "42px", float: "right" }} 
                                             onClick={() => {
-                                                if (packageName !== "" && packageQuantity > 0 && packageWeight > 0 && packageDimensions !== "") {
+                                                if (packageName !== "" && packageQuantity > 0 && packageWeight > 0) {
                                                     setPackagesSelection((prevItems: any) => [...prevItems, { 
-                                                        name: packageName, quantity: packageQuantity, dimensions: packageDimensions, weight: packageWeight
+                                                        name: packageName, quantity: packageQuantity, dimensions: packageLength+"x"+packageWidth+"x"+packageHeight, weight: packageWeight, volume: packageLength*packageWidth*packageHeight
                                                     }]);
-                                                    setPackageName(""); setPackageQuantity(1); setPackageDimensions(""); setPackageWeight(0);
+                                                    setPackageName(""); setPackageQuantity(1); setPackageLength(0); setPackageWidth(0); setPackageHeight(0); setPackageWeight(0);
                                                 } 
                                                 else {
-                                                    enqueueSnackbar("You need to fill the fields package name, weight and dimensions.", { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                                                    enqueueSnackbar(t('fieldNeedTobeFilled'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
                                                 }
                                             }} 
                                         >
@@ -1357,7 +1410,7 @@ function Request() {
                                                                     }
                                                                 >
                                                                     <ListItemText primary={
-                                                                        t('name')+" : "+item.name+" | "+t('quantity')+" : "+item.quantity+" | "+t('dimensions')+" : "+item.dimensions+" | "+t('weight')+" : "+item.weight+" Kg"
+                                                                        t('name')+" : "+item.name+" | "+t('quantity')+" : "+item.quantity+" | "+t('dimensions')+" : "+item.dimensions+" | Cubage ("+item.volume+" \u33A5) | "+t('weight')+" : "+item.weight+" Kg"
                                                                     } />
                                                                 </ListItem>
                                                             </Grid>
@@ -1374,15 +1427,39 @@ function Request() {
                                     <>
                                     <Grid item xs={12} md={3} mt={1}>
                                         <InputLabel htmlFor="unit-name" sx={inputLabelStyles}>{t('unitName')}</InputLabel>
-                                        <BootstrapInput id="unit-name" type="text" value={unitName} onChange={(e: any) => {setUnitName(e.target.value)}} fullWidth />
+                                        {/* <BootstrapInput id="unit-name" type="text" value={unitName} onChange={(e: any) => {setUnitName(e.target.value)}} fullWidth /> */}
+                                        <NativeSelect
+                                            id="unit-name"
+                                            value={unitName}
+                                            onChange={(e: any) => { setUnitName(e.target.value) }}
+                                            input={<BootstrapInput />}
+                                            fullWidth
+                                        >
+                                            <option key={"option2-x"} value="">{t('notDefined')}</option>
+                                            {packingOptions.map((elm: any, i: number) => (
+                                                <option key={"elm22-"+i} value={elm}>{elm}</option>
+                                            ))}
+                                        </NativeSelect>
                                     </Grid>
                                     <Grid item xs={12} md={1} mt={1}>
                                         <InputLabel htmlFor="unit-quantity" sx={inputLabelStyles}>{t('quantity')}</InputLabel>
                                         <BootstrapInput id="unit-quantity" type="number" inputProps={{ min: 1, max: 100 }} value={unitQuantity} onChange={(e: any) => {setUnitQuantity(e.target.value)}} fullWidth />
                                     </Grid>
-                                    <Grid item xs={12} md={2} mt={1}>
+                                    {/* <Grid item xs={12} md={2} mt={1}>
                                         <InputLabel htmlFor="unit-dimensions" sx={inputLabelStyles}>{t('dimensions')}</InputLabel>
                                         <BootstrapInput id="unit-dimensions" type="text" value={unitDimensions} onChange={(e: any) => {setUnitDimensions(e.target.value)}} fullWidth />
+                                    </Grid> */}
+                                    <Grid item xs={12} md={1} mt={1}>
+                                        <InputLabel htmlFor="unit-length" sx={inputLabelStyles}>{t('length')}(cm)</InputLabel>
+                                        <BootstrapInput id="unit-length" type="number" value={unitLength} onChange={(e: any) => {setUnitLength(e.target.value)}} fullWidth />
+                                    </Grid>
+                                    <Grid item xs={12} md={1} mt={1}>
+                                        <InputLabel htmlFor="unit-width" sx={inputLabelStyles}>{t('width')}(cm)</InputLabel>
+                                        <BootstrapInput id="unit-width" type="number" value={unitWidth} onChange={(e: any) => {setUnitWidth(e.target.value)}} fullWidth />
+                                    </Grid>
+                                    <Grid item xs={12} md={1} mt={1}>
+                                        <InputLabel htmlFor="unit-height" sx={inputLabelStyles}>{t('height')}(cm)</InputLabel>
+                                        <BootstrapInput id="unit-height" type="number" value={unitHeight} onChange={(e: any) => {setUnitHeight(e.target.value)}} fullWidth />
                                     </Grid>
                                     <Grid item xs={12} md={2} mt={1}>
                                         <InputLabel htmlFor="unit-weight" sx={inputLabelStyles}>{t('weight')} (Kg)</InputLabel>
@@ -1393,14 +1470,14 @@ function Request() {
                                             variant="contained" color="inherit" fullWidth sx={whiteButtonStyles} 
                                             style={{ marginTop: "30px", height: "42px", float: "right" }} 
                                             onClick={() => {
-                                                if (unitName !== "" && unitQuantity > 0 && unitWeight > 0 && unitDimensions !== "") {
+                                                if (unitName !== "" && unitQuantity > 0 && unitWeight > 0) {
                                                     setUnitsSelection((prevItems: any) => [...prevItems, { 
-                                                        name: unitName, quantity: unitQuantity, dimensions: unitDimensions, weight: unitWeight
+                                                        name: unitName, quantity: unitQuantity, dimensions: unitLength+"x"+unitWidth+"x"+unitHeight, weight: unitWeight, volume: unitLength*unitWidth*unitHeight
                                                     }]);
-                                                    setUnitName(""); setUnitQuantity(1); setUnitDimensions(""); setUnitWeight(0);
+                                                    setUnitName(""); setUnitQuantity(1); setUnitLength(0); setUnitWidth(0); setUnitHeight(0); setUnitWeight(0);
                                                 } 
                                                 else {
-                                                    enqueueSnackbar("You need to fill the fields unit name, weight and dimensions.", { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                                                    enqueueSnackbar(t('fieldNeedTobeFilled'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
                                                 }
                                             }} 
                                         >
@@ -1425,7 +1502,7 @@ function Request() {
                                                                     }
                                                                 >
                                                                     <ListItemText primary={
-                                                                        t('name')+" : "+item.name+" | "+t('quantity')+" : "+item.quantity+" | "+t('dimensions')+" : "+item.dimensions+" | "+t('weight')+" : "+item.weight+" Kg"
+                                                                        t('name')+" : "+item.name+" | "+t('quantity')+" : "+item.quantity+" | "+t('dimensions')+" : "+item.dimensions+" | Cubage ("+item.volume+" \u33A5) | "+t('weight')+" : "+item.weight+" Kg"
                                                                     } />
                                                                 </ListItem>
                                                             </Grid>
@@ -1496,6 +1573,7 @@ function Request() {
                                         </> : <Skeleton sx={{ mt: 3 }} />   
                                     }
                                 </Grid>
+                                
                                 <Grid item xs={12}>
                                     <Accordion sx={{ backgroundColor: "#fbfbfb" }}>
                                         <AccordionSummary
@@ -1634,48 +1712,9 @@ function Request() {
                                                         {
                                                             activeStep === 2 ? 
                                                             <Grid container spacing={2} mt={1} px={2}>
-                                                                {/* <Grid item xs={12} md={4} mt={1}>
-                                                                    <InputLabel htmlFor="departure-date" sx={inputLabelStyles}>{t('departureDate')}</InputLabel>
-                                                                    <LocalizationProvider dateAdapter={AdapterDayjs}>
-                                                                        <DateTimePicker 
-                                                                            value={departureDate} 
-                                                                            onChange={(value: any) => { setDepartureDate(value) }}
-                                                                            slotProps={{ textField: { id: "departure-date", fullWidth: true, sx: datetimeStyles }, inputAdornment: { sx: { position: "relative", right: "11.5px" } } }}
-                                                                        />
-                                                                    </LocalizationProvider>
-                                                                </Grid> */}
-                                                                {/* <Grid item xs={12} md={4} mt={1}>
-                                                                    <InputLabel htmlFor="loading-date" sx={inputLabelStyles}>{t('loadingDate')}</InputLabel>
-                                                                    <LocalizationProvider dateAdapter={AdapterDayjs}>
-                                                                        <DateTimePicker 
-                                                                            value={loadingDate} 
-                                                                            onChange={(value: any) => { setLoadingDate(value) }}
-                                                                            slotProps={{ textField: { id: "loading-date", fullWidth: true, sx: datetimeStyles }, inputAdornment: { sx: { position: "relative", right: "11.5px" } } }}
-                                                                        />
-                                                                    </LocalizationProvider>
-                                                                </Grid> */}
                                                                 <Grid item xs={12} md={6} mt={1}>
                                                                     <InputLabel htmlFor="loading-city" sx={inputLabelStyles}>{t('departure')} / {t('loadingCity')}</InputLabel>
                                                                     <AutocompleteSearch id="loading-city" value={loadingCity} onChange={setLoadingCity} fullWidth />
-                                                                    {/* {
-                                                                        cities !== null ?
-                                                                        <Autocomplete
-                                                                            disablePortal
-                                                                            id="loading-city"
-                                                                            options={cities}
-                                                                            getOptionLabel={(option: any) => { 
-                                                                                if (option !== null && option !== undefined) {
-                                                                                    return option.name+', '+option.country;
-                                                                                }
-                                                                                return ""; 
-                                                                            }}
-                                                                            value={loadingCity}
-                                                                            sx={{ mt: 1 }}
-                                                                            renderInput={(params: any) => <TextField {...params} />}
-                                                                            onChange={(e: any, value: any) => { setLoadingCity(value); }}
-                                                                            fullWidth
-                                                                        /> : <Skeleton />
-                                                                    } */}
                                                                 </Grid>
                                                                 <Grid item xs={12} md={6} mt={1}>
                                                                     <InputLabel htmlFor="haulage-type" sx={inputLabelStyles}>{t('haulageType')}</InputLabel>
@@ -1802,23 +1841,80 @@ function Request() {
                                                                         />
                                                                     </Grid> : null
                                                                 }
-                                                                <Grid item xs={12} md={4}>
+                                                                <Grid item xs={12} md={6}>
+                                                                    <InputLabel htmlFor="client-name" sx={inputLabelStyles}>{t('clientName')}</InputLabel>
+                                                                    <BootstrapInput id="clien-name" type="text" value={clientName} onChange={(e: any) => setClientName(e.target.value)} fullWidth />
+                                                                </Grid>
+                                                                <Grid item xs={12} md={2}>
                                                                     <InputLabel htmlFor="margin" sx={inputLabelStyles}>{t('margin')} (%)</InputLabel>
                                                                     <BootstrapInput id="margin" type="number" value={margin} onChange={(e: any) => setMargin(e.target.value)} fullWidth />
                                                                 </Grid>
-                                                                <Grid item xs={12} md={4}>
+                                                                <Grid item xs={12} md={2}>
                                                                     <InputLabel htmlFor="reduction" sx={inputLabelStyles}>{t('reduction')} (%)</InputLabel>
                                                                     <BootstrapInput id="reduction" type="number" value={reduction} onChange={(e: any) => setReduction(e.target.value)} fullWidth />
                                                                 </Grid>
-                                                                <Grid item xs={12} md={4}>
+                                                                <Grid item xs={12} md={2}>
                                                                     <InputLabel htmlFor="adding" sx={inputLabelStyles}>{t('extraFee')} ({selectedSeafreight !== null ? selectedSeafreight.currency : null})</InputLabel>
                                                                     <BootstrapInput id="adding" type="number" value={adding} onChange={(e: any) => setAdding(e.target.value)} fullWidth />
                                                                 </Grid>
                                                                 <Grid item xs={12}>
                                                                     <InputLabel htmlFor="details" sx={inputLabelStyles}>{t('detailsOffer')}</InputLabel>
-                                                                    <BootstrapInput id="details" type="text" multiline rows={3} value={details} onChange={(e: any) => setDetails(e.target.value)} fullWidth />
+                                                                    {/* <BootstrapInput id="details" type="text" multiline rows={6} value={details} onChange={(e: any) => setDetails(e.target.value)} fullWidth /> */}
+                                                                    {
+                                                                        selectedHaulage !== null && selectedSeafreight !== null && selectedMisc !== null ? 
+                                                                        <Box sx={{ mt: 2 }}>
+                                                                            <RichTextEditor
+                                                                                ref={rteRef}
+                                                                                extensions={[StarterKit]}
+                                                                                content={`
+                                                                                    <p>Hello {{name}},</p>
+                                                                                    <br>
+                                                                                    <p>As a freight forwarder we can organize your shipment of ${displayContainers(containersSelection)} containers loaded with ${tags.map((elm: any) => elm.productName).join(',')}, with truck (${haulageType}), from ${loadingCity.city} up to ${selectedSeafreight.destinationPortName} at a total cost of ${selectedSeafreight.currency} ${Number(totalPrice+totalPrice*margin/100-totalPrice*reduction/100+adding*1).toFixed(2).toString()}</p>
+                                                                                    <br>
+                                                                                    <p>Inclusive of:</p> 
+                                                                                    <p>${selectedHaulage.freeTime} ${t('hours')} loading included for each container, after which ${selectedHaulage.overtimeTariff} ${selectedHaulage.currency} / hour is charged.</p>
+                                                                                    <p>${displayServices(selectedMisc.services)} included</p>
+                                                                                    <br>
+                                                                                    <p>Not included:</p>
+                                                                                    <p>Costs related to customs inspection, if required</p>
+                                                                                    <p>Detention, demurrage, storage</p>
+                                                                                    <br>
+                                                                                    <p>Offer based on ETD ${selectedSeafreight.departurePortName} ${(new Date()).toLocaleDateString().slice(0,10)}</p>
+                                                                                    <br>
+                                                                                    <p>Sailing time ${selectedSeafreight.departurePortName} to ${selectedSeafreight.destinationPortName} approx. ${selectedSeafreight.transitTime} days</p>
+                                                                                    <br>
+                                                                                    <p>This offer remains valid today, to be confirmed at the time of your booking.</p>
+                                                                                    <br>
+                                                                                    <p>We also send per attached pdf our order confirmation and invoice terms & conditions</p>
+                                                                                    <br>
+                                                                                    <p>Best regards,</p>
+                                                                                    <br>
+                                                                                    <p>JEFFRY COOLS</p>`
+                                                                                }
+                                                                                renderControls={() => (
+                                                                                <MenuControlsContainer>
+                                                                                    <MenuSelectHeading />
+                                                                                    <MenuDivider />
+                                                                                    <MenuButtonBold />
+                                                                                    <MenuButtonItalic />
+                                                                                    {/* <MenuButtonUnderline /> */}
+                                                                                    <MenuButtonStrikethrough />
+                                                                                    <MenuButtonOrderedList />
+                                                                                    <MenuButtonBulletedList />
+                                                                                    <MenuSelectTextAlign />
+                                                                                    <MenuButtonEditLink />
+                                                                                    <MenuButtonHorizontalRule />
+                                                                                    <MenuButtonUndo />
+                                                                                    <MenuButtonRedo />
+                                                                                    {/* Add more controls of your choosing here */}
+                                                                                </MenuControlsContainer>
+                                                                                )}
+                                                                            />
+                                                                        </Box>   
+                                                                        : null
+                                                                    }
                                                                 </Grid>
-                                                                <Grid item xs={12}>
+                                                                {/* <Grid item xs={12}>
                                                                     <Typography variant="h6">
                                                                         { 
                                                                             selectedSeafreight !== null ? 
@@ -1828,7 +1924,7 @@ function Request() {
                                                                             /> : null
                                                                         }
                                                                     </Typography>
-                                                                </Grid>
+                                                                </Grid> */}
                                                             </Grid>
                                                             : null
                                                         }
@@ -1929,7 +2025,7 @@ function Request() {
                                     onChange={handleChangeStatus}
                                 >
                                     {
-                                        statusTypes.map((elm) => <DarkTooltip key={"StatusType-"+elm.type} title={elm.description} placement="right" arrow><FormControlLabel value={elm.type} control={<Radio />} label={elm.value} /></DarkTooltip>)
+                                        statusTypes.map((elm) => <DarkTooltip key={"StatusType-"+elm.type} title={elm.description} placement="right" arrow><FormControlLabel value={elm.type} control={<Radio />} label={elm.label} /></DarkTooltip>)
                                     }
                                 </RadioGroup>
                             </FormControl>
