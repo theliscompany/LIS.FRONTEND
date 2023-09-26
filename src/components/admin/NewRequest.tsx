@@ -415,15 +415,15 @@ function NewRequest(props: any) {
                                 <BootstrapInput id="package-dimensions" type="text" value={packageDimensions} onChange={(e: any) => {setPackageDimensions(e.target.value)}} fullWidth />
                             </Grid> */}
                             <Grid item xs={12} md={1} mt={1}>
-                                <InputLabel htmlFor="package-length" sx={inputLabelStyles}>{t('length')}</InputLabel>
+                                <InputLabel htmlFor="package-length" sx={inputLabelStyles}>{t('length')}(cm)</InputLabel>
                                 <BootstrapInput id="package-length" type="number" value={packageLength} onChange={(e: any) => {setPackageLength(e.target.value)}} fullWidth />
                             </Grid>
                             <Grid item xs={12} md={1} mt={1}>
-                                <InputLabel htmlFor="package-width" sx={inputLabelStyles}>{t('width')}</InputLabel>
+                                <InputLabel htmlFor="package-width" sx={inputLabelStyles}>{t('width')}(cm)</InputLabel>
                                 <BootstrapInput id="package-width" type="number" value={packageWidth} onChange={(e: any) => {setPackageWidth(e.target.value)}} fullWidth />
                             </Grid>
                             <Grid item xs={12} md={1} mt={1}>
-                                <InputLabel htmlFor="package-height" sx={inputLabelStyles}>{t('height')}</InputLabel>
+                                <InputLabel htmlFor="package-height" sx={inputLabelStyles}>{t('height')}(cm)</InputLabel>
                                 <BootstrapInput id="package-height" type="number" value={packageHeight} onChange={(e: any) => {setPackageHeight(e.target.value)}} fullWidth />
                             </Grid>
                             <Grid item xs={12} md={2} mt={1}>
@@ -507,15 +507,15 @@ function NewRequest(props: any) {
                                 <BootstrapInput id="unit-dimensions" type="text" value={unitDimensions} onChange={(e: any) => {setUnitDimensions(e.target.value)}} fullWidth />
                             </Grid> */}
                             <Grid item xs={12} md={1} mt={1}>
-                                <InputLabel htmlFor="unit-length" sx={inputLabelStyles}>{t('length')}</InputLabel>
+                                <InputLabel htmlFor="unit-length" sx={inputLabelStyles}>{t('length')}(cm)</InputLabel>
                                 <BootstrapInput id="unit-length" type="number" value={unitLength} onChange={(e: any) => {setUnitLength(e.target.value)}} fullWidth />
                             </Grid>
                             <Grid item xs={12} md={1} mt={1}>
-                                <InputLabel htmlFor="unit-width" sx={inputLabelStyles}>{t('width')}</InputLabel>
+                                <InputLabel htmlFor="unit-width" sx={inputLabelStyles}>{t('width')}(cm)</InputLabel>
                                 <BootstrapInput id="unit-width" type="number" value={unitWidth} onChange={(e: any) => {setUnitWidth(e.target.value)}} fullWidth />
                             </Grid>
                             <Grid item xs={12} md={1} mt={1}>
-                                <InputLabel htmlFor="unit-height" sx={inputLabelStyles}>{t('height')}</InputLabel>
+                                <InputLabel htmlFor="unit-height" sx={inputLabelStyles}>{t('height')}(cm)</InputLabel>
                                 <BootstrapInput id="unit-height" type="number" value={unitHeight} onChange={(e: any) => {setUnitHeight(e.target.value)}} fullWidth />
                             </Grid>
                             <Grid item xs={12} md={2} mt={1}>

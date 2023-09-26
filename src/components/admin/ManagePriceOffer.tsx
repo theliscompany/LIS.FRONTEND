@@ -119,7 +119,7 @@ function ManagePriceOffer(props: any) {
     if(context) {
       const body: any = {
         "requestQuoteId": offer.requestQuoteId,
-        "comment": details,
+        "comment": rteRef.current?.editor?.getHTML(),
         // "quoteOfferNumber": transformId(uuidv4()),
         "quoteOfferVm": 0,
         "quoteOfferId": offer.quoteOfferId,
@@ -197,7 +197,7 @@ function ManagePriceOffer(props: any) {
             packageNames.push(foundPackage.packageName);
         }
     }
-  
+    // console.log(packageNames);
     return packageNames;
 }
 
@@ -213,24 +213,21 @@ return (
                 <Grid item xs={12}>
                     <Typography variant="h5" sx={{ my: 1, fontSize: 19, fontWeight: "bold" }}>{t('selectedContainers')}</Typography>
                     {
-                        offer.containers !== undefined && offer.containers !== null && offer.containers.length !== 0 && containers !== null ? 
-                            <List>
-                                {
-                                    offer.containers.map((item: any, index: number) => (
-                                        <ListItem
-                                            key={"listitem1-"+index}
-                                            sx={{ border: "1px solid #e5e5e5" }}
-                                        >
-                                            <ListItemText primary={
-                                                containers.find((elm: any) => elm.packageId === item.containerId) !== undefined ?
-                                                t('container')+" : "+containers.find((elm: any) => elm.packageId === item.containerId).packageName+" | "+t('quantity')+" : "+item.quantity
-                                                : t('container')+" : "+item.containerId+" | "+t('quantity')+" : "+item.quantity
-                                            } />
-                                        </ListItem>
-                                    ))
-                                }
-                            </List>
-                        : null  
+                      <Grid container spacing={2}>
+                      {
+                          offer.containers.map((item: any, index: number) => (
+                              <Grid key={"listitem1-"+index} item xs={12} md={4}>
+                                  <ListItem sx={{ border: "1px solid #e5e5e5" }}>
+                                    <ListItemText primary={
+                                        containers.find((elm: any) => elm.packageId === item.containerId) !== undefined ?
+                                        t('container')+" : "+containers.find((elm: any) => elm.packageId === item.containerId).packageName+" | "+t('quantity')+" : "+item.quantity
+                                        : t('container')+" : "+item.containerId+" | "+t('quantity')+" : "+item.quantity
+                                    } /> 
+                                  </ListItem>
+                              </Grid>
+                          ))
+                      }
+                      </Grid>
                     }
                 </Grid>
                 <Grid item xs={12}>
@@ -239,8 +236,8 @@ return (
                         rows={[offer.seaFreight]}
                         columns={
                           [
-                            { field: 'carrierName', headerName: t('carrier'), minWidth: 175 },
-                            { field: 'carrierAgentName', headerName: t('carrierAgent'), minWidth: 175 },
+                            { field: 'carrierName', headerName: t('carrier'), minWidth: 150 },
+                            { field: 'carrierAgentName', headerName: t('carrierAgent'), minWidth: 150 },
                             { field: 'departurePortName', headerName: t('departurePort'), minWidth: 125 },
                             { field: 'destinationPortName', headerName: t('destinationPort'), minWidth: 125 },
                             { field: 'frequency', headerName: t('frequency'), valueFormatter: (params: GridValueFormatterParams) => `${t('every')} ${params.value || ''} `+t('days'), minWidth: 125 },
@@ -248,11 +245,11 @@ return (
                             { field: 'currency', headerName: t('prices'), renderCell: (params: GridRenderCellParams) => {
                                 return (
                                   <Box sx={{ my: 1, mr: 1 }}>
-                                    <Box sx={{ my: 1 }} hidden={!getPackageNamesByIds(containersId, containers).includes("20' Dry")}>{params.row.price20dry !== 0 ? "20' Dry : "+params.row.price20dry+" "+params.row.currency : "20' Dry : N/A"}</Box>
-                                    <Box sx={{ my: 1 }} hidden={!getPackageNamesByIds(containersId, containers).includes("20' Rf")}>{params.row.price20rf !== 0 ? "20' Rf : "+params.row.price20rf+" "+params.row.currency : "20' Rf : N/A"}</Box>
-                                    <Box sx={{ my: 1 }} hidden={!getPackageNamesByIds(containersId, containers).includes("40' Dry")}>{params.row.price40dry !== 0 ? "40' Dry : "+params.row.price40dry+" "+params.row.currency : "40' Dry : N/A"}</Box>
-                                    <Box sx={{ my: 1 }} hidden={!getPackageNamesByIds(containersId, containers).includes("40' Hc")}>{params.row.price40hc !== 0 ? "40' Hc : "+params.row.price40hc+" "+params.row.currency : "40' Hc : N/A"}</Box>
-                                    <Box sx={{ my: 1 }} hidden={!getPackageNamesByIds(containersId, containers).includes("40' HcRf")}>{params.row.price40hcrf !== 0 ? "40' HcRf : "+params.row.price40hcrf+" "+params.row.currency : "40' HcRf : N/A"}</Box>
+                                    <Box sx={{ my: 1 }} hidden={!getPackageNamesByIds(containersId, containers).includes("20' Dry")}>{params.row.price20Dry !== 0 ? "20' Dry : "+params.row.price20Dry+" "+params.row.currency : "20' Dry : N/A"}</Box>
+                                    <Box sx={{ my: 1 }} hidden={!getPackageNamesByIds(containersId, containers).includes("20' Rf")}>{params.row.price20Rf !== 0 ? "20' Rf : "+params.row.price20Rf+" "+params.row.currency : "20' Rf : N/A"}</Box>
+                                    <Box sx={{ my: 1 }} hidden={!getPackageNamesByIds(containersId, containers).includes("40' Dry")}>{params.row.price40Dry !== 0 ? "40' Dry : "+params.row.price40Dry+" "+params.row.currency : "40' Dry : N/A"}</Box>
+                                    <Box sx={{ my: 1 }} hidden={!getPackageNamesByIds(containersId, containers).includes("40' Hc")}>{params.row.price40Hc !== 0 ? "40' Hc : "+params.row.price40Hc+" "+params.row.currency : "40' Hc : N/A"}</Box>
+                                    <Box sx={{ my: 1 }} hidden={!getPackageNamesByIds(containersId, containers).includes("40' HcRf")}>{params.row.price40HcRf !== 0 ? "40' HcRf : "+params.row.price40HcRf+" "+params.row.currency : "40' HcRf : N/A"}</Box>
                                 </Box>
                                 );
                             }, minWidth: 200 },
@@ -279,10 +276,10 @@ return (
                                         <Box sx={{ my: 2 }}>{params.row.loadingPort}</Box>
                                     );
                                 }, minWidth: 175 },
-                                { field: 'unitTariff', headerName: t('unitTariff'), valueGetter: (params: GridValueGetterParams) => `${params.row.unitTariff || ''} ${params.row.currency}` },
+                                { field: 'unitTariff', headerName: t('unitTariff'), valueGetter: (params: GridValueGetterParams) => `${params.row.unitTariff || ''} ${params.row.currency}`, minWidth: 150 },
                                 { field: 'freeTime', headerName: t('freeTime'), valueFormatter: (params: GridValueFormatterParams) => `${params.value || ''} `+t('hours'), minWidth: 125 },
                                 { field: 'multiStop', headerName: t('multiStop'), valueGetter: (params: GridValueGetterParams) => `${params.row.multiStop || ''} ${params.row.currency}` },
-                                { field: 'overtimeTariff', headerName: t('overtimeTariff'), valueGetter: (params: GridValueGetterParams) => `${params.row.overtimeTariff || ''} ${params.row.currency} / ${t('hour')}` },
+                                { field: 'overtimeTariff', headerName: t('overtimeTariff'), valueGetter: (params: GridValueGetterParams) => `${params.row.overtimeTariff || ''} ${params.row.currency} / ${t('hour')}`, minWidth: 175 },
                                 { field: 'validUntil', headerName: t('validUntil'), renderCell: (params: GridRenderCellParams) => {
                                     return (
                                         <Box sx={{ my: 1, mr: 1 }}>
@@ -315,11 +312,11 @@ return (
                                 { field: 'currency', headerName: t('costPrices'), renderCell: (params: GridRenderCellParams) => {
                                     return (
                                       <Box sx={{ my: 1, mr: 1 }}>
-                                          <Box sx={{ my: 1 }} hidden={!getPackageNamesByIds(containersId, containers).includes("20' Dry")}>{params.row.price20dry !== 0 ? "20' Dry : "+params.row.price20dry+" "+params.row.currency : "20' Dry : N/A"}</Box>
-                                          <Box sx={{ my: 1 }} hidden={!getPackageNamesByIds(containersId, containers).includes("20' Rf")}>{params.row.price20rf !== 0 ? "20' Rf : "+params.row.price20rf+" "+params.row.currency : "20' Rf : N/A"}</Box>
-                                          <Box sx={{ my: 1 }} hidden={!getPackageNamesByIds(containersId, containers).includes("40' Dry")}>{params.row.price40dry !== 0 ? "40' Dry : "+params.row.price40dry+" "+params.row.currency : "40' Dry : N/A"}</Box>
-                                          <Box sx={{ my: 1 }} hidden={!getPackageNamesByIds(containersId, containers).includes("40' Hc")}>{params.row.price40hc !== 0 ? "40' Hc : "+params.row.price40hc+" "+params.row.currency : "40' Hc : N/A"}</Box>
-                                          <Box sx={{ my: 1 }} hidden={!getPackageNamesByIds(containersId, containers).includes("40' HcRf")}>{params.row.price40hcrf !== 0 ? "40' HcRf : "+params.row.price40hcrf+" "+params.row.currency : "40' HcRf : N/A"}</Box>
+                                          <Box sx={{ my: 1 }} hidden={!getPackageNamesByIds(containersId, containers).includes("20' Dry")}>{params.row.price20Dry !== 0 ? "20' Dry : "+params.row.price20Dry+" "+params.row.currency : "20' Dry : N/A"}</Box>
+                                          <Box sx={{ my: 1 }} hidden={!getPackageNamesByIds(containersId, containers).includes("20' Rf")}>{params.row.price20Rf !== 0 ? "20' Rf : "+params.row.price20Rf+" "+params.row.currency : "20' Rf : N/A"}</Box>
+                                          <Box sx={{ my: 1 }} hidden={!getPackageNamesByIds(containersId, containers).includes("40' Dry")}>{params.row.price40Dry !== 0 ? "40' Dry : "+params.row.price40Dry+" "+params.row.currency : "40' Dry : N/A"}</Box>
+                                          <Box sx={{ my: 1 }} hidden={!getPackageNamesByIds(containersId, containers).includes("40' Hc")}>{params.row.price40Hc !== 0 ? "40' Hc : "+params.row.price40Hc+" "+params.row.currency : "40' Hc : N/A"}</Box>
+                                          <Box sx={{ my: 1 }} hidden={!getPackageNamesByIds(containersId, containers).includes("40' HcRf")}>{params.row.price40HcRf !== 0 ? "40' HcRf : "+params.row.price40HcRf+" "+params.row.currency : "40' HcRf : N/A"}</Box>
                                       </Box>
                                     );
                                 }, minWidth: 200 },

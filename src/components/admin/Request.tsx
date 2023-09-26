@@ -245,7 +245,7 @@ function Request() {
     const [containersSelection, setContainersSelection] = useState<any>([]);
     
     const [unitName, setUnitName] = useState<string>("");
-    const [unitDimensions, setUnitDimensions] = useState<string>("");
+    // const [unitDimensions, setUnitDimensions] = useState<string>("");
     const [unitHeight, setUnitHeight] = useState<number>(0);
     const [unitLength, setUnitLength] = useState<number>(0);
     const [unitWidth, setUnitWidth] = useState<number>(0);
@@ -254,7 +254,7 @@ function Request() {
     const [unitsSelection, setUnitsSelection] = useState<any>([]);
 
     const [packageName, setPackageName] = useState<string>("");
-    const [packageDimensions, setPackageDimensions] = useState<string>("");
+    // const [packageDimensions, setPackageDimensions] = useState<string>("");
     const [packageHeight, setPackageHeight] = useState<number>(0);
     const [packageLength, setPackageLength] = useState<number>(0);
     const [packageWidth, setPackageWidth] = useState<number>(0);
@@ -266,11 +266,11 @@ function Request() {
     const [containersSelected, setContainersSelected] = useState<string[]>([]);
     const [portDestination, setPortDestination] = useState<any>(null);
     const [portDeparture, setPortDeparture] = useState<any>(null);
-    const [loadingDate, setLoadingDate] = useState<Dayjs | null>(null);
+    // const [loadingDate, setLoadingDate] = useState<Dayjs | null>(null);
     const [loadingCity, setLoadingCity] = useState<any>(null);
     const [haulageType, setHaulageType] = useState<string>("");
     const [products, setProducts] = useState<any>(null);
-    const [cities, setCities] = useState<any>(null);
+    // const [cities, setCities] = useState<any>(null);
     const [ports, setPorts] = useState<any>(null);
     const [ports1, setPorts1] = useState<any>(null);
     const [ports2, setPorts2] = useState<any>(null);
@@ -285,7 +285,7 @@ function Request() {
     const [margin, setMargin] = useState<number>(22);
     const [reduction, setReduction] = useState<number>(0);
     const [adding, setAdding] = useState<number>(0);
-    const [details, setDetails] = useState<string>("");
+    // const [details, setDetails] = useState<string>("");
     const [totalPrice, setTotalPrice] = useState<number>(0);
 
     // const [allSeaPorts, setAllSeaPorts] = useState<any>();
@@ -305,8 +305,8 @@ function Request() {
 
     const { t } = useTranslation();
     
-    // const steps = [t('searchOffers'), t('listOffers'), t('sendOffer')];
     const steps = [t('searchSeafreight'), t('selectSeafreight'), t('searchHaulage'), t('selectHaulage'), t('selectMisc'), t('sendOffer')];
+    // const steps = [t('searchHaulage'), t('selectHaulage'), t('searchSeafreight'), t('selectSeafreight'), t('selectMisc'), t('sendOffer')];
     const haulageTypes = [t('haulageType1'), t('haulageType2'), t('haulageType3'), t('haulageType4'), t('haulageType5')];
     const statusTypes = [
         { type: "EnAttente", label: t('labelEnAttente'), value: "En attente", description: t('descriptionEnAttente') }, 
@@ -325,11 +325,11 @@ function Request() {
 
    const columnsSeafreights: GridColDef[] = [
         { field: 'carrierName', headerName: t('carrier'), minWidth: 125 },
-        { field: 'carrierAgentName', headerName: t('carrierAgent'), minWidth: 150 },
+        { field: 'carrierAgentName', headerName: t('carrierAgent'), minWidth: 125 },
         { field: 'departurePortName', headerName: t('departurePort'), minWidth: 125 },
         { field: 'destinationPortName', headerName: t('destinationPort'), minWidth: 125 },
-        { field: 'frequency', headerName: t('frequency'), valueFormatter: (params: GridValueFormatterParams) => `${t('every')} ${params.value || ''} `+t('days'), minWidth: 125 },
-        { field: 'transitTime', headerName: t('transitTime'), valueFormatter: (params: GridValueFormatterParams) => `${params.value || ''} `+t('days'), minWidth: 75 },
+        { field: 'frequency', headerName: t('frequency'), valueFormatter: (params: GridValueFormatterParams) => `${t('every')} ${params.value || ''} `+t('days'), minWidth: 100 },
+        { field: 'transitTime', headerName: t('transitTime'), valueFormatter: (params: GridValueFormatterParams) => `${params.value || ''} `+t('days'), minWidth: 50 },
         { field: 'currency', headerName: t('prices'), renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box sx={{ my: 1, mr: 1 }}>
@@ -340,7 +340,7 @@ function Request() {
                     <Box sx={{ my: 1 }} hidden={!getPackageNamesByIds(containersSelected, containers).includes("40' HcRf")}>{params.row.price40hcrf !== 0 ? "40' HcRf : "+params.row.price40hcrf+" "+t(params.row.currency) : "40' HcRf : N/A"}</Box>
                 </Box>
             );
-        }, minWidth: 150 },
+        }, minWidth: 125 },
         { field: 'validUntil', headerName: t('validUntil'), renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box sx={{ my: 1, mr: 1 }}>
@@ -422,7 +422,8 @@ function Request() {
     const [skipped, setSkipped] = React.useState(new Set<number>());
 
     const isStepOptional = (step: number) => {
-        return step === 2 || step === 3 || step === 4;
+        // return step === 2 || step === 3 || step === 4;
+        return false;
     };
 
     const isStepSkipped = (step: number) => {
@@ -612,7 +613,7 @@ function Request() {
         initializeSeaPorts();
 
         getContainers();
-        getCities();
+        // getCities();
         // Get everything essential too (Products, Ports, Request info)
         getAssignees();
     }, [context]);
@@ -1022,32 +1023,32 @@ function Request() {
         }
     }
     
-    const getCities = async () => {
-        if (context && account) {
-            const token = await instance.acquireTokenSilent({
-                scopes: transportRequest.scopes,
-                account: account
-            })
-            .then((response: AuthenticationResult) => {
-                return response.accessToken;
-            })
-            .catch(() => {
-                return instance.acquireTokenPopup({
-                    ...transportRequest,
-                    account: account
-                    }).then((response) => {
-                        return response.accessToken;
-                    });
-                }
-            );
+    // const getCities = async () => {
+    //     if (context && account) {
+    //         const token = await instance.acquireTokenSilent({
+    //             scopes: transportRequest.scopes,
+    //             account: account
+    //         })
+    //         .then((response: AuthenticationResult) => {
+    //             return response.accessToken;
+    //         })
+    //         .catch(() => {
+    //             return instance.acquireTokenPopup({
+    //                 ...transportRequest,
+    //                 account: account
+    //                 }).then((response) => {
+    //                     return response.accessToken;
+    //                 });
+    //             }
+    //         );
             
-            const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/City/Cities", token);
-            // console.log(response);
-            if (response !== null && response !== undefined) {
-                setCities(response);
-            }  
-        }
-    }
+    //         const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/City/Cities", token);
+    //         // console.log(response);
+    //         if (response !== null && response !== undefined) {
+    //             setCities(response);
+    //         }  
+    //     }
+    // }
     
     const getProducts = async (allPorts: any) => {
         if (context && account) {
@@ -1098,6 +1099,7 @@ function Request() {
                         "haulageType": haulageType,
                         // "loadingPort": loadingCity.name,
                         "loadingPort": loadingCity.city,
+                        "validUntil": selectedHaulage.validUntil,
                         // "loadingPortId": loadingCity.id,
                         "containerNames": [null]
                     }
@@ -1115,11 +1117,12 @@ function Request() {
                             "currency": selectedMisc.currency,
                             "price20": selectedMisc.price20,
                             "price40": selectedMisc.price40,
-                            "price20Dry": selectedMisc.price20dry,
-                            "price20Rf": selectedMisc.price20rf,
-                            "price40Dry": selectedMisc.price40dry,
-                            "price40Hc": selectedMisc.price40hc,
-                            "price40HcRf": selectedMisc.price40hcRf
+                            "price20dry": selectedMisc.price20dry,
+                            "price20rf": selectedMisc.price20rf,
+                            "price40dry": selectedMisc.price40dry,
+                            "price40hc": selectedMisc.price40hc,
+                            "price40hcrf": selectedMisc.price40hcRf,
+                            "validUntil": selectedMisc.validUntil,
                         }                      
                     ]
                 }
@@ -1147,11 +1150,12 @@ function Request() {
                         "currency": selectedSeafreight.currency,
                         "transitTime": selectedSeafreight.transitTime,
                         "frequency": selectedSeafreight.frequency,
-                        "price20Dry": selectedSeafreight.price20dry,
-                        "price20Rf": selectedSeafreight.price20rf,
-                        "price40Dry": selectedSeafreight.price40dry,
-                        "price40Hc": selectedSeafreight.price40hc,
-                        "price40HcRf": selectedSeafreight.price40hcrf
+                        "price20dry": selectedSeafreight.price20dry,
+                        "price20rf": selectedSeafreight.price20rf,
+                        "price40dry": selectedSeafreight.price40dry,
+                        "price40hc": selectedSeafreight.price40hc,
+                        "price40hcrf": selectedSeafreight.price40hcrf,
+                        "validUntil": selectedSeafreight.validUntil,
                     },
                     "containers": containersSelection.map((elm: any) => { return { "containerId": elm.id, quantity: elm.quantity } }),
                     "departureDate": departureDate || (new Date("01/01/2022")).toISOString(),
@@ -1210,7 +1214,7 @@ function Request() {
                             <Grid container spacing={2} mt={1} px={5}>
                                 <Grid item xs={12}>
                                     <Typography variant="body2" color="dodgerblue" sx={{ fontWeight: "bold" }}>
-                                        Tracking N° {trackingNumber}
+                                        {t('quoteNumber')} N° {trackingNumber}
                                     </Typography>
                                 </Grid>
                                 <Grid item xs={12}>
@@ -1354,15 +1358,15 @@ function Request() {
                                         <BootstrapInput id="package-dimensions" type="text" value={packageDimensions} onChange={(e: any) => {setPackageDimensions(e.target.value)}} fullWidth />
                                     </Grid> */}
                                     <Grid item xs={12} md={1} mt={1}>
-                                        <InputLabel htmlFor="package-length" sx={inputLabelStyles}>{t('length')}</InputLabel>
+                                        <InputLabel htmlFor="package-length" sx={inputLabelStyles}>{t('length')}(cm)</InputLabel>
                                         <BootstrapInput id="package-length" type="number" value={packageLength} onChange={(e: any) => {setPackageLength(e.target.value)}} fullWidth />
                                     </Grid>
                                     <Grid item xs={12} md={1} mt={1}>
-                                        <InputLabel htmlFor="package-width" sx={inputLabelStyles}>{t('width')}</InputLabel>
+                                        <InputLabel htmlFor="package-width" sx={inputLabelStyles}>{t('width')}(cm)</InputLabel>
                                         <BootstrapInput id="package-width" type="number" value={packageWidth} onChange={(e: any) => {setPackageWidth(e.target.value)}} fullWidth />
                                     </Grid>
                                     <Grid item xs={12} md={1} mt={1}>
-                                        <InputLabel htmlFor="package-height" sx={inputLabelStyles}>{t('height')}</InputLabel>
+                                        <InputLabel htmlFor="package-height" sx={inputLabelStyles}>{t('height')}(cm)</InputLabel>
                                         <BootstrapInput id="package-height" type="number" value={packageHeight} onChange={(e: any) => {setPackageHeight(e.target.value)}} fullWidth />
                                     </Grid>
                                     <Grid item xs={12} md={2} mt={1}>
@@ -1446,15 +1450,15 @@ function Request() {
                                         <BootstrapInput id="unit-dimensions" type="text" value={unitDimensions} onChange={(e: any) => {setUnitDimensions(e.target.value)}} fullWidth />
                                     </Grid> */}
                                     <Grid item xs={12} md={1} mt={1}>
-                                        <InputLabel htmlFor="unit-length" sx={inputLabelStyles}>{t('length')}</InputLabel>
+                                        <InputLabel htmlFor="unit-length" sx={inputLabelStyles}>{t('length')}(cm)</InputLabel>
                                         <BootstrapInput id="unit-length" type="number" value={unitLength} onChange={(e: any) => {setUnitLength(e.target.value)}} fullWidth />
                                     </Grid>
                                     <Grid item xs={12} md={1} mt={1}>
-                                        <InputLabel htmlFor="unit-width" sx={inputLabelStyles}>{t('width')}</InputLabel>
+                                        <InputLabel htmlFor="unit-width" sx={inputLabelStyles}>{t('width')}(cm)</InputLabel>
                                         <BootstrapInput id="unit-width" type="number" value={unitWidth} onChange={(e: any) => {setUnitWidth(e.target.value)}} fullWidth />
                                     </Grid>
                                     <Grid item xs={12} md={1} mt={1}>
-                                        <InputLabel htmlFor="unit-height" sx={inputLabelStyles}>{t('height')}</InputLabel>
+                                        <InputLabel htmlFor="unit-height" sx={inputLabelStyles}>{t('height')}(cm)</InputLabel>
                                         <BootstrapInput id="unit-height" type="number" value={unitHeight} onChange={(e: any) => {setUnitHeight(e.target.value)}} fullWidth />
                                     </Grid>
                                     <Grid item xs={12} md={2} mt={1}>
@@ -1708,26 +1712,6 @@ function Request() {
                                                         {
                                                             activeStep === 2 ? 
                                                             <Grid container spacing={2} mt={1} px={2}>
-                                                                {/* <Grid item xs={12} md={4} mt={1}>
-                                                                    <InputLabel htmlFor="departure-date" sx={inputLabelStyles}>{t('departureDate')}</InputLabel>
-                                                                    <LocalizationProvider dateAdapter={AdapterDayjs}>
-                                                                        <DateTimePicker 
-                                                                            value={departureDate} 
-                                                                            onChange={(value: any) => { setDepartureDate(value) }}
-                                                                            slotProps={{ textField: { id: "departure-date", fullWidth: true, sx: datetimeStyles }, inputAdornment: { sx: { position: "relative", right: "11.5px" } } }}
-                                                                        />
-                                                                    </LocalizationProvider>
-                                                                </Grid> */}
-                                                                {/* <Grid item xs={12} md={4} mt={1}>
-                                                                    <InputLabel htmlFor="loading-date" sx={inputLabelStyles}>{t('loadingDate')}</InputLabel>
-                                                                    <LocalizationProvider dateAdapter={AdapterDayjs}>
-                                                                        <DateTimePicker 
-                                                                            value={loadingDate} 
-                                                                            onChange={(value: any) => { setLoadingDate(value) }}
-                                                                            slotProps={{ textField: { id: "loading-date", fullWidth: true, sx: datetimeStyles }, inputAdornment: { sx: { position: "relative", right: "11.5px" } } }}
-                                                                        />
-                                                                    </LocalizationProvider>
-                                                                </Grid> */}
                                                                 <Grid item xs={12} md={6} mt={1}>
                                                                     <InputLabel htmlFor="loading-city" sx={inputLabelStyles}>{t('departure')} / {t('loadingCity')}</InputLabel>
                                                                     <AutocompleteSearch id="loading-city" value={loadingCity} onChange={setLoadingCity} fullWidth />

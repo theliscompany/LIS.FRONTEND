@@ -288,5 +288,6 @@ export const fr = {
   height: "Hauteur",
   fieldNeedTobeFilled: "Vous devez remplir les champs type de package, quantité et poids",
   clientName: "Nom du client",
-  costPrices: "Coût par unité"
+  costPrices: "Coût par unité",
+  quoteNumber: "Numéro de devis"
 };
