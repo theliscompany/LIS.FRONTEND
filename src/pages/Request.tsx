@@ -2,14 +2,14 @@ import { Alert, Autocomplete, Box, Button, Chip, DialogActions, DialogContent, F
 import { MuiTelInput } from 'mui-tel-input';
 import React, { useEffect, useState, useRef } from 'react';
 import { useParams } from 'react-router-dom';
-import '../../App.css';
-import AutocompleteSearch from '../shared/AutocompleteSearch';
-import { inputLabelStyles, BootstrapInput, BootstrapDialogTitle, BootstrapDialog, buttonCloseStyles, DarkTooltip, whiteButtonStyles, datetimeStyles, gridStyles } from '../../misc/styles';
+// import '../../App.css';
+import AutocompleteSearch from '../components/shared/AutocompleteSearch';
+import { inputLabelStyles, BootstrapInput, BootstrapDialogTitle, BootstrapDialog, buttonCloseStyles, DarkTooltip, whiteButtonStyles, datetimeStyles, gridStyles } from '../misc/styles';
 import { enqueueSnackbar, SnackbarProvider } from 'notistack';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { pricingRequest, protectedResources, transportRequest } from '../../config/authConfig';
-import { useAuthorizedBackendApi } from '../../api/api';
-import { BackendService } from '../../services/fetch';
+import { pricingRequest, protectedResources, transportRequest } from '../config/authConfig';
+import { useAuthorizedBackendApi } from '../api/api';
+import { BackendService } from '../services/fetch';
 import { MuiChipsInputChip } from 'mui-chips-input';
 import { DateTimePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
@@ -46,11 +46,11 @@ import { JSON as seaPorts } from 'sea-ports';
 // @ts-ignore
 
 import { DataGrid, GridColDef, GridRenderCellParams, GridValueFormatterParams, GridValueGetterParams, GridRowSelectionModel } from '@mui/x-data-grid';
-import ClientSearch from '../shared/ClientSearch';
-import RequestListNotes from '../editRequestPage/RequestListNotes';
-import RequestAddNote from '../editRequestPage/RequestAddNote';
-import RequestAskInformation from '../editRequestPage/RequestAskInformation';
-import RequestChangeStatus from '../editRequestPage/RequestChangeStatus';
+import ClientSearch from '../components/shared/ClientSearch';
+import RequestListNotes from '../components/editRequestPage/RequestListNotes';
+import RequestAddNote from '../components/editRequestPage/RequestAddNote';
+import RequestAskInformation from '../components/editRequestPage/RequestAskInformation';
+import RequestChangeStatus from '../components/editRequestPage/RequestChangeStatus';
 
 //let statusTypes = ["EnAttente", "Valider", "Rejeter"];
 // let cargoTypes = ["Container", "Conventional", "RollOnRollOff"];

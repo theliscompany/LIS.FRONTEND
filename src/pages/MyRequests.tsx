@@ -17,7 +17,7 @@ import { BackendService } from '../services/fetch';
 import { RequestResponseDto } from '../models/models';
 import { useAccount, useMsal } from '@azure/msal-react';
 import { useTranslation } from 'react-i18next';
-import RequestViewItem from '../components/admin/requestsPage/RequestViewItem';
+import RequestViewItem from '../components/requestsPage/RequestViewItem';
 
 function createGetRequestUrl(variable1: string, variable2: string, variable3: string, variable4: string, variable5: Dayjs|null, variable6: Dayjs|null, variable7: Dayjs|null, variable8: Dayjs|null, assigneeId: number) {
     let url = protectedResources.apiLisQuotes.endPoint+'/Request?';

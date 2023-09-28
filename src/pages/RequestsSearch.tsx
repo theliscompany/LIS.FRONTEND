@@ -13,7 +13,7 @@ import { BackendService } from '../services/fetch';
 import { useParams } from 'react-router-dom';
 import { RequestResponseDto } from '../models/models';
 import { useTranslation } from 'react-i18next';
-import RequestViewItem from '../components/admin/requestsPage/RequestViewItem';
+import RequestViewItem from '../components/requestsPage/RequestViewItem';
 
 function createGetRequestUrl(variable1: string, variable2: string, variable3: string, variable4: string) {
     let url = protectedResources.apiLisQuotes.endPoint+'/Request?';
