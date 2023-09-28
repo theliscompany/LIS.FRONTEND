@@ -1,13 +1,13 @@
 import { Alert, Box, Chip, Grid, IconButton, Skeleton, Table, TableBody, TableCell, TableHead, TableRow, Typography } from '@mui/material';
 import { useEffect, useState } from 'react';
-import '../../App.css';
-import { DarkTooltip } from '../../misc/styles';
+// import '../../App.css';
+import { DarkTooltip } from '../misc/styles';
 import { enqueueSnackbar, SnackbarProvider } from 'notistack';
 import AssignmentIndIcon from '@mui/icons-material/AssignmentInd';
 import AssignmentReturnIcon from '@mui/icons-material/AssignmentReturn';
-import { graphRequest, protectedResources } from '../../authConfig';
-import { useAuthorizedBackendApi } from '../../api/api';
-import { BackendService } from '../../services/fetch';
+import { graphRequest, protectedResources } from '../config/authConfig';
+import { useAuthorizedBackendApi } from '../api/api';
+import { BackendService } from '../services/fetch';
 import { useAccount, useMsal } from '@azure/msal-react';
 import { AuthenticationResult } from '@azure/msal-browser';
 import { useTranslation } from 'react-i18next';
@@ -49,22 +49,6 @@ function UsersAssignment(props: any) {
             }  
         }
     }
-
-    // const resetAssignees = async () => {
-    //     if (context) {
-    //         setLoad(true);
-    //         const response = await (context as BackendService<any>).getSingle(protectedResources.apiLisQuotes.endPoint+"/Assignee");
-    //         if (response !== null && response.code !== undefined) {
-    //             if (response.code === 200) {
-    //                 //console.log(response);
-    //                 setAssignees(response.data);
-    //             }
-    //             else {
-    //                 setLoad(false);
-    //             }
-    //         }  
-    //     }
-    // }
 
     const getUsersFromAAD = (token: string) => {
         fetch("https://graph.microsoft.com/v1.0/users", {
@@ -228,8 +212,7 @@ function UsersAssignment(props: any) {
                                 </Box> : !showAlert ? <Skeleton sx={{ mt: 3 }} /> : null
                             }
                             {
-                                showAlert ?
-                                <Alert severity="warning">{t('notAdministratorForAssign')}</Alert> : null
+                                showAlert ?<Alert severity="warning">{t('notAdministratorForAssign')}</Alert> : null
                             }
                         </Grid>
                     </Grid>

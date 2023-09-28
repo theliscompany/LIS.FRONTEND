@@ -1,16 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { AuthenticationResult } from '@azure/msal-browser';
 import { useAccount, useMsal } from '@azure/msal-react';
 import { Typography, Box, Grid, TableCell, TableHead, Table, TableBody, TableRow, Chip, IconButton, Button, DialogContent, DialogActions } from '@mui/material';
 import Skeleton from '@mui/material/Skeleton';
 import { SnackbarProvider, enqueueSnackbar } from 'notistack';
-import { useAuthorizedBackendApi } from '../../api/api';
-import { protectedResources, transportRequest } from '../../authConfig';
-import { BackendService } from '../../services/fetch';
+import { useAuthorizedBackendApi } from '../api/api';
+import { protectedResources } from '../config/authConfig';
+import { BackendService } from '../services/fetch';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { BootstrapDialog, BootstrapDialogTitle, buttonCloseStyles } from '../../misc/styles';
+import { BootstrapDialog, BootstrapDialogTitle, buttonCloseStyles } from '../misc/styles';
 import { NavLink } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
@@ -41,17 +40,15 @@ function statusLabel(value: string) {
 function PriceOffers() {
     const [load, setLoad] = useState<boolean>(true);
     const [offers, setOffers] = useState<any>(null);
-    const [ports, setPorts] = useState<any>(null);
     const [modal, setModal] = useState<boolean>(false);
     const [currentId, setCurrentId] = useState<string>("");
 
-    const { instance, accounts } = useMsal();
+    const { accounts } = useMsal();
     const account = useAccount(accounts[0] || {});
         
     const context = useAuthorizedBackendApi();
     
     useEffect(() => {
-        // getPorts();
         getPriceOffers();
     }, []);
     
@@ -71,37 +68,6 @@ function PriceOffers() {
                 }
             }
             console.log(response);
-        }
-    }
-    
-    const getPorts = async () => {
-        setLoad(true);
-        if (context && account) {
-            const token = await instance.acquireTokenSilent({
-                scopes: transportRequest.scopes,
-                account: account
-            })
-            .then((response: AuthenticationResult) => {
-                return response.accessToken;
-            })
-            .catch(() => {
-                return instance.acquireTokenPopup({
-                    ...transportRequest,
-                    account: account
-                    }).then((response) => {
-                        return response.accessToken;
-                    });
-                }
-            );
-            
-            const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Port/Ports", token);
-            console.log(response);
-            if (response !== null && response !== undefined) {
-                setPorts(response);
-                
-                // I check the offers after the ports
-                getPriceOffers();
-            }  
         }
     }
     
@@ -143,8 +109,6 @@ function PriceOffers() {
                                                             <TableCell align="left" sx={{ fontSize: 16, fontWeight: "bolder" }}>{t('createdDate')}</TableCell>
                                                             <TableCell align="left" sx={{ fontSize: 16, fontWeight: "bolder" }}>{t('departure')}</TableCell>
                                                             <TableCell align="left" sx={{ fontSize: 16, fontWeight: "bolder" }}>{t('arrival')}</TableCell>
-                                                            {/* <TableCell align="left" sx={{ fontSize: 16, fontWeight: "bolder" }}>Haulage?</TableCell>
-                                                            <TableCell align="left" sx={{ fontSize: 16, fontWeight: "bolder" }}>Misc?</TableCell> */}
                                                             <TableCell align="left" sx={{ fontSize: 16, fontWeight: "bolder" }}>{t('status')}</TableCell>
                                                             <TableCell align="left" sx={{ fontSize: 16, fontWeight: "bolder" }}>{t('clientApproval')}</TableCell>
                                                             <TableCell align="left" sx={{ fontSize: 16, fontWeight: "bolder" }}>{t('totalPrice')}</TableCell>
@@ -163,8 +127,6 @@ function PriceOffers() {
                                                                         <TableCell align="left">{(new Date(row.created)).toLocaleString()}</TableCell>
                                                                         <TableCell align="left">{row.seaFreight.departurePortName}</TableCell>
                                                                         <TableCell align="left">{row.seaFreight.destinationPortName}</TableCell>
-                                                                        {/* <TableCell align="left">{row.haulage !== null ? <Chip label="Yes" color="success" /> : <Chip label="No" />}</TableCell>
-                                                                        <TableCell align="left">{row.miscellaneousList !== null ? <Chip label="Yes" color="success" /> : <Chip label="No" />}</TableCell> */}
                                                                         <TableCell align="left"><Chip label={statusLabel(row.status)} color={colors(row.status)} /></TableCell>
                                                                         <TableCell align="left">{row.status !== "Accepted" && row.clientApproval === "Pending" ? <Chip label={t('noEmail')} /> : <Chip label={row.clientApproval} color={colors(row.clientApproval)} />}</TableCell>
                                                                         <TableCell align="left">{Number(row.totalPrice+row.totalPrice*row.margin/100-row.totalPrice*row.reduction/100+row.extraFee*1).toFixed(2)} {row.seaFreight.currency}</TableCell>

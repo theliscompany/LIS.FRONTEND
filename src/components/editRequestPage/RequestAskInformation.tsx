@@ -4,7 +4,7 @@ import { Button, DialogActions, DialogContent, Grid, InputLabel, Typography } fr
 import { useAuthorizedBackendApi } from '../../api/api';
 import { useTranslation } from 'react-i18next';
 import { enqueueSnackbar } from 'notistack';
-import { protectedResources } from '../../authConfig';
+import { protectedResources } from '../../config/authConfig';
 import { BackendService } from '../../services/fetch';
 import { useAccount, useMsal } from '@azure/msal-react';
 

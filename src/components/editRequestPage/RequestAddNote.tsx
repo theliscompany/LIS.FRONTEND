@@ -5,7 +5,7 @@ import { useAuthorizedBackendApi } from '../../api/api';
 import { useTranslation } from 'react-i18next';
 import { enqueueSnackbar } from 'notistack';
 import { BackendService } from '../../services/fetch';
-import { protectedResources } from '../../authConfig';
+import { protectedResources } from '../../config/authConfig';
 import { useAccount, useMsal } from '@azure/msal-react';
 
 function RequestAddNote(props: any) {

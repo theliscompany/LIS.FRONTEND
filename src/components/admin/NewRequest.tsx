@@ -5,7 +5,7 @@ import '../../App.css';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { inputLabelStyles, BootstrapInput, whiteButtonStyles } from '../../misc/styles';
 import { enqueueSnackbar, SnackbarProvider } from 'notistack';
-import { protectedResources, transportRequest } from '../../authConfig';
+import { protectedResources, transportRequest } from '../../config/authConfig';
 import { useAuthorizedBackendApi } from '../../api/api';
 import { BackendService } from '../../services/fetch';
 // import { MailData } from '../../models/models';

@@ -6,7 +6,7 @@ import { Typography, Box, Grid, Chip, InputLabel, Button, Alert, List, ListItem,
 import Skeleton from '@mui/material/Skeleton';
 import { SnackbarProvider, enqueueSnackbar } from 'notistack';
 import { useAuthorizedBackendApi } from '../../api/api';
-import { protectedResources, transportRequest } from '../../authConfig';
+import { protectedResources, transportRequest } from '../../config/authConfig';
 import { BackendService } from '../../services/fetch';
 import { BootstrapInput, gridStyles, inputLabelStyles } from '../../misc/styles';
 import { DataGrid, GridRenderCellParams, GridValueFormatterParams, GridValueGetterParams } from '@mui/x-data-grid';

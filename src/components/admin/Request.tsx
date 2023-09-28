@@ -7,7 +7,7 @@ import AutocompleteSearch from '../shared/AutocompleteSearch';
 import { inputLabelStyles, BootstrapInput, BootstrapDialogTitle, BootstrapDialog, buttonCloseStyles, DarkTooltip, whiteButtonStyles, datetimeStyles, gridStyles } from '../../misc/styles';
 import { enqueueSnackbar, SnackbarProvider } from 'notistack';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { pricingRequest, protectedResources, transportRequest } from '../../authConfig';
+import { pricingRequest, protectedResources, transportRequest } from '../../config/authConfig';
 import { useAuthorizedBackendApi } from '../../api/api';
 import { BackendService } from '../../services/fetch';
 import { MuiChipsInputChip } from 'mui-chips-input';

@@ -1,17 +1,17 @@
 import { Box, Button, Chip, Grid, InputLabel, Skeleton, Table, TableBody, TableCell, TableHead, TableRow, Typography } from '@mui/material';
 import { useEffect, useState } from 'react';
-import '../../App.css';
-import { BootstrapInput, datetimeStyles, inputLabelStyles } from '../../misc/styles';
+// import '../../App.css';
+import { BootstrapInput, datetimeStyles, inputLabelStyles } from '../misc/styles';
 import { enqueueSnackbar, SnackbarProvider } from 'notistack';
 import SearchIcon from '@mui/icons-material/Search';
-import { protectedResources } from '../../authConfig';
-import { useAuthorizedBackendApi } from '../../api/api';
-import { BackendService } from '../../services/fetch';
+import { protectedResources } from '../config/authConfig';
+import { useAuthorizedBackendApi } from '../api/api';
+import { BackendService } from '../services/fetch';
 import { Link } from 'react-router-dom';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DateTimePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { Dayjs } from 'dayjs';
-import { RequestResponseDto } from '../../models/models';
+import { RequestResponseDto } from '../models/models';
 import { useTranslation } from 'react-i18next';
 
 function createGetRequestUrl(variable1: Dayjs|null, variable2: Dayjs|null, variable3: string, variable4: string) {

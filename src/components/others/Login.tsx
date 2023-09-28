@@ -11,7 +11,7 @@ import LockOpenIcon from '@mui/icons-material/LockOpen';
 import Card from '@mui/material/Card';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import { useMsal  } from '@azure/msal-react';
-import { loginRequest } from '../../authConfig';
+import { loginRequest } from '../../config/authConfig';
 //import "../../styles/HideLauncher.css";
 
 function Login() {

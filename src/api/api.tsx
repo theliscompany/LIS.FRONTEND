@@ -2,7 +2,7 @@ import { AuthenticationResult } from "@azure/msal-browser";
 import { useAccount, useMsal } from "@azure/msal-react";
 import { useEffect } from "react";
 import { createContext, useContext, useState } from "react";
-import { loginRequest } from "../authConfig";
+import { loginRequest } from "../config/authConfig";
 import { BackendService } from "../services/fetch";
 
 export const AuthorizedBackendApiContext = createContext<BackendService<unknown> | null>(null!);

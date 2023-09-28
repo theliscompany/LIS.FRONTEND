@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { useAuthorizedBackendApi } from '../../api/api';
 import { enqueueSnackbar } from 'notistack';
 import { BackendService } from '../../services/fetch';
-import { protectedResources } from '../../authConfig';
+import { protectedResources } from '../../config/authConfig';
 
 function RequestChangeStatus(props: any) {
     const [statusMessage, setStatusMessage] = useState<string>("");

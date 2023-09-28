@@ -5,7 +5,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import { useTranslation } from 'react-i18next';
 import { useAuthorizedBackendApi } from '../../api/api';
 import { enqueueSnackbar } from 'notistack';
-import { protectedResources } from '../../authConfig';
+import { protectedResources } from '../../config/authConfig';
 import { BackendService } from '../../services/fetch';
 
 function RequestListNotes(props: any) {
