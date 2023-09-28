@@ -6,22 +6,22 @@ import Requests from './pages/Requests';
 import Privacy from './pages/Privacy';
 import { AuthenticatedTemplate, UnauthenticatedTemplate } from '@azure/msal-react';
 import NotFound from './pages/NotFound';
-import Request from './components/admin/Request';
+import Request from './pages/Request';
 import { AuthorizedBackendApiProvider } from './api/api';
 import RequestsSearch from './pages/RequestsSearch';
 import Tracking from './pages/Tracking';
-import NewRequest from './components/admin/NewRequest';
+import NewRequest from './pages/NewRequest';
 import UsersAssignment from './pages/UsersAssignment';
 import Histories from './pages/Histories';
 import MyRequests from './pages/MyRequests';
 import PriceOffers from './pages/PriceOffers';
 import ManagePriceOffer from './pages/ManagePriceOffer';
-import ApproveOffer from './components/admin/ApproveOffer';
+import ApproveOffer from './pages/ApproveOffer';
 
 // Remove if locales are not used
 import './locales/i18n';
-import Login from './components/others/Login';
-import Seafreights from './components/others/Seafreights';
+import Login from './utils/others/Login';
+import Seafreights from './utils/others/Seafreights';
 
 const App = () => {
   return (
