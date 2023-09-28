@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
-import { BootstrapDialogTitle, BootstrapInput, buttonCloseStyles, inputLabelStyles } from '../../misc/styles';
+import { BootstrapDialogTitle, BootstrapInput, buttonCloseStyles, inputLabelStyles } from '../../utils/misc/styles';
 import { Button, DialogActions, DialogContent, Grid, InputLabel, Typography } from '@mui/material';
 import { useAuthorizedBackendApi } from '../../api/api';
 import { useTranslation } from 'react-i18next';
 import { enqueueSnackbar } from 'notistack';
-import { BackendService } from '../../services/fetch';
+import { BackendService } from '../../utils/services/fetch';
 import { protectedResources } from '../../config/authConfig';
 import { useAccount, useMsal } from '@azure/msal-react';
 

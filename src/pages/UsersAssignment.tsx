@@ -1,13 +1,13 @@
 import { Alert, Box, Chip, Grid, IconButton, Skeleton, Table, TableBody, TableCell, TableHead, TableRow, Typography } from '@mui/material';
 import { useEffect, useState } from 'react';
 // import '../../App.css';
-import { DarkTooltip } from '../misc/styles';
+import { DarkTooltip } from '../utils/misc/styles';
 import { enqueueSnackbar, SnackbarProvider } from 'notistack';
 import AssignmentIndIcon from '@mui/icons-material/AssignmentInd';
 import AssignmentReturnIcon from '@mui/icons-material/AssignmentReturn';
 import { graphRequest, protectedResources } from '../config/authConfig';
 import { useAuthorizedBackendApi } from '../api/api';
-import { BackendService } from '../services/fetch';
+import { BackendService } from '../utils/services/fetch';
 import { useAccount, useMsal } from '@azure/msal-react';
 import { AuthenticationResult } from '@azure/msal-browser';
 import { useTranslation } from 'react-i18next';

@@ -9,13 +9,13 @@ import React, { useEffect } from 'react';
 // import '../../App.css';
 import { Button, Grid, InputLabel, NativeSelect, Skeleton } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
-import { BootstrapInput, datetimeStyles, inputLabelStyles } from '../misc/styles';
+import { BootstrapInput, datetimeStyles, inputLabelStyles } from '../utils/misc/styles';
 import { protectedResources } from '../config/authConfig';
 import { enqueueSnackbar, SnackbarProvider } from 'notistack';
 import { useAuthorizedBackendApi } from '../api/api';
-import { BackendService } from '../services/fetch';
+import { BackendService } from '../utils/services/fetch';
 import { useParams } from 'react-router-dom';
-import { RequestResponseDto } from '../models/models';
+import { RequestResponseDto } from '../utils/models/models';
 import { useTranslation } from 'react-i18next';
 import RequestViewItem from '../components/requestsPage/RequestViewItem';
 

@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
 import { Chip, Grid, IconButton, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Skeleton, DialogContent, DialogActions, Button } from '@mui/material';
-import { BootstrapDialogTitle, DarkTooltip, buttonCloseStyles } from '../../misc/styles';
+import { BootstrapDialogTitle, DarkTooltip, buttonCloseStyles } from '../../utils/misc/styles';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { useTranslation } from 'react-i18next';
 import { useAuthorizedBackendApi } from '../../api/api';
 import { enqueueSnackbar } from 'notistack';
 import { protectedResources } from '../../config/authConfig';
-import { BackendService } from '../../services/fetch';
+import { BackendService } from '../../utils/services/fetch';
 
 function RequestListNotes(props: any) {
     const [loadNotes, setLoadNotes] = useState<boolean>(true);

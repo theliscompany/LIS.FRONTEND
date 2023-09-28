@@ -1,10 +1,10 @@
 import { useState } from 'react';
-import { BootstrapDialogTitle, BootstrapInput, DarkTooltip, buttonCloseStyles, inputLabelStyles } from '../../misc/styles';
+import { BootstrapDialogTitle, BootstrapInput, DarkTooltip, buttonCloseStyles, inputLabelStyles } from '../../utils/misc/styles';
 import { Button, DialogActions, DialogContent, FormControl, FormControlLabel, FormLabel, Grid, InputLabel, Radio, RadioGroup, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { useAuthorizedBackendApi } from '../../api/api';
 import { enqueueSnackbar } from 'notistack';
-import { BackendService } from '../../services/fetch';
+import { BackendService } from '../../utils/services/fetch';
 import { protectedResources } from '../../config/authConfig';
 
 function RequestChangeStatus(props: any) {

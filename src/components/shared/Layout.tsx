@@ -33,7 +33,7 @@ import { styled, Theme, CSSObject } from '@mui/material/styles';
 import { useState } from 'react';
 import { useAccount, useMsal } from '@azure/msal-react';
 import '../../App.css';
-import { BootstrapInput, DarkTooltip } from '../../misc/styles';
+import { BootstrapInput, DarkTooltip } from '../../utils/misc/styles';
 import Search from '@mui/icons-material/Search';
 
 import { useNavigate } from 'react-router-dom';

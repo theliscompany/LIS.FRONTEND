@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Alert, Autocomplete, Box, Button, Card, CardActions, CardContent, Checkbox, DialogActions, DialogContent, Grid, InputLabel, ListItemText, MenuItem, NativeSelect, Select, SelectChangeEvent, Skeleton, TextField, Typography, Menu } from '@mui/material';
 import FaceIcon from '@mui/icons-material/Face';
-import { bottomStyles, cardStyles, buttonStyles, buttonCloseStyles, inputLabelStyles, cardTextStyles, BootstrapInput, BootstrapDialog, BootstrapDialogTitle } from '../misc/styles';
+import { bottomStyles, cardStyles, buttonStyles, buttonCloseStyles, inputLabelStyles, cardTextStyles, BootstrapInput, BootstrapDialog, BootstrapDialogTitle } from '../utils/misc/styles';
 // import '../../App.css';
 // @ts-ignore
 import { CookieBanner } from '@palmabit/react-cookie-law';
@@ -13,9 +13,9 @@ import { useIsAuthenticated, useMsal } from '@azure/msal-react';
 import Testimonies from '../components/landingPage/Testimonies';
 import Footer from '../components/landingPage/Footer';
 import { loginRequest, protectedResources } from '../config/authConfig';
-import { BackendService } from '../services/fetch';
+import { BackendService } from '../utils/services/fetch';
 import { useAuthorizedBackendApi } from '../api/api';
-import { MailData } from '../models/models';
+import { MailData } from '../utils/models/models';
 // import { AuthenticationResult } from '@azure/msal-browser';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';

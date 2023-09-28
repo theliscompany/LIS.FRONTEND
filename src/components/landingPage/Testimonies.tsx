@@ -1,6 +1,6 @@
 import { Box, Card, Grid, Typography } from '@mui/material';
 import '../../App.css';
-import { h4textStyles, h5textStyles, textStyles } from '../../misc/styles';
+import { h4textStyles, h5textStyles, textStyles } from '../../utils/misc/styles';
 import { useTranslation } from 'react-i18next';
 
 function Testimonies() {
