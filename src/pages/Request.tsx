@@ -1,12 +1,13 @@
-import { Alert, Autocomplete, Box, Button, Chip, DialogActions, DialogContent, FormControl, FormControlLabel, FormLabel, Grid, IconButton, InputLabel, ListItem, ListItemText, NativeSelect, Paper, Radio, RadioGroup, Skeleton, Step, StepLabel, Stepper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Typography } from '@mui/material';
+import { Alert, Autocomplete, Box, Button, Chip, DialogActions, DialogContent, FormControl, FormControlLabel, FormLabel, Grid, IconButton, InputLabel, ListItem, ListItemText, NativeSelect, Paper, Popover, Radio, RadioGroup, Skeleton, Step, StepLabel, Stepper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Typography } from '@mui/material';
 import { MuiTelInput } from 'mui-tel-input';
 import React, { useEffect, useState, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 // import '../../App.css';
 import AutocompleteSearch from '../components/shared/AutocompleteSearch';
-import { inputLabelStyles, BootstrapInput, BootstrapDialogTitle, BootstrapDialog, buttonCloseStyles, DarkTooltip, whiteButtonStyles, datetimeStyles, gridStyles } from '../utils/misc/styles';
+import { inputLabelStyles, BootstrapInput, BootstrapDialogTitle, BootstrapDialog, buttonCloseStyles, DarkTooltip, whiteButtonStyles, datetimeStyles, gridStyles, HtmlTooltip } from '../utils/misc/styles';
 import { enqueueSnackbar, SnackbarProvider } from 'notistack';
 import DeleteIcon from '@mui/icons-material/Delete';
+import HelpIcon from '@mui/icons-material/Help';
 import { pricingRequest, protectedResources, transportRequest } from '../config/authConfig';
 import { useAuthorizedBackendApi } from '../api/api';
 import { BackendService } from '../utils/services/fetch';
@@ -314,10 +315,10 @@ function Request() {
     const haulageTypes = [t('haulageType1'), t('haulageType2'), t('haulageType3'), t('haulageType4'), t('haulageType5')];
     
     const columnsSeafreights: GridColDef[] = [
-        { field: 'carrierName', headerName: t('carrier'), minWidth: 125 },
-        { field: 'carrierAgentName', headerName: t('carrierAgent'), minWidth: 125 },
-        { field: 'departurePortName', headerName: t('departurePort'), minWidth: 125 },
-        { field: 'destinationPortName', headerName: t('destinationPort'), minWidth: 125 },
+        { field: 'carrierName', headerName: t('carrier'), minWidth: 150 },
+        { field: 'carrierAgentName', headerName: t('carrierAgent'), minWidth: 150 },
+        // { field: 'departurePortName', headerName: t('departurePort'), minWidth: 125 },
+        // { field: 'destinationPortName', headerName: t('destinationPort'), minWidth: 125 },
         { field: 'frequency', headerName: t('frequency'), valueFormatter: (params: GridValueFormatterParams) => `${t('every')} ${params.value || ''} `+t('days'), minWidth: 100 },
         { field: 'transitTime', headerName: t('transitTime'), valueFormatter: (params: GridValueFormatterParams) => `${params.value || ''} `+t('days'), minWidth: 50 },
         { field: 'currency', headerName: t('prices'), renderCell: (params: GridRenderCellParams) => {
@@ -338,15 +339,43 @@ function Request() {
                 </Box>
             );
         }, minWidth: 100 },
+        { field: 'lastUpdated', headerName: t('lastUpdated'), renderCell: (params: GridRenderCellParams) => {
+            return (
+                <Box sx={{ my: 1, mr: 1 }}>
+                    <Chip label={(new Date(params.row.lastUpdated)).toLocaleDateString().slice(0,10)} color={(new Date()).getTime() - (new Date(params.row.lastUpdated)).getTime() > 0 ? "default" : "default"}></Chip>
+                </Box>
+            );
+        }, minWidth: 100 },
+        { field: 'comment', headerName: "Comment", renderCell: (params: GridRenderCellParams) => {
+            return (
+                <Box sx={{ my: 2 }}>
+                    <HtmlTooltip
+                        title={
+                            params.row.comment === "" || params.row.comment === null ? 
+                            <Box sx={{ p: 1 }}>
+                                <Typography color="inherit" sx={{ fontSize: 13 }}>{t('noComment')}</Typography>
+                            </Box> : 
+                            <Box sx={{ p: 1 }}>
+                                <Typography color="inherit" sx={{ fontSize: 13 }}>{params.row.comment}</Typography>
+                            </Box>
+                        }
+                    >
+                        <IconButton size="small">
+                            <HelpIcon fontSize="small" />
+                        </IconButton>
+                    </HtmlTooltip>
+                </Box>
+            );
+        }, minWidth: 100 },
     ];
     
     const columnsHaulages: GridColDef[] = [
         { field: 'haulierName', headerName: t('haulier'), minWidth: 150 },
-        { field: 'loadingPort', headerName: t('loadingPort'), renderCell: (params: GridRenderCellParams) => {
-            return (
-                <Box sx={{ my: 2 }}>{params.row.loadingPort}</Box>
-            );
-        }, minWidth: 150 },
+        // { field: 'loadingPort', headerName: t('loadingPort'), renderCell: (params: GridRenderCellParams) => {
+        //     return (
+        //         <Box sx={{ my: 2 }}>{params.row.loadingPort}</Box>
+        //     );
+        // }, minWidth: 150 },
         { field: 'unitTariff', headerName: t('unitTariff'), valueGetter: (params: GridValueGetterParams) => `${params.row.unitTariff || ''} ${t(params.row.currency)}`, minWidth: 150 },
         { field: 'freeTime', headerName: t('freeTime'), valueFormatter: (params: GridValueFormatterParams) => `${params.value || ''} ${t('hours')}`, minWidth: 100 },
         { field: 'overtimeTariff', headerName: t('overtimeTariff'), valueGetter: (params: GridValueGetterParams) => `${params.row.overtimeTariff || ''} ${t(params.row.currency)} / ${t('hour')}`, minWidth: 125 },
@@ -357,13 +386,41 @@ function Request() {
                     <Chip label={(new Date(params.row.validUntil)).toLocaleDateString().slice(0,10)} color={(new Date()).getTime() - (new Date(params.row.validUntil)).getTime() > 0 ? "warning" : "success"}></Chip>
                 </Box>
             );
-        }, minWidth: 150 },
+        }, minWidth: 100 },
+        { field: 'updated', headerName: t('lastUpdated'), renderCell: (params: GridRenderCellParams) => {
+            return (
+                <Box sx={{ my: 1, mr: 1 }}>
+                    <Chip label={(new Date(params.row.updated)).toLocaleDateString().slice(0,10)} color={(new Date()).getTime() - (new Date(params.row.updated)).getTime() > 0 ? "default" : "default"}></Chip>
+                </Box>
+            );
+        }, minWidth: 100 },
+        { field: 'comment', headerName: "Comment", renderCell: (params: GridRenderCellParams) => {
+            return (
+                <Box sx={{ my: 2 }}>
+                    <HtmlTooltip
+                        title={
+                            params.row.comment === "" || params.row.comment === null ? 
+                            <Box sx={{ p: 1 }}>
+                                <Typography color="inherit" sx={{ fontSize: 13 }}>{t('noComment')}</Typography>
+                            </Box> : 
+                            <Box sx={{ p: 1 }}>
+                                <Typography color="inherit" sx={{ fontSize: 13 }}>{params.row.comment}</Typography>
+                            </Box>
+                        }
+                    >
+                        <IconButton size="small">
+                            <HelpIcon fontSize="small" />
+                        </IconButton>
+                    </HtmlTooltip>
+                </Box>
+            );
+        }, minWidth: 100 },
     ];
     
     const columnsMiscs: GridColDef[] = [
-        { field: 'supplierName', headerName: t('supplier'), minWidth: 150 },
-        { field: 'departurePortName', headerName: t('departurePort'), valueFormatter: (params: GridValueFormatterParams) => `${portDeparture.portName || ''}`, minWidth: 175 },
-        { field: 'destinationPortName', headerName: t('destinationPort'), valueFormatter: (params: GridValueFormatterParams) => `${portDestination.portName || ''}`, minWidth: 175 },
+        { field: 'supplierName', headerName: t('supplier'), minWidth: 200 },
+        // { field: 'departurePortName', headerName: t('departurePort'), valueFormatter: (params: GridValueFormatterParams) => `${portDeparture.portName || ''}`, minWidth: 175 },
+        // { field: 'destinationPortName', headerName: t('destinationPort'), valueFormatter: (params: GridValueFormatterParams) => `${portDestination.portName || ''}`, minWidth: 175 },
         { field: 'currency', headerName: t('costPrices'), renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box sx={{ my: 1, mr: 1 }}>
@@ -388,6 +445,34 @@ function Request() {
                 </Box>
             );
         }, minWidth: 200 },
+        { field: 'updated', headerName: t('lastUpdated'), renderCell: (params: GridRenderCellParams) => {
+            return (
+                <Box sx={{ my: 1, mr: 1 }}>
+                    <Chip label={(new Date(params.row.updated)).toLocaleDateString().slice(0,10)} color={(new Date()).getTime() - (new Date(params.row.updated)).getTime() > 0 ? "default" : "default"}></Chip>
+                </Box>
+            );
+        }, minWidth: 100 },
+        { field: 'comment', headerName: "Comment", renderCell: (params: GridRenderCellParams) => {
+            return (
+                <Box sx={{ my: 2 }}>
+                    <HtmlTooltip
+                        title={
+                            params.row.comment === "" || params.row.comment === null ? 
+                            <Box sx={{ p: 1 }}>
+                                <Typography color="inherit" sx={{ fontSize: 13 }}>{t('noComment')}</Typography>
+                            </Box> : 
+                            <Box sx={{ p: 1 }}>
+                                <Typography color="inherit" sx={{ fontSize: 13 }}>{params.row.comment}</Typography>
+                            </Box>
+                        }
+                    >
+                        <IconButton size="small">
+                            <HelpIcon fontSize="small" />
+                        </IconButton>
+                    </HtmlTooltip>
+                </Box>
+            );
+        }, minWidth: 100 },
     ];
     
     const handleChangeHaulageType = (event: { target: { value: string } }) => {
@@ -1543,7 +1628,7 @@ function Request() {
                                                                         !loadResults ? 
                                                                         seafreights !== null && seafreights.length !== 0 ?
                                                                             <Box>
-                                                                                <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>{t('listSeaFreightsPricingOffers')}</Typography>
+                                                                                <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>{t('listSeaFreightsPricingOffers')+t('fromDotted')+portDeparture.portName+"-"+portDestination.portName} </Typography>
                                                                                 <DataGrid
                                                                                     rows={seafreights}
                                                                                     columns={columnsSeafreights}
@@ -1599,7 +1684,7 @@ function Request() {
                                                                         !loadResults ? 
                                                                         haulages !== null && haulages.length !== 0 ?
                                                                             <Box>
-                                                                                <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>{t('listHaulagesPricingOffers')}</Typography>
+                                                                                <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>{t('listHaulagesPricingOffers')+t('fromDotted')+loadingCity.city}</Typography>
                                                                                 <DataGrid
                                                                                     rows={haulages}
                                                                                     columns={columnsHaulages}
@@ -1629,7 +1714,7 @@ function Request() {
                                                                         !loadResults ? 
                                                                         miscs !== null && miscs.length !== 0 ?
                                                                             <Box>
-                                                                                <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>{t('listMiscPricingOffers')}</Typography>
+                                                                                <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>{t('listMiscPricingOffers')+t('fromDotted')+portDeparture.portName+"-"+portDestination.portName}</Typography>
                                                                                 <DataGrid
                                                                                     rows={miscs}
                                                                                     columns={columnsMiscs}

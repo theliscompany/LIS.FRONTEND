@@ -289,5 +289,8 @@ export const fr = {
   fieldNeedTobeFilled: "Vous devez remplir les champs type de package, quantité et poids",
   clientName: "Nom du client",
   costPrices: "Coût par unité",
-  quoteNumber: "Numéro de devis"
+  quoteNumber: "Numéro de devis",
+  lastUpdated: "Mis à jour le",
+  comment: "Commentaire/remarque",
+  noComment: "Sans commentaire"
 };

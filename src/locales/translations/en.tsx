@@ -289,5 +289,8 @@ export const en = {
   fieldNeedTobeFilled: "You need to fill the fields package name, quantity and weight",
   clientName: "Client name",
   costPrices: "Cost per unit",
-  quoteNumber: "Quote number"
+  quoteNumber: "Quote number",
+  lastUpdated: "Last updated",
+  comment: "Comment or remarks",
+  noComment: "No comment"
 };
