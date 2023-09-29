@@ -148,7 +148,7 @@ export const en = {
   sendOffer: "Send an offer",
   typeSomething: "No results, type something...",
   typeSomethingSearch: "Type something to search...",
-  generatedPriceOffers: "Generated price offers",
+  generatedPriceOffers: "Sent price offers",
   errorHappened: "An error happened during the operation.",
   requestEditedSuccess: "Your request has been edited with success.",
   managerAssignedRequest: "The manager has been assigned to this request.",
@@ -292,5 +292,10 @@ export const en = {
   quoteNumber: "Quote number",
   lastUpdated: "Last updated",
   comment: "Comment or remarks",
-  noComment: "No comment"
+  noComment: "No comment",
+  seafreights: "Seafreights",
+  listSeafreights: "List of sea freights",
+  created: "Created date",
+  deleteRow: "Delete this row",
+  editRow: "Edit this row"
 };

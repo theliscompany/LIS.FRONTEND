@@ -292,5 +292,10 @@ export const fr = {
   quoteNumber: "Numéro de devis",
   lastUpdated: "Mis à jour le",
   comment: "Commentaire/remarque",
-  noComment: "Sans commentaire"
+  noComment: "Sans commentaire",
+  seafreights: "Frêts maritimes",
+  listSeafreights: "Liste de frêts maritimes",
+  created: "Créé le",
+  deleteRow: "Supprimer cette ligne",
+  editRow: "Modifier cette ligne"
 };

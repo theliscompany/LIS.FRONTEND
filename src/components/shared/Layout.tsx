@@ -16,6 +16,7 @@ import PeopleIcon from '@mui/icons-material/PeopleAltOutlined';
 import AddIcon from '@mui/icons-material/AddCircleOutline';
 import HomeIcon from '@mui/icons-material/Home';
 import FirstPageIcon from '@mui/icons-material/FirstPage';
+import DirectionsBoatIcon from '@mui/icons-material/DirectionsBoat';
 import Avatar from '@mui/material/Avatar';
 import MenuItem from '@mui/material/MenuItem';
 import Menu from '@mui/material/Menu';
@@ -234,6 +235,9 @@ function Layout(props: {children?: React.ReactNode}) {
                                     </MenuItem>
                                     <MenuItem onClick={() => { navigate('/admin/quote-offers'); handleCloseNavMenu(); }}>
                                         <Typography textAlign="center">{t('priceOffers')}</Typography>
+                                    </MenuItem>
+                                    <MenuItem onClick={() => { navigate('/admin/seafreights'); handleCloseNavMenu(); }}>
+                                        <Typography textAlign="center">{t('seafreights')}</Typography>
                                     </MenuItem>
                                 </Menu>
                             </Grid>
@@ -498,6 +502,18 @@ function Layout(props: {children?: React.ReactNode}) {
                                             <PortraitIcon fontSize="small" />
                                         </ListItemIcon>
                                         <ListItemText primary={t('priceOffers')} />
+                                    </ListItemButton>
+                                </DarkTooltip>
+                                </ListItem>
+                            </NavLink>
+                            <NavLink to="/admin/seafreights" className={({ isActive }) => isActive ? "cs-navlink-active" : "cs-navlink"}>
+                                <ListItem className="cs-listitem" key={"Seafreights"} disablePadding disableGutters>
+                                <DarkTooltip title={t('seafreights')} placement="right" arrow>
+                                    <ListItemButton className="cs-listitembutton">
+                                        <ListItemIcon className="cs-listitemicon">
+                                            <DirectionsBoatIcon fontSize="small" />
+                                        </ListItemIcon>
+                                        <ListItemText primary={t('seafreights')} />
                                     </ListItemButton>
                                 </DarkTooltip>
                                 </ListItem>

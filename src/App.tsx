@@ -21,7 +21,8 @@ import ApproveOffer from './pages/ApproveOffer';
 // Remove if locales are not used
 import './locales/i18n';
 import Login from './utils/others/Login';
-import Seafreights from './utils/others/Seafreights';
+import Seafreights from './pages/Seafreights';
+// import Seafreights from './utils/others/Seafreights';
 
 const App = () => {
   return (
@@ -42,7 +43,8 @@ const App = () => {
                 <Route path="quote-offers" element={<PriceOffers />} />
                 <Route path="quote-offers/:id" element={<ManagePriceOffer />} />
                 <Route path="users" element={<UsersAssignment />} />
-                <Route path="test" element={<Seafreights />} />
+                {/* <Route path="test" element={<Seafreights />} /> */}
+                <Route path="seafreights" element={<Seafreights />} />
               </Route> 
               <Route path="/" element={<Layout children={<Requests />} />} />
               <Route path="login" element={<Layout children={<Requests />} />} />
