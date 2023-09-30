@@ -294,8 +294,10 @@ export const en = {
   comment: "Comment or remarks",
   noComment: "No comment",
   seafreights: "Seafreights",
-  listSeafreights: "List of sea freights",
+  listSeafreights: "List of sea freights prices",
   created: "Created date",
   deleteRow: "Delete this row",
-  editRow: "Edit this row"
+  editRow: "Edit this row",
+  areYouSureDeleteRow: "Do you really want to delete this row? Be careful, this action cannot be undone.",
+  accept: "Confirm"
 };

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Accordion, AccordionDetails, AccordionSummary, Alert, Autocomplete, Box, Button, Chip, Grid, IconButton, InputLabel, Skeleton, TextField, Typography } from '@mui/material';
+import { Accordion, AccordionDetails, AccordionSummary, Alert, Autocomplete, Box, Button, Chip, DialogActions, DialogContent, Grid, IconButton, InputLabel, Skeleton, TextField, Typography } from '@mui/material';
 import HelpIcon from '@mui/icons-material/Help';
 import SearchIcon from '@mui/icons-material/Search';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -11,7 +11,7 @@ import { useAuthorizedBackendApi } from '../api/api';
 import { protectedResources } from '../config/authConfig';
 import { BackendService } from '../utils/services/fetch';
 import { GridColDef, GridValueFormatterParams, GridRenderCellParams, DataGrid } from '@mui/x-data-grid';
-import { HtmlTooltip, gridStyles, inputLabelStyles, whiteButtonStyles } from '../utils/misc/styles';
+import { BootstrapDialog, BootstrapDialogTitle, HtmlTooltip, buttonCloseStyles, gridStyles, inputLabelStyles, whiteButtonStyles } from '../utils/misc/styles';
 import CompanySearch from '../components/shared/CompanySearch';
 
 function createGetRequestUrl(variable1: number, variable2: number, variable3: number) {
@@ -34,6 +34,9 @@ function createGetRequestUrl(variable1: number, variable2: number, variable3: nu
 
 function Seafreights() {
     const [load, setLoad] = useState<boolean>(true);
+    const [modal, setModal] = useState<boolean>(false);
+    const [modal2, setModal2] = useState<boolean>(false);
+    const [currentId, setCurrentId] = useState<string>("");
     const [seafreights, setSeafreights] = useState<any>(null);
     const [carrier, setCarrier] = useState<any>(null);
     const [portDeparture, setPortDeparture] = useState<any>(null);
@@ -79,10 +82,10 @@ function Seafreights() {
         { field: 'xxx', headerName: t('Actions'), renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box sx={{ my: 1, mr: 1 }}>
-                    <IconButton size="small" title={t('deleteRow')} sx={{ mr: 0.5 }}>
+                    <IconButton size="small" title={t('editRow')} sx={{ mr: 0.5 }}>
                         <EditIcon fontSize="small" />
                     </IconButton>
-                    <IconButton size="small" title={t('editRow')}>
+                    <IconButton size="small" title={t('deleteRow')} onClick={() => { setCurrentId(params.row.seaFreightId); setModal(true); }}>
                         <DeleteIcon fontSize="small" />
                     </IconButton>
                 </Box>
@@ -281,6 +284,40 @@ function Seafreights() {
                     </Grid> : <Skeleton sx={{ mx: 5, mt: 3 }} />
                 }
             </Box>
+            <BootstrapDialog
+                onClose={() => setModal(false)}
+                aria-labelledby="custom-dialog-title"
+                open={modal}
+                maxWidth="md"
+                fullWidth
+            >
+                <BootstrapDialogTitle id="custom-dialog-title" onClose={() => setModal(false)}>
+                    <b>{t('deleteRow')}</b>
+                </BootstrapDialogTitle>
+                <DialogContent dividers>{t('areYouSureDeleteRow')}</DialogContent>
+                <DialogActions>
+                    <Button variant="contained" color={"primary"} onClick={() => { alert("Function not available yet!"); }} sx={{ mr: 3, textTransform: "none" }}>{t('accept')}</Button>
+                    <Button variant="contained" onClick={() => setModal(false)} sx={buttonCloseStyles}>{t('close')}</Button>
+                </DialogActions>
+            </BootstrapDialog>
+            <BootstrapDialog
+                onClose={() => setModal2(false)}
+                aria-labelledby="custom-dialog-title2"
+                open={modal2}
+                maxWidth="md"
+                fullWidth
+            >
+                <BootstrapDialogTitle id="custom-dialog-title2" onClose={() => setModal2(false)}>
+                    <b>{t('editRow')}</b>
+                </BootstrapDialogTitle>
+                <DialogContent dividers>
+                    
+                </DialogContent>
+                <DialogActions>
+                    <Button variant="contained" color={"primary"} onClick={() => { alert("Function not available yet!"); }} sx={{ mr: 3, textTransform: "none" }}>{t('validate')}</Button>
+                    <Button variant="contained" onClick={() => setModal2(false)} sx={buttonCloseStyles}>{t('close')}</Button>
+                </DialogActions>
+            </BootstrapDialog>
         </div>
     );
 }

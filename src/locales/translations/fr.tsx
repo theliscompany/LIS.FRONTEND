@@ -294,8 +294,10 @@ export const fr = {
   comment: "Commentaire/remarque",
   noComment: "Sans commentaire",
   seafreights: "Frêts maritimes",
-  listSeafreights: "Liste de frêts maritimes",
+  listSeafreights: "Liste des prix de frêts maritimes",
   created: "Créé le",
   deleteRow: "Supprimer cette ligne",
-  editRow: "Modifier cette ligne"
+  editRow: "Modifier cette ligne",
+  areYouSureDeleteRow: "Voulez vous réellement supprimer cette ligne? Attention, cette action est définitive.",
+  accept: "Confirmer"
 };
