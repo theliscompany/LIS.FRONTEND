@@ -116,7 +116,14 @@ export const tagInputStyles = {
 export const whiteButtonStyles = { 
   background: "#fff", 
   color: "#333", mt: 2, 
-  textTransform: "none" 
+  textTransform: "none"
+}
+
+export const actionButtonStyles = { 
+  textTransform: "none",
+  alignItems: "flex-end", 
+  justifyContent: "flex-end",
+  float: "right"
 }
 
 export const gridStyles = { 

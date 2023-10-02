@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Accordion, AccordionDetails, AccordionSummary, Alert, Autocomplete, Box, Button, Chip, DialogActions, DialogContent, Grid, IconButton, InputLabel, Skeleton, TextField, Typography } from '@mui/material';
 import HelpIcon from '@mui/icons-material/Help';
+import AddCircleOutlinedIcon from '@mui/icons-material/AddCircleOutlined';
 import SearchIcon from '@mui/icons-material/Search';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
@@ -11,7 +12,7 @@ import { useAuthorizedBackendApi } from '../api/api';
 import { protectedResources } from '../config/authConfig';
 import { BackendService } from '../utils/services/fetch';
 import { GridColDef, GridValueFormatterParams, GridRenderCellParams, DataGrid } from '@mui/x-data-grid';
-import { BootstrapDialog, BootstrapDialogTitle, HtmlTooltip, buttonCloseStyles, gridStyles, inputLabelStyles, whiteButtonStyles } from '../utils/misc/styles';
+import { BootstrapDialog, BootstrapDialogTitle, HtmlTooltip, actionButtonStyles, buttonCloseStyles, buttonStyles, gridStyles, inputLabelStyles, whiteButtonStyles } from '../utils/misc/styles';
 import CompanySearch from '../components/shared/CompanySearch';
 
 function createGetRequestUrl(variable1: number, variable2: number, variable3: number) {
@@ -38,7 +39,7 @@ function Seafreights() {
     const [modal2, setModal2] = useState<boolean>(false);
     const [currentId, setCurrentId] = useState<string>("");
     const [seafreights, setSeafreights] = useState<any>(null);
-    const [carrier, setCarrier] = useState<any>(null);
+    const [searchedCarrier, setSearchedCarrier] = useState<any>(null);
     const [portDeparture, setPortDeparture] = useState<any>(null);
     const [portDestination, setPortDestination] = useState<any>(null);
     const [ports, setPorts] = useState<any>(null);
@@ -145,7 +146,7 @@ function Seafreights() {
     const searchSeafreights = async () => {
         if (context) {
             setLoad(true);
-            var requestFormatted = createGetRequestUrl(portDeparture?.portId, portDestination?.portId, carrier?.contactId);
+            var requestFormatted = createGetRequestUrl(portDeparture?.portId, portDestination?.portId, searchedCarrier?.contactId);
             const response = await (context as BackendService<any>).getSingle(requestFormatted);
             if (response !== null && response !== undefined) {
                 setSeafreights(response);
@@ -163,10 +164,15 @@ function Seafreights() {
             <SnackbarProvider />
             <Box sx={{ py: 2.5 }}>
                 <Typography variant="h5" sx={{mt: {xs: 4, md: 1.5, lg: 1.5 }}} mx={5}><b>{t('listSeafreights')}</b></Typography>
-                <Grid container spacing={2} mt={1} px={5}>
+                <Grid container spacing={2} mt={0} px={5}>
+                    <Grid item xs={12}>
+                        <Button variant="contained" sx={actionButtonStyles} onClick={() => { setModal2(true); }}>
+                            New seafreight price <AddCircleOutlinedIcon sx={{ ml: 0.5, justifyContent: "center", alignItems: "center" }} fontSize="small" />
+                        </Button>
+                    </Grid>
                     <Grid item xs={12} md={4} mt={1}>
                         <InputLabel htmlFor="company-name" sx={inputLabelStyles}>{t('carrier')}</InputLabel>
-                        <CompanySearch id="company-name" value={carrier} onChange={setCarrier} callBack={() => console.log(carrier)} fullWidth />
+                        <CompanySearch id="company-name" value={searchedCarrier} onChange={setSearchedCarrier} callBack={() => console.log(searchedCarrier)} fullWidth />
                     </Grid>
                     <Grid item xs={12} md={3} mt={1}>
                         <InputLabel htmlFor="port-departure" sx={inputLabelStyles}>{t('departurePort')}</InputLabel>
