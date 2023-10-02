@@ -293,11 +293,19 @@ export const fr = {
   lastUpdated: "Mis à jour le",
   comment: "Commentaire/remarque",
   noComment: "Sans commentaire",
-  seafreights: "Frêts maritimes",
+  seafreights: "Prix des frêts maritimes",
   listSeafreights: "Liste des prix de frêts maritimes",
   created: "Créé le",
   deleteRow: "Supprimer cette ligne",
   editRow: "Modifier cette ligne",
+  createRow: "Ajouter une ligne",
   areYouSureDeleteRow: "Voulez vous réellement supprimer cette ligne? Attention, cette action est définitive.",
-  accept: "Confirmer"
+  accept: "Confirmer",
+  currency: "Devise",
+  rowDeletedSuccess: "Cette ligne a été supprimée avec succès",
+  rowDeletedError : "Une erreur s'est produite, le système n'a pas réussi à supprimer cette ligne",
+  inDays: "en jours",
+  everyxDays: "tous les x jours",
+  serviceName: "Service",
+  containers: "Conteneurs (tailles)"
 };

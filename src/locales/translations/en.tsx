@@ -293,11 +293,19 @@ export const en = {
   lastUpdated: "Last updated",
   comment: "Comment or remarks",
   noComment: "No comment",
-  seafreights: "Seafreights",
+  seafreights: "Seafreights prices",
   listSeafreights: "List of sea freights prices",
   created: "Created date",
   deleteRow: "Delete this row",
   editRow: "Edit this row",
+  createRow: "Add a row",
   areYouSureDeleteRow: "Do you really want to delete this row? Be careful, this action cannot be undone.",
-  accept: "Confirm"
+  accept: "Confirm",
+  currency: "Currency",
+  rowDeletedSuccess: "This row has been deleted with success",
+  rowDeletedError: "An error occured, the system failed to delete this row",
+  inDays: "in days",
+  everyxDays: "every x days",
+  serviceName: "Service",
+  containers: "Containers (sizes)"
 };

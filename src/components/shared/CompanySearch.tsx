@@ -21,7 +21,7 @@ const CompanySearch: React.FC<LocationAutocompleteProps> = ({ id, value, onChang
         setLoading(true);
         try {
             const response = await axios.get(
-                `https://liscrm-dev.azurewebsites.net/Contact/GetContactsByName/contactsByName?contactName=${search}`,
+                `https://liscrm-dev.azurewebsites.net/Contact/GetContactsByName?value=${search}`,
             );
             setOptions(response.data);
         } catch (error) {
