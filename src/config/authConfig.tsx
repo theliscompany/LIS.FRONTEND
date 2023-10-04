@@ -35,6 +35,7 @@ export const transportRequest: PopupRequest = {
   scopes: [
     "api://f0b35c43-ffd4-4096-bb75-32306b1e7109/LIS.TRANSPORT.PortsRead",
     "api://f0b35c43-ffd4-4096-bb75-32306b1e7109/LIS.TRANSPORT.CitiesRead",
+    "api://f0b35c43-ffd4-4096-bb75-32306b1e7109/LIS.TRANSPORT.ServicesRead",
     "api://f0b35c43-ffd4-4096-bb75-32306b1e7109/LIS.TRANSPORT.ContainersRead"
   ]
 };

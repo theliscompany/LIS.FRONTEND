@@ -4,16 +4,17 @@ import { debounce } from "@mui/material/utils";
 import axios from "axios";
 import { useTranslation } from "react-i18next";
 
-interface LocationAutocompleteProps {
+interface CompanyAutocompleteProps {
     id: string;
     value: string;
     onChange: (value: any) => void;
     fullWidth?: boolean;
     disabled?: boolean;
+    category: number;
     callBack?: (value: any) => void;
 }
 
-const CompanySearch: React.FC<LocationAutocompleteProps> = ({ id, value, onChange, fullWidth, disabled, callBack }) => {
+const CompanySearch: React.FC<CompanyAutocompleteProps> = ({ id, value, onChange, fullWidth, disabled, category, callBack }) => {
     const [loading, setLoading] = useState(false);
     const [options, setOptions] = useState<any[]>([]);
 
@@ -21,7 +22,7 @@ const CompanySearch: React.FC<LocationAutocompleteProps> = ({ id, value, onChang
         setLoading(true);
         try {
             const response = await axios.get(
-                `https://liscrm-dev.azurewebsites.net/Contact/GetContactsByName?value=${search}`,
+                `https://liscrm-dev.azurewebsites.net/Contact/GetContactsByCategory?contactName=${search}&category=${category}`,
             );
             setOptions(response.data);
         } catch (error) {

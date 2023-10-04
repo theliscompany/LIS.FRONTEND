@@ -286,7 +286,7 @@ export const en = {
   length: "Length",
   width: "Width",
   height: "Height",
-  fieldNeedTobeFilled: "You need to fill the fields package name, quantity and weight",
+  fieldNeedTobeFilled: "You need to fill the fields required",
   clientName: "Client name",
   costPrices: "Cost per unit",
   quoteNumber: "Quote number",
@@ -307,5 +307,7 @@ export const en = {
   inDays: "in days",
   everyxDays: "every x days",
   serviceName: "Service",
-  containers: "Containers (sizes)"
+  containers: "Containers (sizes)",
+  successCreated: "The element has been created with success",
+  price: "Price"
 };

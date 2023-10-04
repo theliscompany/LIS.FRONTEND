@@ -286,7 +286,7 @@ export const fr = {
   length: "Longueur",
   width: "Largeur",
   height: "Hauteur",
-  fieldNeedTobeFilled: "Vous devez remplir les champs type de package, quantité et poids",
+  fieldNeedTobeFilled: "Vous devez remplir les champs requis",
   clientName: "Nom du client",
   costPrices: "Coût par unité",
   quoteNumber: "Numéro de devis",
@@ -307,5 +307,7 @@ export const fr = {
   inDays: "en jours",
   everyxDays: "tous les x jours",
   serviceName: "Service",
-  containers: "Conteneurs (tailles)"
+  containers: "Conteneurs (tailles)",
+  successCreated: "L'élément a été créée avec succès",
+  price: "Prix"
 };
