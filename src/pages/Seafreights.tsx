@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Accordion, AccordionDetails, AccordionSummary, Alert, Autocomplete, Box, Button, Chip, DialogActions, DialogContent, FilledInput, Grid, IconButton, InputLabel, ListItem, ListItemText, MenuItem, NativeSelect, OutlinedInput, Select, Skeleton, TextField, Typography } from '@mui/material';
-import HelpIcon from '@mui/icons-material/Help';
+import { Accordion, AccordionDetails, AccordionSummary, Alert, Autocomplete, Box, Button, Chip, DialogActions, DialogContent, Grid, IconButton, InputLabel, ListItem, ListItemText, NativeSelect, Skeleton, TextField, Typography } from '@mui/material';
 import AddCircleOutlinedIcon from '@mui/icons-material/AddCircleOutlined';
 import SearchIcon from '@mui/icons-material/Search';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -12,11 +11,11 @@ import { useAuthorizedBackendApi } from '../api/api';
 import { protectedResources, transportRequest } from '../config/authConfig';
 import { BackendService } from '../utils/services/fetch';
 import { GridColDef, GridValueFormatterParams, GridRenderCellParams, DataGrid } from '@mui/x-data-grid';
-import { BootstrapDialog, BootstrapDialogTitle, BootstrapInput, HtmlTooltip, actionButtonStyles, buttonCloseStyles, buttonStyles, datetimeStyles, gridStyles, inputLabelStyles, whiteButtonStyles } from '../utils/misc/styles';
+import { BootstrapDialog, BootstrapDialogTitle, BootstrapInput, actionButtonStyles, buttonCloseStyles, datetimeStyles, gridStyles, inputLabelStyles, whiteButtonStyles } from '../utils/misc/styles';
 import CompanySearch from '../components/shared/CompanySearch';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import { DatePicker, DateTimePicker, LocalizationProvider } from '@mui/x-date-pickers';
-import { Dayjs } from 'dayjs';
+import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
+import dayjs, { Dayjs } from 'dayjs';
 import { AuthenticationResult } from '@azure/msal-browser';
 import { useMsal, useAccount } from '@azure/msal-react';
 import { CategoryEnum } from '../utils/constants';
@@ -52,9 +51,11 @@ function createGetRequestUrl(variable1: number, variable2: number, variable3: nu
 
 function Seafreights() {
     const [load, setLoad] = useState<boolean>(true);
+    const [loadEdit, setLoadEdit] = useState<boolean>(false);
     const [modal, setModal] = useState<boolean>(false);
     const [modal2, setModal2] = useState<boolean>(false);
     const [currentId, setCurrentId] = useState<string>("");
+    const [currentEditId, setCurrentEditId] = useState<string>("");
     const [seafreights, setSeafreights] = useState<any>(null);
     const [searchedCarrier, setSearchedCarrier] = useState<any>(null);
     const [portDeparture, setPortDeparture] = useState<any>(null);
@@ -124,7 +125,7 @@ function Seafreights() {
         { field: 'xxx', headerName: t('Actions'), renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box sx={{ my: 1, mr: 1 }}>
-                    <IconButton size="small" title={t('editRow')} sx={{ mr: 0.5 }}>
+                    <IconButton size="small" title={t('editRow')} sx={{ mr: 0.5 }} onClick={() => { setCurrentEditId(params.row.seaFreightId); getSeafreight(params.row.seaFreightId); setModal2(true); }}>
                         <EditIcon fontSize="small" />
                     </IconButton>
                     <IconButton size="small" title={t('deleteRow')} onClick={() => { setCurrentId(params.row.seaFreightId); setModal(true); }}>
@@ -232,6 +233,30 @@ function Seafreights() {
         }
     }
     
+    const getSeafreight = async (id: string) => {
+        setLoadEdit(true)
+        if (context) {
+            const response = await (context as BackendService<any>).getSingle(protectedResources.apiLisPricing.endPoint+"/SeaFreight/SeaFreight?seaFreightId="+id);
+            if (response !== null && response !== undefined) {
+                setCarrier({contactId: response.carrierId, contactName: response.carrierName});
+                setCarrierAgent({contactId: response.carrierAgentId, contactName: response.carrierAgentName});
+                setPortLoading(ports.find((elm: any) => elm.portId === response.departurePortId));
+                setPortDischarge(ports.find((elm: any) => elm.portId === response.destinationPortId));
+                setCurrency(response.currency);
+                setValidUntil(dayjs(response.validUntil));
+                setTransitTime(response.transitTime);
+                setFrequency(response.frequency);
+                setComment(response.comment);
+                setServicesSelection(response.services);
+                setLoadEdit(false);
+            }
+            else {
+                setLoadEdit(false);
+            }
+            console.log(response);
+        }
+    }
+    
     const searchSeafreights = async () => {
         if (context) {
             setLoad(true);
@@ -250,24 +275,45 @@ function Seafreights() {
 
     const createSeafreight = async () => {
         if (context) {
-            // console.log(servicesSelection);
-            var dataSent = {
-                // "seaFreightId": "string",
-                "departurePortId": portLoading.portId,
-                "destinationPortId": portDischarge.portId,
-                "departurePortName": portLoading.portName,
-                "destinationPortName": portDischarge.portName,
-                "carrierId": carrier.contactId,
-                "carrierName": carrier.contactName,
-                "carrierAgentId": carrierAgent.contactId,
-                "carrierAgentName": carrierAgent.contactName,
-                "currency": currency,
-                "validUntil": validUntil?.toISOString(),
-                "transitTime": transitTime,
-                "frequency": frequency,
-                "comment": comment,
-                "services": servicesSelection
-            };
+            var dataSent = null;
+            if (currentEditId !== "") {
+                dataSent = {
+                    "seaFreightId": currentEditId,
+                    "departurePortId": portLoading.portId,
+                    "destinationPortId": portDischarge.portId,
+                    "departurePortName": portLoading.portName,
+                    "destinationPortName": portDischarge.portName,
+                    "carrierId": carrier.contactId,
+                    "carrierName": carrier.contactName,
+                    "carrierAgentId": carrierAgent.contactId,
+                    "carrierAgentName": carrierAgent.contactName,
+                    "currency": currency,
+                    "validUntil": validUntil?.toISOString(),
+                    "transitTime": transitTime,
+                    "frequency": frequency,
+                    "comment": comment,
+                    "services": servicesSelection
+                };    
+            }
+            else {
+                dataSent = {
+                    // "seaFreightId": "string",
+                    "departurePortId": portLoading.portId,
+                    "destinationPortId": portDischarge.portId,
+                    "departurePortName": portLoading.portName,
+                    "destinationPortName": portDischarge.portName,
+                    "carrierId": carrier.contactId,
+                    "carrierName": carrier.contactName,
+                    "carrierAgentId": carrierAgent.contactId,
+                    "carrierAgentName": carrierAgent.contactName,
+                    "currency": currency,
+                    "validUntil": validUntil?.toISOString(),
+                    "transitTime": transitTime,
+                    "frequency": frequency,
+                    "comment": comment,
+                    "services": servicesSelection
+                };    
+            }
             const response = await (context as BackendService<any>).postBasic(protectedResources.apiLisPricing.endPoint+"/SeaFreight/SeaFreight", dataSent);
             if (response !== null && response !== undefined) {
                 setModal2(false);
@@ -302,7 +348,7 @@ function Seafreights() {
                 <Typography variant="h5" sx={{mt: {xs: 4, md: 1.5, lg: 1.5 }}} mx={5}><b>{t('listSeafreights')}</b></Typography>
                 <Grid container spacing={2} mt={0} px={5}>
                     <Grid item xs={12}>
-                        <Button variant="contained" sx={actionButtonStyles} onClick={() => { setModal2(true); }}>
+                        <Button variant="contained" sx={actionButtonStyles} onClick={() => { setCurrentEditId(""); setModal2(true); }}>
                             New seafreight price <AddCircleOutlinedIcon sx={{ ml: 0.5, pb: 0.25, justifyContent: "center", alignItems: "center" }} fontSize="small" />
                         </Button>
                     </Grid>
@@ -444,227 +490,230 @@ function Seafreights() {
                 fullWidth
             >
                 <BootstrapDialogTitle id="custom-dialog-title2" onClose={() => setModal2(false)}>
-                    <b>{t('createRow')}</b>
+                    <b>{currentEditId === "" ? t('createRow') : t('editRow')}</b>
                 </BootstrapDialogTitle>
                 <DialogContent dividers>
-                    <Grid container spacing={2}>
-                        <Grid item xs={12} md={8}>
-                            <Grid container spacing={2}>
-                                <Grid item xs={12} md={6} mt={0.25}>
-                                    <InputLabel htmlFor="carrier" sx={inputLabelStyles}>{t('carrier')}</InputLabel>
-                                    <CompanySearch id="carrier" value={carrier} onChange={setCarrier} category={CategoryEnum.SUPPLIERS} callBack={() => console.log(carrier)} fullWidth />
-                                </Grid>
-                                <Grid item xs={12} md={6} mt={0.25}>
-                                    <InputLabel htmlFor="carrier-agent" sx={inputLabelStyles}>{t('carrierAgent')}</InputLabel>
-                                    <CompanySearch id="carrier-agent" value={carrierAgent} onChange={setCarrierAgent} category={CategoryEnum.SUPPLIERS} callBack={() => console.log(carrierAgent)} fullWidth />
-                                </Grid>
-                                <Grid item xs={12} md={6} mt={0.25}>
-                                    <InputLabel htmlFor="port-loading" sx={inputLabelStyles}>{t('departurePort')}</InputLabel>
-                                    {
-                                        ports !== null ?
-                                        <Autocomplete
-                                            disablePortal
-                                            id="port-loading"
-                                            options={ports}
-                                            renderOption={(props, option, i) => {
-                                                return (
-                                                    <li {...props} key={option.portId}>
-                                                        {option.portName+", "+option.country}
-                                                    </li>
-                                                );
-                                            }}
-                                            getOptionLabel={(option: any) => { 
-                                                if (option !== null && option !== undefined) {
-                                                    return option.portName+', '+option.country;
-                                                }
-                                                return ""; 
-                                            }}
-                                            value={portLoading}
-                                            sx={{ mt: 1 }}
-                                            renderInput={(params: any) => <TextField {...params} />}
-                                            onChange={(e: any, value: any) => { setPortLoading(value); }}
-                                            fullWidth
-                                        /> : <Skeleton />
-                                    }
-                                </Grid>
-                                <Grid item xs={12} md={6} mt={0.25}>
-                                    <InputLabel htmlFor="discharge-port" sx={inputLabelStyles}>{t('arrivalPort')}</InputLabel>
-                                    {
-                                        ports !== null ?
-                                        <Autocomplete
-                                            disablePortal
-                                            id="discharge-port"
-                                            options={ports}
-                                            renderOption={(props, option, i) => {
-                                                return (
-                                                    <li {...props} key={option.portId}>
-                                                        {option.portName+", "+option.country}
-                                                    </li>
-                                                );
-                                            }}
-                                            getOptionLabel={(option: any) => { 
-                                                if (option !== null && option !== undefined) {
-                                                    return option.portName+', '+option.country;
-                                                }
-                                                return ""; 
-                                            }}
-                                            value={portDischarge}
-                                            sx={{ mt: 1 }}
-                                            renderInput={(params: any) => <TextField {...params} />}
-                                            onChange={(e: any, value: any) => { setPortDischarge(value); }}
-                                            fullWidth
-                                        /> : <Skeleton />
-                                    }
-                                </Grid>
-                            </Grid>
-                        </Grid>
-                        <Grid item xs={12} md={4}>
-                            <Grid container spacing={2}>
-                                <Grid item xs={12} md={12} mt={0}>
-                                    <InputLabel htmlFor="comment" sx={inputLabelStyles}>{t('comment')}</InputLabel>
-                                    <BootstrapInput id="comment" type="text" multiline rows={4.875} value={comment} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setComment(e.target.value)} fullWidth />
-                                </Grid>
-                            </Grid>
-                        </Grid>
-                        <Grid item xs={12} md={3}>
-                            <InputLabel htmlFor="valid-until" sx={inputLabelStyles}>{t('validUntil')}</InputLabel>
-                            <LocalizationProvider dateAdapter={AdapterDayjs}>
-                                <DatePicker 
-                                    value={validUntil} 
-                                    onChange={(value: any) => { setValidUntil(value) }}
-                                    slotProps={{ textField: { id: "valid-until", fullWidth: true, sx: datetimeStyles }, inputAdornment: { sx: { position: "relative", right: "11.5px" } } }}
-                                />
-                            </LocalizationProvider>
-                        </Grid>
-                        <Grid item xs={12} md={3}>
-                            <InputLabel htmlFor="currency" sx={inputLabelStyles}>{t('currency')}</InputLabel>
-                            <NativeSelect
-                                id="currency"
-                                value={currency}
-                                onChange={(e: any) => { setCurrency(e.target.value) }}
-                                input={<BootstrapInput />}
-                                fullWidth
-                            >
-                                {currencyOptions.map((elm: any, i: number) => (
-                                    <option key={"currencyElm-"+i} value={elm.value}>{elm.label}</option>
-                                ))}
-                            </NativeSelect>
-                        </Grid>
-                        <Grid item xs={12} md={3}>
-                            <Grid item xs={12} md={12} mt={0}>
-                                <InputLabel htmlFor="transit-time" sx={inputLabelStyles}>{t('transitTime')} ({t('inDays')})</InputLabel>
-                                <BootstrapInput id="transit-time" type="number" value={transitTime} onChange={(e: any) => setTransitTime(e.target.value)} fullWidth />
-                            </Grid>
-                        </Grid>
-                        <Grid item xs={12} md={3}>
-                            <Grid item xs={12} md={12} mt={0}>
-                                <InputLabel htmlFor="frequency" sx={inputLabelStyles}>{t('frequency')} ({t('everyxDays')})</InputLabel>
-                                <BootstrapInput id="frequency" type="number" value={frequency} onChange={(e: any) => setFrequency(e.target.value)} fullWidth />
-                            </Grid>
-                        </Grid>
-                        <Grid item xs={12} md={12}>
-                            <Typography sx={{ fontSize: 18 }}><b>List of services</b></Typography>
-                        </Grid>
-                        <Grid item xs={12} md={4}>
-                            <InputLabel htmlFor="service-name" sx={inputLabelStyles}>{t('serviceName')}</InputLabel>
-                            {
-                                services !== null ?
-                                <Autocomplete
-                                    disablePortal
-                                    id="service-name"
-                                    options={services}
-                                    renderOption={(props, option, i) => {
-                                        return (
-                                            <li {...props} key={option.portId}>
-                                                {option.serviceName}
-                                            </li>
-                                        );
-                                    }}
-                                    getOptionLabel={(option: any) => { 
-                                        if (option !== null && option !== undefined) {
-                                            return option.serviceName;
-                                        }
-                                        return ""; 
-                                    }}
-                                    value={serviceName}
-                                    sx={{ mt: 1 }}
-                                    renderInput={(params: any) => <TextField {...params} />}
-                                    onChange={(e: any, value: any) => { setServiceName(value); }}
-                                    fullWidth
-                                /> : <Skeleton />
-                            }
-                        </Grid>
-                        <Grid item xs={12} md={4}>
-                            <InputLabel htmlFor="container-types" sx={inputLabelStyles}>{t('containers')}</InputLabel>
-                            {
-                                containers !== null ? 
-                                <Autocomplete
-                                    multiple
-                                    id="container-types"
-                                    options={containers}
-                                    getOptionLabel={(option: any) => option.packageName}
-                                    value={containerTypes}
-                                    onChange={(event: any, newValue: any) => {
-                                        setContainerTypes(newValue);
-                                    }}
-                                    renderInput={(params: any) => <TextField {...params} sx={{ mt: 1, textTransform: "lowercase" }} />}
-                                    fullWidth
-                                /> : <Skeleton />
-                            }
-                        </Grid>
-                        <Grid item xs={12} md={2}>
-                            <InputLabel htmlFor="price-cs" sx={inputLabelStyles}>{t('price')}</InputLabel>
-                            <BootstrapInput id="price-cs" type="number" value={price} onChange={(e: any) => setPrice(e.target.value)} fullWidth />
-                        </Grid>
-                        <Grid item xs={12} md={2}>
-                            <Button
-                                variant="contained" color="inherit" fullWidth sx={whiteButtonStyles} 
-                                style={{ marginTop: "30px", height: "42px", float: "right" }} 
-                                onClick={() => {
-                                    if (serviceName !== null && containerTypes !== null && price > 0) {
-                                        console.log(serviceName); console.log(containerTypes); console.log(price);
-                                        setServicesSelection((prevItems: any) => [...prevItems, { 
-                                            service: { serviceId: serviceName.serviceId, serviceName: serviceName.serviceName, price: Number(price) }, containers: containerTypes
-                                        }]);
-                                        setServiceName(null); setContainerTypes([]); setPrice(0);
-                                    } 
-                                    else {
-                                        enqueueSnackbar(t('fieldNeedTobeFilled'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
-                                    }
-                                }} 
-                            >
-                                {t('add')}
-                            </Button>
-                        </Grid>
-                        <Grid item xs={12}>
-                            {
-                                servicesSelection !== undefined && servicesSelection !== null && servicesSelection.length !== 0 ? 
-                                    <Grid container spacing={2}>
+                    {
+                        loadEdit === false ?
+                        <Grid container spacing={2}>
+                            <Grid item xs={12} md={8}>
+                                <Grid container spacing={2}>
+                                    <Grid item xs={12} md={6} mt={0.25}>
+                                        <InputLabel htmlFor="carrier" sx={inputLabelStyles}>{t('carrier')}</InputLabel>
+                                        <CompanySearch id="carrier" value={carrier} onChange={setCarrier} category={CategoryEnum.SUPPLIERS} callBack={() => console.log(carrier)} fullWidth />
+                                    </Grid>
+                                    <Grid item xs={12} md={6} mt={0.25}>
+                                        <InputLabel htmlFor="carrier-agent" sx={inputLabelStyles}>{t('carrierAgent')}</InputLabel>
+                                        <CompanySearch id="carrier-agent" value={carrierAgent} onChange={setCarrierAgent} category={CategoryEnum.SUPPLIERS} callBack={() => console.log(carrierAgent)} fullWidth />
+                                    </Grid>
+                                    <Grid item xs={12} md={6} mt={0.25}>
+                                        <InputLabel htmlFor="port-loading" sx={inputLabelStyles}>{t('departurePort')}</InputLabel>
                                         {
-                                            servicesSelection.map((item: any, index: number) => (
-                                                <Grid key={"serviceitem1-"+index} item xs={12} md={6}>
-                                                    <ListItem
-                                                        sx={{ border: "1px solid #e5e5e5" }}
-                                                        secondaryAction={
-                                                            <IconButton edge="end" onClick={() => {
-                                                                setServicesSelection((prevItems: any) => prevItems.filter((item: any, i: number) => i !== index));
-                                                            }}>
-                                                                <DeleteIcon />
-                                                            </IconButton>
-                                                        }
-                                                    >
-                                                        <ListItemText primary={
-                                                            t('serviceName')+" : "+item.service.serviceName+" | "+t('containers')+" : "+item.containers.map((elm: any) => elm.packageName).join(", ")+" | "+t('price')+" : "+item.service.price+" "+currency
-                                                        } />
-                                                    </ListItem>
-                                                </Grid>
-                                            ))
+                                            ports !== null ?
+                                            <Autocomplete
+                                                disablePortal
+                                                id="port-loading"
+                                                options={ports}
+                                                renderOption={(props, option, i) => {
+                                                    return (
+                                                        <li {...props} key={option.portId}>
+                                                            {option.portName+", "+option.country}
+                                                        </li>
+                                                    );
+                                                }}
+                                                getOptionLabel={(option: any) => { 
+                                                    if (option !== null && option !== undefined) {
+                                                        return option.portName+', '+option.country;
+                                                    }
+                                                    return ""; 
+                                                }}
+                                                value={portLoading}
+                                                sx={{ mt: 1 }}
+                                                renderInput={(params: any) => <TextField {...params} />}
+                                                onChange={(e: any, value: any) => { setPortLoading(value); }}
+                                                fullWidth
+                                            /> : <Skeleton />
                                         }
                                     </Grid>
-                                : null  
-                            }
-                        </Grid>
-                    </Grid>
+                                    <Grid item xs={12} md={6} mt={0.25}>
+                                        <InputLabel htmlFor="discharge-port" sx={inputLabelStyles}>{t('arrivalPort')}</InputLabel>
+                                        {
+                                            ports !== null ?
+                                            <Autocomplete
+                                                disablePortal
+                                                id="discharge-port"
+                                                options={ports}
+                                                renderOption={(props, option, i) => {
+                                                    return (
+                                                        <li {...props} key={option.portId}>
+                                                            {option.portName+", "+option.country}
+                                                        </li>
+                                                    );
+                                                }}
+                                                getOptionLabel={(option: any) => { 
+                                                    if (option !== null && option !== undefined) {
+                                                        return option.portName+', '+option.country;
+                                                    }
+                                                    return ""; 
+                                                }}
+                                                value={portDischarge}
+                                                sx={{ mt: 1 }}
+                                                renderInput={(params: any) => <TextField {...params} />}
+                                                onChange={(e: any, value: any) => { setPortDischarge(value); }}
+                                                fullWidth
+                                            /> : <Skeleton />
+                                        }
+                                    </Grid>
+                                </Grid>
+                            </Grid>
+                            <Grid item xs={12} md={4}>
+                                <Grid container spacing={2}>
+                                    <Grid item xs={12} md={12} mt={0}>
+                                        <InputLabel htmlFor="comment" sx={inputLabelStyles}>{t('comment')}</InputLabel>
+                                        <BootstrapInput id="comment" type="text" multiline rows={4.875} value={comment} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setComment(e.target.value)} fullWidth />
+                                    </Grid>
+                                </Grid>
+                            </Grid>
+                            <Grid item xs={12} md={3}>
+                                <InputLabel htmlFor="valid-until" sx={inputLabelStyles}>{t('validUntil')}</InputLabel>
+                                <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                    <DatePicker 
+                                        value={validUntil} 
+                                        onChange={(value: any) => { setValidUntil(value) }}
+                                        slotProps={{ textField: { id: "valid-until", fullWidth: true, sx: datetimeStyles }, inputAdornment: { sx: { position: "relative", right: "11.5px" } } }}
+                                    />
+                                </LocalizationProvider>
+                            </Grid>
+                            <Grid item xs={12} md={3}>
+                                <InputLabel htmlFor="currency" sx={inputLabelStyles}>{t('currency')}</InputLabel>
+                                <NativeSelect
+                                    id="currency"
+                                    value={currency}
+                                    onChange={(e: any) => { setCurrency(e.target.value) }}
+                                    input={<BootstrapInput />}
+                                    fullWidth
+                                >
+                                    {currencyOptions.map((elm: any, i: number) => (
+                                        <option key={"currencyElm-"+i} value={elm.value}>{elm.label}</option>
+                                    ))}
+                                </NativeSelect>
+                            </Grid>
+                            <Grid item xs={12} md={3}>
+                                <Grid item xs={12} md={12} mt={0}>
+                                    <InputLabel htmlFor="transit-time" sx={inputLabelStyles}>{t('transitTime')} ({t('inDays')})</InputLabel>
+                                    <BootstrapInput id="transit-time" type="number" value={transitTime} onChange={(e: any) => setTransitTime(e.target.value)} fullWidth />
+                                </Grid>
+                            </Grid>
+                            <Grid item xs={12} md={3}>
+                                <Grid item xs={12} md={12} mt={0}>
+                                    <InputLabel htmlFor="frequency" sx={inputLabelStyles}>{t('frequency')} ({t('everyxDays')})</InputLabel>
+                                    <BootstrapInput id="frequency" type="number" value={frequency} onChange={(e: any) => setFrequency(e.target.value)} fullWidth />
+                                </Grid>
+                            </Grid>
+                            <Grid item xs={12} md={12}>
+                                <Typography sx={{ fontSize: 18 }}><b>List of services</b></Typography>
+                            </Grid>
+                            <Grid item xs={12} md={4}>
+                                <InputLabel htmlFor="service-name" sx={inputLabelStyles}>{t('serviceName')}</InputLabel>
+                                {
+                                    services !== null ?
+                                    <Autocomplete
+                                        disablePortal
+                                        id="service-name"
+                                        options={services}
+                                        renderOption={(props, option, i) => {
+                                            return (
+                                                <li {...props} key={option.portId}>
+                                                    {option.serviceName}
+                                                </li>
+                                            );
+                                        }}
+                                        getOptionLabel={(option: any) => { 
+                                            if (option !== null && option !== undefined) {
+                                                return option.serviceName;
+                                            }
+                                            return ""; 
+                                        }}
+                                        value={serviceName}
+                                        sx={{ mt: 1 }}
+                                        renderInput={(params: any) => <TextField {...params} />}
+                                        onChange={(e: any, value: any) => { setServiceName(value); }}
+                                        fullWidth
+                                    /> : <Skeleton />
+                                }
+                            </Grid>
+                            <Grid item xs={12} md={4}>
+                                <InputLabel htmlFor="container-types" sx={inputLabelStyles}>{t('containers')}</InputLabel>
+                                {
+                                    containers !== null ? 
+                                    <Autocomplete
+                                        multiple
+                                        id="container-types"
+                                        options={containers}
+                                        getOptionLabel={(option: any) => option.packageName}
+                                        value={containerTypes}
+                                        onChange={(event: any, newValue: any) => {
+                                            setContainerTypes(newValue);
+                                        }}
+                                        renderInput={(params: any) => <TextField {...params} sx={{ mt: 1, textTransform: "lowercase" }} />}
+                                        fullWidth
+                                    /> : <Skeleton />
+                                }
+                            </Grid>
+                            <Grid item xs={12} md={2}>
+                                <InputLabel htmlFor="price-cs" sx={inputLabelStyles}>{t('price')}</InputLabel>
+                                <BootstrapInput id="price-cs" type="number" value={price} onChange={(e: any) => setPrice(e.target.value)} fullWidth />
+                            </Grid>
+                            <Grid item xs={12} md={2}>
+                                <Button
+                                    variant="contained" color="inherit" fullWidth sx={whiteButtonStyles} 
+                                    style={{ marginTop: "30px", height: "42px", float: "right" }} 
+                                    onClick={() => {
+                                        if (serviceName !== null && containerTypes !== null && price > 0) {
+                                            console.log(serviceName); console.log(containerTypes); console.log(price);
+                                            setServicesSelection((prevItems: any) => [...prevItems, { 
+                                                service: { serviceId: serviceName.serviceId, serviceName: serviceName.serviceName, price: Number(price) }, containers: containerTypes
+                                            }]);
+                                            setServiceName(null); setContainerTypes([]); setPrice(0);
+                                        } 
+                                        else {
+                                            enqueueSnackbar(t('fieldNeedTobeFilled'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                                        }
+                                    }} 
+                                >
+                                    {t('add')}
+                                </Button>
+                            </Grid>
+                            <Grid item xs={12}>
+                                {
+                                    servicesSelection !== undefined && servicesSelection !== null && servicesSelection.length !== 0 ? 
+                                        <Grid container spacing={2}>
+                                            {
+                                                servicesSelection.map((item: any, index: number) => (
+                                                    <Grid key={"serviceitem1-"+index} item xs={12} md={6}>
+                                                        <ListItem
+                                                            sx={{ border: "1px solid #e5e5e5" }}
+                                                            secondaryAction={
+                                                                <IconButton edge="end" onClick={() => {
+                                                                    setServicesSelection((prevItems: any) => prevItems.filter((item: any, i: number) => i !== index));
+                                                                }}>
+                                                                    <DeleteIcon />
+                                                                </IconButton>
+                                                            }
+                                                        >
+                                                            <ListItemText primary={
+                                                                t('serviceName')+" : "+item.service.serviceName+" | "+t('containers')+" : "+item.containers.map((elm: any) => elm.packageName).join(", ")+" | "+t('price')+" : "+item.service.price+" "+currency
+                                                            } />
+                                                        </ListItem>
+                                                    </Grid>
+                                                ))
+                                            }
+                                        </Grid>
+                                    : null  
+                                }
+                            </Grid>
+                        </Grid> : <Skeleton />
+                    }
                 </DialogContent>
                 <DialogActions>
                     <Button variant="contained" color={"primary"} onClick={() => { createSeafreight(); }} sx={{ mr: 1.5, textTransform: "none" }}>{t('validate')}</Button>

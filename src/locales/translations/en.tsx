@@ -309,5 +309,6 @@ export const en = {
   serviceName: "Service",
   containers: "Containers (sizes)",
   successCreated: "The element has been created with success",
-  price: "Price"
+  price: "Price",
+  haulages: "Haulages prices",
 };
