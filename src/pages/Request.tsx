@@ -1,15 +1,16 @@
-import { Alert, Autocomplete, Box, Button, Chip, DialogActions, DialogContent, FormControl, FormControlLabel, FormLabel, Grid, IconButton, InputLabel, ListItem, ListItemText, NativeSelect, Paper, Radio, RadioGroup, Skeleton, Step, StepLabel, Stepper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Typography } from '@mui/material';
+import { Alert, Autocomplete, Box, Button, Chip, DialogActions, DialogContent, FormControl, FormControlLabel, FormLabel, Grid, IconButton, InputLabel, ListItem, ListItemText, NativeSelect, Paper, Popover, Radio, RadioGroup, Skeleton, Step, StepLabel, Stepper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Typography } from '@mui/material';
 import { MuiTelInput } from 'mui-tel-input';
 import React, { useEffect, useState, useRef } from 'react';
 import { useParams } from 'react-router-dom';
-import '../../App.css';
-import AutocompleteSearch from '../shared/AutocompleteSearch';
-import { inputLabelStyles, BootstrapInput, BootstrapDialogTitle, BootstrapDialog, buttonCloseStyles, DarkTooltip, whiteButtonStyles, datetimeStyles, gridStyles } from '../../misc/styles';
+// import '../../App.css';
+import AutocompleteSearch from '../components/shared/AutocompleteSearch';
+import { inputLabelStyles, BootstrapInput, BootstrapDialogTitle, BootstrapDialog, buttonCloseStyles, DarkTooltip, whiteButtonStyles, datetimeStyles, gridStyles, HtmlTooltip } from '../utils/misc/styles';
 import { enqueueSnackbar, SnackbarProvider } from 'notistack';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { pricingRequest, protectedResources, transportRequest } from '../../authConfig';
-import { useAuthorizedBackendApi } from '../../api/api';
-import { BackendService } from '../../services/fetch';
+import HelpIcon from '@mui/icons-material/Help';
+import { pricingRequest, protectedResources, transportRequest } from '../config/authConfig';
+import { useAuthorizedBackendApi } from '../api/api';
+import { BackendService } from '../utils/services/fetch';
 import { MuiChipsInputChip } from 'mui-chips-input';
 import { DateTimePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
@@ -45,8 +46,12 @@ import {
 import { JSON as seaPorts } from 'sea-ports';
 // @ts-ignore
 
-import { DataGrid, GridColDef, GridEventListener, GridRenderCellParams, GridValueFormatterParams, GridValueGetterParams, GridRowSelectionModel } from '@mui/x-data-grid';
-import ClientSearch from '../shared/ClientSearch';
+import { DataGrid, GridColDef, GridRenderCellParams, GridValueFormatterParams, GridValueGetterParams, GridRowSelectionModel } from '@mui/x-data-grid';
+import ClientSearch from '../components/shared/ClientSearch';
+import RequestListNotes from '../components/editRequestPage/RequestListNotes';
+import RequestAddNote from '../components/editRequestPage/RequestAddNote';
+import RequestAskInformation from '../components/editRequestPage/RequestAskInformation';
+import RequestChangeStatus from '../components/editRequestPage/RequestChangeStatus';
 
 //let statusTypes = ["EnAttente", "Valider", "Rejeter"];
 // let cargoTypes = ["Container", "Conventional", "RollOnRollOff"];
@@ -208,7 +213,6 @@ function findClosestSeaPort(myPort: any, seaPorts: any) {
 function Request() {
     const [load, setLoad] = useState<boolean>(true);
     const [loadAssignees, setLoadAssignees] = useState<boolean>(true);
-    const [loadNotes, setLoadNotes] = useState<boolean>(true);
     const [loadResults, setLoadResults] = useState<boolean>(false);
     const [email, setEmail] = useState<string>("");
     const [status, setStatus] = useState<string | null>(null);
@@ -230,15 +234,16 @@ function Request() {
     const [modal3, setModal3] = useState<boolean>(false);
     const [modal4, setModal4] = useState<boolean>(false);
     const [modal5, setModal5] = useState<boolean>(false);
-    const [mailSubject, setMailSubject] = useState<string>("");
-    const [mailContent, setMailContent] = useState<string>("");
-    const [statusMessage, setStatusMessage] = useState<string>("");
-    const [generalNote, setGeneralNote] = useState<string>("");
-    const [selectedStatus, setSelectedStatus] = React.useState('EnAttente');
+    // const [mailSubject, setMailSubject] = useState<string>("");
+    // const [mailContent, setMailContent] = useState<string>("");
+    // const [statusMessage, setStatusMessage] = useState<string>("");
+    // const [generalNote, setGeneralNote] = useState<string>("");
+    // const [selectedStatus, setSelectedStatus] = React.useState('EnAttente');
     const [assignedManager, setAssignedManager] = useState<string>("");
     const [assignees, setAssignees] = useState<any>(null);
-    const [notes, setNotes] = useState<any>(null);
-    const [idUser, setIdUser] = useState<any>(null);
+    // const [loadNotes, setLoadNotes] = useState<boolean>(true);
+    // const [notes, setNotes] = useState<any>(null);
+    // const [idUser, setIdUser] = useState<any>(null);
 
     const [containerType, setContainerType] = useState<string>("20' Dry");
     const [quantity, setQuantity] = useState<number>(1);
@@ -308,26 +313,12 @@ function Request() {
     const steps = [t('searchSeafreight'), t('selectSeafreight'), t('searchHaulage'), t('selectHaulage'), t('selectMisc'), t('sendOffer')];
     // const steps = [t('searchHaulage'), t('selectHaulage'), t('searchSeafreight'), t('selectSeafreight'), t('selectMisc'), t('sendOffer')];
     const haulageTypes = [t('haulageType1'), t('haulageType2'), t('haulageType3'), t('haulageType4'), t('haulageType5')];
-    const statusTypes = [
-        { type: "EnAttente", label: t('labelEnAttente'), value: "En attente", description: t('descriptionEnAttente') }, 
-        { type: "Valider", label: t('labelValider'), value: "Validé", description: t('descriptionValider') }, 
-        { type: "Rejeter", label: t('labelRejeter'), value: "Rejeté", description: t('descriptionRejeter') }, 
-        { type: "EnCoursDeTraitement", label: t('labelEnCoursDeTraitement'), value: "En cours de traitement", description: t('descriptionEnCoursDeTraitement') }, 
-        { type: "EnTransit", label: t('labelEnTransit'), value: "En transit", description: t('descriptionEnTransit') }, 
-        { type: "EnDouane", label: t('labelEnDouane'), value: "En douane", description: t('descriptionEnDouane') }, 
-        { type: "LivraisonEnCours", label: t('labelLivraisonEnCours'), value: "Livraison en cours", description: t('descriptionLivraisonEnCours') }, 
-        { type: "Livre", label: t('labelLivre'), value: "Livré", description: t('descriptionLivre') }, 
-        { type: "Annule", label: t('labelAnnule'), value: "Annulé", description: t('descriptionAnnule') }, 
-        { type: "Retour", label: t('labelRetour'), value: "Retourné", description: t('descriptionRetour') }, 
-        { type: "Problème", label: t('labelProbleme'), value: "Problème", description: t('descriptionProbleme') }, 
-        { type: "EnAttenteDeFacturation", label: t('labelEnAttenteDeFacturation'), value: "En attente de facturation", description: t('descriptionEnAttenteDeFacturation') } 
-    ];
-
-   const columnsSeafreights: GridColDef[] = [
-        { field: 'carrierName', headerName: t('carrier'), minWidth: 125 },
-        { field: 'carrierAgentName', headerName: t('carrierAgent'), minWidth: 125 },
-        { field: 'departurePortName', headerName: t('departurePort'), minWidth: 125 },
-        { field: 'destinationPortName', headerName: t('destinationPort'), minWidth: 125 },
+    
+    const columnsSeafreights: GridColDef[] = [
+        { field: 'carrierName', headerName: t('carrier'), minWidth: 150 },
+        { field: 'carrierAgentName', headerName: t('carrierAgent'), minWidth: 150 },
+        // { field: 'departurePortName', headerName: t('departurePort'), minWidth: 125 },
+        // { field: 'destinationPortName', headerName: t('destinationPort'), minWidth: 125 },
         { field: 'frequency', headerName: t('frequency'), valueFormatter: (params: GridValueFormatterParams) => `${t('every')} ${params.value || ''} `+t('days'), minWidth: 100 },
         { field: 'transitTime', headerName: t('transitTime'), valueFormatter: (params: GridValueFormatterParams) => `${params.value || ''} `+t('days'), minWidth: 50 },
         { field: 'currency', headerName: t('prices'), renderCell: (params: GridRenderCellParams) => {
@@ -348,15 +339,43 @@ function Request() {
                 </Box>
             );
         }, minWidth: 100 },
+        { field: 'lastUpdated', headerName: t('lastUpdated'), renderCell: (params: GridRenderCellParams) => {
+            return (
+                <Box sx={{ my: 1, mr: 1 }}>
+                    <Chip label={(new Date(params.row.lastUpdated)).toLocaleDateString().slice(0,10)} color={(new Date()).getTime() - (new Date(params.row.lastUpdated)).getTime() > 0 ? "default" : "default"}></Chip>
+                </Box>
+            );
+        }, minWidth: 100 },
+        { field: 'comment', headerName: "Comment", renderCell: (params: GridRenderCellParams) => {
+            return (
+                <Box sx={{ my: 2 }}>
+                    <HtmlTooltip
+                        title={
+                            params.row.comment === "" || params.row.comment === null ? 
+                            <Box sx={{ p: 1 }}>
+                                <Typography color="inherit" sx={{ fontSize: 13 }}>{t('noComment')}</Typography>
+                            </Box> : 
+                            <Box sx={{ p: 1 }}>
+                                <Typography color="inherit" sx={{ fontSize: 13 }}>{params.row.comment}</Typography>
+                            </Box>
+                        }
+                    >
+                        <IconButton size="small">
+                            <HelpIcon fontSize="small" />
+                        </IconButton>
+                    </HtmlTooltip>
+                </Box>
+            );
+        }, minWidth: 100 },
     ];
     
     const columnsHaulages: GridColDef[] = [
         { field: 'haulierName', headerName: t('haulier'), minWidth: 150 },
-        { field: 'loadingPort', headerName: t('loadingPort'), renderCell: (params: GridRenderCellParams) => {
-            return (
-                <Box sx={{ my: 2 }}>{params.row.loadingPort}</Box>
-            );
-        }, minWidth: 150 },
+        // { field: 'loadingPort', headerName: t('loadingPort'), renderCell: (params: GridRenderCellParams) => {
+        //     return (
+        //         <Box sx={{ my: 2 }}>{params.row.loadingPort}</Box>
+        //     );
+        // }, minWidth: 150 },
         { field: 'unitTariff', headerName: t('unitTariff'), valueGetter: (params: GridValueGetterParams) => `${params.row.unitTariff || ''} ${t(params.row.currency)}`, minWidth: 150 },
         { field: 'freeTime', headerName: t('freeTime'), valueFormatter: (params: GridValueFormatterParams) => `${params.value || ''} ${t('hours')}`, minWidth: 100 },
         { field: 'overtimeTariff', headerName: t('overtimeTariff'), valueGetter: (params: GridValueGetterParams) => `${params.row.overtimeTariff || ''} ${t(params.row.currency)} / ${t('hour')}`, minWidth: 125 },
@@ -367,13 +386,41 @@ function Request() {
                     <Chip label={(new Date(params.row.validUntil)).toLocaleDateString().slice(0,10)} color={(new Date()).getTime() - (new Date(params.row.validUntil)).getTime() > 0 ? "warning" : "success"}></Chip>
                 </Box>
             );
-        }, minWidth: 150 },
+        }, minWidth: 100 },
+        { field: 'updated', headerName: t('lastUpdated'), renderCell: (params: GridRenderCellParams) => {
+            return (
+                <Box sx={{ my: 1, mr: 1 }}>
+                    <Chip label={(new Date(params.row.updated)).toLocaleDateString().slice(0,10)} color={(new Date()).getTime() - (new Date(params.row.updated)).getTime() > 0 ? "default" : "default"}></Chip>
+                </Box>
+            );
+        }, minWidth: 100 },
+        { field: 'comment', headerName: "Comment", renderCell: (params: GridRenderCellParams) => {
+            return (
+                <Box sx={{ my: 2 }}>
+                    <HtmlTooltip
+                        title={
+                            params.row.comment === "" || params.row.comment === null ? 
+                            <Box sx={{ p: 1 }}>
+                                <Typography color="inherit" sx={{ fontSize: 13 }}>{t('noComment')}</Typography>
+                            </Box> : 
+                            <Box sx={{ p: 1 }}>
+                                <Typography color="inherit" sx={{ fontSize: 13 }}>{params.row.comment}</Typography>
+                            </Box>
+                        }
+                    >
+                        <IconButton size="small">
+                            <HelpIcon fontSize="small" />
+                        </IconButton>
+                    </HtmlTooltip>
+                </Box>
+            );
+        }, minWidth: 100 },
     ];
     
     const columnsMiscs: GridColDef[] = [
-        { field: 'supplierName', headerName: t('supplier'), minWidth: 150 },
-        { field: 'departurePortName', headerName: t('departurePort'), valueFormatter: (params: GridValueFormatterParams) => `${portDeparture.portName || ''}`, minWidth: 175 },
-        { field: 'destinationPortName', headerName: t('destinationPort'), valueFormatter: (params: GridValueFormatterParams) => `${portDestination.portName || ''}`, minWidth: 175 },
+        { field: 'supplierName', headerName: t('supplier'), minWidth: 200 },
+        // { field: 'departurePortName', headerName: t('departurePort'), valueFormatter: (params: GridValueFormatterParams) => `${portDeparture.portName || ''}`, minWidth: 175 },
+        // { field: 'destinationPortName', headerName: t('destinationPort'), valueFormatter: (params: GridValueFormatterParams) => `${portDestination.portName || ''}`, minWidth: 175 },
         { field: 'currency', headerName: t('costPrices'), renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box sx={{ my: 1, mr: 1 }}>
@@ -398,6 +445,34 @@ function Request() {
                 </Box>
             );
         }, minWidth: 200 },
+        { field: 'updated', headerName: t('lastUpdated'), renderCell: (params: GridRenderCellParams) => {
+            return (
+                <Box sx={{ my: 1, mr: 1 }}>
+                    <Chip label={(new Date(params.row.updated)).toLocaleDateString().slice(0,10)} color={(new Date()).getTime() - (new Date(params.row.updated)).getTime() > 0 ? "default" : "default"}></Chip>
+                </Box>
+            );
+        }, minWidth: 100 },
+        { field: 'comment', headerName: "Comment", renderCell: (params: GridRenderCellParams) => {
+            return (
+                <Box sx={{ my: 2 }}>
+                    <HtmlTooltip
+                        title={
+                            params.row.comment === "" || params.row.comment === null ? 
+                            <Box sx={{ p: 1 }}>
+                                <Typography color="inherit" sx={{ fontSize: 13 }}>{t('noComment')}</Typography>
+                            </Box> : 
+                            <Box sx={{ p: 1 }}>
+                                <Typography color="inherit" sx={{ fontSize: 13 }}>{params.row.comment}</Typography>
+                            </Box>
+                        }
+                    >
+                        <IconButton size="small">
+                            <HelpIcon fontSize="small" />
+                        </IconButton>
+                    </HtmlTooltip>
+                </Box>
+            );
+        }, minWidth: 100 },
     ];
     
     const handleChangeHaulageType = (event: { target: { value: string } }) => {
@@ -413,10 +488,6 @@ function Request() {
         setAssignedManager(event.target.value);
     };
     
-    const handleChangeStatus = (event: React.ChangeEvent<HTMLInputElement>) => {
-        setSelectedStatus((event.target as HTMLInputElement).value);
-    };
-
     // Stepper functions
     const [activeStep, setActiveStep] = React.useState(0);
     const [skipped, setSkipped] = React.useState(new Set<number>());
@@ -772,110 +843,6 @@ function Request() {
         }
     }
 
-    const changeStatusRequest = async () => {
-        if(context) {
-            const body: any = {
-                newStatus: selectedStatus,
-                customMessage: statusMessage
-            };
-
-            const data = await (context as BackendService<any>).put(protectedResources.apiLisQuotes.endPoint+"/Request/"+id+"/changeStatus", body);
-            if (data?.status === 200) {
-                setModal2(false);
-                enqueueSnackbar(t('requestStatusUpdated'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
-            }
-            else {
-                enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
-            }
-        }
-    }
-
-    const askInformations = async () => {
-        if (mailContent !== "") {
-            if (context) {
-                var dataSent = { "content": mailContent, "requestQuoteId": id, "subject": mailSubject, "noteType": "InformationRequest", email: email, "idUser": idUser };
-                const response = await (context as BackendService<any>).post(protectedResources.apiLisQuotes.endPoint+"/RequestQuoteNotes", dataSent);
-                if (response !== null) {
-                    setModal(false);
-                    enqueueSnackbar(t('messageSuccessSent'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
-                }
-                else {
-                    enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
-                }
-            }
-        }
-        else {
-            enqueueSnackbar(t('contentEmpty'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
-        }
-    }
-
-    const addRequestNote = async () => {
-        if (generalNote !== "") {
-            if (context) {
-                var dataSent = { "content": generalNote, "requestQuoteId": id, "noteType": "General", "idUser": idUser };
-                const response = await (context as BackendService<any>).post(protectedResources.apiLisQuotes.endPoint+"/RequestQuoteNotes", dataSent);
-                if (response !== null) {
-                    setModal3(false);
-                    enqueueSnackbar(t('commentSuccessAdded'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
-                }
-                else {
-                    enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
-                }
-            }
-        }
-        else {
-            enqueueSnackbar(t('contentEmpty'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
-        }
-    }
-
-    const getNotes = async (idRequest: string|undefined) => {
-        if (context) {
-            setLoadNotes(true);
-            const response = await (context as BackendService<any>).getSingle(protectedResources.apiLisQuotes.endPoint+"/RequestQuoteNotes?requestQuoteId="+idRequest);
-            if (response !== null && response.code !== undefined) {
-                if (response.code === 200) {
-                    // console.log(response.data);
-                    setNotes(response.data);
-                    setLoadNotes(false);
-                }
-                else {
-                    setLoadNotes(false);
-                }
-            }
-        }
-    }
-    
-    const deleteNote = async (idNote: string) => {
-        if (context) {
-            const response = await (context as any).delete(protectedResources.apiLisQuotes.endPoint+"/RequestQuoteNotes/"+idNote);
-            if (response !== null && response.code !== undefined) {
-                if (response.code === 200) {
-                    enqueueSnackbar("The note has been deleted with success.", { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
-                    getNotes(id);
-                }
-                else {
-                    enqueueSnackbar("An error happened during this operation.", { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
-                }
-            }  
-        }
-    }
-
-    // const getPriceRequests = async () => {
-    //     if (containersSelection.map((elm: any) => elm.container).length !== 0 && portDestination !== null) {
-    //         // alert(containersSelected);
-    //         // console.log(containers.map((elm: any) => elm.packageName));
-    //         setLoadResults(true);
-    //         getSeaFreightPriceOffers();
-    //         getMiscellaneousPriceOffers();
-    //         if (loadingCity !== null && haulageType !== "") {
-    //             getHaulagePriceOffers();
-    //         }
-    //     }
-    //     else {
-    //         enqueueSnackbar(t('priceFieldsEmpty'), { variant: "warning", anchorOrigin: { horizontal: "right", vertical: "top"} });
-    //     }
-    // }
-    
     const getHaulagePriceOffers = async () => {
         if (context && account) {
             const token = await instance.acquireTokenSilent({
@@ -1022,33 +989,6 @@ function Request() {
             }  
         }
     }
-    
-    // const getCities = async () => {
-    //     if (context && account) {
-    //         const token = await instance.acquireTokenSilent({
-    //             scopes: transportRequest.scopes,
-    //             account: account
-    //         })
-    //         .then((response: AuthenticationResult) => {
-    //             return response.accessToken;
-    //         })
-    //         .catch(() => {
-    //             return instance.acquireTokenPopup({
-    //                 ...transportRequest,
-    //                 account: account
-    //                 }).then((response) => {
-    //                     return response.accessToken;
-    //                 });
-    //             }
-    //         );
-            
-    //         const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/City/Cities", token);
-    //         // console.log(response);
-    //         if (response !== null && response !== undefined) {
-    //             setCities(response);
-    //         }  
-    //     }
-    // }
     
     const getProducts = async (allPorts: any) => {
         if (context && account) {
@@ -1688,7 +1628,7 @@ function Request() {
                                                                         !loadResults ? 
                                                                         seafreights !== null && seafreights.length !== 0 ?
                                                                             <Box>
-                                                                                <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>{t('listSeaFreightsPricingOffers')}</Typography>
+                                                                                <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>{t('listSeaFreightsPricingOffers')+t('fromDotted')+portDeparture.portName+"-"+portDestination.portName} </Typography>
                                                                                 <DataGrid
                                                                                     rows={seafreights}
                                                                                     columns={columnsSeafreights}
@@ -1744,7 +1684,7 @@ function Request() {
                                                                         !loadResults ? 
                                                                         haulages !== null && haulages.length !== 0 ?
                                                                             <Box>
-                                                                                <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>{t('listHaulagesPricingOffers')}</Typography>
+                                                                                <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>{t('listHaulagesPricingOffers')+t('fromDotted')+loadingCity.city}</Typography>
                                                                                 <DataGrid
                                                                                     rows={haulages}
                                                                                     columns={columnsHaulages}
@@ -1774,7 +1714,7 @@ function Request() {
                                                                         !loadResults ? 
                                                                         miscs !== null && miscs.length !== 0 ?
                                                                             <Box>
-                                                                                <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>{t('listMiscPricingOffers')}</Typography>
+                                                                                <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>{t('listMiscPricingOffers')+t('fromDotted')+portDeparture.portName+"-"+portDestination.portName}</Typography>
                                                                                 <DataGrid
                                                                                     rows={miscs}
                                                                                     columns={columnsMiscs}
@@ -1959,7 +1899,7 @@ function Request() {
                                     <Button variant="contained" color="primary" sx={{ mt: 2, mr: 2, textTransform: "none" }} onClick={editRequest} >{t('editRequest')}</Button>
                                     <Button variant="contained" color="inherit" sx={whiteButtonStyles} onClick={() => { setModal2(true); }} >{t('changeStatus')}</Button>
                                     <Button variant="contained" color="inherit" sx={whiteButtonStyles} style={{ float: "right" }} onClick={() => { setModal3(true); }} >{t('addCommentNote')}</Button>
-                                    <Button variant="contained" color="inherit" sx={whiteButtonStyles} style={{ float: "right", marginRight: "10px" }} onClick={() => { setModal4(true); getNotes(id); }} >{t('listNotes')}</Button>
+                                    <Button variant="contained" color="inherit" sx={whiteButtonStyles} style={{ float: "right", marginRight: "10px" }} onClick={() => { setModal4(true); /*getNotes(id);*/ }} >{t('listNotes')}</Button>
                                 </Grid>
                         </Grid> : <Skeleton sx={{ mx: 5, mt: 3 }} />
                     }
@@ -1974,28 +1914,7 @@ function Request() {
                 maxWidth="md"
                 fullWidth
             >
-                <BootstrapDialogTitle id="custom-dialog-title" onClose={() => setModal(false)}>
-                    <b>{t('askInformation')}</b>
-                </BootstrapDialogTitle>
-                <DialogContent dividers>
-                    <Typography variant="subtitle1" gutterBottom px={2}>
-                        {t('pleaseFillForm')}
-                    </Typography>
-                    <Grid container spacing={2} mt={1} px={2}>
-                        <Grid item xs={12}>
-                            <InputLabel htmlFor="mail-subject" sx={inputLabelStyles}>{t('subject')}</InputLabel>
-                            <BootstrapInput id="mail-subject" type="text" inputProps={{ min: 0, max: 100 }} value={mailSubject} onChange={(e: any) => {setMailSubject(e.target.value)}} fullWidth />
-                        </Grid>
-                        <Grid item xs={12} mt={1}>
-                            <InputLabel htmlFor="mail-content" sx={inputLabelStyles}>{t('content')}</InputLabel>
-                            <BootstrapInput id="mail-content" type="text" multiline rows={4} value={mailContent} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setMailContent(e.target.value)} fullWidth />
-                        </Grid>
-                    </Grid>
-                </DialogContent>
-                <DialogActions>
-                    <Button variant="contained" color={!load ? "primary" : "info"} className="mr-3" onClick={askInformations} disabled={load === true} sx={{ textTransform: "none" }}>{t('send')}</Button>
-                    <Button variant="contained" onClick={() => setModal(false)} sx={buttonCloseStyles}>{t('close')}</Button>
-                </DialogActions>
+                <RequestAskInformation id={id} userId={null} email={email} closeModal={() => setModal(false)} />
             </BootstrapDialog>
             
             {/* Change request status */}
@@ -2006,40 +1925,7 @@ function Request() {
                 maxWidth="md"
                 fullWidth
             >
-                <BootstrapDialogTitle id="custom-dialog-title2" onClose={() => setModal2(false)}>
-                    <b>{t('changeRequestStatus')}</b>
-                </BootstrapDialogTitle>
-                <DialogContent dividers>
-                    <Typography variant="subtitle1" gutterBottom px={2}>
-                        {t('pleaseChooseOptions')}
-                    </Typography>
-                    <Grid container spacing={2} mt={1} px={2}>
-                        <Grid item xs={12}>
-                            <FormControl>
-                                <FormLabel id="demo-controlled-radio-buttons-group" sx={{ color: "#333" }}>{t('statusList')}</FormLabel>
-                                <RadioGroup
-                                    aria-labelledby="demo-controlled-radio-buttons-group"
-                                    name="controlled-radio-buttons-group"
-                                    row
-                                    value={selectedStatus}
-                                    onChange={handleChangeStatus}
-                                >
-                                    {
-                                        statusTypes.map((elm) => <DarkTooltip key={"StatusType-"+elm.type} title={elm.description} placement="right" arrow><FormControlLabel value={elm.type} control={<Radio />} label={elm.label} /></DarkTooltip>)
-                                    }
-                                </RadioGroup>
-                            </FormControl>
-                        </Grid>
-                        <Grid item xs={12} mt={1}>
-                            <InputLabel htmlFor="status-message" sx={inputLabelStyles}>{t('statusMessage')}</InputLabel>
-                            <BootstrapInput id="status-message" type="text" multiline rows={4} value={statusMessage} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setStatusMessage(e.target.value)} fullWidth />
-                        </Grid>
-                    </Grid>
-                </DialogContent>
-                <DialogActions>
-                    <Button variant="contained" color={!load ? "primary" : "info"} className="mr-3" onClick={changeStatusRequest} disabled={load === true} sx={{ textTransform: "none" }}>{t('validate')}</Button>
-                    <Button variant="contained" onClick={() => setModal2(false)} sx={buttonCloseStyles}>{t('close')}</Button>
-                </DialogActions>
+                <RequestChangeStatus id={id} closeModal={() => setModal2(false)} />
             </BootstrapDialog>
             
             {/* Add a comment/note */}
@@ -2050,24 +1936,7 @@ function Request() {
                 maxWidth="md"
                 fullWidth
             >
-                <BootstrapDialogTitle id="custom-dialog-title3" onClose={() => setModal3(false)}>
-                    <b>{t('addCommentNote')}</b>
-                </BootstrapDialogTitle>
-                <DialogContent dividers>
-                    <Typography variant="subtitle1" gutterBottom px={2}>
-                        {t('pleaseFillAddNote')}
-                    </Typography>
-                    <Grid container spacing={2} mt={1} px={2}>
-                        <Grid item xs={12} mt={1}>
-                            <InputLabel htmlFor="general-note" sx={inputLabelStyles}>{t('generalNote')}</InputLabel>
-                            <BootstrapInput id="general-note" type="text" multiline rows={4} value={generalNote} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setGeneralNote(e.target.value)} fullWidth />
-                        </Grid>
-                    </Grid>
-                </DialogContent>
-                <DialogActions>
-                    <Button variant="contained" color={!load ? "primary" : "info"} className="mr-3" onClick={addRequestNote} disabled={load === true} sx={{ textTransform: "none" }}>{t('validate')}</Button>
-                    <Button variant="contained" onClick={() => setModal3(false)} sx={buttonCloseStyles}>{t('close')}</Button>
-                </DialogActions>
+                <RequestAddNote id={id} userId={null} closeModal={() => setModal3(false)} />
             </BootstrapDialog>
 
             {/* List of notes */}
@@ -2078,61 +1947,7 @@ function Request() {
                 maxWidth="lg"
                 fullWidth
             >
-                <BootstrapDialogTitle id="custom-dialog-title4" onClose={() => setModal4(false)}>
-                    <b>{t('listNotesRequest')} {id}</b>
-                </BootstrapDialogTitle>
-                <DialogContent dividers>
-                    <Grid container spacing={2} mt={1} px={2}>
-                        <Grid item xs={12}>
-                            {
-                                !loadNotes && notes !== null ?
-                                <TableContainer component={Paper}>
-                                    <Table sx={{ minWidth: 650 }} aria-label="simple table" size="small">
-                                        <TableHead>
-                                            <TableRow>
-                                                <TableCell align="left" sx={{ fontSize: 16, fontWeight: "bolder" }}>{t('id')}</TableCell>
-                                                <TableCell align="left" sx={{ fontSize: 16, fontWeight: "bolder" }}>{t('content')}</TableCell>
-                                                <TableCell align="left" sx={{ fontSize: 16, fontWeight: "bolder" }}>{t('date')}</TableCell>
-                                                {/* <TableCell align="left" sx={{ fontSize: 16, fontWeight: "bolder" }}>Request id</TableCell> */}
-                                                <TableCell align="left" sx={{ fontSize: 16, fontWeight: "bolder" }}>{t('noteType')}</TableCell>
-                                                <TableCell align="left"><b></b></TableCell>
-                                            </TableRow>
-                                        </TableHead>
-                                        <TableBody>
-                                            {
-                                                notes.reverse().map((row: any, i: number) => (
-                                                    <TableRow key={"requestNote-"+row.id} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-                                                        <TableCell align="left">{row.id}</TableCell>
-                                                        <TableCell align="left">{row.content}</TableCell>
-                                                        <TableCell align="left">{(new Date(row.createdAt)).toLocaleString()}</TableCell>
-                                                        {/* <TableCell align="left">{row.requestQuoteId}</TableCell> */}
-                                                        <TableCell align="left">
-                                                            <Chip label={row.noteType} color={row.noteType === "General" ? "primary" : "warning" } />
-                                                        </TableCell>
-                                                        <TableCell align="left">
-                                                            <DarkTooltip title={t('deleteNote')} placement="right" arrow>
-                                                                <IconButton 
-                                                                    size="medium" 
-                                                                    onClick={() => { deleteNote(row.id); }}
-                                                                    disabled={row.noteType !== "General"}
-                                                                >
-                                                                    <DeleteIcon />
-                                                                </IconButton>
-                                                            </DarkTooltip>
-                                                        </TableCell>
-                                                    </TableRow>
-                                                ))
-                                            }
-                                        </TableBody>
-                                    </Table>
-                                </TableContainer> : <Skeleton sx={{ mt: 3 }} />
-                            }
-                        </Grid>
-                    </Grid>
-                </DialogContent>
-                <DialogActions>
-                    <Button variant="contained" onClick={() => setModal4(false)} sx={buttonCloseStyles}>{t('close')}</Button>
-                </DialogActions>
+                <RequestListNotes id={id} closeModal={() => setModal4(false)} />
             </BootstrapDialog>
 
             {/* Price offer  */}

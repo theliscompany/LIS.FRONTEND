@@ -1,5 +1,5 @@
 import { Box, Grid } from '@mui/material';
-import '../../App.css';
+// import '../../App.css';
 import { useTranslation } from 'react-i18next';
 
 function Privacy() {

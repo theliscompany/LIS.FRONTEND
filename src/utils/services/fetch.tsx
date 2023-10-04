@@ -1,5 +1,5 @@
 import { AccountInfo, AuthenticationResult, IPublicClientApplication } from '@azure/msal-browser';
-import { loginRequest } from '../authConfig';
+import { loginRequest } from '../../config/authConfig';
     
 export const GetToken = (instance: IPublicClientApplication, account: AccountInfo): Promise<AuthenticationResult> => {    
     return instance.acquireTokenSilent({

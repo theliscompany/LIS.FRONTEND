@@ -1,9 +1,9 @@
 import { Alert, Box, Button, Chip, Divider, Grid, List, ListItem, ListItemText, Typography } from '@mui/material';
 import Skeleton from '@mui/material/Skeleton';
 import { useEffect, useState } from 'react';
-import '../../App.css';
-import { protectedResources } from '../../authConfig';
-import { BootstrapInput } from '../../misc/styles';
+// import '../../App.css';
+import { protectedResources } from '../config/authConfig';
+import { BootstrapInput } from '../utils/misc/styles';
 import { useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
@@ -104,19 +104,6 @@ function Tracking() {
                                     <ListItemText primary={t('requestDate')} secondary={(new Date(trackingData.requestQuoteData.createdAt)).toLocaleString()} />
                                 </ListItem>
                             </List>
-                            {/* <Typography sx={{ mt: 3 }}>You have received the following messages : </Typography>
-                            <List sx={{ my: 3, border: "1px #e2e2e2 solid" }} dense>
-                                {
-                                    trackingData.notes.map((elm: any) => {
-                                        return <>
-                                            <ListItem>
-                                                <ListItemText primary={"Date : " + (new Date(elm.createdAt)).toLocaleString()} secondary={elm.content} />
-                                            </ListItem>
-                                            <Divider />
-                                        </>;
-                                    })
-                                }
-                            </List> */}
                         </Box> 
                         : <Typography sx={{ mt: 3 }}>{t('trackingCodeNotDefined')}</Typography>
                     }
