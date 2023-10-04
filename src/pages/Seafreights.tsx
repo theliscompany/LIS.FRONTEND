@@ -250,33 +250,33 @@ function Seafreights() {
 
     const createSeafreight = async () => {
         if (context) {
-            console.log(servicesSelection);
-            // var dataSent = {
-            //     // "seaFreightId": "string",
-            //     "departurePortId": portLoading.portId,
-            //     "destinationPortId": portDischarge.portId,
-            //     "departurePortName": portLoading.portName,
-            //     "destinationPortName": portDischarge.portName,
-            //     "carrierId": carrier.contactId,
-            //     "carrierName": carrier.contactName,
-            //     "carrierAgentId": carrierAgent.contactId,
-            //     "carrierAgentName": carrierAgent.contactName,
-            //     "currency": currency,
-            //     "validUntil": validUntil?.toISOString(),
-            //     "transitTime": transitTime,
-            //     "frequency": frequency,
-            //     "comment": comment,
-            //     "services": servicesSelection
-            // };
-            // const response = await (context as BackendService<any>).postBasic(protectedResources.apiLisPricing.endPoint+"/SeaFreight/SeaFreight", dataSent);
-            // if (response !== null && response !== undefined) {
-            //     setModal2(false);
-            //     enqueueSnackbar(t('successCreated'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
-            //     getSeafreights();
-            // }
-            // else {
-            //     enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
-            // }
+            // console.log(servicesSelection);
+            var dataSent = {
+                // "seaFreightId": "string",
+                "departurePortId": portLoading.portId,
+                "destinationPortId": portDischarge.portId,
+                "departurePortName": portLoading.portName,
+                "destinationPortName": portDischarge.portName,
+                "carrierId": carrier.contactId,
+                "carrierName": carrier.contactName,
+                "carrierAgentId": carrierAgent.contactId,
+                "carrierAgentName": carrierAgent.contactName,
+                "currency": currency,
+                "validUntil": validUntil?.toISOString(),
+                "transitTime": transitTime,
+                "frequency": frequency,
+                "comment": comment,
+                "services": servicesSelection
+            };
+            const response = await (context as BackendService<any>).postBasic(protectedResources.apiLisPricing.endPoint+"/SeaFreight/SeaFreight", dataSent);
+            if (response !== null && response !== undefined) {
+                setModal2(false);
+                enqueueSnackbar(t('successCreated'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                getSeafreights();
+            }
+            else {
+                enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+            }
         }
     }
 
@@ -424,7 +424,7 @@ function Seafreights() {
                 onClose={() => setModal(false)}
                 aria-labelledby="custom-dialog-title"
                 open={modal}
-                maxWidth="md"
+                maxWidth="sm"
                 fullWidth
             >
                 <BootstrapDialogTitle id="custom-dialog-title" onClose={() => setModal(false)}>
@@ -432,7 +432,7 @@ function Seafreights() {
                 </BootstrapDialogTitle>
                 <DialogContent dividers>{t('areYouSureDeleteRow')}</DialogContent>
                 <DialogActions>
-                    <Button variant="contained" color={"primary"} onClick={() => { deleteSeafreightPrice(currentId); }} sx={{ mr: 3, textTransform: "none" }}>{t('accept')}</Button>
+                    <Button variant="contained" color={"primary"} onClick={() => { deleteSeafreightPrice(currentId); }} sx={{ mr: 1.5, textTransform: "none" }}>{t('accept')}</Button>
                     <Button variant="contained" onClick={() => setModal(false)} sx={buttonCloseStyles}>{t('close')}</Button>
                 </DialogActions>
             </BootstrapDialog>
@@ -667,7 +667,7 @@ function Seafreights() {
                     </Grid>
                 </DialogContent>
                 <DialogActions>
-                    <Button variant="contained" color={"primary"} onClick={() => { createSeafreight(); }} sx={{ mr: 3, textTransform: "none" }}>{t('validate')}</Button>
+                    <Button variant="contained" color={"primary"} onClick={() => { createSeafreight(); }} sx={{ mr: 1.5, textTransform: "none" }}>{t('validate')}</Button>
                     <Button variant="contained" onClick={() => setModal2(false)} sx={buttonCloseStyles}>{t('close')}</Button>
                 </DialogActions>
             </BootstrapDialog>
