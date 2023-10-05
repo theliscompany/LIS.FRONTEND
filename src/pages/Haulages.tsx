@@ -20,6 +20,7 @@ import { AuthenticationResult } from '@azure/msal-browser';
 import { useMsal, useAccount } from '@azure/msal-react';
 import { CategoryEnum } from '../utils/constants';
 import AutocompleteSearch from '../components/shared/AutocompleteSearch';
+import { MailData } from '../utils/models/models';
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -105,11 +106,11 @@ function Haulages() {
     
     const columnsHaulages: GridColDef[] = [
         { field: 'haulierName', headerName: t('haulier'), minWidth: 150 },
-        { field: 'loadingPort', headerName: t('loadingPort'), renderCell: (params: GridRenderCellParams) => {
-            return (
-                <Box sx={{ my: 2 }}>{params.row.loadingPort}</Box>
-            );
-        }, minWidth: 150 },
+        // { field: 'loadingPort', headerName: t('loadingPort'), renderCell: (params: GridRenderCellParams) => {
+        //     return (
+        //         <Box sx={{ my: 2 }}>{params.row.loadingPort}</Box>
+        //     );
+        // }, minWidth: 150 },
         { field: 'unitTariff', headerName: t('unitTariff'), valueGetter: (params: GridValueGetterParams) => `${params.row.unitTariff || ''} ${t(params.row.currency)}`, minWidth: 150 },
         { field: 'freeTime', headerName: t('freeTime'), valueFormatter: (params: GridValueFormatterParams) => `${params.value || ''} ${t('hours')}`, minWidth: 100 },
         { field: 'overtimeTariff', headerName: t('overtimeTariff'), valueGetter: (params: GridValueGetterParams) => `${params.row.overtimeTariff || ''} ${t(params.row.currency)} / ${t('hour')}`, minWidth: 125 },
@@ -210,7 +211,7 @@ function Haulages() {
                 });
             });
 
-            const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisPricing.endPoint+"/Haulage/GetHaulages", token);
+            const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisPricing.endPoint+"/Haulage/Haulages", token);
             if (response !== null && response !== undefined) {
                 setHaulages(response);
                 setLoad(false);
@@ -220,6 +221,22 @@ function Haulages() {
             }
             console.log(response);
         }
+    }
+    
+    const resetForm =async () => {
+        setHaulier(null);
+        setLoadingCity(null);
+        setLoadingPort(null);
+        setCurrency("EUR");
+        setValidUntil(null);
+        setFreeTime(0);
+        setMultiStop(0);
+        setUnitTariff(0);
+        setOvertimeTariff(0);
+        setHaulageType("On trailer, direct loading");
+        setEmptyPickupDepot("");
+        setComment("");
+        setContainerTypes([]);
     }
     
     const getHaulage = async (id: string) => {
@@ -242,8 +259,8 @@ function Haulages() {
             const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisPricing.endPoint+"/Haulage/Haulage?offerId="+id, token);
             if (response !== null && response !== undefined) {
                 setHaulier({contactId: response.haulierId, contactName: response.haulierName});
-                setLoadingCity(response.loadingCity);
-                setLoadingPort(ports.find((elm: any) => elm.portId === response.destinationPortId));
+                setLoadingCity({city: response.loadingCity});
+                setLoadingPort(ports.find((elm: any) => elm.portId === response.loadingPortId));
                 setCurrency(response.currency);
                 setValidUntil(dayjs(response.validUntil));
                 setFreeTime(response.freeTime);
@@ -312,7 +329,7 @@ function Haulages() {
             var dataSent = null;
             if (currentEditId !== "") {
                 dataSent = {
-                    "id": currentEditId,
+                    "offerId": currentEditId,
                     "haulierId": haulier.contactId,
                     "haulierName": haulier.contactName,
                     "currency": currency,
@@ -322,7 +339,7 @@ function Haulages() {
                     "freeTime": freeTime,
                     "multiStop": multiStop,
                     "overtimeTariff": overtimeTariff,
-                    "unitTariff": unitTariff,
+                    "unitTariff": Number(unitTariff),
                     "haulageType": haulageType,
                     "emptyPickupDepot": emptyPickupDepot,
                     "comment": comment,
@@ -342,7 +359,7 @@ function Haulages() {
                     "freeTime": freeTime,
                     "multiStop": multiStop,
                     "overtimeTariff": overtimeTariff,
-                    "unitTariff": unitTariff,
+                    "unitTariff": Number(unitTariff),
                     "haulageType": haulageType,
                     "emptyPickupDepot": emptyPickupDepot,
                     "comment": comment,
@@ -384,7 +401,7 @@ function Haulages() {
                 <Typography variant="h5" sx={{mt: {xs: 4, md: 1.5, lg: 1.5 }}} mx={5}><b>{t('listHaulages')}</b></Typography>
                 <Grid container spacing={2} mt={0} px={5}>
                     <Grid item xs={12}>
-                        <Button variant="contained" sx={actionButtonStyles} onClick={() => { setCurrentEditId(""); setModal2(true); }}>
+                        <Button variant="contained" sx={actionButtonStyles} onClick={() => { setCurrentEditId(""); resetForm(); setModal2(true); }}>
                             New haulage price <AddCircleOutlinedIcon sx={{ ml: 0.5, pb: 0.25, justifyContent: "center", alignItems: "center" }} fontSize="small" />
                         </Button>
                     </Grid>

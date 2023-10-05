@@ -207,6 +207,19 @@ function Seafreights() {
         }
     }
     
+    const resetForm =async () => {
+        setCarrier(null);
+        setCarrierAgent(null);
+        setPortLoading(null);
+        setPortDischarge(null);
+        setCurrency("EUR");
+        setValidUntil(null);
+        setTransitTime(0);
+        setFrequency(0);
+        setComment("");
+        setServicesSelection([]);
+    }
+    
     const getSeafreight = async (id: string) => {
         setLoadEdit(true)
         if (context) {
@@ -266,7 +279,8 @@ function Seafreights() {
                     "transitTime": transitTime,
                     "frequency": frequency,
                     "comment": comment,
-                    "services": servicesSelection
+                    "services": servicesSelection,
+                    "updated": (new Date()).toISOString()
                 };    
             }
             else {
@@ -285,7 +299,8 @@ function Seafreights() {
                     "transitTime": transitTime,
                     "frequency": frequency,
                     "comment": comment,
-                    "services": servicesSelection
+                    "services": servicesSelection,
+                    "updated": (new Date()).toISOString()
                 };    
             }
             const response = await (context as BackendService<any>).postBasic(protectedResources.apiLisPricing.endPoint+"/SeaFreight/SeaFreight", dataSent);
@@ -322,7 +337,7 @@ function Seafreights() {
                 <Typography variant="h5" sx={{mt: {xs: 4, md: 1.5, lg: 1.5 }}} mx={5}><b>{t('listSeafreights')}</b></Typography>
                 <Grid container spacing={2} mt={0} px={5}>
                     <Grid item xs={12}>
-                        <Button variant="contained" sx={actionButtonStyles} onClick={() => { setCurrentEditId(""); setModal2(true); }}>
+                        <Button variant="contained" sx={actionButtonStyles} onClick={() => { setCurrentEditId(""); resetForm(); setModal2(true); }}>
                             New seafreight price <AddCircleOutlinedIcon sx={{ ml: 0.5, pb: 0.25, justifyContent: "center", alignItems: "center" }} fontSize="small" />
                         </Button>
                     </Grid>

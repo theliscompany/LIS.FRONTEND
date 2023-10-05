@@ -52,6 +52,7 @@ import RequestListNotes from '../components/editRequestPage/RequestListNotes';
 import RequestAddNote from '../components/editRequestPage/RequestAddNote';
 import RequestAskInformation from '../components/editRequestPage/RequestAskInformation';
 import RequestChangeStatus from '../components/editRequestPage/RequestChangeStatus';
+import { MailData } from '../utils/models/models';
 
 //let statusTypes = ["EnAttente", "Valider", "Rejeter"];
 // let cargoTypes = ["Container", "Conventional", "RollOnRollOff"];
@@ -326,7 +327,7 @@ function Request() {
         { field: 'carrierAgentName', headerName: t('carrierAgent'), minWidth: 150 },
         // { field: 'departurePortName', headerName: t('departurePort'), minWidth: 125 },
         // { field: 'destinationPortName', headerName: t('destinationPort'), minWidth: 125 },
-        { field: 'frequency', headerName: t('frequency'), valueFormatter: (params: GridValueFormatterParams) => `${t('every')} ${params.value || ''} `+t('days'), minWidth: 100 },
+        { field: 'frequency', headerName: t('frequency'), valueFormatter: (params: GridValueFormatterParams) => `${t('every')} ${params.value || ''} `+t('days'), minWidth: 125 },
         { field: 'transitTime', headerName: t('transitTime'), valueFormatter: (params: GridValueFormatterParams) => `${params.value || ''} `+t('days'), minWidth: 50 },
         { field: 'currency', headerName: t('prices'), renderCell: (params: GridRenderCellParams) => {
             return (
@@ -338,7 +339,7 @@ function Request() {
                     <Box sx={{ my: 1 }} hidden={!getPackageNamesByIds(containersSelected, containers).includes("40' HcRf")}>{params.row.price40hcrf !== 0 ? "40' HcRf : "+params.row.price40hcrf+" "+t(params.row.currency) : "40' HcRf : N/A"}</Box>
                 </Box>
             );
-        }, minWidth: 125 },
+        }, minWidth: 150 },
         { field: 'validUntil', headerName: t('validUntil'), renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box sx={{ my: 1, mr: 1 }}>
@@ -1122,6 +1123,31 @@ function Request() {
                 if (response !== null) {
                     setModal5(false);
                     enqueueSnackbar(t('offerSuccessSent'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
+
+
+                    var footer = `
+                    <body style="font-family: Verdana, sans-serif; font-size: 14px; color: #333;">
+                        <div style="background-color: #f2f2f2; padding: 20px;">
+                            <h1 style="color: #000; margin-bottom: 20px;">New request for quote</h1>
+                            <p style="margin-bottom: 20px;">You have received a new request for quote in LIS Quotes.</p>
+                            <a href="https://lisquotes-ui.azurewebsites.net/login" style="display: inline-block; background-color: #008089; color: #fff; padding: 10px 20px; text-decoration: none;">Login to LIS Quotes</a>
+                            <p style="margin-top: 20px;">Please, click the button up to login to LIS Quotes and manage this quote.</p>
+                            <div style="font-family: Verdana; padding-top: 60px;">
+                                <div><a target="_blank" href="www.omnifreight.eu">www.omnifreight.eu</a></div>
+                                <div style="padding-bottom: 10px;"><a target="_blank" href="http://www.facebook.com/omnifreight">http://www.facebook.com/omnifreight</a></div>
+                                <div>Italiëlei 211</div>
+                                <div>2000 Antwerpen</div>
+                                <div>Belgium</div>
+                                <div>E-mail: transport@omnifreight.eu</div>
+                                <div>Tel +32.3.295.38.82</div>
+                                <div>Fax +32.3.295.38.77</div>
+                                <div>Whatsapp +32.494.40.24.25</div>
+                                <img src="http://www.omnifreight.eu/Images/omnifreight_logo.jpg" style="max-width: 200px;">
+                            </div>
+                        </div>
+                    </body>
+                    `;
+                    postEmail("cyrille.penaye@omnifreight.eu", email, "Nouvelle offre de devis", rteRef.current?.editor?.getHTML()+footer);
                 }
                 else {
                     enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
@@ -1147,6 +1173,18 @@ function Request() {
             const closest = findClosestSeaPort(value, ports);
             setPortDestination(closest);
             setPorts2(sortByCloseness(value, ports).slice(0, 15));
+        }
+    }
+
+    const postEmail = async(from: string, to: string, subject: string, htmlContent: string) => {
+        const body: MailData = { from: from, to: to, subject: subject, htmlContent: htmlContent };
+        const data = await (context as BackendService<any>).postForm(protectedResources.apiLisQuotes.endPoint+"/Email", body);
+        console.log(data);
+        if (data?.status === 200) {
+            enqueueSnackbar(t('messageSuccessSent'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
+        }
+        else {
+            enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
         }
     }
 

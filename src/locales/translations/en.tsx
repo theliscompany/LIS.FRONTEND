@@ -307,7 +307,7 @@ export const en = {
   inDays: "in days",
   everyxDays: "every x days",
   serviceName: "Service",
-  containers: "Containers (sizes)",
+  containers: "Containers",
   successCreated: "The element has been created with success",
   price: "Price",
   haulages: "Haulages prices",
@@ -315,5 +315,17 @@ export const en = {
   emptyPickupDepot: "Empty pickup depot",
   unitTariff2: "Unit tariff",
   freeTime2: "Free time at loading place (in hours)",
-  miscellaneous: "Miscellaneous prices"
+  miscellaneous: "Miscellaneous prices",
+  labelEnAttente: "Waiting",
+  labelValider: "Validated",
+  labelRejeter: "Rejected",
+  labelEnCoursDeTraitement: "Processing",
+  labelEnTransit: "In transit",
+  labelEnDouane: "In customs",
+  labelLivraisonEnCours: "Delivery in progress",
+  labelLivre: "Delivered",
+  labelAnnule: "Cancelled",
+  labelRetour: "Returned",
+  labelProbleme: "Problem",
+  labelEnAttenteDeFacturation: "Waiting for billing"
 };

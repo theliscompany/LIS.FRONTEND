@@ -72,7 +72,7 @@ function RequestChangeStatus(props: any) {
                                 onChange={handleChangeStatus}
                             >
                                 {
-                                    statusTypes.map((elm: any) => <DarkTooltip key={"StatusType-"+elm.type} title={elm.description} placement="right" arrow><FormControlLabel value={elm.type} control={<Radio />} label={elm.label} /></DarkTooltip>)
+                                    statusTypes.map((elm: any) => <DarkTooltip key={"StatusType-"+elm.type} title={elm.label} placement="right" arrow><FormControlLabel value={elm.type} control={<Radio />} label={elm.label} /></DarkTooltip>)
                                 }
                             </RadioGroup>
                         </FormControl>
