@@ -311,4 +311,9 @@ export const en = {
   successCreated: "The element has been created with success",
   price: "Price",
   haulages: "Haulages prices",
+  listHaulages: "List of haulages prices",
+  emptyPickupDepot: "Empty pickup depot",
+  unitTariff2: "Unit tariff",
+  freeTime2: "Free time at loading place (in hours)",
+  miscellaneous: "Miscellaneous prices"
 };

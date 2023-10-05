@@ -8,9 +8,9 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { SnackbarProvider, enqueueSnackbar } from 'notistack';
 import { useTranslation } from 'react-i18next';
 import { useAuthorizedBackendApi } from '../api/api';
-import { protectedResources, transportRequest } from '../config/authConfig';
+import { pricingRequest, protectedResources, transportRequest } from '../config/authConfig';
 import { BackendService } from '../utils/services/fetch';
-import { GridColDef, GridValueFormatterParams, GridRenderCellParams, DataGrid } from '@mui/x-data-grid';
+import { GridColDef, GridValueFormatterParams, GridRenderCellParams, DataGrid, GridValueGetterParams } from '@mui/x-data-grid';
 import { BootstrapDialog, BootstrapDialogTitle, BootstrapInput, actionButtonStyles, buttonCloseStyles, datetimeStyles, gridStyles, inputLabelStyles, whiteButtonStyles } from '../utils/misc/styles';
 import CompanySearch from '../components/shared/CompanySearch';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
@@ -19,6 +19,7 @@ import dayjs, { Dayjs } from 'dayjs';
 import { AuthenticationResult } from '@azure/msal-browser';
 import { useMsal, useAccount } from '@azure/msal-react';
 import { CategoryEnum } from '../utils/constants';
+import AutocompleteSearch from '../components/shared/AutocompleteSearch';
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -31,17 +32,17 @@ const MenuProps = {
   },
 };
 
-function createGetRequestUrl(variable1: number, variable2: number, variable3: number) {
-    let url = protectedResources.apiLisPricing.endPoint+"/SeaFreight/GetSeaFreights?";
+function createGetRequestUrl(variable1: number, variable2: number) {
+    let url = protectedResources.apiLisPricing.endPoint+"/Haulage/Haulages?";
     if (variable1) {
-      url += 'DeparturePortId=' + encodeURIComponent(variable1) + '&';
+      url += 'LoadingPortId=' + encodeURIComponent(variable1) + '&';
     }
     if (variable2) {
-      url += 'DestinationPortId=' + encodeURIComponent(variable2) + '&';
+      url += 'HaulierId=' + encodeURIComponent(variable2) + '&';
     }
-    if (variable3) {
-      url += 'CarrierAgentId=' + encodeURIComponent(variable3) + '&';
-    }
+    // if (variable3) {
+    //   url += 'CarrierAgentId=' + encodeURIComponent(variable3) + '&';
+    // }
     
     if (url.slice(-1) === '&') {
       url = url.slice(0, -1);
@@ -49,33 +50,37 @@ function createGetRequestUrl(variable1: number, variable2: number, variable3: nu
     return url;
 }
 
-function Seafreights() {
+function Haulages() {
     const [load, setLoad] = useState<boolean>(true);
     const [loadEdit, setLoadEdit] = useState<boolean>(false);
     const [modal, setModal] = useState<boolean>(false);
     const [modal2, setModal2] = useState<boolean>(false);
     const [ports, setPorts] = useState<any>(null);
     const [containers, setContainers] = useState<any>(null);
-    const [services, setServices] = useState<any>(null);
+
+    const [pricingToken, setPricingToken] = useState<string>("");
+
     const [currentId, setCurrentId] = useState<string>("");
     const [currentEditId, setCurrentEditId] = useState<string>("");
-    const [seafreights, setSeafreights] = useState<any>(null);
-    const [searchedCarrier, setSearchedCarrier] = useState<any>(null);
-    const [portDeparture, setPortDeparture] = useState<any>(null);
-    const [portDestination, setPortDestination] = useState<any>(null);
-    const [carrier, setCarrier] = useState<any>(null);
-    const [carrierAgent, setCarrierAgent] = useState<any>(null);
-    const [portLoading, setPortLoading] = useState<any>(null);
-    const [portDischarge, setPortDischarge] = useState<any>(null);
-    const [transitTime, setTransitTime] = useState<number>(0);
-    const [frequency, setFrequency] = useState<number>(0);
+    const [haulages, setHaulages] = useState<any>(null);
+    
+    const [searchedHaulier, setSearchedHaulier] = useState<any>(null);
+    const [searchedLoadingCity, setSearchedLoadingCity] = useState<any>(null);
+    const [searchedLoadingPort, setSearchedLoadingPort] = useState<any>(null);
+    
+    const [haulier, setHaulier] = useState<any>(null);
+    const [loadingCity, setLoadingCity] = useState<any>(null);
+    const [loadingPort, setLoadingPort] = useState<any>(null);
+    const [freeTime, setFreeTime] = useState<number>(0);
+    const [multiStop, setMultiStop] = useState<number>(0);
+    const [unitTariff, setUnitTariff] = useState<number>(0);
+    const [overtimeTariff, setOvertimeTariff] = useState<number>(0);
     const [validUntil, setValidUntil] = useState<Dayjs | null>(null);
     const [currency, setCurrency] = useState<string>("EUR");
-    const [comment, setComment] = useState<string>("");
-    const [serviceName, setServiceName] = useState<any>(null);
+    const [haulageType, setHaulageType] = useState<string>("On trailer, direct loading");
+    const [emptyPickupDepot, setEmptyPickupDepot] = useState<string>("");
     const [containerTypes, setContainerTypes] = useState<any>([]);
-    const [price, setPrice] = useState<number>(0);
-    const [servicesSelection, setServicesSelection] = useState<any>([]);
+    const [comment, setComment] = useState<string>("");
     
     const { t } = useTranslation();
     
@@ -89,25 +94,31 @@ function Seafreights() {
         { code: "USD", label: 'Dollar - $' },
         { code: "FCFA", label: 'Franc CFA - FCFA' }
     ]
+
+    const haulageTypeOptions = [
+        { value: "On trailer, direct loading", label: t('haulageType1') },
+        { value: "On trailer, Loading with Interval", label: t('haulageType2') },
+        { value: "Side loader, direct loading", label: t('haulageType3') },
+        { value: "Side loader, Loading with Interval, from trailer to floor", label: t('haulageType4') },
+        { value: "Side loader, Loading with Interval, from floor to trailer", label: t('haulageType5') }
+    ];
     
-    const columnsSeafreights: GridColDef[] = [
-        // { field: 'carrierName', headerName: t('carrier'), minWidth: 150 },
-        { field: 'carrierAgentName', headerName: t('carrierAgent'), minWidth: 225 },
-        // { field: 'departurePortName', headerName: t('departurePort'), minWidth: 125 },
-        // { field: 'destinationPortName', headerName: t('destinationPort'), minWidth: 125 },
-        { field: 'frequency', headerName: t('frequency'), valueFormatter: (params: GridValueFormatterParams) => `${t('every')} ${params.value || ''} `+t('days'), minWidth: 125 },
-        { field: 'transitTime', headerName: t('transitTime'), valueFormatter: (params: GridValueFormatterParams) => `${params.value || ''} `+t('days'), minWidth: 100 },
-        { field: 'currency', headerName: t('prices'), renderCell: (params: GridRenderCellParams) => {
+    const columnsHaulages: GridColDef[] = [
+        { field: 'haulierName', headerName: t('haulier'), minWidth: 150 },
+        { field: 'loadingPort', headerName: t('loadingPort'), renderCell: (params: GridRenderCellParams) => {
             return (
-                <Box sx={{ my: 1, mr: 1 }}>
-                    <Box sx={{ my: 1 }} hidden={params.row.total20Dry === 0}>{params.row.total20Dry !== 0 ? "20' Dry : "+params.row.total20Dry+" "+t(params.row.currency) : "20' Dry : N/A"}</Box>
-                    <Box sx={{ my: 1 }} hidden={params.row.total20RF === 0}>{params.row.total20RF !== 0 ? "20' Rf : "+params.row.total20RF+" "+t(params.row.currency) : "20' Rf : N/A"}</Box>
-                    <Box sx={{ my: 1 }} hidden={params.row.total40Dry === 0}>{params.row.total40Dry !== 0 ? "40' Dry : "+params.row.total40Dry+" "+t(params.row.currency) : "40' Dry : N/A"}</Box>
-                    <Box sx={{ my: 1 }} hidden={params.row.total40HC === 0}>{params.row.total40HC !== 0 ? "40' Hc : "+params.row.total40HC+" "+t(params.row.currency) : "40' Hc : N/A"}</Box>
-                    <Box sx={{ my: 1 }} hidden={params.row.total20HCRF === 0}>{params.row.total20HCRF !== 0 ? "40' HcRf : "+params.row.total20HCRF+" "+t(params.row.currency) : "40' HcRf : N/A"}</Box>
-                </Box>
+                <Box sx={{ my: 2 }}>{params.row.loadingPort}</Box>
             );
-        }, minWidth: 175 },
+        }, minWidth: 150 },
+        { field: 'unitTariff', headerName: t('unitTariff'), valueGetter: (params: GridValueGetterParams) => `${params.row.unitTariff || ''} ${t(params.row.currency)}`, minWidth: 150 },
+        { field: 'freeTime', headerName: t('freeTime'), valueFormatter: (params: GridValueFormatterParams) => `${params.value || ''} ${t('hours')}`, minWidth: 100 },
+        { field: 'overtimeTariff', headerName: t('overtimeTariff'), valueGetter: (params: GridValueGetterParams) => `${params.row.overtimeTariff || ''} ${t(params.row.currency)} / ${t('hour')}`, minWidth: 125 },
+        { field: 'multiStop', headerName: t('multiStop'), valueGetter: (params: GridValueGetterParams) => `${params.row.multiStop || ''} ${t(params.row.currency)}` },
+        { field: 'containersType', headerName: t('containers'), renderCell: (params: GridRenderCellParams) => {
+            return (
+                <Box sx={{ my: 2 }}>{params.row.containersType.join(", ")}</Box>
+            );
+        }, minWidth: 150 },
         { field: 'validUntil', headerName: t('validUntil'), renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box sx={{ my: 1, mr: 1 }}>
@@ -125,10 +136,10 @@ function Seafreights() {
         { field: 'xxx', headerName: t('Actions'), renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box sx={{ my: 1, mr: 1 }}>
-                    <IconButton size="small" title={t('editRow')} sx={{ mr: 0.5 }} onClick={() => { setCurrentEditId(params.row.seaFreightId); getSeafreight(params.row.seaFreightId); setModal2(true); }}>
+                    <IconButton size="small" title={t('editRow')} sx={{ mr: 0.5 }} onClick={() => { setCurrentEditId(params.row.id); getHaulage(params.row.id); setModal2(true); }}>
                         <EditIcon fontSize="small" />
                     </IconButton>
-                    <IconButton size="small" title={t('deleteRow')} onClick={() => { setCurrentId(params.row.seaFreightId); setModal(true); }}>
+                    <IconButton size="small" title={t('deleteRow')} onClick={() => { setCurrentId(params.row.id); setModal(true); }}>
                         <DeleteIcon fontSize="small" />
                     </IconButton>
                 </Box>
@@ -138,7 +149,7 @@ function Seafreights() {
     
     useEffect(() => {
         getPorts();
-        getSeafreights();
+        getHaulages();
         getProtectedData(); // Services and Containers
     }, []);
     
@@ -170,20 +181,10 @@ function Seafreights() {
                 }
             );
             
-            getServices(token);
             getContainers(token);
         }
     }
 
-    const getServices = async (token: string) => {
-        if (context) {
-            const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Service/Services", token);
-            if (response !== null && response !== undefined) {
-                setServices(response);
-            }  
-        }
-    }
-    
     const getContainers = async (token: string) => {
         if (context) {
             const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Package/Containers", token);
@@ -193,11 +194,25 @@ function Seafreights() {
         }
     }
     
-    const getSeafreights = async () => {
-        if (context) {
-            const response = await (context as BackendService<any>).getSingle(protectedResources.apiLisPricing.endPoint+"/SeaFreight/GetSeaFreights");
+    const getHaulages = async () => {
+        if (context && account) {
+            const token = await instance.acquireTokenSilent({
+                scopes: pricingRequest.scopes,
+                account: account
+            }).then((response:AuthenticationResult)=>{
+                return response.accessToken;
+            }).catch(() => {
+                return instance.acquireTokenPopup({
+                    ...pricingRequest,
+                    account: account
+                    }).then((response) => {
+                        return response.accessToken;
+                });
+            });
+
+            const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisPricing.endPoint+"/Haulage/GetHaulages", token);
             if (response !== null && response !== undefined) {
-                setSeafreights(response);
+                setHaulages(response);
                 setLoad(false);
             }
             else {
@@ -207,21 +222,38 @@ function Seafreights() {
         }
     }
     
-    const getSeafreight = async (id: string) => {
+    const getHaulage = async (id: string) => {
         setLoadEdit(true)
-        if (context) {
-            const response = await (context as BackendService<any>).getSingle(protectedResources.apiLisPricing.endPoint+"/SeaFreight/SeaFreight?seaFreightId="+id);
+        if (context && account) {
+            const token = await instance.acquireTokenSilent({
+                scopes: pricingRequest.scopes,
+                account: account
+            }).then((response:AuthenticationResult)=>{
+                return response.accessToken;
+            }).catch(() => {
+                return instance.acquireTokenPopup({
+                    ...pricingRequest,
+                    account: account
+                    }).then((response) => {
+                        return response.accessToken;
+                });
+            });
+
+            const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisPricing.endPoint+"/Haulage/Haulage?offerId="+id, token);
             if (response !== null && response !== undefined) {
-                setCarrier({contactId: response.carrierId, contactName: response.carrierName});
-                setCarrierAgent({contactId: response.carrierAgentId, contactName: response.carrierAgentName});
-                setPortLoading(ports.find((elm: any) => elm.portId === response.departurePortId));
-                setPortDischarge(ports.find((elm: any) => elm.portId === response.destinationPortId));
+                setHaulier({contactId: response.haulierId, contactName: response.haulierName});
+                setLoadingCity(response.loadingCity);
+                setLoadingPort(ports.find((elm: any) => elm.portId === response.destinationPortId));
                 setCurrency(response.currency);
                 setValidUntil(dayjs(response.validUntil));
-                setTransitTime(response.transitTime);
-                setFrequency(response.frequency);
+                setFreeTime(response.freeTime);
+                setMultiStop(response.multiStop);
+                setUnitTariff(response.unitTariff);
+                setOvertimeTariff(response.overtimeTariff);
+                setHaulageType(response.haulageType);
+                setEmptyPickupDepot(response.emptyPickupDepot);
                 setComment(response.comment);
-                setServicesSelection(response.services);
+                setContainerTypes(response.containers);
                 setLoadEdit(false);
             }
             else {
@@ -231,13 +263,27 @@ function Seafreights() {
         }
     }
     
-    const searchSeafreights = async () => {
-        if (context) {
+    const searchHaulages = async () => {
+        if (context && account) {
+            const token = await instance.acquireTokenSilent({
+                scopes: pricingRequest.scopes,
+                account: account
+            }).then((response:AuthenticationResult)=>{
+                return response.accessToken;
+            }).catch(() => {
+                return instance.acquireTokenPopup({
+                    ...pricingRequest,
+                    account: account
+                    }).then((response) => {
+                        return response.accessToken;
+                });
+            });
+
             setLoad(true);
-            var requestFormatted = createGetRequestUrl(portDeparture?.portId, portDestination?.portId, searchedCarrier?.contactId);
-            const response = await (context as BackendService<any>).getSingle(requestFormatted);
+            var requestFormatted = createGetRequestUrl(searchedLoadingPort?.portId, searchedHaulier?.contactId);
+            const response = await (context as BackendService<any>).getWithToken(requestFormatted, token);
             if (response !== null && response !== undefined) {
-                setSeafreights(response);
+                setHaulages(response);
                 setLoad(false);
             }
             else {
@@ -247,52 +293,68 @@ function Seafreights() {
         }
     }
 
-    const createSeafreight = async () => {
-        if (context) {
+    const createHaulage = async () => {
+        if (context && account) {
+            const token = await instance.acquireTokenSilent({
+                scopes: pricingRequest.scopes,
+                account: account
+            }).then((response:AuthenticationResult)=>{
+                return response.accessToken;
+            }).catch(() => {
+                return instance.acquireTokenPopup({
+                    ...pricingRequest,
+                    account: account
+                    }).then((response) => {
+                        return response.accessToken;
+                });
+            });
+
             var dataSent = null;
             if (currentEditId !== "") {
                 dataSent = {
-                    "seaFreightId": currentEditId,
-                    "departurePortId": portLoading.portId,
-                    "destinationPortId": portDischarge.portId,
-                    "departurePortName": portLoading.portName,
-                    "destinationPortName": portDischarge.portName,
-                    "carrierId": carrier.contactId,
-                    "carrierName": carrier.contactName,
-                    "carrierAgentId": carrierAgent.contactId,
-                    "carrierAgentName": carrierAgent.contactName,
+                    "id": currentEditId,
+                    "haulierId": haulier.contactId,
+                    "haulierName": haulier.contactName,
                     "currency": currency,
-                    "validUntil": validUntil?.toISOString(),
-                    "transitTime": transitTime,
-                    "frequency": frequency,
+                    "loadingCity": loadingCity.city.toUpperCase(),
+                    "loadingPortId": loadingPort.portId,
+                    "loadingPort": loadingPort.portName,
+                    "freeTime": freeTime,
+                    "multiStop": multiStop,
+                    "overtimeTariff": overtimeTariff,
+                    "unitTariff": unitTariff,
+                    "haulageType": haulageType,
+                    "emptyPickupDepot": emptyPickupDepot,
                     "comment": comment,
-                    "services": servicesSelection
+                    "validUntil": validUntil?.toISOString(),
+                    "containers": containerTypes,
                 };    
             }
             else {
                 dataSent = {
-                    // "seaFreightId": "string",
-                    "departurePortId": portLoading.portId,
-                    "destinationPortId": portDischarge.portId,
-                    "departurePortName": portLoading.portName,
-                    "destinationPortName": portDischarge.portName,
-                    "carrierId": carrier.contactId,
-                    "carrierName": carrier.contactName,
-                    "carrierAgentId": carrierAgent.contactId,
-                    "carrierAgentName": carrierAgent.contactName,
+                    "id": null,
+                    "haulierId": haulier.contactId,
+                    "haulierName": haulier.contactName,
                     "currency": currency,
-                    "validUntil": validUntil?.toISOString(),
-                    "transitTime": transitTime,
-                    "frequency": frequency,
+                    "loadingCity": loadingCity.city.toUpperCase(),
+                    "loadingPortId": loadingPort.portId,
+                    "loadingPort": loadingPort.portName,
+                    "freeTime": freeTime,
+                    "multiStop": multiStop,
+                    "overtimeTariff": overtimeTariff,
+                    "unitTariff": unitTariff,
+                    "haulageType": haulageType,
+                    "emptyPickupDepot": emptyPickupDepot,
                     "comment": comment,
-                    "services": servicesSelection
+                    "validUntil": validUntil?.toISOString(),
+                    "containers": containerTypes,
                 };    
             }
-            const response = await (context as BackendService<any>).postBasic(protectedResources.apiLisPricing.endPoint+"/SeaFreight/SeaFreight", dataSent);
+            const response = await (context as BackendService<any>).postWithToken(protectedResources.apiLisPricing.endPoint+"/Haulage/Haulage", dataSent, token);
             if (response !== null && response !== undefined) {
                 setModal2(false);
                 enqueueSnackbar(t('successCreated'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
-                getSeafreights();
+                getHaulages();
             }
             else {
                 enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
@@ -300,14 +362,14 @@ function Seafreights() {
         }
     }
 
-    const deleteSeafreightPrice = async (id: string) => {
+    const deleteHaulagePrice = async (id: string) => {
         if (context) {
             // alert("Function not available yet!");
-            const response = await (context as BackendService<any>).delete(protectedResources.apiLisPricing.endPoint+"/SeaFreight/DeleteSeaFreightPrice?id="+id);
+            const response = await (context as BackendService<any>).delete(protectedResources.apiLisPricing.endPoint+"/Haulage/DeleteHaulagePrice?id="+id);
             if (response !== null && response !== undefined) {
                 enqueueSnackbar(t('rowDeletedSuccess'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
                 setModal(false);
-                getSeafreights();
+                getHaulages();
             }
             else {
                 enqueueSnackbar(t('rowDeletedError'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
@@ -319,16 +381,16 @@ function Seafreights() {
         <div style={{ background: "#fff", borderTopLeftRadius: 20, borderTopRightRadius: 20 }}>
             <SnackbarProvider />
             <Box sx={{ py: 2.5 }}>
-                <Typography variant="h5" sx={{mt: {xs: 4, md: 1.5, lg: 1.5 }}} mx={5}><b>{t('listSeafreights')}</b></Typography>
+                <Typography variant="h5" sx={{mt: {xs: 4, md: 1.5, lg: 1.5 }}} mx={5}><b>{t('listHaulages')}</b></Typography>
                 <Grid container spacing={2} mt={0} px={5}>
                     <Grid item xs={12}>
                         <Button variant="contained" sx={actionButtonStyles} onClick={() => { setCurrentEditId(""); setModal2(true); }}>
-                            New seafreight price <AddCircleOutlinedIcon sx={{ ml: 0.5, pb: 0.25, justifyContent: "center", alignItems: "center" }} fontSize="small" />
+                            New haulage price <AddCircleOutlinedIcon sx={{ ml: 0.5, pb: 0.25, justifyContent: "center", alignItems: "center" }} fontSize="small" />
                         </Button>
                     </Grid>
                     <Grid item xs={12} md={4} mt={1}>
                         <InputLabel htmlFor="company-name" sx={inputLabelStyles}>{t('carrier')}</InputLabel>
-                        <CompanySearch id="company-name" value={searchedCarrier} onChange={setSearchedCarrier} category={CategoryEnum.SUPPLIERS} callBack={() => console.log(searchedCarrier)} fullWidth />
+                        <CompanySearch id="company-name" value={searchedHaulier} onChange={setSearchedHaulier} category={CategoryEnum.CHARGEUR} callBack={() => console.log(searchedHaulier)} fullWidth />
                     </Grid>
                     <Grid item xs={12} md={3} mt={1}>
                         <InputLabel htmlFor="port-departure" sx={inputLabelStyles}>{t('departurePort')}</InputLabel>
@@ -351,10 +413,10 @@ function Seafreights() {
                                     }
                                     return ""; 
                                 }}
-                                value={portDeparture}
+                                value={searchedLoadingCity}
                                 sx={{ mt: 1 }}
                                 renderInput={(params: any) => <TextField {...params} />}
-                                onChange={(e: any, value: any) => { setPortDeparture(value); }}
+                                onChange={(e: any, value: any) => { setSearchedLoadingCity(value); }}
                                 fullWidth
                             /> : <Skeleton />
                         }
@@ -380,10 +442,10 @@ function Seafreights() {
                                     }
                                     return ""; 
                                 }}
-                                value={portDestination}
+                                value={searchedLoadingPort}
                                 sx={{ mt: 1 }}
                                 renderInput={(params: any) => <TextField {...params} />}
-                                onChange={(e: any, value: any) => { setPortDestination(value); }}
+                                onChange={(e: any, value: any) => { setSearchedLoadingPort(value); }}
                                 fullWidth
                             /> : <Skeleton />
                         }
@@ -395,7 +457,7 @@ function Seafreights() {
                             startIcon={<SearchIcon />} 
                             size="large"
                             sx={{ backgroundColor: "#fff", color: "#333", textTransform: "none", mb: 0.15 }}
-                            onClick={searchSeafreights}
+                            onClick={searchHaulages}
                             fullWidth
                         >
                             {t('search')}
@@ -407,23 +469,23 @@ function Seafreights() {
                     <Grid container spacing={2} mt={1} px={5}>
                         <Grid item xs={12}>
                             {
-                                seafreights !== null ?
+                                haulages !== null ?
                                 <Box sx={{ overflow: "auto" }}>
                                     {
-                                        seafreights.map((item: any, i: number) => {
+                                        haulages.map((item: any, i: number) => {
                                             return (
                                                 <Accordion key={"seaf"+i} sx={{ border: 1, borderColor: "#e5e5e5" }}>
                                                     <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="panel1a-content" id="panel1a-header">
-                                                        <Chip variant="outlined" label={item.departurePortName} sx={{ mr: 1 }} />
-                                                        <Chip variant="outlined" label={item.destinationPortName} />
+                                                        <Chip variant="outlined" label={item.loadingCity} sx={{ mr: 1 }} />
+                                                        <Chip variant="outlined" label={item.loadingPort} />
                                                         {/* <Typography>{t('from')} {item.departurePortName} {t('to')} {item.destinationPortName}</Typography> */}
                                                     </AccordionSummary>
                                                     <AccordionDetails>
                                                         <DataGrid
-                                                            rows={item.suppliers}
-                                                            columns={columnsSeafreights}
+                                                            rows={item.hauliers}
+                                                            columns={columnsHaulages}
                                                             hideFooter
-                                                            getRowId={(row: any) => row?.seaFreightId}
+                                                            getRowId={(row: any) => row?.id}
                                                             getRowHeight={() => "auto" }
                                                             sx={gridStyles}
                                                             disableRowSelectionOnClick
@@ -452,7 +514,7 @@ function Seafreights() {
                 </BootstrapDialogTitle>
                 <DialogContent dividers>{t('areYouSureDeleteRow')}</DialogContent>
                 <DialogActions>
-                    <Button variant="contained" color={"primary"} onClick={() => { deleteSeafreightPrice(currentId); }} sx={{ mr: 1.5, textTransform: "none" }}>{t('accept')}</Button>
+                    <Button variant="contained" color={"primary"} onClick={() => { deleteHaulagePrice(currentId); }} sx={{ mr: 1.5, textTransform: "none" }}>{t('accept')}</Button>
                     <Button variant="contained" onClick={() => setModal(false)} sx={buttonCloseStyles}>{t('close')}</Button>
                 </DialogActions>
             </BootstrapDialog>
@@ -473,20 +535,20 @@ function Seafreights() {
                             <Grid item xs={12} md={8}>
                                 <Grid container spacing={2}>
                                     <Grid item xs={12} md={6} mt={0.25}>
-                                        <InputLabel htmlFor="carrier" sx={inputLabelStyles}>{t('carrier')}</InputLabel>
-                                        <CompanySearch id="carrier" value={carrier} onChange={setCarrier} category={CategoryEnum.SUPPLIERS} callBack={() => console.log(carrier)} fullWidth />
+                                        <InputLabel htmlFor="haulier" sx={inputLabelStyles}>{t('haulier')}</InputLabel>
+                                        <CompanySearch id="haulier" value={haulier} onChange={setHaulier} category={CategoryEnum.CHARGEUR} callBack={() => console.log(haulier)} fullWidth />
                                     </Grid>
                                     <Grid item xs={12} md={6} mt={0.25}>
-                                        <InputLabel htmlFor="carrier-agent" sx={inputLabelStyles}>{t('carrierAgent')}</InputLabel>
-                                        <CompanySearch id="carrier-agent" value={carrierAgent} onChange={setCarrierAgent} category={CategoryEnum.SUPPLIERS} callBack={() => console.log(carrierAgent)} fullWidth />
+                                        <InputLabel htmlFor="loading-city" sx={inputLabelStyles}>{t('loadingCity')}</InputLabel>
+                                        <AutocompleteSearch id="loading-city" value={loadingCity} onChange={setLoadingCity} fullWidth />
                                     </Grid>
                                     <Grid item xs={12} md={6} mt={0.25}>
-                                        <InputLabel htmlFor="port-loading" sx={inputLabelStyles}>{t('departurePort')}</InputLabel>
+                                        <InputLabel htmlFor="loading-port" sx={inputLabelStyles}>{t('loadingPort')}</InputLabel>
                                         {
                                             ports !== null ?
                                             <Autocomplete
                                                 disablePortal
-                                                id="port-loading"
+                                                id="loading-port"
                                                 options={ports}
                                                 renderOption={(props, option, i) => {
                                                     return (
@@ -501,42 +563,17 @@ function Seafreights() {
                                                     }
                                                     return ""; 
                                                 }}
-                                                value={portLoading}
+                                                value={loadingPort}
                                                 sx={{ mt: 1 }}
                                                 renderInput={(params: any) => <TextField {...params} />}
-                                                onChange={(e: any, value: any) => { setPortLoading(value); }}
+                                                onChange={(e: any, value: any) => { setLoadingPort(value); }}
                                                 fullWidth
                                             /> : <Skeleton />
                                         }
                                     </Grid>
                                     <Grid item xs={12} md={6} mt={0.25}>
-                                        <InputLabel htmlFor="discharge-port" sx={inputLabelStyles}>{t('arrivalPort')}</InputLabel>
-                                        {
-                                            ports !== null ?
-                                            <Autocomplete
-                                                disablePortal
-                                                id="discharge-port"
-                                                options={ports}
-                                                renderOption={(props, option, i) => {
-                                                    return (
-                                                        <li {...props} key={option.portId}>
-                                                            {option.portName+", "+option.country}
-                                                        </li>
-                                                    );
-                                                }}
-                                                getOptionLabel={(option: any) => { 
-                                                    if (option !== null && option !== undefined) {
-                                                        return option.portName+', '+option.country;
-                                                    }
-                                                    return ""; 
-                                                }}
-                                                value={portDischarge}
-                                                sx={{ mt: 1 }}
-                                                renderInput={(params: any) => <TextField {...params} />}
-                                                onChange={(e: any, value: any) => { setPortDischarge(value); }}
-                                                fullWidth
-                                            /> : <Skeleton />
-                                        }
+                                        <InputLabel htmlFor="emptyPickupDepot" sx={inputLabelStyles}>{t('emptyPickupDepot')}</InputLabel>
+                                        <BootstrapInput id="emptyPickupDepot" type="text" value={emptyPickupDepot} onChange={(e: any) => setEmptyPickupDepot(e.target.value)} fullWidth />
                                     </Grid>
                                 </Grid>
                             </Grid>
@@ -568,49 +605,23 @@ function Seafreights() {
                                     fullWidth
                                 >
                                     {currencyOptions.map((elm: any, i: number) => (
-                                        <option key={"currencyElm-"+i} value={elm.code}>{elm.label}</option>
+                                        <option key={"currencyElm-"+i} value={elm.value}>{elm.label}</option>
                                     ))}
                                 </NativeSelect>
                             </Grid>
-                            <Grid item xs={12} md={3}>
-                                <InputLabel htmlFor="transit-time" sx={inputLabelStyles}>{t('transitTime')} ({t('inDays')})</InputLabel>
-                                <BootstrapInput id="transit-time" type="number" value={transitTime} onChange={(e: any) => setTransitTime(e.target.value)} fullWidth />
-                            </Grid>
-                            <Grid item xs={12} md={3}>
-                                <InputLabel htmlFor="frequency" sx={inputLabelStyles}>{t('frequency')} ({t('everyxDays')})</InputLabel>
-                                <BootstrapInput id="frequency" type="number" value={frequency} onChange={(e: any) => setFrequency(e.target.value)} fullWidth />
-                            </Grid>
-                            <Grid item xs={12} md={12}>
-                                <Typography sx={{ fontSize: 18 }}><b>List of services</b></Typography>
-                            </Grid>
-                            <Grid item xs={12} md={4}>
-                                <InputLabel htmlFor="service-name" sx={inputLabelStyles}>{t('serviceName')}</InputLabel>
-                                {
-                                    services !== null ?
-                                    <Autocomplete
-                                        disablePortal
-                                        id="service-name"
-                                        options={services}
-                                        renderOption={(props, option, i) => {
-                                            return (
-                                                <li {...props} key={option.portId}>
-                                                    {option.serviceName}
-                                                </li>
-                                            );
-                                        }}
-                                        getOptionLabel={(option: any) => { 
-                                            if (option !== null && option !== undefined) {
-                                                return option.serviceName;
-                                            }
-                                            return ""; 
-                                        }}
-                                        value={serviceName}
-                                        sx={{ mt: 1 }}
-                                        renderInput={(params: any) => <TextField {...params} />}
-                                        onChange={(e: any, value: any) => { setServiceName(value); }}
-                                        fullWidth
-                                    /> : <Skeleton />
-                                }
+                            <Grid item xs={12} md={6}>
+                                <InputLabel htmlFor="haulageType" sx={inputLabelStyles}>{t('haulageType')}</InputLabel>
+                                <NativeSelect
+                                    id="haulageType"
+                                    value={haulageType}
+                                    onChange={(e: any) => { setHaulageType(e.target.value) }}
+                                    input={<BootstrapInput />}
+                                    fullWidth
+                                >
+                                    {haulageTypeOptions.map((elm: any, i: number) => (
+                                        <option key={"haulageElm-"+i} value={elm.value}>{elm.label}</option>
+                                    ))}
+                                </NativeSelect>
                             </Grid>
                             <Grid item xs={12} md={4}>
                                 <InputLabel htmlFor="container-types" sx={inputLabelStyles}>{t('containers')}</InputLabel>
@@ -631,62 +642,26 @@ function Seafreights() {
                                 }
                             </Grid>
                             <Grid item xs={12} md={2}>
-                                <InputLabel htmlFor="price-cs" sx={inputLabelStyles}>{t('price')}</InputLabel>
-                                <BootstrapInput id="price-cs" type="number" value={price} onChange={(e: any) => setPrice(e.target.value)} fullWidth />
+                                <InputLabel htmlFor="free-time" sx={inputLabelStyles}>{t('freeTime')} ({t('hours')})</InputLabel>
+                                <BootstrapInput id="free-time" type="number" value={freeTime} onChange={(e: any) => setFreeTime(e.target.value)} fullWidth />
                             </Grid>
                             <Grid item xs={12} md={2}>
-                                <Button
-                                    variant="contained" color="inherit" fullWidth sx={whiteButtonStyles} 
-                                    style={{ marginTop: "30px", height: "42px", float: "right" }} 
-                                    onClick={() => {
-                                        if (serviceName !== null && containerTypes !== null && price > 0) {
-                                            console.log(serviceName); console.log(containerTypes); console.log(price);
-                                            setServicesSelection((prevItems: any) => [...prevItems, { 
-                                                service: { serviceId: serviceName.serviceId, serviceName: serviceName.serviceName, price: Number(price) }, containers: containerTypes
-                                            }]);
-                                            setServiceName(null); setContainerTypes([]); setPrice(0);
-                                        } 
-                                        else {
-                                            enqueueSnackbar(t('fieldNeedTobeFilled'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
-                                        }
-                                    }} 
-                                >
-                                    {t('add')}
-                                </Button>
+                                <InputLabel htmlFor="unitTariff-cs" sx={inputLabelStyles}>{t('unitTariff2')}</InputLabel>
+                                <BootstrapInput id="unitTariff-cs" type="number" value={unitTariff} onChange={(e: any) => setUnitTariff(e.target.value)} fullWidth />
                             </Grid>
-                            <Grid item xs={12}>
-                                {
-                                    servicesSelection !== undefined && servicesSelection !== null && servicesSelection.length !== 0 ? 
-                                        <Grid container spacing={2}>
-                                            {
-                                                servicesSelection.map((item: any, index: number) => (
-                                                    <Grid key={"serviceitem1-"+index} item xs={12} md={6}>
-                                                        <ListItem
-                                                            sx={{ border: "1px solid #e5e5e5" }}
-                                                            secondaryAction={
-                                                                <IconButton edge="end" onClick={() => {
-                                                                    setServicesSelection((prevItems: any) => prevItems.filter((item: any, i: number) => i !== index));
-                                                                }}>
-                                                                    <DeleteIcon />
-                                                                </IconButton>
-                                                            }
-                                                        >
-                                                            <ListItemText primary={
-                                                                t('serviceName')+" : "+item.service.serviceName+" | "+t('containers')+" : "+item.containers.map((elm: any) => elm.packageName).join(", ")+" | "+t('price')+" : "+item.service.price+" "+currency
-                                                            } />
-                                                        </ListItem>
-                                                    </Grid>
-                                                ))
-                                            }
-                                        </Grid>
-                                    : null  
-                                }
+                            <Grid item xs={12} md={2}>
+                                <InputLabel htmlFor="overtimeTariff-cs" sx={inputLabelStyles}>{t('overtimeTariff')} (/{t('hour')})</InputLabel>
+                                <BootstrapInput id="overtimeTariff-cs" type="number" value={overtimeTariff} onChange={(e: any) => setOvertimeTariff(e.target.value)} fullWidth />
+                            </Grid>
+                            <Grid item xs={12} md={2}>
+                                <InputLabel htmlFor="multiStop" sx={inputLabelStyles}>{t('multiStop')}</InputLabel>
+                                <BootstrapInput id="multiStop" type="number" value={multiStop} onChange={(e: any) => setMultiStop(e.target.value)} fullWidth />
                             </Grid>
                         </Grid> : <Skeleton />
                     }
                 </DialogContent>
                 <DialogActions>
-                    <Button variant="contained" color={"primary"} onClick={() => { createSeafreight(); }} sx={{ mr: 1.5, textTransform: "none" }}>{t('validate')}</Button>
+                    <Button variant="contained" color={"primary"} onClick={() => { createHaulage(); }} sx={{ mr: 1.5, textTransform: "none" }}>{t('validate')}</Button>
                     <Button variant="contained" onClick={() => setModal2(false)} sx={buttonCloseStyles}>{t('close')}</Button>
                 </DialogActions>
             </BootstrapDialog>
@@ -694,4 +669,4 @@ function Seafreights() {
     );
 }
 
-export default Seafreights;
+export default Haulages;

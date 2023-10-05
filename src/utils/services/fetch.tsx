@@ -130,6 +130,30 @@ export class BackendService<T> {
         });
     }     
 
+    postWithToken = (url: string, model: T, accessToken:string): Promise<FileResponse | null> => {
+        if(!accessToken) return Promise.reject<null>("Access token is not valid!");
+
+        url = url.replace(/[?&]$/, "");
+
+        const authorization = "Bearer " + accessToken;
+
+        const content_ = JSON.stringify(model);
+
+        let options_ : RequestInit = {
+            body: content_,
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json",
+                "Authorization": authorization
+            }
+        };
+
+        return fetch(url, options_).then((_response: Response) => {
+            return this.processPostRequests(_response);
+        });
+    }
+
     postBasic = (url: string, model: T): Promise<FileResponse | null> => {
         url = url.replace(/[?&]$/, "");
 

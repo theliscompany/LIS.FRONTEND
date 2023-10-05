@@ -313,6 +313,13 @@ function Request() {
     const steps = [t('searchSeafreight'), t('selectSeafreight'), t('searchHaulage'), t('selectHaulage'), t('selectMisc'), t('sendOffer')];
     // const steps = [t('searchHaulage'), t('selectHaulage'), t('searchSeafreight'), t('selectSeafreight'), t('selectMisc'), t('sendOffer')];
     const haulageTypes = [t('haulageType1'), t('haulageType2'), t('haulageType3'), t('haulageType4'), t('haulageType5')];
+    const haulageTypeOptions = [
+        { value: "On trailer, direct loading", label: t('haulageType1') },
+        { value: "On trailer, Loading with Interval", label: t('haulageType2') },
+        { value: "Side loader, direct loading", label: t('haulageType3') },
+        { value: "Side loader, Loading with Interval, from trailer to floor", label: t('haulageType4') },
+        { value: "Side loader, Loading with Interval, from floor to trailer", label: t('haulageType5') }
+    ];
     
     const columnsSeafreights: GridColDef[] = [
         { field: 'carrierName', headerName: t('carrier'), minWidth: 150 },
@@ -1667,8 +1674,8 @@ function Request() {
                                                                     >
                                                                         <option key={"kdq-"} value="">{t('anyType')}</option>
                                                                         {
-                                                                            haulageTypes.map((item: any, i: number) => (
-                                                                                <option key={"kdq"+i} value={item}>{item}</option>
+                                                                            haulageTypeOptions.map((item: any, i: number) => (
+                                                                                <option key={"kdq"+i} value={item.value}>{item.label}</option>
                                                                             ))
                                                                         }
                                                                     </NativeSelect>

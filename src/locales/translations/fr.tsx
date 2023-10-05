@@ -311,4 +311,9 @@ export const fr = {
   successCreated: "L'élément a été créée avec succès",
   price: "Prix",
   haulages: "Prix des transports",
+  listHaulages: "Liste des prix de transport routier",
+  emptyPickupDepot: "Dépôt de ramassage vide",
+  unitTariff2: "Tarif unitaire",
+  freeTime2: "Temps libre au lieu de chargement (en heures)",
+  miscellaneous: "Prix de services divers"
 };
