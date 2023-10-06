@@ -111,15 +111,15 @@ function Haulages() {
         //         <Box sx={{ my: 2 }}>{params.row.loadingPort}</Box>
         //     );
         // }, minWidth: 150 },
-        { field: 'unitTariff', headerName: t('unitTariff'), valueGetter: (params: GridValueGetterParams) => `${params.row.unitTariff || ''} ${t(params.row.currency)}`, minWidth: 150 },
+        { field: 'unitTariff', headerName: t('unitTariff'), valueGetter: (params: GridValueGetterParams) => `${params.row.unitTariff || ''} ${t(params.row.currency)}`, minWidth: 125 },
         { field: 'freeTime', headerName: t('freeTime'), valueFormatter: (params: GridValueFormatterParams) => `${params.value || ''} ${t('hours')}`, minWidth: 100 },
         { field: 'overtimeTariff', headerName: t('overtimeTariff'), valueGetter: (params: GridValueGetterParams) => `${params.row.overtimeTariff || ''} ${t(params.row.currency)} / ${t('hour')}`, minWidth: 125 },
-        { field: 'multiStop', headerName: t('multiStop'), valueGetter: (params: GridValueGetterParams) => `${params.row.multiStop || ''} ${t(params.row.currency)}` },
+        { field: 'multiStop', headerName: t('multiStop'), valueGetter: (params: GridValueGetterParams) => `${params.row.multiStop || ''} ${t(params.row.currency)}`, width: 100 },
         { field: 'containersType', headerName: t('containers'), renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box sx={{ my: 2 }}>{params.row.containersType.join(", ")}</Box>
             );
-        }, minWidth: 150 },
+        }, minWidth: 125 },
         { field: 'validUntil', headerName: t('validUntil'), renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box sx={{ my: 1, mr: 1 }}>
