@@ -14,20 +14,22 @@ import ListItemText from '@mui/material/ListItemText';
 import MenuIcon from '@mui/icons-material/Menu';
 import PeopleIcon from '@mui/icons-material/PeopleAltOutlined';
 import AddIcon from '@mui/icons-material/AddCircleOutline';
-import HomeIcon from '@mui/icons-material/Home';
+import HomeIcon from '@mui/icons-material/HomeOutlined';
 import FirstPageIcon from '@mui/icons-material/FirstPage';
-import DirectionsBoatIcon from '@mui/icons-material/DirectionsBoat';
+import DirectionsBoatIcon from '@mui/icons-material/DirectionsBoatOutlined';
+import LocalShippingIcon from '@mui/icons-material/LocalShippingOutlined';
+import Inventory2Icon from "@mui/icons-material/Inventory2Outlined"
 import Avatar from '@mui/material/Avatar';
 import MenuItem from '@mui/material/MenuItem';
 import Menu from '@mui/material/Menu';
 import IconButton from '@mui/material/IconButton';
 import Button from '@mui/material/Button';
 import LastPageIcon from '@mui/icons-material/LastPage';
-import AutoFixHighIcon from '@mui/icons-material/AutoFixHigh';
+import AutoFixHighIcon from '@mui/icons-material/AutoFixHighOutlined';
 import PortraitIcon from '@mui/icons-material/Portrait';
 import GroupsIcon from '@mui/icons-material/Groups';
 import LogoutIcon from '@mui/icons-material/Logout';
-import NotificationsIcon from '@mui/icons-material/Notifications';
+import NotificationsIcon from '@mui/icons-material/NotificationsOutlined';
 import { Container, InputAdornment } from '@mui/material';
 import { Outlet, NavLink, Link } from 'react-router-dom';
 import { styled, Theme, CSSObject } from '@mui/material/styles';
@@ -238,6 +240,12 @@ function Layout(props: {children?: React.ReactNode}) {
                                     </MenuItem>
                                     <MenuItem onClick={() => { navigate('/admin/seafreights'); handleCloseNavMenu(); }}>
                                         <Typography textAlign="center">{t('seafreights')}</Typography>
+                                    </MenuItem>
+                                    <MenuItem onClick={() => { navigate('/admin/haulages'); handleCloseNavMenu(); }}>
+                                        <Typography textAlign="center">{t('haulages')}</Typography>
+                                    </MenuItem>
+                                    <MenuItem onClick={() => { navigate('/admin/miscellaneous'); handleCloseNavMenu(); }}>
+                                        <Typography textAlign="center">{t('miscellaneous')}</Typography>
                                     </MenuItem>
                                 </Menu>
                             </Grid>
@@ -514,6 +522,30 @@ function Layout(props: {children?: React.ReactNode}) {
                                             <DirectionsBoatIcon fontSize="small" />
                                         </ListItemIcon>
                                         <ListItemText primary={t('seafreights')} />
+                                    </ListItemButton>
+                                </DarkTooltip>
+                                </ListItem>
+                            </NavLink>
+                            <NavLink to="/admin/haulages" className={({ isActive }) => isActive ? "cs-navlink-active" : "cs-navlink"}>
+                                <ListItem className="cs-listitem" key={"Haulages"} disablePadding disableGutters>
+                                <DarkTooltip title={t('haulages')} placement="right" arrow>
+                                    <ListItemButton className="cs-listitembutton">
+                                        <ListItemIcon className="cs-listitemicon">
+                                            <LocalShippingIcon fontSize="small" />
+                                        </ListItemIcon>
+                                        <ListItemText primary={t('haulages')} />
+                                    </ListItemButton>
+                                </DarkTooltip>
+                                </ListItem>
+                            </NavLink>
+                            <NavLink to="/admin/miscellaneous" className={({ isActive }) => isActive ? "cs-navlink-active" : "cs-navlink"}>
+                                <ListItem className="cs-listitem" key={"Miscellaneous"} disablePadding disableGutters>
+                                <DarkTooltip title={t('miscellaneous')} placement="right" arrow>
+                                    <ListItemButton className="cs-listitembutton">
+                                        <ListItemIcon className="cs-listitemicon">
+                                            <Inventory2Icon fontSize="small" />
+                                        </ListItemIcon>
+                                        <ListItemText primary={t('miscellaneous')} />
                                     </ListItemButton>
                                 </DarkTooltip>
                                 </ListItem>

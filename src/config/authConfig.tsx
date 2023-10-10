@@ -28,6 +28,7 @@ export const graphRequest: PopupRequest = {
 export const pricingRequest: PopupRequest = {
   scopes: [
     "api://e0e63c6a-8095-4823-a523-2c7b007e9cf5/PricingsRead",
+    "api://e0e63c6a-8095-4823-a523-2c7b007e9cf5/LIS.Pricing.ReadWrite"
   ]
 };
 

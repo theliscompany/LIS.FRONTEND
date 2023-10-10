@@ -22,6 +22,8 @@ import ApproveOffer from './pages/ApproveOffer';
 import './locales/i18n';
 import Login from './utils/others/Login';
 import Seafreights from './pages/Seafreights';
+import Haulages from './pages/Haulages';
+import Miscellaneous from './pages/Miscellaneous';
 // import Seafreights from './utils/others/Seafreights';
 
 const App = () => {
@@ -45,6 +47,8 @@ const App = () => {
                 <Route path="users" element={<UsersAssignment />} />
                 {/* <Route path="test" element={<Seafreights />} /> */}
                 <Route path="seafreights" element={<Seafreights />} />
+                <Route path="haulages" element={<Haulages />} />
+                <Route path="miscellaneous" element={<Miscellaneous />} />
               </Route> 
               <Route path="/" element={<Layout children={<Requests />} />} />
               <Route path="login" element={<Layout children={<Requests />} />} />

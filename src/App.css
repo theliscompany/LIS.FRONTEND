@@ -49,9 +49,9 @@
 .cs-listitembutton {
   padding: 4px 12px !important;
 }
-/*.cs-listitemicon {
-  
-}*/
+.cs-listitemicon {
+  min-width: 42px !important;
+}
 .cs-navlink {
   text-decoration: none;
   color: initial;

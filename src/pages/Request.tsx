@@ -52,6 +52,7 @@ import RequestListNotes from '../components/editRequestPage/RequestListNotes';
 import RequestAddNote from '../components/editRequestPage/RequestAddNote';
 import RequestAskInformation from '../components/editRequestPage/RequestAskInformation';
 import RequestChangeStatus from '../components/editRequestPage/RequestChangeStatus';
+import { MailData } from '../utils/models/models';
 
 //let statusTypes = ["EnAttente", "Valider", "Rejeter"];
 // let cargoTypes = ["Container", "Conventional", "RollOnRollOff"];
@@ -126,6 +127,20 @@ function parseLocation(inputString: string) {
     };
     
     return locationObject;
+}
+
+function parseContact(inputString: string) {
+    const parts = inputString.split(', ');
+    
+    const number = parts[0];
+    const name = parts[1];
+    
+    const contactObject = {
+        contactId: number,
+        contactName: name,
+    };
+    
+    return contactObject;
 }
 
 function displayContainers(value: any) {
@@ -313,13 +328,20 @@ function Request() {
     const steps = [t('searchSeafreight'), t('selectSeafreight'), t('searchHaulage'), t('selectHaulage'), t('selectMisc'), t('sendOffer')];
     // const steps = [t('searchHaulage'), t('selectHaulage'), t('searchSeafreight'), t('selectSeafreight'), t('selectMisc'), t('sendOffer')];
     const haulageTypes = [t('haulageType1'), t('haulageType2'), t('haulageType3'), t('haulageType4'), t('haulageType5')];
+    const haulageTypeOptions = [
+        { value: "On trailer, direct loading", label: t('haulageType1') },
+        { value: "On trailer, Loading with Interval", label: t('haulageType2') },
+        { value: "Side loader, direct loading", label: t('haulageType3') },
+        { value: "Side loader, Loading with Interval, from trailer to floor", label: t('haulageType4') },
+        { value: "Side loader, Loading with Interval, from floor to trailer", label: t('haulageType5') }
+    ];
     
     const columnsSeafreights: GridColDef[] = [
         { field: 'carrierName', headerName: t('carrier'), minWidth: 150 },
         { field: 'carrierAgentName', headerName: t('carrierAgent'), minWidth: 150 },
         // { field: 'departurePortName', headerName: t('departurePort'), minWidth: 125 },
         // { field: 'destinationPortName', headerName: t('destinationPort'), minWidth: 125 },
-        { field: 'frequency', headerName: t('frequency'), valueFormatter: (params: GridValueFormatterParams) => `${t('every')} ${params.value || ''} `+t('days'), minWidth: 100 },
+        { field: 'frequency', headerName: t('frequency'), valueFormatter: (params: GridValueFormatterParams) => `${t('every')} ${params.value || ''} `+t('days'), minWidth: 125 },
         { field: 'transitTime', headerName: t('transitTime'), valueFormatter: (params: GridValueFormatterParams) => `${params.value || ''} `+t('days'), minWidth: 50 },
         { field: 'currency', headerName: t('prices'), renderCell: (params: GridRenderCellParams) => {
             return (
@@ -331,7 +353,7 @@ function Request() {
                     <Box sx={{ my: 1 }} hidden={!getPackageNamesByIds(containersSelected, containers).includes("40' HcRf")}>{params.row.price40hcrf !== 0 ? "40' HcRf : "+params.row.price40hcrf+" "+t(params.row.currency) : "40' HcRf : N/A"}</Box>
                 </Box>
             );
-        }, minWidth: 125 },
+        }, minWidth: 150 },
         { field: 'validUntil', headerName: t('validUntil'), renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box sx={{ my: 1, mr: 1 }}>
@@ -339,13 +361,13 @@ function Request() {
                 </Box>
             );
         }, minWidth: 100 },
-        { field: 'lastUpdated', headerName: t('lastUpdated'), renderCell: (params: GridRenderCellParams) => {
-            return (
-                <Box sx={{ my: 1, mr: 1 }}>
-                    <Chip label={(new Date(params.row.lastUpdated)).toLocaleDateString().slice(0,10)} color={(new Date()).getTime() - (new Date(params.row.lastUpdated)).getTime() > 0 ? "default" : "default"}></Chip>
-                </Box>
-            );
-        }, minWidth: 100 },
+        // { field: 'lastUpdated', headerName: t('lastUpdated'), renderCell: (params: GridRenderCellParams) => {
+        //     return (
+        //         <Box sx={{ my: 1, mr: 1 }}>
+        //             <Chip label={(new Date(params.row.lastUpdated)).toLocaleDateString().slice(0,10)} color={(new Date()).getTime() - (new Date(params.row.lastUpdated)).getTime() > 0 ? "default" : "default"}></Chip>
+        //         </Box>
+        //     );
+        // }, minWidth: 100 },
         { field: 'comment', headerName: "Comment", renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box sx={{ my: 2 }}>
@@ -371,12 +393,12 @@ function Request() {
     
     const columnsHaulages: GridColDef[] = [
         { field: 'haulierName', headerName: t('haulier'), minWidth: 150 },
-        // { field: 'loadingPort', headerName: t('loadingPort'), renderCell: (params: GridRenderCellParams) => {
-        //     return (
-        //         <Box sx={{ my: 2 }}>{params.row.loadingPort}</Box>
-        //     );
-        // }, minWidth: 150 },
-        { field: 'unitTariff', headerName: t('unitTariff'), valueGetter: (params: GridValueGetterParams) => `${params.row.unitTariff || ''} ${t(params.row.currency)}`, minWidth: 150 },
+        { field: 'loadingPort', headerName: t('loadingPort'), renderCell: (params: GridRenderCellParams) => {
+            return (
+                <Box sx={{ my: 2 }}>{params.row.loadingPort}</Box>
+            );
+        }, minWidth: 150 },
+        { field: 'unitTariff', headerName: t('unitTariff'), valueGetter: (params: GridValueGetterParams) => `${params.row.unitTariff || ''} ${t(params.row.currency)}`, minWidth: 125 },
         { field: 'freeTime', headerName: t('freeTime'), valueFormatter: (params: GridValueFormatterParams) => `${params.value || ''} ${t('hours')}`, minWidth: 100 },
         { field: 'overtimeTariff', headerName: t('overtimeTariff'), valueGetter: (params: GridValueGetterParams) => `${params.row.overtimeTariff || ''} ${t(params.row.currency)} / ${t('hour')}`, minWidth: 125 },
         { field: 'multiStop', headerName: t('multiStop'), valueGetter: (params: GridValueGetterParams) => `${params.row.multiStop || ''} ${t(params.row.currency)}` },
@@ -387,13 +409,13 @@ function Request() {
                 </Box>
             );
         }, minWidth: 100 },
-        { field: 'updated', headerName: t('lastUpdated'), renderCell: (params: GridRenderCellParams) => {
-            return (
-                <Box sx={{ my: 1, mr: 1 }}>
-                    <Chip label={(new Date(params.row.updated)).toLocaleDateString().slice(0,10)} color={(new Date()).getTime() - (new Date(params.row.updated)).getTime() > 0 ? "default" : "default"}></Chip>
-                </Box>
-            );
-        }, minWidth: 100 },
+        // { field: 'updated', headerName: t('lastUpdated'), renderCell: (params: GridRenderCellParams) => {
+        //     return (
+        //         <Box sx={{ my: 1, mr: 1 }}>
+        //             <Chip label={(new Date(params.row.updated)).toLocaleDateString().slice(0,10)} color={(new Date()).getTime() - (new Date(params.row.updated)).getTime() > 0 ? "default" : "default"}></Chip>
+        //         </Box>
+        //     );
+        // }, minWidth: 100 },
         { field: 'comment', headerName: "Comment", renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box sx={{ my: 2 }}>
@@ -642,6 +664,54 @@ function Request() {
         setActiveStep(0);
     };
     
+    function calculateContainerPrice(type: string, quantity: number) {
+        // Calculate seafreight prices
+        var seafreightPrices = 0;
+        if (selectedSeafreight.price20dry !== 0 && type == "20' Dry") {
+            seafreightPrices += selectedSeafreight.price20dry*containersSelection.find((elm: any) => elm.id === 8).quantity;
+        }
+        if (selectedSeafreight.price20rf !== 0 && type == "20' Rf") {
+            seafreightPrices += selectedSeafreight.price20rf*containersSelection.find((elm: any) => elm.id === 13).quantity;
+        }
+        if (selectedSeafreight.price40dry !== 0 && type == "40' Dry") {
+            seafreightPrices += selectedSeafreight.price40dry*containersSelection.find((elm: any) => elm.id === 9).quantity;
+        }
+        if (selectedSeafreight.price40hc !== 0 && type == "40' Hc") {
+            seafreightPrices += selectedSeafreight.price40hc*containersSelection.find((elm: any) => elm.id === 10).quantity;
+        }
+        if (selectedSeafreight.price40hcrf !== 0 && type == "40' HcRf") {
+            seafreightPrices += selectedSeafreight.price40hcrf*containersSelection.find((elm: any) => elm.id === 15).quantity;
+        }
+
+        // Calculate haulage prices
+        var haulagePrices = 0;
+        if (selectedHaulage !== null) {
+            haulagePrices = haulagePrices + selectedHaulage.unitTariff*quantity;
+        }    
+        
+        // Calculate miscellaneous prices
+        var miscPrices = 0;
+        if (selectedMisc !== null) {
+            if (selectedMisc.price20dry !== 0 && type == "20' Dry") {
+                miscPrices += selectedMisc.price20dry*containersSelection.find((elm: any) => elm.id === 8).quantity;
+            }
+            if (selectedMisc.price20rf !== 0 && type == "20' Rf") {
+                miscPrices += selectedMisc.price20rf*containersSelection.find((elm: any) => elm.id === 13).quantity;
+            }
+            if (selectedMisc.price40dry !== 0 && type == "40' Dry") {
+                miscPrices += selectedMisc.price40dry*containersSelection.find((elm: any) => elm.id === 9).quantity;
+            }
+            if (selectedMisc.price40hc !== 0 && type == "40' Hc") {
+                miscPrices += selectedMisc.price40hc*containersSelection.find((elm: any) => elm.id === 10).quantity;
+            }
+            if (selectedMisc.price40hcrf !== 0 && type == "40' HcRf") {
+                miscPrices += selectedMisc.price40hcrf*containersSelection.find((elm: any) => elm.id === 15).quantity;
+            }
+        }
+
+        return ((seafreightPrices+haulagePrices+miscPrices)*0.22+seafreightPrices+haulagePrices+miscPrices).toFixed(2);
+    }
+    
     function similar(str1: string, str2: string) {
         const cleanStr1 = str1.replace(/[\s-]/g, '').toLowerCase();
         const cleanStr2 = str2.replace(/[\s-]/g, '').toLowerCase();
@@ -727,7 +797,7 @@ function Request() {
                     setStatus(response.data.status);
                     // setCargoType(String(cargoTypes.indexOf(response.data.cargoType)));
                     setPackingType(response.data.packingType !== null ? response.data.packingType : "FCL");
-                    setClientNumber(response.data.clientNumber !== null && response.data.clientNumber !== "" ? { contactId: Number(response.data.clientNumber) } : "");
+                    setClientNumber(response.data.clientNumber !== null && response.data.clientNumber !== "" ? parseContact(response.data.clientNumber) : "");
                     setContainersSelection(response.data.containers.map((elm: any) => { return {
                         id: elm.id,
                         container: elm.containers, 
@@ -828,7 +898,7 @@ function Request() {
                 } }),
                 quantity: quantity,
                 detail: message,
-                clientNumber: clientNumber !== null ? String(clientNumber.contactId) : null,
+                clientNumber: clientNumber !== null ? String(clientNumber.contactId)+", "+clientNumber.contactName : null,
                 tags: tags.length !== 0 ? tags.map((elm: any) => elm.productName).join(',') : null,
                 assigneeId: Number(assignedManager)
             };
@@ -1115,6 +1185,22 @@ function Request() {
                 if (response !== null) {
                     setModal5(false);
                     enqueueSnackbar(t('offerSuccessSent'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
+
+                    var footer = `
+                    <div style="font-family: Verdana; padding-top: 60px;">
+                        <div><a target="_blank" href="www.omnifreight.eu">www.omnifreight.eu</a></div>
+                        <div style="padding-bottom: 10px;"><a target="_blank" href="http://www.facebook.com/omnifreight">http://www.facebook.com/omnifreight</a></div>
+                        <div>Italiëlei 211</div>
+                        <div>2000 Antwerpen</div>
+                        <div>Belgium</div>
+                        <div>E-mail: transport@omnifreight.eu</div>
+                        <div>Tel +32.3.295.38.82</div>
+                        <div>Fax +32.3.295.38.77</div>
+                        <div>Whatsapp +32.494.40.24.25</div>
+                        <img src="http://www.omnifreight.eu/Images/omnifreight_logo.jpg" style="max-width: 200px;">
+                    </div>
+                    `;
+                    postEmail("cyrille.penaye@omnifreight.eu", email, "Nouvelle offre de devis", rteRef.current?.editor?.getHTML()+footer);
                 }
                 else {
                     enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
@@ -1140,6 +1226,18 @@ function Request() {
             const closest = findClosestSeaPort(value, ports);
             setPortDestination(closest);
             setPorts2(sortByCloseness(value, ports).slice(0, 15));
+        }
+    }
+
+    const postEmail = async(from: string, to: string, subject: string, htmlContent: string) => {
+        const body: MailData = { from: from, to: to, subject: subject, htmlContent: htmlContent };
+        const data = await (context as BackendService<any>).postForm(protectedResources.apiLisQuotes.endPoint+"/Email", body);
+        console.log(data);
+        if (data?.status === 200) {
+            enqueueSnackbar(t('messageSuccessSent'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
+        }
+        else {
+            enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
         }
     }
 
@@ -1667,8 +1765,8 @@ function Request() {
                                                                     >
                                                                         <option key={"kdq-"} value="">{t('anyType')}</option>
                                                                         {
-                                                                            haulageTypes.map((item: any, i: number) => (
-                                                                                <option key={"kdq"+i} value={item}>{item}</option>
+                                                                            haulageTypeOptions.map((item: any, i: number) => (
+                                                                                <option key={"kdq"+i} value={item.value}>{item.label}</option>
                                                                             ))
                                                                         }
                                                                     </NativeSelect>
@@ -1781,7 +1879,7 @@ function Request() {
                                                                         />
                                                                     </Grid> : null
                                                                 }
-                                                                <Grid item xs={12} md={6}>
+                                                                {/* <Grid item xs={12} md={6}>
                                                                     <InputLabel htmlFor="client-name" sx={inputLabelStyles}>{t('clientName')}</InputLabel>
                                                                     <BootstrapInput id="clien-name" type="text" value={clientName} onChange={(e: any) => setClientName(e.target.value)} fullWidth />
                                                                 </Grid>
@@ -1796,40 +1894,39 @@ function Request() {
                                                                 <Grid item xs={12} md={2}>
                                                                     <InputLabel htmlFor="adding" sx={inputLabelStyles}>{t('extraFee')} ({selectedSeafreight !== null ? selectedSeafreight.currency : null})</InputLabel>
                                                                     <BootstrapInput id="adding" type="number" value={adding} onChange={(e: any) => setAdding(e.target.value)} fullWidth />
-                                                                </Grid>
+                                                                </Grid> */}
                                                                 <Grid item xs={12}>
                                                                     <InputLabel htmlFor="details" sx={inputLabelStyles}>{t('detailsOffer')}</InputLabel>
                                                                     {/* <BootstrapInput id="details" type="text" multiline rows={6} value={details} onChange={(e: any) => setDetails(e.target.value)} fullWidth /> */}
                                                                     {
-                                                                        selectedHaulage !== null && selectedSeafreight !== null && selectedMisc !== null ? 
+                                                                        selectedSeafreight !== null && selectedHaulage !== null ? 
                                                                         <Box sx={{ mt: 2 }}>
                                                                             <RichTextEditor
                                                                                 ref={rteRef}
                                                                                 extensions={[StarterKit]}
                                                                                 content={`
-                                                                                    <p>Hello {{name}},</p>
+                                                                                    <p>Bonjour ${clientNumber !== null && clientNumber.contactName !== undefined ? clientNumber.contactName : "{clientName}"},</p>
                                                                                     <br>
-                                                                                    <p>As a freight forwarder we can organize your shipment of ${displayContainers(containersSelection)} containers loaded with ${tags.map((elm: any) => elm.productName).join(',')}, with truck (${haulageType}), from ${loadingCity.city} up to ${selectedSeafreight.destinationPortName} at a total cost of ${selectedSeafreight.currency} ${Number(totalPrice+totalPrice*margin/100-totalPrice*reduction/100+adding*1).toFixed(2).toString()}</p>
+                                                                                    <p>Nous vous remercions pour votre demande.</p>
                                                                                     <br>
-                                                                                    <p>Inclusive of:</p> 
-                                                                                    <p>${selectedHaulage.freeTime} ${t('hours')} loading included for each container, after which ${selectedHaulage.overtimeTariff} ${selectedHaulage.currency} / hour is charged.</p>
-                                                                                    <p>${displayServices(selectedMisc.services)} included</p>
+                                                                                    <p>En notre qualité de commissionnaire expéditeur nous pouvons organiser votre expédition de ${displayContainers(containersSelection)} conteneur(s) chargé(s) avec des ${tags.map((elm: any) => elm.productName).join(',')}, sur camion depuis ${loadingCity.city} à rendu port de ${selectedSeafreight.destinationPortName} comme suit :</p>
                                                                                     <br>
-                                                                                    <p>Not included:</p>
-                                                                                    <p>Costs related to customs inspection, if required</p>
-                                                                                    <p>Detention, demurrage, storage</p>
+                                                                                    ${containersSelection !== null ? containersSelection.map((elm: any) => "<p>"+calculateContainerPrice(elm.container, elm.quantity)+" "+selectedSeafreight.currency+" / "+elm.container+"</p>") : ""}
                                                                                     <br>
-                                                                                    <p>Offer based on ETD ${selectedSeafreight.departurePortName} ${(new Date()).toLocaleDateString().slice(0,10)}</p>
+                                                                                    <p>Chargement de ${selectedHaulage.freeTime} heures inclus pour les conteneurs, ensuite de ${selectedHaulage.overtimeTariff} ${selectedHaulage.currency} par heure indivisible.</p>
+                                                                                    ${selectedMisc !== null ? selectedMisc.services.map((elm: any) => "<p>- "+elm.service.serviceName+" inclus ("+elm.service.price+" "+selectedSeafreight.currency+")</p>").join('') : "<br>"}
                                                                                     <br>
-                                                                                    <p>Sailing time ${selectedSeafreight.departurePortName} to ${selectedSeafreight.destinationPortName} approx. ${selectedSeafreight.transitTime} days</p>
+                                                                                    <p>Départs hebdomadaires.</p>
                                                                                     <br>
-                                                                                    <p>This offer remains valid today, to be confirmed at the time of your booking.</p>
+                                                                                    <p>Délai de mer +/- ${selectedSeafreight.transitTime} jours.</p>
                                                                                     <br>
-                                                                                    <p>We also send per attached pdf our order confirmation and invoice terms & conditions</p>
+                                                                                    <p>Tarif valable ce jour. Tarifs à confirmer lors de votre réservation.</p>
                                                                                     <br>
-                                                                                    <p>Best regards,</p>
+                                                                                    <p>Ci-joint vous trouverez nos conditions de commande et de facturation qui, ensemble avec nos conditions générales, sont appliqués.</p>
                                                                                     <br>
-                                                                                    <p>JEFFRY COOLS</p>`
+                                                                                    <p>Cordialement</p>
+                                                                                    <br>
+                                                                                    <p>Jeffry COOLS</p>`
                                                                                 }
                                                                                 renderControls={() => (
                                                                                 <MenuControlsContainer>
