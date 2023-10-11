@@ -21,7 +21,7 @@ export const en = {
   weight: "Weight",
   name: "Name",
   specifics: "Specifics",
-  clientNumber: "Client number",
+  clientNumber: "Client name (or number)",
   details: "Other details about your need (Optional)",
   assignedManager: "Assigned manager",
   overviewTitle: "General timeline of the requests",
@@ -327,5 +327,8 @@ export const en = {
   labelAnnule: "Cancelled",
   labelRetour: "Returned",
   labelProbleme: "Problem",
-  labelEnAttenteDeFacturation: "Waiting for billing"
+  labelEnAttenteDeFacturation: "Waiting for billing",
+  fileSent: "Attachments",
+  fieldsEmptySeafreight: "You must fill all the required fields and choose at least one service",
+  fieldsEmptyHaulage: "You must fill all the required fields"
 };

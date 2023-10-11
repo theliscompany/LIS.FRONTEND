@@ -53,21 +53,25 @@ import RequestAddNote from '../components/editRequestPage/RequestAddNote';
 import RequestAskInformation from '../components/editRequestPage/RequestAskInformation';
 import RequestChangeStatus from '../components/editRequestPage/RequestChangeStatus';
 import { MailData } from '../utils/models/models';
+import { MuiFileInput } from 'mui-file-input';
 
 //let statusTypes = ["EnAttente", "Valider", "Rejeter"];
 // let cargoTypes = ["Container", "Conventional", "RollOnRollOff"];
 // let packingTypes = ["LCL", "Airfreight", "Cars", "Trucks", "Not containerised"];
 let packingOptions = ["Unit", "Bundle", "Bag", "Pallet", "Carton", "Lot", "Crate"];
 
-function createGetRequestUrl(url: string, variable1: string|undefined, variable2: string, variable3: string) {
-    if (variable1) {
-        url += 'PlannedDeparture=' + encodeURIComponent(variable1) + '&';
-    }
+function createGetRequestUrl(url: string, variable2: string, variable3: string, variable4: string) {
+    // if (variable1) {
+    //     url += 'PlannedDeparture=' + encodeURIComponent(variable1) + '&';
+    // }
     if (variable2) {
         url += 'HaulageType=' + encodeURIComponent(variable2) + '&';
     }
     if (variable3) {
         url += 'LoadingCity=' + encodeURIComponent(variable3) + '&';
+    }
+    if (variable4) {
+        url += 'ContainerTypesId=' + variable4 + '&';
     }
     
     if (url.slice(-1) === '&') {
@@ -76,16 +80,16 @@ function createGetRequestUrl(url: string, variable1: string|undefined, variable2
     return url;
 }
 
-function createGetRequestUrl2(url: string, variable1: string, variable2: string, variable3: string|undefined, variable4: string) {
+function createGetRequestUrl2(url: string, variable1: string, variable2: string, variable4: string) {
     if (variable1) {
         url += 'DeparturePortId=' + encodeURIComponent(variable1) + '&';
     }
     if (variable2) {
         url += 'DestinationPortId=' + encodeURIComponent(variable2) + '&';
     }
-    if (variable3) {
-        url += 'PlannedDeparture=' + encodeURIComponent(variable3) + '&';
-    }
+    // if (variable3) {
+    //     url += 'PlannedDeparture=' + encodeURIComponent(variable3) + '&';
+    // }
     if (variable4) {
         url += 'ContainerTypesId=' + variable4 + '&';
     }
@@ -146,13 +150,6 @@ function parseContact(inputString: string) {
 function displayContainers(value: any) {
     var aux = value[0];
     return aux.quantity+"x"+aux.container;
-}
-
-function displayServices(value: any) {
-    var aux = value.map((elm: any, i: number) => {
-        return elm.service.serviceName;
-    })
-    return aux.join(", ");
 }
 
 function removeAccents(input: string) {
@@ -314,6 +311,8 @@ function Request() {
     const [rowSelectionModel2, setRowSelectionModel2] = React.useState<GridRowSelectionModel>([]);
     const [rowSelectionModel3, setRowSelectionModel3] = React.useState<GridRowSelectionModel>([]);
 
+    const [fileValue, setFileValue] = useState<File[] | undefined>(undefined);
+
     const rteRef = useRef<RichTextEditorRef>(null);
     
     let { id } = useParams();
@@ -398,7 +397,7 @@ function Request() {
                 <Box sx={{ my: 2 }}>{params.row.loadingPort}</Box>
             );
         }, minWidth: 150 },
-        { field: 'unitTariff', headerName: t('unitTariff'), valueGetter: (params: GridValueGetterParams) => `${params.row.unitTariff || ''} ${t(params.row.currency)}`, minWidth: 125 },
+        { field: 'unitTariff', headerName: t('unitTariff'), valueGetter: (params: GridValueGetterParams) => `${params.row.unitTariff || ''} ${t(params.row.currency)}`, minWidth: 100 },
         { field: 'freeTime', headerName: t('freeTime'), valueFormatter: (params: GridValueFormatterParams) => `${params.value || ''} ${t('hours')}`, minWidth: 100 },
         { field: 'overtimeTariff', headerName: t('overtimeTariff'), valueGetter: (params: GridValueGetterParams) => `${params.row.overtimeTariff || ''} ${t(params.row.currency)} / ${t('hour')}`, minWidth: 125 },
         { field: 'multiStop', headerName: t('multiStop'), valueGetter: (params: GridValueGetterParams) => `${params.row.multiStop || ''} ${t(params.row.currency)}` },
@@ -933,7 +932,8 @@ function Request() {
             });
             
             // I removed the loadingDate
-            var urlSent = createGetRequestUrl(protectedResources.apiLisPricing.endPoint+"/Pricing/HaulagesOfferRequest?", (new Date("01/01/2022"))?.toISOString(), haulageType, loadingCity.city.toUpperCase());
+            var containersFormatted = containersSelected.join("&ContainerTypesId=");
+            var urlSent = createGetRequestUrl(protectedResources.apiLisPricing.endPoint+"/Pricing/HaulagesOfferRequest?", haulageType, loadingCity.city.toUpperCase(), containersFormatted);
             const response = await (context as BackendService<any>).getWithToken(urlSent, token);
             setLoadResults(false);
             setHaulages(response);
@@ -960,11 +960,8 @@ function Request() {
                 });
             });
             
-            // console.log(containersSelected);
             var containersFormatted = containersSelected.join("&ContainerTypesId=");
-            // console.log(containersFormatted);
-            
-            var urlSent = createGetRequestUrl2(protectedResources.apiLisPricing.endPoint+"/Pricing/SeaFreightsOffersRequest?", portDeparture.portId, portDestination.portId, departureDate?.toISOString(), containersFormatted);
+            var urlSent = createGetRequestUrl2(protectedResources.apiLisPricing.endPoint+"/Pricing/SeaFreightsOffersRequest?", portDeparture.portId, portDestination.portId, containersFormatted);
             const response = await (context as BackendService<any>).getWithToken(urlSent, token);
             setLoadResults(false);
             setSeafreights(response);
@@ -992,8 +989,7 @@ function Request() {
             });
             
             var containersFormatted = containersSelected.join("&ContainerTypesId=");
-            
-            var urlSent = createGetRequestUrl2(protectedResources.apiLisPricing.endPoint+"/Pricing/MiscellaneoussOffersRequest?", portDeparture.portId, portDestination.portId, departureDate?.toISOString(), containersFormatted);
+            var urlSent = createGetRequestUrl2(protectedResources.apiLisPricing.endPoint+"/Pricing/MiscellaneoussOffersRequest?", portDeparture.portId, portDestination.portId, containersFormatted);
             const response = await (context as BackendService<any>).getWithToken(urlSent, token);
             setLoadResults(false);
             setMiscs(response);
@@ -1200,7 +1196,7 @@ function Request() {
                         <img src="http://www.omnifreight.eu/Images/omnifreight_logo.jpg" style="max-width: 200px;">
                     </div>
                     `;
-                    postEmail("cyrille.penaye@omnifreight.eu", email, "Nouvelle offre de devis", rteRef.current?.editor?.getHTML()+footer);
+                    postEmail("pricing@omnifreight.eu", email, "Nouvelle offre de devis", rteRef.current?.editor?.getHTML()+footer);
                 }
                 else {
                     enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
@@ -1230,15 +1226,34 @@ function Request() {
     }
 
     const postEmail = async(from: string, to: string, subject: string, htmlContent: string) => {
-        const body: MailData = { from: from, to: to, subject: subject, htmlContent: htmlContent };
-        const data = await (context as BackendService<any>).postForm(protectedResources.apiLisQuotes.endPoint+"/Email", body);
-        console.log(data);
-        if (data?.status === 200) {
-            enqueueSnackbar(t('messageSuccessSent'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
+        const form = new FormData();
+        form.append('From', from);
+        form.append('To', to);
+        form.append('Subject', subject);
+        form.append('HtmlContent', htmlContent);
+        if (fileValue !== undefined) {
+            for (var i=0; i < fileValue.length; i++) {
+                form.append('Attachments', fileValue[i]);
+            }
         }
-        else {
-            enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
-        }
+
+        fetch('https://lisquotes-svc.azurewebsites.net/api/Email', {
+            method: 'POST',
+            headers: {
+                'accept': '*/*',
+                // 'Content-Type': 'multipart/form-data'
+            },
+            body: form
+        })
+        .then((response) => response.json())
+        .then((response: any) => {
+            if (response !== undefined && response !== null && response.code == 200) {
+                enqueueSnackbar(t('messageSuccessSent'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
+            }
+            else {
+                enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+            }
+        });
     }
 
     return (
@@ -1580,7 +1595,7 @@ function Request() {
                                 <Grid item xs={12} md={6} mt={1}>
                                     <InputLabel htmlFor="client-number" sx={inputLabelStyles}>{t('clientNumber')}</InputLabel>
                                     {/* <BootstrapInput id="client-number" value={clientNumber} onChange={(e: any) => {setClientNumber(e.target.value)}} fullWidth /> */}
-                                    <ClientSearch id="client-number" value={clientNumber} onChange={setClientNumber} callBack={() => console.log(clientNumber)} fullWidth />
+                                    <ClientSearch id="client-number" value={clientNumber} onChange={setClientNumber} fullWidth />
                                 </Grid>
                                 
                                 <Grid item xs={12} md={6} mt={.5} sx={{ display: { xs: 'none', md: 'block' } }}>
@@ -1896,6 +1911,13 @@ function Request() {
                                                                     <BootstrapInput id="adding" type="number" value={adding} onChange={(e: any) => setAdding(e.target.value)} fullWidth />
                                                                 </Grid> */}
                                                                 <Grid item xs={12}>
+                                                                    <InputLabel htmlFor="fileSent" sx={inputLabelStyles}>{t('fileSent')}</InputLabel>
+                                                                    <MuiFileInput 
+                                                                        id="fileSent" size="small" variant="outlined" multiple fullWidth inputProps={{ accept: '.pdf' }} 
+                                                                        value={fileValue} sx={{ mt: 1 }} onChange={(newValue: any) => { console.log(newValue); setFileValue(newValue); }} 
+                                                                    />
+                                                                </Grid>
+                                                                <Grid item xs={12}>
                                                                     <InputLabel htmlFor="details" sx={inputLabelStyles}>{t('detailsOffer')}</InputLabel>
                                                                     {/* <BootstrapInput id="details" type="text" multiline rows={6} value={details} onChange={(e: any) => setDetails(e.target.value)} fullWidth /> */}
                                                                     {
@@ -1911,10 +1933,10 @@ function Request() {
                                                                                     <br>
                                                                                     <p>En notre qualité de commissionnaire expéditeur nous pouvons organiser votre expédition de ${displayContainers(containersSelection)} conteneur(s) chargé(s) avec des ${tags.map((elm: any) => elm.productName).join(',')}, sur camion depuis ${loadingCity.city} à rendu port de ${selectedSeafreight.destinationPortName} comme suit :</p>
                                                                                     <br>
-                                                                                    ${containersSelection !== null ? containersSelection.map((elm: any) => "<p>"+calculateContainerPrice(elm.container, elm.quantity)+" "+selectedSeafreight.currency+" / "+elm.container+"</p>") : ""}
+                                                                                    ${containersSelection !== null ? containersSelection.map((elm: any) => "<p>"+calculateContainerPrice(elm.container, elm.quantity)+" "+selectedSeafreight.currency+" / "+elm.container+"</p>").join('') : ""}
                                                                                     <br>
                                                                                     <p>Chargement de ${selectedHaulage.freeTime} heures inclus pour les conteneurs, ensuite de ${selectedHaulage.overtimeTariff} ${selectedHaulage.currency} par heure indivisible.</p>
-                                                                                    ${selectedMisc !== null ? selectedMisc.services.map((elm: any) => "<p>- "+elm.service.serviceName+" inclus ("+elm.service.price+" "+selectedSeafreight.currency+")</p>").join('') : "<br>"}
+                                                                                    ${selectedMisc !== null ? selectedMisc.services.map((elm: any) => "<p>- "+elm.service.serviceName+" inclus</p>").join('') : "<br>"}
                                                                                     <br>
                                                                                     <p>Départs hebdomadaires.</p>
                                                                                     <br>

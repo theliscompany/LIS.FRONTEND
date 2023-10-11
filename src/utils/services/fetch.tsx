@@ -130,7 +130,7 @@ export class BackendService<T> {
         });
     }     
 
-    postWithToken = (url: string, model: T, accessToken:string): Promise<FileResponse | null> => {
+    postWithToken = (url: string, model: T, accessToken: string): Promise<FileResponse | null> => {
         if(!accessToken) return Promise.reject<null>("Access token is not valid!");
 
         url = url.replace(/[?&]$/, "");
@@ -200,6 +200,24 @@ export class BackendService<T> {
 
         //const authorization = "Bearer " + this.accessToken;
         let options_: RequestInit = this.deleteOption();
+
+        return fetch(url, options_).then((_response: Response) => {
+            return this.processGetSingleRequest(_response);
+        });
+    }
+
+    deleteWithToken = (url: string, accessToken: string): Promise<T | null> => {
+        if(!accessToken) return Promise.reject<null>("Access token is not valid!");
+        
+        url = url.replace(/[?&]$/, "");
+
+        const authorization = "Bearer " + accessToken;
+        let options_: RequestInit = {
+            method: "DELETE",
+            headers: {
+                "Authorization": authorization
+            }
+        }
 
         return fetch(url, options_).then((_response: Response) => {
             return this.processGetSingleRequest(_response);
