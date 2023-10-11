@@ -207,7 +207,7 @@ function Seafreights() {
         }
     }
     
-    const resetForm =async () => {
+    const resetForm = () => {
         setCarrier(null);
         setCarrierAgent(null);
         setPortLoading(null);
@@ -261,57 +261,62 @@ function Seafreights() {
     }
 
     const createSeafreight = async () => {
-        if (context) {
-            var dataSent = null;
-            if (currentEditId !== "") {
-                dataSent = {
-                    "seaFreightId": currentEditId,
-                    "departurePortId": portLoading.portId,
-                    "destinationPortId": portDischarge.portId,
-                    "departurePortName": portLoading.portName,
-                    "destinationPortName": portDischarge.portName,
-                    "carrierId": carrier.contactId,
-                    "carrierName": carrier.contactName,
-                    "carrierAgentId": carrierAgent.contactId,
-                    "carrierAgentName": carrierAgent.contactName,
-                    "currency": currency,
-                    "validUntil": validUntil?.toISOString(),
-                    "transitTime": transitTime,
-                    "frequency": frequency,
-                    "comment": comment,
-                    "services": servicesSelection,
-                    "updated": (new Date()).toISOString()
-                };    
+        if (portLoading !== null && portDischarge !== null && carrier !== null && carrierAgent !== null && frequency !== 0 && transitTime !== 0 && servicesSelection !== null && validUntil !== null) {
+            if (context) {
+                var dataSent = null;
+                if (currentEditId !== "") {
+                    dataSent = {
+                        "seaFreightId": currentEditId,
+                        "departurePortId": portLoading.portId,
+                        "destinationPortId": portDischarge.portId,
+                        "departurePortName": portLoading.portName,
+                        "destinationPortName": portDischarge.portName,
+                        "carrierId": carrier.contactId,
+                        "carrierName": carrier.contactName,
+                        "carrierAgentId": carrierAgent.contactId,
+                        "carrierAgentName": carrierAgent.contactName,
+                        "currency": currency,
+                        "validUntil": validUntil?.toISOString(),
+                        "transitTime": transitTime,
+                        "frequency": frequency,
+                        "comment": comment,
+                        "services": servicesSelection,
+                        "updated": (new Date()).toISOString()
+                    };    
+                }
+                else {
+                    dataSent = {
+                        // "seaFreightId": "string",
+                        "departurePortId": portLoading.portId,
+                        "destinationPortId": portDischarge.portId,
+                        "departurePortName": portLoading.portName,
+                        "destinationPortName": portDischarge.portName,
+                        "carrierId": carrier.contactId,
+                        "carrierName": carrier.contactName,
+                        "carrierAgentId": carrierAgent.contactId,
+                        "carrierAgentName": carrierAgent.contactName,
+                        "currency": currency,
+                        "validUntil": validUntil?.toISOString(),
+                        "transitTime": transitTime,
+                        "frequency": frequency,
+                        "comment": comment,
+                        "services": servicesSelection,
+                        "updated": (new Date()).toISOString()
+                    };    
+                }
+                const response = await (context as BackendService<any>).postBasic(protectedResources.apiLisPricing.endPoint+"/SeaFreight/SeaFreight", dataSent);
+                if (response !== null && response !== undefined) {
+                    setModal2(false);
+                    enqueueSnackbar(t('successCreated'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                    getSeafreights();
+                }
+                else {
+                    enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                }
             }
-            else {
-                dataSent = {
-                    // "seaFreightId": "string",
-                    "departurePortId": portLoading.portId,
-                    "destinationPortId": portDischarge.portId,
-                    "departurePortName": portLoading.portName,
-                    "destinationPortName": portDischarge.portName,
-                    "carrierId": carrier.contactId,
-                    "carrierName": carrier.contactName,
-                    "carrierAgentId": carrierAgent.contactId,
-                    "carrierAgentName": carrierAgent.contactName,
-                    "currency": currency,
-                    "validUntil": validUntil?.toISOString(),
-                    "transitTime": transitTime,
-                    "frequency": frequency,
-                    "comment": comment,
-                    "services": servicesSelection,
-                    "updated": (new Date()).toISOString()
-                };    
-            }
-            const response = await (context as BackendService<any>).postBasic(protectedResources.apiLisPricing.endPoint+"/SeaFreight/SeaFreight", dataSent);
-            if (response !== null && response !== undefined) {
-                setModal2(false);
-                enqueueSnackbar(t('successCreated'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
-                getSeafreights();
-            }
-            else {
-                enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
-            }
+        }
+        else {
+            enqueueSnackbar(t('fieldsEmptySeafreight'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
         }
     }
 

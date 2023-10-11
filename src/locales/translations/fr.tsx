@@ -21,7 +21,7 @@ export const fr = {
   weight: "Poids",
   name: "Nom",
   specifics: "Spécificités",
-  clientNumber: "Numéro du client",
+  clientNumber: "Nom du client (ou numéro)",
   details: "Autres détails concernant vos besoins (Optionnel)",
   assignedManager: "Gestionnaire assigné",
   overviewTitle: "Historique des demandes de devis",
@@ -327,5 +327,8 @@ export const fr = {
   labelAnnule: "Annulé",
   labelRetour: "Retourné",
   labelProbleme: "Problème",
-  labelEnAttenteDeFacturation: "En attente de facturation"
+  labelEnAttenteDeFacturation: "En attente de facturation",
+  fileSent: "Fichiers joints",
+  fieldEmptySeafreight : "Vous devez remplir tous les champs obligatoires et choisir au moins un service",
+  fieldsEmptyHaulage: "Vous devez remplir tous les champs obligatoires"
 };

@@ -223,7 +223,7 @@ function Haulages() {
         }
     }
     
-    const resetForm =async () => {
+    const resetForm = () => {
         setHaulier(null);
         setLoadingCity(null);
         setLoadingPort(null);
@@ -311,78 +311,83 @@ function Haulages() {
     }
 
     const createHaulage = async () => {
-        if (context && account) {
-            const token = await instance.acquireTokenSilent({
-                scopes: pricingRequest.scopes,
-                account: account
-            }).then((response:AuthenticationResult)=>{
-                return response.accessToken;
-            }).catch(() => {
-                return instance.acquireTokenPopup({
-                    ...pricingRequest,
+        if (haulier !== null && loadingCity !== null && loadingPort !== null && freeTime > 0 && unitTariff > 0 && overtimeTariff > 0 && multiStop > 0 && validUntil !== null && containerTypes.length > 0) {
+            if (context && account) {
+                const token = await instance.acquireTokenSilent({
+                    scopes: pricingRequest.scopes,
                     account: account
-                    }).then((response) => {
-                        return response.accessToken;
+                }).then((response:AuthenticationResult)=>{
+                    return response.accessToken;
+                }).catch(() => {
+                    return instance.acquireTokenPopup({
+                        ...pricingRequest,
+                        account: account
+                        }).then((response) => {
+                            return response.accessToken;
+                    });
                 });
-            });
-
-            var dataSent = null;
-            if (currentEditId !== "") {
-                dataSent = {
-                    "offerId": currentEditId,
-                    "haulierId": haulier.contactId,
-                    "haulierName": haulier.contactName,
-                    "currency": currency,
-                    "loadingCity": loadingCity.city.toUpperCase(),
-                    "loadingPortId": loadingPort.portId,
-                    "loadingPort": loadingPort.portName,
-                    "freeTime": freeTime,
-                    "multiStop": multiStop,
-                    "overtimeTariff": overtimeTariff,
-                    "unitTariff": Number(unitTariff),
-                    "haulageType": haulageType,
-                    "emptyPickupDepot": emptyPickupDepot,
-                    "comment": comment,
-                    "validUntil": validUntil?.toISOString(),
-                    "containers": containerTypes,
-                };    
+    
+                var dataSent = null;
+                if (currentEditId !== "") {
+                    dataSent = {
+                        "offerId": currentEditId,
+                        "haulierId": haulier.contactId,
+                        "haulierName": haulier.contactName,
+                        "currency": currency,
+                        "loadingCity": loadingCity.city.toUpperCase(),
+                        "loadingPortId": loadingPort.portId,
+                        "loadingPort": loadingPort.portName,
+                        "freeTime": freeTime,
+                        "multiStop": multiStop,
+                        "overtimeTariff": overtimeTariff,
+                        "unitTariff": Number(unitTariff),
+                        "haulageType": haulageType,
+                        "emptyPickupDepot": emptyPickupDepot,
+                        "comment": comment,
+                        "validUntil": validUntil?.toISOString(),
+                        "containers": containerTypes,
+                    };    
+                }
+                else {
+                    dataSent = {
+                        "id": null,
+                        "haulierId": haulier.contactId,
+                        "haulierName": haulier.contactName,
+                        "currency": currency,
+                        "loadingCity": loadingCity.city.toUpperCase(),
+                        "loadingPortId": loadingPort.portId,
+                        "loadingPort": loadingPort.portName,
+                        "freeTime": freeTime,
+                        "multiStop": multiStop,
+                        "overtimeTariff": overtimeTariff,
+                        "unitTariff": Number(unitTariff),
+                        "haulageType": haulageType,
+                        "emptyPickupDepot": emptyPickupDepot,
+                        "comment": comment,
+                        "validUntil": validUntil?.toISOString(),
+                        "containers": containerTypes,
+                    };    
+                }
+                const response = await (context as BackendService<any>).postWithToken(protectedResources.apiLisPricing.endPoint+"/Haulage/Haulage", dataSent, token);
+                if (response !== null && response !== undefined) {
+                    setModal2(false);
+                    enqueueSnackbar(t('successCreated'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                    getHaulages();
+                }
+                else {
+                    enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                }
             }
-            else {
-                dataSent = {
-                    "id": null,
-                    "haulierId": haulier.contactId,
-                    "haulierName": haulier.contactName,
-                    "currency": currency,
-                    "loadingCity": loadingCity.city.toUpperCase(),
-                    "loadingPortId": loadingPort.portId,
-                    "loadingPort": loadingPort.portName,
-                    "freeTime": freeTime,
-                    "multiStop": multiStop,
-                    "overtimeTariff": overtimeTariff,
-                    "unitTariff": Number(unitTariff),
-                    "haulageType": haulageType,
-                    "emptyPickupDepot": emptyPickupDepot,
-                    "comment": comment,
-                    "validUntil": validUntil?.toISOString(),
-                    "containers": containerTypes,
-                };    
-            }
-            const response = await (context as BackendService<any>).postWithToken(protectedResources.apiLisPricing.endPoint+"/Haulage/Haulage", dataSent, token);
-            if (response !== null && response !== undefined) {
-                setModal2(false);
-                enqueueSnackbar(t('successCreated'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
-                getHaulages();
-            }
-            else {
-                enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
-            }
+        }
+        else {
+            enqueueSnackbar(t('fieldsEmptyHaulage'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
         }
     }
 
     const deleteHaulagePrice = async (id: string) => {
         if (context) {
             // alert("Function not available yet!");
-            const response = await (context as BackendService<any>).delete(protectedResources.apiLisPricing.endPoint+"/Haulage/DeleteHaulagePrice?id="+id);
+            const response = await (context as BackendService<any>).delete(protectedResources.apiLisPricing.endPoint+"/Haulage/DeleteHaulage?offerId="+id);
             if (response !== null && response !== undefined) {
                 enqueueSnackbar(t('rowDeletedSuccess'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
                 setModal(false);

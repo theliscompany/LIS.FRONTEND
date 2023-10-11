@@ -46,6 +46,8 @@ const ClientSearch: React.FC<LocationAutocompleteProps> = ({ id, value, onChange
                 id={id}
                 fullWidth={fullWidth}
                 disablePortal
+                freeSolo
+                autoSelect
                 options={options}
                 loading={loading}
                 noOptionsText={t('typeSomething')}
@@ -61,7 +63,13 @@ const ClientSearch: React.FC<LocationAutocompleteProps> = ({ id, value, onChange
                 }}
                 value={value}
                 onChange={(event, newValue) => {
-                    onChange(newValue);
+                    // console.log(newValue);
+                    if (newValue.contactName == undefined) {
+                        onChange({ contactId: 0, contactName: newValue});
+                    }
+                    else {
+                        onChange(newValue);
+                    }
                     if (callBack) {
                         callBack(newValue);
                     }

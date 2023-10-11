@@ -13,6 +13,11 @@ interface LocationAutocompleteProps {
     callBack?: (value: any) => void;
 }
 
+function isNumeric(str: string) {
+    // if (typeof str != "string") return false // we only process strings!  
+    return !isNaN(Number(str)) // ...and ensure strings of whitespace fail
+}
+
 const AutocompleteSearch: React.FC<LocationAutocompleteProps> = ({ id, value, onChange, fullWidth, disabled, callBack }) => {
     const [loading, setLoading] = useState(false);
     const [options, setOptions] = useState<any[]>([]);
@@ -24,20 +29,27 @@ const AutocompleteSearch: React.FC<LocationAutocompleteProps> = ({ id, value, on
     const debouncedSearch = debounce(async (value: string) => {
         setLoading(true);
         try {
-            // const response = await axios.get(
-            //     `https://wft-geo-db.p.rapidapi.com/v1/geo/cities?limit=5&namePrefix=${value}&sort=-population&languageCode=${i18n.language}`,
-            //     {
-            //         headers: {
-            //             "x-rapidapi-key": "VTFclTfEVAmshQmaJNoPsbhlnoAcp1i978ojsnVvUKgKp4QiG6",
-            //             "x-rapidapi-host": "wft-geo-db.p.rapidapi.com",
-            //         },
-            //     }
-            // );
-            // setOptions(response.data.data);
-            const response = await axios.get(
-                `https://secure.geonames.org/postalCodeSearchJSON?formatted=true&postalcode=${value}&maxRows=500&username=blackstarmc97`
-            );
-            if (response.data.postalCodes.length === 0) {
+            if (isNumeric(value)) {
+                const response = await axios.get(
+                    `https://secure.geonames.org/postalCodeSearchJSON?formatted=true&postalcode=${value}&maxRows=500&username=blackstarmc97`
+                );
+                if (response.data.postalCodes.length === 0) {
+                    const response = await axios.get(
+                        `https://secure.geonames.org/search?name_startsWith=${value}&formatted=true&type=json&username=blackstarmc97`
+                    );
+                    
+                    var auxResponse = response.data.geonames.map((elm: any) => { return { id: elm.geonameId, region: elm.adminName1||"", city: elm.name, country: elm.countryName, postalCode: null, latitude: elm.lat, longitude: elm.lng } });
+                    let result = auxResponse.filter((e: any, i: number) => {
+                        return auxResponse.findIndex((x: any) => {
+                        return x.city == e.city && x.country == e.country && x.region == e.region;}) == i;
+                    });
+                    setOptions(result);
+                }
+                else {
+                    setOptions(response.data.postalCodes.map((elm: any, i: number) => { return { id: 'psCode-'+i, city: elm.placeName, country: regionNames.of(elm.countryCode), postalCode: elm.postalCode, latitude: elm.lat, longitude: elm.lng }  }))
+                }
+            }
+            else {
                 const response = await axios.get(
                     `https://secure.geonames.org/search?name_startsWith=${value}&formatted=true&type=json&username=blackstarmc97`
                 );
@@ -48,9 +60,6 @@ const AutocompleteSearch: React.FC<LocationAutocompleteProps> = ({ id, value, on
                     return x.city == e.city && x.country == e.country && x.region == e.region;}) == i;
                 });
                 setOptions(result);
-            }
-            else {
-                setOptions(response.data.postalCodes.map((elm: any, i: number) => { return { id: 'psCode-'+i, city: elm.placeName, country: regionNames.of(elm.countryCode), postalCode: elm.postalCode, latitude: elm.lat, longitude: elm.lng }  }))
             }
         } catch (error) {
             console.log(error);
