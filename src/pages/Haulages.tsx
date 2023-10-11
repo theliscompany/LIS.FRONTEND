@@ -33,13 +33,16 @@ const MenuProps = {
   },
 };
 
-function createGetRequestUrl(variable1: number, variable2: number) {
+function createGetRequestUrl(variable1: number, variable2: number, variable3: string) {
     let url = protectedResources.apiLisPricing.endPoint+"/Haulage/Haulages?";
     if (variable1) {
       url += 'LoadingPortId=' + encodeURIComponent(variable1) + '&';
     }
     if (variable2) {
       url += 'HaulierId=' + encodeURIComponent(variable2) + '&';
+    }
+    if (variable3) {
+        url += 'LoadingCity=' + encodeURIComponent(variable3) + '&';
     }
     // if (variable3) {
     //   url += 'CarrierAgentId=' + encodeURIComponent(variable3) + '&';
@@ -82,6 +85,8 @@ function Haulages() {
     const [emptyPickupDepot, setEmptyPickupDepot] = useState<string>("");
     const [containerTypes, setContainerTypes] = useState<any>([]);
     const [comment, setComment] = useState<string>("");
+
+    const [tempToken, setTempToken] = useState<string>("");
     
     const { t } = useTranslation();
     
@@ -151,7 +156,7 @@ function Haulages() {
     useEffect(() => {
         getPorts();
         getHaulages();
-        getProtectedData(); // Services and Containers
+        getContainers();
     }, []);
     
     const getPorts = async () => {
@@ -163,7 +168,7 @@ function Haulages() {
         }
     }
     
-    const getProtectedData = async () => {
+    const getContainers = async () => {
         if (context && account) {
             const token = await instance.acquireTokenSilent({
                 scopes: transportRequest.scopes,
@@ -182,12 +187,6 @@ function Haulages() {
                 }
             );
             
-            getContainers(token);
-        }
-    }
-
-    const getContainers = async (token: string) => {
-        if (context) {
             const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Package/Containers", token);
             if (response !== null && response !== undefined) {
                 setContainers(response);
@@ -210,6 +209,7 @@ function Haulages() {
                         return response.accessToken;
                 });
             });
+            setTempToken(token);
 
             const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisPricing.endPoint+"/Haulage/Haulages", token);
             if (response !== null && response !== undefined) {
@@ -242,21 +242,21 @@ function Haulages() {
     const getHaulage = async (id: string) => {
         setLoadEdit(true)
         if (context && account) {
-            const token = await instance.acquireTokenSilent({
-                scopes: pricingRequest.scopes,
-                account: account
-            }).then((response:AuthenticationResult)=>{
-                return response.accessToken;
-            }).catch(() => {
-                return instance.acquireTokenPopup({
-                    ...pricingRequest,
-                    account: account
-                    }).then((response) => {
-                        return response.accessToken;
-                });
-            });
+            // const token = await instance.acquireTokenSilent({
+            //     scopes: pricingRequest.scopes,
+            //     account: account
+            // }).then((response:AuthenticationResult)=>{
+            //     return response.accessToken;
+            // }).catch(() => {
+            //     return instance.acquireTokenPopup({
+            //         ...pricingRequest,
+            //         account: account
+            //         }).then((response) => {
+            //             return response.accessToken;
+            //     });
+            // });
 
-            const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisPricing.endPoint+"/Haulage/Haulage?offerId="+id, token);
+            const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisPricing.endPoint+"/Haulage/Haulage?offerId="+id, tempToken);
             if (response !== null && response !== undefined) {
                 setHaulier({contactId: response.haulierId, contactName: response.haulierName});
                 setLoadingCity({city: response.loadingCity});
@@ -282,23 +282,23 @@ function Haulages() {
     
     const searchHaulages = async () => {
         if (context && account) {
-            const token = await instance.acquireTokenSilent({
-                scopes: pricingRequest.scopes,
-                account: account
-            }).then((response:AuthenticationResult)=>{
-                return response.accessToken;
-            }).catch(() => {
-                return instance.acquireTokenPopup({
-                    ...pricingRequest,
-                    account: account
-                    }).then((response) => {
-                        return response.accessToken;
-                });
-            });
+            // const token = await instance.acquireTokenSilent({
+            //     scopes: pricingRequest.scopes,
+            //     account: account
+            // }).then((response:AuthenticationResult)=>{
+            //     return response.accessToken;
+            // }).catch(() => {
+            //     return instance.acquireTokenPopup({
+            //         ...pricingRequest,
+            //         account: account
+            //         }).then((response) => {
+            //             return response.accessToken;
+            //     });
+            // });
 
             setLoad(true);
-            var requestFormatted = createGetRequestUrl(searchedLoadingPort?.portId, searchedHaulier?.contactId);
-            const response = await (context as BackendService<any>).getWithToken(requestFormatted, token);
+            var requestFormatted = createGetRequestUrl(searchedLoadingPort?.portId, searchedHaulier?.contactId, searchedLoadingCity?.city.toUpperCase());
+            const response = await (context as BackendService<any>).getWithToken(requestFormatted, tempToken);
             if (response !== null && response !== undefined) {
                 setHaulages(response);
                 setLoad(false);
@@ -313,19 +313,19 @@ function Haulages() {
     const createHaulage = async () => {
         if (haulier !== null && loadingCity !== null && loadingPort !== null && freeTime > 0 && unitTariff > 0 && overtimeTariff > 0 && multiStop > 0 && validUntil !== null && containerTypes.length > 0) {
             if (context && account) {
-                const token = await instance.acquireTokenSilent({
-                    scopes: pricingRequest.scopes,
-                    account: account
-                }).then((response:AuthenticationResult)=>{
-                    return response.accessToken;
-                }).catch(() => {
-                    return instance.acquireTokenPopup({
-                        ...pricingRequest,
-                        account: account
-                        }).then((response) => {
-                            return response.accessToken;
-                    });
-                });
+                // const token = await instance.acquireTokenSilent({
+                //     scopes: pricingRequest.scopes,
+                //     account: account
+                // }).then((response:AuthenticationResult)=>{
+                //     return response.accessToken;
+                // }).catch(() => {
+                //     return instance.acquireTokenPopup({
+                //         ...pricingRequest,
+                //         account: account
+                //         }).then((response) => {
+                //             return response.accessToken;
+                //     });
+                // });
     
                 var dataSent = null;
                 if (currentEditId !== "") {
@@ -368,7 +368,7 @@ function Haulages() {
                         "containers": containerTypes,
                     };    
                 }
-                const response = await (context as BackendService<any>).postWithToken(protectedResources.apiLisPricing.endPoint+"/Haulage/Haulage", dataSent, token);
+                const response = await (context as BackendService<any>).postWithToken(protectedResources.apiLisPricing.endPoint+"/Haulage/Haulage", dataSent, tempToken);
                 if (response !== null && response !== undefined) {
                     setModal2(false);
                     enqueueSnackbar(t('successCreated'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
@@ -387,7 +387,7 @@ function Haulages() {
     const deleteHaulagePrice = async (id: string) => {
         if (context) {
             // alert("Function not available yet!");
-            const response = await (context as BackendService<any>).delete(protectedResources.apiLisPricing.endPoint+"/Haulage/DeleteHaulage?offerId="+id);
+            const response = await (context as BackendService<any>).deleteWithToken(protectedResources.apiLisPricing.endPoint+"/Haulage/DeleteHaulage?offerId="+id, tempToken);
             if (response !== null && response !== undefined) {
                 enqueueSnackbar(t('rowDeletedSuccess'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
                 setModal(false);
@@ -411,45 +411,20 @@ function Haulages() {
                         </Button>
                     </Grid>
                     <Grid item xs={12} md={4} mt={1}>
-                        <InputLabel htmlFor="company-name" sx={inputLabelStyles}>{t('carrier')}</InputLabel>
+                        <InputLabel htmlFor="company-name" sx={inputLabelStyles}>{t('haulier')}</InputLabel>
                         <CompanySearch id="company-name" value={searchedHaulier} onChange={setSearchedHaulier} category={CategoryEnum.CHARGEUR} callBack={() => console.log(searchedHaulier)} fullWidth />
                     </Grid>
                     <Grid item xs={12} md={3} mt={1}>
-                        <InputLabel htmlFor="port-departure" sx={inputLabelStyles}>{t('departurePort')}</InputLabel>
-                        {
-                            ports !== null ?
-                            <Autocomplete
-                                disablePortal
-                                id="port-departure"
-                                options={ports}
-                                renderOption={(props, option, i) => {
-                                    return (
-                                        <li {...props} key={option.portId}>
-                                            {option.portName+", "+option.country}
-                                        </li>
-                                    );
-                                }}
-                                getOptionLabel={(option: any) => { 
-                                    if (option !== null && option !== undefined) {
-                                        return option.portName+', '+option.country;
-                                    }
-                                    return ""; 
-                                }}
-                                value={searchedLoadingCity}
-                                sx={{ mt: 1 }}
-                                renderInput={(params: any) => <TextField {...params} />}
-                                onChange={(e: any, value: any) => { setSearchedLoadingCity(value); }}
-                                fullWidth
-                            /> : <Skeleton />
-                        }
+                        <InputLabel htmlFor="loading-city-searched" sx={inputLabelStyles}>{t('loadingCity')}</InputLabel>
+                        <AutocompleteSearch id="loading-city-searched" value={searchedLoadingCity} onChange={setSearchedLoadingCity} fullWidth />
                     </Grid>
                     <Grid item xs={12} md={3} mt={1}>
-                        <InputLabel htmlFor="destination-port" sx={inputLabelStyles}>{t('arrivalPort')}</InputLabel>
+                        <InputLabel htmlFor="loading-port-searched" sx={inputLabelStyles}>{t('loadingPort')}</InputLabel>
                         {
                             ports !== null ?
                             <Autocomplete
                                 disablePortal
-                                id="destination-port"
+                                id="loading-port-searched"
                                 options={ports}
                                 renderOption={(props, option, i) => {
                                     return (

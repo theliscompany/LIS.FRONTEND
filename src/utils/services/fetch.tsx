@@ -206,11 +206,18 @@ export class BackendService<T> {
         });
     }
 
-    deleteWithToken = (url: string): Promise<T | null> => {
+    deleteWithToken = (url: string, accessToken: string): Promise<T | null> => {
+        if(!accessToken) return Promise.reject<null>("Access token is not valid!");
+        
         url = url.replace(/[?&]$/, "");
 
-        //const authorization = "Bearer " + this.accessToken;
-        let options_: RequestInit = this.deleteOption();
+        const authorization = "Bearer " + accessToken;
+        let options_: RequestInit = {
+            method: "DELETE",
+            headers: {
+                "Authorization": authorization
+            }
+        }
 
         return fetch(url, options_).then((_response: Response) => {
             return this.processGetSingleRequest(_response);

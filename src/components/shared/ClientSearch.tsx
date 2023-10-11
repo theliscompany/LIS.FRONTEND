@@ -63,9 +63,19 @@ const ClientSearch: React.FC<LocationAutocompleteProps> = ({ id, value, onChange
                 }}
                 value={value}
                 onChange={(event, newValue) => {
-                    // console.log(newValue);
-                    if (newValue.contactName == undefined) {
-                        onChange({ contactId: 0, contactName: newValue});
+                    console.log(newValue);
+                    var splitValue = null;
+                    if (newValue.contactName === undefined) {
+                        splitValue = newValue.split(', ');
+                    }
+                    
+                    if (splitValue !== null && splitValue !== undefined) {
+                        if (splitValue.length !== 2) {
+                            onChange({ contactId: 0, contactName: newValue});
+                        }
+                        else {
+                            onChange({ contactId: splitValue[0], contactName: splitValue[1]});
+                        }
                     }
                     else {
                         onChange(newValue);

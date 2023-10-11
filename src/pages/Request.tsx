@@ -60,15 +60,18 @@ import { MuiFileInput } from 'mui-file-input';
 // let packingTypes = ["LCL", "Airfreight", "Cars", "Trucks", "Not containerised"];
 let packingOptions = ["Unit", "Bundle", "Bag", "Pallet", "Carton", "Lot", "Crate"];
 
-function createGetRequestUrl(url: string, variable1: string|undefined, variable2: string, variable3: string) {
-    if (variable1) {
-        url += 'PlannedDeparture=' + encodeURIComponent(variable1) + '&';
-    }
+function createGetRequestUrl(url: string, variable2: string, variable3: string, variable4: string) {
+    // if (variable1) {
+    //     url += 'PlannedDeparture=' + encodeURIComponent(variable1) + '&';
+    // }
     if (variable2) {
         url += 'HaulageType=' + encodeURIComponent(variable2) + '&';
     }
     if (variable3) {
         url += 'LoadingCity=' + encodeURIComponent(variable3) + '&';
+    }
+    if (variable4) {
+        url += 'ContainerTypesId=' + variable4 + '&';
     }
     
     if (url.slice(-1) === '&') {
@@ -77,16 +80,16 @@ function createGetRequestUrl(url: string, variable1: string|undefined, variable2
     return url;
 }
 
-function createGetRequestUrl2(url: string, variable1: string, variable2: string, variable3: string|undefined, variable4: string) {
+function createGetRequestUrl2(url: string, variable1: string, variable2: string, variable4: string) {
     if (variable1) {
         url += 'DeparturePortId=' + encodeURIComponent(variable1) + '&';
     }
     if (variable2) {
         url += 'DestinationPortId=' + encodeURIComponent(variable2) + '&';
     }
-    if (variable3) {
-        url += 'PlannedDeparture=' + encodeURIComponent(variable3) + '&';
-    }
+    // if (variable3) {
+    //     url += 'PlannedDeparture=' + encodeURIComponent(variable3) + '&';
+    // }
     if (variable4) {
         url += 'ContainerTypesId=' + variable4 + '&';
     }
@@ -929,7 +932,8 @@ function Request() {
             });
             
             // I removed the loadingDate
-            var urlSent = createGetRequestUrl(protectedResources.apiLisPricing.endPoint+"/Pricing/HaulagesOfferRequest?", (new Date("01/01/2022"))?.toISOString(), haulageType, loadingCity.city.toUpperCase());
+            var containersFormatted = containersSelected.join("&ContainerTypesId=");
+            var urlSent = createGetRequestUrl(protectedResources.apiLisPricing.endPoint+"/Pricing/HaulagesOfferRequest?", haulageType, loadingCity.city.toUpperCase(), containersFormatted);
             const response = await (context as BackendService<any>).getWithToken(urlSent, token);
             setLoadResults(false);
             setHaulages(response);
@@ -956,11 +960,8 @@ function Request() {
                 });
             });
             
-            // console.log(containersSelected);
             var containersFormatted = containersSelected.join("&ContainerTypesId=");
-            // console.log(containersFormatted);
-            
-            var urlSent = createGetRequestUrl2(protectedResources.apiLisPricing.endPoint+"/Pricing/SeaFreightsOffersRequest?", portDeparture.portId, portDestination.portId, departureDate?.toISOString(), containersFormatted);
+            var urlSent = createGetRequestUrl2(protectedResources.apiLisPricing.endPoint+"/Pricing/SeaFreightsOffersRequest?", portDeparture.portId, portDestination.portId, containersFormatted);
             const response = await (context as BackendService<any>).getWithToken(urlSent, token);
             setLoadResults(false);
             setSeafreights(response);
@@ -988,8 +989,7 @@ function Request() {
             });
             
             var containersFormatted = containersSelected.join("&ContainerTypesId=");
-            
-            var urlSent = createGetRequestUrl2(protectedResources.apiLisPricing.endPoint+"/Pricing/MiscellaneoussOffersRequest?", portDeparture.portId, portDestination.portId, departureDate?.toISOString(), containersFormatted);
+            var urlSent = createGetRequestUrl2(protectedResources.apiLisPricing.endPoint+"/Pricing/MiscellaneoussOffersRequest?", portDeparture.portId, portDestination.portId, containersFormatted);
             const response = await (context as BackendService<any>).getWithToken(urlSent, token);
             setLoadResults(false);
             setMiscs(response);
