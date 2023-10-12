@@ -22,17 +22,6 @@ import { CategoryEnum } from '../utils/constants';
 import AutocompleteSearch from '../components/shared/AutocompleteSearch';
 import { MailData } from '../utils/models/models';
 
-const ITEM_HEIGHT = 48;
-const ITEM_PADDING_TOP = 8;
-const MenuProps = {
-  PaperProps: {
-    style: {
-      maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
-      width: 250,
-    },
-  },
-};
-
 function createGetRequestUrl(variable1: number, variable2: number, variable3: string) {
     let url = protectedResources.apiLisPricing.endPoint+"/Haulage/Haulages?";
     if (variable1) {
@@ -61,8 +50,6 @@ function Haulages() {
     const [modal2, setModal2] = useState<boolean>(false);
     const [ports, setPorts] = useState<any>(null);
     const [containers, setContainers] = useState<any>(null);
-
-    const [pricingToken, setPricingToken] = useState<string>("");
 
     const [currentId, setCurrentId] = useState<string>("");
     const [currentEditId, setCurrentEditId] = useState<string>("");
@@ -242,20 +229,6 @@ function Haulages() {
     const getHaulage = async (id: string) => {
         setLoadEdit(true)
         if (context && account) {
-            // const token = await instance.acquireTokenSilent({
-            //     scopes: pricingRequest.scopes,
-            //     account: account
-            // }).then((response:AuthenticationResult)=>{
-            //     return response.accessToken;
-            // }).catch(() => {
-            //     return instance.acquireTokenPopup({
-            //         ...pricingRequest,
-            //         account: account
-            //         }).then((response) => {
-            //             return response.accessToken;
-            //     });
-            // });
-
             const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisPricing.endPoint+"/Haulage/Haulage?offerId="+id, tempToken);
             if (response !== null && response !== undefined) {
                 setHaulier({contactId: response.haulierId, contactName: response.haulierName});
@@ -282,20 +255,6 @@ function Haulages() {
     
     const searchHaulages = async () => {
         if (context && account) {
-            // const token = await instance.acquireTokenSilent({
-            //     scopes: pricingRequest.scopes,
-            //     account: account
-            // }).then((response:AuthenticationResult)=>{
-            //     return response.accessToken;
-            // }).catch(() => {
-            //     return instance.acquireTokenPopup({
-            //         ...pricingRequest,
-            //         account: account
-            //         }).then((response) => {
-            //             return response.accessToken;
-            //     });
-            // });
-
             setLoad(true);
             var requestFormatted = createGetRequestUrl(searchedLoadingPort?.portId, searchedHaulier?.contactId, searchedLoadingCity?.city.toUpperCase());
             const response = await (context as BackendService<any>).getWithToken(requestFormatted, tempToken);
@@ -313,20 +272,6 @@ function Haulages() {
     const createHaulage = async () => {
         if (haulier !== null && loadingCity !== null && loadingPort !== null && freeTime > 0 && unitTariff > 0 && overtimeTariff > 0 && multiStop > 0 && validUntil !== null && containerTypes.length > 0) {
             if (context && account) {
-                // const token = await instance.acquireTokenSilent({
-                //     scopes: pricingRequest.scopes,
-                //     account: account
-                // }).then((response:AuthenticationResult)=>{
-                //     return response.accessToken;
-                // }).catch(() => {
-                //     return instance.acquireTokenPopup({
-                //         ...pricingRequest,
-                //         account: account
-                //         }).then((response) => {
-                //             return response.accessToken;
-                //     });
-                // });
-    
                 var dataSent = null;
                 if (currentEditId !== "") {
                     dataSent = {
@@ -407,7 +352,7 @@ function Haulages() {
                 <Grid container spacing={2} mt={0} px={5}>
                     <Grid item xs={12}>
                         <Button variant="contained" sx={actionButtonStyles} onClick={() => { setCurrentEditId(""); resetForm(); setModal2(true); }}>
-                            New haulage price <AddCircleOutlinedIcon sx={{ ml: 0.5, pb: 0.25, justifyContent: "center", alignItems: "center" }} fontSize="small" />
+                            {t('newHaulagePrice')} <AddCircleOutlinedIcon sx={{ ml: 0.5, pb: 0.25, justifyContent: "center", alignItems: "center" }} fontSize="small" />
                         </Button>
                     </Grid>
                     <Grid item xs={12} md={4} mt={1}>

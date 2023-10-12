@@ -330,5 +330,11 @@ export const en = {
   labelEnAttenteDeFacturation: "Waiting for billing",
   fileSent: "Attachments",
   fieldsEmptySeafreight: "You must fill all the required fields and choose at least one service",
-  fieldsEmptyHaulage: "You must fill all the required fields"
+  fieldsEmptyHaulage: "You must fill all the required fields",
+  listMiscellaneous: "List of miscellaneous prices",
+  newSeafreightPrice: "New seafreight price",
+  newHaulagePrice: "New haulage price",
+  newMiscellaneousPrice: "New miscellaneous price",
+  listServices: "List of services",
+  withShipment: "With shipment"
 };
