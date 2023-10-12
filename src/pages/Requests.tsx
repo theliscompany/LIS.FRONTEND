@@ -225,7 +225,7 @@ function Requests() {
                             <List sx={{ mt: 3 }}>
                                 {
                                     requests.map((item: any, i: number) => {
-                                        return (<RequestViewItem item={item} i={i} />)
+                                        return (<RequestViewItem key={"rvi-"+i} item={item} i={i} />)
                                     })
                                 }
                             </List> : <Typography variant="subtitle1" my={3}>{t('errorHappened')}</Typography>

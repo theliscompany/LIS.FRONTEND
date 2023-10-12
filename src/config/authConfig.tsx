@@ -2,9 +2,9 @@ import { PopupRequest } from "@azure/msal-browser";
 
 export const msalConfig: any = {
   auth: {
-    clientId: "788aee08-9270-4549-9a97-c43b43a8bb73",
-    authority: "https://login.microsoftonline.com/abb93e13-2d77-476f-a287-59892d6b3c24",
-    redirectUri: "/admin/",
+    clientId: process.env.REACT_APP_CLIENT_ID,
+    authority: process.env.REACT_APP_AUTHORITY,
+    redirectUri: process.env.REACT_APP_REDIRECT_URI,
     navigateToLoginRequestUrl: false
   },
   cache: {
@@ -15,47 +15,46 @@ export const msalConfig: any = {
 
 export const loginRequest: PopupRequest = {
   scopes: [
-    "api://a9d2f4e4-a410-4588-8fbf-1be9101209b3/LIS.Quote.ReadWrite",
+    process.env.REACT_APP_LOGIN_REQUEST_SCOPE !== undefined ? process.env.REACT_APP_LOGIN_REQUEST_SCOPE : ""
   ]
 };
 
 export const graphRequest: PopupRequest = {
   scopes: [
-    "https://graph.microsoft.com/User.ReadBasic.All"
+    process.env.REACT_APP_GRAPH_REQUEST_SCOPE !== undefined ? process.env.REACT_APP_GRAPH_REQUEST_SCOPE : ""
   ]
 };
 
 export const pricingRequest: PopupRequest = {
   scopes: [
-    "api://e0e63c6a-8095-4823-a523-2c7b007e9cf5/PricingsRead",
-    "api://e0e63c6a-8095-4823-a523-2c7b007e9cf5/LIS.Pricing.ReadWrite"
+    process.env.REACT_APP_PRICING_REQUEST_SCOPE1 !== undefined ? process.env.REACT_APP_PRICING_REQUEST_SCOPE1 : "",
+    process.env.REACT_APP_PRICING_REQUEST_SCOPE2 !== undefined ? process.env.REACT_APP_PRICING_REQUEST_SCOPE2 : ""
   ]
 };
 
 export const transportRequest: PopupRequest = {
   scopes: [
-    "api://f0b35c43-ffd4-4096-bb75-32306b1e7109/LIS.TRANSPORT.PortsRead",
-    "api://f0b35c43-ffd4-4096-bb75-32306b1e7109/LIS.TRANSPORT.CitiesRead",
-    "api://f0b35c43-ffd4-4096-bb75-32306b1e7109/LIS.TRANSPORT.ServicesRead",
-    "api://f0b35c43-ffd4-4096-bb75-32306b1e7109/LIS.TRANSPORT.ContainersRead"
+    process.env.REACT_APP_TRANSPORT_REQUEST_SCOPE1 !== undefined ? process.env.REACT_APP_TRANSPORT_REQUEST_SCOPE1 : "",
+    process.env.REACT_APP_TRANSPORT_REQUEST_SCOPE2 !== undefined ? process.env.REACT_APP_TRANSPORT_REQUEST_SCOPE2 : "",
+    process.env.REACT_APP_TRANSPORT_REQUEST_SCOPE3 !== undefined ? process.env.REACT_APP_TRANSPORT_REQUEST_SCOPE3 : "",
+    process.env.REACT_APP_TRANSPORT_REQUEST_SCOPE4 !== undefined ? process.env.REACT_APP_TRANSPORT_REQUEST_SCOPE4 : ""
   ]
 };
 
 export const protectedResources = {
   apiLisQuotes: {
-    endPoint: "https://lisquotes-svc.azurewebsites.net/api"
+    endPoint: process.env.REACT_APP_API_LIS_QUOTES_ENDPOINT
   },
   apiLisPricing: {
-    endPoint: "https://lis-pricing-dev.azurewebsites.net/api"
-    // endPoint: "https://localhost:7128/api"
+    endPoint: process.env.REACT_APP_API_LIS_PRICING_ENDPOINT
   },
   apiLisTransport: {
-    endPoint: "https://listransport.azurewebsites.net"
+    endPoint: process.env.REACT_APP_API_LIS_TRANSPORT_ENDPOINT
   },
   apiLisOffer: {
-    endPoint: "https://lis-offer.azurewebsites.net/api"
+    endPoint: process.env.REACT_APP_API_LIS_OFFER_ENDPOINT
   },
   apiLisClient: {
-    endPoint: "https://liscrm-dev.azurewebsites.net"
+    endPoint: process.env.REACT_APP_API_LIS_CLIENT_ENDPOINT
   }
 }

@@ -169,7 +169,7 @@ function UsersAssignment(props: any) {
                                 users !== null && users !== undefined && assignees !== null ?
                                 <Box sx={{ overflow: "auto" }}>
                                     <Box sx={{ width: "100%", display: "table", tableLayout: "fixed" }}>
-                                        <Table aria-label="simple table">
+                                        <Table aria-label="simple table" sx={{ border: 1, borderColor: "#e5e5e5" }}>
                                             <TableHead>
                                                 <TableRow>
                                                     <TableCell align="left" sx={{ fontSize: 16, fontWeight: "bolder" }}>{t('id')}</TableCell>
