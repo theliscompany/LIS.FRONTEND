@@ -336,5 +336,6 @@ export const fr = {
   newHaulagePrice: "Nouveau prix de transport routier",
   newMiscellaneousPrice: "Nouveau prix de service divers",
   listServices: "Liste des services",
-  withShipment: "Avec expédition"
+  withShipment: "Avec expédition",
+  mailLanguage: "Message initial dans la langue"
 };
