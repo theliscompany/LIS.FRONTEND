@@ -301,12 +301,12 @@ function Request() {
     ];
     
     const columnsSeafreights: GridColDef[] = [
-        { field: 'carrierName', headerName: t('carrier'), minWidth: 150 },
-        { field: 'carrierAgentName', headerName: t('carrierAgent'), minWidth: 150 },
-        // { field: 'departurePortName', headerName: t('departurePort'), minWidth: 125 },
-        // { field: 'destinationPortName', headerName: t('destinationPort'), minWidth: 125 },
-        { field: 'frequency', headerName: t('frequency'), valueFormatter: (params: GridValueFormatterParams) => `${t('every')} ${params.value || ''} `+t('days'), minWidth: 125 },
-        { field: 'transitTime', headerName: t('transitTime'), valueFormatter: (params: GridValueFormatterParams) => `${params.value || ''} `+t('days'), minWidth: 50 },
+        { field: 'carrierName', headerName: t('carrier'), flex: 1.2 },
+        { field: 'carrierAgentName', headerName: t('carrierAgent'), flex: 1.2 },
+        // { field: 'departurePortName', headerName: t('departurePort'), flex: 1 },
+        // { field: 'destinationPortName', headerName: t('destinationPort'), flex: 1 },
+        { field: 'frequency', headerName: t('frequency'), valueFormatter: (params: GridValueFormatterParams) => `${t('every')} ${params.value || ''} `+t('days'), flex: 1 },
+        { field: 'transitTime', headerName: t('transitTime'), valueFormatter: (params: GridValueFormatterParams) => `${params.value || ''} `+t('days'), flex: 1 },
         { field: 'currency', headerName: t('prices'), renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box sx={{ my: 1, mr: 1 }}>
@@ -317,21 +317,21 @@ function Request() {
                     <Box sx={{ my: 1 }} hidden={!getPackageNamesByIds(containersSelected, containers).includes("40' HcRf")}>{params.row.price40hcrf !== 0 ? "40' HcRf : "+params.row.price40hcrf+" "+t(params.row.currency) : "40' HcRf : N/A"}</Box>
                 </Box>
             );
-        }, minWidth: 150 },
+        }, flex: 1.1 },
         { field: 'validUntil', headerName: t('validUntil'), renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box sx={{ my: 1, mr: 1 }}>
                     <Chip label={(new Date(params.row.validUntil)).toLocaleDateString().slice(0,10)} color={(new Date()).getTime() - (new Date(params.row.validUntil)).getTime() > 0 ? "warning" : "success"}></Chip>
                 </Box>
             );
-        }, minWidth: 100 },
+        }, flex: 0.9 },
         // { field: 'lastUpdated', headerName: t('lastUpdated'), renderCell: (params: GridRenderCellParams) => {
         //     return (
         //         <Box sx={{ my: 1, mr: 1 }}>
         //             <Chip label={(new Date(params.row.lastUpdated)).toLocaleDateString().slice(0,10)} color={(new Date()).getTime() - (new Date(params.row.lastUpdated)).getTime() > 0 ? "default" : "default"}></Chip>
         //         </Box>
         //     );
-        // }, minWidth: 100 },
+        // }, flex: 1 },
         { field: 'comment', headerName: "Comment", renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box sx={{ my: 2 }}>
@@ -352,34 +352,34 @@ function Request() {
                     </HtmlTooltip>
                 </Box>
             );
-        }, minWidth: 100 },
+        }, flex: 0.6 },
     ];
     
     const columnsHaulages: GridColDef[] = [
-        { field: 'haulierName', headerName: t('haulier'), minWidth: 150 },
+        { field: 'haulierName', headerName: t('haulier'), flex: 1.3 },
         { field: 'loadingPort', headerName: t('loadingPort'), renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box sx={{ my: 2 }}>{params.row.loadingPort}</Box>
             );
-        }, minWidth: 150 },
-        { field: 'unitTariff', headerName: t('unitTariff'), valueGetter: (params: GridValueGetterParams) => `${params.row.unitTariff || ''} ${t(params.row.currency)}`, minWidth: 100 },
-        { field: 'freeTime', headerName: t('freeTime'), valueFormatter: (params: GridValueFormatterParams) => `${params.value || ''} ${t('hours')}`, minWidth: 100 },
-        { field: 'overtimeTariff', headerName: t('overtimeTariff'), valueGetter: (params: GridValueGetterParams) => `${params.row.overtimeTariff || ''} ${t(params.row.currency)} / ${t('hour')}`, minWidth: 125 },
-        { field: 'multiStop', headerName: t('multiStop'), valueGetter: (params: GridValueGetterParams) => `${params.row.multiStop || ''} ${t(params.row.currency)}` },
+        }, flex: 1 },
+        { field: 'unitTariff', headerName: t('unitTariff'), valueGetter: (params: GridValueGetterParams) => `${params.row.unitTariff || ''} ${t(params.row.currency)}`, flex: 1 },
+        { field: 'freeTime', headerName: t('freeTime'), valueFormatter: (params: GridValueFormatterParams) => `${params.value || ''} ${t('hours')}`, flex: 1 },
+        { field: 'overtimeTariff', headerName: t('overtimeTariff'), valueGetter: (params: GridValueGetterParams) => `${params.row.overtimeTariff || ''} ${t(params.row.currency)} / ${t('hour')}`, flex: 1 },
+        { field: 'multiStop', headerName: t('multiStop'), valueGetter: (params: GridValueGetterParams) => `${params.row.multiStop || ''} ${t(params.row.currency)}`, flex: 1 },
         { field: 'validUntil', headerName: t('validUntil'), renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box sx={{ my: 1, mr: 1 }}>
                     <Chip label={(new Date(params.row.validUntil)).toLocaleDateString().slice(0,10)} color={(new Date()).getTime() - (new Date(params.row.validUntil)).getTime() > 0 ? "warning" : "success"}></Chip>
                 </Box>
             );
-        }, minWidth: 100 },
+        }, flex: 0.9 },
         // { field: 'updated', headerName: t('lastUpdated'), renderCell: (params: GridRenderCellParams) => {
         //     return (
         //         <Box sx={{ my: 1, mr: 1 }}>
         //             <Chip label={(new Date(params.row.updated)).toLocaleDateString().slice(0,10)} color={(new Date()).getTime() - (new Date(params.row.updated)).getTime() > 0 ? "default" : "default"}></Chip>
         //         </Box>
         //     );
-        // }, minWidth: 100 },
+        // }, flex: 1 },
         { field: 'comment', headerName: "Comment", renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box sx={{ my: 2 }}>
@@ -400,7 +400,7 @@ function Request() {
                     </HtmlTooltip>
                 </Box>
             );
-        }, minWidth: 100 },
+        }, flex: 0.8 },
     ];
     
     const columnsMiscs: GridColDef[] = [
