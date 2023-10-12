@@ -343,7 +343,7 @@ function Seafreights() {
                 <Grid container spacing={2} mt={0} px={5}>
                     <Grid item xs={12}>
                         <Button variant="contained" sx={actionButtonStyles} onClick={() => { setCurrentEditId(""); resetForm(); setModal2(true); }}>
-                            New seafreight price <AddCircleOutlinedIcon sx={{ ml: 0.5, pb: 0.25, justifyContent: "center", alignItems: "center" }} fontSize="small" />
+                            {t('newSeafreightPrice')} <AddCircleOutlinedIcon sx={{ ml: 0.5, pb: 0.25, justifyContent: "center", alignItems: "center" }} fontSize="small" />
                         </Button>
                     </Grid>
                     <Grid item xs={12} md={4} mt={1}>
@@ -601,7 +601,7 @@ function Seafreights() {
                                 <BootstrapInput id="frequency" type="number" value={frequency} onChange={(e: any) => setFrequency(e.target.value)} fullWidth />
                             </Grid>
                             <Grid item xs={12} md={12}>
-                                <Typography sx={{ fontSize: 18 }}><b>List of services</b></Typography>
+                                <Typography sx={{ fontSize: 18 }}><b>{t('listServices')}</b></Typography>
                             </Grid>
                             <Grid item xs={12} md={4}>
                                 <InputLabel htmlFor="service-name" sx={inputLabelStyles}>{t('serviceName')}</InputLabel>

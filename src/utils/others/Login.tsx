@@ -27,7 +27,7 @@ function Login() {
         <AppBar position="static" sx={{ background: "#fff", boxShadow: 0, borderBottom: "1px solid rgb(241, 242, 246)" }}>
           <Toolbar variant="dense" sx={{ margin: "0 auto" }}>
               <Typography variant="h6" noWrap component="a" href="/" sx={{ display: "flex", margin: "5px 0" }}>
-                  <img src="./img/lisquoteslogo.png" className="img-fluid" style={{ maxHeight: "75px" }} alt="lisquotes" />
+                  <img src="/img/lisquoteslogo.png" className="img-fluid" style={{ maxHeight: "75px" }} alt="lisquotes" />
               </Typography>
           </Toolbar>
         </AppBar>
@@ -46,7 +46,7 @@ function Login() {
             </Card>
           </Grid>
           <Grid item xs={12} md={8} p={3} sx={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", backgroundColor: "#68b7d7" }}>
-            <img src="./img/login-image.svg" alt="login" style={{ width: "60%", display: "block", margin: "0 auto" }} />
+            <img src="/img/login-image.svg" alt="login" style={{ width: "60%", display: "block", margin: "0 auto" }} />
             <Typography variant="h4" mt={3} fontFamily="inherit" color="#fff" sx={{ fontSize: { xs: 24 } }}><span>Welcome! Your adventure starts here...</span></Typography>
             <Typography variant="body1" mt={2} fontFamily="inherit" mb={3} color="#fff">Discover LIS QUOTES, your application for managing requests for quotes.</Typography>
           </Grid>

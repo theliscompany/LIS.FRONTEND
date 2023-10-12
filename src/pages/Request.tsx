@@ -1,4 +1,4 @@
-import { Alert, Autocomplete, Box, Button, Chip, DialogActions, DialogContent, FormControl, FormControlLabel, FormLabel, Grid, IconButton, InputLabel, ListItem, ListItemText, NativeSelect, Paper, Popover, Radio, RadioGroup, Skeleton, Step, StepLabel, Stepper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Typography } from '@mui/material';
+import { Alert, Autocomplete, Box, Button, Chip, DialogActions, DialogContent, FormControl, FormControlLabel, FormLabel, Grid, IconButton, InputLabel, ListItem, ListItemText, NativeSelect, Paper, Popover, Radio, RadioGroup, Skeleton, Step, StepLabel, Stepper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material';
 import { MuiTelInput } from 'mui-tel-input';
 import React, { useEffect, useState, useRef } from 'react';
 import { useParams } from 'react-router-dom';
@@ -54,6 +54,8 @@ import RequestAskInformation from '../components/editRequestPage/RequestAskInfor
 import RequestChangeStatus from '../components/editRequestPage/RequestChangeStatus';
 import { MailData } from '../utils/models/models';
 import { MuiFileInput } from 'mui-file-input';
+import { calculateDistance, findClosestSeaPort } from '../utils/functions';
+import { EditorContent, useEditor } from '@tiptap/react';
 
 //let statusTypes = ["EnAttente", "Valider", "Rejeter"];
 // let cargoTypes = ["Container", "Conventional", "RollOnRollOff"];
@@ -152,24 +154,6 @@ function displayContainers(value: any) {
     return aux.quantity+"x"+aux.container;
 }
 
-function removeAccents(input: string) {
-    return input.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-}
-
-function calculateDistance(coord1: any, coord2: any) {
-    const [lat1, lon1] = coord1;
-    const [lon2, lat2] = coord2;
-    const R = 6371; // Radius of the Earth in km
-    const dLat = (lat2 - lat1) * (Math.PI / 180);
-    const dLon = (lon2 - lon1) * (Math.PI / 180);
-    const a =
-        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-        Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    const distance = R * c;
-    return distance;
-}
-
 function sortByCloseness(myPort: any, seaPorts: any) {
     const myCoordinates = [myPort.latitude, myPort.longitude];
 
@@ -193,33 +177,6 @@ function sortByCloseness(myPort: any, seaPorts: any) {
     });
 
     return seaPorts;
-}
-
-function findClosestSeaPort(myPort: any, seaPorts: any) {
-    const myCoordinates = [myPort.latitude, myPort.longitude];
-    let closestPort = null;
-    let minDistance = Infinity;
-    
-    if (seaPorts !== null && seaPorts !== undefined) {
-        const matchingNamePort = seaPorts.find((seaPort: any) => seaPort.portName.toUpperCase() === removeAccents(myPort.city).toUpperCase());
-        if (matchingNamePort) {
-            return matchingNamePort;
-        }
-    }
-
-    for (const seaPort of seaPorts) {
-        const seaPortCoordinates = seaPort.coordinates;
-        if (seaPortCoordinates !== undefined) {
-            const distance = calculateDistance(myCoordinates, seaPortCoordinates);
-            
-            if (distance < minDistance) {
-                minDistance = distance;
-                closestPort = seaPort;
-            }
-        }
-    }
-
-    return closestPort;
 }
 
 function Request() {
@@ -312,8 +269,16 @@ function Request() {
     const [rowSelectionModel3, setRowSelectionModel3] = React.useState<GridRowSelectionModel>([]);
 
     const [fileValue, setFileValue] = useState<File[] | undefined>(undefined);
+    const [mailLanguage, setMailLanguage] = useState<string>("fr");
 
     const rteRef = useRef<RichTextEditorRef>(null);
+    const editor = useEditor({
+        extensions: [
+          StarterKit,
+        ],
+        content: '',
+    });
+    const [contentValue, setContentValue] = useState<string>("");
     
     let { id } = useParams();
 
@@ -1910,12 +1875,78 @@ function Request() {
                                                                     <InputLabel htmlFor="adding" sx={inputLabelStyles}>{t('extraFee')} ({selectedSeafreight !== null ? selectedSeafreight.currency : null})</InputLabel>
                                                                     <BootstrapInput id="adding" type="number" value={adding} onChange={(e: any) => setAdding(e.target.value)} fullWidth />
                                                                 </Grid> */}
-                                                                <Grid item xs={12}>
+                                                                <Grid item xs={8}>
                                                                     <InputLabel htmlFor="fileSent" sx={inputLabelStyles}>{t('fileSent')}</InputLabel>
                                                                     <MuiFileInput 
                                                                         id="fileSent" size="small" variant="outlined" multiple fullWidth inputProps={{ accept: '.pdf' }} 
                                                                         value={fileValue} sx={{ mt: 1 }} onChange={(newValue: any) => { console.log(newValue); setFileValue(newValue); }} 
                                                                     />
+                                                                </Grid>
+                                                                <Grid item xs={4}>
+                                                                    <InputLabel htmlFor="mailLanguage" sx={inputLabelStyles}>{t('mailLanguage')}</InputLabel>
+                                                                    <ToggleButtonGroup
+                                                                        color="primary"
+                                                                        value={mailLanguage}
+                                                                        exclusive
+                                                                        size="small"
+                                                                        onChange={(event: React.MouseEvent<HTMLElement>, newValue: string,) => { 
+                                                                            setMailLanguage(newValue); 
+                                                                            if (newValue === "fr") {
+                                                                                rteRef.current?.editor?.commands.setContent(`<p>Bonjour ${clientNumber !== null && clientNumber.contactName !== undefined ? clientNumber.contactName : "{clientName}"},</p>
+                                                                                <br>
+                                                                                <p>Nous vous remercions pour votre demande.</p>
+                                                                                <br>
+                                                                                <p>En notre qualité de commissionnaire expéditeur nous pouvons organiser votre expédition de ${displayContainers(containersSelection)} conteneur(s) chargé(s) avec des ${tags.map((elm: any) => elm.productName).join(',')}, sur camion depuis ${loadingCity.city} à rendu port de ${selectedSeafreight.destinationPortName} comme suit :</p>
+                                                                                <br>
+                                                                                ${containersSelection !== null ? containersSelection.map((elm: any) => "<p>"+calculateContainerPrice(elm.container, elm.quantity)+" "+selectedSeafreight.currency+" / "+elm.container+"</p>").join('') : ""}
+                                                                                <br>
+                                                                                <p>Chargement de ${selectedHaulage.freeTime} heures inclus pour chaque conteneur, ensuite de ${selectedHaulage.overtimeTariff} ${selectedHaulage.currency} par heure indivisible.</p>
+                                                                                ${selectedMisc !== null ? selectedMisc.services.map((elm: any) => "<p>- "+elm.service.serviceName+" inclus</p>").join('') : "<br>"}
+                                                                                <br>
+                                                                                <p>Départs tous les ${selectedSeafreight.frequency} jours.</p>
+                                                                                <br>
+                                                                                <p>Délai de mer +/- ${selectedSeafreight.transitTime} jours.</p>
+                                                                                <br>
+                                                                                <p>Tarif valable ce jour. Tarifs à confirmer lors de votre réservation.</p>
+                                                                                <br>
+                                                                                <p>Ci-joint vous trouverez nos conditions de commande et de facturation qui, ensemble avec nos conditions générales, sont appliqués.</p>
+                                                                                <br>
+                                                                                <p>Cordialement</p>
+                                                                                <br>
+                                                                                <p>Jeffry COOLS</p>`);
+                                                                            }
+                                                                            else {
+                                                                                rteRef.current?.editor?.commands.setContent(`<p>Hello ${clientNumber !== null && clientNumber.contactName !== undefined ? clientNumber.contactName : "{clientName}"},</p>
+                                                                                <br>
+                                                                                <p>We thank you for your request.</p>
+                                                                                <br>
+                                                                                <p>As a freight forwarder we can organize your shipment of ${displayContainers(containersSelection)} containers loaded with ${tags.map((elm: any) => elm.productName).join(',')}, on truck from ${loadingCity.city} up to arrival at ${selectedSeafreight.destinationPortName} with the following costs :</p>
+                                                                                <br>
+                                                                                ${containersSelection !== null ? containersSelection.map((elm: any) => "<p>"+calculateContainerPrice(elm.container, elm.quantity)+" "+selectedSeafreight.currency+" / "+elm.container+"</p>").join('') : ""}
+                                                                                <br>
+                                                                                <p>${selectedHaulage.freeTime} hours loading included for each container, after which ${selectedHaulage.overtimeTariff} ${selectedHaulage.currency} per hour is charged.</p>
+                                                                                ${selectedMisc !== null ? selectedMisc.services.map((elm: any) => "<p>- "+elm.service.serviceName+" included</p>").join('') : "<br>"}
+                                                                                <br>
+                                                                                <p>Departures every ${selectedSeafreight.frequency} days.</p>
+                                                                                <br>
+                                                                                <p>Sailing time ${selectedSeafreight.departurePortName} to ${selectedSeafreight.destinationPortName} approx. ${selectedSeafreight.transitTime} days.</p>
+                                                                                <br>
+                                                                                <p>This offer remains valid today, to be confirmed at the time of your booking..</p>
+                                                                                <br>
+                                                                                <p>We also send per attached pdf our order confirmation and invoice terms & conditions.</p>
+                                                                                <br>
+                                                                                <p>Best regards,</p>
+                                                                                <br>
+                                                                                <p>Jeffry COOLS</p>`);
+                                                                            }
+                                                                        }}
+                                                                        aria-label="Platform"
+                                                                        fullWidth
+                                                                        sx={{ mt: 1 }}
+                                                                    >
+                                                                        <ToggleButton value="fr"><img src="/assets/img/flags/flag-fr.png" style={{ width: "12px", marginRight: "6px" }} alt="flag english" /> Français</ToggleButton>
+                                                                        <ToggleButton value="en"><img src="/assets/img/flags/flag-en.png" style={{ width: "12px", marginRight: "6px" }} alt="flag english" /> English</ToggleButton>
+                                                                    </ToggleButtonGroup>
                                                                 </Grid>
                                                                 <Grid item xs={12}>
                                                                     <InputLabel htmlFor="details" sx={inputLabelStyles}>{t('detailsOffer')}</InputLabel>
@@ -1926,8 +1957,8 @@ function Request() {
                                                                             <RichTextEditor
                                                                                 ref={rteRef}
                                                                                 extensions={[StarterKit]}
-                                                                                content={`
-                                                                                    <p>Bonjour ${clientNumber !== null && clientNumber.contactName !== undefined ? clientNumber.contactName : "{clientName}"},</p>
+                                                                                content={
+                                                                                    `<p>Bonjour ${clientNumber !== null && clientNumber.contactName !== undefined ? clientNumber.contactName : "{clientName}"},</p>
                                                                                     <br>
                                                                                     <p>Nous vous remercions pour votre demande.</p>
                                                                                     <br>
@@ -1935,10 +1966,10 @@ function Request() {
                                                                                     <br>
                                                                                     ${containersSelection !== null ? containersSelection.map((elm: any) => "<p>"+calculateContainerPrice(elm.container, elm.quantity)+" "+selectedSeafreight.currency+" / "+elm.container+"</p>").join('') : ""}
                                                                                     <br>
-                                                                                    <p>Chargement de ${selectedHaulage.freeTime} heures inclus pour les conteneurs, ensuite de ${selectedHaulage.overtimeTariff} ${selectedHaulage.currency} par heure indivisible.</p>
+                                                                                    <p>Chargement de ${selectedHaulage.freeTime} heures inclus pour chaque conteneur, ensuite de ${selectedHaulage.overtimeTariff} ${selectedHaulage.currency} par heure indivisible.</p>
                                                                                     ${selectedMisc !== null ? selectedMisc.services.map((elm: any) => "<p>- "+elm.service.serviceName+" inclus</p>").join('') : "<br>"}
                                                                                     <br>
-                                                                                    <p>Départs hebdomadaires.</p>
+                                                                                    <p>Départs tous les ${selectedSeafreight.frequency} jours.</p>
                                                                                     <br>
                                                                                     <p>Délai de mer +/- ${selectedSeafreight.transitTime} jours.</p>
                                                                                     <br>
@@ -1956,7 +1987,6 @@ function Request() {
                                                                                     <MenuDivider />
                                                                                     <MenuButtonBold />
                                                                                     <MenuButtonItalic />
-                                                                                    {/* <MenuButtonUnderline /> */}
                                                                                     <MenuButtonStrikethrough />
                                                                                     <MenuButtonOrderedList />
                                                                                     <MenuButtonBulletedList />
@@ -1965,7 +1995,6 @@ function Request() {
                                                                                     <MenuButtonHorizontalRule />
                                                                                     <MenuButtonUndo />
                                                                                     <MenuButtonRedo />
-                                                                                    {/* Add more controls of your choosing here */}
                                                                                 </MenuControlsContainer>
                                                                                 )}
                                                                             />
@@ -1973,17 +2002,6 @@ function Request() {
                                                                         : null
                                                                     }
                                                                 </Grid>
-                                                                {/* <Grid item xs={12}>
-                                                                    <Typography variant="h6">
-                                                                        { 
-                                                                            selectedSeafreight !== null ? 
-                                                                            <Chip variant="outlined" size="medium"
-                                                                                label={t('totalPrice').toUpperCase()+" : "+ Number(totalPrice+totalPrice*margin/100-totalPrice*reduction/100+adding*1).toFixed(2).toString()+" "+selectedSeafreight.currency}
-                                                                                sx={{ fontWeight: "bold", fontSize: 16, py: 3 }} 
-                                                                            /> : null
-                                                                        }
-                                                                    </Typography>
-                                                                </Grid> */}
                                                             </Grid>
                                                             : null
                                                         }

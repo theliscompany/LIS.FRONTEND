@@ -330,5 +330,12 @@ export const fr = {
   labelEnAttenteDeFacturation: "En attente de facturation",
   fileSent: "Fichiers joints",
   fieldEmptySeafreight : "Vous devez remplir tous les champs obligatoires et choisir au moins un service",
-  fieldsEmptyHaulage: "Vous devez remplir tous les champs obligatoires"
+  fieldsEmptyHaulage: "Vous devez remplir tous les champs obligatoires",
+  listMiscellaneous: "Liste de prix de divers services",
+  newSeafreightPrice: "Nouveau prix de frêt maritime",
+  newHaulagePrice: "Nouveau prix de transport routier",
+  newMiscellaneousPrice: "Nouveau prix de service divers",
+  listServices: "Liste des services",
+  withShipment: "Avec expédition",
+  mailLanguage: "Message initial dans la langue"
 };
