@@ -337,5 +337,9 @@ export const fr = {
   newMiscellaneousPrice: "Nouveau prix de service divers",
   listServices: "Liste des services",
   withShipment: "Avec expédition",
-  mailLanguage: "Message initial dans la langue"
+  mailLanguage: "Message initial dans la langue",
+  youNeedSelectHaulage : "Vous devez sélectionner une offre de transport avant de passer à l'étape suivante",
+  youNeedSelectSeafreight : "Vous devez sélectionner une offre de fret maritime avant de passer à l'étape suivante",
+  msgValidateHaulageStep: "Vous devez remplir les champs de chargement de la ville et du type de transport",
+  msgValidateStartStep: "Les champs date de départ, conteneurs et port de destination ne peuvent pas être vides, remplissez-les"
 };
