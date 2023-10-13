@@ -337,5 +337,9 @@ export const en = {
   newMiscellaneousPrice: "New miscellaneous price",
   listServices: "List of services",
   withShipment: "With shipment",
-  mailLanguage: "Initial message with language"
+  mailLanguage: "Initial message with language",
+  youNeedSelectHaulage: "You need to select a haulage offer before going to the next step",
+  youNeedSelectSeafreight: "You need to select a sea freight offer before going to the next step",
+  msgValidateHaulageStep: "You need to fill the fields loading city and haulage type",
+  msgValidateStartStep: "The fields departure date, containers and destination port cannot be empty, fill them"
 };

@@ -82,7 +82,7 @@ function Miscellaneous() {
     ]
     
     const columnsMiscs: GridColDef[] = [
-        { field: 'supplierName', headerName: t('supplier'), minWidth: 150 },
+        { field: 'supplierName', headerName: t('supplier'), flex: 1 },
         { field: 'currency', headerName: t('prices'), renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box sx={{ my: 1, mr: 1 }}>
@@ -93,21 +93,21 @@ function Miscellaneous() {
                     <Box sx={{ my: 1 }} hidden={params.row.total20HCRF === 0}>{params.row.total20HCRF !== 0 ? "40' HcRf : "+params.row.total20HCRF+" "+t(params.row.currency) : "40' HcRf : N/A"}</Box>
                 </Box>
             );
-        }, minWidth: 175 },
+        }, flex: 1 },
         { field: 'validUntil', headerName: t('validUntil'), renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box sx={{ my: 1, mr: 1 }}>
                     <Chip label={(new Date(params.row.validUntil)).toLocaleDateString().slice(0,10)} color={(new Date()).getTime() - (new Date(params.row.validUntil)).getTime() > 0 ? "warning" : "success"}></Chip>
                 </Box>
             );
-        }, minWidth: 100 },
+        }, flex: 0.5 },
         { field: 'created', headerName: t('created'), renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box sx={{ my: 1, mr: 1 }}>
                     <Chip label={(new Date(params.row.created)).toLocaleDateString().slice(0,10)} color={(new Date()).getTime() - (new Date(params.row.created)).getTime() > 0 ? "default" : "default"}></Chip>
                 </Box>
             );
-        }, minWidth: 100 },
+        }, flex: 0.5 },
         { field: 'xxx', headerName: t('Actions'), renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box sx={{ my: 1, mr: 1 }}>
@@ -119,7 +119,7 @@ function Miscellaneous() {
                     </IconButton>
                 </Box>
             );
-        }, minWidth: 100 },
+        }, flex: 0.4 },
     ];
     
     useEffect(() => {

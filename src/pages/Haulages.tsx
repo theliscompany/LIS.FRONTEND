@@ -97,35 +97,35 @@ function Haulages() {
     ];
     
     const columnsHaulages: GridColDef[] = [
-        { field: 'haulierName', headerName: t('haulier'), minWidth: 150 },
+        { field: 'haulierName', headerName: t('haulier'), flex: 1.4 },
         // { field: 'loadingPort', headerName: t('loadingPort'), renderCell: (params: GridRenderCellParams) => {
         //     return (
         //         <Box sx={{ my: 2 }}>{params.row.loadingPort}</Box>
         //     );
-        // }, minWidth: 150 },
-        { field: 'unitTariff', headerName: t('unitTariff'), valueGetter: (params: GridValueGetterParams) => `${params.row.unitTariff || ''} ${t(params.row.currency)}`, minWidth: 125 },
-        { field: 'freeTime', headerName: t('freeTime'), valueFormatter: (params: GridValueFormatterParams) => `${params.value || ''} ${t('hours')}`, minWidth: 100 },
-        { field: 'overtimeTariff', headerName: t('overtimeTariff'), valueGetter: (params: GridValueGetterParams) => `${params.row.overtimeTariff || ''} ${t(params.row.currency)} / ${t('hour')}`, minWidth: 125 },
-        { field: 'multiStop', headerName: t('multiStop'), valueGetter: (params: GridValueGetterParams) => `${params.row.multiStop || ''} ${t(params.row.currency)}`, width: 100 },
+        // }, flex: 1 },
+        { field: 'unitTariff', headerName: t('unitTariff'), valueGetter: (params: GridValueGetterParams) => `${params.row.unitTariff || ''} ${t(params.row.currency)}`, flex: 1 },
+        { field: 'freeTime', headerName: t('freeTime'), valueFormatter: (params: GridValueFormatterParams) => `${params.value || ''} ${t('hours')}`, flex: 1 },
+        { field: 'overtimeTariff', headerName: t('overtimeTariff'), valueGetter: (params: GridValueGetterParams) => `${params.row.overtimeTariff || ''} ${t(params.row.currency)} / ${t('hour')}`, flex: 1 },
+        { field: 'multiStop', headerName: t('multiStop'), valueGetter: (params: GridValueGetterParams) => `${params.row.multiStop || ''} ${t(params.row.currency)}`, flex: 1 },
         // { field: 'containersType', headerName: t('containers'), renderCell: (params: GridRenderCellParams) => {
         //     return (
         //         <Box sx={{ my: 2 }}>{params.row.containersType.join(", ")}</Box>
         //     );
-        // }, minWidth: 125 },
+        // }, flex: 1 },
         { field: 'validUntil', headerName: t('validUntil'), renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box sx={{ my: 1, mr: 1 }}>
                     <Chip label={(new Date(params.row.validUntil)).toLocaleDateString().slice(0,10)} color={(new Date()).getTime() - (new Date(params.row.validUntil)).getTime() > 0 ? "warning" : "success"}></Chip>
                 </Box>
             );
-        }, minWidth: 100 },
+        }, flex: 1 },
         { field: 'created', headerName: t('created'), renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box sx={{ my: 1, mr: 1 }}>
                     <Chip label={(new Date(params.row.created)).toLocaleDateString().slice(0,10)} color={(new Date()).getTime() - (new Date(params.row.created)).getTime() > 0 ? "default" : "default"}></Chip>
                 </Box>
             );
-        }, minWidth: 100 },
+        }, flex: 1 },
         { field: 'xxx', headerName: t('Actions'), renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box sx={{ my: 1, mr: 1 }}>
@@ -137,7 +137,7 @@ function Haulages() {
                     </IconButton>
                 </Box>
             );
-        }, minWidth: 100 },
+        }, flex: 1 },
     ];
     
     useEffect(() => {
@@ -269,7 +269,7 @@ function Haulages() {
         }
     }
 
-    const createHaulage = async () => {
+    const createUpdateHaulage = async () => {
         if (haulier !== null && loadingCity !== null && loadingPort !== null && freeTime > 0 && unitTariff > 0 && overtimeTariff > 0 && multiStop > 0 && validUntil !== null && containerTypes.length > 0) {
             if (context && account) {
                 var dataSent = null;
@@ -317,7 +317,7 @@ function Haulages() {
                 if (response !== null && response !== undefined) {
                     setModal2(false);
                     enqueueSnackbar(t('successCreated'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
-                    getHaulages();
+                    searchHaulages();
                 }
                 else {
                     enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
@@ -336,7 +336,7 @@ function Haulages() {
             if (response !== null && response !== undefined) {
                 enqueueSnackbar(t('rowDeletedSuccess'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
                 setModal(false);
-                getHaulages();
+                searchHaulages();
             }
             else {
                 enqueueSnackbar(t('rowDeletedError'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
@@ -603,7 +603,7 @@ function Haulages() {
                     }
                 </DialogContent>
                 <DialogActions>
-                    <Button variant="contained" color={"primary"} onClick={() => { createHaulage(); }} sx={{ mr: 1.5, textTransform: "none" }}>{t('validate')}</Button>
+                    <Button variant="contained" color={"primary"} onClick={() => { createUpdateHaulage(); }} sx={{ mr: 1.5, textTransform: "none" }}>{t('validate')}</Button>
                     <Button variant="contained" onClick={() => setModal2(false)} sx={buttonCloseStyles}>{t('close')}</Button>
                 </DialogActions>
             </BootstrapDialog>

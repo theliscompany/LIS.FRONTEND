@@ -20,17 +20,6 @@ import { AuthenticationResult } from '@azure/msal-browser';
 import { useMsal, useAccount } from '@azure/msal-react';
 import { CategoryEnum } from '../utils/constants';
 
-const ITEM_HEIGHT = 48;
-const ITEM_PADDING_TOP = 8;
-const MenuProps = {
-  PaperProps: {
-    style: {
-      maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
-      width: 250,
-    },
-  },
-};
-
 function createGetRequestUrl(variable1: number, variable2: number, variable3: number) {
     let url = protectedResources.apiLisPricing.endPoint+"/SeaFreight/GetSeaFreights?";
     if (variable1) {
@@ -91,12 +80,12 @@ function Seafreights() {
     ]
     
     const columnsSeafreights: GridColDef[] = [
-        // { field: 'carrierName', headerName: t('carrier'), minWidth: 150 },
-        { field: 'carrierAgentName', headerName: t('carrierAgent'), minWidth: 225 },
-        // { field: 'departurePortName', headerName: t('departurePort'), minWidth: 125 },
-        // { field: 'destinationPortName', headerName: t('destinationPort'), minWidth: 125 },
-        { field: 'frequency', headerName: t('frequency'), valueFormatter: (params: GridValueFormatterParams) => `${t('every')} ${params.value || ''} `+t('days'), minWidth: 125 },
-        { field: 'transitTime', headerName: t('transitTime'), valueFormatter: (params: GridValueFormatterParams) => `${params.value || ''} `+t('days'), minWidth: 100 },
+        // { field: 'carrierName', headerName: t('carrier'), flex: 1 },
+        { field: 'carrierAgentName', headerName: t('carrierAgent'), flex: 1.4 },
+        // { field: 'departurePortName', headerName: t('departurePort'), flex: 1 },
+        // { field: 'destinationPortName', headerName: t('destinationPort'), flex: 1 },
+        { field: 'frequency', headerName: t('frequency'), valueFormatter: (params: GridValueFormatterParams) => `${t('every')} ${params.value || ''} `+t('days'), flex: 1 },
+        { field: 'transitTime', headerName: t('transitTime'), valueFormatter: (params: GridValueFormatterParams) => `${params.value || ''} `+t('days'), flex: 1 },
         { field: 'currency', headerName: t('prices'), renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box sx={{ my: 1, mr: 1 }}>
@@ -107,21 +96,21 @@ function Seafreights() {
                     <Box sx={{ my: 1 }} hidden={params.row.total20HCRF === 0}>{params.row.total20HCRF !== 0 ? "40' HcRf : "+params.row.total20HCRF+" "+t(params.row.currency) : "40' HcRf : N/A"}</Box>
                 </Box>
             );
-        }, minWidth: 175 },
+        }, flex: 1 },
         { field: 'validUntil', headerName: t('validUntil'), renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box sx={{ my: 1, mr: 1 }}>
                     <Chip label={(new Date(params.row.validUntil)).toLocaleDateString().slice(0,10)} color={(new Date()).getTime() - (new Date(params.row.validUntil)).getTime() > 0 ? "warning" : "success"}></Chip>
                 </Box>
             );
-        }, minWidth: 100 },
+        }, flex: 1 },
         { field: 'created', headerName: t('created'), renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box sx={{ my: 1, mr: 1 }}>
                     <Chip label={(new Date(params.row.created)).toLocaleDateString().slice(0,10)} color={(new Date()).getTime() - (new Date(params.row.created)).getTime() > 0 ? "default" : "default"}></Chip>
                 </Box>
             );
-        }, minWidth: 100 },
+        }, flex: 1 },
         { field: 'xxx', headerName: t('Actions'), renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box sx={{ my: 1, mr: 1 }}>
@@ -133,7 +122,7 @@ function Seafreights() {
                     </IconButton>
                 </Box>
             );
-        }, minWidth: 100 },
+        }, flex: 0.8 },
     ];
     
     useEffect(() => {
@@ -260,7 +249,7 @@ function Seafreights() {
         }
     }
 
-    const createSeafreight = async () => {
+    const createUpdateSeafreight = async () => {
         if (portLoading !== null && portDischarge !== null && carrier !== null && carrierAgent !== null && frequency !== 0 && transitTime !== 0 && servicesSelection !== null && validUntil !== null) {
             if (context) {
                 var dataSent = null;
@@ -308,7 +297,7 @@ function Seafreights() {
                 if (response !== null && response !== undefined) {
                     setModal2(false);
                     enqueueSnackbar(t('successCreated'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
-                    getSeafreights();
+                    searchSeafreights();
                 }
                 else {
                     enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
@@ -327,7 +316,7 @@ function Seafreights() {
             if (response !== null && response !== undefined) {
                 enqueueSnackbar(t('rowDeletedSuccess'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
                 setModal(false);
-                getSeafreights();
+                searchSeafreights();
             }
             else {
                 enqueueSnackbar(t('rowDeletedError'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
@@ -706,7 +695,7 @@ function Seafreights() {
                     }
                 </DialogContent>
                 <DialogActions>
-                    <Button variant="contained" color={"primary"} onClick={() => { createSeafreight(); }} sx={{ mr: 1.5, textTransform: "none" }}>{t('validate')}</Button>
+                    <Button variant="contained" color={"primary"} onClick={() => { createUpdateSeafreight(); }} sx={{ mr: 1.5, textTransform: "none" }}>{t('validate')}</Button>
                     <Button variant="contained" onClick={() => setModal2(false)} sx={buttonCloseStyles}>{t('close')}</Button>
                 </DialogActions>
             </BootstrapDialog>

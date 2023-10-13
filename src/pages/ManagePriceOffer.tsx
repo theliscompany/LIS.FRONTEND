@@ -236,12 +236,12 @@ return (
                         rows={[offer.seaFreight]}
                         columns={
                           [
-                            { field: 'carrierName', headerName: t('carrier'), minWidth: 150 },
-                            { field: 'carrierAgentName', headerName: t('carrierAgent'), minWidth: 150 },
-                            { field: 'departurePortName', headerName: t('departurePort'), minWidth: 125 },
-                            { field: 'destinationPortName', headerName: t('destinationPort'), minWidth: 125 },
-                            { field: 'frequency', headerName: t('frequency'), valueFormatter: (params: GridValueFormatterParams) => `${t('every')} ${params.value || ''} `+t('days'), minWidth: 125 },
-                            { field: 'transitTime', headerName: t('transitTime'), valueFormatter: (params: GridValueFormatterParams) => `${params.value || ''} `+t('days') },
+                            { field: 'carrierName', headerName: t('carrier'), flex: 1.3 },
+                            { field: 'carrierAgentName', headerName: t('carrierAgent'), flex: 1 },
+                            { field: 'departurePortName', headerName: t('departurePort'), flex: 1 },
+                            { field: 'destinationPortName', headerName: t('destinationPort'), flex: 1 },
+                            { field: 'frequency', headerName: t('frequency'), valueFormatter: (params: GridValueFormatterParams) => `${t('every')} ${params.value || ''} `+t('days'), flex: 1 },
+                            { field: 'transitTime', headerName: t('transitTime'), valueFormatter: (params: GridValueFormatterParams) => `${params.value || ''} `+t('days'), flex: 1 },
                             { field: 'currency', headerName: t('prices'), renderCell: (params: GridRenderCellParams) => {
                                 return (
                                   <Box sx={{ my: 1, mr: 1 }}>
@@ -252,7 +252,7 @@ return (
                                     <Box sx={{ my: 1 }} hidden={!getPackageNamesByIds(containersId, containers).includes("40' HcRf")}>{params.row.price40HcRf !== 0 ? "40' HcRf : "+params.row.price40HcRf+" "+params.row.currency : "40' HcRf : N/A"}</Box>
                                 </Box>
                                 );
-                            }, minWidth: 200 },
+                            }, flex: 1 },
                           ]
                         }
                         hideFooter
@@ -270,23 +270,23 @@ return (
                             rows={[offer.haulage]}
                             columns={
                               [
-                                { field: 'haulierName', headerName: t('haulier'), minWidth: 175 },
+                                { field: 'haulierName', headerName: t('haulier'), flex: 1.3 },
                                 { field: 'loadingPort', headerName: t('loadingPort'), renderCell: (params: GridRenderCellParams) => {
                                     return (
                                         <Box sx={{ my: 2 }}>{params.row.loadingPort}</Box>
                                     );
-                                }, minWidth: 175 },
-                                { field: 'unitTariff', headerName: t('unitTariff'), valueGetter: (params: GridValueGetterParams) => `${params.row.unitTariff || ''} ${params.row.currency}`, minWidth: 150 },
-                                { field: 'freeTime', headerName: t('freeTime'), valueFormatter: (params: GridValueFormatterParams) => `${params.value || ''} `+t('hours'), minWidth: 125 },
-                                { field: 'multiStop', headerName: t('multiStop'), valueGetter: (params: GridValueGetterParams) => `${params.row.multiStop || ''} ${params.row.currency}` },
-                                { field: 'overtimeTariff', headerName: t('overtimeTariff'), valueGetter: (params: GridValueGetterParams) => `${params.row.overtimeTariff || ''} ${params.row.currency} / ${t('hour')}`, minWidth: 175 },
+                                }, flex: 1 },
+                                { field: 'unitTariff', headerName: t('unitTariff'), valueGetter: (params: GridValueGetterParams) => `${params.row.unitTariff || ''} ${params.row.currency}`, flex: 1 },
+                                { field: 'freeTime', headerName: t('freeTime'), valueFormatter: (params: GridValueFormatterParams) => `${params.value || ''} `+t('hours'), flex: 1 },
+                                { field: 'multiStop', headerName: t('multiStop'), valueGetter: (params: GridValueGetterParams) => `${params.row.multiStop || ''} ${params.row.currency}`, flex: 1 },
+                                { field: 'overtimeTariff', headerName: t('overtimeTariff'), valueGetter: (params: GridValueGetterParams) => `${params.row.overtimeTariff || ''} ${params.row.currency} / ${t('hour')}`, flex: 1 },
                                 { field: 'validUntil', headerName: t('validUntil'), renderCell: (params: GridRenderCellParams) => {
                                     return (
                                         <Box sx={{ my: 1, mr: 1 }}>
                                             <Chip label={(new Date(params.row.validUntil)).toLocaleDateString().slice(0,10)} color={(new Date()).getTime() - (new Date(params.row.validUntil)).getTime() > 0 ? "warning" : "success"}></Chip>
                                         </Box>
                                     );
-                                }, minWidth: 150 },
+                                }, flex: 1 },
                               ]
                             }
                             hideFooter
@@ -306,9 +306,9 @@ return (
                             rows={offer.miscellaneousList}
                             columns={
                               [
-                                { field: 'supplierName', headerName: t('supplier'), minWidth: 175 },
-                                { field: 'departurePortName', headerName: t('departurePort'), minWidth: 175, valueFormatter: (params: GridValueFormatterParams) => `${offer.seaFreight.departurePortName || ''}`, },
-                                { field: 'destinationPortName', headerName: t('destinationPort'), minWidth: 200, valueFormatter: (params: GridValueFormatterParams) => `${offer.seaFreight.destinationPortName || ''}`, },
+                                { field: 'supplierName', headerName: t('supplier'), flex: 1.3 },
+                                { field: 'departurePortName', headerName: t('departurePort'), flex: 1, valueFormatter: (params: GridValueFormatterParams) => `${offer.seaFreight.departurePortName || ''}` },
+                                { field: 'destinationPortName', headerName: t('destinationPort'), flex: 1, valueFormatter: (params: GridValueFormatterParams) => `${offer.seaFreight.destinationPortName || ''}` },
                                 { field: 'currency', headerName: t('costPrices'), renderCell: (params: GridRenderCellParams) => {
                                     return (
                                       <Box sx={{ my: 1, mr: 1 }}>
@@ -319,7 +319,7 @@ return (
                                           <Box sx={{ my: 1 }} hidden={!getPackageNamesByIds(containersId, containers).includes("40' HcRf")}>{params.row.price40HcRf !== 0 ? "40' HcRf : "+params.row.price40HcRf+" "+params.row.currency : "40' HcRf : N/A"}</Box>
                                       </Box>
                                     );
-                                }, minWidth: 200 },
+                                }, flex: 1 },
                                 // { field: 'services', headerName: 'Services', renderCell: (params: GridRenderCellParams) => {
                                 //   return (
                                 //       <Box sx={{ my: 1, mr: 1 }}>
@@ -332,7 +332,7 @@ return (
                                 //           })}
                                 //       </Box>
                                 //   );
-                                // }, minWidth: 200 },
+                                // }, flex: 1 },
                               ]
                             }
                             hideFooter
