@@ -293,7 +293,7 @@ export const en = {
   lastUpdated: "Last updated",
   comment: "Comment or remarks",
   noComment: "No comment",
-  seafreights: "Seafreights prices",
+  seafreights: "Seafreights",
   listSeafreights: "List of sea freights prices",
   created: "Created date",
   deleteRow: "Delete this row",
@@ -310,12 +310,12 @@ export const en = {
   containers: "Containers",
   successCreated: "The element has been created with success",
   price: "Price",
-  haulages: "Haulages prices",
+  haulages: "Haulages",
   listHaulages: "List of haulages prices",
   emptyPickupDepot: "Empty pickup depot",
   unitTariff2: "Unit tariff",
   freeTime2: "Free time at loading place (in hours)",
-  miscellaneous: "Miscellaneous prices",
+  miscellaneous: "Miscellaneous",
   labelEnAttente: "Waiting",
   labelValider: "Validated",
   labelRejeter: "Rejected",
@@ -341,5 +341,6 @@ export const en = {
   youNeedSelectHaulage: "You need to select a haulage offer before going to the next step",
   youNeedSelectSeafreight: "You need to select a sea freight offer before going to the next step",
   msgValidateHaulageStep: "You need to fill the fields loading city and haulage type",
-  msgValidateStartStep: "The fields departure date, containers and destination port cannot be empty, fill them"
+  msgValidateStartStep: "The fields departure date, containers and destination port cannot be empty, fill them",
+  pricing: "Pricing"
 };

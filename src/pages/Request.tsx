@@ -1100,6 +1100,7 @@ function Request() {
                 if (response !== null) {
                     setModal5(false);
                     enqueueSnackbar(t('offerSuccessSent'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                    console.log(response);
 
                     var footer = `
                     <div style="font-family: Verdana; padding-top: 60px;">
