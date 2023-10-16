@@ -21,7 +21,7 @@ import { useMsal, useAccount } from '@azure/msal-react';
 import { CategoryEnum } from '../utils/constants';
 
 function createGetRequestUrl(variable1: number, variable2: number, variable3: number) {
-    let url = protectedResources.apiLisPricing.endPoint+"/SeaFreight/GetSeaFreights?";
+    let url = protectedResources.apiLisPricing.endPoint+"/Miscellaneous/Miscellaneous?";
     if (variable1) {
       url += 'DeparturePortId=' + encodeURIComponent(variable1) + '&';
     }
@@ -29,7 +29,7 @@ function createGetRequestUrl(variable1: number, variable2: number, variable3: nu
       url += 'DestinationPortId=' + encodeURIComponent(variable2) + '&';
     }
     if (variable3) {
-      url += 'CarrierAgentId=' + encodeURIComponent(variable3) + '&';
+      url += 'SupplierId=' + encodeURIComponent(variable3) + '&';
     }
     
     if (url.slice(-1) === '&') {
@@ -252,9 +252,9 @@ function Miscellaneous() {
     const searchMiscellaneous = async () => {
         if (context) {
             setLoad(true);
-            // var requestFormatted = createGetRequestUrl(portDeparture?.portId, portDestination?.portId, searchedSupplier?.contactId);
+            var requestFormatted = createGetRequestUrl(portDeparture?.portId, portDestination?.portId, searchedSupplier?.contactId);
             // const response = await (context as BackendService<any>).getSingle(requestFormatted);
-            const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisPricing.endPoint+"/Miscellaneous/Miscellaneous?withShipment="+withShipment, tempToken);
+            const response = await (context as BackendService<any>).getWithToken(requestFormatted+"&withShipment="+withShipment, tempToken);
             if (response !== null && response !== undefined) {
                 setMiscs(response);
                 setLoad(false);
@@ -346,10 +346,10 @@ function Miscellaneous() {
         }
     }
 
-    const deleteSeafreightPrice = async (id: string) => {
+    const deleteMiscellaneous = async (id: string) => {
         if (context) {
             // alert("Function not available yet!");
-            const response = await (context as BackendService<any>).delete(protectedResources.apiLisPricing.endPoint+"/SeaFreight/DeleteSeaFreightPrice?id="+id);
+            const response = await (context as BackendService<any>).delete(protectedResources.apiLisPricing.endPoint+"/Miscellaneous/DeleteMiscellaneous/"+id);
             if (response !== null && response !== undefined) {
                 enqueueSnackbar(t('rowDeletedSuccess'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
                 setModal(false);
@@ -529,7 +529,7 @@ function Miscellaneous() {
                 </BootstrapDialogTitle>
                 <DialogContent dividers>{t('areYouSureDeleteRow')}</DialogContent>
                 <DialogActions>
-                    <Button variant="contained" color={"primary"} onClick={() => { deleteSeafreightPrice(currentId); }} sx={{ mr: 1.5, textTransform: "none" }}>{t('accept')}</Button>
+                    <Button variant="contained" color={"primary"} onClick={() => { deleteMiscellaneous(currentId); }} sx={{ mr: 1.5, textTransform: "none" }}>{t('accept')}</Button>
                     <Button variant="contained" onClick={() => setModal(false)} sx={buttonCloseStyles}>{t('close')}</Button>
                 </DialogActions>
             </BootstrapDialog>
