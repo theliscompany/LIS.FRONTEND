@@ -469,7 +469,7 @@ function Miscellaneous() {
                     withShipment !== false ? 
                     <Grid item xs={12}>
                         {
-                            miscs !== null && miscs !== undefined ?
+                            miscs !== null && miscs.length !== 0 ?
                             <Box sx={{ overflow: "auto" }}>
                                 {
                                     miscs.map((item: any, i: number) => {
@@ -502,7 +502,7 @@ function Miscellaneous() {
                     withShipment !== true ? 
                     <Grid item xs={12}>
                         {
-                            miscsWithoutShipment !== null && miscsWithoutShipment !== undefined ?
+                            miscsWithoutShipment !== null && miscsWithoutShipment.length !== 0 ?
                             <DataGrid
                                 rows={miscsWithoutShipment}
                                 columns={columnsMiscs}

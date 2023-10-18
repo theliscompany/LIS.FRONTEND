@@ -201,6 +201,7 @@ function Haulages() {
             const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisPricing.endPoint+"/Haulage/Haulages", token);
             if (response !== null && response !== undefined) {
                 setHaulages(response);
+                // setHaulages([]);
                 setLoad(false);
             }
             else {
@@ -411,7 +412,7 @@ function Haulages() {
                     <Grid container spacing={2} mt={1} px={5}>
                         <Grid item xs={12}>
                             {
-                                haulages !== null ?
+                                haulages !== null && haulages.length !== 0 ?
                                 <Box sx={{ overflow: "auto" }}>
                                     {
                                         haulages.map((item: any, i: number) => {
@@ -437,8 +438,7 @@ function Haulages() {
                                             )
                                         })
                                     }
-                                </Box> 
-                                : <Alert severity="warning">{t('noResults')}</Alert>
+                                </Box> : <Alert severity="warning">{t('noResults')}</Alert>
                             }
                         </Grid>
                     </Grid> : <Skeleton sx={{ mx: 5, mt: 3 }} />

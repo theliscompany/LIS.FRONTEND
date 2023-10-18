@@ -342,5 +342,6 @@ export const fr = {
   youNeedSelectSeafreight : "Vous devez sélectionner une offre de fret maritime avant de passer à l'étape suivante",
   msgValidateHaulageStep: "Vous devez remplir les champs de chargement de la ville et du type de transport",
   msgValidateStartStep: "Les champs date de départ, conteneurs et port de destination ne peuvent pas être vides, remplissez-les",
-  pricing: "Gestion des prix"
+  pricing: "Gestion des prix",
+  assigneeCreatedSuccess: "Succès de l'opération"
 };

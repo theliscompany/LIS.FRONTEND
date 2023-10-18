@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAccount, useMsal } from '@azure/msal-react';
-import { Typography, Box, Grid, TableCell, TableHead, Table, TableBody, TableRow, Chip, IconButton, Button, DialogContent, DialogActions } from '@mui/material';
+import { Typography, Box, Grid, TableCell, TableHead, Table, TableBody, TableRow, Chip, IconButton, Button, DialogContent, DialogActions, Alert } from '@mui/material';
 import Skeleton from '@mui/material/Skeleton';
 import { SnackbarProvider, enqueueSnackbar } from 'notistack';
 import { useAuthorizedBackendApi } from '../api/api';
@@ -9,9 +9,10 @@ import { protectedResources } from '../config/authConfig';
 import { BackendService } from '../utils/services/fetch';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { BootstrapDialog, BootstrapDialogTitle, buttonCloseStyles } from '../utils/misc/styles';
+import { BootstrapDialog, BootstrapDialogTitle, buttonCloseStyles, gridStyles } from '../utils/misc/styles';
 import { NavLink } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { DataGrid, GridColDef, GridRenderCellParams, GridValueFormatterParams } from '@mui/x-data-grid';
 
 function colors(value: string) {
     switch (value) {
@@ -48,11 +49,47 @@ function PriceOffers() {
         
     const context = useAuthorizedBackendApi();
     
+    const { t } = useTranslation();
+    
+    const columnsOffers: GridColDef[] = [
+        { field: 'quoteOfferNumber', headerName: t('offerId'), flex: 0.5 },
+        { field: 'requestQuoteId', headerName: t('requestQuoteId'), renderCell: (params: GridRenderCellParams) => {
+            return (
+                <Box>
+                    <Link to={"/admin/request/"+params.row.requestQuoteId}>{params.row.requestQuoteId}</Link>
+                </Box>
+            );
+        }, flex: 0.5 },
+        { field: 'created', headerName: t('created'), valueFormatter: (params: GridValueFormatterParams) => `${(new Date(params.value)).toLocaleString().slice(0,10)}`, flex: 0.8 },
+        { field: 'xxx', headerName: t('departure'), renderCell: (params: GridRenderCellParams) => {
+            return (<Box>{params.row.seaFreight.departurePortName}</Box>);
+        }, flex: 1.1 },
+        { field: 'yyy', headerName: t('arrival'), renderCell: (params: GridRenderCellParams) => {
+            return (<Box>{params.row.seaFreight.destinationPortName}</Box>);
+        }, flex: 1.1 },
+        { field: 'zzz', headerName: t('status'), renderCell: (params: GridRenderCellParams) => {
+            return (<Box><Chip label={statusLabel(params.row.status)} color={colors(params.row.status)} /></Box>);
+        }, flex: 0.6 },
+        { field: 'qqq', headerName: t('clientApproval'), renderCell: (params: GridRenderCellParams) => {
+            return (<Box>{params.row.status !== "Accepted" && params.row.clientApproval === "Pending" ? <Chip label={t('noEmail')} /> : <Chip label={params.row.clientApproval} color={colors(params.row.clientApproval)} />}</Box>);
+        }, flex: 0.6 },
+        { field: 'www', headerName: t('Actions'), renderCell: (params: GridRenderCellParams) => {
+            return (
+                <Box sx={{ my: 1, mr: 1 }}>
+                    <IconButton component={NavLink} to={"/admin/quote-offers/"+params.row.id} sx={{ mr: 1 }}>
+                        <EditIcon fontSize="small" />
+                    </IconButton>
+                    <IconButton onClick={() => { setCurrentId(params.row.id); setModal(true); }}>
+                        <DeleteIcon fontSize="small" />
+                    </IconButton>
+                </Box>
+            );
+        }, flex: 0.8 }
+    ];
+    
     useEffect(() => {
         getPriceOffers();
     }, []);
-    
-    const { t } = useTranslation();
     
     const getPriceOffers = async () => {
         if (context) {
@@ -61,6 +98,7 @@ function PriceOffers() {
                 if (response.code === 200) {
                     console.log(response.data);
                     setOffers(response.data.reverse());
+                    // setOffers([]);
                     setLoad(false);
                 }
                 else {
@@ -98,10 +136,19 @@ function PriceOffers() {
                         <Grid container spacing={2} mt={1} px={5}>
                             <Grid item xs={12}>
                                 {
-                                    offers !== null ?
+                                    offers !== null && offers.length !== 0 ?
                                     <Box sx={{ overflow: "auto" }}>
                                         <Box sx={{ width: "100%", display: "table", tableLayout: "fixed" }}>
-                                            <Table sx={{ minWidth: 650, border: 1, borderColor: "#e5e5e5" }} aria-label="simple table">
+                                            <DataGrid
+                                                rows={offers}
+                                                columns={columnsOffers}
+                                                // hideFooter
+                                                getRowId={(row: any) => row?.id}
+                                                getRowHeight={() => "auto" }
+                                                sx={gridStyles}
+                                                disableRowSelectionOnClick
+                                            />
+                                            {/* <Table sx={{ minWidth: 650, border: 1, borderColor: "#e5e5e5" }} aria-label="simple table">
                                                 <TableHead>
                                                     <TableRow>
                                                         <TableCell align="left" sx={{ fontSize: 16, fontWeight: "bolder" }}>{t('offerId')}</TableCell>
@@ -111,7 +158,6 @@ function PriceOffers() {
                                                         <TableCell align="left" sx={{ fontSize: 16, fontWeight: "bolder" }}>{t('arrival')}</TableCell>
                                                         <TableCell align="left" sx={{ fontSize: 16, fontWeight: "bolder" }}>{t('status')}</TableCell>
                                                         <TableCell align="left" sx={{ fontSize: 16, fontWeight: "bolder" }}>{t('clientApproval')}</TableCell>
-                                                        <TableCell align="left" sx={{ fontSize: 16, fontWeight: "bolder" }}>{t('totalPrice')}</TableCell>
                                                         <TableCell align="left"><b></b></TableCell>
                                                     </TableRow>
                                                 </TableHead>
@@ -129,7 +175,6 @@ function PriceOffers() {
                                                                     <TableCell align="left">{row.seaFreight.destinationPortName}</TableCell>
                                                                     <TableCell align="left"><Chip label={statusLabel(row.status)} color={colors(row.status)} /></TableCell>
                                                                     <TableCell align="left">{row.status !== "Accepted" && row.clientApproval === "Pending" ? <Chip label={t('noEmail')} /> : <Chip label={row.clientApproval} color={colors(row.clientApproval)} />}</TableCell>
-                                                                    <TableCell align="left">{Number(row.totalPrice+row.totalPrice*row.margin/100-row.totalPrice*row.reduction/100+row.extraFee*1).toFixed(2)} {row.seaFreight.currency}</TableCell>
                                                                     <TableCell align="left">
                                                                         <IconButton component={NavLink} to={"/admin/quote-offers/"+row.id} sx={{ mr: 1 }}>
                                                                             <EditIcon fontSize="small" />
@@ -143,9 +188,9 @@ function PriceOffers() {
                                                         ))
                                                     }
                                                 </TableBody>
-                                            </Table>
+                                            </Table> */}
                                         </Box>
-                                    </Box> : <Skeleton sx={{ mt: 3 }} />
+                                    </Box> : <Alert severity="warning">{t('noResults')}</Alert>
                                 }
                             </Grid>
                         </Grid> : <Skeleton sx={{ mx: 5, mt: 3 }} />

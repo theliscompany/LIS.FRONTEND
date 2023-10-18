@@ -3,7 +3,7 @@ import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import React, { useEffect } from 'react';
 // import '../../App.css';
-import { Button, Grid, InputLabel, NativeSelect, Skeleton } from '@mui/material';
+import { Alert, Button, Grid, InputLabel, NativeSelect, Skeleton } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import { BootstrapInput, inputLabelStyles } from '../utils/misc/styles';
 import { protectedResources } from '../config/authConfig';
@@ -163,14 +163,14 @@ function RequestsSearch() {
 
                 {
                     !load ? 
-                        notifications !== null ? 
+                        notifications !== null && notifications.length !== 0 ? 
                         <List sx={{ mt: 3 }}>
                             {
                                 notifications.map((item: any, i: number) => {
                                     return (<RequestViewItem item={item} i={i} />)
                                 })
                             }
-                        </List> : <Typography variant="subtitle1" mx={5} my={3}>{t('errorHappened')}</Typography>
+                        </List> : <Alert severity="warning">{t('noResults')}</Alert>
                     : <Skeleton sx={{ mx: 5, mt: 3 }} />
                 }
                 

@@ -1094,7 +1094,7 @@ function Request() {
                     "extraFee": adding,
                     "totalPrice": totalPrice
                 };
-                const response = await (context as BackendService<any>).postBasic(protectedResources.apiLisOffer.endPoint+"/QuoteOffer", dataSent);
+                const response = await (context as BackendService<any>).postReturnJson(protectedResources.apiLisOffer.endPoint+"/QuoteOffer", dataSent);
                 // const response = await axios.post(protectedResources.apiLisOffer.endPoint+"/QuoteOffer", dataSent);
                 
                 if (response !== null) {
@@ -1104,7 +1104,9 @@ function Request() {
 
                     var footer = `
                     <div style="font-family: Verdana; padding-top: 60px;">
-                        <div><a target="_blank" href="www.omnifreight.eu">www.omnifreight.eu</a></div>
+                        <a href="${"http://localhost:3000/acceptOffer/"+response.data.requestQuoteId}" style="display:inline-block;background-color:#008089;color:#fff;padding:10px 20px;text-decoration:none" target="_blank">Accept the offer</a>
+                        <a href="${"http://localhost:3000/refuseOffer/"+response.data.requestQuoteId}" style="display:inline-block;background-color:#F2F2F2;color:#008089;padding:10px 20px;text-decoration:none" target="_blank">Refuse the offer</a>
+                        <div style="margin-top: 15px;"><a target="_blank" href="www.omnifreight.eu">www.omnifreight.eu</a></div>
                         <div style="padding-bottom: 10px;"><a target="_blank" href="http://www.facebook.com/omnifreight">http://www.facebook.com/omnifreight</a></div>
                         <div>Italiëlei 211</div>
                         <div>2000 Antwerpen</div>
