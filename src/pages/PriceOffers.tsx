@@ -9,10 +9,11 @@ import { protectedResources } from '../config/authConfig';
 import { BackendService } from '../utils/services/fetch';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { BootstrapDialog, BootstrapDialogTitle, buttonCloseStyles, gridStyles } from '../utils/misc/styles';
+import { BootstrapDialog, BootstrapDialogTitle, actionButtonStyles, buttonCloseStyles, gridStyles } from '../utils/misc/styles';
 import { NavLink } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { DataGrid, GridColDef, GridRenderCellParams, GridValueFormatterParams } from '@mui/x-data-grid';
+import { RestartAltOutlined } from '@mui/icons-material';
 
 function colors(value: string) {
     switch (value) {
@@ -52,21 +53,22 @@ function PriceOffers() {
     const { t } = useTranslation();
     
     const columnsOffers: GridColDef[] = [
-        { field: 'quoteOfferNumber', headerName: t('offerId'), flex: 0.5 },
-        { field: 'requestQuoteId', headerName: t('requestQuoteId'), renderCell: (params: GridRenderCellParams) => {
+        // { field: 'quoteOfferNumber', headerName: t('offerId'), flex: 0.5 },
+        { field: 'requestQuoteId', headerName: t('email'), renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box>
-                    <Link to={"/admin/request/"+params.row.requestQuoteId}>{params.row.requestQuoteId}</Link>
+                    <Link to={"/admin/request/"+params.row.requestQuoteId}>{params.row.emailUser}</Link>
                 </Box>
             );
-        }, flex: 0.5 },
-        { field: 'created', headerName: t('created'), valueFormatter: (params: GridValueFormatterParams) => `${(new Date(params.value)).toLocaleString().slice(0,10)}`, flex: 0.8 },
+        }, flex: 1.2 },
+        // { field: 'quoteOfferNumber', headerName: t('offerId'), flex: 0.5 },
+        { field: 'created', headerName: t('created'), valueFormatter: (params: GridValueFormatterParams) => `${(new Date(params.value)).toLocaleString().slice(0,10)}`, flex: 0.6 },
         { field: 'xxx', headerName: t('departure'), renderCell: (params: GridRenderCellParams) => {
             return (<Box>{params.row.seaFreight.departurePortName}</Box>);
-        }, flex: 1.1 },
+        }, flex: 1 },
         { field: 'yyy', headerName: t('arrival'), renderCell: (params: GridRenderCellParams) => {
             return (<Box>{params.row.seaFreight.destinationPortName}</Box>);
-        }, flex: 1.1 },
+        }, flex: 1 },
         { field: 'zzz', headerName: t('status'), renderCell: (params: GridRenderCellParams) => {
             return (<Box><Chip label={statusLabel(params.row.status)} color={colors(params.row.status)} /></Box>);
         }, flex: 0.6 },
@@ -84,7 +86,7 @@ function PriceOffers() {
                     </IconButton>
                 </Box>
             );
-        }, flex: 0.8 }
+        }, flex: 0.7 }
     ];
     
     useEffect(() => {
@@ -93,6 +95,7 @@ function PriceOffers() {
     
     const getPriceOffers = async () => {
         if (context) {
+            setLoad(true);
             const response = await (context as BackendService<any>).getSingle(protectedResources.apiLisOffer.endPoint+"/QuoteOffer");
             if (response !== null && response.code !== undefined) {
                 if (response.code === 200) {
@@ -130,10 +133,17 @@ function PriceOffers() {
             <SnackbarProvider />
             <Box py={2.5}>
                 <Typography variant="h5" sx={{mt: {xs: 4, md: 1.5, lg: 1.5 }}} mx={5}><b>{t('generatedPriceOffers')}</b></Typography>
+                <Grid container spacing={2} mt={0} px={5}>
+                    <Grid item xs={12}>
+                        <Button variant="contained" sx={actionButtonStyles} onClick={() => { getPriceOffers(); }}>
+                            {t('reload')} <RestartAltOutlined sx={{ ml: 0.5, pb: 0.45, justifyContent: "center", alignItems: "center" }} fontSize="small" />
+                        </Button>
+                    </Grid>
+                </Grid>
                 <Box>
                     {
                         !load ? 
-                        <Grid container spacing={2} mt={1} px={5}>
+                        <Grid container spacing={2} mt={0} px={5}>
                             <Grid item xs={12}>
                                 {
                                     offers !== null && offers.length !== 0 ?

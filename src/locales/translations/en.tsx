@@ -343,5 +343,7 @@ export const en = {
   msgValidateHaulageStep: "You need to fill the fields loading city and haulage type",
   msgValidateStartStep: "The fields departure date, containers and destination port cannot be empty, fill them",
   pricing: "Pricing",
-  assigneeCreatedSuccess: "Operation success"
+  assigneeCreatedSuccess: "Operation success",
+  messageModal: "Message",
+  reload: "Reload"
 };
