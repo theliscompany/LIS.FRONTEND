@@ -1,7 +1,7 @@
-import { Alert, Box, Chip, Grid, IconButton, Skeleton, Table, TableBody, TableCell, TableHead, TableRow, Typography } from '@mui/material';
+import { Alert, Box, Chip, Grid, IconButton, Link, Skeleton, Table, TableBody, TableCell, TableHead, TableRow, Typography } from '@mui/material';
 import { useEffect, useState } from 'react';
 // import '../../App.css';
-import { DarkTooltip } from '../utils/misc/styles';
+import { DarkTooltip, gridStyles } from '../utils/misc/styles';
 import { enqueueSnackbar, SnackbarProvider } from 'notistack';
 import AssignmentIndIcon from '@mui/icons-material/AssignmentInd';
 import AssignmentReturnIcon from '@mui/icons-material/AssignmentReturn';
@@ -11,6 +11,7 @@ import { BackendService } from '../utils/services/fetch';
 import { useAccount, useMsal } from '@azure/msal-react';
 import { AuthenticationResult } from '@azure/msal-browser';
 import { useTranslation } from 'react-i18next';
+import { DataGrid, GridColDef, GridRenderCellParams, GridValueFormatterParams } from '@mui/x-data-grid';
 
 function UsersAssignment(props: any) {
     const [load, setLoad] = useState<boolean>(false);
@@ -24,6 +25,38 @@ function UsersAssignment(props: any) {
     const context = useAuthorizedBackendApi();
     
     const { t } = useTranslation();
+    
+    const columnsUsers: GridColDef[] = [
+        { field: 'id', headerName: t('id'), flex: 1.6 },
+        { field: 'displayName', headerName: t('name'), flex: 1.2 },
+        { field: 'mail', headerName: t('email'), flex: 1.2 },
+        // { field: 'assignee', headerName: t('assignee'), valueFormatter: (params: GridValueFormatterParams) => `${params.value !== null ? params.value.name+" (#"+params.value.id+")" : "Not defined"}`, flex: 1 },
+        { field: 'xxx', headerName: t('status'), renderCell: (params: GridRenderCellParams) => {
+            return (
+                <Box>
+                    { assignees.some((user: any) => user.email === params.row.mail) ? <Chip label={t('canAssign')} color="success" /> : <Chip label={t('cannotAssign')} /> }
+                </Box>
+            );
+        }, flex: 0.6 },
+        { field: 'www', headerName: t('Actions'), renderCell: (params: GridRenderCellParams) => {
+            return (
+                <Box sx={{ my: 1, mr: 1 }}>
+                    <DarkTooltip title={ assignees.some((user: any) => user.email === params.row.mail) ? t('cancelAssign') : t('assignAsManager')} placement="right" arrow>
+                        <IconButton 
+                            size="medium" 
+                            onClick={() => { 
+                                assignees.some((user: any) => user.email === params.row.mail) ?
+                                removeAsManager(params.row.mail) : 
+                                assignAsManager(params.row.displayName, params.row.mail, params.row.id)
+                            }}
+                        >
+                            { assignees.some((user: any) => user.email === params.row.mail) ? <AssignmentReturnIcon /> : <AssignmentIndIcon /> }
+                        </IconButton>
+                    </DarkTooltip>
+                </Box>
+            );
+        }, flex: 0.5 }
+    ];
     
     useEffect(() => {
         getAssignees();
@@ -169,7 +202,16 @@ function UsersAssignment(props: any) {
                                 users !== null && users !== undefined && assignees !== null ?
                                 <Box sx={{ overflow: "auto" }}>
                                     <Box sx={{ width: "100%", display: "table", tableLayout: "fixed" }}>
-                                        <Table aria-label="simple table" sx={{ border: 1, borderColor: "#e5e5e5" }}>
+                                        <DataGrid
+                                            rows={users}
+                                            columns={columnsUsers}
+                                            // hideFooter
+                                            getRowId={(row: any) => row?.id}
+                                            getRowHeight={() => "auto" }
+                                            sx={gridStyles}
+                                            disableRowSelectionOnClick
+                                        />
+                                        {/* <Table aria-label="simple table" sx={{ border: 1, borderColor: "#e5e5e5" }}>
                                             <TableHead>
                                                 <TableRow>
                                                     <TableCell align="left" sx={{ fontSize: 16, fontWeight: "bolder" }}>{t('id')}</TableCell>
@@ -207,7 +249,7 @@ function UsersAssignment(props: any) {
                                                     ))
                                                 }
                                             </TableBody>
-                                        </Table>
+                                        </Table> */}
                                     </Box>
                                 </Box> : !showAlert ? <Skeleton sx={{ mt: 3 }} /> : null
                             }

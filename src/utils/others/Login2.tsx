@@ -4,7 +4,7 @@ import '../../App.css';
 function Login2() {
   return (
     <div className="App">
-      
+          
     </div>
   );
 }

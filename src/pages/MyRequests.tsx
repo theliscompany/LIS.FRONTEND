@@ -7,7 +7,7 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 import React, { useEffect, useState } from 'react';
 // import '../../App.css';
-import { Button, Grid, InputLabel, NativeSelect, Skeleton } from '@mui/material';
+import { Alert, Button, Grid, InputLabel, NativeSelect, Skeleton } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import { BootstrapInput, datetimeStyles, inputLabelStyles } from '../utils/misc/styles';
 import { protectedResources } from '../config/authConfig';
@@ -247,14 +247,14 @@ function MyRequests() {
 
                 {
                     !load ? 
-                        notifications !== null ? 
+                        notifications !== null && notifications.length !== 0 ? 
                         <List sx={{ mt: 3  }}>
                             {
                                 notifications.map((item: any, i: number) => {
                                     return (<RequestViewItem item={item} i={i} />)
                                 })
                             }
-                        </List> : <Typography variant="subtitle1" px={5} my={3}>{t('noRequests')}</Typography>
+                        </List> : <Alert severity="warning">{t('noResults')}</Alert>
                     : <Skeleton sx={{ mt: 3 }} />
                 }
                 

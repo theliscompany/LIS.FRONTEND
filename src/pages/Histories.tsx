@@ -1,7 +1,7 @@
-import { Box, Button, Chip, Grid, InputLabel, Skeleton, Table, TableBody, TableCell, TableHead, TableRow, Typography } from '@mui/material';
+import { Alert, Box, Button, Chip, Grid, IconButton, InputLabel, Skeleton, Table, TableBody, TableCell, TableHead, TableRow, Typography } from '@mui/material';
 import { useEffect, useState } from 'react';
 // import '../../App.css';
-import { BootstrapInput, datetimeStyles, inputLabelStyles } from '../utils/misc/styles';
+import { BootstrapInput, datetimeStyles, gridStyles, inputLabelStyles } from '../utils/misc/styles';
 import { enqueueSnackbar, SnackbarProvider } from 'notistack';
 import SearchIcon from '@mui/icons-material/Search';
 import { protectedResources } from '../config/authConfig';
@@ -13,6 +13,7 @@ import { DateTimePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { Dayjs } from 'dayjs';
 import { RequestResponseDto } from '../utils/models/models';
 import { useTranslation } from 'react-i18next';
+import { GridColDef, GridValueFormatterParams, GridRenderCellParams, DataGrid } from '@mui/x-data-grid';
 
 function createGetRequestUrl(variable1: Dayjs|null, variable2: Dayjs|null, variable3: string, variable4: string) {
     let url = protectedResources.apiLisQuotes.endPoint+'/RequestQuoteHistory?';
@@ -50,6 +51,39 @@ function Histories(props: any) {
     useEffect(() => {
         getHistories();
     }, [context]);
+    
+    const columnsEvents: GridColDef[] = [
+        { field: 'id', headerName: t('id'), flex: 0.5 },
+        { field: 'requestQuoteId', headerName: t('requestQuoteId'), renderCell: (params: GridRenderCellParams) => {
+            return (
+                <Box>
+                    <Link to={"/admin/request/"+params.row.requestQuoteId}>{params.row.requestQuoteId}</Link>
+                </Box>
+            );
+        }, flex: 0.5 },
+        { field: 'assignee', headerName: t('assignee'), valueFormatter: (params: GridValueFormatterParams) => `${params.value !== null ? params.value.name+" (#"+params.value.id+")" : "Not defined"}`, flex: 1 },
+        { field: 'assigneeId', headerName: t('assigneeId'), renderCell: (params: GridRenderCellParams) => {
+            return (
+                <Box>
+                    {params.row.assignee !== null ? params.row.assignee.email : "Not defined"}
+                </Box>
+            );
+        }, flex: 1 },
+        { field: 'assignedAt', headerName: t('assignDate'), renderCell: (params: GridRenderCellParams) => {
+            return (
+                <Box sx={{ my: 1, mr: 1 }}>
+                    {params.row.assignedAt !== null ? (new Date(params.row.assignedAt)).toLocaleString() : <Chip label={t('currentlyAssigned')} color="success" />}
+                </Box>
+            );
+        }, flex: 1 },
+        { field: 'unassignedAt', headerName: t('unassignDate'), renderCell: (params: GridRenderCellParams) => {
+            return (
+                <Box sx={{ my: 1, mr: 1 }}>
+                    {params.row.unassignedAt !== null ? (new Date(params.row.unassignedAt)).toLocaleString() : <Chip label={t('currentlyAssigned')} color="success" />}
+                </Box>
+            );
+        }, flex: 1 }
+    ];
     
     const getHistories = async () => {
         if (context) {
@@ -137,10 +171,20 @@ function Histories(props: any) {
                     </Grid>
                         <Grid item xs={12}>
                             {
-                                !load && histories !== null ?
+                                !load ?
+                                histories !== null && histories.length !== 0 ?
                                 <Box sx={{ overflow: "auto" }}>
                                     <Box sx={{ width: "100%", display: "table", tableLayout: "fixed" }}>
-                                        <Table aria-label="simple table" sx={{ border: 1, borderColor: "#e5e5e5" }}>
+                                        <DataGrid
+                                            rows={histories}
+                                            columns={columnsEvents}
+                                            // hideFooter
+                                            getRowId={(row: any) => row?.id}
+                                            getRowHeight={() => "auto" }
+                                            sx={gridStyles}
+                                            disableRowSelectionOnClick
+                                        />
+                                        {/* <Table aria-label="simple table" sx={{ border: 1, borderColor: "#e5e5e5" }}>
                                             <TableHead>
                                                 <TableRow>
                                                     <TableCell align="left" sx={{ fontSize: 16, fontWeight: "bolder" }}>Id</TableCell>
@@ -168,9 +212,10 @@ function Histories(props: any) {
                                                     ))
                                                 }
                                             </TableBody>
-                                        </Table>
+                                        </Table> */}
                                     </Box>
-                                </Box> : <Skeleton sx={{ mt: 3 }} />
+                                </Box> : <Alert severity="warning">{t('noResults')}</Alert>
+                                : <Skeleton sx={{ mt: 3 }} />
                             }
                         </Grid>
                     </Grid>

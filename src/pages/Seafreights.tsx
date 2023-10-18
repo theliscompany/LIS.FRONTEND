@@ -187,6 +187,7 @@ function Seafreights() {
             const response = await (context as BackendService<any>).getSingle(protectedResources.apiLisPricing.endPoint+"/SeaFreight/GetSeaFreights");
             if (response !== null && response !== undefined) {
                 setSeafreights(response);
+                // setSeafreights([]);
                 setLoad(false);
             }
             else {
@@ -416,7 +417,7 @@ function Seafreights() {
                     <Grid container spacing={2} mt={1} px={5}>
                         <Grid item xs={12}>
                             {
-                                seafreights !== null ?
+                                seafreights !== null && seafreights.length !== 0 ?
                                 <Box sx={{ overflow: "auto" }}>
                                     {
                                         seafreights.map((item: any, i: number) => {
@@ -442,8 +443,7 @@ function Seafreights() {
                                             )
                                         })
                                     }
-                                </Box> 
-                                : <Alert severity="warning">{t('noResults')}</Alert>
+                                </Box> : <Alert severity="warning">{t('noResults')}</Alert>
                             }
                         </Grid>
                     </Grid> : <Skeleton sx={{ mx: 5, mt: 3 }} />

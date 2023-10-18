@@ -1094,28 +1094,31 @@ function Request() {
                     "extraFee": adding,
                     "totalPrice": totalPrice
                 };
-                const response = await (context as BackendService<any>).postBasic(protectedResources.apiLisOffer.endPoint+"/QuoteOffer", dataSent);
+                const response = await (context as BackendService<any>).postReturnJson(protectedResources.apiLisOffer.endPoint+"/QuoteOffer", dataSent);
                 // const response = await axios.post(protectedResources.apiLisOffer.endPoint+"/QuoteOffer", dataSent);
                 
                 if (response !== null) {
                     setModal5(false);
                     enqueueSnackbar(t('offerSuccessSent'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                    console.log(response);
 
-                    var footer = `
-                    <div style="font-family: Verdana; padding-top: 60px;">
-                        <div><a target="_blank" href="www.omnifreight.eu">www.omnifreight.eu</a></div>
-                        <div style="padding-bottom: 10px;"><a target="_blank" href="http://www.facebook.com/omnifreight">http://www.facebook.com/omnifreight</a></div>
-                        <div>Italiëlei 211</div>
-                        <div>2000 Antwerpen</div>
-                        <div>Belgium</div>
-                        <div>E-mail: transport@omnifreight.eu</div>
-                        <div>Tel +32.3.295.38.82</div>
-                        <div>Fax +32.3.295.38.77</div>
-                        <div>Whatsapp +32.494.40.24.25</div>
-                        <img src="http://www.omnifreight.eu/Images/omnifreight_logo.jpg" style="max-width: 200px;">
-                    </div>
-                    `;
-                    postEmail("pricing@omnifreight.eu", email, "Nouvelle offre de devis", rteRef.current?.editor?.getHTML()+footer);
+                    // var footer = `
+                    // <div style="font-family: Verdana; padding-top: 60px;">
+                    //     <a href="${"http://localhost:3000/acceptOffer/"+response.data.requestQuoteId}" style="display:inline-block;background-color:#008089;color:#fff;padding:10px 20px;text-decoration:none" target="_blank">Accept the offer</a>
+                    //     <a href="${"http://localhost:3000/refuseOffer/"+response.data.requestQuoteId}" style="display:inline-block;background-color:#F2F2F2;color:#008089;padding:10px 20px;text-decoration:none" target="_blank">Refuse the offer</a>
+                    //     <div style="margin-top: 15px;"><a target="_blank" href="www.omnifreight.eu">www.omnifreight.eu</a></div>
+                    //     <div style="padding-bottom: 10px;"><a target="_blank" href="http://www.facebook.com/omnifreight">http://www.facebook.com/omnifreight</a></div>
+                    //     <div>Italiëlei 211</div>
+                    //     <div>2000 Antwerpen</div>
+                    //     <div>Belgium</div>
+                    //     <div>E-mail: transport@omnifreight.eu</div>
+                    //     <div>Tel +32.3.295.38.82</div>
+                    //     <div>Fax +32.3.295.38.77</div>
+                    //     <div>Whatsapp +32.494.40.24.25</div>
+                    //     <img src="http://www.omnifreight.eu/Images/omnifreight_logo.jpg" style="max-width: 200px;">
+                    // </div>
+                    // `;
+                    // postEmail("pricing@omnifreight.eu", email, "Nouvelle offre de devis", rteRef.current?.editor?.getHTML()+footer);
                 }
                 else {
                     enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
@@ -1144,36 +1147,36 @@ function Request() {
         }
     }
 
-    const postEmail = async(from: string, to: string, subject: string, htmlContent: string) => {
-        const form = new FormData();
-        form.append('From', from);
-        form.append('To', to);
-        form.append('Subject', subject);
-        form.append('HtmlContent', htmlContent);
-        if (fileValue !== undefined) {
-            for (var i=0; i < fileValue.length; i++) {
-                form.append('Attachments', fileValue[i]);
-            }
-        }
+    // const postEmail = async(from: string, to: string, subject: string, htmlContent: string) => {
+    //     const form = new FormData();
+    //     form.append('From', from);
+    //     form.append('To', to);
+    //     form.append('Subject', subject);
+    //     form.append('HtmlContent', htmlContent);
+    //     if (fileValue !== undefined) {
+    //         for (var i=0; i < fileValue.length; i++) {
+    //             form.append('Attachments', fileValue[i]);
+    //         }
+    //     }
 
-        fetch('https://lisquotes-svc.azurewebsites.net/api/Email', {
-            method: 'POST',
-            headers: {
-                'accept': '*/*',
-                // 'Content-Type': 'multipart/form-data'
-            },
-            body: form
-        })
-        .then((response) => response.json())
-        .then((response: any) => {
-            if (response !== undefined && response !== null && response.code == 200) {
-                enqueueSnackbar(t('messageSuccessSent'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
-            }
-            else {
-                enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
-            }
-        });
-    }
+    //     fetch('https://lisquotes-svc.azurewebsites.net/api/Email', {
+    //         method: 'POST',
+    //         headers: {
+    //             'accept': '*/*',
+    //             // 'Content-Type': 'multipart/form-data'
+    //         },
+    //         body: form
+    //     })
+    //     .then((response) => response.json())
+    //     .then((response: any) => {
+    //         if (response !== undefined && response !== null && response.code == 200) {
+    //             enqueueSnackbar(t('messageSuccessSent'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
+    //         }
+    //         else {
+    //             enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+    //         }
+    //     });
+    // }
 
     return (
         <div style={{ background: "#fff", borderTopLeftRadius: 20, borderTopRightRadius: 20 }}>
@@ -1949,13 +1952,13 @@ function Request() {
                                                                     <InputLabel htmlFor="adding" sx={inputLabelStyles}>{t('extraFee')} ({selectedSeafreight !== null ? selectedSeafreight.currency : null})</InputLabel>
                                                                     <BootstrapInput id="adding" type="number" value={adding} onChange={(e: any) => setAdding(e.target.value)} fullWidth />
                                                                 </Grid> */}
-                                                                <Grid item xs={8}>
+                                                                {/* <Grid item xs={8}>
                                                                     <InputLabel htmlFor="fileSent" sx={inputLabelStyles}>{t('fileSent')}</InputLabel>
                                                                     <MuiFileInput 
                                                                         id="fileSent" size="small" variant="outlined" multiple fullWidth inputProps={{ accept: '.pdf' }} 
                                                                         value={fileValue} sx={{ mt: 1 }} onChange={(newValue: any) => { console.log(newValue); setFileValue(newValue); }} 
                                                                     />
-                                                                </Grid>
+                                                                </Grid> */}
                                                                 <Grid item xs={4}>
                                                                     <InputLabel htmlFor="mailLanguage" sx={inputLabelStyles}>{t('mailLanguage')}</InputLabel>
                                                                     <ToggleButtonGroup
