@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Typography, Box, Grid, Chip, InputLabel, Button, Alert, List, ListItem, ListItemText, DialogActions, DialogContent } from '@mui/material';
+import { Button, Alert, DialogActions, DialogContent } from '@mui/material';
 import Skeleton from '@mui/material/Skeleton';
-import { SnackbarProvider, enqueueSnackbar } from 'notistack';
-import { protectedResources, transportRequest } from '../config/authConfig';
-import { BootstrapDialog, BootstrapDialogTitle, BootstrapInput, buttonCloseStyles, gridStyles, inputLabelStyles } from '../utils/misc/styles';
+import { enqueueSnackbar } from 'notistack';
+import { protectedResources } from '../config/authConfig';
+import { BootstrapDialog, BootstrapDialogTitle, buttonCloseStyles } from '../utils/misc/styles';
 import { useTranslation } from 'react-i18next';
 
 

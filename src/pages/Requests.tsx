@@ -1,3 +1,4 @@
+import React, { useEffect } from 'react';
 import List from '@mui/material/List';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
@@ -5,8 +6,6 @@ import { Dayjs } from 'dayjs';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
-import React, { useEffect } from 'react';
-// import '../../App.css';
 import { Alert, Button, Grid, InputLabel, NativeSelect, Skeleton } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import { BootstrapInput, datetimeStyles, inputLabelStyles } from '../utils/misc/styles';
@@ -22,16 +21,16 @@ import RequestViewItem from '../components/requestsPage/RequestViewItem';
 function createGetRequestUrl(variable1: string, variable2: string, variable3: string, variable4: string, variable5: Dayjs|null, variable6: Dayjs|null, variable7: Dayjs|null, variable8: Dayjs|null) {
     let url = protectedResources.apiLisQuotes.endPoint+'/Request?';
     if (variable1) {
-      url += 'departure=' + encodeURIComponent(variable1) + '&';
+        url += 'departure=' + encodeURIComponent(variable1) + '&';
     }
     if (variable2) {
-      url += 'arrival=' + encodeURIComponent(variable2) + '&';
+        url += 'arrival=' + encodeURIComponent(variable2) + '&';
     }
     if (variable3) {
-      url += 'packingType=' + encodeURIComponent(variable3) + '&';
+        url += 'packingType=' + encodeURIComponent(variable3) + '&';
     }
     if (variable4) {
-      url += 'status=' + encodeURIComponent(variable4) + '&';
+        url += 'status=' + encodeURIComponent(variable4) + '&';
     }
     if (variable5) {
         url += 'createdAtStart=' + encodeURIComponent(variable5.format('YYYY-MM-DDTHH:mm:ss')) + '&';
@@ -47,7 +46,7 @@ function createGetRequestUrl(variable1: string, variable2: string, variable3: st
     }  
     
     if (url.slice(-1) === '&') {
-      url = url.slice(0, -1);
+        url = url.slice(0, -1);
     }
     return url;
 }
@@ -228,7 +227,7 @@ function Requests() {
                                         return (<RequestViewItem key={"rvi-"+i} item={item} i={i} />)
                                     })
                                 }
-                            </List> : <Alert severity="warning">{t('noResults')}</Alert>
+                            </List> : <Alert severity="warning" sx={{ mx: 5, mt: 3 }}>{t('noResults')}</Alert>
                         : <Skeleton sx={{ mt: 3 }} />
                     }
                     </Grid>

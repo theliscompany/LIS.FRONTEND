@@ -1,14 +1,12 @@
+import React, { useEffect, useState } from 'react';
 import { Alert, Autocomplete, Box, Button, Grid, InputLabel, NativeSelect, Skeleton, TextField, Typography, ListItem, ListItemText, IconButton } from '@mui/material';
 import { MuiTelInput } from 'mui-tel-input';
-import React, { useEffect, useState } from 'react';
-// import '../../App.css';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { inputLabelStyles, BootstrapInput, whiteButtonStyles } from '../utils/misc/styles';
 import { enqueueSnackbar, SnackbarProvider } from 'notistack';
 import { protectedResources, transportRequest } from '../config/authConfig';
 import { useAuthorizedBackendApi } from '../api/api';
 import { BackendService } from '../utils/services/fetch';
-// import { MailData } from '../../models/models';
 import { useAccount, useMsal } from '@azure/msal-react';
 import { Link } from 'react-router-dom';
 import { AuthenticationResult } from '@azure/msal-browser';

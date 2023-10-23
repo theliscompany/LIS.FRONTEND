@@ -1,8 +1,7 @@
+import React, { useEffect } from 'react';
 import List from '@mui/material/List';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
-import React, { useEffect } from 'react';
-// import '../../App.css';
 import { Alert, Button, Grid, InputLabel, NativeSelect, Skeleton } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import { BootstrapInput, inputLabelStyles } from '../utils/misc/styles';
@@ -170,7 +169,7 @@ function RequestsSearch() {
                                     return (<RequestViewItem item={item} i={i} />)
                                 })
                             }
-                        </List> : <Alert severity="warning">{t('noResults')}</Alert>
+                        </List> : <Alert severity="warning" sx={{ mx: 5, mt: 3 }}>{t('noResults')}</Alert>
                     : <Skeleton sx={{ mx: 5, mt: 3 }} />
                 }
                 

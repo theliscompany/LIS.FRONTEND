@@ -1,6 +1,5 @@
-import { Alert, Box, Chip, Grid, IconButton, Link, Skeleton, Table, TableBody, TableCell, TableHead, TableRow, Typography } from '@mui/material';
 import { useEffect, useState } from 'react';
-// import '../../App.css';
+import { Alert, Box, Chip, Grid, IconButton, Skeleton, Typography } from '@mui/material';
 import { DarkTooltip, gridStyles } from '../utils/misc/styles';
 import { enqueueSnackbar, SnackbarProvider } from 'notistack';
 import AssignmentIndIcon from '@mui/icons-material/AssignmentInd';
@@ -11,7 +10,7 @@ import { BackendService } from '../utils/services/fetch';
 import { useAccount, useMsal } from '@azure/msal-react';
 import { AuthenticationResult } from '@azure/msal-browser';
 import { useTranslation } from 'react-i18next';
-import { DataGrid, GridColDef, GridRenderCellParams, GridValueFormatterParams } from '@mui/x-data-grid';
+import { DataGrid, GridColDef, GridRenderCellParams } from '@mui/x-data-grid';
 
 function UsersAssignment(props: any) {
     const [load, setLoad] = useState<boolean>(false);
@@ -211,45 +210,6 @@ function UsersAssignment(props: any) {
                                             sx={gridStyles}
                                             disableRowSelectionOnClick
                                         />
-                                        {/* <Table aria-label="simple table" sx={{ border: 1, borderColor: "#e5e5e5" }}>
-                                            <TableHead>
-                                                <TableRow>
-                                                    <TableCell align="left" sx={{ fontSize: 16, fontWeight: "bolder" }}>{t('id')}</TableCell>
-                                                    <TableCell align="left" sx={{ fontSize: 16, fontWeight: "bolder" }}>{t('name')}</TableCell>
-                                                    <TableCell align="left" sx={{ fontSize: 16, fontWeight: "bolder" }}>{t('email')}</TableCell>
-                                                    <TableCell align="left" sx={{ fontSize: 16, fontWeight: "bolder" }}>{t('status')}</TableCell>
-                                                    <TableCell align="left"><b></b></TableCell>
-                                                </TableRow>
-                                            </TableHead>
-                                            <TableBody>
-                                                {
-                                                    users.map((row: any, i: number) => (
-                                                        <TableRow key={row.id} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-                                                            <TableCell align="left">{ "OmniMember-"+i}</TableCell>
-                                                            <TableCell align="left">{row.displayName}</TableCell>
-                                                            <TableCell align="left">{row.mail}</TableCell>
-                                                            <TableCell align="left">
-                                                                { assignees.some((user: any) => user.email === row.mail) ? <Chip label={t('canAssign')} color="success" /> : <Chip label={t('cannotAssign')} /> }
-                                                            </TableCell>
-                                                            <TableCell align="left">
-                                                                <DarkTooltip title={ assignees.some((user: any) => user.email === row.mail) ? t('cancelAssign') : t('assignAsManager')} placement="right" arrow>
-                                                                    <IconButton 
-                                                                        size="medium" 
-                                                                        onClick={() => { 
-                                                                            assignees.some((user: any) => user.email === row.mail) ?
-                                                                            removeAsManager(row.mail) : 
-                                                                            assignAsManager(row.displayName, row.mail, row.id)
-                                                                        }}
-                                                                    >
-                                                                        { assignees.some((user: any) => user.email === row.mail) ? <AssignmentReturnIcon /> : <AssignmentIndIcon /> }
-                                                                    </IconButton>
-                                                                </DarkTooltip>
-                                                            </TableCell>
-                                                        </TableRow>
-                                                    ))
-                                                }
-                                            </TableBody>
-                                        </Table> */}
                                     </Box>
                                 </Box> : !showAlert ? <Skeleton sx={{ mt: 3 }} /> : null
                             }
