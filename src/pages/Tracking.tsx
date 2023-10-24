@@ -1,7 +1,6 @@
+import { useEffect, useState } from 'react';
 import { Alert, Box, Button, Chip, Divider, Grid, List, ListItem, ListItemText, Typography } from '@mui/material';
 import Skeleton from '@mui/material/Skeleton';
-import { useEffect, useState } from 'react';
-// import '../../App.css';
 import { protectedResources } from '../config/authConfig';
 import { BootstrapInput } from '../utils/misc/styles';
 import { useParams } from 'react-router-dom';

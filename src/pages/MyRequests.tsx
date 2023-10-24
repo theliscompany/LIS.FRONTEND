@@ -1,3 +1,4 @@
+import React, { useEffect, useState } from 'react';
 import List from '@mui/material/List';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
@@ -5,8 +6,6 @@ import { Dayjs } from 'dayjs';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
-import React, { useEffect, useState } from 'react';
-// import '../../App.css';
 import { Alert, Button, Grid, InputLabel, NativeSelect, Skeleton } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import { BootstrapInput, datetimeStyles, inputLabelStyles } from '../utils/misc/styles';
@@ -254,7 +253,7 @@ function MyRequests() {
                                     return (<RequestViewItem item={item} i={i} />)
                                 })
                             }
-                        </List> : <Alert severity="warning">{t('noResults')}</Alert>
+                        </List> : <Alert severity="warning" sx={{ mx: 5, mt: 3 }}>{t('noResults')}</Alert>
                     : <Skeleton sx={{ mt: 3 }} />
                 }
                 

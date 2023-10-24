@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAccount, useMsal } from '@azure/msal-react';
-import { Typography, Box, Grid, TableCell, TableHead, Table, TableBody, TableRow, Chip, IconButton, Button, DialogContent, DialogActions, Alert } from '@mui/material';
+import { Typography, Box, Grid, Chip, IconButton, Button, DialogContent, DialogActions, Alert } from '@mui/material';
 import Skeleton from '@mui/material/Skeleton';
 import { SnackbarProvider, enqueueSnackbar } from 'notistack';
 import { useAuthorizedBackendApi } from '../api/api';
@@ -158,47 +158,6 @@ function PriceOffers() {
                                                 sx={gridStyles}
                                                 disableRowSelectionOnClick
                                             />
-                                            {/* <Table sx={{ minWidth: 650, border: 1, borderColor: "#e5e5e5" }} aria-label="simple table">
-                                                <TableHead>
-                                                    <TableRow>
-                                                        <TableCell align="left" sx={{ fontSize: 16, fontWeight: "bolder" }}>{t('offerId')}</TableCell>
-                                                        <TableCell align="left" sx={{ fontSize: 16, fontWeight: "bolder" }}>{t('requestQuoteId')}</TableCell>
-                                                        <TableCell align="left" sx={{ fontSize: 16, fontWeight: "bolder" }}>{t('createdDate')}</TableCell>
-                                                        <TableCell align="left" sx={{ fontSize: 16, fontWeight: "bolder" }}>{t('departure')}</TableCell>
-                                                        <TableCell align="left" sx={{ fontSize: 16, fontWeight: "bolder" }}>{t('arrival')}</TableCell>
-                                                        <TableCell align="left" sx={{ fontSize: 16, fontWeight: "bolder" }}>{t('status')}</TableCell>
-                                                        <TableCell align="left" sx={{ fontSize: 16, fontWeight: "bolder" }}>{t('clientApproval')}</TableCell>
-                                                        <TableCell align="left"><b></b></TableCell>
-                                                    </TableRow>
-                                                </TableHead>
-                                                <TableBody>
-                                                    {
-                                                        offers.map((row: any, i: number) => (
-                                                            <React.Fragment key={"offer-"+row.id}>
-                                                                <TableRow sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-                                                                    <TableCell align="left">{row.quoteOfferNumber}</TableCell>
-                                                                    <TableCell align="left">
-                                                                        <Link to={"/admin/request/"+row.requestQuoteId}>{row.requestQuoteId}</Link>
-                                                                    </TableCell>
-                                                                    <TableCell align="left">{(new Date(row.created)).toLocaleString().slice(0,10)}</TableCell>
-                                                                    <TableCell align="left">{row.seaFreight.departurePortName}</TableCell>
-                                                                    <TableCell align="left">{row.seaFreight.destinationPortName}</TableCell>
-                                                                    <TableCell align="left"><Chip label={statusLabel(row.status)} color={colors(row.status)} /></TableCell>
-                                                                    <TableCell align="left">{row.status !== "Accepted" && row.clientApproval === "Pending" ? <Chip label={t('noEmail')} /> : <Chip label={row.clientApproval} color={colors(row.clientApproval)} />}</TableCell>
-                                                                    <TableCell align="left">
-                                                                        <IconButton component={NavLink} to={"/admin/quote-offers/"+row.id} sx={{ mr: 1 }}>
-                                                                            <EditIcon fontSize="small" />
-                                                                        </IconButton>
-                                                                        <IconButton onClick={() => { setCurrentId(row.id); setModal(true); }}>
-                                                                            <DeleteIcon fontSize="small" />
-                                                                        </IconButton>
-                                                                    </TableCell>
-                                                                </TableRow>
-                                                            </React.Fragment>
-                                                        ))
-                                                    }
-                                                </TableBody>
-                                            </Table> */}
                                         </Box>
                                     </Box> : <Alert severity="warning">{t('noResults')}</Alert>
                                 }

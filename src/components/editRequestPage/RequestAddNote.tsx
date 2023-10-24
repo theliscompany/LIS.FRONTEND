@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { BootstrapDialogTitle, BootstrapInput, buttonCloseStyles, inputLabelStyles } from '../../utils/misc/styles';
 import { Button, DialogActions, DialogContent, Grid, InputLabel, Typography } from '@mui/material';
 import { useAuthorizedBackendApi } from '../../api/api';
