@@ -152,7 +152,7 @@ function Landing() {
     //         <div style="background-color: #f2f2f2; padding: 20px;">
     //             <h1 style="color: #000; margin-bottom: 20px;">New request for quote</h1>
     //             <p style="margin-bottom: 20px;">You have received a new request for quote in LIS Quotes.</p>
-    //             <a href="https://lisquotes-ui.azurewebsites.net/login" style="display: inline-block; background-color: #008089; color: #fff; padding: 10px 20px; text-decoration: none;">Login to LIS Quotes</a>
+    //             <a href="https://lis-quotes-ui-dev.azurewebsites.net/login" style="display: inline-block; background-color: #008089; color: #fff; padding: 10px 20px; text-decoration: none;">Login to LIS Quotes</a>
     //             <p style="margin-top: 20px;">Please, click the button up to login to LIS Quotes and manage this quote.</p>
     //             <div style="font-family: Verdana; padding-top: 60px;">
     //                 <div><a target="_blank" href="www.omnifreight.eu">www.omnifreight.eu</a></div>
@@ -190,7 +190,7 @@ function Landing() {
                         setLoad(false);
                         // download("/assets/omnifreight_flyer.pdf", "Flyer Omnifreight.pdf");
                         // Here i should send the email to the file
-                        var content = "<body style=\"font-family: Arial, sans-serif; font-size: 14px; color: #333;\">\r\n\t<div style=\"background-color: #f2f2f2; padding: 20px;\">\r\n\t\t<h1 style=\"color: #000; margin-bottom: 20px;\">Download the flyer</h1>\r\n\t\t<p style=\"margin-bottom: 20px;\">We have sent you the flyer.</p>\r\n\t\t<a href=\"https://lisquotes-ui.azurewebsites.net/assets/omnifreight_flyer.pdf\" style=\"display: inline-block; background-color: #008089; color: #fff; padding: 10px 20px; text-decoration: none;\">Download</a>\r\n\t\t<p style=\"margin-top: 20px;\">Please, click the button up to download the document.</p>\r\n\t</div>\r\n</body>";
+                        var content = "<body style=\"font-family: Arial, sans-serif; font-size: 14px; color: #333;\">\r\n\t<div style=\"background-color: #f2f2f2; padding: 20px;\">\r\n\t\t<h1 style=\"color: #000; margin-bottom: 20px;\">Download the flyer</h1>\r\n\t\t<p style=\"margin-bottom: 20px;\">We have sent you the flyer.</p>\r\n\t\t<a href=\"https://lis-quotes-ui-dev.azurewebsites.net/assets/omnifreight_flyer.pdf\" style=\"display: inline-block; background-color: #008089; color: #fff; padding: 10px 20px; text-decoration: none;\">Download</a>\r\n\t\t<p style=\"margin-top: 20px;\">Please, click the button up to download the document.</p>\r\n\t</div>\r\n</body>";
                         postEmail("cyrille.penaye@omnifreight.eu", email, "You received the flyer", content);
                     }).catch(error => { 
                         setLoad(false);
