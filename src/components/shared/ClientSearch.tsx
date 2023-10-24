@@ -20,12 +20,6 @@ const ClientSearch: React.FC<LocationAutocompleteProps> = ({ id, value, onChange
     const debouncedSearch = debounce(async (search: string) => {
         setLoading(true);
         try {
-            // if (Number(search)) {
-
-            // }
-            // else {
-
-            // }
             const response = await axios.get(
                 `https://liscrm-dev.azurewebsites.net/Contact/GetContactsByCategory?contactName=${search}&category=1`,
             );

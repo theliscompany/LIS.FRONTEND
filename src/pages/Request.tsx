@@ -1,10 +1,9 @@
-import { Alert, Autocomplete, Box, Button, Chip, DialogActions, DialogContent, FormControl, FormControlLabel, FormLabel, Grid, IconButton, InputLabel, ListItem, ListItemText, NativeSelect, Paper, Popover, Radio, RadioGroup, Skeleton, Step, StepLabel, Stepper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material';
-import { MuiTelInput } from 'mui-tel-input';
 import React, { useEffect, useState, useRef } from 'react';
 import { useParams } from 'react-router-dom';
-// import '../../App.css';
+import { Alert, Autocomplete, Box, Button, Chip, DialogActions, DialogContent, Grid, IconButton, InputLabel, ListItem, ListItemText, NativeSelect, Skeleton, Step, StepLabel, Stepper, TextField, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material';
+import { MuiTelInput } from 'mui-tel-input';
 import AutocompleteSearch from '../components/shared/AutocompleteSearch';
-import { inputLabelStyles, BootstrapInput, BootstrapDialogTitle, BootstrapDialog, buttonCloseStyles, DarkTooltip, whiteButtonStyles, datetimeStyles, gridStyles, HtmlTooltip } from '../utils/misc/styles';
+import { inputLabelStyles, BootstrapInput, BootstrapDialogTitle, BootstrapDialog, buttonCloseStyles, whiteButtonStyles, gridStyles, HtmlTooltip } from '../utils/misc/styles';
 import { enqueueSnackbar, SnackbarProvider } from 'notistack';
 import DeleteIcon from '@mui/icons-material/Delete';
 import HelpIcon from '@mui/icons-material/Help';
@@ -12,8 +11,6 @@ import { pricingRequest, protectedResources, transportRequest } from '../config/
 import { useAuthorizedBackendApi } from '../api/api';
 import { BackendService } from '../utils/services/fetch';
 import { MuiChipsInputChip } from 'mui-chips-input';
-import { DateTimePicker, LocalizationProvider } from '@mui/x-date-pickers';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { Dayjs } from 'dayjs';
 import { useAccount, useMsal } from '@azure/msal-react';
 import { AuthenticationResult } from '@azure/msal-browser';
@@ -52,10 +49,10 @@ import RequestListNotes from '../components/editRequestPage/RequestListNotes';
 import RequestAddNote from '../components/editRequestPage/RequestAddNote';
 import RequestAskInformation from '../components/editRequestPage/RequestAskInformation';
 import RequestChangeStatus from '../components/editRequestPage/RequestChangeStatus';
-import { MailData } from '../utils/models/models';
-import { MuiFileInput } from 'mui-file-input';
+// import { MailData } from '../utils/models/models';
+// import { MuiFileInput } from 'mui-file-input';
 import { calculateDistance, findClosestSeaPort } from '../utils/functions';
-import { EditorContent, useEditor } from '@tiptap/react';
+// import { EditorContent, useEditor } from '@tiptap/react';
 
 //let statusTypes = ["EnAttente", "Valider", "Rejeter"];
 // let cargoTypes = ["Container", "Conventional", "RollOnRollOff"];
@@ -186,7 +183,7 @@ function Request() {
     const [email, setEmail] = useState<string>("");
     const [status, setStatus] = useState<string | null>(null);
     const [trackingNumber, setTrackingNumber] = useState<string>("");
-    const [clientName, setClientName] = useState<string>("");
+    // const [clientName, setClientName] = useState<string>("");
     const [phone, setPhone] = useState<string>("");
     const [message, setMessage] = useState<string>("");
     // const [cargoType, setCargoType] = useState<string>("0");
@@ -268,17 +265,17 @@ function Request() {
     const [rowSelectionModel2, setRowSelectionModel2] = React.useState<GridRowSelectionModel>([]);
     const [rowSelectionModel3, setRowSelectionModel3] = React.useState<GridRowSelectionModel>([]);
 
-    const [fileValue, setFileValue] = useState<File[] | undefined>(undefined);
+    // const [fileValue, setFileValue] = useState<File[] | undefined>(undefined);
     const [mailLanguage, setMailLanguage] = useState<string>("fr");
 
     const rteRef = useRef<RichTextEditorRef>(null);
-    const editor = useEditor({
-        extensions: [
-          StarterKit,
-        ],
-        content: '',
-    });
-    const [contentValue, setContentValue] = useState<string>("");
+    // const editor = useEditor({
+    //     extensions: [
+    //       StarterKit,
+    //     ],
+    //     content: '',
+    // });
+    // const [contentValue, setContentValue] = useState<string>("");
     
     let { id } = useParams();
 
@@ -291,7 +288,7 @@ function Request() {
     
     const steps = [t('searchHaulage'), t('selectHaulage'), t('searchSeafreight'), t('selectSeafreight'), t('selectMisc'), t('sendOffer')];
     // const steps = [t('searchHaulage'), t('selectHaulage'), t('searchSeafreight'), t('selectSeafreight'), t('selectMisc'), t('sendOffer')];
-    const haulageTypes = [t('haulageType1'), t('haulageType2'), t('haulageType3'), t('haulageType4'), t('haulageType5')];
+    // const haulageTypes = [t('haulageType1'), t('haulageType2'), t('haulageType3'), t('haulageType4'), t('haulageType5')];
     const haulageTypeOptions = [
         { value: "On trailer, direct loading", label: t('haulageType1') },
         { value: "On trailer, Loading with Interval", label: t('haulageType2') },
@@ -1606,64 +1603,6 @@ function Request() {
                                                                         }
                                                                     </NativeSelect>
                                                                 </Grid>
-                                                                {/* <Grid item xs={12} md={6} mt={1}>
-                                                                    <InputLabel htmlFor="port-departure" sx={inputLabelStyles}>{t('departurePort')}</InputLabel>
-                                                                    {
-                                                                        ports !== null ?
-                                                                        <Autocomplete
-                                                                            disablePortal
-                                                                            id="port-departure"
-                                                                            options={ports1}
-                                                                            renderOption={(props, option, i) => {
-                                                                                return (
-                                                                                    <li {...props} key={option.portId}>
-                                                                                        {option.portName+", "+option.country}
-                                                                                    </li>
-                                                                                );
-                                                                            }}
-                                                                            getOptionLabel={(option: any) => { 
-                                                                                if (option !== null && option !== undefined) {
-                                                                                    return option.portName+', '+option.country;
-                                                                                }
-                                                                                return ""; 
-                                                                            }}
-                                                                            value={portDeparture}
-                                                                            sx={{ mt: 1 }}
-                                                                            renderInput={(params: any) => <TextField {...params} />}
-                                                                            onChange={(e: any, value: any) => { setPortDeparture(value); }}
-                                                                            fullWidth
-                                                                        /> : <Skeleton />
-                                                                    }
-                                                                </Grid>
-                                                                <Grid item xs={12} md={6} mt={1}>
-                                                                    <InputLabel htmlFor="destination-port" sx={inputLabelStyles}>{t('arrivalPort')}</InputLabel>
-                                                                    {
-                                                                        ports !== null ?
-                                                                        <Autocomplete
-                                                                            disablePortal
-                                                                            id="destination-port"
-                                                                            options={ports2}
-                                                                            renderOption={(props, option, i) => {
-                                                                                return (
-                                                                                    <li {...props} key={option.portId}>
-                                                                                        {option.portName+", "+option.country}
-                                                                                    </li>
-                                                                                );
-                                                                            }}
-                                                                            getOptionLabel={(option: any) => { 
-                                                                                if (option !== null && option !== undefined) {
-                                                                                    return option.portName+', '+option.country;
-                                                                                }
-                                                                                return ""; 
-                                                                            }}
-                                                                            value={portDestination}
-                                                                            sx={{ mt: 1 }}
-                                                                            renderInput={(params: any) => <TextField {...params} />}
-                                                                            onChange={(e: any, value: any) => { setPortDestination(value); }}
-                                                                            fullWidth
-                                                                        /> : <Skeleton />
-                                                                    }
-                                                                </Grid> */}
                                                             </Grid> : null
                                                         }
                                                         {
@@ -1673,7 +1612,7 @@ function Request() {
                                                                     {
                                                                         !loadResults ? 
                                                                         haulages !== null && haulages.length !== 0 ?
-                                                                            <Box>
+                                                                            <Box sx={{ overflow: "auto", width: { xs: "98.5%" } }}>
                                                                                 <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>{t('listHaulagesPricingOffers')+t('fromDotted')+loadingCity.city}</Typography>
                                                                                 <DataGrid
                                                                                     rows={haulages}
@@ -1693,31 +1632,6 @@ function Request() {
                                                                         : <Skeleton />
                                                                     }
                                                                 </Grid>
-                                                                {/* <Grid item xs={12}>
-                                                                    <Alert severity="info" sx={{ mb: 2 }}>{t('selectOfferMessage')}</Alert>
-                                                                    {
-                                                                        !loadResults ? 
-                                                                        seafreights !== null && seafreights.length !== 0 ?
-                                                                            <Box>
-                                                                                <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>{t('listSeaFreightsPricingOffers')+t('fromDotted')+portDeparture.portName+"-"+portDestination.portName} </Typography>
-                                                                                <DataGrid
-                                                                                    rows={seafreights}
-                                                                                    columns={columnsSeafreights}
-                                                                                    hideFooter
-                                                                                    getRowId={(row: any) => row?.seaFreightId}
-                                                                                    getRowHeight={() => "auto" }
-                                                                                    sx={gridStyles}
-                                                                                    onRowSelectionModelChange={(newRowSelectionModel) => {
-                                                                                        setRowSelectionModel(newRowSelectionModel);
-                                                                                        setSelectedSeafreight(newRowSelectionModel.length !== 0 ? seafreights.find((elm: any) => elm.seaFreightId === newRowSelectionModel[0]) : null);
-                                                                                    }}
-                                                                                    rowSelectionModel={rowSelectionModel}
-                                                                                    // onRowClick={handleRowSeafreightsClick}
-                                                                                />
-                                                                            </Box> : <Alert severity="error">{t('noResults')}</Alert>
-                                                                        : <Skeleton />
-                                                                    }
-                                                                </Grid> */}
                                                             </Grid> : null
                                                         }
                                                         {
@@ -1814,7 +1728,7 @@ function Request() {
                                                                     {
                                                                         !loadResults ? 
                                                                         seafreights !== null && seafreights.length !== 0 ?
-                                                                            <Box>
+                                                                        <Box sx={{ overflow: "auto", width: { xs: "98.5%" } }}>
                                                                                 <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>{t('listSeaFreightsPricingOffers')+t('fromDotted')+portDeparture.portName+"-"+portDestination.portName} </Typography>
                                                                                 <DataGrid
                                                                                     rows={seafreights}
@@ -1868,7 +1782,7 @@ function Request() {
                                                                     {
                                                                         !loadResults ? 
                                                                         miscs !== null && miscs.length !== 0 ?
-                                                                            <Box>
+                                                                            <Box sx={{ overflow: "auto", width: { xs: "98.5%" } }}>
                                                                                 <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>{t('listMiscPricingOffers')+t('fromDotted')+portDeparture.portName+"-"+portDestination.portName}</Typography>
                                                                                 <DataGrid
                                                                                     rows={miscs}
@@ -1896,69 +1810,52 @@ function Request() {
                                                             <Grid container spacing={2} mt={1} px={2}>
                                                                 <Grid item xs={12}>
                                                                     <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>{t('selectedSeafreight')}</Typography>
-                                                                    <DataGrid
-                                                                        rows={[selectedSeafreight]}
-                                                                        columns={columnsSeafreights}
-                                                                        hideFooter
-                                                                        getRowId={(row: any) => row?.seaFreightId}
-                                                                        getRowHeight={() => "auto" }
-                                                                        sx={gridStyles}
-                                                                        isRowSelectable={(params: any) => false}
-                                                                    />
+                                                                    <Box sx={{ overflow: "auto", width: { xs: "98.5%" } }}>
+                                                                        <DataGrid
+                                                                            rows={[selectedSeafreight]}
+                                                                            columns={columnsSeafreights}
+                                                                            hideFooter
+                                                                            getRowId={(row: any) => row?.seaFreightId}
+                                                                            getRowHeight={() => "auto" }
+                                                                            sx={gridStyles}
+                                                                            isRowSelectable={(params: any) => false}
+                                                                        />
+                                                                    </Box>
                                                                 </Grid>
                                                                 {
                                                                     selectedHaulage !== null ? 
                                                                     <Grid item xs={12}>
                                                                         <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>{t('selectedHaulage')}</Typography>
-                                                                        <DataGrid
-                                                                            rows={[selectedHaulage]}
-                                                                            columns={columnsHaulages}
-                                                                            hideFooter
-                                                                            getRowId={(row: any) => row?.id}
-                                                                            getRowHeight={() => "auto" }
-                                                                            sx={gridStyles}
-                                                                            isRowSelectable={(params: any) => false}
-                                                                        />
+                                                                        <Box sx={{ overflow: "auto", width: { xs: "98.5%" } }}>
+                                                                            <DataGrid
+                                                                                rows={[selectedHaulage]}
+                                                                                columns={columnsHaulages}
+                                                                                hideFooter
+                                                                                getRowId={(row: any) => row?.id}
+                                                                                getRowHeight={() => "auto" }
+                                                                                sx={gridStyles}
+                                                                                isRowSelectable={(params: any) => false}
+                                                                            />
+                                                                        </Box>
                                                                     </Grid> : null
                                                                 }
                                                                 {
                                                                     selectedMisc !== null ? 
                                                                     <Grid item xs={12}>
                                                                         <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>{t('selectedMisc')}</Typography>
-                                                                        <DataGrid
-                                                                            rows={[selectedMisc]}
-                                                                            columns={columnsMiscs}
-                                                                            hideFooter
-                                                                            getRowId={(row: any) => row?.id}
-                                                                            getRowHeight={() => "auto" }
-                                                                            sx={gridStyles}
-                                                                            isRowSelectable={(params: any) => false}
-                                                                        />
+                                                                        <Box sx={{ overflow: "auto", width: { xs: "98.5%" } }}>
+                                                                            <DataGrid
+                                                                                rows={[selectedMisc]}
+                                                                                columns={columnsMiscs}
+                                                                                hideFooter
+                                                                                getRowId={(row: any) => row?.id}
+                                                                                getRowHeight={() => "auto" }
+                                                                                sx={gridStyles}
+                                                                                isRowSelectable={(params: any) => false}
+                                                                            />
+                                                                        </Box>
                                                                     </Grid> : null
                                                                 }
-                                                                {/* <Grid item xs={12} md={6}>
-                                                                    <InputLabel htmlFor="client-name" sx={inputLabelStyles}>{t('clientName')}</InputLabel>
-                                                                    <BootstrapInput id="clien-name" type="text" value={clientName} onChange={(e: any) => setClientName(e.target.value)} fullWidth />
-                                                                </Grid>
-                                                                <Grid item xs={12} md={2}>
-                                                                    <InputLabel htmlFor="margin" sx={inputLabelStyles}>{t('margin')} (%)</InputLabel>
-                                                                    <BootstrapInput id="margin" type="number" value={margin} onChange={(e: any) => setMargin(e.target.value)} fullWidth />
-                                                                </Grid>
-                                                                <Grid item xs={12} md={2}>
-                                                                    <InputLabel htmlFor="reduction" sx={inputLabelStyles}>{t('reduction')} (%)</InputLabel>
-                                                                    <BootstrapInput id="reduction" type="number" value={reduction} onChange={(e: any) => setReduction(e.target.value)} fullWidth />
-                                                                </Grid>
-                                                                <Grid item xs={12} md={2}>
-                                                                    <InputLabel htmlFor="adding" sx={inputLabelStyles}>{t('extraFee')} ({selectedSeafreight !== null ? selectedSeafreight.currency : null})</InputLabel>
-                                                                    <BootstrapInput id="adding" type="number" value={adding} onChange={(e: any) => setAdding(e.target.value)} fullWidth />
-                                                                </Grid> */}
-                                                                {/* <Grid item xs={8}>
-                                                                    <InputLabel htmlFor="fileSent" sx={inputLabelStyles}>{t('fileSent')}</InputLabel>
-                                                                    <MuiFileInput 
-                                                                        id="fileSent" size="small" variant="outlined" multiple fullWidth inputProps={{ accept: '.pdf' }} 
-                                                                        value={fileValue} sx={{ mt: 1 }} onChange={(newValue: any) => { console.log(newValue); setFileValue(newValue); }} 
-                                                                    />
-                                                                </Grid> */}
                                                                 <Grid item xs={4}>
                                                                     <InputLabel htmlFor="mailLanguage" sx={inputLabelStyles}>{t('mailLanguage')}</InputLabel>
                                                                     <ToggleButtonGroup
@@ -2178,7 +2075,6 @@ function Request() {
                 <DialogContent dividers>
                 </DialogContent>
                 <DialogActions>
-                    {/* <Button variant="contained" color={!load ? "primary" : "info"} className="mr-3" onClick={() => { getPriceRequests(); }} sx={{ textTransform: "none" }}>Generate the offer</Button> */}
                     <Button variant="contained" onClick={() => setModal5(false)} sx={buttonCloseStyles}>{t('close')}</Button>
                 </DialogActions>
             </BootstrapDialog>

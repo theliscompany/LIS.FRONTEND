@@ -6,6 +6,50 @@ import { useTranslation } from 'react-i18next';
 function RequestViewItem(props: any) {
     const { t } = useTranslation();
     
+    function colors(value: string) {
+        switch (value) {
+            case "EnAttente": 
+                return "warning";
+                break;
+            case "Valider":
+                return "success";
+                break;
+            case "Accepted":
+                return "success";
+                break;
+            case "New":
+                return "primary";
+                break;
+            case "Rejeter": 
+                return "error";
+                break;
+            case "Rejeected": 
+                return "error";
+                break;
+            case "No response": 
+                return "default";
+                break;
+        }
+    }
+    
+    const statusTypes = [
+        { type: "EnAttente", label: t('labelEnAttente'), value: "En attente", description: t('descriptionEnAttente') }, 
+        { type: "Valider", label: t('labelValider'), value: "Validé", description: t('descriptionValider') }, 
+        { type: "Rejeter", label: t('labelRejeter'), value: "Rejeté", description: t('descriptionRejeter') }, 
+        { type: "EnCoursDeTraitement", label: t('labelEnCoursDeTraitement'), value: "En cours de traitement", description: t('descriptionEnCoursDeTraitement') }, 
+        { type: "EnTransit", label: t('labelEnTransit'), value: "En transit", description: t('descriptionEnTransit') }, 
+        { type: "EnDouane", label: t('labelEnDouane'), value: "En douane", description: t('descriptionEnDouane') }, 
+        { type: "LivraisonEnCours", label: t('labelLivraisonEnCours'), value: "Livraison en cours", description: t('descriptionLivraisonEnCours') }, 
+        { type: "Livre", label: t('labelLivre'), value: "Livré", description: t('descriptionLivre') }, 
+        { type: "Annule", label: t('labelAnnule'), value: "Annulé", description: t('descriptionAnnule') }, 
+        { type: "Retour", label: t('labelRetour'), value: "Retourné", description: t('descriptionRetour') }, 
+        { type: "Problème", label: t('labelProbleme'), value: "Problème", description: t('descriptionProbleme') }, 
+        { type: "EnAttenteDeFacturation", label: t('labelEnAttenteDeFacturation'), value: "En attente de facturation", description: t('descriptionEnAttenteDeFacturation') },
+        { type: "Accepted", label: t('labelValider'), value: "Validé", description: t('descriptionValider') }, 
+        { type: "Rejected", label: t('labelRejeter'), value: "Rejeté", description: t('descriptionRejeter') }, 
+        { type: "New", label: t('labelNew'), value: "Nouveau", description: t('descriptionNew') }, 
+    ];
+    
     function dateTimeDiff(date_time: string) {
         const now = new Date();
         const datetime = new Date(date_time);
@@ -45,7 +89,7 @@ function RequestViewItem(props: any) {
                     />        
                 </Grid>
                 <Grid item xs={12}>
-                    {dateTimeDiff(props.item.createdAt)} <Chip size="small" label={props.item.status} color={props.item.status === "EnAttente" ? "warning" : props.item.status === "Valider" ? "success" : "secondary"} sx={{ ml: 1 }} />
+                    {dateTimeDiff(props.item.createdAt)} <Chip size="small" label={statusTypes.find((elm: any) => elm.type === props.item.status)?.label} color={colors(props.item.status)} sx={{ ml: 1 }} />
                 </Grid>
                 <Grid item xs={12} md={6} mt={1}>
                     <Typography variant="subtitle1" display="flex" alignItems="center" justifyContent="left" fontSize={15}>{t('departure')}</Typography>

@@ -1,6 +1,4 @@
 import { Box, Typography } from '@mui/material';
-//import React, { useEffect } from 'react';
-// import '../../App.css';
 import { useTranslation } from 'react-i18next'; 
 
 function NotFound() {

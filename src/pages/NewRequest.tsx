@@ -224,7 +224,7 @@ function NewRequest(props: any) {
                         departure: departure !== null && departure !== undefined ? departure.city.toUpperCase()+', '+departure.country+', '+departure.latitude+', '+departure.longitude : "",
                         arrival: arrival !== null && arrival !== undefined ? arrival.city.toUpperCase()+', '+arrival.country+', '+arrival.latitude+', '+arrival.longitude : "",
                         cargoType: 0,
-                        clientNumber: clientNumber !== null ? String(clientNumber.contactId) : null,
+                        clientNumber: clientNumber !== null ? String(clientNumber.contactId)+", "+clientNumber.contactName : null,
                         packingType: packingType,
                         containers: containersSelection.map((elm: any, i: number) => { return { 
                             id: containers.find((item: any) => item.packageName === elm.container).packageId, 

@@ -522,19 +522,6 @@ function Layout(props: {children?: React.ReactNode}) {
                                 </List>
                             </Collapse>
                             
-                            <NavLink to="/admin/quote-offers" className={({ isActive }) => isActive ? "cs-navlink-active" : "cs-navlink"}>
-                                <ListItem className="cs-listitem" key={"Price offers"} disablePadding disableGutters>
-                                <DarkTooltip title={t('priceOffers')} placement="right" arrow>
-                                    <ListItemButton className="cs-listitembutton">
-                                        <ListItemIcon className="cs-listitemicon">
-                                            <PortraitIcon fontSize="small" />
-                                        </ListItemIcon>
-                                        <ListItemText primary={t('priceOffers')} primaryTypographyProps={{ fontSize: 14 }} />
-                                    </ListItemButton>
-                                </DarkTooltip>
-                                </ListItem>
-                            </NavLink>
-                            
                             <ListItem className="cs-listitem" key={"Prices part"} disablePadding disableGutters>
                                 <ListItemButton className="cs-listitembutton" onClick={() => { setOpenPrices(!openPrices); }}>
                                     <ListItemIcon className="cs-listitemicon">
@@ -584,6 +571,20 @@ function Layout(props: {children?: React.ReactNode}) {
                                     </NavLink>
                                 </List>
                             </Collapse>
+
+                            <NavLink to="/admin/quote-offers" className={({ isActive }) => isActive ? "cs-navlink-active" : "cs-navlink"}>
+                                <ListItem className="cs-listitem" key={"Price offers"} disablePadding disableGutters>
+                                <DarkTooltip title={t('priceOffers')} placement="right" arrow>
+                                    <ListItemButton className="cs-listitembutton">
+                                        <ListItemIcon className="cs-listitemicon">
+                                            <PortraitIcon fontSize="small" />
+                                        </ListItemIcon>
+                                        <ListItemText primary={t('priceOffers')} primaryTypographyProps={{ fontSize: 14 }} />
+                                    </ListItemButton>
+                                </DarkTooltip>
+                                </ListItem>
+                            </NavLink>
+                            
                         </List>
                         
                         <List dense sx={{ position: "absolute", bottom: "0px", left: "10px", right: "10px" }}>
