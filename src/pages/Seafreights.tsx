@@ -80,12 +80,9 @@ function Seafreights() {
     ]
     
     const columnsSeafreights: GridColDef[] = [
-        // { field: 'carrierName', headerName: t('carrier'), flex: 1 },
-        { field: 'carrierAgentName', headerName: t('carrierAgent'), flex: 1.4 },
-        // { field: 'departurePortName', headerName: t('departurePort'), flex: 1 },
-        // { field: 'destinationPortName', headerName: t('destinationPort'), flex: 1 },
-        { field: 'frequency', headerName: t('frequency'), valueFormatter: (params: GridValueFormatterParams) => `${t('every')} ${params.value || ''} `+t('days'), flex: 1 },
-        { field: 'transitTime', headerName: t('transitTime'), valueFormatter: (params: GridValueFormatterParams) => `${params.value || ''} `+t('days'), flex: 1 },
+        { field: 'carrierAgentName', headerName: t('carrierAgent'), minWidth: 125, flex: 1.4 },
+        { field: 'frequency', headerName: t('frequency'), valueFormatter: (params: GridValueFormatterParams) => `${t('every')} ${params.value || ''} `+t('days'), minWidth: 100, flex: 1 },
+        { field: 'transitTime', headerName: t('transitTime'), valueFormatter: (params: GridValueFormatterParams) => `${params.value || ''} `+t('days'), minWidth: 100, flex: 1 },
         { field: 'currency', headerName: t('prices'), renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box sx={{ my: 1, mr: 1 }}>
@@ -96,21 +93,21 @@ function Seafreights() {
                     <Box sx={{ my: 1 }} hidden={params.row.total20HCRF === 0}>{params.row.total20HCRF !== 0 ? "40' HcRf : "+params.row.total20HCRF+" "+t(params.row.currency) : "40' HcRf : N/A"}</Box>
                 </Box>
             );
-        }, flex: 1 },
+        }, minWidth: 150, flex: 1 },
         { field: 'validUntil', headerName: t('validUntil'), renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box sx={{ my: 1, mr: 1 }}>
                     <Chip label={(new Date(params.row.validUntil)).toLocaleDateString().slice(0,10)} color={(new Date()).getTime() - (new Date(params.row.validUntil)).getTime() > 0 ? "warning" : "success"}></Chip>
                 </Box>
             );
-        }, flex: 1 },
+        }, minWidth: 100, flex: 1 },
         { field: 'created', headerName: t('created'), renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box sx={{ my: 1, mr: 1 }}>
                     <Chip label={(new Date(params.row.created)).toLocaleDateString().slice(0,10)} color={(new Date()).getTime() - (new Date(params.row.created)).getTime() > 0 ? "default" : "default"}></Chip>
                 </Box>
             );
-        }, flex: 1 },
+        }, minWidth: 100, flex: 1 },
         { field: 'xxx', headerName: t('Actions'), renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box sx={{ my: 1, mr: 1 }}>
@@ -122,7 +119,7 @@ function Seafreights() {
                     </IconButton>
                 </Box>
             );
-        }, flex: 0.8 },
+        }, minWidth: 120, flex: 0.8 },
     ];
     
     useEffect(() => {
@@ -414,11 +411,11 @@ function Seafreights() {
                 </Grid>
                 {
                     !load ? 
-                    <Grid container spacing={2} mt={1} px={5}>
+                    <Grid container spacing={2} mt={1} px={5} sx={{ maxWidth: "xs" }}>
                         <Grid item xs={12}>
                             {
                                 seafreights !== null && seafreights.length !== 0 ?
-                                <Box sx={{ overflow: "auto" }}>
+                                <Box sx={{ overflow: "auto", width: { xs: "calc(100vw - 80px)", md: "100%" } }}>
                                     {
                                         seafreights.map((item: any, i: number) => {
                                             return (

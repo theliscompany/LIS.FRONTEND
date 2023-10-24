@@ -26,17 +26,17 @@ function UsersAssignment(props: any) {
     const { t } = useTranslation();
     
     const columnsUsers: GridColDef[] = [
-        { field: 'id', headerName: t('id'), flex: 1.6 },
-        { field: 'displayName', headerName: t('name'), flex: 1.2 },
-        { field: 'mail', headerName: t('email'), flex: 1.2 },
-        // { field: 'assignee', headerName: t('assignee'), valueFormatter: (params: GridValueFormatterParams) => `${params.value !== null ? params.value.name+" (#"+params.value.id+")" : "Not defined"}`, flex: 1 },
+        { field: 'id', headerName: t('id'), minWidth: 100, flex: 1.6 },
+        { field: 'displayName', headerName: t('name'), minWidth: 100, flex: 1.2 },
+        { field: 'mail', headerName: t('email'), minWidth: 250, flex: 1.2 },
+        // { field: 'assignee', headerName: t('assignee'), valueFormatter: (params: GridValueFormatterParams) => `${params.value !== null ? params.value.name+" (#"+params.value.id+")" : "Not defined"}`, minWidth: 100, flex: 1 },
         { field: 'xxx', headerName: t('status'), renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box>
                     { assignees.some((user: any) => user.email === params.row.mail) ? <Chip label={t('canAssign')} color="success" /> : <Chip label={t('cannotAssign')} /> }
                 </Box>
             );
-        }, flex: 0.6 },
+        }, minWidth: 100, flex: 0.6 },
         { field: 'www', headerName: t('Actions'), renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box sx={{ my: 1, mr: 1 }}>
@@ -54,7 +54,7 @@ function UsersAssignment(props: any) {
                     </DarkTooltip>
                 </Box>
             );
-        }, flex: 0.5 }
+        }, minWidth: 100, flex: 0.5 }
     ];
     
     useEffect(() => {

@@ -5,7 +5,7 @@ export const en = {
   newRequest: "New request",
   myRequests: "My requests",
   requests: "Requests",
-  priceOffers: "Sent offers",
+  priceOffers: "Offers",
   collapse: "Collapse",
   whatsappNumber: "Whatsapp number",
   emailAddress: "Your email address",
@@ -345,5 +345,6 @@ export const en = {
   pricing: "Pricing",
   assigneeCreatedSuccess: "Operation success",
   messageModal: "Message",
-  reload: "Reload"
+  reload: "Reload",
+  labelNew: "New"
 };

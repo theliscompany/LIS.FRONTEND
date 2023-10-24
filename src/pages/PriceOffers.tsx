@@ -53,28 +53,26 @@ function PriceOffers() {
     const { t } = useTranslation();
     
     const columnsOffers: GridColDef[] = [
-        // { field: 'quoteOfferNumber', headerName: t('offerId'), flex: 0.5 },
         { field: 'requestQuoteId', headerName: t('email'), renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box>
                     <Link to={"/admin/request/"+params.row.requestQuoteId}>{params.row.emailUser}</Link>
                 </Box>
             );
-        }, flex: 1.2 },
-        // { field: 'quoteOfferNumber', headerName: t('offerId'), flex: 0.5 },
-        { field: 'created', headerName: t('created'), valueFormatter: (params: GridValueFormatterParams) => `${(new Date(params.value)).toLocaleString().slice(0,10)}`, flex: 0.6 },
+        }, minWidth: 200, flex: 1.2 },
+        { field: 'created', headerName: t('created'), valueFormatter: (params: GridValueFormatterParams) => `${(new Date(params.value)).toLocaleString().slice(0,10)}`, minWidth: 100, flex: 0.6 },
         { field: 'xxx', headerName: t('departure'), renderCell: (params: GridRenderCellParams) => {
             return (<Box>{params.row.seaFreight.departurePortName}</Box>);
-        }, flex: 1 },
+        }, minWidth: 100, flex: 1 },
         { field: 'yyy', headerName: t('arrival'), renderCell: (params: GridRenderCellParams) => {
             return (<Box>{params.row.seaFreight.destinationPortName}</Box>);
-        }, flex: 1 },
+        }, minWidth: 100, flex: 1 },
         { field: 'zzz', headerName: t('status'), renderCell: (params: GridRenderCellParams) => {
             return (<Box><Chip label={statusLabel(params.row.status)} color={colors(params.row.status)} /></Box>);
-        }, flex: 0.6 },
+        }, minWidth: 100, flex: 0.6 },
         { field: 'qqq', headerName: t('clientApproval'), renderCell: (params: GridRenderCellParams) => {
             return (<Box>{params.row.status !== "Accepted" && params.row.clientApproval === "Pending" ? <Chip label={t('noEmail')} /> : <Chip label={params.row.clientApproval} color={colors(params.row.clientApproval)} />}</Box>);
-        }, flex: 0.6 },
+        }, minWidth: 100, flex: 0.6 },
         { field: 'www', headerName: t('Actions'), renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box sx={{ my: 1, mr: 1 }}>
@@ -86,7 +84,7 @@ function PriceOffers() {
                     </IconButton>
                 </Box>
             );
-        }, flex: 0.7 }
+        }, minWidth: 150, flex: 0.7 }
     ];
     
     useEffect(() => {

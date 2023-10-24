@@ -82,7 +82,7 @@ function Miscellaneous() {
     ]
     
     const columnsMiscs: GridColDef[] = [
-        { field: 'supplierName', headerName: t('supplier'), flex: 1 },
+        { field: 'supplierName', headerName: t('supplier'), minWidth: 120, flex: 1 },
         { field: 'currency', headerName: t('prices'), renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box sx={{ my: 1, mr: 1 }}>
@@ -93,21 +93,21 @@ function Miscellaneous() {
                     <Box sx={{ my: 1 }} hidden={params.row.total20HCRF === 0}>{params.row.total20HCRF !== 0 ? "40' HcRf : "+params.row.total20HCRF+" "+t(params.row.currency) : "40' HcRf : N/A"}</Box>
                 </Box>
             );
-        }, flex: 1 },
+        }, minWidth: 140, flex: 1 },
         { field: 'validUntil', headerName: t('validUntil'), renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box sx={{ my: 1, mr: 1 }}>
                     <Chip label={(new Date(params.row.validUntil)).toLocaleDateString().slice(0,10)} color={(new Date()).getTime() - (new Date(params.row.validUntil)).getTime() > 0 ? "warning" : "success"}></Chip>
                 </Box>
             );
-        }, flex: 0.5 },
+        }, minWidth: 100, flex: 0.5 },
         { field: 'created', headerName: t('created'), renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box sx={{ my: 1, mr: 1 }}>
                     <Chip label={(new Date(params.row.created)).toLocaleDateString().slice(0,10)} color={(new Date()).getTime() - (new Date(params.row.created)).getTime() > 0 ? "default" : "default"}></Chip>
                 </Box>
             );
-        }, flex: 0.5 },
+        }, minWidth: 100, flex: 0.5 },
         { field: 'xxx', headerName: t('Actions'), renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box sx={{ my: 1, mr: 1 }}>
@@ -119,7 +119,7 @@ function Miscellaneous() {
                     </IconButton>
                 </Box>
             );
-        }, flex: 0.4 },
+        }, minWidth: 120, flex: 0.4 },
     ];
     
     useEffect(() => {
@@ -367,7 +367,7 @@ function Miscellaneous() {
             <Box sx={{ py: 2.5 }}>
                 <Typography variant="h5" sx={{mt: {xs: 4, md: 1.5, lg: 1.5 }}} mx={5}><b>{t('listMiscellaneous')}</b></Typography>
                 <Grid container spacing={2} mt={0} px={5}>
-                    <Grid item xs={9}>
+                    <Grid item xs={12} md={9}>
                         <FormControlLabel 
                             control={
                             <Switch
@@ -382,7 +382,7 @@ function Miscellaneous() {
                             sx={{ float: "right" }}
                         />
                     </Grid>
-                    <Grid item xs={3}>
+                    <Grid item xs={12} md={3}>
                         <Button variant="contained" sx={actionButtonStyles} onClick={() => { setCurrentEditId(""); resetForm(); setModal2(true); }}>
                             {t('newMiscellaneousPrice')} <AddCircleOutlinedIcon sx={{ ml: 0.5, pb: 0.25, justifyContent: "center", alignItems: "center" }} fontSize="small" />
                         </Button>
@@ -470,7 +470,7 @@ function Miscellaneous() {
                     <Grid item xs={12}>
                         {
                             miscs !== null && miscs.length !== 0 ?
-                            <Box sx={{ overflow: "auto" }}>
+                                <Box sx={{ overflow: "auto", width: { xs: "calc(100vw - 80px)", md: "100%" } }}>
                                 {
                                     miscs.map((item: any, i: number) => {
                                         return (
@@ -501,6 +501,7 @@ function Miscellaneous() {
                 {
                     withShipment !== true ? 
                     <Grid item xs={12}>
+                       <Box sx={{ overflow: "auto", width: { xs: "calc(100vw - 80px)", md: "100%" } }}>
                         {
                             miscsWithoutShipment !== null && miscsWithoutShipment.length !== 0 ?
                             <DataGrid
@@ -513,6 +514,7 @@ function Miscellaneous() {
                                 disableRowSelectionOnClick
                             /> : <Skeleton />
                         }
+                        </Box>
                     </Grid> : null
                 }
             </Grid>

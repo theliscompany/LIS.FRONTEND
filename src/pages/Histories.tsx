@@ -52,36 +52,36 @@ function Histories(props: any) {
     }, [context]);
     
     const columnsEvents: GridColDef[] = [
-        { field: 'id', headerName: t('id'), flex: 0.5 },
+        { field: 'id', headerName: t('id'), minWidth: 100, flex: 0.5 },
         { field: 'requestQuoteId', headerName: t('requestQuoteId'), renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box>
                     <Link to={"/admin/request/"+params.row.requestQuoteId}>{params.row.requestQuoteId}</Link>
                 </Box>
             );
-        }, flex: 0.5 },
-        { field: 'assignee', headerName: t('assignee'), valueFormatter: (params: GridValueFormatterParams) => `${params.value !== null ? params.value.name+" (#"+params.value.id+")" : "Not defined"}`, flex: 1 },
+        }, minWidth: 100, flex: 0.5 },
+        { field: 'assignee', headerName: t('assignee'), valueFormatter: (params: GridValueFormatterParams) => `${params.value !== null ? params.value.name+" (#"+params.value.id+")" : "Not defined"}`, minWidth: 100, flex: 1 },
         { field: 'assigneeId', headerName: t('assigneeId'), renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box>
                     {params.row.assignee !== null ? params.row.assignee.email : "Not defined"}
                 </Box>
             );
-        }, flex: 1 },
+        }, minWidth: 250, flex: 1 },
         { field: 'assignedAt', headerName: t('assignDate'), renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box sx={{ my: 1, mr: 1 }}>
                     {params.row.assignedAt !== null ? (new Date(params.row.assignedAt)).toLocaleString() : <Chip label={t('currentlyAssigned')} color="success" />}
                 </Box>
             );
-        }, flex: 1 },
+        }, minWidth: 100, flex: 1 },
         { field: 'unassignedAt', headerName: t('unassignDate'), renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box sx={{ my: 1, mr: 1 }}>
                     {params.row.unassignedAt !== null ? (new Date(params.row.unassignedAt)).toLocaleString() : <Chip label={t('currentlyAssigned')} color="success" />}
                 </Box>
             );
-        }, flex: 1 }
+        }, minWidth: 100, flex: 1 }
     ];
     
     const getHistories = async () => {
