@@ -59,6 +59,8 @@ const App = () => {
 						<Route path="tracking" element={<Tracking />} />
 						<Route path="tracking/:id" element={<Tracking />} />
 						<Route path="quote-offers/approve/:id" element={<ApproveOffer />} />
+						<Route path="acceptOffer/:id" element={<AcceptOffer />} />
+						<Route path="refuseOffer/:id" element={<RefuseOffer />} />
 						<Route path="*" element={<NotFound />} />
 					</Routes>
 				</AuthorizedBackendApiProvider>
