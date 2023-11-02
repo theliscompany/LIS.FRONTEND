@@ -126,7 +126,7 @@ const Step1RequestForm: React.FC<Step1RequestFormProps> = ({
   onSaveDraft
 }) => {
   // Log des valeurs reçues pour débogage
-  console.log('🔧 [STEP1] Props reçues:', {
+ /*console.log('🔧 [STEP1] Props reçues:', {
     assignee,
     incotermName,
     cityFrom,
@@ -135,37 +135,14 @@ const Step1RequestForm: React.FC<Step1RequestFormProps> = ({
     customer,
     status,
     comment
-  });
+  });*/
 
-  console.log('🔧 [STEP1] DraftQuote complet reçu:', draftQuote);
-  console.log('🔧 [STEP1] Email utilisateur dans draftQuote:', draftQuote?.emailUser);
+  //console.log('🔧 [STEP1] DraftQuote complet reçu:', draftQuote);
+  //console.log('🔧 [STEP1] Email utilisateur dans draftQuote:', draftQuote?.emailUser);
 
   const { t, i18n } = useTranslation();
 
-  /**
-   * SYSTÈME DE SAUVEGARDE IMPLÉMENTÉ:
-   * 
-   * 1. SAUVEGARDE AUTOMATIQUE LOCALE:
-   *    - Sauvegarde tous les éléments de l'étape 1 dans le state local (draftQuote)
-   *    - Auto-sauvegarde à chaque changement (débounce 500ms)
-   *    - Fallback dans localStorage
-   *    - Persistance des PAYS corrigée (origin.city.country & destination.city.country)
-   * 
-   * 2. SAUVEGARDE MANUELLE API:
-   *    - Bouton "💾 Sauvegarder" pour sauvegarder tout le wizard en base
-   *    - Sauvegarde l'étape courante en local PUIS tout le wizard via API
-   *    - Messages de statut (en cours, succès, erreur)
-   * 
-   * 3. DONNÉES SAUVEGARDÉES:
-   *    - customer (client sélectionné)
-   *    - route.origin.city (name + country) ✅ PAYS PERSISTÉ
-   *    - route.destination.city (name + country) ✅ PAYS PERSISTÉ  
-   *    - product (produit)
-   *    - assignedTo (assigné)
-   *    - incoterm (incoterm)
-   *    - comments (commentaires)
-   *    - status (statut)
-   */
+
 
   // Ajout des états pour l'aide au choix du container
   const [typeMarchandise, setTypeMarchandise] = useState('standard');
