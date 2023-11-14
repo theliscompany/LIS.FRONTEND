@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Accordion, AccordionDetails, AccordionSummary, Autocomplete, Box, Button, Chip, DialogActions, DialogContent, FormControlLabel, Grid, IconButton, InputLabel, ListItem, ListItemText, NativeSelect, Skeleton, Switch, TextField, Typography } from '@mui/material';
+import { Accordion, AccordionDetails, AccordionSummary, Alert, Autocomplete, Box, Button, Chip, DialogActions, DialogContent, FormControlLabel, Grid, IconButton, InputLabel, ListItem, ListItemText, NativeSelect, Skeleton, Switch, TextField, Typography } from '@mui/material';
 import AddCircleOutlinedIcon from '@mui/icons-material/AddCircleOutlined';
 import SearchIcon from '@mui/icons-material/Search';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -124,7 +124,7 @@ function Miscellaneous() {
     
     useEffect(() => {
         getPorts();
-        getMiscellaneouses();
+        // getMiscellaneouses();
         getProtectedData(); // Services and Containers
     }, []);
 
@@ -185,6 +185,8 @@ function Miscellaneous() {
     
     const getMiscellaneouses = async () => {
         if (context && account) {
+            setLoad(true);
+
             var token = null;
             if (tempToken === "") {
                 token = await instance.acquireTokenSilent({
@@ -205,6 +207,7 @@ function Miscellaneous() {
             
             const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisPricing.endPoint+"/Miscellaneous/Miscellaneous?withShipment="+withShipment, token !== null ? token : tempToken);
             if (response !== null && response !== undefined) {
+                // setMiscs([]);
                 setMiscs(response);
                 if (withShipment === false) {
                     setMiscsWithoutShipment(response);
@@ -373,8 +376,8 @@ function Miscellaneous() {
                             <Switch
                                 checked={withShipment}
                                 onChange={(event: React.ChangeEvent<HTMLInputElement>) => { 
-                                    setMiscs(null); setMiscsWithoutShipment(null);
-                                    console.log(event.target.checked); setWithShipment(event.target.checked);
+                                    // setMiscs(null); setMiscsWithoutShipment(null);
+                                    console.log(event.target.checked); setWithShipment(event.target.checked); setLoad(true);
                                 }}
                                 inputProps={{ 'aria-label': 'controlled' }}
                             />}
@@ -466,7 +469,8 @@ function Miscellaneous() {
                     
                 <Grid container spacing={2} mt={1} px={5}>
                 {
-                    withShipment !== false ? 
+                    withShipment === true ?
+                    !load ? 
                     <Grid item xs={12}>
                         {
                             miscs !== null && miscs.length !== 0 ?
@@ -494,11 +498,34 @@ function Miscellaneous() {
                                         )
                                     })
                                 }
-                            </Box> : <Skeleton />
+                            </Box> : <Alert severity="warning">{t('noResults')}</Alert>
                         }
-                    </Grid> : null
+                    </Grid> : <Skeleton sx={{ mx: 1, mt: 3, width: "100%" }} /> : null
                 }
                 {
+                    withShipment === false ?
+                    !load ? 
+                    <Grid item xs={12}>
+                        {
+                            miscsWithoutShipment !== null && miscsWithoutShipment.length !== 0 ?
+                                <Box sx={{ overflow: "auto", width: { xs: "calc(100vw - 80px)", md: "100%" } }}>
+                                {
+                                    miscsWithoutShipment !== null && miscsWithoutShipment.length !== 0 ?
+                                    <DataGrid
+                                        rows={miscsWithoutShipment}
+                                        columns={columnsMiscs}
+                                        hideFooter
+                                        getRowId={(row: any) => row?.miscellaneousId}
+                                        getRowHeight={() => "auto" }
+                                        sx={gridStyles}
+                                        disableRowSelectionOnClick
+                                    /> : <Skeleton />
+                                }
+                            </Box> : <Alert severity="warning">{t('noResults')}</Alert>
+                        }
+                    </Grid> : <Skeleton sx={{ mx: 1, mt: 3, width: "100%" }} /> : null
+                }
+                {/* {
                     withShipment !== true ? 
                     <Grid item xs={12}>
                        <Box sx={{ overflow: "auto", width: { xs: "calc(100vw - 80px)", md: "100%" } }}>
@@ -516,7 +543,7 @@ function Miscellaneous() {
                         }
                         </Box>
                     </Grid> : null
-                }
+                } */}
                 </Grid>
             </Box>
             <BootstrapDialog
