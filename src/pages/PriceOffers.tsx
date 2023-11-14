@@ -127,9 +127,9 @@ function PriceOffers() {
     }
 
     return (
-        <div style={{ background: "#fff", borderTopLeftRadius: 20, borderTopRightRadius: 20, width: "100%" }}>
+        <div style={{ background: "#fff", borderTopLeftRadius: 20, borderTopRightRadius: 20 }}>
             <SnackbarProvider />
-            <Box py={2.5}>
+            <Box py={2.5} sx={{ minWidth: { xs: "100vw", md: "100%" }}}>
                 <Typography variant="h5" sx={{mt: {xs: 4, md: 1.5, lg: 1.5 }}} px={5}><b>{t('generatedPriceOffers')}</b></Typography>
                 <Grid container spacing={2} mt={0} px={5}>
                     <Grid item xs={12}>
@@ -146,7 +146,7 @@ function PriceOffers() {
                                 {
                                     offers !== null && offers.length !== 0 ?
                                     <Box sx={{ overflow: "auto" }}>
-                                        <Box sx={{ width: "100%", display: "table", tableLayout: "fixed" }}>
+                                        <Box sx={{ width: "100%" }}>
                                             <DataGrid
                                                 rows={offers}
                                                 columns={columnsOffers}
