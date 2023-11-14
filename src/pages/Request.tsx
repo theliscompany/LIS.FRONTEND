@@ -140,7 +140,7 @@ function parseContact(inputString: string) {
     const name = parts[1];
     
     const contactObject = {
-        contactId: number,
+        contactNumber: number,
         contactName: name,
     };
     
@@ -817,7 +817,7 @@ function Request() {
                 } }),
                 quantity: quantity,
                 detail: message,
-                clientNumber: clientNumber !== null ? String(clientNumber.contactId)+", "+clientNumber.contactName : null,
+                clientNumber: clientNumber !== null ? String(clientNumber.contactNumber)+", "+clientNumber.contactName : null,
                 tags: tags.length !== 0 ? tags.map((elm: any) => elm.productName).join(',') : null,
                 assigneeId: Number(assignedManager)
             };

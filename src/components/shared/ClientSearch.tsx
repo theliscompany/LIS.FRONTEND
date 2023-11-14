@@ -27,7 +27,6 @@ const ClientSearch: React.FC<LocationAutocompleteProps> = ({ id, value, onChange
     const account = useAccount(accounts[0] || {});
 
     const debouncedSearch = debounce(async (search: string) => {
-
         if (context && account) {
             setLoading(true);
             const token = await instance.acquireTokenSilent({
@@ -47,17 +46,22 @@ const ClientSearch: React.FC<LocationAutocompleteProps> = ({ id, value, onChange
                 }
             );
             
-            const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisClient.endPoint+"/Contact/GetContactsByCategory?contactName="+search+"&category=1", token);
-            console.log("Containers", response);
-            if (response !== null && response !== undefined) {
+            // First i search by contact number
+            const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisClient.endPoint+"/Contact/GetContactsByContactNumber?contactNumber="+search+"&category=1", token);
+            if (response !== null && response !== undefined && response.length !== 0) {
+                console.log(response);
                 setOptions(response);
             }  
+            else {
+                // If i dont find i search by contact name
+                const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisClient.endPoint+"/Contact/GetContactsByCategory?contactName="+search+"&category=1", token);
+                if (response !== null && response !== undefined) {
+                    console.log(response);
+                    setOptions(response);
+                }   
+            }
             setLoading(false);
         }
-
-
-        
-        
     }, 1000);
 
     const { t } = useTranslation();
@@ -79,9 +83,9 @@ const ClientSearch: React.FC<LocationAutocompleteProps> = ({ id, value, onChange
                     // console.log(option);
                     if (option !== undefined && option !== null && option !== "") {
                         if (option.contactName !== undefined && option.contactName !== null) {
-                            return `${option.contactId}, ${option.contactName}`;
+                            return `${option.contactNumber === "" ? "0" : option.contactNumber}, ${option.contactName}`;
                         }
-                        return `${option.contactId}`;
+                        return `${option.contactNumber === "" ? "0" : option.contactNumber}`;
                     }
                     return "";
                 }}
@@ -95,10 +99,10 @@ const ClientSearch: React.FC<LocationAutocompleteProps> = ({ id, value, onChange
                     
                     if (splitValue !== null && splitValue !== undefined) {
                         if (splitValue.length !== 2) {
-                            onChange({ contactId: 0, contactName: newValue});
+                            onChange({ contactNumber: "0", contactName: newValue});
                         }
                         else {
-                            onChange({ contactId: splitValue[0], contactName: splitValue[1]});
+                            onChange({ contactNumber: splitValue[0], contactName: splitValue[1]});
                         }
                     }
                     else {
