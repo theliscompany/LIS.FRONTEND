@@ -8,7 +8,7 @@ export const fr = {
   priceOffers: "Offres",
   collapse: "Décaler",
   whatsappNumber: "Numéro whatsapp",
-  emailAddress: "Votre adresse mail",
+  emailAddress: "Adresse mail",
   departure: "De (ville, pays)",
   arrival: "A (ville, pays)",
   packingType: "Type de packing",
@@ -22,7 +22,7 @@ export const fr = {
   name: "Nom",
   specifics: "Spécificités",
   clientNumber: "Nom du client (ou numéro)",
-  details: "Autres détails concernant vos besoins (Optionnel)",
+  details: "Autres détails concernant votre demande (Optionnel)",
   assignedManager: "Gestionnaire assigné",
   overviewTitle: "Historique des demandes de devis",
   assigneeId: "Id gestionnaire",
@@ -346,5 +346,7 @@ export const fr = {
   assigneeCreatedSuccess: "Succès de l'opération",
   messageModal: "Message",
   reload: "Recharger",
-  labelNew: "Nouveau"
+  labelNew: "Nouveau",
+  requestHaulagePrice: "Demander un prix au transporteur",
+  requestSeafreightPrice: "Demander un prix au transporteur"
 };

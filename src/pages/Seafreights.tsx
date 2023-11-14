@@ -8,7 +8,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { SnackbarProvider, enqueueSnackbar } from 'notistack';
 import { useTranslation } from 'react-i18next';
 import { useAuthorizedBackendApi } from '../api/api';
-import { protectedResources, transportRequest } from '../config/authConfig';
+import { pricingRequest, protectedResources, transportRequest } from '../config/authConfig';
 import { BackendService } from '../utils/services/fetch';
 import { GridColDef, GridValueFormatterParams, GridRenderCellParams, DataGrid } from '@mui/x-data-grid';
 import { BootstrapDialog, BootstrapDialogTitle, BootstrapInput, actionButtonStyles, buttonCloseStyles, datetimeStyles, gridStyles, inputLabelStyles, whiteButtonStyles } from '../utils/misc/styles';
@@ -180,11 +180,25 @@ function Seafreights() {
     }
     
     const getSeafreights = async () => {
-        if (context) {
-            const response = await (context as BackendService<any>).getSingle(protectedResources.apiLisPricing.endPoint+"/SeaFreight/GetSeaFreights");
+        if (context && account) {
+            const token = await instance.acquireTokenSilent({
+                scopes: pricingRequest.scopes,
+                account: account
+            }).then((response:AuthenticationResult)=>{
+                return response.accessToken;
+            }).catch(() => {
+                return instance.acquireTokenPopup({
+                    ...pricingRequest,
+                    account: account
+                    }).then((response) => {
+                        return response.accessToken;
+                });
+            });
+            
+            const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisPricing.endPoint+"/SeaFreight/GetSeaFreights", token);
             if (response !== null && response !== undefined) {
                 setSeafreights(response);
-                // setSeafreights([]);
+                // setHaulages([]);
                 setLoad(false);
             }
             else {
@@ -192,6 +206,20 @@ function Seafreights() {
             }
             console.log(response);
         }
+        
+        // if (context) {
+        //     const response = await (context as BackendService<any>).get(protectedResources.apiLisPricing.endPoint+"/SeaFreight/GetSeaFreights");
+        //     console.log(response);
+        //     if (response !== null && response !== undefined) {
+        //         setSeafreights(response);
+        //         // setSeafreights([]);
+        //         setLoad(false);
+        //     }
+        //     else {
+        //         setLoad(false);
+        //     }
+        //     console.log(response);
+        // }
     }
     
     const resetForm = () => {

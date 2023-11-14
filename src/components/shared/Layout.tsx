@@ -605,7 +605,7 @@ function Layout(props: {children?: React.ReactNode}) {
                 <Box sx={{ 
                     mt: { xs: 10, md: 0 }, 
                     flexGrow: { xs: 0, md: 1 }, p: { xs: 0, md: 3 },
-                    background: "#f9fafb", minHeight: "100vh" 
+                    background: "#f9fafb", minHeight: "100vh", minWidth: "100vw"
                 }}>
                     <Outlet />
                 </Box>

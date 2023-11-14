@@ -127,10 +127,10 @@ function PriceOffers() {
     }
 
     return (
-        <div style={{ background: "#fff", borderTopLeftRadius: 20, borderTopRightRadius: 20 }}>
+        <div style={{ background: "#fff", borderTopLeftRadius: 20, borderTopRightRadius: 20, width: "100%" }}>
             <SnackbarProvider />
             <Box py={2.5}>
-                <Typography variant="h5" sx={{mt: {xs: 4, md: 1.5, lg: 1.5 }}} mx={5}><b>{t('generatedPriceOffers')}</b></Typography>
+                <Typography variant="h5" sx={{mt: {xs: 4, md: 1.5, lg: 1.5 }}} px={5}><b>{t('generatedPriceOffers')}</b></Typography>
                 <Grid container spacing={2} mt={0} px={5}>
                     <Grid item xs={12}>
                         <Button variant="contained" sx={actionButtonStyles} onClick={() => { getPriceOffers(); }}>

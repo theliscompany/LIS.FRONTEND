@@ -22,7 +22,7 @@ const CompanySearch: React.FC<CompanyAutocompleteProps> = ({ id, value, onChange
         setLoading(true);
         try {
             const response = await axios.get(
-                `https://liscrm-dev.azurewebsites.net/Contact/GetContactsByCategory?contactName=${search}&category=${category}`,
+                `${process.env.REACT_APP_API_LIS_CLIENT_ENDPOINT}Contact/GetContactsByCategory?contactName=${search}&category=${category}`,
             );
             setOptions(response.data);
         } catch (error) {

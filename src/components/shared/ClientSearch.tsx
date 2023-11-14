@@ -3,6 +3,8 @@ import { Autocomplete, CircularProgress, Skeleton, TextField } from "@mui/materi
 import { debounce } from "@mui/material/utils";
 import axios from "axios";
 import { useTranslation } from "react-i18next";
+import { BackendService } from "../../utils/services/fetch";
+import { useAuthorizedBackendApi } from "../../api/api";
 
 interface LocationAutocompleteProps {
     id: string;
@@ -17,12 +19,15 @@ const ClientSearch: React.FC<LocationAutocompleteProps> = ({ id, value, onChange
     const [loading, setLoading] = useState(false);
     const [options, setOptions] = useState<any[]>([]);
 
+    const context = useAuthorizedBackendApi();
+
     const debouncedSearch = debounce(async (search: string) => {
         setLoading(true);
-        try {
-            const response = await axios.get(
-                `https://liscrm-dev.azurewebsites.net/Contact/GetContactsByCategory?contactName=${search}&category=1`,
-            );
+            try {
+            const response:any = await (context as BackendService<any>).getSingle(`${process.env.REACT_APP_API_LIS_CLIENT_ENDPOINT}/Contact/GetContactsByCategory?contactName=${search}&category=1`);
+            // const response = await axios.get(
+            //     `${process.env.REACT_APP_API_LIS_CLIENT_ENDPOINT}Contact/GetContactsByCategory?contactName=${search}&category=1`,
+            // );
             setOptions(response.data);
         } catch (error) {
             console.log(error);
