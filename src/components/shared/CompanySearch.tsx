@@ -27,10 +27,10 @@ const CompanySearch: React.FC<CompanyAutocompleteProps> = ({ id, value, onChange
                 console.log(response);
                 setOptions(response.data?.data || []);
             }  
-            setLoading(false);
         }
         catch (err: any) {
             console.log(err);
+        } finally {
             setLoading(false);
         }
     }, 1000);
