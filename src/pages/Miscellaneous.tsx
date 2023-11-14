@@ -517,7 +517,7 @@ function Miscellaneous() {
                         </Box>
                     </Grid> : null
                 }
-            </Grid>
+                </Grid>
             </Box>
             <BootstrapDialog
                 onClose={() => setModal(false)}
