@@ -3,6 +3,11 @@ import { Autocomplete, CircularProgress, Skeleton, TextField } from "@mui/materi
 import { debounce } from "@mui/material/utils";
 import axios from "axios";
 import { useTranslation } from "react-i18next";
+import { AuthenticationResult } from "@azure/msal-browser";
+import { useMsal, useAccount } from "@azure/msal-react";
+import { useAuthorizedBackendApi } from "../../api/api";
+import { crmRequest, protectedResources } from "../../config/authConfig";
+import { BackendService } from "../../utils/services/fetch";
 
 interface CompanyAutocompleteProps {
     id: string;
@@ -18,17 +23,37 @@ const CompanySearch: React.FC<CompanyAutocompleteProps> = ({ id, value, onChange
     const [loading, setLoading] = useState(false);
     const [options, setOptions] = useState<any[]>([]);
 
+    const { instance, accounts } = useMsal();
+    const context = useAuthorizedBackendApi();
+    const account = useAccount(accounts[0] || {});
+
     const debouncedSearch = debounce(async (search: string) => {
-        setLoading(true);
-        try {
-            const response = await axios.get(
-                `${process.env.REACT_APP_API_LIS_CLIENT_ENDPOINT}Contact/GetContactsByCategory?contactName=${search}&category=${category}`,
+        if (context && account) {
+            setLoading(true);
+            const token = await instance.acquireTokenSilent({
+                scopes: crmRequest.scopes,
+                account: account
+            })
+            .then((response: AuthenticationResult) => {
+                return response.accessToken;
+            })
+            .catch(() => {
+                return instance.acquireTokenPopup({
+                    ...crmRequest,
+                    account: account
+                    }).then((response) => {
+                        return response.accessToken;
+                    });
+                }
             );
-            setOptions(response.data);
-        } catch (error) {
-            console.log(error);
+            
+            const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisClient.endPoint+"/Contact/GetContactsByCategory?contactName="+search+"&category="+category, token);
+            if (response !== null && response !== undefined && response.length !== 0) {
+                console.log(response);
+                setOptions(response);
+            }  
+            setLoading(false);
         }
-        setLoading(false);
     }, 1000);
 
     const { t } = useTranslation();
