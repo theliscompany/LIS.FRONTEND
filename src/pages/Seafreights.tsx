@@ -366,7 +366,7 @@ function Seafreights() {
                     </Grid>
                     <Grid item xs={12} md={4} mt={1}>
                         <InputLabel htmlFor="company-name" sx={inputLabelStyles}>{t('carrier')}</InputLabel>
-                        <CompanySearch id="company-name" value={searchedCarrier} onChange={setSearchedCarrier} category={CategoryEnum.SUPPLIERS} callBack={() => console.log(searchedCarrier)} fullWidth />
+                        <CompanySearch id="company-name" value={searchedCarrier} onChange={setSearchedCarrier} category={CategoryEnum.SHIPPING_LINES} callBack={() => console.log(searchedCarrier)} fullWidth />
                     </Grid>
                     <Grid item xs={12} md={3} mt={1}>
                         <InputLabel htmlFor="port-departure" sx={inputLabelStyles}>{t('departurePort')}</InputLabel>
@@ -511,11 +511,11 @@ function Seafreights() {
                                 <Grid container spacing={2}>
                                     <Grid item xs={12} md={6} mt={0.25}>
                                         <InputLabel htmlFor="carrier" sx={inputLabelStyles}>{t('carrier')}</InputLabel>
-                                        <CompanySearch id="carrier" value={carrier} onChange={setCarrier} category={CategoryEnum.SUPPLIERS} callBack={() => console.log(carrier)} fullWidth />
+                                        <CompanySearch id="carrier" value={carrier} onChange={setCarrier} category={CategoryEnum.SHIPPING_LINES} callBack={() => console.log(carrier)} fullWidth />
                                     </Grid>
                                     <Grid item xs={12} md={6} mt={0.25}>
                                         <InputLabel htmlFor="carrier-agent" sx={inputLabelStyles}>{t('carrierAgent')}</InputLabel>
-                                        <CompanySearch id="carrier-agent" value={carrierAgent} onChange={setCarrierAgent} category={CategoryEnum.SUPPLIERS} callBack={() => console.log(carrierAgent)} fullWidth />
+                                        <CompanySearch id="carrier-agent" value={carrierAgent} onChange={setCarrierAgent} category={CategoryEnum.SHIPPING_LINES} callBack={() => console.log(carrierAgent)} fullWidth />
                                     </Grid>
                                     <Grid item xs={12} md={6} mt={0.25}>
                                         <InputLabel htmlFor="port-loading" sx={inputLabelStyles}>{t('departurePort')}</InputLabel>
