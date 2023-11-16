@@ -198,8 +198,8 @@ function ManagePriceOffer(props: any) {
 
 				var footer = `
 				<div style="font-family: Verdana; padding-top: 60px;">
-					<a href="${"https://lis-quotes-ui-dev.azurewebsites.net/acceptOffer/"+id}" style="display:inline-block;background-color:#008089;color:#fff;padding:10px 20px;text-decoration:none" target="_blank">Accept the offer</a>
-					<a href="${"https://lis-quotes-ui-dev.azurewebsites.net/refuseOffer/"+id}" style="display:inline-block;background-color:#F2F2F2;color:#008089;padding:10px 20px;text-decoration:none" target="_blank">Refuse the offer</a>
+					<a href="${process.env.REACT_APP_ORIGIN_URL+"/acceptOffer/"+id}" style="display:inline-block;background-color:#008089;color:#fff;padding:10px 20px;text-decoration:none" target="_blank">Accept the offer</a>
+					<a href="${process.env.REACT_APP_ORIGIN_URL+"/refuseOffer/"+id}" style="display:inline-block;background-color:#F2F2F2;color:#008089;padding:10px 20px;text-decoration:none" target="_blank">Refuse the offer</a>
 					<div style="margin-top: 15px;"><a target="_blank" href="www.omnifreight.eu">www.omnifreight.eu</a></div>
 					<div style="padding-bottom: 10px;"><a target="_blank" href="http://www.facebook.com/omnifreight">http://www.facebook.com/omnifreight</a></div>
 					<div>Italiëlei 211</div>

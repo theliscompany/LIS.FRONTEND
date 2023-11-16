@@ -41,6 +41,12 @@ export const transportRequest: PopupRequest = {
   ]
 };
 
+export const crmRequest: PopupRequest = {
+  scopes:[
+    process.env.REACT_APP_CRM_REQUEST_SCOPE !== undefined ? process.env.REACT_APP_CRM_REQUEST_SCOPE : ""
+  ]
+}
+
 export const protectedResources = {
   apiLisQuotes: {
     endPoint: process.env.REACT_APP_API_LIS_QUOTES_ENDPOINT

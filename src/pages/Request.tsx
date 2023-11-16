@@ -7,6 +7,7 @@ import { inputLabelStyles, BootstrapInput, BootstrapDialogTitle, BootstrapDialog
 import { enqueueSnackbar, SnackbarProvider } from 'notistack';
 import DeleteIcon from '@mui/icons-material/Delete';
 import HelpIcon from '@mui/icons-material/Help';
+import RestartAltIcon from '@mui/icons-material/RestartAlt';
 import { pricingRequest, protectedResources, transportRequest } from '../config/authConfig';
 import { useAuthorizedBackendApi } from '../api/api';
 import { BackendService } from '../utils/services/fetch';
@@ -139,7 +140,7 @@ function parseContact(inputString: string) {
     const name = parts[1];
     
     const contactObject = {
-        contactId: number,
+        contactNumber: number,
         contactName: name,
     };
     
@@ -475,8 +476,8 @@ function Request() {
     const [skipped, setSkipped] = React.useState(new Set<number>());
 
     const isStepOptional = (step: number) => {
-        // return step === 2 || step === 3 || step === 4;
-        return false;
+        return step === 0 || step === 1;
+        // return false;
     };
 
     const isStepSkipped = (step: number) => {
@@ -816,7 +817,7 @@ function Request() {
                 } }),
                 quantity: quantity,
                 detail: message,
-                clientNumber: clientNumber !== null ? String(clientNumber.contactId)+", "+clientNumber.contactName : null,
+                clientNumber: clientNumber !== null ? String(clientNumber.contactNumber)+", "+clientNumber.contactName : null,
                 tags: tags.length !== 0 ? tags.map((elm: any) => elm.productName).join(',') : null,
                 assigneeId: Number(assignedManager)
             };
@@ -850,6 +851,7 @@ function Request() {
                 });
             });
             
+            setLoadResults(true);
             // I removed the loadingDate
             var containersFormatted = containersSelected.join("&ContainerTypesId=");
             var urlSent = createGetRequestUrl(protectedResources.apiLisPricing.endPoint+"/Pricing/HaulagesOfferRequest?", haulageType, loadingCity.city.toUpperCase(), containersFormatted);
@@ -879,6 +881,7 @@ function Request() {
                 });
             });
             
+            setLoadResults(true);
             var containersFormatted = containersSelected.join("&ContainerTypesId=");
             var urlSent = createGetRequestUrl2(protectedResources.apiLisPricing.endPoint+"/Pricing/SeaFreightsOffersRequest?", portDeparture.portId, portDestination.portId, containersFormatted);
             const response = await (context as BackendService<any>).getWithToken(urlSent, token);
@@ -1613,7 +1616,26 @@ function Request() {
                                                                         !loadResults ? 
                                                                         haulages !== null && haulages.length !== 0 ?
                                                                             <Box sx={{ overflow: "auto", width: { xs: "98.5%" } }}>
-                                                                                <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>{t('listHaulagesPricingOffers')+t('fromDotted')+loadingCity.city}</Typography>
+                                                                                <Grid container>
+                                                                                    <Grid item xs={8}>
+                                                                                        <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>
+                                                                                            {t('listHaulagesPricingOffers')+t('fromDotted')+loadingCity.city}
+                                                                                        </Typography>
+                                                                                    </Grid>
+                                                                                    <Grid item xs={4}>
+                                                                                        <Button variant="contained" color="inherit" sx={{ 
+                                                                                                textTransform: "none", backgroundColor: "#fff", 
+                                                                                                color: "#333", float: "right", marginTop: "8px", marginLeft: "10px" 
+                                                                                            }} onClick={getHaulagePriceOffers}
+                                                                                        >{t('reload')} <RestartAltIcon fontSize='small' /></Button>
+                                                                                        <Button variant="contained" color="inherit" sx={{ 
+                                                                                            textTransform: "none", backgroundColor: "#fff", 
+                                                                                            color: "#333", float: "right", marginTop: "8px" 
+                                                                                            }}
+                                                                                        >{t('requestHaulagePrice')}</Button>
+                                                                                    </Grid>
+                                                                                </Grid>
+                                                                                
                                                                                 <DataGrid
                                                                                     rows={haulages}
                                                                                     columns={columnsHaulages}
@@ -1696,27 +1718,6 @@ function Request() {
                                                                         /> : <Skeleton />
                                                                     }
                                                                 </Grid>
-                                                                {/* <Grid item xs={12} md={6} mt={1}>
-                                                                    <InputLabel htmlFor="loading-city" sx={inputLabelStyles}>{t('departure')} / {t('loadingCity')}</InputLabel>
-                                                                    <AutocompleteSearch id="loading-city" value={loadingCity} onChange={setLoadingCity} fullWidth />
-                                                                </Grid>
-                                                                <Grid item xs={12} md={6} mt={1}>
-                                                                    <InputLabel htmlFor="haulage-type" sx={inputLabelStyles}>{t('haulageType')}</InputLabel>
-                                                                    <NativeSelect
-                                                                        id="haulage-type"
-                                                                        value={haulageType}
-                                                                        onChange={handleChangeHaulageType}
-                                                                        input={<BootstrapInput />}
-                                                                        fullWidth
-                                                                    >
-                                                                        <option key={"kdq-"} value="">{t('anyType')}</option>
-                                                                        {
-                                                                            haulageTypeOptions.map((item: any, i: number) => (
-                                                                                <option key={"kdq"+i} value={item.value}>{item.label}</option>
-                                                                            ))
-                                                                        }
-                                                                    </NativeSelect>
-                                                                </Grid> */}
                                                             </Grid>
                                                             : null
                                                         }
@@ -1729,49 +1730,43 @@ function Request() {
                                                                         !loadResults ? 
                                                                         seafreights !== null && seafreights.length !== 0 ?
                                                                         <Box sx={{ overflow: "auto", width: { xs: "98.5%" } }}>
-                                                                                <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>{t('listSeaFreightsPricingOffers')+t('fromDotted')+portDeparture.portName+"-"+portDestination.portName} </Typography>
-                                                                                <DataGrid
-                                                                                    rows={seafreights}
-                                                                                    columns={columnsSeafreights}
-                                                                                    hideFooter
-                                                                                    getRowId={(row: any) => row?.seaFreightId}
-                                                                                    getRowHeight={() => "auto" }
-                                                                                    sx={gridStyles}
-                                                                                    onRowSelectionModelChange={(newRowSelectionModel) => {
-                                                                                        setRowSelectionModel(newRowSelectionModel);
-                                                                                        setSelectedSeafreight(newRowSelectionModel.length !== 0 ? seafreights.find((elm: any) => elm.seaFreightId === newRowSelectionModel[0]) : null);
-                                                                                    }}
-                                                                                    rowSelectionModel={rowSelectionModel}
-                                                                                    // onRowClick={handleRowSeafreightsClick}
-                                                                                />
-                                                                            </Box> : <Alert severity="error">{t('noResults')}</Alert>
+                                                                            <Grid container>
+                                                                                <Grid item xs={8}>
+                                                                                    <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>
+                                                                                        {t('listSeaFreightsPricingOffers')+t('fromDotted')+portDeparture.portName+"-"+portDestination.portName}
+                                                                                    </Typography>
+                                                                                </Grid>
+                                                                                <Grid item xs={4}>
+                                                                                    <Button variant="contained" color="inherit" sx={{ 
+                                                                                            textTransform: "none", backgroundColor: "#fff", 
+                                                                                            color: "#333", float: "right", marginTop: "8px", marginLeft: "10px"
+                                                                                        }} onClick={getSeaFreightPriceOffers}
+                                                                                    >{t('reload')} <RestartAltIcon fontSize='small' /></Button>
+                                                                                    <Button variant="contained" color="inherit" sx={{ 
+                                                                                            textTransform: "none", backgroundColor: "#fff", 
+                                                                                            color: "#333", float: "right", marginTop: "8px"
+                                                                                        }}
+                                                                                    >{t('requestSeafreightPrice')}</Button>
+                                                                                </Grid>
+                                                                            </Grid>
+                                                                            <DataGrid
+                                                                                rows={seafreights}
+                                                                                columns={columnsSeafreights}
+                                                                                hideFooter
+                                                                                getRowId={(row: any) => row?.seaFreightId}
+                                                                                getRowHeight={() => "auto" }
+                                                                                sx={gridStyles}
+                                                                                onRowSelectionModelChange={(newRowSelectionModel) => {
+                                                                                    setRowSelectionModel(newRowSelectionModel);
+                                                                                    setSelectedSeafreight(newRowSelectionModel.length !== 0 ? seafreights.find((elm: any) => elm.seaFreightId === newRowSelectionModel[0]) : null);
+                                                                                }}
+                                                                                rowSelectionModel={rowSelectionModel}
+                                                                                // onRowClick={handleRowSeafreightsClick}
+                                                                            />
+                                                                        </Box> : <Alert severity="error">{t('noResults')}</Alert>
                                                                         : <Skeleton />
                                                                     }
                                                                 </Grid>
-                                                                {/* <Grid item xs={12}>
-                                                                    {
-                                                                        !loadResults ? 
-                                                                        haulages !== null && haulages.length !== 0 ?
-                                                                            <Box>
-                                                                                <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>{t('listHaulagesPricingOffers')+t('fromDotted')+loadingCity.city}</Typography>
-                                                                                <DataGrid
-                                                                                    rows={haulages}
-                                                                                    columns={columnsHaulages}
-                                                                                    hideFooter
-                                                                                    getRowId={(row: any) => row?.id}
-                                                                                    getRowHeight={() => "auto" }
-                                                                                    sx={gridStyles}
-                                                                                    onRowSelectionModelChange={(newRowSelectionModel) => {
-                                                                                        setRowSelectionModel2(newRowSelectionModel);
-                                                                                        setSelectedHaulage(newRowSelectionModel.length !== 0 ? haulages.find((elm: any) => elm.id === newRowSelectionModel[0]) : null);
-                                                                                    }}
-                                                                                    rowSelectionModel={rowSelectionModel2}
-                                                                                    // onRowClick={handleRowHaulagesClick}
-                                                                                />
-                                                                            </Box> : <Alert severity="error">{t('noResults')}</Alert>
-                                                                        : <Skeleton />
-                                                                    }
-                                                                </Grid> */}
                                                             </Grid>
                                                             : null
                                                         }

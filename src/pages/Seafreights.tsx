@@ -8,7 +8,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { SnackbarProvider, enqueueSnackbar } from 'notistack';
 import { useTranslation } from 'react-i18next';
 import { useAuthorizedBackendApi } from '../api/api';
-import { protectedResources, transportRequest } from '../config/authConfig';
+import { pricingRequest, protectedResources, transportRequest } from '../config/authConfig';
 import { BackendService } from '../utils/services/fetch';
 import { GridColDef, GridValueFormatterParams, GridRenderCellParams, DataGrid } from '@mui/x-data-grid';
 import { BootstrapDialog, BootstrapDialogTitle, BootstrapInput, actionButtonStyles, buttonCloseStyles, datetimeStyles, gridStyles, inputLabelStyles, whiteButtonStyles } from '../utils/misc/styles';
@@ -65,6 +65,8 @@ function Seafreights() {
     const [containerTypes, setContainerTypes] = useState<any>([]);
     const [price, setPrice] = useState<number>(0);
     const [servicesSelection, setServicesSelection] = useState<any>([]);
+
+    const [tempToken, setTempToken] = useState<string>("");
     
     const { t } = useTranslation();
     
@@ -180,11 +182,26 @@ function Seafreights() {
     }
     
     const getSeafreights = async () => {
-        if (context) {
-            const response = await (context as BackendService<any>).getSingle(protectedResources.apiLisPricing.endPoint+"/SeaFreight/GetSeaFreights");
+        if (context && account) {
+            const token = await instance.acquireTokenSilent({
+                scopes: pricingRequest.scopes,
+                account: account
+            }).then((response:AuthenticationResult)=>{
+                return response.accessToken;
+            }).catch(() => {
+                return instance.acquireTokenPopup({
+                    ...pricingRequest,
+                    account: account
+                    }).then((response) => {
+                        return response.accessToken;
+                });
+            });
+            setTempToken(token);
+            
+            const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisPricing.endPoint+"/SeaFreight/GetSeaFreights", token);
             if (response !== null && response !== undefined) {
                 setSeafreights(response);
-                // setSeafreights([]);
+                // setHaulages([]);
                 setLoad(false);
             }
             else {
@@ -192,6 +209,20 @@ function Seafreights() {
             }
             console.log(response);
         }
+        
+        // if (context) {
+        //     const response = await (context as BackendService<any>).get(protectedResources.apiLisPricing.endPoint+"/SeaFreight/GetSeaFreights");
+        //     console.log(response);
+        //     if (response !== null && response !== undefined) {
+        //         setSeafreights(response);
+        //         // setSeafreights([]);
+        //         setLoad(false);
+        //     }
+        //     else {
+        //         setLoad(false);
+        //     }
+        //     console.log(response);
+        // }
     }
     
     const resetForm = () => {
@@ -235,7 +266,7 @@ function Seafreights() {
         if (context) {
             setLoad(true);
             var requestFormatted = createGetRequestUrl(portDeparture?.portId, portDestination?.portId, searchedCarrier?.contactId);
-            const response = await (context as BackendService<any>).getSingle(requestFormatted);
+            const response = await (context as BackendService<any>).getWithToken(requestFormatted, tempToken);
             if (response !== null && response !== undefined) {
                 setSeafreights(response);
                 setLoad(false);
@@ -291,7 +322,7 @@ function Seafreights() {
                         "updated": (new Date()).toISOString()
                     };    
                 }
-                const response = await (context as BackendService<any>).postBasic(protectedResources.apiLisPricing.endPoint+"/SeaFreight/SeaFreight", dataSent);
+                const response = await (context as BackendService<any>).postWithToken(protectedResources.apiLisPricing.endPoint+"/SeaFreight/SeaFreight", dataSent, tempToken);
                 if (response !== null && response !== undefined) {
                     setModal2(false);
                     enqueueSnackbar(t('successCreated'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });

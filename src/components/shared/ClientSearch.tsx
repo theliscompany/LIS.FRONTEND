@@ -3,6 +3,11 @@ import { Autocomplete, CircularProgress, Skeleton, TextField } from "@mui/materi
 import { debounce } from "@mui/material/utils";
 import axios from "axios";
 import { useTranslation } from "react-i18next";
+import { BackendService } from "../../utils/services/fetch";
+import { useAuthorizedBackendApi } from "../../api/api";
+import { useAccount, useMsal } from "@azure/msal-react";
+import { crmRequest, protectedResources } from "../../config/authConfig";
+import { AuthenticationResult } from "@azure/msal-browser";
 
 interface LocationAutocompleteProps {
     id: string;
@@ -17,17 +22,46 @@ const ClientSearch: React.FC<LocationAutocompleteProps> = ({ id, value, onChange
     const [loading, setLoading] = useState(false);
     const [options, setOptions] = useState<any[]>([]);
 
+    const { instance, accounts } = useMsal();
+    const context = useAuthorizedBackendApi();
+    const account = useAccount(accounts[0] || {});
+
     const debouncedSearch = debounce(async (search: string) => {
-        setLoading(true);
-        try {
-            const response = await axios.get(
-                `https://liscrm-dev.azurewebsites.net/Contact/GetContactsByCategory?contactName=${search}&category=1`,
+        if (context && account) {
+            setLoading(true);
+            const token = await instance.acquireTokenSilent({
+                scopes: crmRequest.scopes,
+                account: account
+            })
+            .then((response: AuthenticationResult) => {
+                return response.accessToken;
+            })
+            .catch(() => {
+                return instance.acquireTokenPopup({
+                    ...crmRequest,
+                    account: account
+                    }).then((response) => {
+                        return response.accessToken;
+                    });
+                }
             );
-            setOptions(response.data);
-        } catch (error) {
-            console.log(error);
+            
+            // First i search by contact number
+            const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisClient.endPoint+"/Contact/GetContactsByContactNumber?contactNumber="+search+"&category=1", token);
+            if (response !== null && response !== undefined && response.length !== 0) {
+                console.log(response);
+                setOptions(response);
+            }  
+            else {
+                // If i dont find i search by contact name
+                const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisClient.endPoint+"/Contact/GetContactsByCategory?contactName="+search+"&category=1", token);
+                if (response !== null && response !== undefined) {
+                    console.log(response);
+                    setOptions(response);
+                }   
+            }
+            setLoading(false);
         }
-        setLoading(false);
     }, 1000);
 
     const { t } = useTranslation();
@@ -49,9 +83,9 @@ const ClientSearch: React.FC<LocationAutocompleteProps> = ({ id, value, onChange
                     // console.log(option);
                     if (option !== undefined && option !== null && option !== "") {
                         if (option.contactName !== undefined && option.contactName !== null) {
-                            return `${option.contactId}, ${option.contactName}`;
+                            return `${option.contactNumber === "" ? "0" : option.contactNumber}, ${option.contactName}`;
                         }
-                        return `${option.contactId}`;
+                        return `${option.contactNumber === "" ? "0" : option.contactNumber}`;
                     }
                     return "";
                 }}
@@ -65,10 +99,10 @@ const ClientSearch: React.FC<LocationAutocompleteProps> = ({ id, value, onChange
                     
                     if (splitValue !== null && splitValue !== undefined) {
                         if (splitValue.length !== 2) {
-                            onChange({ contactId: 0, contactName: newValue});
+                            onChange({ contactNumber: "0", contactName: newValue});
                         }
                         else {
-                            onChange({ contactId: splitValue[0], contactName: splitValue[1]});
+                            onChange({ contactNumber: splitValue[0], contactName: splitValue[1]});
                         }
                     }
                     else {

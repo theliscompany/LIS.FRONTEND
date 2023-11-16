@@ -13,6 +13,7 @@ import { useParams } from 'react-router-dom';
 import { RequestResponseDto } from '../utils/models/models';
 import { useTranslation } from 'react-i18next';
 import RequestViewItem from '../components/requestsPage/RequestViewItem';
+import AutocompleteSearch from '../components/shared/AutocompleteSearch';
 
 function createGetRequestUrl(variable1: string, variable2: string, variable3: string, variable4: string) {
     let url = protectedResources.apiLisQuotes.endPoint+'/Request?';
@@ -41,10 +42,8 @@ function RequestsSearch() {
     const [status, setStatus] = React.useState<string>("");
     // const [cargoType, setCargoType] = React.useState<string>("");
     const [packingType, setPackingType] = React.useState<string>("");
-    // const [departureTown, setDepartureTown] = React.useState<any>(null);
-    // const [arrivalTown, setArrivalTown] = React.useState<any>(null);
-    const [departure, setDeparture] = React.useState<string>("");
-    const [arrival, setArrival] = React.useState<string>("");
+    const [departure, setDeparture] = React.useState<any>(null);
+    const [arrival, setArrival] = React.useState<any>(null);
     let { search } = useParams();
 
     const context = useAuthorizedBackendApi();
@@ -83,7 +82,14 @@ function RequestsSearch() {
     const searchRequests = async () => {
         if (context) {
             setLoad(true);
-            var requestFormatted = createGetRequestUrl(departure, arrival, packingType, status);
+            
+            var postcode1 = "";
+            var postcode2 = "";
+            var auxDeparture = departure !== null && departure !== undefined ? [departure.city.toUpperCase(),departure.country,departure.latitude,departure.longitude,postcode1].filter((val: any) => { return val !== "" }).join(', ') : "";
+            var auxArrival = arrival !== null && arrival !== undefined ? [arrival.city.toUpperCase(),arrival.country,arrival.latitude,arrival.longitude,postcode2].filter((val: any) => { return val !== "" }).join(', ') : "";
+            console.log(auxDeparture, auxArrival);
+
+            var requestFormatted = createGetRequestUrl(auxDeparture, auxArrival, packingType, status);
             const response: RequestResponseDto = await (context as BackendService<any>).getSingle(requestFormatted);
             if (response !== null && response.code !== undefined && response.data !== undefined) {
                 if (response.code === 200) {
@@ -108,14 +114,15 @@ function RequestsSearch() {
                     }
                 </Typography>
                 <Grid container spacing={1} px={5} mt={2}>
-                <Grid item xs={12} md={3}>
+                    <Grid item xs={12} md={3}>
                         <InputLabel htmlFor="departure" sx={inputLabelStyles}>{t('departure')}</InputLabel>
-                        <BootstrapInput id="departure" type="text" value={departure} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setDeparture(e.target.value)} fullWidth />
+                        <AutocompleteSearch id="departure" value={departure} onChange={setDeparture} fullWidth />
                     </Grid>
                     <Grid item xs={12} md={3}>
                         <InputLabel htmlFor="arrival" sx={inputLabelStyles}>{t('arrival')}</InputLabel>
-                        <BootstrapInput id="arrival" type="text" value={arrival} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setArrival(e.target.value)} fullWidth />
+                        <AutocompleteSearch id="arrival" value={arrival} onChange={setArrival} fullWidth />
                     </Grid>
+                    
                     <Grid item xs={12} md={3}>
                         <InputLabel htmlFor="packing-type" sx={inputLabelStyles}>{t('packingType')}</InputLabel>
                         <NativeSelect
