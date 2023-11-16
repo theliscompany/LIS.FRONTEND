@@ -65,6 +65,8 @@ function Seafreights() {
     const [containerTypes, setContainerTypes] = useState<any>([]);
     const [price, setPrice] = useState<number>(0);
     const [servicesSelection, setServicesSelection] = useState<any>([]);
+
+    const [tempToken, setTempToken] = useState<string>("");
     
     const { t } = useTranslation();
     
@@ -194,6 +196,7 @@ function Seafreights() {
                         return response.accessToken;
                 });
             });
+            setTempToken(token);
             
             const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisPricing.endPoint+"/SeaFreight/GetSeaFreights", token);
             if (response !== null && response !== undefined) {
@@ -263,7 +266,7 @@ function Seafreights() {
         if (context) {
             setLoad(true);
             var requestFormatted = createGetRequestUrl(portDeparture?.portId, portDestination?.portId, searchedCarrier?.contactId);
-            const response = await (context as BackendService<any>).getSingle(requestFormatted);
+            const response = await (context as BackendService<any>).getWithToken(requestFormatted, tempToken);
             if (response !== null && response !== undefined) {
                 setSeafreights(response);
                 setLoad(false);
@@ -319,7 +322,7 @@ function Seafreights() {
                         "updated": (new Date()).toISOString()
                     };    
                 }
-                const response = await (context as BackendService<any>).postBasic(protectedResources.apiLisPricing.endPoint+"/SeaFreight/SeaFreight", dataSent);
+                const response = await (context as BackendService<any>).postWithToken(protectedResources.apiLisPricing.endPoint+"/SeaFreight/SeaFreight", dataSent, tempToken);
                 if (response !== null && response !== undefined) {
                     setModal2(false);
                     enqueueSnackbar(t('successCreated'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
