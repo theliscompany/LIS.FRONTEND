@@ -155,3 +155,9 @@ svg.MuiSvgIcon-root.MuiSvgIcon-fontSizeMedium.MuiNativeSelect-icon.MuiNativeSele
   position: absolute;
   right: 8.5px;
 }
+
+.tiptap.ProseMirror {
+  line-height: 30px;
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+  font-size: 14px !important;
+}

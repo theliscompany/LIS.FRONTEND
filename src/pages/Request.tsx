@@ -53,6 +53,7 @@ import RequestChangeStatus from '../components/editRequestPage/RequestChangeStat
 // import { MailData } from '../utils/models/models';
 // import { MuiFileInput } from 'mui-file-input';
 import { calculateDistance, findClosestSeaPort } from '../utils/functions';
+import RequestPriceRequest from '../components/editRequestPage/RequestPriceRequest';
 // import { EditorContent, useEditor } from '@tiptap/react';
 
 //let statusTypes = ["EnAttente", "Valider", "Rejeter"];
@@ -148,8 +149,8 @@ function parseContact(inputString: string) {
 }
 
 function displayContainers(value: any) {
-    var aux = value[0];
-    return aux.quantity+"x"+aux.container;
+    var aux = value.map((elm: any) => '<li>'+elm.quantity+"x"+elm.container+'</li>').join('');
+    return '<ul>'+aux+'</ul>';
 }
 
 function sortByCloseness(myPort: any, seaPorts: any) {
@@ -184,15 +185,10 @@ function Request() {
     const [email, setEmail] = useState<string>("");
     const [status, setStatus] = useState<string | null>(null);
     const [trackingNumber, setTrackingNumber] = useState<string>("");
-    // const [clientName, setClientName] = useState<string>("");
     const [phone, setPhone] = useState<string>("");
     const [message, setMessage] = useState<string>("");
-    // const [cargoType, setCargoType] = useState<string>("0");
-    // const [cargoProducts, setCargoProducts] = useState<any>([]);
     const [packingType, setPackingType] = useState<string>("FCL");
     const [clientNumber, setClientNumber] = useState<any>(null);
-    // const [departureTown, setDepartureTown] = useState<any>(null);
-    // const [arrivalTown, setArrivalTown] = useState<any>(null);
     const [departure, setDeparture] = useState<any>(null);
     const [arrival, setArrival] = useState<any>(null);
     const [tags, setTags] = useState<MuiChipsInputChip[]>([]);
@@ -201,23 +197,15 @@ function Request() {
     const [modal3, setModal3] = useState<boolean>(false);
     const [modal4, setModal4] = useState<boolean>(false);
     const [modal5, setModal5] = useState<boolean>(false);
-    // const [mailSubject, setMailSubject] = useState<string>("");
-    // const [mailContent, setMailContent] = useState<string>("");
-    // const [statusMessage, setStatusMessage] = useState<string>("");
-    // const [generalNote, setGeneralNote] = useState<string>("");
-    // const [selectedStatus, setSelectedStatus] = React.useState('EnAttente');
+    const [modal6, setModal6] = useState<boolean>(false);
     const [assignedManager, setAssignedManager] = useState<string>("");
     const [assignees, setAssignees] = useState<any>(null);
-    // const [loadNotes, setLoadNotes] = useState<boolean>(true);
-    // const [notes, setNotes] = useState<any>(null);
-    // const [idUser, setIdUser] = useState<any>(null);
-
+    
     const [containerType, setContainerType] = useState<string>("20' Dry");
     const [quantity, setQuantity] = useState<number>(1);
     const [containersSelection, setContainersSelection] = useState<any>([]);
     
     const [unitName, setUnitName] = useState<string>("");
-    // const [unitDimensions, setUnitDimensions] = useState<string>("");
     const [unitHeight, setUnitHeight] = useState<number>(0);
     const [unitLength, setUnitLength] = useState<number>(0);
     const [unitWidth, setUnitWidth] = useState<number>(0);
@@ -226,7 +214,6 @@ function Request() {
     const [unitsSelection, setUnitsSelection] = useState<any>([]);
 
     const [packageName, setPackageName] = useState<string>("");
-    // const [packageDimensions, setPackageDimensions] = useState<string>("");
     const [packageHeight, setPackageHeight] = useState<number>(0);
     const [packageLength, setPackageLength] = useState<number>(0);
     const [packageWidth, setPackageWidth] = useState<number>(0);
@@ -234,15 +221,12 @@ function Request() {
     const [packageQuantity, setPackageQuantity] = useState<number>(1);
     const [packagesSelection, setPackagesSelection] = useState<any>([]);
     
-    const [departureDate, setDepartureDate] = useState<Dayjs | null>(null);
     const [containersSelected, setContainersSelected] = useState<string[]>([]);
     const [portDestination, setPortDestination] = useState<any>(null);
     const [portDeparture, setPortDeparture] = useState<any>(null);
-    // const [loadingDate, setLoadingDate] = useState<Dayjs | null>(null);
     const [loadingCity, setLoadingCity] = useState<any>(null);
     const [haulageType, setHaulageType] = useState<string>("");
     const [products, setProducts] = useState<any>(null);
-    // const [cities, setCities] = useState<any>(null);
     const [ports, setPorts] = useState<any>(null);
     const [ports1, setPorts1] = useState<any>(null);
     const [ports2, setPorts2] = useState<any>(null);
@@ -254,11 +238,11 @@ function Request() {
     const [selectedSeafreight, setSelectedSeafreight] = useState<any>(null);
     const [selectedMisc, setSelectedMisc] = useState<any>(null);
     
-    const [margin, setMargin] = useState<number>(22);
-    const [reduction, setReduction] = useState<number>(0);
-    const [adding, setAdding] = useState<number>(0);
+    // const [margin, setMargin] = useState<number>(22);
+    // const [reduction, setReduction] = useState<number>(0);
+    // const [adding, setAdding] = useState<number>(0);
     // const [details, setDetails] = useState<string>("");
-    const [totalPrice, setTotalPrice] = useState<number>(0);
+    // const [totalPrice, setTotalPrice] = useState<number>(0);
 
     // const [allSeaPorts, setAllSeaPorts] = useState<any>();
     
@@ -266,17 +250,9 @@ function Request() {
     const [rowSelectionModel2, setRowSelectionModel2] = React.useState<GridRowSelectionModel>([]);
     const [rowSelectionModel3, setRowSelectionModel3] = React.useState<GridRowSelectionModel>([]);
 
-    // const [fileValue, setFileValue] = useState<File[] | undefined>(undefined);
     const [mailLanguage, setMailLanguage] = useState<string>("fr");
 
     const rteRef = useRef<RichTextEditorRef>(null);
-    // const editor = useEditor({
-    //     extensions: [
-    //       StarterKit,
-    //     ],
-    //     content: '',
-    // });
-    // const [contentValue, setContentValue] = useState<string>("");
     
     let { id } = useParams();
 
@@ -288,8 +264,6 @@ function Request() {
     const { t } = useTranslation();
     
     const steps = [t('searchHaulage'), t('selectHaulage'), t('searchSeafreight'), t('selectSeafreight'), t('selectMisc'), t('sendOffer')];
-    // const steps = [t('searchHaulage'), t('selectHaulage'), t('searchSeafreight'), t('selectSeafreight'), t('selectMisc'), t('sendOffer')];
-    // const haulageTypes = [t('haulageType1'), t('haulageType2'), t('haulageType3'), t('haulageType4'), t('haulageType5')];
     const haulageTypeOptions = [
         { value: "On trailer, direct loading", label: t('haulageType1') },
         { value: "On trailer, Loading with Interval", label: t('haulageType2') },
@@ -1086,19 +1060,18 @@ function Request() {
                         "validUntil": selectedSeafreight.validUntil,
                     },
                     "containers": containersSelection.map((elm: any) => { return { "containerId": elm.id, quantity: elm.quantity } }),
-                    "departureDate": departureDate || (new Date("01/01/2022")).toISOString(),
+                    "departureDate": (new Date("01/01/2022")).toISOString(),
                     "departurePortId": portDeparture.portId,
                     "destinationPortId": portDestination.portId,
-                    "margin": margin,
-                    "reduction": reduction,
-                    "extraFee": adding,
-                    "totalPrice": totalPrice
+                    "margin": 0,
+                    "reduction": 0,
+                    "extraFee": 0,
+                    "totalPrice": 0
                 };
                 const response = await (context as BackendService<any>).postReturnJson(protectedResources.apiLisOffer.endPoint+"/QuoteOffer", dataSent);
                 // const response = await axios.post(protectedResources.apiLisOffer.endPoint+"/QuoteOffer", dataSent);
                 
                 if (response !== null) {
-                    setModal5(false);
                     enqueueSnackbar(t('offerSuccessSent'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
                     console.log(response);
 
@@ -1310,7 +1283,6 @@ function Request() {
                                     <>
                                     <Grid item xs={12} md={3} mt={1}>
                                         <InputLabel htmlFor="package-name" sx={inputLabelStyles}>{t('packageName')}</InputLabel>
-                                        {/* <BootstrapInput id="package-name" type="text" value={packageName} onChange={(e: any) => {setPackageName(e.target.value)}} fullWidth /> */}
                                         <NativeSelect
                                             id="package-name"
                                             value={packageName}
@@ -1398,7 +1370,6 @@ function Request() {
                                     <>
                                     <Grid item xs={12} md={3} mt={1}>
                                         <InputLabel htmlFor="unit-name" sx={inputLabelStyles}>{t('unitName')}</InputLabel>
-                                        {/* <BootstrapInput id="unit-name" type="text" value={unitName} onChange={(e: any) => {setUnitName(e.target.value)}} fullWidth /> */}
                                         <NativeSelect
                                             id="unit-name"
                                             value={unitName}
@@ -1623,16 +1594,28 @@ function Request() {
                                                                                         </Typography>
                                                                                     </Grid>
                                                                                     <Grid item xs={4}>
-                                                                                        <Button variant="contained" color="inherit" sx={{ 
+                                                                                        <Button 
+                                                                                            variant="contained" 
+                                                                                            color="inherit" 
+                                                                                            sx={{ 
                                                                                                 textTransform: "none", backgroundColor: "#fff", 
                                                                                                 color: "#333", float: "right", marginTop: "8px", marginLeft: "10px" 
-                                                                                            }} onClick={getHaulagePriceOffers}
-                                                                                        >{t('reload')} <RestartAltIcon fontSize='small' /></Button>
-                                                                                        <Button variant="contained" color="inherit" sx={{ 
-                                                                                            textTransform: "none", backgroundColor: "#fff", 
-                                                                                            color: "#333", float: "right", marginTop: "8px" 
+                                                                                            }} 
+                                                                                            onClick={getHaulagePriceOffers}
+                                                                                        >
+                                                                                            {t('reload')} <RestartAltIcon fontSize='small' />
+                                                                                        </Button>
+                                                                                        <Button 
+                                                                                            variant="contained" 
+                                                                                            color="inherit" 
+                                                                                            sx={{ 
+                                                                                                textTransform: "none", backgroundColor: "#fff", 
+                                                                                                color: "#333", float: "right", marginTop: "8px" 
                                                                                             }}
-                                                                                        >{t('requestHaulagePrice')}</Button>
+                                                                                            onClick={() => setModal5(true)}
+                                                                                        >
+                                                                                            {t('requestHaulagePrice')}
+                                                                                        </Button>
                                                                                     </Grid>
                                                                                 </Grid>
                                                                                 
@@ -1737,16 +1720,28 @@ function Request() {
                                                                                     </Typography>
                                                                                 </Grid>
                                                                                 <Grid item xs={4}>
-                                                                                    <Button variant="contained" color="inherit" sx={{ 
+                                                                                    <Button 
+                                                                                        variant="contained" 
+                                                                                        color="inherit" 
+                                                                                        sx={{ 
                                                                                             textTransform: "none", backgroundColor: "#fff", 
                                                                                             color: "#333", float: "right", marginTop: "8px", marginLeft: "10px"
-                                                                                        }} onClick={getSeaFreightPriceOffers}
-                                                                                    >{t('reload')} <RestartAltIcon fontSize='small' /></Button>
-                                                                                    <Button variant="contained" color="inherit" sx={{ 
+                                                                                        }} 
+                                                                                        onClick={getSeaFreightPriceOffers}
+                                                                                    >
+                                                                                        {t('reload')} <RestartAltIcon fontSize='small' />
+                                                                                    </Button>
+                                                                                    <Button 
+                                                                                        variant="contained" 
+                                                                                        color="inherit" 
+                                                                                        sx={{ 
                                                                                             textTransform: "none", backgroundColor: "#fff", 
                                                                                             color: "#333", float: "right", marginTop: "8px"
                                                                                         }}
-                                                                                    >{t('requestSeafreightPrice')}</Button>
+                                                                                        onClick={() => setModal6(true)}
+                                                                                    >
+                                                                                        {t('requestSeafreightPrice')}
+                                                                                    </Button>
                                                                                 </Grid>
                                                                             </Grid>
                                                                             <DataGrid
@@ -1919,7 +1914,6 @@ function Request() {
                                                                 </Grid>
                                                                 <Grid item xs={12}>
                                                                     <InputLabel htmlFor="details" sx={inputLabelStyles}>{t('detailsOffer')}</InputLabel>
-                                                                    {/* <BootstrapInput id="details" type="text" multiline rows={6} value={details} onChange={(e: any) => setDetails(e.target.value)} fullWidth /> */}
                                                                     {
                                                                         selectedSeafreight !== null && selectedHaulage !== null ? 
                                                                         <Box sx={{ mt: 2 }}>
@@ -2056,7 +2050,7 @@ function Request() {
                 <RequestListNotes id={id} closeModal={() => setModal4(false)} />
             </BootstrapDialog>
 
-            {/* Price offer  */}
+            {/* Price request haulage  */}
             <BootstrapDialog
                 onClose={() => setModal5(false)}
                 aria-labelledby="custom-dialog-title5"
@@ -2064,14 +2058,28 @@ function Request() {
                 maxWidth="lg"
                 fullWidth
             >
-                <BootstrapDialogTitle id="custom-dialog-title5" onClose={() => setModal5(false)}>
-                    <b>{t('generatePriceOffer')}</b>
-                </BootstrapDialogTitle>
-                <DialogContent dividers>
-                </DialogContent>
-                <DialogActions>
-                    <Button variant="contained" onClick={() => setModal5(false)} sx={buttonCloseStyles}>{t('close')}</Button>
-                </DialogActions>
+                
+            </BootstrapDialog>
+
+            {/* Price request seafreight FCL */}
+            <BootstrapDialog
+                onClose={() => setModal6(false)}
+                aria-labelledby="custom-dialog-title5"
+                open={modal6}
+                maxWidth="lg"
+                fullWidth
+            >
+                <RequestPriceRequest 
+                    id={id} userId={null} 
+                    products={products} 
+                    commodities={tags} 
+                    ports={ports}
+                    portLoading={portDeparture}
+                    portDischarge={portDestination} 
+                    containers={containers} 
+                    containersSelection={containersSelection}
+                    closeModal={() => setModal6(false)} 
+                />
             </BootstrapDialog>
         </div>
     );
