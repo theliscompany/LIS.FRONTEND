@@ -22,7 +22,7 @@ export const fr = {
   name: "Nom",
   specifics: "Spécificités",
   clientNumber: "Nom du client (ou numéro)",
-  details: "Autres détails concernant votre demande (Optionnel)",
+  details: "Autres détails concernant la demande (Optionnel)",
   assignedManager: "Gestionnaire assigné",
   overviewTitle: "Historique des demandes de devis",
   assigneeId: "Id gestionnaire",
@@ -348,5 +348,15 @@ export const fr = {
   reload: "Recharger",
   labelNew: "Nouveau",
   requestHaulagePrice: "Demander un prix au transporteur",
-  requestSeafreightPrice: "Demander un prix au transporteur"
+  requestSeafreightPrice: "Demander un prix au transporteur",
+  priceRequestFCL: "Demande de prix FCL",
+  priceRequestHaulage: "Demande de prix de transport",
+  portLoading: "Port de chargement",
+  portDischarge: "Port de déchargement",
+  commodities: "Commodités",
+  etd: "Date prévue de départ",
+  recipients: "Destinataires",
+  deliveryPort: "Port de délivrance",
+  errorSelectRecipient: "Vous devez sélectionner au moins un destinataire avant d'envoyer votre mail",
+  mailSentTo: "Mail envoyé à : "
 };

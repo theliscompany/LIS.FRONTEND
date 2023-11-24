@@ -22,7 +22,7 @@ export const en = {
   name: "Name",
   specifics: "Specifics",
   clientNumber: "Client name (or number)",
-  details: "Other details about your request (Optional)",
+  details: "Other details about the request (Optional)",
   assignedManager: "Assigned manager",
   overviewTitle: "General timeline of the requests",
   assigneeId: "Assignee Id",
@@ -348,5 +348,15 @@ export const en = {
   reload: "Reload",
   labelNew: "New",
   requestHaulagePrice: "Request haulage price",
-  requestSeafreightPrice: "Request seafreight price"
+  requestSeafreightPrice: "Request seafreight price",
+  priceRequestFCL: "Price request FCL",
+  priceRequestHaulage: "Price request haulage",
+  portLoading: "Port of loading",
+  portDischarge: "Port of discharge",
+  commodities: "Commodities",
+  etd: "Estimate time of departure",
+  recipients: "Recipients",
+  deliveryPort: "Port of delivery",
+  errorSelectRecipient: "You need to select at least one recipient before sending the mail",
+  mailSentTo: "Mail sent to : "
 };
