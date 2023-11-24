@@ -161,3 +161,6 @@ svg.MuiSvgIcon-root.MuiSvgIcon-fontSizeMedium.MuiNativeSelect-icon.MuiNativeSele
   font-family: Verdana, Geneva, Tahoma, sans-serif;
   font-size: 14px !important;
 }
+.tiptap.ProseMirror > ul {
+  margin-bottom: -30px !important;
+}

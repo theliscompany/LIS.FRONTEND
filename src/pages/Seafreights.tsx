@@ -589,7 +589,8 @@ function Seafreights() {
                                 <InputLabel htmlFor="valid-until" sx={inputLabelStyles}>{t('validUntil')}</InputLabel>
                                 <LocalizationProvider dateAdapter={AdapterDayjs}>
                                     <DatePicker 
-                                        value={validUntil} 
+                                        value={validUntil}
+                                        format="DD/MM/YYYY"
                                         onChange={(value: any) => { setValidUntil(value) }}
                                         slotProps={{ textField: { id: "valid-until", fullWidth: true, sx: datetimeStyles }, inputAdornment: { sx: { position: "relative", right: "11.5px" } } }}
                                     />

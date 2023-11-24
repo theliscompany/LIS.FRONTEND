@@ -1,18 +1,17 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useParams } from 'react-router-dom';
-import { Alert, Autocomplete, Box, Button, Chip, DialogActions, DialogContent, Grid, IconButton, InputLabel, ListItem, ListItemText, NativeSelect, Skeleton, Step, StepLabel, Stepper, TextField, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material';
+import { Alert, Autocomplete, Box, Button, Chip, Grid, IconButton, InputLabel, ListItem, ListItemText, NativeSelect, Skeleton, Step, StepLabel, Stepper, TextField, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material';
 import { MuiTelInput } from 'mui-tel-input';
 import AutocompleteSearch from '../components/shared/AutocompleteSearch';
-import { inputLabelStyles, BootstrapInput, BootstrapDialogTitle, BootstrapDialog, buttonCloseStyles, whiteButtonStyles, gridStyles, HtmlTooltip } from '../utils/misc/styles';
+import { inputLabelStyles, BootstrapInput, BootstrapDialog, whiteButtonStyles, gridStyles, HtmlTooltip } from '../utils/misc/styles';
 import { enqueueSnackbar, SnackbarProvider } from 'notistack';
 import DeleteIcon from '@mui/icons-material/Delete';
 import HelpIcon from '@mui/icons-material/Help';
 import RestartAltIcon from '@mui/icons-material/RestartAlt';
-import { pricingRequest, protectedResources, transportRequest } from '../config/authConfig';
+import { crmRequest, pricingRequest, protectedResources, transportRequest } from '../config/authConfig';
 import { useAuthorizedBackendApi } from '../api/api';
 import { BackendService } from '../utils/services/fetch';
 import { MuiChipsInputChip } from 'mui-chips-input';
-import { Dayjs } from 'dayjs';
 import { useAccount, useMsal } from '@azure/msal-react';
 import { AuthenticationResult } from '@azure/msal-browser';
 import { useTranslation } from 'react-i18next';
@@ -54,6 +53,7 @@ import RequestChangeStatus from '../components/editRequestPage/RequestChangeStat
 // import { MuiFileInput } from 'mui-file-input';
 import { calculateDistance, findClosestSeaPort } from '../utils/functions';
 import RequestPriceRequest from '../components/editRequestPage/RequestPriceRequest';
+import RequestPriceHaulage from '../components/editRequestPage/RequestPriceHaulage';
 // import { EditorContent, useEditor } from '@tiptap/react';
 
 //let statusTypes = ["EnAttente", "Valider", "Rejeter"];
@@ -230,6 +230,7 @@ function Request() {
     const [ports, setPorts] = useState<any>(null);
     const [ports1, setPorts1] = useState<any>(null);
     const [ports2, setPorts2] = useState<any>(null);
+    const [clients, setClients] = useState<any>(null);
     const [containers, setContainers] = useState<any>(null);
     const [miscs, setMiscs] = useState<any>(null);
     const [haulages, setHaulages] = useState<any>(null);
@@ -243,8 +244,8 @@ function Request() {
     // const [adding, setAdding] = useState<number>(0);
     // const [details, setDetails] = useState<string>("");
     // const [totalPrice, setTotalPrice] = useState<number>(0);
-
     // const [allSeaPorts, setAllSeaPorts] = useState<any>();
+    const [tempToken, setTempToken] = useState<string>("");
     
     const [rowSelectionModel, setRowSelectionModel] = React.useState<GridRowSelectionModel>([]);
     const [rowSelectionModel2, setRowSelectionModel2] = React.useState<GridRowSelectionModel>([]);
@@ -644,6 +645,9 @@ function Request() {
     }
     
     useEffect(() => {
+        // Here i try to get all the clients
+        getClients();
+        
         // Here i initialize the sea ports
         initializeSeaPorts();
 
@@ -668,7 +672,10 @@ function Request() {
                 else {
                     setLoadAssignees(false);
                 }
-            }  
+            }
+            else {
+                setLoadAssignees(false);
+            }
         }
     }
     
@@ -824,6 +831,7 @@ function Request() {
                     return response.accessToken;
                 });
             });
+            setTempToken(token);
             
             setLoadResults(true);
             // I removed the loadingDate
@@ -854,6 +862,7 @@ function Request() {
                     return response.accessToken;
                 });
             });
+            setTempToken(token);
             
             setLoadResults(true);
             var containersFormatted = containersSelected.join("&ContainerTypesId=");
@@ -867,29 +876,40 @@ function Request() {
     
     const getMiscellaneousPriceOffers = async () => {
         if (context && account) {
+            var containersFormatted = containersSelected.join("&ContainerTypesId=");
+            var urlSent = createGetRequestUrl2(protectedResources.apiLisPricing.endPoint+"/Pricing/MiscellaneoussOffersRequest?", portDeparture.portId, portDestination.portId, containersFormatted);
+            const response = await (context as BackendService<any>).getWithToken(urlSent, tempToken);
+            setLoadResults(false);
+            setMiscs(response);
+            // console.log(response);  
+        }
+    }
+    
+    const getClients = async () => {
+        if (context && account) {
             const token = await instance.acquireTokenSilent({
-                scopes: pricingRequest.scopes,
+                scopes: crmRequest.scopes,
                 account: account
             })
             .then((response: AuthenticationResult) => {
                 return response.accessToken;
             })
-            .catch((err) => {
-                console.log(err);
+            .catch(() => {
                 return instance.acquireTokenPopup({
-                    ...pricingRequest,
+                    ...transportRequest,
                     account: account
-                }).then((response) => {
-                    return response.accessToken;
-                });
-            });
+                    }).then((response) => {
+                        return response.accessToken;
+                    });
+                }
+            );
             
-            var containersFormatted = containersSelected.join("&ContainerTypesId=");
-            var urlSent = createGetRequestUrl2(protectedResources.apiLisPricing.endPoint+"/Pricing/MiscellaneoussOffersRequest?", portDeparture.portId, portDestination.portId, containersFormatted);
-            const response = await (context as BackendService<any>).getWithToken(urlSent, token);
-            setLoadResults(false);
-            setMiscs(response);
-            // console.log(response);  
+            const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisClient.endPoint+"/Contact/GetContacts", token);
+            if (response !== null && response !== undefined) {
+                console.log(response);
+                // Removing duplicates from client array
+                setClients(response.filter((obj: any, index: number, self: any) => index === self.findIndex((o: any) => o.contactName === obj.contactName)));
+            }  
         }
     }
     
@@ -1856,52 +1876,38 @@ function Request() {
                                                                         onChange={(event: React.MouseEvent<HTMLElement>, newValue: string,) => { 
                                                                             setMailLanguage(newValue); 
                                                                             if (newValue === "fr") {
-                                                                                rteRef.current?.editor?.commands.setContent(`<p>Bonjour ${clientNumber !== null && clientNumber.contactName !== undefined ? clientNumber.contactName : "{clientName}"},</p>
-                                                                                <br>
+                                                                                rteRef.current?.editor?.commands.setContent(
+                                                                                `<div>
+                                                                                <p>Bonjour ${clientNumber !== null && clientNumber.contactName !== undefined ? clientNumber.contactName : "{clientName}"},</p>
                                                                                 <p>Nous vous remercions pour votre demande.</p>
-                                                                                <br>
                                                                                 <p>En notre qualité de commissionnaire expéditeur nous pouvons organiser votre expédition de ${displayContainers(containersSelection)} conteneur(s) chargé(s) avec des ${tags.map((elm: any) => elm.productName).join(',')}, sur camion depuis ${loadingCity.city} à rendu port de ${selectedSeafreight.destinationPortName} comme suit :</p>
-                                                                                <br>
                                                                                 ${containersSelection !== null ? containersSelection.map((elm: any) => "<p>"+calculateContainerPrice(elm.container, elm.quantity)+" "+selectedSeafreight.currency+" / "+elm.container+"</p>").join('') : ""}
-                                                                                <br>
                                                                                 <p>Chargement de ${selectedHaulage.freeTime} heures inclus pour chaque conteneur, ensuite de ${selectedHaulage.overtimeTariff} ${selectedHaulage.currency} par heure indivisible.</p>
                                                                                 ${selectedMisc !== null ? selectedMisc.services.map((elm: any) => "<p>- "+elm.service.serviceName+" inclus</p>").join('') : "<br>"}
-                                                                                <br>
                                                                                 <p>Départs tous les ${selectedSeafreight.frequency} jours.</p>
-                                                                                <br>
                                                                                 <p>Délai de mer +/- ${selectedSeafreight.transitTime} jours.</p>
-                                                                                <br>
                                                                                 <p>Tarif valable ce jour. Tarifs à confirmer lors de votre réservation.</p>
-                                                                                <br>
                                                                                 <p>Ci-joint vous trouverez nos conditions de commande et de facturation qui, ensemble avec nos conditions générales, sont appliqués.</p>
-                                                                                <br>
                                                                                 <p>Cordialement</p>
-                                                                                <br>
-                                                                                <p>Jeffry COOLS</p>`);
+                                                                                <p>Jeffry COOLS</p>
+                                                                                </div>`);
                                                                             }
                                                                             else {
-                                                                                rteRef.current?.editor?.commands.setContent(`<p>Hello ${clientNumber !== null && clientNumber.contactName !== undefined ? clientNumber.contactName : "{clientName}"},</p>
-                                                                                <br>
+                                                                                rteRef.current?.editor?.commands.setContent(
+                                                                                `<div>
+                                                                                <p>Hello ${clientNumber !== null && clientNumber.contactName !== undefined ? clientNumber.contactName : "{clientName}"},</p>
                                                                                 <p>We thank you for your request.</p>
-                                                                                <br>
                                                                                 <p>As a freight forwarder we can organize your shipment of ${displayContainers(containersSelection)} containers loaded with ${tags.map((elm: any) => elm.productName).join(',')}, on truck from ${loadingCity.city} up to arrival at ${selectedSeafreight.destinationPortName} with the following costs :</p>
-                                                                                <br>
                                                                                 ${containersSelection !== null ? containersSelection.map((elm: any) => "<p>"+calculateContainerPrice(elm.container, elm.quantity)+" "+selectedSeafreight.currency+" / "+elm.container+"</p>").join('') : ""}
-                                                                                <br>
                                                                                 <p>${selectedHaulage.freeTime} hours loading included for each container, after which ${selectedHaulage.overtimeTariff} ${selectedHaulage.currency} per hour is charged.</p>
                                                                                 ${selectedMisc !== null ? selectedMisc.services.map((elm: any) => "<p>- "+elm.service.serviceName+" included</p>").join('') : "<br>"}
-                                                                                <br>
                                                                                 <p>Departures every ${selectedSeafreight.frequency} days.</p>
-                                                                                <br>
                                                                                 <p>Sailing time ${selectedSeafreight.departurePortName} to ${selectedSeafreight.destinationPortName} approx. ${selectedSeafreight.transitTime} days.</p>
-                                                                                <br>
                                                                                 <p>This offer remains valid today, to be confirmed at the time of your booking..</p>
-                                                                                <br>
                                                                                 <p>We also send per attached pdf our order confirmation and invoice terms & conditions.</p>
-                                                                                <br>
                                                                                 <p>Best regards,</p>
-                                                                                <br>
-                                                                                <p>Jeffry COOLS</p>`);
+                                                                                <p>Jeffry COOLS</p>
+                                                                                </div>`);
                                                                             }
                                                                         }}
                                                                         aria-label="Platform"
@@ -1921,28 +1927,20 @@ function Request() {
                                                                                 ref={rteRef}
                                                                                 extensions={[StarterKit]}
                                                                                 content={
-                                                                                    `<p>Bonjour ${clientNumber !== null && clientNumber.contactName !== undefined ? clientNumber.contactName : "{clientName}"},</p>
-                                                                                    <br>
+                                                                                    `<div>
+                                                                                    <p>Bonjour ${clientNumber !== null && clientNumber.contactName !== undefined ? clientNumber.contactName : "{clientName}"},</p>
                                                                                     <p>Nous vous remercions pour votre demande.</p>
-                                                                                    <br>
                                                                                     <p>En notre qualité de commissionnaire expéditeur nous pouvons organiser votre expédition de ${displayContainers(containersSelection)} conteneur(s) chargé(s) avec des ${tags.map((elm: any) => elm.productName).join(',')}, sur camion depuis ${loadingCity.city} à rendu port de ${selectedSeafreight.destinationPortName} comme suit :</p>
-                                                                                    <br>
                                                                                     ${containersSelection !== null ? containersSelection.map((elm: any) => "<p>"+calculateContainerPrice(elm.container, elm.quantity)+" "+selectedSeafreight.currency+" / "+elm.container+"</p>").join('') : ""}
-                                                                                    <br>
                                                                                     <p>Chargement de ${selectedHaulage.freeTime} heures inclus pour chaque conteneur, ensuite de ${selectedHaulage.overtimeTariff} ${selectedHaulage.currency} par heure indivisible.</p>
                                                                                     ${selectedMisc !== null ? selectedMisc.services.map((elm: any) => "<p>- "+elm.service.serviceName+" inclus</p>").join('') : "<br>"}
-                                                                                    <br>
                                                                                     <p>Départs tous les ${selectedSeafreight.frequency} jours.</p>
-                                                                                    <br>
                                                                                     <p>Délai de mer +/- ${selectedSeafreight.transitTime} jours.</p>
-                                                                                    <br>
                                                                                     <p>Tarif valable ce jour. Tarifs à confirmer lors de votre réservation.</p>
-                                                                                    <br>
                                                                                     <p>Ci-joint vous trouverez nos conditions de commande et de facturation qui, ensemble avec nos conditions générales, sont appliqués.</p>
-                                                                                    <br>
                                                                                     <p>Cordialement</p>
-                                                                                    <br>
-                                                                                    <p>Jeffry COOLS</p>`
+                                                                                    <p>Jeffry COOLS</p>
+                                                                                    </div>`
                                                                                 }
                                                                                 renderControls={() => (
                                                                                 <MenuControlsContainer>
@@ -2058,7 +2056,14 @@ function Request() {
                 maxWidth="lg"
                 fullWidth
             >
-                
+                <RequestPriceHaulage
+                    token={tempToken} 
+                    companies={clients}
+                    ports={ports}
+                    loadingCity={loadingCity}
+                    loadingPort={portDeparture}
+                    closeModal={() => setModal5(false)}
+                />
             </BootstrapDialog>
 
             {/* Price request seafreight FCL */}
@@ -2070,9 +2075,10 @@ function Request() {
                 fullWidth
             >
                 <RequestPriceRequest 
-                    id={id} userId={null} 
+                    token={tempToken} 
                     products={products} 
-                    commodities={tags} 
+                    commodities={tags}
+                    companies={clients}
                     ports={ports}
                     portLoading={portDeparture}
                     portDischarge={portDestination} 

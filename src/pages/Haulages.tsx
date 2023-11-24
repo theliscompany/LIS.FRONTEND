@@ -97,7 +97,7 @@ function Haulages() {
     
     const columnsHaulages: GridColDef[] = [
         { field: 'haulierName', headerName: t('haulier'), minWidth: 125, flex: 1.4 },
-        // { field: 'loadingPort', headerName: t('loadingPort'), renderCell: (params: GridRenderCellParams) => {
+        // { field: 'deliveryPort', headerName: t('deliveryPort'), renderCell: (params: GridRenderCellParams) => {
         //     return (
         //         <Box sx={{ my: 2 }}>{params.row.loadingPort}</Box>
         //     );
@@ -364,7 +364,7 @@ function Haulages() {
                         <AutocompleteSearch id="loading-city-searched" value={searchedLoadingCity} onChange={setSearchedLoadingCity} fullWidth />
                     </Grid>
                     <Grid item xs={12} md={3} mt={1}>
-                        <InputLabel htmlFor="loading-port-searched" sx={inputLabelStyles}>{t('loadingPort')}</InputLabel>
+                        <InputLabel htmlFor="loading-port-searched" sx={inputLabelStyles}>{t('deliveryPort')}</InputLabel>
                         {
                             ports !== null ?
                             <Autocomplete
@@ -484,7 +484,7 @@ function Haulages() {
                                         <AutocompleteSearch id="loading-city" value={loadingCity} onChange={setLoadingCity} fullWidth />
                                     </Grid>
                                     <Grid item xs={12} md={6} mt={0.25}>
-                                        <InputLabel htmlFor="loading-port" sx={inputLabelStyles}>{t('loadingPort')}</InputLabel>
+                                        <InputLabel htmlFor="loading-port" sx={inputLabelStyles}>{t('deliveryPort')}</InputLabel>
                                         {
                                             ports !== null ?
                                             <Autocomplete
@@ -530,7 +530,8 @@ function Haulages() {
                                 <InputLabel htmlFor="valid-until" sx={inputLabelStyles}>{t('validUntil')}</InputLabel>
                                 <LocalizationProvider dateAdapter={AdapterDayjs}>
                                     <DatePicker 
-                                        value={validUntil} 
+                                        value={validUntil}
+                                        format="DD/MM/YYYY" 
                                         onChange={(value: any) => { setValidUntil(value) }}
                                         slotProps={{ textField: { id: "valid-until", fullWidth: true, sx: datetimeStyles }, inputAdornment: { sx: { position: "relative", right: "11.5px" } } }}
                                     />

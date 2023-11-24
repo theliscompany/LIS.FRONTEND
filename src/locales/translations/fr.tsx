@@ -354,5 +354,9 @@ export const fr = {
   portLoading: "Port de chargement",
   portDischarge: "Port de déchargement",
   commodities: "Commodités",
-  etd: "Date prévue de départ"
+  etd: "Date prévue de départ",
+  recipients: "Destinataires",
+  deliveryPort: "Port de délivrance",
+  errorSelectRecipient: "Vous devez sélectionner au moins un destinataire avant d'envoyer votre mail",
+  mailSentTo: "Mail envoyé à : "
 };

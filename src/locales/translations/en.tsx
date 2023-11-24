@@ -354,5 +354,9 @@ export const en = {
   portLoading: "Port of loading",
   portDischarge: "Port of discharge",
   commodities: "Commodities",
-  etd: "Estimate time of departure"
+  etd: "Estimate time of departure",
+  recipients: "Recipients",
+  deliveryPort: "Port of delivery",
+  errorSelectRecipient: "You need to select at least one recipient before sending the mail",
+  mailSentTo: "Mail sent to : "
 };
