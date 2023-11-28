@@ -256,7 +256,6 @@ function Miscellaneous() {
         if (context) {
             setLoad(true);
             var requestFormatted = createGetRequestUrl(portDeparture?.portId, portDestination?.portId, searchedSupplier?.contactId);
-            // const response = await (context as BackendService<any>).getSingle(requestFormatted);
             const response = await (context as BackendService<any>).getWithToken(requestFormatted+"&withShipment="+withShipment, tempToken);
             if (response !== null && response !== undefined) {
                 setMiscs(response);

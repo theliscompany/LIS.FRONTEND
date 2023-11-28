@@ -241,7 +241,7 @@ function Seafreights() {
     const getSeafreight = async (id: string) => {
         setLoadEdit(true)
         if (context) {
-            const response = await (context as BackendService<any>).getSingle(protectedResources.apiLisPricing.endPoint+"/SeaFreight/SeaFreight?seaFreightId="+id);
+            const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisPricing.endPoint+"/SeaFreight/SeaFreight?seaFreightId="+id, tempToken);
             if (response !== null && response !== undefined) {
                 setCarrier({contactId: response.carrierId, contactName: response.carrierName});
                 setCarrierAgent({contactId: response.carrierAgentId, contactName: response.carrierAgentName});
