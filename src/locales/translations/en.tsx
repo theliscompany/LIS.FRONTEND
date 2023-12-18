@@ -358,5 +358,6 @@ export const en = {
   recipients: "Recipients",
   deliveryPort: "Port of delivery",
   errorSelectRecipient: "You need to select at least one recipient before sending the mail",
-  mailSentTo: "Mail sent to : "
+  mailSentTo: "Mail sent to : ",
+  templates: "Templates"
 };
