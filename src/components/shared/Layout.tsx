@@ -21,6 +21,7 @@ import LocalShippingIcon from '@mui/icons-material/LocalShippingOutlined';
 import Inventory2Icon from "@mui/icons-material/Inventory2Outlined"
 import AssignmentOutlinedIcon from '@mui/icons-material/AssignmentOutlined';
 import RequestQuoteOutlinedIcon from '@mui/icons-material/RequestQuoteOutlined';
+import TextSnippetOutlinedIcon from '@mui/icons-material/TextSnippetOutlined';
 import StarBorder from '@mui/icons-material/StarBorder';
 import Avatar from '@mui/material/Avatar';
 import MenuItem from '@mui/material/MenuItem';
@@ -584,6 +585,18 @@ function Layout(props: {children?: React.ReactNode}) {
                                 </DarkTooltip>
                                 </ListItem>
                             </NavLink>
+                            {/* <NavLink to="/admin/templates" className={({ isActive }) => isActive ? "cs-navlink-active" : "cs-navlink"}>
+                                <ListItem className="cs-listitem" key={"Templates"} disablePadding disableGutters>
+                                <DarkTooltip title={t('templates')} placement="right" arrow>
+                                    <ListItemButton className="cs-listitembutton">
+                                        <ListItemIcon className="cs-listitemicon">
+                                            <TextSnippetOutlinedIcon fontSize="small" />
+                                        </ListItemIcon>
+                                        <ListItemText primary={t('templates')} primaryTypographyProps={{ fontSize: 14 }} />
+                                    </ListItemButton>
+                                </DarkTooltip>
+                                </ListItem>
+                            </NavLink> */}
                             
                         </List>
                         

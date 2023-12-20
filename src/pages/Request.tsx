@@ -1653,7 +1653,41 @@ function Request() {
                                                                                     rowSelectionModel={rowSelectionModel2}
                                                                                     // onRowClick={handleRowHaulagesClick}
                                                                                 />
-                                                                            </Box> : <Alert severity="error">{t('noResults')}</Alert>
+                                                                            </Box> :
+                                                                            <Box>
+                                                                                <Grid container>
+                                                                                    <Grid item xs={8}>
+                                                                                        <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>
+                                                                                            {t('listHaulagesPricingOffers')+t('fromDotted')+loadingCity.city}
+                                                                                        </Typography>
+                                                                                    </Grid>
+                                                                                    <Grid item xs={4}>
+                                                                                        <Button 
+                                                                                            variant="contained" 
+                                                                                            color="inherit" 
+                                                                                            sx={{ 
+                                                                                                textTransform: "none", backgroundColor: "#fff", 
+                                                                                                color: "#333", float: "right", marginTop: "8px", marginLeft: "10px" 
+                                                                                            }} 
+                                                                                            onClick={getHaulagePriceOffers}
+                                                                                        >
+                                                                                            {t('reload')} <RestartAltIcon fontSize='small' />
+                                                                                        </Button>
+                                                                                        <Button 
+                                                                                            variant="contained" 
+                                                                                            color="inherit" 
+                                                                                            sx={{ 
+                                                                                                textTransform: "none", backgroundColor: "#fff", 
+                                                                                                color: "#333", float: "right", marginTop: "8px" 
+                                                                                            }}
+                                                                                            onClick={() => setModal5(true)}
+                                                                                        >
+                                                                                            {t('requestHaulagePrice')}
+                                                                                        </Button>
+                                                                                    </Grid>
+                                                                                </Grid>
+                                                                                <Alert severity="error">{t('noResults')}</Alert>
+                                                                            </Box> 
                                                                         : <Skeleton />
                                                                     }
                                                                 </Grid>
@@ -1778,7 +1812,41 @@ function Request() {
                                                                                 rowSelectionModel={rowSelectionModel}
                                                                                 // onRowClick={handleRowSeafreightsClick}
                                                                             />
-                                                                        </Box> : <Alert severity="error">{t('noResults')}</Alert>
+                                                                        </Box> : 
+                                                                        <Box>
+                                                                            <Grid container>
+                                                                                <Grid item xs={8}>
+                                                                                    <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>
+                                                                                        {t('listSeaFreightsPricingOffers')+t('fromDotted')+portDeparture.portName+"-"+portDestination.portName}
+                                                                                    </Typography>
+                                                                                </Grid>
+                                                                                <Grid item xs={4}>
+                                                                                    <Button 
+                                                                                        variant="contained" 
+                                                                                        color="inherit" 
+                                                                                        sx={{ 
+                                                                                            textTransform: "none", backgroundColor: "#fff", 
+                                                                                            color: "#333", float: "right", marginTop: "8px", marginLeft: "10px"
+                                                                                        }} 
+                                                                                        onClick={getSeaFreightPriceOffers}
+                                                                                    >
+                                                                                        {t('reload')} <RestartAltIcon fontSize='small' />
+                                                                                    </Button>
+                                                                                    <Button 
+                                                                                        variant="contained" 
+                                                                                        color="inherit" 
+                                                                                        sx={{ 
+                                                                                            textTransform: "none", backgroundColor: "#fff", 
+                                                                                            color: "#333", float: "right", marginTop: "8px"
+                                                                                        }}
+                                                                                        onClick={() => setModal6(true)}
+                                                                                    >
+                                                                                        {t('requestSeafreightPrice')}
+                                                                                    </Button>
+                                                                                </Grid>
+                                                                            </Grid>
+                                                                            <Alert severity="error">{t('noResults')}</Alert>
+                                                                        </Box>
                                                                         : <Skeleton />
                                                                     }
                                                                 </Grid>

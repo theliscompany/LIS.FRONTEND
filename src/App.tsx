@@ -26,6 +26,7 @@ import Haulages from './pages/Haulages';
 import Miscellaneous from './pages/Miscellaneous';
 import AcceptOffer from './pages/AcceptOffer';
 import RefuseOffer from './pages/RefuseOffer';
+import Templates from './pages/Templates';
 // import Seafreights from './utils/others/Seafreights';
 
 const App = () => {
@@ -50,6 +51,7 @@ const App = () => {
 							<Route path="seafreights" element={<Seafreights />} />
 							<Route path="haulages" element={<Haulages />} />
 							<Route path="miscellaneous" element={<Miscellaneous />} />
+							<Route path="templates" element={<Templates />} />
 						</Route> 
 						<Route path="/" element={<Layout children={<Requests />} />} />
 						<Route path="login" element={<Layout children={<Requests />} />} />

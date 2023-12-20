@@ -62,5 +62,8 @@ export const protectedResources = {
   },
   apiLisClient: {
     endPoint: process.env.REACT_APP_API_LIS_CLIENT_ENDPOINT
+  },
+  apiLisTemplate: {
+    endPoint: process.env.REACT_APP_API_LIS_TEMPLATE_ENDPOINT
   }
 }
