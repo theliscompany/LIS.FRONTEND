@@ -308,7 +308,7 @@ export const fr = {
   everyxDays: "tous les x jours",
   serviceName: "Service",
   containers: "Conteneurs",
-  successCreated: "L'élément a été créée avec succès",
+  successCreated: "L'élément a été créé / modifié avec succès",
   price: "Prix",
   haulages: "Transports routiers",
   listHaulages: "Liste des prix de transport routier",
@@ -359,5 +359,18 @@ export const fr = {
   deliveryPort: "Port de délivrance",
   errorSelectRecipient: "Vous devez sélectionner au moins un destinataire avant d'envoyer votre mail",
   mailSentTo: "Mail envoyé à : ",
-  templates: "Modèles"
+  templates: "Modèles",
+  listTemplates: "Liste des modèles",
+  newTemplate: "Nouveau modèle",
+  createdBefore: "Créé avant le",
+  createdAfter: "Créé après le",
+  currentVersion: "Version actuelle",
+  tags: "Etiquettes",
+  listContainers: "Liste des conteneurs",
+  containersQuantities: "Conteneurs et quantités",
+  variables: "Ajouter une variable",
+  errorHappenedVersion: "Une erreur s'est produite, essayez de changer la version avant de valider",
+  successEdited: "L'élément a été modifié avec succès",
+  cantDelete: "Vous ne pouvez pas supprimer cet élément",
+  pricesContainers: "Prix par conteneurs"
 };

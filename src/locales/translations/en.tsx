@@ -359,5 +359,18 @@ export const en = {
   deliveryPort: "Port of delivery",
   errorSelectRecipient: "You need to select at least one recipient before sending the mail",
   mailSentTo: "Mail sent to : ",
-  templates: "Templates"
+  templates: "Templates",
+  listTemplates: "List of templates",
+  newTemplate: "New template",
+  createdBefore: "Created before",
+  createdAfter: "Created after",
+  currentVersion: "Current version",
+  tags: "Tags",
+  listContainers: "List of containers",
+  containersQuantities: "Containers and quantities",
+  variables: "Add a variable",
+  errorHappenedVersion: "An error happened, try to change the version before validating",
+  successEdited: "The element has been modified with success",
+  cantDelete: "You cant delete this element",
+  pricesContainers: "Prices by containers"
 };

@@ -585,7 +585,7 @@ function Layout(props: {children?: React.ReactNode}) {
                                 </DarkTooltip>
                                 </ListItem>
                             </NavLink>
-                            {/* <NavLink to="/admin/templates" className={({ isActive }) => isActive ? "cs-navlink-active" : "cs-navlink"}>
+                            <NavLink to="/admin/templates" className={({ isActive }) => isActive ? "cs-navlink-active" : "cs-navlink"}>
                                 <ListItem className="cs-listitem" key={"Templates"} disablePadding disableGutters>
                                 <DarkTooltip title={t('templates')} placement="right" arrow>
                                     <ListItemButton className="cs-listitembutton">
@@ -596,7 +596,7 @@ function Layout(props: {children?: React.ReactNode}) {
                                     </ListItemButton>
                                 </DarkTooltip>
                                 </ListItem>
-                            </NavLink> */}
+                            </NavLink>
                             
                         </List>
                         

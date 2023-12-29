@@ -160,7 +160,8 @@ svg.MuiSvgIcon-root.MuiSvgIcon-fontSizeMedium.MuiNativeSelect-icon.MuiNativeSele
   line-height: 30px;
   font-family: Verdana, Geneva, Tahoma, sans-serif;
   font-size: 14px !important;
+  min-height: 170px;
 }
-.tiptap.ProseMirror > ul {
+/* .tiptap.ProseMirror > ul {
   margin-bottom: -30px !important;
-}
+} */
