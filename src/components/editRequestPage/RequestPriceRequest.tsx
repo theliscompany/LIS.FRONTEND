@@ -158,8 +158,11 @@ function RequestPriceRequest(props: any) {
                 var aux = getAllCarriers(response);
                 console.log(response.length !== 0 ? aux : "None");
                 
-                setRecipients(props.companies.filter((obj: any) => aux.includes(obj.contactName) && obj.email !== "" && obj.email !== null));
+                if (aux.length !== 0) {
+                    setRecipients(props.companies.filter((obj: any) => aux.includes(obj.contactName) && obj.email !== "" && obj.email !== null));
+                }
                 // setCarriersData(props.companies.filter((obj: any) => aux.includes(obj.contactName) && obj.email !== "" && obj.email !== null));
+                // setCarriersData(props.companies);
                 setLoad(false);
             }
             else {

@@ -143,9 +143,11 @@ function RequestPriceHaulage(props: any) {
                 var aux = getAllHauliers(response);
                 console.log(response.length !== 0 ? aux : "None");
                 
-                setRecipients(props.companies.filter((obj: any) => aux.includes(obj.contactName) && obj.email !== "" && obj.email !== null));
+                if (aux.length !== 0) {
+                    setRecipients(props.companies.filter((obj: any) => aux.includes(obj.contactName) && obj.email !== "" && obj.email !== null));
+                }
                 // setHauliersData(props.companies.filter((obj: any) => aux.includes(obj.contactName) && obj.email !== "" && obj.email !== null));
-                setHauliersData(props.companies);
+                // setHauliersData(props.companies);
                 setLoad(false);
             }
             else {
