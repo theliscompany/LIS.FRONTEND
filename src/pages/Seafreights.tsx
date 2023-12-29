@@ -8,7 +8,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { SnackbarProvider, enqueueSnackbar } from 'notistack';
 import { useTranslation } from 'react-i18next';
 import { useAuthorizedBackendApi } from '../api/api';
-import { pricingRequest, protectedResources, transportRequest } from '../config/authConfig';
+import { crmRequest, pricingRequest, protectedResources, transportRequest } from '../config/authConfig';
 import { BackendService } from '../utils/services/fetch';
 import { GridColDef, GridValueFormatterParams, GridRenderCellParams, DataGrid } from '@mui/x-data-grid';
 import { BootstrapDialog, BootstrapDialogTitle, BootstrapInput, actionButtonStyles, buttonCloseStyles, datetimeStyles, gridStyles, inputLabelStyles, whiteButtonStyles } from '../utils/misc/styles';
@@ -19,6 +19,8 @@ import dayjs, { Dayjs } from 'dayjs';
 import { AuthenticationResult } from '@azure/msal-browser';
 import { useMsal, useAccount } from '@azure/msal-react';
 import { CategoryEnum } from '../utils/constants';
+import RequestPriceRequest from '../components/editRequestPage/RequestPriceRequest';
+import { Mail } from '@mui/icons-material';
 
 function createGetRequestUrl(variable1: number, variable2: number, variable3: number) {
     let url = protectedResources.apiLisPricing.endPoint+"/SeaFreight/GetSeaFreights?";
@@ -43,7 +45,10 @@ function Seafreights() {
     const [loadEdit, setLoadEdit] = useState<boolean>(false);
     const [modal, setModal] = useState<boolean>(false);
     const [modal2, setModal2] = useState<boolean>(false);
+    const [modal6, setModal6] = useState<boolean>(false);
     const [ports, setPorts] = useState<any>(null);
+    const [products, setProducts] = useState<any>(null);
+    const [clients, setClients] = useState<any>(null);
     const [containers, setContainers] = useState<any>(null);
     const [services, setServices] = useState<any>(null);
     const [currentId, setCurrentId] = useState<string>("");
@@ -113,10 +118,10 @@ function Seafreights() {
         { field: 'xxx', headerName: t('Actions'), renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box sx={{ my: 1, mr: 1 }}>
-                    <IconButton size="small" title={t('editRow')} sx={{ mr: 0.5 }} onClick={() => { setCurrentEditId(params.row.seaFreightId); getSeafreight(params.row.seaFreightId); setModal2(true); }}>
+                    <IconButton size="small" title={t('editRowSeafreight')} sx={{ mr: 0.5 }} onClick={() => { setCurrentEditId(params.row.seaFreightId); getSeafreight(params.row.seaFreightId); setModal2(true); }}>
                         <EditIcon fontSize="small" />
                     </IconButton>
-                    <IconButton size="small" title={t('deleteRow')} onClick={() => { setCurrentId(params.row.seaFreightId); setModal(true); }}>
+                    <IconButton size="small" title={t('deleteRowSeafreight')} onClick={() => { setCurrentId(params.row.seaFreightId); setModal(true); }}>
                         <DeleteIcon fontSize="small" />
                     </IconButton>
                 </Box>
@@ -125,10 +130,67 @@ function Seafreights() {
     ];
     
     useEffect(() => {
+        getClients();
+        getProducts();
         getPorts();
         getSeafreights();
         getProtectedData(); // Services and Containers
     }, []);
+    
+    const getProducts = async () => {
+        if (context && account) {
+            const token = await instance.acquireTokenSilent({
+                scopes: transportRequest.scopes,
+                account: account
+            })
+            .then((response: AuthenticationResult) => {
+                return response.accessToken;
+            })
+            .catch(() => {
+                return instance.acquireTokenPopup({
+                    ...transportRequest,
+                    account: account
+                    }).then((response) => {
+                        return response.accessToken;
+                    });
+                }
+            );
+            
+            const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Product/Products", token);
+            // console.log(response);
+            if (response !== null && response !== undefined) {
+                setProducts(response);
+            }  
+        }
+    }
+    
+    const getClients = async () => {
+        if (context && account) {
+            const token = await instance.acquireTokenSilent({
+                scopes: crmRequest.scopes,
+                account: account
+            })
+            .then((response: AuthenticationResult) => {
+                return response.accessToken;
+            })
+            .catch(() => {
+                return instance.acquireTokenPopup({
+                    ...transportRequest,
+                    account: account
+                    }).then((response) => {
+                        return response.accessToken;
+                    });
+                }
+            );
+            
+            const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisClient.endPoint+"/Contact/GetContacts", token);
+            if (response !== null && response !== undefined) {
+                console.log(response);
+                // Removing duplicates from client array
+                setClients(response.filter((obj: any, index: number, self: any) => index === self.findIndex((o: any) => o.contactName === obj.contactName)));
+            }  
+        }
+    }
     
     const getPorts = async () => {
         if (context) {
@@ -363,6 +425,9 @@ function Seafreights() {
                         <Button variant="contained" sx={actionButtonStyles} onClick={() => { setCurrentEditId(""); resetForm(); setModal2(true); }}>
                             {t('newSeafreightPrice')} <AddCircleOutlinedIcon sx={{ ml: 0.5, pb: 0.25, justifyContent: "center", alignItems: "center" }} fontSize="small" />
                         </Button>
+                        <Button variant="contained" sx={actionButtonStyles} onClick={() => { setModal6(true); }}>
+                            {t('requestSeafreightPrice')} <Mail sx={{ ml: 0.5, pb: 0.25, justifyContent: "center", alignItems: "center" }} fontSize="small" />
+                        </Button>
                     </Grid>
                     <Grid item xs={12} md={4} mt={1}>
                         <InputLabel htmlFor="company-name" sx={inputLabelStyles}>{t('carrier')}</InputLabel>
@@ -485,7 +550,7 @@ function Seafreights() {
                 fullWidth
             >
                 <BootstrapDialogTitle id="custom-dialog-title" onClose={() => setModal(false)}>
-                    <b>{t('deleteRow')}</b>
+                    <b>{t('deleteRowSeafreight')}</b>
                 </BootstrapDialogTitle>
                 <DialogContent dividers>{t('areYouSureDeleteRow')}</DialogContent>
                 <DialogActions>
@@ -501,7 +566,7 @@ function Seafreights() {
                 fullWidth
             >
                 <BootstrapDialogTitle id="custom-dialog-title2" onClose={() => setModal2(false)}>
-                    <b>{currentEditId === "" ? t('createRow') : t('editRow')}</b>
+                    <b>{currentEditId === "" ? t('createRowSeafreight') : t('editRowSeafreight')}</b>
                 </BootstrapDialogTitle>
                 <DialogContent dividers>
                     {
@@ -727,6 +792,28 @@ function Seafreights() {
                     <Button variant="contained" color={"primary"} onClick={() => { createUpdateSeafreight(); }} sx={{ mr: 1.5, textTransform: "none" }}>{t('validate')}</Button>
                     <Button variant="contained" onClick={() => setModal2(false)} sx={buttonCloseStyles}>{t('close')}</Button>
                 </DialogActions>
+            </BootstrapDialog>
+
+            {/* Price request seafreight FCL */}
+            <BootstrapDialog
+                onClose={() => setModal6(false)}
+                aria-labelledby="custom-dialog-title5"
+                open={modal6}
+                maxWidth="lg"
+                fullWidth
+            >
+                <RequestPriceRequest 
+                    token={tempToken} 
+                    products={products} 
+                    commodities={[]}
+                    companies={clients}
+                    ports={ports}
+                    portLoading={null}
+                    portDischarge={null} 
+                    containers={containers} 
+                    containersSelection={[]}
+                    closeModal={() => setModal6(false)} 
+                />
             </BootstrapDialog>
         </div>
     );

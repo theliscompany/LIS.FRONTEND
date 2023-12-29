@@ -8,7 +8,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { SnackbarProvider, enqueueSnackbar } from 'notistack';
 import { useTranslation } from 'react-i18next';
 import { useAuthorizedBackendApi } from '../api/api';
-import { pricingRequest, protectedResources, transportRequest } from '../config/authConfig';
+import { crmRequest, pricingRequest, protectedResources, transportRequest } from '../config/authConfig';
 import { BackendService } from '../utils/services/fetch';
 import { GridColDef, GridValueFormatterParams, GridRenderCellParams, DataGrid, GridValueGetterParams } from '@mui/x-data-grid';
 import { BootstrapDialog, BootstrapDialogTitle, BootstrapInput, actionButtonStyles, buttonCloseStyles, datetimeStyles, gridStyles, inputLabelStyles } from '../utils/misc/styles';
@@ -20,6 +20,8 @@ import { AuthenticationResult } from '@azure/msal-browser';
 import { useMsal, useAccount } from '@azure/msal-react';
 import { CategoryEnum } from '../utils/constants';
 import AutocompleteSearch from '../components/shared/AutocompleteSearch';
+import RequestPriceHaulage from '../components/editRequestPage/RequestPriceHaulage';
+import { Mail } from '@mui/icons-material';
 
 function createGetRequestUrl(variable1: number, variable2: number, variable3: string) {
     let url = protectedResources.apiLisPricing.endPoint+"/Haulage/Haulages?";
@@ -47,7 +49,9 @@ function Haulages() {
     const [loadEdit, setLoadEdit] = useState<boolean>(false);
     const [modal, setModal] = useState<boolean>(false);
     const [modal2, setModal2] = useState<boolean>(false);
+    const [modal5, setModal5] = useState<boolean>(false);
     const [ports, setPorts] = useState<any>(null);
+    const [clients, setClients] = useState<any>(null);
     const [containers, setContainers] = useState<any>(null);
 
     const [currentId, setCurrentId] = useState<string>("");
@@ -128,10 +132,10 @@ function Haulages() {
         { field: 'xxx', headerName: t('Actions'), renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box sx={{ my: 1, mr: 1 }}>
-                    <IconButton size="small" title={t('editRow')} sx={{ mr: 0.5 }} onClick={() => { setCurrentEditId(params.row.id); getHaulage(params.row.id); setModal2(true); }}>
+                    <IconButton size="small" title={t('editRowHaulage')} sx={{ mr: 0.5 }} onClick={() => { setCurrentEditId(params.row.id); getHaulage(params.row.id); setModal2(true); }}>
                         <EditIcon fontSize="small" />
                     </IconButton>
-                    <IconButton size="small" title={t('deleteRow')} onClick={() => { setCurrentId(params.row.id); setModal(true); }}>
+                    <IconButton size="small" title={t('deleteRowHaulage')} onClick={() => { setCurrentId(params.row.id); setModal(true); }}>
                         <DeleteIcon fontSize="small" />
                     </IconButton>
                 </Box>
@@ -140,10 +144,39 @@ function Haulages() {
     ];
     
     useEffect(() => {
+        getClients();
         getPorts();
         getHaulages();
         getContainers();
     }, []);
+    
+    const getClients = async () => {
+        if (context && account) {
+            const token = await instance.acquireTokenSilent({
+                scopes: crmRequest.scopes,
+                account: account
+            })
+            .then((response: AuthenticationResult) => {
+                return response.accessToken;
+            })
+            .catch(() => {
+                return instance.acquireTokenPopup({
+                    ...transportRequest,
+                    account: account
+                    }).then((response) => {
+                        return response.accessToken;
+                    });
+                }
+            );
+            
+            const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisClient.endPoint+"/Contact/GetContacts", token);
+            if (response !== null && response !== undefined) {
+                console.log(response);
+                // Removing duplicates from client array
+                setClients(response.filter((obj: any, index: number, self: any) => index === self.findIndex((o: any) => o.contactName === obj.contactName)));
+            }  
+        }
+    }
     
     const getPorts = async () => {
         if (context) {
@@ -354,10 +387,13 @@ function Haulages() {
                         <Button variant="contained" sx={actionButtonStyles} onClick={() => { setCurrentEditId(""); resetForm(); setModal2(true); }}>
                             {t('newHaulagePrice')} <AddCircleOutlinedIcon sx={{ ml: 0.5, pb: 0.25, justifyContent: "center", alignItems: "center" }} fontSize="small" />
                         </Button>
+                        <Button variant="contained" sx={actionButtonStyles} onClick={() => { setModal5(true); }}>
+                            {t('requestHaulagePrice')} <Mail sx={{ ml: 0.5, pb: 0.25, justifyContent: "center", alignItems: "center" }} fontSize="small" />
+                        </Button>
                     </Grid>
                     <Grid item xs={12} md={4} mt={1}>
                         <InputLabel htmlFor="company-name" sx={inputLabelStyles}>{t('haulier')}</InputLabel>
-                        <CompanySearch id="company-name" value={searchedHaulier} onChange={setSearchedHaulier} category={CategoryEnum.SUPPLIERS} callBack={() => console.log(searchedHaulier)} fullWidth />
+                        <CompanySearch id="company-name" value={searchedHaulier} onChange={setSearchedHaulier} category={CategoryEnum.CUSTOMERS} callBack={() => console.log(searchedHaulier)} fullWidth />
                     </Grid>
                     <Grid item xs={12} md={3} mt={1}>
                         <InputLabel htmlFor="loading-city-searched" sx={inputLabelStyles}>{t('loadingCity')}</InputLabel>
@@ -451,7 +487,7 @@ function Haulages() {
                 fullWidth
             >
                 <BootstrapDialogTitle id="custom-dialog-title" onClose={() => setModal(false)}>
-                    <b>{t('deleteRow')}</b>
+                    <b>{t('deleteRowHaulage')}</b>
                 </BootstrapDialogTitle>
                 <DialogContent dividers>{t('areYouSureDeleteRow')}</DialogContent>
                 <DialogActions>
@@ -467,7 +503,7 @@ function Haulages() {
                 fullWidth
             >
                 <BootstrapDialogTitle id="custom-dialog-title2" onClose={() => setModal2(false)}>
-                    <b>{currentEditId === "" ? t('createRow') : t('editRow')}</b>
+                    <b>{currentEditId === "" ? t('createRowHaulage') : t('editRowHaulage')}</b>
                 </BootstrapDialogTitle>
                 <DialogContent dividers>
                     {
@@ -606,6 +642,27 @@ function Haulages() {
                     <Button variant="contained" color={"primary"} onClick={() => { createUpdateHaulage(); }} sx={{ mr: 1.5, textTransform: "none" }}>{t('validate')}</Button>
                     <Button variant="contained" onClick={() => setModal2(false)} sx={buttonCloseStyles}>{t('close')}</Button>
                 </DialogActions>
+            </BootstrapDialog>
+
+            {/* Price request haulage  */}
+            <BootstrapDialog
+                onClose={() => setModal5(false)}
+                aria-labelledby="custom-dialog-title5"
+                open={modal5}
+                maxWidth="lg"
+                fullWidth
+            >
+                {
+                    clients !== null ?
+                    <RequestPriceHaulage
+                        token={tempToken} 
+                        companies={clients}
+                        ports={ports}
+                        loadingCity={null}
+                        loadingPort={null}
+                        closeModal={() => setModal5(false)}
+                    /> : <Skeleton />
+                }
             </BootstrapDialog>
         </div>
     );

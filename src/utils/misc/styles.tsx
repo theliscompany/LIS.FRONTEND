@@ -123,7 +123,8 @@ export const actionButtonStyles = {
   textTransform: "none",
   alignItems: "flex-end", 
   justifyContent: "flex-end",
-  float: "right"
+  float: "right",
+  marginLeft: "8px"
 }
 
 export const gridStyles = { 

@@ -34,7 +34,7 @@ function RequestPriceHaulage(props: any) {
     const [loadingCity, setLoadingCity] = useState<any>(props.loadingCity);
     const [deliveryPort, setDeliveryPort] = useState<any>(props.loadingPort);
     
-    const [hauliersData, setHauliersData] = useState<any>([]);
+    const [hauliersData, setHauliersData] = useState<any>(props.companies);
     
     const [mailLanguage, setMailLanguage] = useState<string>("fr");
     const [load, setLoad] = useState<boolean>(false);
@@ -52,7 +52,7 @@ function RequestPriceHaulage(props: any) {
         form.append('From', from);
         form.append('To', to);
         form.append('Subject', subject);
-        // form.append('HtmlContent', htmlContent);
+        form.append('HtmlContent', htmlContent);
         // if (fileValue !== undefined) {
         //     for (var i=0; i < fileValue.length; i++) {
         //         form.append('Attachments', fileValue[i]);
@@ -70,7 +70,8 @@ function RequestPriceHaulage(props: any) {
         .then((response) => response.json())
         .then((response: any) => {
             if (response !== undefined && response !== null && response.code == 200) {
-                enqueueSnackbar(t('messageSuccessSent'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                // enqueueSnackbar(t('messageSuccessSent'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                enqueueSnackbar(t('mailSentTo')+to, { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
             }
             else {
                 enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
@@ -100,8 +101,8 @@ function RequestPriceHaulage(props: any) {
             `;
             for (var i=0; i < selectedMails.length; i++) {
                 console.log("Mail sent to : "+selectedMails[i]);
-                enqueueSnackbar(t('mailSentTo')+selectedMails[i], { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
-                // postEmail("pricing@omnifreight.eu", selectedMails.join(','), subject, rteRef.current?.editor?.getHTML() + footer);    
+                // enqueueSnackbar(t('mailSentTo')+selectedMails[i], { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                postEmail("pricing@omnifreight.eu", selectedMails.join(','), subject, rteRef.current?.editor?.getHTML() + footer);    
             }
         }
         else {
@@ -135,14 +136,18 @@ function RequestPriceHaulage(props: any) {
     const searchHaulages = async () => {
         if (context) {
             setLoad(true);
-            setHauliersData([]);
+            // setHauliersData([]);
             var requestFormatted = createGetRequestUrl(loadingCity?.portId, deliveryPort?.portId);
             const response = await (context as BackendService<any>).getWithToken(requestFormatted, props.token);
             if (response !== null && response !== undefined) {
                 var aux = getAllHauliers(response);
                 console.log(response.length !== 0 ? aux : "None");
                 
-                setHauliersData(props.companies.filter((obj: any) => aux.includes(obj.contactName) && obj.email !== "" && obj.email !== null));
+                if (aux.length !== 0) {
+                    setRecipients(props.companies.filter((obj: any) => aux.includes(obj.contactName) && obj.email !== "" && obj.email !== null));
+                }
+                // setHauliersData(props.companies.filter((obj: any) => aux.includes(obj.contactName) && obj.email !== "" && obj.email !== null));
+                // setHauliersData(props.companies);
                 setLoad(false);
             }
             else {
@@ -165,19 +170,19 @@ function RequestPriceHaulage(props: any) {
             <p>Jeffry COOLS</p>
             </div>`);
         }
-        else {
-            rteRef.current?.editor?.commands.setContent(
-            `<div>
-            <p>Good afternoon,</p>
-            <p>Kindly revert to us asap with your best quote for trucking 20' and 40'HC containers as follows :</p>
-            <p>Empty pickup depot : ${emptyPickupDepot !== "" ? emptyPickupDepot.toUpperCase() : ""}</p>
-            <p>Loading city : ${loadingCity !== null ? loadingCity.city.toUpperCase() : ""}</p>
-            <p>Port of delivery : ${deliveryPort !== null ? deliveryPort.portName : ""}</p>
-            <p></p>
-            <p>Thanks/regards</p>
-            <p>Jeffry COOLS</p>
-            </div>`);
-        }
+        // else {
+        //     rteRef.current?.editor?.commands.setContent(
+        //     `<div>
+        //     <p>Good afternoon,</p>
+        //     <p>Kindly revert to us asap with your best quote for trucking 20' and 40'HC containers as follows :</p>
+        //     <p>Empty pickup depot : ${emptyPickupDepot !== "" ? emptyPickupDepot.toUpperCase() : ""}</p>
+        //     <p>Loading city : ${loadingCity !== null ? loadingCity.city.toUpperCase() : ""}</p>
+        //     <p>Port of delivery : ${deliveryPort !== null ? deliveryPort.portName : ""}</p>
+        //     <p></p>
+        //     <p>Thanks/regards</p>
+        //     <p>Jeffry COOLS</p>
+        //     </div>`);
+        // }
     }
 
     useEffect(() => {
@@ -297,19 +302,19 @@ function RequestPriceHaulage(props: any) {
                                             <p>Jeffry COOLS</p>
                                             </div>`);
                                         }
-                                        else {
-                                            rteRef.current?.editor?.commands.setContent(
-                                            `<div>
-                                            <p>Good afternoon,</p>
-                                            <p>Kindly revert to us asap with your best quote for trucking 20' and 40'HC containers as follows :</p>
-                                            <p>Empty pickup depot : ${emptyPickupDepot !== "" ? emptyPickupDepot.toUpperCase() : ""}</p>
-                                            <p>Loading city : ${loadingCity !== null ? loadingCity.city.toUpperCase() : ""}</p>
-                                            <p>Port of delivery : ${deliveryPort !== null ? deliveryPort.portName : ""}</p>
-                                            <p></p>
-                                            <p>Thanks/regards</p>
-                                            <p>Jeffry COOLS</p>
-                                            </div>`);
-                                        }
+                                        // else {
+                                        //     rteRef.current?.editor?.commands.setContent(
+                                        //     `<div>
+                                        //     <p>Good afternoon,</p>
+                                        //     <p>Kindly revert to us asap with your best quote for trucking 20' and 40'HC containers as follows :</p>
+                                        //     <p>Empty pickup depot : ${emptyPickupDepot !== "" ? emptyPickupDepot.toUpperCase() : ""}</p>
+                                        //     <p>Loading city : ${loadingCity !== null ? loadingCity.city.toUpperCase() : ""}</p>
+                                        //     <p>Port of delivery : ${deliveryPort !== null ? deliveryPort.portName : ""}</p>
+                                        //     <p></p>
+                                        //     <p>Thanks/regards</p>
+                                        //     <p>Jeffry COOLS</p>
+                                        //     </div>`);
+                                        // }
                                     }}
                                     aria-label="Platform"
                                     fullWidth

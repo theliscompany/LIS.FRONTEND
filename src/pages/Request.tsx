@@ -546,6 +546,9 @@ function Request() {
             // it should never occur unless someone's actively trying to break something.
             throw new Error("You can't skip a step that isn't optional.");
         }
+        if (activeStep === 0) {
+            getHaulagePriceOffers();
+        }
 
         setActiveStep((prevActiveStep) => prevActiveStep + 1);
         setSkipped((prevSkipped) => {

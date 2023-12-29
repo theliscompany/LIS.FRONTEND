@@ -49,7 +49,7 @@ function RequestPriceRequest(props: any) {
     const [quantity, setQuantity] = useState<number>(1);
     const [containersSelection, setContainersSelection] = useState<any>(props.containersSelection);
 
-    const [carriersData, setCarriersData] = useState<any>([]);
+    const [carriersData, setCarriersData] = useState<any>(props.companies);
     
     const [mailLanguage, setMailLanguage] = useState<string>("fr");
     const [load, setLoad] = useState<boolean>(false);
@@ -68,7 +68,7 @@ function RequestPriceRequest(props: any) {
         form.append('From', from);
         form.append('To', to);
         form.append('Subject', subject);
-        // form.append('HtmlContent', htmlContent);
+        form.append('HtmlContent', htmlContent);
         // if (fileValue !== undefined) {
         //     for (var i=0; i < fileValue.length; i++) {
         //         form.append('Attachments', fileValue[i]);
@@ -117,7 +117,7 @@ function RequestPriceRequest(props: any) {
             for (var i=0; i < selectedMails.length; i++) {
                 console.log("Mail sent to : "+selectedMails[i]);
                 enqueueSnackbar(t('mailSentTo')+selectedMails[i], { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
-                // postEmail("pricing@omnifreight.eu", selectedMails.join(','), subject, rteRef.current?.editor?.getHTML() + footer);    
+                postEmail("pricing@omnifreight.eu", selectedMails.join(','), subject, rteRef.current?.editor?.getHTML() + footer);    
             }
         }
         else {
@@ -151,14 +151,18 @@ function RequestPriceRequest(props: any) {
     const searchSeafreights = async () => {
         if (context) {
             setLoad(true);
-            setCarriersData([]);
+            // setCarriersData([]);
             var requestFormatted = createGetRequestUrl(portLoading?.portId, portDischarge?.portId);
             const response = await (context as BackendService<any>).getWithToken(requestFormatted, props.token);
             if (response !== null && response !== undefined) {
                 var aux = getAllCarriers(response);
                 console.log(response.length !== 0 ? aux : "None");
                 
-                setCarriersData(props.companies.filter((obj: any) => aux.includes(obj.contactName) && obj.email !== "" && obj.email !== null));
+                if (aux.length !== 0) {
+                    setRecipients(props.companies.filter((obj: any) => aux.includes(obj.contactName) && obj.email !== "" && obj.email !== null));
+                }
+                // setCarriersData(props.companies.filter((obj: any) => aux.includes(obj.contactName) && obj.email !== "" && obj.email !== null));
+                // setCarriersData(props.companies);
                 setLoad(false);
             }
             else {

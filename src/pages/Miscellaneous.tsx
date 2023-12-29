@@ -111,10 +111,10 @@ function Miscellaneous() {
         { field: 'xxx', headerName: t('Actions'), renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box sx={{ my: 1, mr: 1 }}>
-                    <IconButton size="small" title={t('editRow')} sx={{ mr: 0.5 }} onClick={() => { setCurrentEditId(params.row.miscellaneousId); getMiscellaneous(params.row.miscellaneousId); setModal2(true); }}>
+                    <IconButton size="small" title={t('editRowMisc')} sx={{ mr: 0.5 }} onClick={() => { setCurrentEditId(params.row.miscellaneousId); getMiscellaneous(params.row.miscellaneousId); setModal2(true); }}>
                         <EditIcon fontSize="small" />
                     </IconButton>
-                    <IconButton size="small" title={t('deleteRow')} onClick={() => { setCurrentId(params.row.miscellaneousId); setModal(true); }}>
+                    <IconButton size="small" title={t('deleteRowMisc')} onClick={() => { setCurrentId(params.row.miscellaneousId); setModal(true); }}>
                         <DeleteIcon fontSize="small" />
                     </IconButton>
                 </Box>
@@ -553,7 +553,7 @@ function Miscellaneous() {
                 fullWidth
             >
                 <BootstrapDialogTitle id="custom-dialog-title" onClose={() => setModal(false)}>
-                    <b>{t('deleteRow')}</b>
+                    <b>{t('deleteRowMisc')}</b>
                 </BootstrapDialogTitle>
                 <DialogContent dividers>{t('areYouSureDeleteRow')}</DialogContent>
                 <DialogActions>
@@ -569,7 +569,7 @@ function Miscellaneous() {
                 fullWidth
             >
                 <BootstrapDialogTitle id="custom-dialog-title2" onClose={() => setModal2(false)}>
-                    <b>{currentEditId === "" ? t('createRow') : t('editRow')}</b>
+                    <b>{currentEditId === "" ? t('createRowMisc') : t('editRowMisc')}</b>
                 </BootstrapDialogTitle>
                 <DialogContent dividers>
                     {

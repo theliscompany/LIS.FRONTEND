@@ -330,6 +330,7 @@ function throwException(message: string, status: number, response: string, heade
 export interface FileResponse {
     data: Blob;
     status: number;
+    code?: number;
     fileName?: string;
     headers?: { [name: string]: any };
 }
