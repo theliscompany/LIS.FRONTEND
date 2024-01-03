@@ -382,4 +382,5 @@ export const fr = {
   deleteRowMisc: "Supprimer prix de service divers",
   editRowMisc: "Modifier prix de service divers",
   createRowMisc: "Ajouter prix de service divers",
+  selectedTemplate: "Choisir un modèle"
 };

@@ -37,10 +37,12 @@ function displayContainers(value: any) {
     return '<ul>'+aux+'</ul>';
 }
 
+const defaultTemplate = "658e880927587b09811c13cb";
+
 function RequestPriceRequest(props: any) {
-    const [subject, setSubject] = useState<string>(props.portLoading !== null && props.portDischarge !== null ? props.portLoading.portName+" - "+props.portDischarge.portName+" / RATE REQUEST" : "");
+    const [subject, setSubject] = useState<string>(props.portLoading !== null && props.portDischarge !== null ? props.portLoading.portName+","+props.portLoading.country+" - "+props.portDischarge.portName+","+props.portDischarge.country+" / RATE REQUEST" : "");
     const [recipients, setRecipients] = useState<any>([]);
-    const [commodities, setCommodities] = useState<MuiChipsInputChip[]>(props.commodities);
+    const [commoditiesArr, setCommoditiesArr] = useState<MuiChipsInputChip[]>(props.commodities);
     const [portLoading, setPortLoading] = useState<any>(props.portLoading);
     const [portDischarge, setPortDischarge] = useState<any>(props.portDischarge);
     const [estimatedTimeDeparture, setEstimatedTimeDeparture] = useState<Dayjs | null>(null);
@@ -51,8 +53,16 @@ function RequestPriceRequest(props: any) {
 
     const [carriersData, setCarriersData] = useState<any>(props.companies);
     
+    const [content, setContent] = useState<string>("");
+    const [templateBase, setTemplateBase] = useState<string>("");
+
+    const [templates, setTemplates] = useState<any>([]);
+    const [loadTemplates, setLoadTemplates] = useState<boolean>(false);
+    const [selectedTemplate, setSelectedTemplate] = useState<string>(defaultTemplate);
+    
     const [mailLanguage, setMailLanguage] = useState<string>("fr");
     const [load, setLoad] = useState<boolean>(false);
+    const [loadTemplate, setLoadTemplate] = useState<boolean>(false);
 
     const rteRef = useRef<RichTextEditorRef>(null);
     
@@ -101,13 +111,14 @@ function RequestPriceRequest(props: any) {
             console.log(selectedMails);
 
             var footer = `
-            <div style="font-family: Verdana; padding-top: 60px;">
+            <div style="font-family: Verdana; padding-top: 35px;">
+                <div>${account?.name}</div>
                 <div style="margin-top: 5px;"><a target="_blank" href="www.omnifreight.eu">www.omnifreight.eu</a></div>
                 <div style="padding-bottom: 10px;"><a target="_blank" href="http://www.facebook.com/omnifreight">http://www.facebook.com/omnifreight</a></div>
                 <div>Italiëlei 211</div>
                 <div>2000 Antwerpen</div>
                 <div>Belgium</div>
-                <div>E-mail: transport@omnifreight.eu</div>
+                <div>E-mail: ${account?.username}</div>
                 <div>Tel +32.3.295.38.82</div>
                 <div>Fax +32.3.295.38.77</div>
                 <div>Whatsapp +32.494.40.24.25</div>
@@ -116,8 +127,8 @@ function RequestPriceRequest(props: any) {
             `;
             for (var i=0; i < selectedMails.length; i++) {
                 console.log("Mail sent to : "+selectedMails[i]);
-                enqueueSnackbar(t('mailSentTo')+selectedMails[i], { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
-                postEmail("pricing@omnifreight.eu", selectedMails.join(','), subject, rteRef.current?.editor?.getHTML() + footer);    
+                // enqueueSnackbar(t('mailSentTo')+selectedMails[i], { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                postEmail("pricing@omnifreight.eu", selectedMails.join(','), subject, "<div style='font-family: Verdana;'>"+rteRef.current?.editor?.getHTML()+"</div>");    
             }
         }
         else {
@@ -171,45 +182,61 @@ function RequestPriceRequest(props: any) {
         }
     }
 
-    const resetEditor = () => {
-        if (mailLanguage === "fr") {
-            rteRef.current?.editor?.commands.setContent(
-            `<div>
-            <p>Bonjour,</p>
-            <p>Veuillez revenir avec votre meilleure offre pour l'expédition suivante :</p>
-            <p>Port de chargement : ${portLoading !== null ? portLoading.portName : ""}</p>
-            <p>Port de déchargement : ${portDischarge !== null ? portDischarge.portName : ""}</p>
-            <p>Type et quantité d'emballage : ${displayContainers(containersSelection)}</p>
-            <p>Commodités : ${commodities.map((elm: any) => elm.productName).join(', ')}</p>
-            <p>Date prévue de départ : ${estimatedTimeDeparture !== null ? estimatedTimeDeparture.toDate().toLocaleDateString().slice(0,10) : ""}</p>
-            <p></p>
-            <p>Cordialement</p>
-            <p>Jeffry COOLS</p>
-            </div>`);
-        }
-        else {
-            rteRef.current?.editor?.commands.setContent(
-            `<div>
-            <p>Good afternoon,</p>
-            <p>Please revert with your best offer for following shipment :</p>
-            <p>Port of loading : ${portLoading !== null ? portLoading.portName : ""}</p>
-            <p>Port of discharge : ${portDischarge !== null ? portDischarge.portName : ""}</p>
-            <p>Packing type and quantity : ${displayContainers(containersSelection)}</p>
-            <p>Commodities : ${commodities.map((elm: any) => elm.productName).join(',')}</p>
-            <p>ETD : ${estimatedTimeDeparture !== null ? estimatedTimeDeparture.toDate().toLocaleDateString().slice(0,10) : ""}</p>
-            <p></p>
-            <p>Thanks/regards</p>
-            <p>Jeffry COOLS</p>
-            </div>`);
+    const getTemplates = async () => {
+        if (context && account) {
+            const response = await (context as BackendService<any>).getSingle(protectedResources.apiLisTemplate.endPoint+"/Template");
+            if (response !== null && response.data !== undefined) {
+                setTemplates(response.data);
+                console.log(response);
+                setLoadTemplates(false);
+            }
+            else {
+                setLoadTemplates(false);
+            }
+            console.log(response);
         }
     }
+    
+    const getTemplate = async (id: string) => {
+        setLoadTemplate(true)
+        if (context) {
+            const response = await (context as BackendService<any>).getSingle(protectedResources.apiLisTemplate.endPoint+"/Template/"+id);
+            if (response !== null && response !== undefined) {
+                setTemplateBase(response.data.content);
+                setLoadTemplate(false);
+            }
+            else {
+                setLoadTemplate(false);
+            }
+            console.log(response);
+        }
+    }
+    
+    // Fonction pour remplacer les variables dans le template
+    function generateEmailContent(template: string, variables: any) {
+        return template.replace(/\{\{(.*?)\}\}/g, (_, variableName: any) => variables[variableName.trim()] || '');
+    }
+    
+    useEffect(() => {
+        getTemplate(selectedTemplate);
+    }, [selectedTemplate]);
 
     useEffect(() => {
-        resetEditor();
-    }, [commodities, portLoading, portDischarge, containersSelection, estimatedTimeDeparture]);
+        // setLoadingCity(loadingCityObj !== null ? loadingCityObj.city.toUpperCase() : "");
+        var departurePort = portLoading !== null ? portLoading.portName : "";
+        var destinationPort = portDischarge !== null ? portDischarge.portName : "";
+        var commodities:any = commoditiesArr.map((elm: any) => elm.productName).join(',');
+        var etd = estimatedTimeDeparture !== null ? estimatedTimeDeparture.toDate().toLocaleDateString().slice(0,10) : "";
+        var containersQuantities = displayContainers(containersSelection);
+
+        const variables = { departurePort, destinationPort, commodities, etd, containersQuantities };
+        rteRef.current?.editor?.commands.setContent(generateEmailContent(templateBase, variables));
+        // resetEditor();
+    }, [commoditiesArr, portLoading, portDischarge, containersSelection, estimatedTimeDeparture]);
 
     useEffect(() => {
         searchSeafreights();
+        getTemplates();
     }, [portLoading]);
 
     return (
@@ -270,10 +297,10 @@ function RequestPriceRequest(props: any) {
                                             }
                                             return ""; 
                                         }}
-                                        value={commodities}
+                                        value={commoditiesArr}
                                         sx={{ mt: 1 }}
                                         renderInput={(params: any) => <TextField {...params} sx={{ textTransform: "lowercase" }} />}
-                                        onChange={(e: any, value: any) => { setCommodities(value); }}
+                                        onChange={(e: any, value: any) => { setCommoditiesArr(value); }}
                                         fullWidth
                                     /> : <Skeleton />
                                 }
@@ -307,10 +334,10 @@ function RequestPriceRequest(props: any) {
                                             setPortLoading(value); 
                                             if (portDischarge !== null && portDischarge !== undefined) {
                                                 if (value !== null && value !== undefined) {
-                                                    setSubject(value.portName+" - "+portDischarge.portName+" / RATE REQUEST"); 
+                                                    setSubject(value.portName+","+value.country+" - "+portDischarge.portName+","+portDischarge.country+" / RATE REQUEST"); 
                                                 }
                                                 else {
-                                                    setSubject(" - "+portDischarge.portName+" / RATE REQUEST"); 
+                                                    setSubject(" - "+portDischarge.portName+","+portDischarge.country+" / RATE REQUEST"); 
                                                 }
                                             }
                                             else {
@@ -350,10 +377,10 @@ function RequestPriceRequest(props: any) {
                                             setPortDischarge(value);
                                             if (portLoading !== null && portLoading !== undefined) {
                                                 if (value !== null && value !== undefined) {
-                                                    setSubject(portLoading.portName+" - "+value.portName+" / RATE REQUEST");  
+                                                    setSubject(portLoading.portName+","+portLoading.country+" - "+value.portName+","+value.country+" / RATE REQUEST");  
                                                 }
                                                 else {
-                                                    setSubject(portLoading.portName+" - "+" / RATE REQUEST");  
+                                                    setSubject(portLoading.portName+","+portLoading.country+" - "+" / RATE REQUEST");  
                                                 }
                                             }
                                             else {
@@ -447,7 +474,26 @@ function RequestPriceRequest(props: any) {
                     </Grid>
                     <Grid item xs={12} md={6} mt={0.5}>
                         <Grid container>
-                            <Grid item xs={12}>
+                        <Grid item xs={12}>
+                                <InputLabel htmlFor="selectedTemplate" sx={inputLabelStyles}>{t('selectedTemplate')}</InputLabel>
+                                {
+                                    loadTemplates !== true ?
+                                    <NativeSelect
+                                        id="selectedTemplate"
+                                        value={selectedTemplate}
+                                        onChange={(e: any) => { setSelectedTemplate(e.target.value); }}
+                                        input={<BootstrapInput />}
+                                        fullWidth
+                                    >
+                                        {templates.map((elm: any, i: number) => (
+                                            <option key={"templateElm-"+i} value={elm.id}>{elm.name}</option>
+                                        ))}
+                                    </NativeSelect>
+                                    : <Skeleton />
+                                }
+                            </Grid>
+
+                            {/* <Grid item xs={12}>
                                 <InputLabel htmlFor="mailLanguage" sx={inputLabelStyles}>{t('mailLanguage')}</InputLabel>
                                 <ToggleButtonGroup
                                     color="primary"
@@ -457,34 +503,10 @@ function RequestPriceRequest(props: any) {
                                     onChange={(event: React.MouseEvent<HTMLElement>, newValue: string,) => { 
                                         setMailLanguage(newValue); 
                                         if (newValue === "fr") {
-                                            rteRef.current?.editor?.commands.setContent(
-                                            `<div>
-                                            <p>Bonjour,</p>
-                                            <p>Veuillez revenir avec votre meilleure offre pour l'expédition suivante :</p>
-                                            <p>Port de chargement : ${portLoading !== null ? portLoading.portName : ""}</p>
-                                            <p>Port de déchargement : ${portDischarge !== null ? portDischarge.portName : ""}</p>
-                                            <p>Type et quantité d'emballage : ${displayContainers(containersSelection)}</p>
-                                            <p>Commodités : ${commodities.map((elm: any) => elm.productName).join(',')}</p>
-                                            <p>Date prévue de départ : ${estimatedTimeDeparture !== null ? estimatedTimeDeparture.toDate().toLocaleDateString().slice(0,10) : ""}</p>
-                                            <p></p>
-                                            <p>Cordialement</p>
-                                            <p>Jeffry COOLS</p>
-                                            </div>`);
+                                            rteRef.current?.editor?.commands.setContent(templateBase);
                                         }
                                         else {
-                                            rteRef.current?.editor?.commands.setContent(
-                                            `<div>
-                                            <p>Good afternoon,</p>
-                                            <p>Please revert with your best offer for following shipment :</p>
-                                            <p>Port of loading : ${portLoading !== null ? portLoading.portName : ""}</p>
-                                            <p>Port of discharge : ${portDischarge !== null ? portDischarge.portName : ""}</p>
-                                            <p>Packing type and quantity : ${displayContainers(containersSelection)}</p>
-                                            <p>Commodities : ${commodities.map((elm: any) => elm.productName).join(',')}</p>
-                                            <p>ETD : ${estimatedTimeDeparture !== null ? estimatedTimeDeparture.toDate().toLocaleDateString().slice(0,10) : ""}</p>
-                                            <p></p>
-                                            <p>Thanks/regards</p>
-                                            <p>Jeffry COOLS</p>
-                                            </div>`);
+                                            rteRef.current?.editor?.commands.setContent(templateBaseEn);
                                         }
                                     }}
                                     aria-label="Platform"
@@ -494,44 +516,35 @@ function RequestPriceRequest(props: any) {
                                     <ToggleButton value="fr"><img src="/assets/img/flags/flag-fr.png" style={{ width: "12px", marginRight: "6px" }} alt="flag english" /> Français</ToggleButton>
                                     <ToggleButton value="en"><img src="/assets/img/flags/flag-en.png" style={{ width: "12px", marginRight: "6px" }} alt="flag english" /> English</ToggleButton>
                                 </ToggleButtonGroup>
-                            </Grid>
+                            </Grid> */}
                             <Grid item xs={12} mt={1.5}>
                                 <InputLabel htmlFor="details" sx={inputLabelStyles}>{t('detailsOffer')}</InputLabel>
                                 <Box sx={{ mt: 1 }}>
-                                    <RichTextEditor
-                                        ref={rteRef}
-                                        extensions={[StarterKit]}
-                                        content={
-                                            `<div>
-                                            <p>Bonjour,</p>
-                                            <p>Veuillez revenir avec votre meilleure offre pour l'expédition suivante :</p>
-                                            <p>Port de chargement : ${portLoading !== null ? portLoading.portName : ""}</p>
-                                            <p>Port de déchargement : ${portDischarge !== null ? portDischarge.portName : ""}</p>
-                                            <p>Type et quantité d'emballage : ${displayContainers(containersSelection)}</p>
-                                            <p>Commodités : ${commodities.map((elm: any) => elm.productName).join(',')}</p>
-                                            <p>Date prévue de départ : ${estimatedTimeDeparture !== null ? estimatedTimeDeparture.toDate().toLocaleDateString().slice(0,10) : ""}</p>
-                                            <p></p>
-                                            <p>Cordialement</p>
-                                            <p>Jeffry COOLS</p>
-                                            </div>`
-                                        }
-                                        renderControls={() => (
-                                        <MenuControlsContainer>
-                                            <MenuSelectHeading />
-                                            <MenuDivider />
-                                            <MenuButtonBold />
-.                                            <MenuButtonItalic />
-                                            <MenuButtonStrikethrough />
-                                            <MenuButtonOrderedList />
-                                            <MenuButtonBulletedList />
-                                            <MenuSelectTextAlign />
-                                            <MenuButtonEditLink />
-                                            <MenuButtonHorizontalRule />
-                                            <MenuButtonUndo />
-                                            <MenuButtonRedo />
-                                        </MenuControlsContainer>
-                                        )}
-                                    />
+                                    {
+                                        loadTemplate !== true ?
+                                        <RichTextEditor
+                                            ref={rteRef}
+                                            extensions={[StarterKit]}
+                                            content={templateBase}
+                                            renderControls={() => (
+                                            <MenuControlsContainer>
+                                                <MenuSelectHeading />
+                                                <MenuDivider />
+                                                <MenuButtonBold />
+    .                                            <MenuButtonItalic />
+                                                <MenuButtonStrikethrough />
+                                                <MenuButtonOrderedList />
+                                                <MenuButtonBulletedList />
+                                                <MenuSelectTextAlign />
+                                                <MenuButtonEditLink />
+                                                <MenuButtonHorizontalRule />
+                                                <MenuButtonUndo />
+                                                <MenuButtonRedo />
+                                            </MenuControlsContainer>
+                                            )}
+                                        />
+                                        : <Skeleton />
+                                    }
                                 </Box>
                             </Grid>
                         </Grid>

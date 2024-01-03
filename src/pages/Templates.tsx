@@ -43,6 +43,7 @@ const variableOptions = [
     { label: t('loadingCity'), value: "loadingCity" },
     { label: t('departurePort'), value: "departurePort" },
     { label: t('destinationPort'), value: "destinationPort" },
+    { label: t('emptyPickupDepot'), value: "emptyPickupDepot" },
     { label: t('commodities'), value: "commodities" },
     { label: t('etd'), value: "etd" },
     { label: t('frequency'), value: "frequency" },
@@ -168,20 +169,6 @@ function Templates() {
             }
             console.log(response);
         }
-        
-        // if (context) {
-        //     const response = await (context as BackendService<any>).get(protectedResources.apiLisTemplate.endPoint+"/SeaFreight/GetSeaFreights");
-        //     console.log(response);
-        //     if (response !== null && response !== undefined) {
-        //         setTemplates(response);
-        //         // setTemplates([]);
-        //         setLoad(false);
-        //     }
-        //     else {
-        //         setLoad(false);
-        //     }
-        //     console.log(response);
-        // }
     }
     
     const resetForm = () => {
@@ -437,8 +424,9 @@ function Templates() {
                                     <Grid item xs={12} md={12} mt={1}>
                                         <InputLabel htmlFor="variables" sx={inputLabelStyles}>{t('variables')}</InputLabel>
                                         {
-                                            variableOptions.map((elm) => (
+                                            variableOptions.map((elm: any, i: number) => (
                                                 <Chip 
+                                                    key={'ChipI'+i}
                                                     label={elm.label} 
                                                     variant='outlined' 
                                                     onClick={() => { 
