@@ -197,11 +197,6 @@ function RequestPriceHaulage(props: any) {
         }
     }
     
-    // Fonction pour remplacer les variables dans le template
-    // function generateEmailContent(template: string, variables: any) {
-    //     return template.replace(/\{\{(.*?)\}\}/g, (_, variableName: any) => variables[variableName.trim()]);
-    // }
-
     function generateEmailContent(template: string, variables: any) {
         return template.replace(/\{\{(.*?)\}\}/g, (_, variableName: any) => {
             const trimmedName = variableName.trim();
