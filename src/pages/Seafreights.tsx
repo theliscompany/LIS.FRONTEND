@@ -802,18 +802,21 @@ function Seafreights() {
                 maxWidth="lg"
                 fullWidth
             >
-                <RequestPriceRequest 
-                    token={tempToken} 
-                    products={products} 
-                    commodities={[]}
-                    companies={clients}
-                    ports={ports}
-                    portLoading={null}
-                    portDischarge={null} 
-                    containers={containers} 
-                    containersSelection={[]}
-                    closeModal={() => setModal6(false)} 
-                />
+                {
+                    clients !== null && products !== null ?
+                    <RequestPriceRequest 
+                        token={tempToken} 
+                        products={products} 
+                        commodities={[]}
+                        companies={clients}
+                        ports={ports}
+                        portLoading={null}
+                        portDischarge={null} 
+                        containers={containers} 
+                        containersSelection={[]}
+                        closeModal={() => setModal6(false)} 
+                    /> : <Skeleton />
+                }
             </BootstrapDialog>
         </div>
     );

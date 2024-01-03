@@ -382,4 +382,5 @@ export const en = {
   deleteRowMisc: "Delete miscellaneous price",
   editRowMisc: "Edit miscellaneous price",
   createRowMisc: "Add miscellaneous price",
+  selectedTemplate: "Select a template"
 };

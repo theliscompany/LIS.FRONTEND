@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { BootstrapDialogTitle, BootstrapInput, buttonCloseStyles, inputLabelStyles } from '../../utils/misc/styles';
-import { Autocomplete, Box, Button, DialogActions, DialogContent, Grid, InputLabel, Skeleton, TextField, ToggleButton, ToggleButtonGroup } from '@mui/material';
+import { Autocomplete, Box, Button, DialogActions, DialogContent, Grid, InputLabel, NativeSelect, Skeleton, TextField, ToggleButton, ToggleButtonGroup } from '@mui/material';
 import { useAuthorizedBackendApi } from '../../api/api';
 import { useTranslation } from 'react-i18next';
 import { enqueueSnackbar } from 'notistack';
@@ -27,17 +27,27 @@ function createGetRequestUrl(variable1: number, variable2: number) {
     return url;
 }
 
+const defaultTemplate = "658e7e0d27587b09811c13ca";
+
 function RequestPriceHaulage(props: any) {
-    const [subject, setSubject] = useState<string>("Rate request haulage");
+    const [subject, setSubject] = useState<string>(props.loadingCity !== null ? props.loadingCity.city.toUpperCase()+","+props.loadingCity.country.toUpperCase()+" / RATE REQUEST HAULAGE" : "");
     const [recipients, setRecipients] = useState<any>([]);
     const [emptyPickupDepot, setEmptyPickupDepot] = useState<string>("");
-    const [loadingCity, setLoadingCity] = useState<any>(props.loadingCity);
+    const [loadingCityObj, setLoadingCityObj] = useState<any>(props.loadingCity);
+    // const [loadingCity, setLoadingCity] = useState<string>("");
     const [deliveryPort, setDeliveryPort] = useState<any>(props.loadingPort);
     
     const [hauliersData, setHauliersData] = useState<any>(props.companies);
+    const [content, setContent] = useState<string>("");
+    const [templateBase, setTemplateBase] = useState<string>("");
+    
+    const [templates, setTemplates] = useState<any>([]);
+    const [loadTemplates, setLoadTemplates] = useState<boolean>(false);
+    const [selectedTemplate, setSelectedTemplate] = useState<string>(defaultTemplate);
     
     const [mailLanguage, setMailLanguage] = useState<string>("fr");
     const [load, setLoad] = useState<boolean>(false);
+    const [loadTemplate, setLoadTemplate] = useState<boolean>(false);
 
     const rteRef = useRef<RichTextEditorRef>(null);
     
@@ -86,13 +96,14 @@ function RequestPriceHaulage(props: any) {
             console.log(selectedMails);
 
             var footer = `
-            <div style="font-family: Verdana; padding-top: 60px;">
+            <div style="font-family: Verdana; padding-top: 35px;">
+                <div>${account?.name}</div>
                 <div style="margin-top: 5px;"><a target="_blank" href="www.omnifreight.eu">www.omnifreight.eu</a></div>
                 <div style="padding-bottom: 10px;"><a target="_blank" href="http://www.facebook.com/omnifreight">http://www.facebook.com/omnifreight</a></div>
                 <div>Italiëlei 211</div>
                 <div>2000 Antwerpen</div>
                 <div>Belgium</div>
-                <div>E-mail: transport@omnifreight.eu</div>
+                <div>E-mail: ${account?.username}</div>
                 <div>Tel +32.3.295.38.82</div>
                 <div>Fax +32.3.295.38.77</div>
                 <div>Whatsapp +32.494.40.24.25</div>
@@ -102,7 +113,7 @@ function RequestPriceHaulage(props: any) {
             for (var i=0; i < selectedMails.length; i++) {
                 console.log("Mail sent to : "+selectedMails[i]);
                 // enqueueSnackbar(t('mailSentTo')+selectedMails[i], { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
-                postEmail("pricing@omnifreight.eu", selectedMails.join(','), subject, rteRef.current?.editor?.getHTML() + footer);    
+                postEmail("pricing@omnifreight.eu", selectedMails.join(','), subject, "<div style='font-family: Verdana;'>"+rteRef.current?.editor?.getHTML()+"</div>"+footer);    
             }
         }
         else {
@@ -137,7 +148,7 @@ function RequestPriceHaulage(props: any) {
         if (context) {
             setLoad(true);
             // setHauliersData([]);
-            var requestFormatted = createGetRequestUrl(loadingCity?.portId, deliveryPort?.portId);
+            var requestFormatted = createGetRequestUrl(loadingCityObj?.portId, deliveryPort?.portId);
             const response = await (context as BackendService<any>).getWithToken(requestFormatted, props.token);
             if (response !== null && response !== undefined) {
                 var aux = getAllHauliers(response);
@@ -156,41 +167,85 @@ function RequestPriceHaulage(props: any) {
         }
     }
 
-    const resetEditor = () => {
-        if (mailLanguage === "fr") {
-            rteRef.current?.editor?.commands.setContent(
-            `<div>
-            <p>Bonjour,</p>
-            <p>Veuillez nous contacter dès que possible avec votre meilleur devis pour le transport routier de conteneurs 20' et 40'HC comme suit :</p>
-            <p>Lieu de ramassage à vide : ${emptyPickupDepot !== "" ? emptyPickupDepot.toUpperCase() : ""}</p>
-            <p>Ville de chargement : ${loadingCity !== null ? loadingCity.city.toUpperCase() : ""}</p>
-            <p>Port de réception : ${deliveryPort !== null ? deliveryPort.portName : ""}</p>
-            <p></p>
-            <p>Cordialement,</p>
-            <p>Jeffry COOLS</p>
-            </div>`);
+    const getTemplates = async () => {
+        if (context && account) {
+            const response = await (context as BackendService<any>).getSingle(protectedResources.apiLisTemplate.endPoint+"/Template");
+            if (response !== null && response.data !== undefined) {
+                setTemplates(response.data);
+                console.log(response);
+                setLoadTemplates(false);
+            }
+            else {
+                setLoadTemplates(false);
+            }
+            console.log(response);
         }
-        // else {
-        //     rteRef.current?.editor?.commands.setContent(
-        //     `<div>
-        //     <p>Good afternoon,</p>
-        //     <p>Kindly revert to us asap with your best quote for trucking 20' and 40'HC containers as follows :</p>
-        //     <p>Empty pickup depot : ${emptyPickupDepot !== "" ? emptyPickupDepot.toUpperCase() : ""}</p>
-        //     <p>Loading city : ${loadingCity !== null ? loadingCity.city.toUpperCase() : ""}</p>
-        //     <p>Port of delivery : ${deliveryPort !== null ? deliveryPort.portName : ""}</p>
-        //     <p></p>
-        //     <p>Thanks/regards</p>
-        //     <p>Jeffry COOLS</p>
-        //     </div>`);
-        // }
+    }
+    
+    const getTemplate = async (id: string) => {
+        setLoadTemplate(true)
+        if (context) {
+            const response = await (context as BackendService<any>).getSingle(protectedResources.apiLisTemplate.endPoint+"/Template/"+id);
+            if (response !== null && response !== undefined) {
+                setTemplateBase(response.data.content);
+                setLoadTemplate(false);
+            }
+            else {
+                setLoadTemplate(false);
+            }
+            console.log(response);
+        }
+    }
+    
+    // Fonction pour remplacer les variables dans le template
+    // function generateEmailContent(template: string, variables: any) {
+    //     return template.replace(/\{\{(.*?)\}\}/g, (_, variableName: any) => variables[variableName.trim()]);
+    // }
+
+    function generateEmailContent(template: string, variables: any) {
+        return template.replace(/\{\{(.*?)\}\}/g, (_, variableName: any) => {
+            const trimmedName = variableName.trim();
+            // Si la variable est non nulle/vide, l'encapsuler dans <strong>
+            if (variables[trimmedName]) {
+                return `<strong>${variables[trimmedName]}</strong>`;
+            } else {
+                return `{{${trimmedName}}}`; // Laisser le placeholder si la variable est nulle/vide
+            }
+        });
+    }
+    
+    function getDefaultContent(template: any) {
+        var loadingCity = loadingCityObj !== null ? loadingCityObj.city.toUpperCase()+', '+loadingCityObj.country.toUpperCase() : "";
+        var destinationPort = deliveryPort !== null ? deliveryPort.portName+', '+deliveryPort.country : "";
+        
+        const variables = { loadingCity, destinationPort, emptyPickupDepot };
+        return generateEmailContent(template, variables);
     }
 
     useEffect(() => {
-        resetEditor();
-    }, [emptyPickupDepot, loadingCity, deliveryPort]);
+        if (loadingCityObj !== null) {
+            setSubject(loadingCityObj.city.toUpperCase()+","+loadingCityObj.country.toUpperCase()+" / RATE REQUEST HAULAGE");
+        }
+        else {
+            setSubject("");
+        }
+    }, [loadingCityObj]);
+
+    useEffect(() => {
+        getTemplate(selectedTemplate);
+    }, [selectedTemplate]);
+
+    useEffect(() => {
+        var loadingCity = loadingCityObj !== null ? loadingCityObj.city.toUpperCase()+', '+loadingCityObj.country.toUpperCase() : "";
+        var destinationPort = deliveryPort !== null ? deliveryPort.portName+', '+deliveryPort.country : "";
+        
+        const variables = { loadingCity, destinationPort, emptyPickupDepot };
+        rteRef.current?.editor?.commands.setContent(generateEmailContent(templateBase, variables));
+    }, [loadingCityObj, deliveryPort, emptyPickupDepot, templateBase, selectedTemplate]);
 
     useEffect(() => {
         searchHaulages();
+        getTemplates();
     }, [deliveryPort]);
 
     return (
@@ -242,7 +297,7 @@ function RequestPriceHaulage(props: any) {
                             </Grid>
                             <Grid item xs={12} md={12} mt={0.5}>
                                 <InputLabel htmlFor="loading-city" sx={inputLabelStyles}>{t('loadingCity')}</InputLabel>
-                                <AutocompleteSearch id="loading-city" value={loadingCity} onChange={setLoadingCity} fullWidth />
+                                <AutocompleteSearch id="loading-city" value={loadingCityObj} onChange={setLoadingCityObj} fullWidth  />
                             </Grid>
                             <Grid item xs={12} md={12} mt={0.5}>
                                 <InputLabel htmlFor="deliveryPort" sx={inputLabelStyles}>{t('destinationPort')}</InputLabel>
@@ -278,9 +333,29 @@ function RequestPriceHaulage(props: any) {
                             </Grid>
                         </Grid>
                     </Grid>
+
                     <Grid item xs={12} md={6} mt={0.5}>
                         <Grid container>
                             <Grid item xs={12}>
+                                <InputLabel htmlFor="selectedTemplate" sx={inputLabelStyles}>{t('selectedTemplate')}</InputLabel>
+                                {
+                                    loadTemplates !== true ?
+                                    <NativeSelect
+                                        id="selectedTemplate"
+                                        value={selectedTemplate}
+                                        onChange={(e: any) => { setSelectedTemplate(e.target.value); }}
+                                        input={<BootstrapInput />}
+                                        fullWidth
+                                    >
+                                        {templates.map((elm: any, i: number) => (
+                                            <option key={"templateElm-"+i} value={elm.id}>{elm.name}</option>
+                                        ))}
+                                    </NativeSelect>
+                                    : <Skeleton />
+                                }
+                            </Grid>
+
+                            {/* <Grid item xs={12}>
                                 <InputLabel htmlFor="mailLanguage" sx={inputLabelStyles}>{t('mailLanguage')}</InputLabel>
                                 <ToggleButtonGroup
                                     color="primary"
@@ -290,31 +365,11 @@ function RequestPriceHaulage(props: any) {
                                     onChange={(event: React.MouseEvent<HTMLElement>, newValue: string,) => { 
                                         setMailLanguage(newValue); 
                                         if (newValue === "fr") {
-                                            rteRef.current?.editor?.commands.setContent(
-                                            `<div>
-                                            <p>Bonjour,</p>
-                                            <p>Veuillez nous contacter dès que possible avec votre meilleur devis pour le transport routier de conteneurs 20' et 40'HC comme suit :</p>
-                                            <p>Lieu de ramassage à vide : ${emptyPickupDepot !== "" ? emptyPickupDepot.toUpperCase() : ""}</p>
-                                            <p>Ville de chargement : ${loadingCity !== null ? loadingCity.city.toUpperCase() : ""}</p>
-                                            <p>Port de réception : ${deliveryPort !== null ? deliveryPort.portName : ""}</p>
-                                            <p></p>
-                                            <p>Cordialement,</p>
-                                            <p>Jeffry COOLS</p>
-                                            </div>`);
+                                            rteRef.current?.editor?.commands.setContent(templateBase);
                                         }
-                                        // else {
-                                        //     rteRef.current?.editor?.commands.setContent(
-                                        //     `<div>
-                                        //     <p>Good afternoon,</p>
-                                        //     <p>Kindly revert to us asap with your best quote for trucking 20' and 40'HC containers as follows :</p>
-                                        //     <p>Empty pickup depot : ${emptyPickupDepot !== "" ? emptyPickupDepot.toUpperCase() : ""}</p>
-                                        //     <p>Loading city : ${loadingCity !== null ? loadingCity.city.toUpperCase() : ""}</p>
-                                        //     <p>Port of delivery : ${deliveryPort !== null ? deliveryPort.portName : ""}</p>
-                                        //     <p></p>
-                                        //     <p>Thanks/regards</p>
-                                        //     <p>Jeffry COOLS</p>
-                                        //     </div>`);
-                                        // }
+                                        else {
+                                            rteRef.current?.editor?.commands.setContent(templateBaseEn);
+                                        }
                                     }}
                                     aria-label="Platform"
                                     fullWidth
@@ -323,42 +378,35 @@ function RequestPriceHaulage(props: any) {
                                     <ToggleButton value="fr"><img src="/assets/img/flags/flag-fr.png" style={{ width: "12px", marginRight: "6px" }} alt="flag english" /> Français</ToggleButton>
                                     <ToggleButton value="en"><img src="/assets/img/flags/flag-en.png" style={{ width: "12px", marginRight: "6px" }} alt="flag english" /> English</ToggleButton>
                                 </ToggleButtonGroup>
-                            </Grid>
+                            </Grid> */}
                             <Grid item xs={12} mt={1.5}>
                                 <InputLabel htmlFor="details" sx={inputLabelStyles}>{t('detailsOffer')}</InputLabel>
                                 <Box sx={{ mt: 1 }}>
-                                    <RichTextEditor
-                                        ref={rteRef}
-                                        extensions={[StarterKit]}
-                                        content={
-                                            `<div>
-                                            <p>Bonjour,</p>
-                                            <p>Veuillez nous contacter dès que possible avec votre meilleur devis pour le transport routier de conteneurs 20' et 40'HC comme suit :</p>
-                                            <p>Lieu de ramassage à vide : ${emptyPickupDepot !== "" ? emptyPickupDepot.toUpperCase() : ""}</p>
-                                            <p>Ville de chargement : ${loadingCity !== null ? loadingCity.city.toUpperCase() : ""}</p>
-                                            <p>Port de réception : ${deliveryPort !== null ? deliveryPort.portName : ""}</p>
-                                            <p></p>
-                                            <p>Cordialement,</p>
-                                            <p>Jeffry COOLS</p>
-                                            </div>`
-                                        }
-                                        renderControls={() => (
-                                        <MenuControlsContainer>
-                                            <MenuSelectHeading />
-                                            <MenuDivider />
-                                            <MenuButtonBold />
-.                                            <MenuButtonItalic />
-                                            <MenuButtonStrikethrough />
-                                            <MenuButtonOrderedList />
-                                            <MenuButtonBulletedList />
-                                            <MenuSelectTextAlign />
-                                            <MenuButtonEditLink />
-                                            <MenuButtonHorizontalRule />
-                                            <MenuButtonUndo />
-                                            <MenuButtonRedo />
-                                        </MenuControlsContainer>
-                                        )}
-                                    />
+                                    {
+                                        loadTemplate !== true ?
+                                        <RichTextEditor
+                                            ref={rteRef}
+                                            extensions={[StarterKit]}
+                                            content={getDefaultContent(templateBase)}
+                                            renderControls={() => (
+                                            <MenuControlsContainer>
+                                                <MenuSelectHeading />
+                                                <MenuDivider />
+                                                <MenuButtonBold />
+    .                                            <MenuButtonItalic />
+                                                <MenuButtonStrikethrough />
+                                                <MenuButtonOrderedList />
+                                                <MenuButtonBulletedList />
+                                                <MenuSelectTextAlign />
+                                                <MenuButtonEditLink />
+                                                <MenuButtonHorizontalRule />
+                                                <MenuButtonUndo />
+                                                <MenuButtonRedo />
+                                            </MenuControlsContainer>
+                                            )}
+                                        />
+                                        : <Skeleton />
+                                    }
                                 </Box>
                             </Grid>
                         </Grid>
