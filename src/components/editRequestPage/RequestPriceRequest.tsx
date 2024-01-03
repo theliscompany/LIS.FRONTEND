@@ -214,15 +214,33 @@ function RequestPriceRequest(props: any) {
     
     // Fonction pour remplacer les variables dans le template
     function generateEmailContent(template: string, variables: any) {
-        return template.replace(/\{\{(.*?)\}\}/g, (_, variableName: any) => variables[variableName.trim()] || '');
+        return template.replace(/\{\{(.*?)\}\}/g, (_, variableName: any) => {
+            const trimmedName = variableName.trim();
+            // Si la variable est non nulle/vide, l'encapsuler dans <strong>
+            if (variables[trimmedName]) {
+                return `<strong>${variables[trimmedName]}</strong>`;
+            } else {
+                return `{{${trimmedName}}}`; // Laisser le placeholder si la variable est nulle/vide
+            }
+        });
     }
     
+    function getDefaultContent(template: any) {
+        var departurePort = portLoading !== null ? portLoading.portName : "";
+        var destinationPort = portDischarge !== null ? portDischarge.portName : "";
+        var commodities:any = commoditiesArr.map((elm: any) => elm.productName).join(',');
+        var etd = estimatedTimeDeparture !== null ? estimatedTimeDeparture.toDate().toLocaleDateString().slice(0,10) : "";
+        var containersQuantities = displayContainers(containersSelection);
+
+        const variables = { departurePort, destinationPort, commodities, etd, containersQuantities };
+        return generateEmailContent(template, variables);
+    }
+
     useEffect(() => {
         getTemplate(selectedTemplate);
     }, [selectedTemplate]);
 
     useEffect(() => {
-        // setLoadingCity(loadingCityObj !== null ? loadingCityObj.city.toUpperCase() : "");
         var departurePort = portLoading !== null ? portLoading.portName : "";
         var destinationPort = portDischarge !== null ? portDischarge.portName : "";
         var commodities:any = commoditiesArr.map((elm: any) => elm.productName).join(',');
@@ -231,7 +249,6 @@ function RequestPriceRequest(props: any) {
 
         const variables = { departurePort, destinationPort, commodities, etd, containersQuantities };
         rteRef.current?.editor?.commands.setContent(generateEmailContent(templateBase, variables));
-        // resetEditor();
     }, [commoditiesArr, portLoading, portDischarge, containersSelection, estimatedTimeDeparture]);
 
     useEffect(() => {
@@ -525,7 +542,7 @@ function RequestPriceRequest(props: any) {
                                         <RichTextEditor
                                             ref={rteRef}
                                             extensions={[StarterKit]}
-                                            content={templateBase}
+                                            content={getDefaultContent(templateBase)}
                                             renderControls={() => (
                                             <MenuControlsContainer>
                                                 <MenuSelectHeading />

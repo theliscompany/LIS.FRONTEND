@@ -30,7 +30,7 @@ function createGetRequestUrl(variable1: number, variable2: number) {
 const defaultTemplate = "658e7e0d27587b09811c13ca";
 
 function RequestPriceHaulage(props: any) {
-    const [subject, setSubject] = useState<string>(props.loadingCity !== null ? props.loadingCity.city.toUpperCase()+","+props.loadingCity.country.toUpperCase()+" - RATE REQUEST HAULAGE" : "");
+    const [subject, setSubject] = useState<string>(props.loadingCity !== null ? props.loadingCity.city.toUpperCase()+","+props.loadingCity.country.toUpperCase()+" / RATE REQUEST HAULAGE" : "");
     const [recipients, setRecipients] = useState<any>([]);
     const [emptyPickupDepot, setEmptyPickupDepot] = useState<string>("");
     const [loadingCityObj, setLoadingCityObj] = useState<any>(props.loadingCity);
@@ -198,13 +198,33 @@ function RequestPriceHaulage(props: any) {
     }
     
     // Fonction pour remplacer les variables dans le template
+    // function generateEmailContent(template: string, variables: any) {
+    //     return template.replace(/\{\{(.*?)\}\}/g, (_, variableName: any) => variables[variableName.trim()]);
+    // }
+
     function generateEmailContent(template: string, variables: any) {
-        return template.replace(/\{\{(.*?)\}\}/g, (_, variableName: any) => variables[variableName.trim()] || '');
+        return template.replace(/\{\{(.*?)\}\}/g, (_, variableName: any) => {
+            const trimmedName = variableName.trim();
+            // Si la variable est non nulle/vide, l'encapsuler dans <strong>
+            if (variables[trimmedName]) {
+                return `<strong>${variables[trimmedName]}</strong>`;
+            } else {
+                return `{{${trimmedName}}}`; // Laisser le placeholder si la variable est nulle/vide
+            }
+        });
     }
     
+    function getDefaultContent(template: any) {
+        var loadingCity = loadingCityObj !== null ? loadingCityObj.city.toUpperCase()+', '+loadingCityObj.country.toUpperCase() : "";
+        var destinationPort = deliveryPort !== null ? deliveryPort.portName+', '+deliveryPort.country : "";
+        
+        const variables = { loadingCity, destinationPort, emptyPickupDepot };
+        return generateEmailContent(template, variables);
+    }
+
     useEffect(() => {
         if (loadingCityObj !== null) {
-            setSubject(loadingCityObj.city.toUpperCase()+","+loadingCityObj.country.toUpperCase()+" - RATE REQUEST HAULAGE");
+            setSubject(loadingCityObj.city.toUpperCase()+","+loadingCityObj.country.toUpperCase()+" / RATE REQUEST HAULAGE");
         }
         else {
             setSubject("");
@@ -216,14 +236,12 @@ function RequestPriceHaulage(props: any) {
     }, [selectedTemplate]);
 
     useEffect(() => {
-        // setLoadingCity(loadingCityObj !== null ? loadingCityObj.city.toUpperCase() : "");
         var loadingCity = loadingCityObj !== null ? loadingCityObj.city.toUpperCase()+', '+loadingCityObj.country.toUpperCase() : "";
         var destinationPort = deliveryPort !== null ? deliveryPort.portName+', '+deliveryPort.country : "";
         
         const variables = { loadingCity, destinationPort, emptyPickupDepot };
         rteRef.current?.editor?.commands.setContent(generateEmailContent(templateBase, variables));
-        // resetEditor();
-    }, [loadingCityObj, deliveryPort, emptyPickupDepot]);
+    }, [loadingCityObj, deliveryPort, emptyPickupDepot, templateBase, selectedTemplate]);
 
     useEffect(() => {
         searchHaulages();
@@ -369,7 +387,7 @@ function RequestPriceHaulage(props: any) {
                                         <RichTextEditor
                                             ref={rteRef}
                                             extensions={[StarterKit]}
-                                            content={templateBase}
+                                            content={getDefaultContent(templateBase)}
                                             renderControls={() => (
                                             <MenuControlsContainer>
                                                 <MenuSelectHeading />
