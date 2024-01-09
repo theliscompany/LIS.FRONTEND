@@ -175,7 +175,7 @@ function Seafreights() {
             })
             .catch(() => {
                 return instance.acquireTokenPopup({
-                    ...transportRequest,
+                    ...crmRequest,
                     account: account
                     }).then((response) => {
                         return response.accessToken;
@@ -183,12 +183,17 @@ function Seafreights() {
                 }
             );
             
-            const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisClient.endPoint+"/Contact/GetContacts", token);
-            if (response !== null && response !== undefined) {
-                console.log(response);
-                // Removing duplicates from client array
-                setClients(response.filter((obj: any, index: number, self: any) => index === self.findIndex((o: any) => o.contactName === obj.contactName)));
-            }  
+            try {
+                const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisClient.endPoint+"/Contact/GetContacts", token);
+                if (response !== null && response !== undefined) {
+                    console.log(response);
+                    // Removing duplicates from client array
+                    setClients(response.filter((obj: any, index: number, self: any) => index === self.findIndex((o: any) => o.contactName === obj.contactName)));
+                }
+            }
+            catch (err: any) {
+                console.log(err);
+            }
         }
     }
     

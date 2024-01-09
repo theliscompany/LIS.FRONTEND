@@ -226,8 +226,8 @@ function RequestPriceRequest(props: any) {
     }
     
     function getDefaultContent(template: any) {
-        var departurePort = portLoading !== null ? portLoading.portName : "";
-        var destinationPort = portDischarge !== null ? portDischarge.portName : "";
+        var departurePort = portLoading !== null ? portLoading.portName+', '+portLoading.country.toUpperCase() : "";
+        var destinationPort = portDischarge !== null ? portDischarge.portName+', '+portDischarge.country.toUpperCase() : "";
         var commodities:any = commoditiesArr.map((elm: any) => elm.productName).join(',');
         var etd = estimatedTimeDeparture !== null ? estimatedTimeDeparture.toDate().toLocaleDateString().slice(0,10) : "";
         var containersQuantities = displayContainers(containersSelection);

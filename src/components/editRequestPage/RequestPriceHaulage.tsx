@@ -211,7 +211,7 @@ function RequestPriceHaulage(props: any) {
     
     function getDefaultContent(template: any) {
         var loadingCity = loadingCityObj !== null ? loadingCityObj.city.toUpperCase()+', '+loadingCityObj.country.toUpperCase() : "";
-        var destinationPort = deliveryPort !== null ? deliveryPort.portName+', '+deliveryPort.country : "";
+        var destinationPort = deliveryPort !== null ? deliveryPort.portName+', '+deliveryPort.country.toUpperCase() : "";
         
         const variables = { loadingCity, destinationPort, emptyPickupDepot };
         return generateEmailContent(template, variables);

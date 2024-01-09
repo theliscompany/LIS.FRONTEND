@@ -899,7 +899,7 @@ function Request() {
             })
             .catch(() => {
                 return instance.acquireTokenPopup({
-                    ...transportRequest,
+                    ...crmRequest,
                     account: account
                     }).then((response) => {
                         return response.accessToken;
