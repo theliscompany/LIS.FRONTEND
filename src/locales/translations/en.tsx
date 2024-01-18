@@ -138,8 +138,8 @@ export const en = {
   loadingPort: "Loading port",
   freeTime: "Free time",
   multiStop: "Multi stop",
-  overtimeTariff: "Overtime tariff",
-  unitTariff: "Haulage per unit",
+  overtimeTariff: "Overtime <br />tariff",
+  unitTariff: "Haulage <br />per unit",
   validUntil: "Valid until",
   destinationPort: "Destination port",
   supplier: "Supplier",
@@ -382,5 +382,9 @@ export const en = {
   deleteRowMisc: "Delete miscellaneous price",
   editRowMisc: "Edit miscellaneous price",
   createRowMisc: "Add miscellaneous price",
-  selectedTemplate: "Select a template"
+  selectedTemplate: "Select a template",
+  reloadIndication: "Please, click the reload button if you want to actualize the data after some modifications",
+  addressCountry: "Address country",
+  countryCode: "Country code",
+  createNewContact: "Create new contact"
 };

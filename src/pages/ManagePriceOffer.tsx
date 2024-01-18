@@ -9,7 +9,7 @@ import { useAuthorizedBackendApi } from '../api/api';
 import { protectedResources, transportRequest } from '../config/authConfig';
 import { BackendService } from '../utils/services/fetch';
 import { BootstrapInput, gridStyles, inputLabelStyles } from '../utils/misc/styles';
-import { DataGrid, GridRenderCellParams, GridValueFormatterParams, GridValueGetterParams } from '@mui/x-data-grid';
+import { DataGrid, GridColumnHeaderParams, GridRenderCellParams, GridValueFormatterParams, GridValueGetterParams } from '@mui/x-data-grid';
 import { useTranslation } from 'react-i18next';
 import StarterKit from "@tiptap/starter-kit";
 import {
@@ -326,10 +326,10 @@ function ManagePriceOffer(props: any) {
 											<Box sx={{ my: 2 }}>{params.row.loadingPort}</Box>
 											);
 										}, flex: 1},
-										{ field: 'unitTariff', headerName: t('unitTariff'), valueGetter: (params: GridValueGetterParams) => `${params.row.unitTariff || ''} ${params.row.currency}`, flex: 1 },
+										{ field: 'unitTariff', headerName: t('unitTariff'), valueGetter: (params: GridValueGetterParams) => `${params.row.unitTariff || ''} ${params.row.currency}`, renderHeader: (params: GridColumnHeaderParams) => (<>{t('unitTariff')}</>), flex: 1 },
 										{ field: 'freeTime', headerName: t('freeTime'), valueFormatter: (params: GridValueFormatterParams) => `${params.value || ''} ` + t('hours'), flex: 1 },
 										{ field: 'multiStop', headerName: t('multiStop'), valueGetter: (params: GridValueGetterParams) => `${params.row.multiStop || ''} ${params.row.currency}`, flex: 1 },
-										{ field: 'overtimeTariff', headerName: t('overtimeTariff'), valueGetter: (params: GridValueGetterParams) => `${params.row.overtimeTariff || ''} ${params.row.currency} / ${t('hour')}`, flex: 1 },
+										{ field: 'overtimeTariff', headerName: t('overtimeTariff'), valueGetter: (params: GridValueGetterParams) => `${params.row.overtimeTariff || ''} ${params.row.currency} / ${t('hour')}`, renderHeader: (params: GridColumnHeaderParams) => (<>Overtime <br />tariff</>), flex: 1 },
 										{ field: 'validUntil', headerName: t('validUntil'), renderCell: (params: GridRenderCellParams) => {
 											return (
 											<Box sx={{ my: 1, mr: 1 }}>

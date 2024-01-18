@@ -165,3 +165,6 @@ svg.MuiSvgIcon-root.MuiSvgIcon-fontSizeMedium.MuiNativeSelect-icon.MuiNativeSele
 /* .tiptap.ProseMirror > ul {
   margin-bottom: -30px !important;
 } */
+.MuiDataGrid-columnHeaderTitleContainerContent {
+  line-height: normal;
+}

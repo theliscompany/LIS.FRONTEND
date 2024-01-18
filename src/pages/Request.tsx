@@ -1,9 +1,9 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useParams } from 'react-router-dom';
-import { Alert, Autocomplete, Box, Button, Chip, Grid, IconButton, InputLabel, ListItem, ListItemText, NativeSelect, Skeleton, Step, StepLabel, Stepper, TextField, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material';
+import { Alert, Autocomplete, Box, Button, Chip, DialogActions, DialogContent, Grid, IconButton, InputLabel, ListItem, ListItemText, NativeSelect, Skeleton, Step, StepLabel, Stepper, TextField, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material';
 import { MuiTelInput } from 'mui-tel-input';
 import AutocompleteSearch from '../components/shared/AutocompleteSearch';
-import { inputLabelStyles, BootstrapInput, BootstrapDialog, whiteButtonStyles, gridStyles, HtmlTooltip } from '../utils/misc/styles';
+import { inputLabelStyles, BootstrapInput, BootstrapDialog, whiteButtonStyles, gridStyles, HtmlTooltip, BootstrapDialogTitle, buttonCloseStyles } from '../utils/misc/styles';
 import { enqueueSnackbar, SnackbarProvider } from 'notistack';
 import DeleteIcon from '@mui/icons-material/Delete';
 import HelpIcon from '@mui/icons-material/Help';
@@ -43,7 +43,7 @@ import {
 import { JSON as seaPorts } from 'sea-ports';
 // @ts-ignore
 
-import { DataGrid, GridColDef, GridRenderCellParams, GridValueFormatterParams, GridValueGetterParams, GridRowSelectionModel } from '@mui/x-data-grid';
+import { DataGrid, GridColDef, GridRenderCellParams, GridValueFormatterParams, GridValueGetterParams, GridRowSelectionModel, GridColumnHeaderParams } from '@mui/x-data-grid';
 import ClientSearch from '../components/shared/ClientSearch';
 import RequestListNotes from '../components/editRequestPage/RequestListNotes';
 import RequestAddNote from '../components/editRequestPage/RequestAddNote';
@@ -54,6 +54,7 @@ import RequestChangeStatus from '../components/editRequestPage/RequestChangeStat
 import { calculateDistance, findClosestSeaPort } from '../utils/functions';
 import RequestPriceRequest from '../components/editRequestPage/RequestPriceRequest';
 import RequestPriceHaulage from '../components/editRequestPage/RequestPriceHaulage';
+import NewContact from '../components/editRequestPage/NewContact';
 // import { EditorContent, useEditor } from '@tiptap/react';
 
 //let statusTypes = ["EnAttente", "Valider", "Rejeter"];
@@ -91,9 +92,9 @@ function createGetRequestUrl2(url: string, variable1: string, variable2: string,
     // if (variable3) {
     //     url += 'PlannedDeparture=' + encodeURIComponent(variable3) + '&';
     // }
-    if (variable4) {
-        url += 'ContainerTypesId=' + variable4 + '&';
-    }
+    // if (variable4) {
+    //     url += 'ContainerTypesId=' + variable4 + '&';
+    // }
     
     if (url.slice(-1) === '&') {
         url = url.slice(0, -1);
@@ -198,6 +199,8 @@ function Request() {
     const [modal4, setModal4] = useState<boolean>(false);
     const [modal5, setModal5] = useState<boolean>(false);
     const [modal6, setModal6] = useState<boolean>(false);
+    const [modal7, setModal7] = useState<boolean>(false);
+    
     const [assignedManager, setAssignedManager] = useState<string>("");
     const [assignees, setAssignees] = useState<any>(null);
     
@@ -239,12 +242,6 @@ function Request() {
     const [selectedSeafreight, setSelectedSeafreight] = useState<any>(null);
     const [selectedMisc, setSelectedMisc] = useState<any>(null);
     
-    // const [margin, setMargin] = useState<number>(22);
-    // const [reduction, setReduction] = useState<number>(0);
-    // const [adding, setAdding] = useState<number>(0);
-    // const [details, setDetails] = useState<string>("");
-    // const [totalPrice, setTotalPrice] = useState<number>(0);
-    // const [allSeaPorts, setAllSeaPorts] = useState<any>();
     const [tempToken, setTempToken] = useState<string>("");
     
     const [rowSelectionModel, setRowSelectionModel] = React.useState<GridRowSelectionModel>([]);
@@ -278,26 +275,26 @@ function Request() {
         { field: 'carrierAgentName', headerName: t('carrierAgent'), flex: 1.2 },
         // { field: 'departurePortName', headerName: t('departurePort'), flex: 1 },
         // { field: 'destinationPortName', headerName: t('destinationPort'), flex: 1 },
-        { field: 'frequency', headerName: t('frequency'), valueFormatter: (params: GridValueFormatterParams) => `${t('every')} ${params.value || ''} `+t('days'), flex: 1 },
-        { field: 'transitTime', headerName: t('transitTime'), valueFormatter: (params: GridValueFormatterParams) => `${params.value || ''} `+t('days'), flex: 1 },
+        { field: 'frequency', headerName: t('frequency'), valueFormatter: (params: GridValueFormatterParams) => `${t('every')} ${params.value || ''} `+t('days'), flex: 0.75 },
+        { field: 'transitTime', headerName: t('transitTime'), valueFormatter: (params: GridValueFormatterParams) => `${params.value || ''} `+t('days'), flex: 0.75 },
         { field: 'currency', headerName: t('prices'), renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box sx={{ my: 1, mr: 1 }}>
-                    <Box sx={{ my: 1 }} hidden={!getPackageNamesByIds(containersSelected, containers).includes("20' Dry")}>{params.row.price20dry !== 0 ? "20' Dry : "+params.row.price20dry+" "+t(params.row.currency) : "20' Dry : N/A"}</Box>
-                    <Box sx={{ my: 1 }} hidden={!getPackageNamesByIds(containersSelected, containers).includes("20' Rf")}>{params.row.price20rf !== 0 ? "20' Rf : "+params.row.price20rf+" "+t(params.row.currency) : "20' Rf : N/A"}</Box>
-                    <Box sx={{ my: 1 }} hidden={!getPackageNamesByIds(containersSelected, containers).includes("40' Dry")}>{params.row.price40dry !== 0 ? "40' Dry : "+params.row.price40dry+" "+t(params.row.currency) : "40' Dry : N/A"}</Box>
-                    <Box sx={{ my: 1 }} hidden={!getPackageNamesByIds(containersSelected, containers).includes("40' Hc")}>{params.row.price40hc !== 0 ? "40' Hc : "+params.row.price40hc+" "+t(params.row.currency) : "40' Hc : N/A"}</Box>
-                    <Box sx={{ my: 1 }} hidden={!getPackageNamesByIds(containersSelected, containers).includes("40' HcRf")}>{params.row.price40hcrf !== 0 ? "40' HcRf : "+params.row.price40hcrf+" "+t(params.row.currency) : "40' HcRf : N/A"}</Box>
+                    <Box sx={{ my: 1 }} hidden={!getPackageNamesByIds((containersSelection.map((elm: any) => elm.id)), containers).includes("20' Dry")}>{params.row.price20dry !== 0 ? "20' Dry : "+params.row.price20dry+" "+t(params.row.currency) : "20' Dry : N/A"}</Box>
+                    <Box sx={{ my: 1 }} hidden={!getPackageNamesByIds((containersSelection.map((elm: any) => elm.id)), containers).includes("20' RF")}>{params.row.price20rf !== 0 ? "20' Rf : "+params.row.price20rf+" "+t(params.row.currency) : "20' Rf : N/A"}</Box>
+                    <Box sx={{ my: 1 }} hidden={!getPackageNamesByIds((containersSelection.map((elm: any) => elm.id)), containers).includes("40' Dry")}>{params.row.price40dry !== 0 ? "40' Dry : "+params.row.price40dry+" "+t(params.row.currency) : "40' Dry : N/A"}</Box>
+                    <Box sx={{ my: 1 }} hidden={!getPackageNamesByIds((containersSelection.map((elm: any) => elm.id)), containers).includes("40' HC")}>{params.row.price40hc !== 0 ? "40' Hc : "+params.row.price40hc+" "+t(params.row.currency) : "40' Hc : N/A"}</Box>
+                    <Box sx={{ my: 1 }} hidden={!getPackageNamesByIds((containersSelection.map((elm: any) => elm.id)), containers).includes("40' HC RF")}>{params.row.price40hcrf !== 0 ? "40' HcRf : "+params.row.price40hcrf+" "+t(params.row.currency) : "40' HcRf : N/A"}</Box>
                 </Box>
             );
-        }, flex: 1.1 },
+        }, renderHeader: (params: GridColumnHeaderParams) => (<>Haulage <br></br>per unit</>), flex: 1 },
         { field: 'validUntil', headerName: t('validUntil'), renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box sx={{ my: 1, mr: 1 }}>
                     <Chip label={(new Date(params.row.validUntil)).toLocaleDateString().slice(0,10)} color={(new Date()).getTime() - (new Date(params.row.validUntil)).getTime() > 0 ? "warning" : "success"}></Chip>
                 </Box>
             );
-        }, flex: 0.9 },
+        }, flex: 0.75 },
         // { field: 'lastUpdated', headerName: t('lastUpdated'), renderCell: (params: GridRenderCellParams) => {
         //     return (
         //         <Box sx={{ my: 1, mr: 1 }}>
@@ -308,7 +305,7 @@ function Request() {
         { field: 'comment', headerName: "Comment", renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box sx={{ my: 2 }}>
-                    <HtmlTooltip
+                    {/* <HtmlTooltip
                         title={
                             params.row.comment === "" || params.row.comment === null ? 
                             <Box sx={{ p: 1 }}>
@@ -322,10 +319,11 @@ function Request() {
                         <IconButton size="small">
                             <HelpIcon fontSize="small" />
                         </IconButton>
-                    </HtmlTooltip>
+                    </HtmlTooltip> */}
+                    {params.row.comment}
                 </Box>
             );
-        }, flex: 0.6 },
+        }, flex: 1 },
     ];
     
     const columnsHaulages: GridColDef[] = [
@@ -335,17 +333,17 @@ function Request() {
                 <Box sx={{ my: 2 }}>{params.row.loadingPort}</Box>
             );
         }, flex: 1 },
-        { field: 'unitTariff', headerName: t('unitTariff'), valueGetter: (params: GridValueGetterParams) => `${params.row.unitTariff || ''} ${t(params.row.currency)}`, flex: 1 },
-        { field: 'freeTime', headerName: t('freeTime'), valueFormatter: (params: GridValueFormatterParams) => `${params.value || ''} ${t('hours')}`, flex: 1 },
-        { field: 'overtimeTariff', headerName: t('overtimeTariff'), valueGetter: (params: GridValueGetterParams) => `${params.row.overtimeTariff || ''} ${t(params.row.currency)} / ${t('hour')}`, flex: 1 },
-        { field: 'multiStop', headerName: t('multiStop'), valueGetter: (params: GridValueGetterParams) => `${params.row.multiStop || ''} ${t(params.row.currency)}`, flex: 1 },
+        { field: 'unitTariff', valueGetter: (params: GridValueGetterParams) => `${params.row.unitTariff || ''} ${t(params.row.currency)}`, renderHeader: (params: GridColumnHeaderParams) => (<>Haulage <br />per unit</>), flex: 0.75 },
+        { field: 'freeTime', headerName: t('freeTime'), valueFormatter: (params: GridValueFormatterParams) => `${params.value || ''} ${t('hours')}`, flex: 0.75 },
+        { field: 'overtimeTariff', headerName: t('overtimeTariff'), valueGetter: (params: GridValueGetterParams) => `${params.row.overtimeTariff || ''} ${t(params.row.currency)} / ${t('hour')}`, renderHeader: (params: GridColumnHeaderParams) => (<>Overtime <br />tariff</>), flex: 0.75 },
+        { field: 'multiStop', headerName: t('multiStop'), valueGetter: (params: GridValueGetterParams) => `${params.row.multiStop || ''} ${t(params.row.currency)}`, flex: 0.75 },
         { field: 'validUntil', headerName: t('validUntil'), renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box sx={{ my: 1, mr: 1 }}>
                     <Chip label={(new Date(params.row.validUntil)).toLocaleDateString().slice(0,10)} color={(new Date()).getTime() - (new Date(params.row.validUntil)).getTime() > 0 ? "warning" : "success"}></Chip>
                 </Box>
             );
-        }, flex: 0.9 },
+        }, flex: 0.75 },
         // { field: 'updated', headerName: t('lastUpdated'), renderCell: (params: GridRenderCellParams) => {
         //     return (
         //         <Box sx={{ my: 1, mr: 1 }}>
@@ -356,7 +354,7 @@ function Request() {
         { field: 'comment', headerName: "Comment", renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box sx={{ my: 2 }}>
-                    <HtmlTooltip
+                    {/* <HtmlTooltip
                         title={
                             params.row.comment === "" || params.row.comment === null ? 
                             <Box sx={{ p: 1 }}>
@@ -370,7 +368,8 @@ function Request() {
                         <IconButton size="small">
                             <HelpIcon fontSize="small" />
                         </IconButton>
-                    </HtmlTooltip>
+                    </HtmlTooltip> */}
+                    {params.row.comment}
                 </Box>
             );
         }, flex: 0.8 },
@@ -383,11 +382,11 @@ function Request() {
         { field: 'currency', headerName: t('costPrices'), renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box sx={{ my: 1, mr: 1 }}>
-                    <Box sx={{ my: 1 }} hidden={params.row.price20dry === 0 || !getPackageNamesByIds(containersSelected, containers).includes("20' Dry")}>{params.row.price20dry !== 0 ? "20' Dry : "+params.row.price20dry+" "+t(params.row.currency) : "20' Dry : N/A"}</Box>
-                    <Box sx={{ my: 1 }} hidden={params.row.price20rf === 0 || !getPackageNamesByIds(containersSelected, containers).includes("20' Rf")}>{params.row.price20rf !== 0 ? "20' Rf : "+params.row.price20rf+" "+t(params.row.currency) : "20' Rf : N/A"}</Box>
-                    <Box sx={{ my: 1 }} hidden={params.row.price40dry === 0 || !getPackageNamesByIds(containersSelected, containers).includes("40' Dry")}>{params.row.price40dry !== 0 ? "40' Dry : "+params.row.price40dry+" "+t(params.row.currency) : "40' Dry : N/A"}</Box>
-                    <Box sx={{ my: 1 }} hidden={params.row.price40hc === 0 || !getPackageNamesByIds(containersSelected, containers).includes("40' Hc")}>{params.row.price40hc !== 0 ? "40' Hc : "+params.row.price40hc+" "+t(params.row.currency) : "40' Hc : N/A"}</Box>
-                    <Box sx={{ my: 1 }} hidden={params.row.price40hcrf === 0 || !getPackageNamesByIds(containersSelected, containers).includes("40' HcRf")}>{params.row.price40hcrf !== 0 ? "40' HcRf : "+params.row.price40hcrf+" "+t(params.row.currency) : "40' HcRf : N/A"}</Box>
+                    <Box sx={{ my: 1 }} hidden={params.row.price20dry === 0 || !getPackageNamesByIds((containersSelection.map((elm: any) => elm.id)), containers).includes("20' Dry")}>{params.row.price20dry !== 0 ? "20' Dry : "+params.row.price20dry+" "+t(params.row.currency) : "20' Dry : N/A"}</Box>
+                    <Box sx={{ my: 1 }} hidden={params.row.price20rf === 0 || !getPackageNamesByIds((containersSelection.map((elm: any) => elm.id)), containers).includes("20' Rf")}>{params.row.price20rf !== 0 ? "20' Rf : "+params.row.price20rf+" "+t(params.row.currency) : "20' Rf : N/A"}</Box>
+                    <Box sx={{ my: 1 }} hidden={params.row.price40dry === 0 || !getPackageNamesByIds((containersSelection.map((elm: any) => elm.id)), containers).includes("40' Dry")}>{params.row.price40dry !== 0 ? "40' Dry : "+params.row.price40dry+" "+t(params.row.currency) : "40' Dry : N/A"}</Box>
+                    <Box sx={{ my: 1 }} hidden={params.row.price40hc === 0 || !getPackageNamesByIds((containersSelection.map((elm: any) => elm.id)), containers).includes("40' Hc")}>{params.row.price40hc !== 0 ? "40' Hc : "+params.row.price40hc+" "+t(params.row.currency) : "40' Hc : N/A"}</Box>
+                    <Box sx={{ my: 1 }} hidden={params.row.price40hcrf === 0 || !getPackageNamesByIds((containersSelection.map((elm: any) => elm.id)), containers).includes("40' HcRf")}>{params.row.price40hcrf !== 0 ? "40' HcRf : "+params.row.price40hcrf+" "+t(params.row.currency) : "40' HcRf : N/A"}</Box>
                 </Box>
             );
         }, flex: 1.5 },
@@ -838,7 +837,7 @@ function Request() {
             
             setLoadResults(true);
             // I removed the loadingDate
-            var containersFormatted = containersSelected.join("&ContainerTypesId=");
+            var containersFormatted = (containersSelection.map((elm: any) => elm.id)).join("&ContainerTypesId=");
             var urlSent = createGetRequestUrl(protectedResources.apiLisPricing.endPoint+"/Pricing/HaulagesOfferRequest?", haulageType, loadingCity.city.toUpperCase(), containersFormatted);
             const response = await (context as BackendService<any>).getWithToken(urlSent, token);
             setLoadResults(false);
@@ -868,7 +867,7 @@ function Request() {
             setTempToken(token);
             
             setLoadResults(true);
-            var containersFormatted = containersSelected.join("&ContainerTypesId=");
+            var containersFormatted = (containersSelection.map((elm: any) => elm.id)).join("&ContainerTypesId=");
             var urlSent = createGetRequestUrl2(protectedResources.apiLisPricing.endPoint+"/Pricing/SeaFreightsOffersRequest?", portDeparture.portId, portDestination.portId, containersFormatted);
             const response = await (context as BackendService<any>).getWithToken(urlSent, token);
             setLoadResults(false);
@@ -879,7 +878,7 @@ function Request() {
     
     const getMiscellaneousPriceOffers = async () => {
         if (context && account) {
-            var containersFormatted = containersSelected.join("&ContainerTypesId=");
+            var containersFormatted = (containersSelection.map((elm: any) => elm.id)).join("&ContainerTypesId=");
             var urlSent = createGetRequestUrl2(protectedResources.apiLisPricing.endPoint+"/Pricing/MiscellaneoussOffersRequest?", portDeparture.portId, portDestination.portId, containersFormatted);
             const response = await (context as BackendService<any>).getWithToken(urlSent, tempToken);
             setLoadResults(false);
@@ -1004,7 +1003,7 @@ function Request() {
             }  
         }
     }
-    
+
     const createNewOffer = async () => {
         if (selectedSeafreight !== null) {
             if (context) {
@@ -1183,11 +1182,15 @@ function Request() {
                         {
                             !load ? 
                             <Grid container spacing={2} mt={1} px={5}>
-                                <Grid item xs={12}>
+                                <Grid item xs={9}>
                                     <Typography variant="body2" color="dodgerblue" sx={{ fontWeight: "bold" }}>
-                                        {t('quoteNumber')} N° {trackingNumber}
+                                        <span style={{ color: 'red' }}>{t('quoteNumber')} : </span> N° {trackingNumber}
                                     </Typography>
                                 </Grid>
+                                <Grid item xs={3}>
+                                    <Button variant="contained" color="inherit" sx={{ float: "right", backgroundColor: "#fff", textTransform: "none" }} onClick={() => { setModal7(true); }} >{t('createNewContact')}</Button>
+                                </Grid>
+
                                 <Grid item xs={12}>
                                     <Alert 
                                         severity="info" 
@@ -1609,7 +1612,7 @@ function Request() {
                                                                     {
                                                                         !loadResults ? 
                                                                         haulages !== null && haulages.length !== 0 ?
-                                                                            <Box sx={{ overflow: "auto", width: { xs: "98.5%" } }}>
+                                                                            <Box sx={{ overflow: "auto" }}>
                                                                                 <Grid container>
                                                                                     <Grid item xs={8}>
                                                                                         <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>
@@ -1769,7 +1772,7 @@ function Request() {
                                                                     {
                                                                         !loadResults ? 
                                                                         seafreights !== null && seafreights.length !== 0 ?
-                                                                        <Box sx={{ overflow: "auto", width: { xs: "98.5%" } }}>
+                                                                        <Box sx={{ overflow: "auto" }}>
                                                                             <Grid container>
                                                                                 <Grid item xs={8}>
                                                                                     <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>
@@ -1863,7 +1866,7 @@ function Request() {
                                                                     {
                                                                         !loadResults ? 
                                                                         miscs !== null && miscs.length !== 0 ?
-                                                                            <Box sx={{ overflow: "auto", width: { xs: "98.5%" } }}>
+                                                                            <Box sx={{ overflow: "auto" }}>
                                                                                 <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>{t('listMiscPricingOffers')+t('fromDotted')+portDeparture.portName+"-"+portDestination.portName}</Typography>
                                                                                 <DataGrid
                                                                                     rows={miscs}
@@ -1891,7 +1894,7 @@ function Request() {
                                                             <Grid container spacing={2} mt={1} px={2}>
                                                                 <Grid item xs={12}>
                                                                     <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>{t('selectedSeafreight')}</Typography>
-                                                                    <Box sx={{ overflow: "auto", width: { xs: "98.5%" } }}>
+                                                                    <Box sx={{ overflow: "auto" }}>
                                                                         <DataGrid
                                                                             rows={[selectedSeafreight]}
                                                                             columns={columnsSeafreights}
@@ -1907,7 +1910,7 @@ function Request() {
                                                                     selectedHaulage !== null ? 
                                                                     <Grid item xs={12}>
                                                                         <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>{t('selectedHaulage')}</Typography>
-                                                                        <Box sx={{ overflow: "auto", width: { xs: "98.5%" } }}>
+                                                                        <Box sx={{ overflow: "auto" }}>
                                                                             <DataGrid
                                                                                 rows={[selectedHaulage]}
                                                                                 columns={columnsHaulages}
@@ -1924,7 +1927,7 @@ function Request() {
                                                                     selectedMisc !== null ? 
                                                                     <Grid item xs={12}>
                                                                         <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>{t('selectedMisc')}</Typography>
-                                                                        <Box sx={{ overflow: "auto", width: { xs: "98.5%" } }}>
+                                                                        <Box sx={{ overflow: "auto" }}>
                                                                             <DataGrid
                                                                                 rows={[selectedMisc]}
                                                                                 columns={columnsMiscs}
@@ -2140,7 +2143,7 @@ function Request() {
             {/* Price request seafreight FCL */}
             <BootstrapDialog
                 onClose={() => setModal6(false)}
-                aria-labelledby="custom-dialog-title5"
+                aria-labelledby="custom-dialog-title6"
                 open={modal6}
                 maxWidth="lg"
                 fullWidth
@@ -2156,6 +2159,19 @@ function Request() {
                     containers={containers} 
                     containersSelection={containersSelection}
                     closeModal={() => setModal6(false)} 
+                />
+            </BootstrapDialog>
+
+            {/* Add a new contact */}
+            <BootstrapDialog
+                onClose={() => setModal7(false)}
+                aria-labelledby="custom-dialog-title7"
+                open={modal7}
+                maxWidth="md"
+                fullWidth
+            >
+                <NewContact 
+                    closeModal={() => setModal7(false)}
                 />
             </BootstrapDialog>
         </div>

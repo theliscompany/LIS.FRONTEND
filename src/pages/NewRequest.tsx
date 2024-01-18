@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Alert, Autocomplete, Box, Button, Grid, InputLabel, NativeSelect, Skeleton, TextField, Typography, ListItem, ListItemText, IconButton } from '@mui/material';
 import { MuiTelInput } from 'mui-tel-input';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { inputLabelStyles, BootstrapInput, whiteButtonStyles } from '../utils/misc/styles';
+import { inputLabelStyles, BootstrapInput, whiteButtonStyles, BootstrapDialog } from '../utils/misc/styles';
 import { enqueueSnackbar, SnackbarProvider } from 'notistack';
 import { protectedResources, transportRequest } from '../config/authConfig';
 import { useAuthorizedBackendApi } from '../api/api';
@@ -13,6 +13,7 @@ import { AuthenticationResult } from '@azure/msal-browser';
 import AutocompleteSearch from '../components/shared/AutocompleteSearch';
 import { useTranslation } from 'react-i18next';
 import ClientSearch from '../components/shared/ClientSearch';
+import NewContact from '../components/editRequestPage/NewContact';
 
 //let statusTypes = ["EnAttente", "Valider", "Rejeter"];
 // let cargoTypes = ["Container", "Conventional", "RollOnRollOff"];
@@ -27,17 +28,12 @@ function NewRequest(props: any) {
     const [load, setLoad] = useState<boolean>(false);
     const [loadUser, setLoadUser] = useState<boolean>(true);
     const [email, setEmail] = useState<string>("");
-    // const [status, setStatus] = useState<string | null>(null);
     const [phone, setPhone] = useState<string>("");
     const [message, setMessage] = useState<string>("");
-    // const [cargoType, setCargoType] = useState<string>("0");
     const [packingType, setPackingType] = useState<string>("FCL");
     const [clientNumber, setClientNumber] = useState<any>(null);
-    // const [departurePort, setDeparturePort] = useState<any>(null);
-    // const [arrivalPort, setArrivalPort] = useState<any>(null);
     const [departure, setDeparture] = useState<any>(null);
     const [arrival, setArrival] = useState<any>(null);
-    // const [tags, setTags] = useState<MuiChipsInputChip[]>([]);
     const [tags, setTags] = useState<any>([]);
     const [currentUser, setCurrentUser] = useState<any>(null);
     const [assignedManager, setAssignedManager] = useState<string>("null");
@@ -48,7 +44,6 @@ function NewRequest(props: any) {
     const [containersSelection, setContainersSelection] = useState<any>([]);
     
     const [unitName, setUnitName] = useState<string>("");
-    const [unitDimensions, setUnitDimensions] = useState<string>("");
     const [unitHeight, setUnitHeight] = useState<number>(0);
     const [unitLength, setUnitLength] = useState<number>(0);
     const [unitWidth, setUnitWidth] = useState<number>(0);
@@ -57,7 +52,6 @@ function NewRequest(props: any) {
     const [unitsSelection, setUnitsSelection] = useState<any>([]);
 
     const [packageName, setPackageName] = useState<string>("");
-    const [packageDimensions, setPackageDimensions] = useState<string>("");
     const [packageHeight, setPackageHeight] = useState<number>(0);
     const [packageLength, setPackageLength] = useState<number>(0);
     const [packageWidth, setPackageWidth] = useState<number>(0);
@@ -66,9 +60,10 @@ function NewRequest(props: any) {
     const [packagesSelection, setPackagesSelection] = useState<any>([]);
     
     const [containers, setContainers] = useState<any>(null);
-    // const [ports, setPorts] = useState<any>(null);
     const [products, setProducts] = useState<any>(null);
-    //let { id } = useParams();
+    
+    const [modal7, setModal7] = useState<boolean>(false);
+    
     const { instance, accounts } = useMsal();
     const account = useAccount(accounts[0] || {});
     
@@ -278,9 +273,14 @@ function NewRequest(props: any) {
         <div style={{ background: "#fff", borderTopLeftRadius: 20, borderTopRightRadius: 20 }}>
             <SnackbarProvider />
             <Box py={2.5}>
-                <Typography variant="h5" sx={{mt: {xs: 4, md: 1.5, lg: 1.5 }}} px={5}><b>{t('createNewRequest')}</b></Typography>
                 <Box>
                     <Grid container spacing={1} px={5} mt={2}>
+                        <Grid item xs={9}>
+                            <Typography variant="h5"><b>{t('createNewRequest')}</b></Typography>
+                        </Grid>
+                        <Grid item xs={3}>
+                            <Button variant="contained" color="inherit" sx={{ float: "right", backgroundColor: "#fff", textTransform: "none" }} onClick={() => { setModal7(true); }} >{t('createNewContact')}</Button>
+                        </Grid>
                         <Grid item xs={12} md={6}>
                             <InputLabel htmlFor="whatsapp-phone-number" sx={inputLabelStyles}>{t('whatsappNumber')}</InputLabel>
                             <MuiTelInput id="whatsapp-phone-number" value={phone} onChange={setPhone} defaultCountry="CM" preferredCountries={["CM", "BE", "KE"]} fullWidth sx={{ mt: 1 }} />
@@ -639,6 +639,19 @@ function NewRequest(props: any) {
                     </Grid>
                 </Box>
             </Box>
+
+            {/* Add a new contact */}
+            <BootstrapDialog
+                onClose={() => setModal7(false)}
+                aria-labelledby="custom-dialog-title7"
+                open={modal7}
+                maxWidth="md"
+                fullWidth
+            >
+                <NewContact 
+                    closeModal={() => setModal7(false)}
+                />
+            </BootstrapDialog>
         </div>
     );
 }

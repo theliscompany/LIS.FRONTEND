@@ -10,7 +10,7 @@ import { useTranslation } from 'react-i18next';
 import { useAuthorizedBackendApi } from '../api/api';
 import { crmRequest, pricingRequest, protectedResources, transportRequest } from '../config/authConfig';
 import { BackendService } from '../utils/services/fetch';
-import { GridColDef, GridValueFormatterParams, GridRenderCellParams, DataGrid, GridValueGetterParams } from '@mui/x-data-grid';
+import { GridColDef, GridValueFormatterParams, GridRenderCellParams, DataGrid, GridValueGetterParams, GridColumnHeaderParams } from '@mui/x-data-grid';
 import { BootstrapDialog, BootstrapDialogTitle, BootstrapInput, actionButtonStyles, buttonCloseStyles, datetimeStyles, gridStyles, inputLabelStyles } from '../utils/misc/styles';
 import CompanySearch from '../components/shared/CompanySearch';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
@@ -106,29 +106,29 @@ function Haulages() {
         //         <Box sx={{ my: 2 }}>{params.row.loadingPort}</Box>
         //     );
         // }, minWidth: 100, flex: 1 },
-        { field: 'unitTariff', headerName: t('unitTariff'), valueGetter: (params: GridValueGetterParams) => `${params.row.unitTariff || ''} ${t(params.row.currency)}`, minWidth: 100, flex: 1 },
-        { field: 'freeTime', headerName: t('freeTime'), valueFormatter: (params: GridValueFormatterParams) => `${params.value || ''} ${t('hours')}`, minWidth: 100, flex: 1 },
-        { field: 'overtimeTariff', headerName: t('overtimeTariff'), valueGetter: (params: GridValueGetterParams) => `${params.row.overtimeTariff || ''} ${t(params.row.currency)} / ${t('hour')}`, minWidth: 100, flex: 1 },
-        { field: 'multiStop', headerName: t('multiStop'), valueGetter: (params: GridValueGetterParams) => `${params.row.multiStop || ''} ${t(params.row.currency)}`, minWidth: 100, flex: 1 },
-        // { field: 'containersType', headerName: t('containers'), renderCell: (params: GridRenderCellParams) => {
-        //     return (
-        //         <Box sx={{ my: 2 }}>{params.row.containersType.join(", ")}</Box>
-        //     );
-        // }, minWidth: 100, flex: 1 },
+        { field: 'unitTariff', headerName: t('unitTariff'), valueGetter: (params: GridValueGetterParams) => `${params.row.unitTariff || ''} ${t(params.row.currency)}`, renderHeader: (params: GridColumnHeaderParams) => (<>{t('unitTariff')}</>), minWidth: 100, flex: 0.75 },
+        { field: 'freeTime', headerName: t('freeTime'), valueFormatter: (params: GridValueFormatterParams) => `${params.value || ''} ${t('hours')}`, minWidth: 100, flex: 0.75 },
+        { field: 'overtimeTariff', headerName: t('overtimeTariff'), valueGetter: (params: GridValueGetterParams) => `${params.row.overtimeTariff || ''} ${t(params.row.currency)} / ${t('hour')}`, renderHeader: (params: GridColumnHeaderParams) => (<>Overtime <br />tariff</>), minWidth: 100, flex: 1 },
+        { field: 'multiStop', headerName: t('multiStop'), valueGetter: (params: GridValueGetterParams) => `${params.row.multiStop || ''} ${t(params.row.currency)}`, minWidth: 100, flex: 0.75 },
+        { field: 'containersType', headerName: t('containers'), renderCell: (params: GridRenderCellParams) => {
+            return (
+                <Box sx={{ my: 2 }}>{params.row.containersType.join(", ")}</Box>
+            );
+        }, minWidth: 100, flex: 1 },
         { field: 'validUntil', headerName: t('validUntil'), renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box sx={{ my: 1, mr: 1 }}>
                     <Chip label={(new Date(params.row.validUntil)).toLocaleDateString().slice(0,10)} color={(new Date()).getTime() - (new Date(params.row.validUntil)).getTime() > 0 ? "warning" : "success"}></Chip>
                 </Box>
             );
-        }, minWidth: 100, flex: 1 },
+        }, minWidth: 100, flex: 0.75 },
         { field: 'created', headerName: t('created'), renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box sx={{ my: 1, mr: 1 }}>
                     <Chip label={(new Date(params.row.created)).toLocaleDateString().slice(0,10)} color={(new Date()).getTime() - (new Date(params.row.created)).getTime() > 0 ? "default" : "default"}></Chip>
                 </Box>
             );
-        }, minWidth: 100, flex: 1 },
+        }, minWidth: 100, flex: 0.75 },
         { field: 'xxx', headerName: t('Actions'), renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box sx={{ my: 1, mr: 1 }}>
@@ -140,7 +140,7 @@ function Haulages() {
                     </IconButton>
                 </Box>
             );
-        }, minWidth: 120, flex: 1 },
+        }, minWidth: 120, flex: 0.5 },
     ];
     
     useEffect(() => {
