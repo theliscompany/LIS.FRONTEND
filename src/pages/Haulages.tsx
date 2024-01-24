@@ -22,6 +22,7 @@ import { CategoryEnum } from '../utils/constants';
 import AutocompleteSearch from '../components/shared/AutocompleteSearch';
 import RequestPriceHaulage from '../components/editRequestPage/RequestPriceHaulage';
 import { Mail } from '@mui/icons-material';
+import NewContact from '../components/editRequestPage/NewContact';
 
 function createGetRequestUrl(variable1: number, variable2: number, variable3: string) {
     let url = protectedResources.apiLisPricing.endPoint+"/Haulage/Haulages?";
@@ -50,6 +51,7 @@ function Haulages() {
     const [modal, setModal] = useState<boolean>(false);
     const [modal2, setModal2] = useState<boolean>(false);
     const [modal5, setModal5] = useState<boolean>(false);
+    const [modal7, setModal7] = useState<boolean>(false);
     const [ports, setPorts] = useState<any>(null);
     const [clients, setClients] = useState<any>(null);
     const [containers, setContainers] = useState<any>(null);
@@ -106,7 +108,7 @@ function Haulages() {
         //         <Box sx={{ my: 2 }}>{params.row.loadingPort}</Box>
         //     );
         // }, minWidth: 100, flex: 1 },
-        { field: 'unitTariff', headerName: t('unitTariff'), valueGetter: (params: GridValueGetterParams) => `${params.row.unitTariff || ''} ${t(params.row.currency)}`, renderHeader: (params: GridColumnHeaderParams) => (<>{t('unitTariff')}</>), minWidth: 100, flex: 0.75 },
+        { field: 'unitTariff', headerName: t('unitTariff'), valueGetter: (params: GridValueGetterParams) => `${params.row.unitTariff || ''} ${t(params.row.currency)}`, renderHeader: (params: GridColumnHeaderParams) => (<>Haulage <br />per unit</>), minWidth: 100, flex: 0.75 },
         { field: 'freeTime', headerName: t('freeTime'), valueFormatter: (params: GridValueFormatterParams) => `${params.value || ''} ${t('hours')}`, minWidth: 100, flex: 0.75 },
         { field: 'overtimeTariff', headerName: t('overtimeTariff'), valueGetter: (params: GridValueGetterParams) => `${params.row.overtimeTariff || ''} ${t(params.row.currency)} / ${t('hour')}`, renderHeader: (params: GridColumnHeaderParams) => (<>Overtime <br />tariff</>), minWidth: 100, flex: 1 },
         { field: 'multiStop', headerName: t('multiStop'), valueGetter: (params: GridValueGetterParams) => `${params.row.multiStop || ''} ${t(params.row.currency)}`, minWidth: 100, flex: 0.75 },
@@ -395,6 +397,7 @@ function Haulages() {
                         <Button variant="contained" sx={actionButtonStyles} onClick={() => { setModal5(true); }}>
                             {t('requestHaulagePrice')} <Mail sx={{ ml: 0.5, pb: 0.25, justifyContent: "center", alignItems: "center" }} fontSize="small" />
                         </Button>
+                        <Button variant="contained" color="inherit" sx={{ float: "right", backgroundColor: "#fff", textTransform: "none" }} onClick={() => { setModal7(true); }} >{t('createNewHaulier')}</Button>
                     </Grid>
                     <Grid item xs={12} md={4} mt={1}>
                         <InputLabel htmlFor="company-name" sx={inputLabelStyles}>{t('haulier')}</InputLabel>
@@ -668,6 +671,20 @@ function Haulages() {
                         closeModal={() => setModal5(false)}
                     /> : <Skeleton />
                 }
+            </BootstrapDialog>
+
+            {/* Add a new contact */}
+            <BootstrapDialog
+                onClose={() => setModal7(false)}
+                aria-labelledby="custom-dialog-title7"
+                open={modal7}
+                maxWidth="md"
+                fullWidth
+            >
+                <NewContact 
+                    categories={["SUPPLIERS"]}
+                    closeModal={() => setModal7(false)}
+                />
             </BootstrapDialog>
         </div>
     );

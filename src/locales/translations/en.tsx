@@ -386,5 +386,7 @@ export const en = {
   reloadIndication: "Please, click the reload button if you want to actualize the data after some modifications",
   addressCountry: "Address country",
   countryCode: "Country code",
-  createNewContact: "Create new contact"
+  createNewContact: "Create new contact",
+  createNewCarrier: "Create new carrier",
+  createNewHaulier: "Create new haulier"
 };

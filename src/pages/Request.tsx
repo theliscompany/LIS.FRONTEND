@@ -275,7 +275,7 @@ function Request() {
         { field: 'carrierAgentName', headerName: t('carrierAgent'), flex: 1.2 },
         // { field: 'departurePortName', headerName: t('departurePort'), flex: 1 },
         // { field: 'destinationPortName', headerName: t('destinationPort'), flex: 1 },
-        { field: 'frequency', headerName: t('frequency'), valueFormatter: (params: GridValueFormatterParams) => `${t('every')} ${params.value || ''} `+t('days'), flex: 0.75 },
+        { field: 'frequency', headerName: t('frequency'), valueFormatter: (params: GridValueFormatterParams) => `${t('every')} ${params.value || ''} `+t('days'), flex: 0.5 },
         { field: 'transitTime', headerName: t('transitTime'), valueFormatter: (params: GridValueFormatterParams) => `${params.value || ''} `+t('days'), flex: 0.75 },
         { field: 'currency', headerName: t('prices'), renderCell: (params: GridRenderCellParams) => {
             return (
@@ -287,7 +287,7 @@ function Request() {
                     <Box sx={{ my: 1 }} hidden={!getPackageNamesByIds((containersSelection.map((elm: any) => elm.id)), containers).includes("40' HC RF")}>{params.row.price40hcrf !== 0 ? "40' HcRf : "+params.row.price40hcrf+" "+t(params.row.currency) : "40' HcRf : N/A"}</Box>
                 </Box>
             );
-        }, renderHeader: (params: GridColumnHeaderParams) => (<>Haulage <br></br>per unit</>), flex: 1 },
+        }, renderHeader: (params: GridColumnHeaderParams) => (<>Haulage <br></br>per unit</>), flex: 0.875 },
         { field: 'validUntil', headerName: t('validUntil'), renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box sx={{ my: 1, mr: 1 }}>
@@ -295,35 +295,13 @@ function Request() {
                 </Box>
             );
         }, flex: 0.75 },
-        // { field: 'lastUpdated', headerName: t('lastUpdated'), renderCell: (params: GridRenderCellParams) => {
-        //     return (
-        //         <Box sx={{ my: 1, mr: 1 }}>
-        //             <Chip label={(new Date(params.row.lastUpdated)).toLocaleDateString().slice(0,10)} color={(new Date()).getTime() - (new Date(params.row.lastUpdated)).getTime() > 0 ? "default" : "default"}></Chip>
-        //         </Box>
-        //     );
-        // }, flex: 1 },
         { field: 'comment', headerName: "Comment", renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box sx={{ my: 2 }}>
-                    {/* <HtmlTooltip
-                        title={
-                            params.row.comment === "" || params.row.comment === null ? 
-                            <Box sx={{ p: 1 }}>
-                                <Typography color="inherit" sx={{ fontSize: 13 }}>{t('noComment')}</Typography>
-                            </Box> : 
-                            <Box sx={{ p: 1 }}>
-                                <Typography color="inherit" sx={{ fontSize: 13 }}>{params.row.comment}</Typography>
-                            </Box>
-                        }
-                    >
-                        <IconButton size="small">
-                            <HelpIcon fontSize="small" />
-                        </IconButton>
-                    </HtmlTooltip> */}
                     {params.row.comment}
                 </Box>
             );
-        }, flex: 1 },
+        }, flex: 1.25 },
     ];
     
     const columnsHaulages: GridColDef[] = [
@@ -334,9 +312,9 @@ function Request() {
             );
         }, flex: 1 },
         { field: 'unitTariff', valueGetter: (params: GridValueGetterParams) => `${params.row.unitTariff || ''} ${t(params.row.currency)}`, renderHeader: (params: GridColumnHeaderParams) => (<>Haulage <br />per unit</>), flex: 0.75 },
-        { field: 'freeTime', headerName: t('freeTime'), valueFormatter: (params: GridValueFormatterParams) => `${params.value || ''} ${t('hours')}`, flex: 0.75 },
+        { field: 'freeTime', headerName: t('freeTime'), valueFormatter: (params: GridValueFormatterParams) => `${params.value || ''} ${t('hours')}`, flex: 0.5 },
         { field: 'overtimeTariff', headerName: t('overtimeTariff'), valueGetter: (params: GridValueGetterParams) => `${params.row.overtimeTariff || ''} ${t(params.row.currency)} / ${t('hour')}`, renderHeader: (params: GridColumnHeaderParams) => (<>Overtime <br />tariff</>), flex: 0.75 },
-        { field: 'multiStop', headerName: t('multiStop'), valueGetter: (params: GridValueGetterParams) => `${params.row.multiStop || ''} ${t(params.row.currency)}`, flex: 0.75 },
+        { field: 'multiStop', headerName: t('multiStop'), valueGetter: (params: GridValueGetterParams) => `${params.row.multiStop || ''} ${t(params.row.currency)}`, flex: 0.5 },
         { field: 'validUntil', headerName: t('validUntil'), renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box sx={{ my: 1, mr: 1 }}>
@@ -372,7 +350,7 @@ function Request() {
                     {params.row.comment}
                 </Box>
             );
-        }, flex: 0.8 },
+        }, flex: 1.25 },
     ];
     
     const columnsMiscs: GridColDef[] = [
@@ -2171,6 +2149,7 @@ function Request() {
                 fullWidth
             >
                 <NewContact 
+                    categories={[""]}
                     closeModal={() => setModal7(false)}
                 />
             </BootstrapDialog>

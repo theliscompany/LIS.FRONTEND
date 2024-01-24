@@ -8,17 +8,31 @@ import { BackendService } from '../../utils/services/fetch';
 import { crmRequest, protectedResources } from '../../config/authConfig';
 import { useAccount, useMsal } from '@azure/msal-react';
 import { AuthenticationResult } from '@azure/msal-browser';
+import { MuiTelInput } from 'mui-tel-input';
 
 function NewContact(props: any) {
     const [testName, setTestName] = useState<string>("");
     const [addressCountry, setAddressCountry] = useState<string>("");
-    const [countryCode, setCountryCode] = useState<string>("CM")
+    const [countryCode, setCountryCode] = useState<string>("CM");
+    const [testPhone, setTestPhone] = useState<string>("");
+    const [testEmail, setTestEmail] = useState<string>("");
     
     const { instance, accounts } = useMsal();
     const account = useAccount(accounts[0] || {});
 
     const context = useAuthorizedBackendApi();
     const { t } = useTranslation();
+    
+    var namesArray = [
+        {type: "", name: t('clientName')},
+        {type: "SUPPLIERS", name: t('haulier')},
+        {type: "SHIPPING_LINES", name: t('carrier')}
+    ];
+    
+    const getFirstMatchingName = (array: any, selectedTypes: any) => {
+        const firstMatchingEntry = array.find((entry: any) => selectedTypes.includes(entry.type));
+        return firstMatchingEntry ? firstMatchingEntry.name : null;
+    };
     
     const createNewContact = async () => {
         if (account && context) {
@@ -43,9 +57,14 @@ function NewContact(props: any) {
                 "contactName": testName,
                 "addressCountry": addressCountry,
                 "createdBy": 5,
-                "countryCode": countryCode
+                "countryCode": countryCode,
+                "phone": testPhone,
+                "email": testEmail
             }
-            const response = await (context as BackendService<any>).postWithToken(protectedResources.apiLisClient.endPoint+"/Contact/CreateCustomerContact", dataSent, token);
+            
+            var categoriesText = props.categories.length !== 0 ? "?"+ props.categories.map((category: any) => `categories=${category}`).join('&') : "";
+
+            const response = await (context as BackendService<any>).postWithToken(protectedResources.apiLisClient.endPoint+"/Contact/CreateCustomerContact"+categoriesText, dataSent, token);
             if (response !== null) {
                 enqueueSnackbar("The contact has been added with success!", { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
                 props.closeModal();
@@ -64,7 +83,9 @@ function NewContact(props: any) {
             <DialogContent dividers>
                 <Grid container spacing={2}>
                     <Grid item xs={12}>
-                        <InputLabel htmlFor="test-name" sx={inputLabelStyles}>{t('clientName')}</InputLabel>
+                        <InputLabel htmlFor="test-name" sx={inputLabelStyles}>
+                            {getFirstMatchingName(namesArray, props.categories)}
+                        </InputLabel>
                         <BootstrapInput id="test-name" type="text" value={testName} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTestName(e.target.value)} fullWidth />
                     </Grid>
                     <Grid item xs={12}>
@@ -74,7 +95,15 @@ function NewContact(props: any) {
                     <Grid item xs={12}>
                         <InputLabel htmlFor="countryCode" sx={inputLabelStyles}>{t('countryCode')}</InputLabel>
                         <BootstrapInput id="countryCode" type="text" value={countryCode} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setCountryCode(e.target.value)} fullWidth />
-                    </Grid>                    
+                    </Grid>
+                    <Grid item xs={12}>
+                        <InputLabel htmlFor="my-email" sx={inputLabelStyles}>{t('emailAddress')}</InputLabel>
+                        <BootstrapInput id="my-email" type="email" value={testEmail} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTestEmail(e.target.value)} fullWidth />
+                    </Grid>
+                    <Grid item xs={12}>
+                        <InputLabel htmlFor="phone-number" sx={inputLabelStyles}>{t('whatsappNumber')}</InputLabel>
+                        <MuiTelInput id="phone-number" value={testPhone} onChange={setTestPhone} defaultCountry="CM" preferredCountries={["CM", "BE", "KE"]} fullWidth sx={{ mt: 1 }} />
+                    </Grid>
                 </Grid>
             </DialogContent>
             <DialogActions>
