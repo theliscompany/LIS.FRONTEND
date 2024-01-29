@@ -1146,7 +1146,8 @@ function Request() {
         
         var commodities:any = tags.map((elm: any) => elm.productName).join(',');
         var listServices = selectedMisc !== null ? selectedMisc.services.map((elm: any) => "<p>- "+elm.service.serviceName+" inclus</p>").join('') : "<br>";
-        var pricesContainers = containersSelection !== null ? containersSelection.map((elm: any) => "<p>"+calculateContainerPrice(elm.container, elm.quantity)+" "+selectedSeafreight.currency+" / "+elm.container+"</p>").join('') : "";
+        // var pricesContainers = "";
+        var pricesContainers = containersSelection !== null && selectedSeafreight !== null ? containersSelection.map((elm: any) => "<p>"+calculateContainerPrice(elm.container, elm.quantity)+" "+selectedSeafreight.currency+" / "+elm.container+"</p>").join('') : "";
         var clientName = clientNumber !== null ? clientNumber.contactName : null;
         var freeTime = selectedHaulage !== null ? selectedHaulage.freeTime : "";
         var overtimeTariff = selectedHaulage !== null ? selectedHaulage.overtimeTariff : "";
@@ -1164,7 +1165,8 @@ function Request() {
         
         var commodities:any = tags.map((elm: any) => elm.productName).join(',');
         var listServices = selectedMisc !== null ? selectedMisc.services.map((elm: any) => "<p>- "+elm.service.serviceName+" inclus</p>").join('') : "<br>";
-        var pricesContainers = containersSelection !== null ? containersSelection.map((elm: any) => "<p>"+calculateContainerPrice(elm.container, elm.quantity)+" "+selectedSeafreight.currency+" / "+elm.container+"</p>").join('') : "";
+        // var pricesContainers = "";
+        var pricesContainers = containersSelection !== null && selectedSeafreight !== null ? containersSelection.map((elm: any) => "<p>"+calculateContainerPrice(elm.container, elm.quantity)+" "+selectedSeafreight.currency+" / "+elm.container+"</p>").join('') : "";
         var clientName = clientNumber !== null ? clientNumber.contactName : null;
         var freeTime = selectedHaulage !== null ? selectedHaulage.freeTime : "";
         var overtimeTariff = selectedHaulage !== null ? selectedHaulage.overtimeTariff : "";
@@ -2019,7 +2021,7 @@ function Request() {
                                                                 <Grid item xs={12}>
                                                                     <InputLabel htmlFor="details" sx={inputLabelStyles}>{t('detailsOffer')}</InputLabel>
                                                                     {
-                                                                        selectedSeafreight !== null && selectedHaulage !== null ? 
+                                                                        selectedSeafreight !== null ? 
                                                                         <Box sx={{ mt: 2 }}>
                                                                             {
                                                                                 loadTemplate !== true ?
