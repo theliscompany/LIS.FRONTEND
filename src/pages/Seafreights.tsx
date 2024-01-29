@@ -21,6 +21,7 @@ import { useMsal, useAccount } from '@azure/msal-react';
 import { CategoryEnum } from '../utils/constants';
 import RequestPriceRequest from '../components/editRequestPage/RequestPriceRequest';
 import { Mail } from '@mui/icons-material';
+import NewContact from '../components/editRequestPage/NewContact';
 
 function createGetRequestUrl(variable1: number, variable2: number, variable3: number) {
     let url = protectedResources.apiLisPricing.endPoint+"/SeaFreight/GetSeaFreights?";
@@ -46,6 +47,7 @@ function Seafreights() {
     const [modal, setModal] = useState<boolean>(false);
     const [modal2, setModal2] = useState<boolean>(false);
     const [modal6, setModal6] = useState<boolean>(false);
+    const [modal7, setModal7] = useState<boolean>(false);
     const [ports, setPorts] = useState<any>(null);
     const [products, setProducts] = useState<any>(null);
     const [clients, setClients] = useState<any>(null);
@@ -175,7 +177,7 @@ function Seafreights() {
             })
             .catch(() => {
                 return instance.acquireTokenPopup({
-                    ...transportRequest,
+                    ...crmRequest,
                     account: account
                     }).then((response) => {
                         return response.accessToken;
@@ -183,12 +185,17 @@ function Seafreights() {
                 }
             );
             
-            const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisClient.endPoint+"/Contact/GetContacts", token);
-            if (response !== null && response !== undefined) {
-                console.log(response);
-                // Removing duplicates from client array
-                setClients(response.filter((obj: any, index: number, self: any) => index === self.findIndex((o: any) => o.contactName === obj.contactName)));
-            }  
+            try {
+                const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisClient.endPoint+"/Contact/GetContacts", token);
+                if (response !== null && response !== undefined) {
+                    console.log(response);
+                    // Removing duplicates from client array
+                    setClients(response.filter((obj: any, index: number, self: any) => index === self.findIndex((o: any) => o.contactName === obj.contactName)));
+                }
+            }
+            catch (err: any) {
+                console.log(err);
+            }
         }
     }
     
@@ -428,6 +435,7 @@ function Seafreights() {
                         <Button variant="contained" sx={actionButtonStyles} onClick={() => { setModal6(true); }}>
                             {t('requestSeafreightPrice')} <Mail sx={{ ml: 0.5, pb: 0.25, justifyContent: "center", alignItems: "center" }} fontSize="small" />
                         </Button>
+                        <Button variant="contained" color="inherit" sx={{ float: "right", backgroundColor: "#fff", textTransform: "none" }} onClick={() => { setModal7(true); }} >{t('createNewCarrier')}</Button>
                     </Grid>
                     <Grid item xs={12} md={4} mt={1}>
                         <InputLabel htmlFor="company-name" sx={inputLabelStyles}>{t('carrier')}</InputLabel>
@@ -817,6 +825,20 @@ function Seafreights() {
                         closeModal={() => setModal6(false)} 
                     /> : <Skeleton />
                 }
+            </BootstrapDialog>
+
+            {/* Add a new contact */}
+            <BootstrapDialog
+                onClose={() => setModal7(false)}
+                aria-labelledby="custom-dialog-title7"
+                open={modal7}
+                maxWidth="md"
+                fullWidth
+            >
+                <NewContact 
+                    categories={["SHIPPING_LINES"]}
+                    closeModal={() => setModal7(false)}
+                />
             </BootstrapDialog>
         </div>
     );

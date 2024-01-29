@@ -39,7 +39,7 @@ function displayContainers(value: any) {
 
 const defaultTemplate = "658e880927587b09811c13cb";
 
-function RequestPriceRequest(props: any) {
+function RequestPriceOffer(props: any) {
     const [subject, setSubject] = useState<string>(props.portLoading !== null && props.portDischarge !== null ? props.portLoading.portName+","+props.portLoading.country+" - "+props.portDischarge.portName+","+props.portDischarge.country+" / RATE REQUEST" : "");
     const [recipients, setRecipients] = useState<any>([]);
     const [commoditiesArr, setCommoditiesArr] = useState<MuiChipsInputChip[]>(props.commodities);
@@ -258,11 +258,7 @@ function RequestPriceRequest(props: any) {
 
     return (
         <>
-            <BootstrapDialogTitle id="custom-dialog-title6" onClose={props.closeModal}>
-                <b>{t('priceRequestFCL')}</b>
-            </BootstrapDialogTitle>
-            <DialogContent dividers>
-                <Grid container spacing={2} px={2}>
+            <Grid container spacing={2} px={2}>
                     <Grid item xs={12} md={6}>
                         <Grid container spacing={1}>
                             <Grid item xs={12} mt={0.5}>
@@ -548,7 +544,7 @@ function RequestPriceRequest(props: any) {
                                                 <MenuSelectHeading />
                                                 <MenuDivider />
                                                 <MenuButtonBold />
-                                                <MenuButtonItalic />
+    .                                            <MenuButtonItalic />
                                                 <MenuButtonStrikethrough />
                                                 <MenuButtonOrderedList />
                                                 <MenuButtonBulletedList />
@@ -567,13 +563,8 @@ function RequestPriceRequest(props: any) {
                         </Grid>
                     </Grid>
                 </Grid>
-            </DialogContent>
-            <DialogActions>
-                <Button variant="contained" color="primary" className="mr-3" onClick={sendPriceRequestFCL} sx={{ textTransform: "none" }}>{t('send')}</Button>
-                <Button variant="contained" onClick={props.closeModal} sx={buttonCloseStyles}>{t('close')}</Button>
-            </DialogActions>
         </>
     );
 }
 
-export default RequestPriceRequest;
+export default RequestPriceOffer;

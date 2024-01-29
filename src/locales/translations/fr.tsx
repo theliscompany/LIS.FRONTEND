@@ -138,8 +138,9 @@ export const fr = {
   loadingPort: "Port de chargement",
   freeTime: "Temps libre",
   multiStop: "Multi-arrêts",
-  overtimeTariff: "Tarif des heures supplémentaires",
-  unitTariff: "Transport par unité",
+  overtimeTariff: "Tarif des <br />heures supplémentaires",
+  overtimeTariff2: "Tarif des heures supplémentaires",
+  unitTariff: "Transport <br />par unité",
   validUntil: "Valide jusqu'au",
   destinationPort: "Port de destination",
   supplier: "Fournisseur",
@@ -382,5 +383,11 @@ export const fr = {
   deleteRowMisc: "Supprimer prix de service divers",
   editRowMisc: "Modifier prix de service divers",
   createRowMisc: "Ajouter prix de service divers",
-  selectedTemplate: "Choisir un modèle"
+  selectedTemplate: "Choisir un modèle",
+  reloadIndication: "Veuillez cliquer sur le bouton Recharger si vous voulez actualiser les données après vos modifications",
+  addressCountry: "Adresse du pays",
+  countryCode: "Code du pays",
+  createNewContact: "Créer un nouveau contact",
+  createNewCarrier: "Créer un nouveau transporteur maritime",
+  createNewHaulier: "Créer un nouveau transporteur routier"
 };

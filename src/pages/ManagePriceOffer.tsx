@@ -9,7 +9,7 @@ import { useAuthorizedBackendApi } from '../api/api';
 import { protectedResources, transportRequest } from '../config/authConfig';
 import { BackendService } from '../utils/services/fetch';
 import { BootstrapInput, gridStyles, inputLabelStyles } from '../utils/misc/styles';
-import { DataGrid, GridRenderCellParams, GridValueFormatterParams, GridValueGetterParams } from '@mui/x-data-grid';
+import { DataGrid, GridColumnHeaderParams, GridRenderCellParams, GridValueFormatterParams, GridValueGetterParams } from '@mui/x-data-grid';
 import { useTranslation } from 'react-i18next';
 import StarterKit from "@tiptap/starter-kit";
 import {
@@ -197,7 +197,8 @@ function ManagePriceOffer(props: any) {
 				enqueueSnackbar(t('priceOfferApproved'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top" } });
 
 				var footer = `
-				<div style="font-family: Verdana; padding-top: 60px;">
+				<div>${account?.name}</div>
+                <div style="font-family: Verdana; padding-top: 60px;">
 					<a href="${process.env.REACT_APP_ORIGIN_URL+"/acceptOffer/"+id}" style="display:inline-block;background-color:#008089;color:#fff;padding:10px 20px;text-decoration:none" target="_blank">Accept the offer</a>
 					<a href="${process.env.REACT_APP_ORIGIN_URL+"/refuseOffer/"+id}" style="display:inline-block;background-color:#F2F2F2;color:#008089;padding:10px 20px;text-decoration:none" target="_blank">Refuse the offer</a>
 					<div style="margin-top: 15px;"><a target="_blank" href="www.omnifreight.eu">www.omnifreight.eu</a></div>
@@ -326,10 +327,10 @@ function ManagePriceOffer(props: any) {
 											<Box sx={{ my: 2 }}>{params.row.loadingPort}</Box>
 											);
 										}, flex: 1},
-										{ field: 'unitTariff', headerName: t('unitTariff'), valueGetter: (params: GridValueGetterParams) => `${params.row.unitTariff || ''} ${params.row.currency}`, flex: 1 },
+										{ field: 'unitTariff', headerName: t('unitTariff'), valueGetter: (params: GridValueGetterParams) => `${params.row.unitTariff || ''} ${params.row.currency}`, renderHeader: (params: GridColumnHeaderParams) => (<>{t('unitTariff')}</>), flex: 1 },
 										{ field: 'freeTime', headerName: t('freeTime'), valueFormatter: (params: GridValueFormatterParams) => `${params.value || ''} ` + t('hours'), flex: 1 },
 										{ field: 'multiStop', headerName: t('multiStop'), valueGetter: (params: GridValueGetterParams) => `${params.row.multiStop || ''} ${params.row.currency}`, flex: 1 },
-										{ field: 'overtimeTariff', headerName: t('overtimeTariff'), valueGetter: (params: GridValueGetterParams) => `${params.row.overtimeTariff || ''} ${params.row.currency} / ${t('hour')}`, flex: 1 },
+										{ field: 'overtimeTariff', headerName: t('overtimeTariff'), valueGetter: (params: GridValueGetterParams) => `${params.row.overtimeTariff || ''} ${params.row.currency} / ${t('hour')}`, renderHeader: (params: GridColumnHeaderParams) => (<>Overtime <br />tariff</>), flex: 1 },
 										{ field: 'validUntil', headerName: t('validUntil'), renderCell: (params: GridRenderCellParams) => {
 											return (
 											<Box sx={{ my: 1, mr: 1 }}>
@@ -459,9 +460,27 @@ function ManagePriceOffer(props: any) {
 							</Alert>
 						</Grid>
 						<Grid item xs={12} md={6} sx={{ pt: 1.5, display: "flex", alignItems: "center", justifyContent: "end" }}>
-							<Button variant="contained" color="primary" sx={{ mr: 1, textTransform: "none" }} onClick={updateOffer}>{t('updateOffer')}</Button>
-							<Button variant="contained" color="success" sx={{ mr: 1, textTransform: "none" }} onClick={acceptOffer}>{t('approveOffer')}</Button>
-							<Button variant="contained" color="secondary" sx={{ mr: 1, textTransform: "none" }} onClick={rejectOffer}>{t('rejectOffer')}</Button>
+							<Button 
+								variant="contained" 
+								color="primary" 
+								sx={{ mr: 1, textTransform: "none" }} 
+								onClick={updateOffer}
+								disabled={offer.status !== "Pending"}
+							>{t('updateOffer')}</Button>
+							<Button 
+								variant="contained" 
+								color="success" 
+								sx={{ mr: 1, textTransform: "none" }} 
+								onClick={acceptOffer}
+								disabled={offer.status !== "Pending"}
+							>{t('approveOffer')}</Button>
+							<Button
+							 	variant="contained" 
+								color="secondary" 
+								sx={{ mr: 1, textTransform: "none" }} 
+								onClick={rejectOffer}
+								disabled={offer.status !== "Pending"}
+							>{t('rejectOffer')}</Button>
 						</Grid>
 					</Grid> : <Skeleton sx={{ mx: 5, mt: 3 }} />
 				}

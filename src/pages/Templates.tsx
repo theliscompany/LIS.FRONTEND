@@ -48,6 +48,9 @@ const variableOptions = [
     { label: t('etd'), value: "etd" },
     { label: t('frequency'), value: "frequency" },
     { label: t('transitTime'), value: "transitTime" },
+    { label: t('freeTime'), value: "freeTime" },
+    { label: t('overtimeTariff2'), value: "overtimeTariff" },
+    { label: t('listServices'), value: "listServices" },
     { label: t('containersQuantities'), value: "containersQuantities" },
     { label: t('pricesContainers'), value: "pricesContainers" },
     { label: t('clientName'), value: "clientName" },
@@ -222,6 +225,7 @@ function Templates() {
                         "name": name,
                         "currentVersion": currentVersion,
                         "content": rteRef.current?.editor?.getHTML(),
+                        "contentEn": rteRef.current?.editor?.getHTML(),
                         "author": "Cyrille Penaye",
                         "tags": tags
                     };
@@ -246,6 +250,7 @@ function Templates() {
                         "name": name,
                         "currentVersion": currentVersion,
                         "content": rteRef.current?.editor?.getHTML(),
+                        "contentEn": rteRef.current?.editor?.getHTML(),
                         "author": "Cyrille Penaye",
                         "tags": tags
                     };
