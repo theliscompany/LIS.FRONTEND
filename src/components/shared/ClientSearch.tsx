@@ -18,6 +18,20 @@ interface LocationAutocompleteProps {
     callBack?: (value: any) => void;
 }
 
+
+function checkFormatCode(code: string) {
+    // Définir une expression régulière pour le format attendu
+    var regex = /^BE-\d{5}$/;
+  
+    // Utiliser la méthode test() pour vérifier si la chaîne de caractères correspond à l'expression régulière
+    if (regex.test(code)) {
+        return true; // La chaîne de caractères respecte le format
+    } 
+    else {
+        return false; // La chaîne de caractères ne respecte pas le format
+    }
+}
+
 const ClientSearch: React.FC<LocationAutocompleteProps> = ({ id, value, onChange, fullWidth, disabled, callBack }) => {
     const [loading, setLoading] = useState(false);
     const [options, setOptions] = useState<any[]>([]);
@@ -46,14 +60,16 @@ const ClientSearch: React.FC<LocationAutocompleteProps> = ({ id, value, onChange
                 }
             );
             
-            // First i search by contact number
-            const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisClient.endPoint+"/Contact/GetContactsByContactNumber?contactNumber="+search+"&category=1", token);
-            // const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisClient.endPoint+"/Contact/GetContacts", token);
-            if (response !== null && response !== undefined && response.length !== 0) {
-                console.log(response);
-                // Removing duplicates from result before rendering
-                setOptions(response.filter((obj: any, index: number, self: any) => index === self.findIndex((o: any) => o.contactName === obj.contactName)));
-            }  
+            if (checkFormatCode(search)) {
+                // First i search by contact number
+                const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisClient.endPoint+"/Contact/GetContactsByContactNumber?contactNumber="+search+"&category=1", token);
+                // const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisClient.endPoint+"/Contact/GetContacts", token);
+                if (response !== null && response !== undefined && response.length !== 0) {
+                    console.log(response);
+                    // Removing duplicates from result before rendering
+                    setOptions(response.filter((obj: any, index: number, self: any) => index === self.findIndex((o: any) => o.contactName === obj.contactName)));
+                }
+            } 
             else {
                 // If i dont find i search by contact name
                 const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisClient.endPoint+"/Contact/GetContactsByCategory?contactName="+search+"&category=1", token);
@@ -77,7 +93,7 @@ const ClientSearch: React.FC<LocationAutocompleteProps> = ({ id, value, onChange
                 id={id}
                 fullWidth={fullWidth}
                 disablePortal
-                freeSolo
+                // freeSolo
                 autoSelect
                 options={options}
                 loading={loading}
@@ -94,23 +110,26 @@ const ClientSearch: React.FC<LocationAutocompleteProps> = ({ id, value, onChange
                 }}
                 value={value}
                 onChange={(event, newValue) => {
-                    // console.log(newValue);
-                    var splitValue = null;
-                    if (newValue.contactName === undefined) {
-                        splitValue = newValue.split(', ');
-                    }
+                    console.log(newValue);
+                    onChange(newValue);
+
+                    // var splitValue = null;
+                    // if (newValue.contactName === undefined) {
+                    //     splitValue = newValue.split(', ');
+                    // }
                     
-                    if (splitValue !== null && splitValue !== undefined) {
-                        if (splitValue.length !== 2) {
-                            onChange({ contactNumber: "0", contactName: newValue});
-                        }
-                        else {
-                            onChange({ contactNumber: splitValue[0], contactName: splitValue[1]});
-                        }
-                    }
-                    else {
-                        onChange(newValue);
-                    }
+                    // if (splitValue !== null && splitValue !== undefined) {
+                    //     if (splitValue.length !== 2) {
+                    //         onChange({ contactNumber: "0", contactName: newValue});
+                    //     }
+                    //     else {
+                    //         onChange({ contactNumber: splitValue[0], contactName: splitValue[1]});
+                    //     }
+                    // }
+                    // else {
+                    //     onChange(newValue);
+                    // }
+
                     if (callBack) {
                         callBack(newValue);
                     }

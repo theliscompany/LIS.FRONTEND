@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import { Alert, Autocomplete, Box, Button, Chip, DialogActions, DialogContent, Grid, IconButton, InputLabel, ListItem, ListItemText, NativeSelect, Skeleton, Step, StepLabel, Stepper, TextField, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material';
 import { MuiTelInput } from 'mui-tel-input';
 import AutocompleteSearch from '../components/shared/AutocompleteSearch';
-import { inputLabelStyles, BootstrapInput, BootstrapDialog, whiteButtonStyles, gridStyles, HtmlTooltip, BootstrapDialogTitle, buttonCloseStyles } from '../utils/misc/styles';
+import { inputLabelStyles, BootstrapInput, BootstrapDialog, whiteButtonStyles, gridStyles, HtmlTooltip, BootstrapDialogTitle, buttonCloseStyles, sizeStyles } from '../utils/misc/styles';
 import { enqueueSnackbar, SnackbarProvider } from 'notistack';
 import DeleteIcon from '@mui/icons-material/Delete';
 import HelpIcon from '@mui/icons-material/Help';
@@ -179,6 +179,9 @@ function sortByCloseness(myPort: any, seaPorts: any) {
     return seaPorts;
 }
 
+// 
+const defaultTemplate = "65b74024891f9de80722fc6d";
+
 function Request() {
     const [load, setLoad] = useState<boolean>(true);
     const [loadAssignees, setLoadAssignees] = useState<boolean>(true);
@@ -248,6 +251,8 @@ function Request() {
     const [rowSelectionModel2, setRowSelectionModel2] = React.useState<GridRowSelectionModel>([]);
     const [rowSelectionModel3, setRowSelectionModel3] = React.useState<GridRowSelectionModel>([]);
 
+    const [templateBase, setTemplateBase] = useState<string>("");
+    const [loadTemplate, setLoadTemplate] = useState<boolean>(false);
     const [mailLanguage, setMailLanguage] = useState<string>("fr");
 
     const rteRef = useRef<RichTextEditorRef>(null);
@@ -391,24 +396,10 @@ function Request() {
         { field: 'comment', headerName: "Comment", renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box sx={{ my: 2 }}>
-                    <HtmlTooltip
-                        title={
-                            params.row.comment === "" || params.row.comment === null ? 
-                            <Box sx={{ p: 1 }}>
-                                <Typography color="inherit" sx={{ fontSize: 13 }}>{t('noComment')}</Typography>
-                            </Box> : 
-                            <Box sx={{ p: 1 }}>
-                                <Typography color="inherit" sx={{ fontSize: 13 }}>{params.row.comment}</Typography>
-                            </Box>
-                        }
-                    >
-                        <IconButton size="small">
-                            <HelpIcon fontSize="small" />
-                        </IconButton>
-                    </HtmlTooltip>
+                    {params.row.comment}
                 </Box>
             );
-        }, flex: 1 },
+        }, flex: 4 },
     ];
     
     const handleChangeHaulageType = (event: { target: { value: string } }) => {
@@ -625,12 +616,12 @@ function Request() {
     }
     
     useEffect(() => {
+        getTemplate(defaultTemplate);
+
         // Here i try to get all the clients
         getClients();
-        
         // Here i initialize the sea ports
         initializeSeaPorts();
-
         getContainers();
         // Get everything essential too (Products, Ports, Request info)
         getAssignees();
@@ -1120,37 +1111,72 @@ function Request() {
         }
     }
 
-    // const postEmail = async(from: string, to: string, subject: string, htmlContent: string) => {
-    //     const form = new FormData();
-    //     form.append('From', from);
-    //     form.append('To', to);
-    //     form.append('Subject', subject);
-    //     form.append('HtmlContent', htmlContent);
-    //     if (fileValue !== undefined) {
-    //         for (var i=0; i < fileValue.length; i++) {
-    //             form.append('Attachments', fileValue[i]);
-    //         }
-    //     }
+    // Work on the template
+    const getTemplate = async (id: string) => {
+        setLoadTemplate(true)
+        if (context) {
+            const response = await (context as BackendService<any>).getSingle(protectedResources.apiLisTemplate.endPoint+"/Template/"+id);
+            if (response !== null && response !== undefined) {
+                setTemplateBase(response.data.content);
+                setLoadTemplate(false);
+            }
+            else {
+                setLoadTemplate(false);
+            }
+            console.log(response);
+        }
+    }
+    
+    // Fonction pour remplacer les variables dans le template
+    function generateEmailContent(template: string, variables: any) {
+        return template.replace(/\{\{(.*?)\}\}/g, (_, variableName: any) => {
+            const trimmedName = variableName.trim();
+            // Si la variable est non nulle/vide, l'encapsuler dans <strong>
+            if (variables[trimmedName]) {
+                return `<strong>${variables[trimmedName]}</strong>`;
+            } else {
+                return `{{${trimmedName}}}`; // Laisser le placeholder si la variable est nulle/vide
+            }
+        });
+    }
+    
+    function getDefaultContent(template: any) {
+        var loadingCity = departure !== null ? departure.city.toUpperCase()+', '+departure.country.toUpperCase() : "";
+        var destinationPort = portDestination !== null ? portDestination.portName+', '+portDestination.country.toUpperCase() : "";
+        
+        var commodities:any = tags.map((elm: any) => elm.productName).join(',');
+        var listServices = selectedMisc !== null ? selectedMisc.services.map((elm: any) => "<p>- "+elm.service.serviceName+" inclus</p>").join('') : "<br>";
+        var pricesContainers = containersSelection !== null ? containersSelection.map((elm: any) => "<p>"+calculateContainerPrice(elm.container, elm.quantity)+" "+selectedSeafreight.currency+" / "+elm.container+"</p>").join('') : "";
+        var clientName = clientNumber !== null ? clientNumber.contactName : null;
+        var freeTime = selectedHaulage !== null ? selectedHaulage.freeTime : "";
+        var overtimeTariff = selectedHaulage !== null ? selectedHaulage.overtimeTariff : "";
+        var frequency = selectedSeafreight !== null ? selectedSeafreight.frequency : "";
+        var transitTime = selectedSeafreight !== null ? selectedSeafreight.transitTime : "";
+        var containersQuantities = displayContainers(containersSelection);
 
-    //     fetch('https://lisquotes-svc.azurewebsites.net/api/Email', {
-    //         method: 'POST',
-    //         headers: {
-    //             'accept': '*/*',
-    //             // 'Content-Type': 'multipart/form-data'
-    //         },
-    //         body: form
-    //     })
-    //     .then((response) => response.json())
-    //     .then((response: any) => {
-    //         if (response !== undefined && response !== null && response.code == 200) {
-    //             enqueueSnackbar(t('messageSuccessSent'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
-    //         }
-    //         else {
-    //             enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
-    //         }
-    //     });
-    // }
+        const variables = { loadingCity, destinationPort, commodities, clientName, freeTime, overtimeTariff, frequency, transitTime, containersQuantities, listServices, pricesContainers };
+        return generateEmailContent(template, variables);
+    }
 
+    useEffect(() => {
+        var loadingCity = departure !== null ? departure.city.toUpperCase()+', '+departure.country.toUpperCase() : "";
+        var destinationPort = portDestination !== null ? portDestination.portName+', '+portDestination.country.toUpperCase() : "";
+        
+        var commodities:any = tags.map((elm: any) => elm.productName).join(',');
+        var listServices = selectedMisc !== null ? selectedMisc.services.map((elm: any) => "<p>- "+elm.service.serviceName+" inclus</p>").join('') : "<br>";
+        var pricesContainers = containersSelection !== null ? containersSelection.map((elm: any) => "<p>"+calculateContainerPrice(elm.container, elm.quantity)+" "+selectedSeafreight.currency+" / "+elm.container+"</p>").join('') : "";
+        var clientName = clientNumber !== null ? clientNumber.contactName : null;
+        var freeTime = selectedHaulage !== null ? selectedHaulage.freeTime : "";
+        var overtimeTariff = selectedHaulage !== null ? selectedHaulage.overtimeTariff : "";
+        var frequency = selectedSeafreight !== null ? selectedSeafreight.frequency : "";
+        var transitTime = selectedSeafreight !== null ? selectedSeafreight.transitTime : "";
+        var containersQuantities = displayContainers(containersSelection);
+
+        const variables = { loadingCity, destinationPort, commodities, clientName, freeTime, overtimeTariff, frequency, transitTime, containersQuantities, listServices, pricesContainers };
+        rteRef.current?.editor?.commands.setContent(generateEmailContent(templateBase, variables));
+    }, [tags, departure, clientNumber, portDestination, selectedSeafreight, selectedHaulage, selectedMisc, containersSelection]);
+
+    
     return (
         <div style={{ background: "#fff", borderTopLeftRadius: 20, borderTopRightRadius: 20 }}>
             <SnackbarProvider />
@@ -1178,9 +1204,58 @@ function Request() {
                                         <Typography variant="subtitle1" display="inline">{t('doYouThinkInformation')}</Typography>
                                     </Alert>
                                 </Grid>
+                                
+                                <Grid item xs={12} md={6} mt={1}>
+                                    <InputLabel htmlFor="client-number" sx={inputLabelStyles}>{t('clientNumber')}</InputLabel>
+                                    <ClientSearch 
+                                        id="client-number" 
+                                        value={clientNumber} 
+                                        onChange={setClientNumber}
+                                        disabled 
+                                        callBack={(value: any) => {
+                                            console.log(value);
+                                            // console.log(clientNumber);
+                                            setClientNumber(value);
+                                            if (clientNumber !== null) {
+                                                setPhone(clientNumber.phone !== null ? clientNumber.phone : "");
+                                                // alert("check");
+                                            }
+                                        }} 
+                                        fullWidth 
+                                    />
+                                </Grid>
+                                <Grid item xs={12} md={6} mt={1}>
+                                    <InputLabel htmlFor="tags" sx={inputLabelStyles}>{t('specifics')}</InputLabel>
+                                    {
+                                        products !== null ?
+                                        <Autocomplete
+                                            multiple    
+                                            disablePortal
+                                            id="tags"
+                                            placeholder="Machinery, Household goods, etc"
+                                            options={products}
+                                            getOptionLabel={(option: any) => { 
+                                                if (option !== null && option !== undefined) {
+                                                    return option.productName !== undefined ? option.productName : option;
+                                                }
+                                                return ""; 
+                                            }}
+                                            value={tags}
+                                            sx={{ mt: 1 }}
+                                            renderInput={(params: any) => <TextField {...params} sx={{ textTransform: "lowercase" }} />}
+                                            onChange={(e: any, value: any) => { setTags(value); }}
+                                            fullWidth
+                                        /> : <Skeleton />
+                                    }
+                                </Grid>
                                 <Grid item xs={12} md={6}>
                                     <InputLabel htmlFor="whatsapp-phone-number" sx={inputLabelStyles}>{t('whatsappNumber')}</InputLabel>
-                                    <MuiTelInput id="whatsapp-phone-number" value={phone} onChange={setPhone} defaultCountry="CM" preferredCountries={["CM", "BE", "KE"]} fullWidth sx={{ mt: 1 }} />
+                                    <MuiTelInput 
+                                        id="whatsapp-phone-number" 
+                                        value={phone} onChange={setPhone} 
+                                        defaultCountry="CM" preferredCountries={["CM", "BE", "KE"]} 
+                                        fullWidth sx={{ mt: 1 }} disabled 
+                                    />
                                 </Grid>
                                 <Grid item xs={12} md={6}>
                                     <InputLabel htmlFor="request-email" sx={inputLabelStyles}>{t('emailAddress')}</InputLabel>
@@ -1457,35 +1532,6 @@ function Request() {
                                     </> : null
                                 }
 
-                                <Grid item xs={12} md={6} mt={1}>
-                                    <InputLabel htmlFor="tags" sx={inputLabelStyles}>{t('specifics')}</InputLabel>
-                                    {
-                                        products !== null ?
-                                        <Autocomplete
-                                            multiple    
-                                            disablePortal
-                                            id="tags"
-                                            placeholder="Machinery, Household goods, etc"
-                                            options={products}
-                                            getOptionLabel={(option: any) => { 
-                                                if (option !== null && option !== undefined) {
-                                                    return option.productName !== undefined ? option.productName : option;
-                                                }
-                                                return ""; 
-                                            }}
-                                            value={tags}
-                                            sx={{ mt: 1 }}
-                                            renderInput={(params: any) => <TextField {...params} sx={{ textTransform: "lowercase" }} />}
-                                            onChange={(e: any, value: any) => { setTags(value); }}
-                                            fullWidth
-                                        /> : <Skeleton />
-                                    }
-                                </Grid>
-                                <Grid item xs={12} md={6} mt={1}>
-                                    <InputLabel htmlFor="client-number" sx={inputLabelStyles}>{t('clientNumber')}</InputLabel>
-                                    <ClientSearch id="client-number" value={clientNumber} onChange={setClientNumber} fullWidth />
-                                </Grid>
-                                
                                 <Grid item xs={12} md={6} mt={.5} sx={{ display: { xs: 'none', md: 'block' } }}>
                                     <InputLabel htmlFor="request-message" sx={inputLabelStyles}>{t('details')}</InputLabel>
                                     <BootstrapInput id="request-message" type="text" multiline rows={3.5} value={message} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setMessage(e.target.value)} fullWidth />
@@ -1844,7 +1890,7 @@ function Request() {
                                                                     {
                                                                         !loadResults ? 
                                                                         miscs !== null && miscs.length !== 0 ?
-                                                                            <Box sx={{ overflow: "auto" }}>
+                                                                            <Box sx={{ overflow: "auto", maxWidth: 'calc(80vw - 130px)' }}>
                                                                                 <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>{t('listMiscPricingOffers')+t('fromDotted')+portDeparture.portName+"-"+portDestination.portName}</Typography>
                                                                                 <DataGrid
                                                                                     rows={miscs}
@@ -1879,7 +1925,7 @@ function Request() {
                                                                             hideFooter
                                                                             getRowId={(row: any) => row?.seaFreightId}
                                                                             getRowHeight={() => "auto" }
-                                                                            sx={gridStyles}
+                                                                            sx={sizeStyles}
                                                                             isRowSelectable={(params: any) => false}
                                                                         />
                                                                     </Box>
@@ -1895,7 +1941,7 @@ function Request() {
                                                                                 hideFooter
                                                                                 getRowId={(row: any) => row?.id}
                                                                                 getRowHeight={() => "auto" }
-                                                                                sx={gridStyles}
+                                                                                sx={sizeStyles}
                                                                                 isRowSelectable={(params: any) => false}
                                                                             />
                                                                         </Box>
@@ -1912,13 +1958,13 @@ function Request() {
                                                                                 hideFooter
                                                                                 getRowId={(row: any) => row?.id}
                                                                                 getRowHeight={() => "auto" }
-                                                                                sx={gridStyles}
+                                                                                sx={sizeStyles}
                                                                                 isRowSelectable={(params: any) => false}
                                                                             />
                                                                         </Box>
                                                                     </Grid> : null
                                                                 }
-                                                                <Grid item xs={4}>
+                                                                {/* <Grid item xs={4}>
                                                                     <InputLabel htmlFor="mailLanguage" sx={inputLabelStyles}>{t('mailLanguage')}</InputLabel>
                                                                     <ToggleButtonGroup
                                                                         color="primary"
@@ -1969,13 +2015,38 @@ function Request() {
                                                                         <ToggleButton value="fr"><img src="/assets/img/flags/flag-fr.png" style={{ width: "12px", marginRight: "6px" }} alt="flag english" /> Français</ToggleButton>
                                                                         <ToggleButton value="en"><img src="/assets/img/flags/flag-en.png" style={{ width: "12px", marginRight: "6px" }} alt="flag english" /> English</ToggleButton>
                                                                     </ToggleButtonGroup>
-                                                                </Grid>
+                                                                </Grid> */}
                                                                 <Grid item xs={12}>
                                                                     <InputLabel htmlFor="details" sx={inputLabelStyles}>{t('detailsOffer')}</InputLabel>
                                                                     {
                                                                         selectedSeafreight !== null && selectedHaulage !== null ? 
                                                                         <Box sx={{ mt: 2 }}>
-                                                                            <RichTextEditor
+                                                                            {
+                                                                                loadTemplate !== true ?
+                                                                                <RichTextEditor
+                                                                                    ref={rteRef}
+                                                                                    extensions={[StarterKit]}
+                                                                                    content={getDefaultContent(templateBase)}
+                                                                                    renderControls={() => (
+                                                                                    <MenuControlsContainer>
+                                                                                        <MenuSelectHeading />
+                                                                                        <MenuDivider />
+                                                                                        <MenuButtonBold />
+                                                                                        <MenuButtonItalic />
+                                                                                        <MenuButtonStrikethrough />
+                                                                                        <MenuButtonOrderedList />
+                                                                                        <MenuButtonBulletedList />
+                                                                                        <MenuSelectTextAlign />
+                                                                                        <MenuButtonEditLink />
+                                                                                        <MenuButtonHorizontalRule />
+                                                                                        <MenuButtonUndo />
+                                                                                        <MenuButtonRedo />
+                                                                                    </MenuControlsContainer>
+                                                                                    )}
+                                                                                />
+                                                                                : <Skeleton />
+                                                                            }
+                                                                            {/* <RichTextEditor
                                                                                 ref={rteRef}
                                                                                 extensions={[StarterKit]}
                                                                                 content={
@@ -2010,7 +2081,7 @@ function Request() {
                                                                                     <MenuButtonRedo />
                                                                                 </MenuControlsContainer>
                                                                                 )}
-                                                                            />
+                                                                            /> */}
                                                                         </Box>   
                                                                         : null
                                                                     }

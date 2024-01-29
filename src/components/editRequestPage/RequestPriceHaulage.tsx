@@ -388,7 +388,7 @@ function RequestPriceHaulage(props: any) {
                                                 <MenuSelectHeading />
                                                 <MenuDivider />
                                                 <MenuButtonBold />
-    .                                            <MenuButtonItalic />
+                                                <MenuButtonItalic />
                                                 <MenuButtonStrikethrough />
                                                 <MenuButtonOrderedList />
                                                 <MenuButtonBulletedList />

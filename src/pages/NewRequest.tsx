@@ -214,12 +214,10 @@ function NewRequest(props: any) {
                     body: JSON.stringify({ 
                         email: email,
                         whatsapp: phone,
-                        // departure: departurePort.portName+', '+departurePort.country,
-                        // arrival: arrivalPort.portName+', '+arrivalPort.country,
                         departure: departure !== null && departure !== undefined ? departure.city.toUpperCase()+', '+departure.country+', '+departure.latitude+', '+departure.longitude : "",
                         arrival: arrival !== null && arrival !== undefined ? arrival.city.toUpperCase()+', '+arrival.country+', '+arrival.latitude+', '+arrival.longitude : "",
                         cargoType: 0,
-                        clientNumber: clientNumber !== null ? String(clientNumber.contactId)+", "+clientNumber.contactName : null,
+                        clientNumber: clientNumber !== null ? String(clientNumber.contactNumber)+", "+clientNumber.contactName : null,
                         packingType: packingType,
                         containers: containersSelection.map((elm: any, i: number) => { return { 
                             id: containers.find((item: any) => item.packageName === elm.container).packageId, 
@@ -281,6 +279,54 @@ function NewRequest(props: any) {
                         <Grid item xs={3}>
                             <Button variant="contained" color="inherit" sx={{ float: "right", backgroundColor: "#fff", textTransform: "none" }} onClick={() => { setModal7(true); }} >{t('createNewContact')}</Button>
                         </Grid>
+                        
+                        <Grid item xs={12} md={6} mt={1}>
+                            <InputLabel htmlFor="client-number" sx={inputLabelStyles}>{t('clientNumber')}</InputLabel>
+                            <ClientSearch 
+                                id="client-number" 
+                                value={clientNumber} 
+                                onChange={setClientNumber} 
+                                callBack={() => {
+                                    console.log(clientNumber);
+                                    if (clientNumber !== null) {
+                                        setPhone(clientNumber.phone !== null ? clientNumber.phone : "");
+                                        setEmail(clientNumber.email !== null ? clientNumber.email : "");
+                                        // alert("check");
+                                    }
+                                }} 
+                                fullWidth 
+                            />
+                        </Grid>
+                        <Grid item xs={12} md={6} mt={1}>
+                            <InputLabel htmlFor="assigned-manager" sx={inputLabelStyles}>{t('assignedManager')}</InputLabel>
+                            {
+                                !loadUser ? 
+                                <>
+                                    <NativeSelect
+                                        id="assigned-manager"
+                                        value={assignedManager}
+                                        onChange={handleChangeAssignedManager}
+                                        input={<BootstrapInput />}
+                                        fullWidth
+                                    >
+                                        <option value="">{t('noAgentAssigned')}</option>
+                                        {
+                                            assignees.map((row: any, i: number) => (
+                                                <option key={"assigneeId-"+i} value={String(row.id)}>{row.name}</option>
+                                            ))
+                                        }
+                                    </NativeSelect>
+                                </> : <Skeleton sx={{ mt: 3 }} />   
+                            }
+                            {/* {
+                                !loadUser ? 
+                                currentUser !== null && currentUser !== undefined ? 
+                                <Alert severity="info" sx={{ mt: 1 }}>{t('requestAssignedTo')} {account?.name} {t('byDefault')}</Alert> : 
+                                <Alert severity="warning" sx={{ mt: 1 }}>{t('requestNotAssignedCurrentUser')} <Link to="/admin/users" style={{ textDecoration: "none" }}>{t('users')}</Link>.</Alert>
+                                : <Skeleton sx={{ my: 1 }} />
+                            }             */}
+                        </Grid>
+                        
                         <Grid item xs={12} md={6}>
                             <InputLabel htmlFor="whatsapp-phone-number" sx={inputLabelStyles}>{t('whatsappNumber')}</InputLabel>
                             <MuiTelInput id="whatsapp-phone-number" value={phone} onChange={setPhone} defaultCountry="CM" preferredCountries={["CM", "BE", "KE"]} fullWidth sx={{ mt: 1 }} />
@@ -301,6 +347,7 @@ function NewRequest(props: any) {
                             <InputLabel htmlFor="packing-type" sx={inputLabelStyles}>{t('packingType')}</InputLabel>
                             <NativeSelect
                                 id="packing-type"
+                                placeholder=''
                                 value={packingType}
                                 onChange={handleChangePackingType}
                                 input={<BootstrapInput />}
@@ -355,7 +402,7 @@ function NewRequest(props: any) {
                                     {t('addContainer')}
                                 </Button>
                             </Grid>
-                            <Grid item xs={12}>
+                            <Grid item xs={12} mb={2}>
                                 {
                                     containersSelection !== undefined && containersSelection !== null && containersSelection.length !== 0 && containers !== null ? 
                                         <Grid container spacing={2}>
@@ -390,7 +437,6 @@ function NewRequest(props: any) {
                             <>
                             <Grid item xs={12} md={3} mt={1}>
                                 <InputLabel htmlFor="package-name" sx={inputLabelStyles}>{t('packageName')}</InputLabel>
-                                {/* <BootstrapInput id="package-name" type="text" value={packageName} onChange={(e: any) => {setPackageName(e.target.value)}} fullWidth /> */}
                                 <NativeSelect
                                     id="package-name"
                                     value={packageName}
@@ -408,10 +454,6 @@ function NewRequest(props: any) {
                                 <InputLabel htmlFor="package-quantity" sx={inputLabelStyles}>{t('quantity')}</InputLabel>
                                 <BootstrapInput id="package-quantity" type="number" inputProps={{ min: 1, max: 100 }} value={packageQuantity} onChange={(e: any) => {setPackageQuantity(e.target.value)}} fullWidth />
                             </Grid>
-                            {/* <Grid item xs={12} md={2} mt={1}>
-                                <InputLabel htmlFor="package-dimensions" sx={inputLabelStyles}>{t('dimensions')}</InputLabel>
-                                <BootstrapInput id="package-dimensions" type="text" value={packageDimensions} onChange={(e: any) => {setPackageDimensions(e.target.value)}} fullWidth />
-                            </Grid> */}
                             <Grid item xs={12} md={1} mt={1}>
                                 <InputLabel htmlFor="package-length" sx={inputLabelStyles}>{t('length')}(cm)</InputLabel>
                                 <BootstrapInput id="package-length" type="number" value={packageLength} onChange={(e: any) => {setPackageLength(e.target.value)}} fullWidth />
@@ -448,7 +490,7 @@ function NewRequest(props: any) {
                                 </Button>
                             </Grid>
                             <Grid item xs={12}>
-                            {
+                                {
                                     packagesSelection !== undefined && packagesSelection !== null && packagesSelection.length !== 0 ? 
                                         <Grid container spacing={2}>
                                             {
@@ -594,46 +636,12 @@ function NewRequest(props: any) {
                                 /> : <Skeleton />
                             }
                         </Grid>
-                        <Grid item xs={12} md={6} mt={1}>
-                            <InputLabel htmlFor="client-number" sx={inputLabelStyles}>{t('clientNumber')}</InputLabel>
-                            {/* <BootstrapInput id="client-number" value={clientNumber} onChange={(e: any) => {setClientNumber(e.target.value)}} fullWidth /> */}
-                            <ClientSearch id="client-number" value={clientNumber} onChange={setClientNumber} callBack={() => console.log(clientNumber)} fullWidth />
-                        </Grid>
-
                         <Grid item xs={12} md={6} mt={.5} sx={{ display: { xs: 'none', md: 'block' } }}>
                             <InputLabel htmlFor="request-message" sx={inputLabelStyles}>{t('details')}</InputLabel>
                             <BootstrapInput id="request-message" type="text" multiline rows={3.5} value={message} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setMessage(e.target.value)} fullWidth />
                         </Grid>
-                        <Grid item xs={12} md={6} mt={1}>
-                            <InputLabel htmlFor="assigned-manager" sx={inputLabelStyles}>{t('assignedManager')}</InputLabel>
-                            {
-                                !loadUser ? 
-                                <>
-                                    <NativeSelect
-                                        id="assigned-manager"
-                                        value={assignedManager}
-                                        onChange={handleChangeAssignedManager}
-                                        input={<BootstrapInput />}
-                                        fullWidth
-                                    >
-                                        <option value="">{t('noAgentAssigned')}</option>
-                                        {
-                                            assignees.map((row: any, i: number) => (
-                                                <option key={"assigneeId-"+i} value={String(row.id)}>{row.name}</option>
-                                            ))
-                                        }
-                                    </NativeSelect>
-                                </> : <Skeleton sx={{ mt: 3 }} />   
-                            }
-                            {
-                                !loadUser ? 
-                                currentUser !== null && currentUser !== undefined ? 
-                                <Alert severity="info" sx={{ mt: 1 }}>{t('requestAssignedTo')} {account?.name} {t('byDefault')}</Alert> : 
-                                <Alert severity="warning" sx={{ mt: 1 }}>{t('requestNotAssignedCurrentUser')} <Link to="/admin/users" style={{ textDecoration: "none" }}>{t('users')}</Link>.</Alert>
-                                : <Skeleton sx={{ my: 1 }} />
-                            }            
-                        </Grid>
-                        <Grid item xs={12}>
+
+                        <Grid item xs={12} md={2}>
                             <Button variant="contained" color={!load ? "primary" : "info"} className="mr-3" onClick={sendQuotationForm} disabled={load === true} sx={{ textTransform: "none" }}>{t('createRequest')}</Button>
                         </Grid>
                     </Grid>

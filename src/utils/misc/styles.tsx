@@ -135,6 +135,15 @@ export const gridStyles = {
   minHeight: "10px"
 }
 
+export const sizeStyles = { 
+  "&.MuiDataGrid-root .MuiDataGrid-cell:focus-within": {
+      outline: "none !important",
+  },
+  height: "auto",
+  minHeight: "10px",
+  maxWidth: "calc(100vw - 430px)"
+}
+
 export const BootstrapInput = styled(InputBase)(({ theme }) => ({
     'label + &': {
       marginTop: theme.spacing(1),

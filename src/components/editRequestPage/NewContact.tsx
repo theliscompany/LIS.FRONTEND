@@ -63,13 +63,22 @@ function NewContact(props: any) {
             }
             
             var categoriesText = props.categories.length !== 0 ? "?"+ props.categories.map((category: any) => `categories=${category}`).join('&') : "";
-
-            const response = await (context as BackendService<any>).postWithToken(protectedResources.apiLisClient.endPoint+"/Contact/CreateCustomerContact"+categoriesText, dataSent, token);
-            if (response !== null) {
-                enqueueSnackbar("The contact has been added with success!", { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
-                props.closeModal();
+            if (categoriesText === "?categories=") {
+                categoriesText = "";
             }
-            else {
+
+            try {
+                const response = await (context as BackendService<any>).postWithToken(protectedResources.apiLisClient.endPoint+"/Contact/CreateCustomerContact"+categoriesText, dataSent, token);
+                if (response !== null) {
+                    enqueueSnackbar("The contact has been added with success!", { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                    props.closeModal();
+                }
+                else {
+                    enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                }
+            }
+            catch (err: any) {
+                console.log(err);
                 enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
             }
         }

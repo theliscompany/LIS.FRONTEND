@@ -197,7 +197,8 @@ function ManagePriceOffer(props: any) {
 				enqueueSnackbar(t('priceOfferApproved'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top" } });
 
 				var footer = `
-				<div style="font-family: Verdana; padding-top: 60px;">
+				<div>${account?.name}</div>
+                <div style="font-family: Verdana; padding-top: 60px;">
 					<a href="${process.env.REACT_APP_ORIGIN_URL+"/acceptOffer/"+id}" style="display:inline-block;background-color:#008089;color:#fff;padding:10px 20px;text-decoration:none" target="_blank">Accept the offer</a>
 					<a href="${process.env.REACT_APP_ORIGIN_URL+"/refuseOffer/"+id}" style="display:inline-block;background-color:#F2F2F2;color:#008089;padding:10px 20px;text-decoration:none" target="_blank">Refuse the offer</a>
 					<div style="margin-top: 15px;"><a target="_blank" href="www.omnifreight.eu">www.omnifreight.eu</a></div>
@@ -459,9 +460,27 @@ function ManagePriceOffer(props: any) {
 							</Alert>
 						</Grid>
 						<Grid item xs={12} md={6} sx={{ pt: 1.5, display: "flex", alignItems: "center", justifyContent: "end" }}>
-							<Button variant="contained" color="primary" sx={{ mr: 1, textTransform: "none" }} onClick={updateOffer}>{t('updateOffer')}</Button>
-							<Button variant="contained" color="success" sx={{ mr: 1, textTransform: "none" }} onClick={acceptOffer}>{t('approveOffer')}</Button>
-							<Button variant="contained" color="secondary" sx={{ mr: 1, textTransform: "none" }} onClick={rejectOffer}>{t('rejectOffer')}</Button>
+							<Button 
+								variant="contained" 
+								color="primary" 
+								sx={{ mr: 1, textTransform: "none" }} 
+								onClick={updateOffer}
+								disabled={offer.status !== "Pending"}
+							>{t('updateOffer')}</Button>
+							<Button 
+								variant="contained" 
+								color="success" 
+								sx={{ mr: 1, textTransform: "none" }} 
+								onClick={acceptOffer}
+								disabled={offer.status !== "Pending"}
+							>{t('approveOffer')}</Button>
+							<Button
+							 	variant="contained" 
+								color="secondary" 
+								sx={{ mr: 1, textTransform: "none" }} 
+								onClick={rejectOffer}
+								disabled={offer.status !== "Pending"}
+							>{t('rejectOffer')}</Button>
 						</Grid>
 					</Grid> : <Skeleton sx={{ mx: 5, mt: 3 }} />
 				}

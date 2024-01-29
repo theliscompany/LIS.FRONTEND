@@ -139,6 +139,7 @@ export const fr = {
   freeTime: "Temps libre",
   multiStop: "Multi-arrêts",
   overtimeTariff: "Tarif des <br />heures supplémentaires",
+  overtimeTariff2: "Tarif des heures supplémentaires",
   unitTariff: "Transport <br />par unité",
   validUntil: "Valide jusqu'au",
   destinationPort: "Port de destination",
