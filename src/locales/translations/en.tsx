@@ -389,5 +389,10 @@ export const en = {
   countryCode: "Country code",
   createNewContact: "Create new contact",
   createNewCarrier: "Create new carrier",
-  createNewHaulier: "Create new haulier"
+  createNewHaulier: "Create new haulier",
+  priceType: "Type of price",
+  lumpSum: "Margin lump sum",
+  margin: "Margin",
+  salesPrice: "Sales price",
+  totalPurchase: "Total purchase"
 };

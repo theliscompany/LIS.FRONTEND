@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Accordion, AccordionDetails, AccordionSummary, Alert, Autocomplete, Box, Button, Chip, DialogActions, DialogContent, Grid, IconButton, InputLabel, ListItem, ListItemText, NativeSelect, Skeleton, TextField, Typography } from '@mui/material';
+import { Accordion, AccordionDetails, AccordionSummary, Alert, Autocomplete, Box, Button, DialogActions, DialogContent, FormControlLabel, Grid, IconButton, InputLabel, ListItem, ListItemText, NativeSelect, Skeleton, Switch, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Typography } from '@mui/material';
+import Chip from '@mui/material/Chip';
 import AddCircleOutlinedIcon from '@mui/icons-material/AddCircleOutlined';
 import SearchIcon from '@mui/icons-material/Search';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -44,6 +45,7 @@ function createGetRequestUrl(variable1: number, variable2: number, variable3: nu
 function Seafreights() {
     const [load, setLoad] = useState<boolean>(true);
     const [loadEdit, setLoadEdit] = useState<boolean>(false);
+    const [loadMiscs, setLoadMiscs] = useState<boolean>(false);
     const [modal, setModal] = useState<boolean>(false);
     const [modal2, setModal2] = useState<boolean>(false);
     const [modal6, setModal6] = useState<boolean>(false);
@@ -53,6 +55,7 @@ function Seafreights() {
     const [clients, setClients] = useState<any>(null);
     const [containers, setContainers] = useState<any>(null);
     const [services, setServices] = useState<any>(null);
+    const [allServices, setAllServices] = useState<any>(null);
     const [currentId, setCurrentId] = useState<string>("");
     const [currentEditId, setCurrentEditId] = useState<string>("");
     const [seafreights, setSeafreights] = useState<any>(null);
@@ -69,12 +72,27 @@ function Seafreights() {
     const [currency, setCurrency] = useState<string>("EUR");
     const [comment, setComment] = useState<string>("");
     const [serviceName, setServiceName] = useState<any>(null);
-    const [containerTypes, setContainerTypes] = useState<any>([]);
+    const [miscs, setMiscs] = useState<any>(null);
+    const [containerTypes, setContainerTypes] = useState<any>(null);
+    // const [containerTypes, setContainerTypes] = useState<any>({packageId: 8, packageName: "20' Dry"});
+    const [priceType, setPriceType] = useState<string>("Seafreight price");
+    
     const [price, setPrice] = useState<number>(0);
     const [servicesSelection, setServicesSelection] = useState<any>([]);
+    const [servicesSelection2, setServicesSelection2] = useState<any>([]);
+    const [miscellaneousId, setMiscellaneousId] = useState<string>("");
 
     const [tempToken, setTempToken] = useState<string>("");
     
+    // State to hold the currently selected container type
+    const [selectedContainer, setSelectedContainer] = useState('');
+
+    // Extract unique container package names
+    // const containerTypes = Array.from(new Set(dataArray.flatMap((item: any) => item.containers.map((container: any) => container.packageName))));
+
+    // Filter services based on the selected container type
+    // const filteredData = selectedContainer === '' ? dataArray : dataArray.filter(item => item.containers.some(container => container.packageName === selectedContainer));
+
     const { t } = useTranslation();
     
     const { instance, accounts } = useMsal();
@@ -120,7 +138,7 @@ function Seafreights() {
         { field: 'xxx', headerName: t('Actions'), renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box sx={{ my: 1, mr: 1 }}>
-                    <IconButton size="small" title={t('editRowSeafreight')} sx={{ mr: 0.5 }} onClick={() => { setCurrentEditId(params.row.seaFreightId); getSeafreight(params.row.seaFreightId); setModal2(true); }}>
+                    <IconButton size="small" title={t('editRowSeafreight')} sx={{ mr: 0.5 }} onClick={() => { setCurrentEditId(params.row.seaFreightId); getSeafreight(params.row.seaFreightId); setServicesSelection2([]); setModal2(true); }}>
                         <EditIcon fontSize="small" />
                     </IconButton>
                     <IconButton size="small" title={t('deleteRowSeafreight')} onClick={() => { setCurrentId(params.row.seaFreightId); setModal(true); }}>
@@ -137,7 +155,12 @@ function Seafreights() {
         getPorts();
         getSeafreights();
         getProtectedData(); // Services and Containers
+        // getMiscellaneouses();
     }, []);
+
+    useEffect(() => {
+        getMiscellaneousesById(miscellaneousId);
+    }, [miscellaneousId]);
     
     const getProducts = async () => {
         if (context && account) {
@@ -236,7 +259,9 @@ function Seafreights() {
         if (context) {
             const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Service/Services", token);
             if (response !== null && response !== undefined) {
-                setServices(response);
+                console.log(response.filter((obj: any) => obj.servicesTypeId.includes(1)));
+                setAllServices(response);
+                setServices(response.filter((obj: any) => obj.servicesTypeId.includes(1))); // Filter the services for seafreights (SEAFREIGHT = 1)
             }  
         }
     }
@@ -245,6 +270,7 @@ function Seafreights() {
         if (context) {
             const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Package/Containers", token);
             if (response !== null && response !== undefined) {
+                console.log(response);
                 setContainers(response);
             }  
         }
@@ -312,17 +338,30 @@ function Seafreights() {
         if (context) {
             const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisPricing.endPoint+"/SeaFreight/SeaFreight?seaFreightId="+id, tempToken);
             if (response !== null && response !== undefined) {
-                setCarrier({contactId: response.carrierId, contactName: response.carrierName});
+                var auxCarrier = {contactId: response.carrierId, contactName: response.carrierName};
+                var auxLoading = ports.find((elm: any) => elm.portId === response.departurePortId);
+                var auxDischarge = ports.find((elm: any) => elm.portId === response.destinationPortId);
+                var auxValidUntil = dayjs(response.validUntil);
+                
+                setCarrier(auxCarrier);
                 setCarrierAgent({contactId: response.carrierAgentId, contactName: response.carrierAgentName});
-                setPortLoading(ports.find((elm: any) => elm.portId === response.departurePortId));
-                setPortDischarge(ports.find((elm: any) => elm.portId === response.destinationPortId));
+                setPortLoading(auxLoading);
+                setPortDischarge(auxDischarge);
                 setCurrency(response.currency);
-                setValidUntil(dayjs(response.validUntil));
+                setValidUntil(auxValidUntil);
                 setTransitTime(response.transitTime);
                 setFrequency(response.frequency);
                 setComment(response.comment);
                 setServicesSelection(response.services);
                 setLoadEdit(false);
+
+                // Initialize the container
+                if (response.services.length !== 0) {
+                    setContainerTypes(response.services[0].containers[0]);
+                }
+
+                // Now i get the miscs
+                getMiscellaneouses(auxCarrier, auxLoading, auxDischarge, auxValidUntil);
             }
             else {
                 setLoadEdit(false);
@@ -421,7 +460,216 @@ function Seafreights() {
             }
         }
     }
+
+    function missingElements(containerType: any, dataArray: any) {
+        // Find all services associated with the specified container type
+        const servicesForContainer = dataArray
+            .filter(({containers}: any) => containers.some((container: any) => container.packageName === containerType))
+            .map(({service}: any) => service.serviceName);
+      
+        // Find all unique services across all container types
+        const allServices: any = new Set(dataArray.map(({service}: any) => service.serviceName));
+      
+        // Determine missing services for the specified container type
+        const missingServices = [...allServices].filter(service => !servicesForContainer.includes(service));
+        
+        console.log(missingServices);
+        return missingServices;
+    }
+
+    const getMiscellaneouses = async (carrier1: any, portLoading1: any, portDischarge1: any, validUntil1: any) => {
+        if (context && account) {
+            setLoadMiscs(true);
+            
+            var token = null;
+            if (tempToken === "") {
+                token = await instance.acquireTokenSilent({
+                    scopes: pricingRequest.scopes,
+                    account: account
+                }).then((response:AuthenticationResult)=>{
+                    return response.accessToken;
+                }).catch(() => {
+                    return instance.acquireTokenPopup({
+                        ...pricingRequest,
+                        account: account
+                        }).then((response) => {
+                            return response.accessToken;
+                    });
+                });
+                setTempToken(token);    
+            }
+
+            if (carrier1 !== null && portLoading1 !== null && portDischarge1 !== null) {
+                const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisPricing.endPoint+"/Miscellaneous/Miscellaneous?SupplierId="+carrier1.contactId+"&DeparturePortId="+portLoading1.portId+"&DestinationPortId="+portDischarge1.portId+"&withShipment=true", token !== null ? token : tempToken);
+                if (response !== null && response !== undefined) {
+                    setMiscs(response);
+                    // console.log(response);
+                    console.log(mapServicesToEnhancedFormat(response, validUntil1.toISOString()));
+                    // setServicesSelection2(mapServicesToEnhancedFormat(response, validUntil1.toISOString()))
+                    setLoadMiscs(false);
+                }
+                else {
+                    setLoadMiscs(false);
+                }
+            }
+            else {
+                console.log("CHECK");
+            }
+        }
+    }
     
+    const getMiscellaneousesById = async (miscId: string) => {
+        if (context && account) {
+            setLoadMiscs(true);
+            
+            var token = null;
+            if (tempToken === "") {
+                token = await instance.acquireTokenSilent({
+                    scopes: pricingRequest.scopes,
+                    account: account
+                }).then((response:AuthenticationResult)=>{
+                    return response.accessToken;
+                }).catch(() => {
+                    return instance.acquireTokenPopup({
+                        ...pricingRequest,
+                        account: account
+                        }).then((response) => {
+                            return response.accessToken;
+                    });
+                });
+                setTempToken(token);    
+            }
+
+            if (miscId !== "") {
+                const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisPricing.endPoint+"/Miscellaneous/Miscellaneous?id="+miscId+"&withShipment=true", token !== null ? token : tempToken);
+                if (response !== null && response !== undefined) {
+                    // setMiscs(response);
+                    console.log(response);
+                    setServicesSelection2(response.services);
+                    setLoadMiscs(false);
+                }
+                else {
+                    setLoadMiscs(false);
+                }
+            }
+            else {
+                console.log("CHECK");
+            }
+        }
+    }
+    
+    const createMiscellaneous = async () => {
+        if (servicesSelection !== null && validUntil !== null) {
+            if (context) {
+                var dataSent = null;
+                if (miscellaneousId !== "") {
+                    if (portLoading !== null && portDischarge !== null && carrier !== null) {
+                        dataSent = {
+                            "miscellaneousId": miscellaneousId,
+                            "departurePortId": portLoading.portId,
+                            "destinationPortId": portDischarge.portId,
+                            "departurePortName": portLoading.portName,
+                            "destinationPortName": portDischarge.portName,
+                            "supplierId": carrier.contactId,
+                            "supplierName": carrier.contactName,
+                            "currency": currency,
+                            "validUntil": validUntil?.toISOString(),
+                            "comment": "",
+                            "services": servicesSelection2,
+                            "updated": (new Date()).toISOString()
+                        };
+                    }
+                }
+                else {
+                    if (portLoading !== null && portDischarge !== null && carrier !== null) {
+                        dataSent = {
+                            // "miscellaneousId": currentEditId,
+                            "departurePortId": portLoading.portId,
+                            "destinationPortId": portDischarge.portId,
+                            "departurePortName": portLoading.portName,
+                            "destinationPortName": portDischarge.portName,
+                            "supplierId": carrier.contactId,
+                            "supplierName": carrier.contactName,
+                            "currency": currency,
+                            "validUntil": validUntil?.toISOString(),
+                            "comment": "",
+                            "services": servicesSelection2,
+                            "updated": (new Date()).toISOString()
+                        };
+                    }
+                }
+                const response = await (context as BackendService<any>).postWithToken(protectedResources.apiLisPricing.endPoint+"/Miscellaneous/Miscellaneous", dataSent, tempToken);
+                if (response !== null && response !== undefined) {
+                    setModal2(false);
+                    enqueueSnackbar(t('successCreated'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                    // getMiscellaneouses();
+                }
+                else {
+                    enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                }
+            }
+        }
+        else {
+            enqueueSnackbar(t('fieldsEmptySeafreight'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+        }
+    }
+
+    const extractServicesByValidDate = (data: any, validUntilDate: string) => {
+        const services:any = [];
+        
+        data.forEach((item: any) => {
+            item.suppliers.forEach((supplier: any) => {
+                if (new Date(supplier.validUntil) >= new Date(validUntilDate)) {
+                    services.push(...supplier.services);
+                }
+            });
+        });
+        
+        return services;
+    };
+    
+    const mapServicesToEnhancedFormat = (data: any, validUntilDate: string) => {
+        const enhancedServices: any = [];
+        
+        data.forEach((item: any) => {
+            item.suppliers.forEach((supplier: any) => {
+                if (supplier.validUntil.slice(0,10) === validUntilDate.slice(0,10)) {
+                    // Here i get the miscellaneous Id
+                    setMiscellaneousId(supplier.miscellaneousId);
+                    // Assuming we're mapping existing container data based on available non-zero totals
+                    var containers: any = [];
+                    if (supplier.total20Dry > 0) { 
+                        setContainerTypes({ packageId: 8, packageName: "20' Dry" });
+                        containers = [{ packageId: 8, packageName: "20' Dry" }];
+                    }
+                    if (supplier.total40Dry > 0) { 
+                        setContainerTypes({ packageId: 9, packageName: "40' Dry" });
+                        containers = [{ packageId: 9, packageName: "40' Dry" }];
+                    }
+                    if (supplier.total40HC > 0) { 
+                        setContainerTypes({ packageId: 10, packageName: "40' HC" });
+                        containers = [{ packageId: 10, packageName: "40' HC" }];
+                    }
+                    // Add similar conditions for other container types as needed
+                    
+                    supplier.services.forEach((service: any) => {
+                        enhancedServices.push({
+                            service: {
+                                // miscellaneousId: supplier.miscellaneousId,
+                                serviceId: service.serviceId,
+                                serviceName: service.serviceName,
+                                price: service.price,
+                            },
+                            containers: containers,
+                        });
+                    });
+                }
+            });
+        });
+      
+        return enhancedServices;
+    };
+      
     return (
         <div style={{ background: "#fff", borderTopLeftRadius: 20, borderTopRightRadius: 20 }}>
             <SnackbarProvider />
@@ -439,7 +687,7 @@ function Seafreights() {
                     </Grid>
                     <Grid item xs={12} md={4} mt={1}>
                         <InputLabel htmlFor="company-name" sx={inputLabelStyles}>{t('carrier')}</InputLabel>
-                        <CompanySearch id="company-name" value={searchedCarrier} onChange={setSearchedCarrier} category={CategoryEnum.SHIPPING_LINES} callBack={() => console.log(searchedCarrier)} fullWidth />
+                        <CompanySearch id="company-name" value={searchedCarrier} onChange={setSearchedCarrier} category={CategoryEnum.SHIPPING_LINES} fullWidth />
                     </Grid>
                     <Grid item xs={12} md={3} mt={1}>
                         <InputLabel htmlFor="port-departure" sx={inputLabelStyles}>{t('departurePort')}</InputLabel>
@@ -669,7 +917,7 @@ function Seafreights() {
                                     />
                                 </LocalizationProvider>
                             </Grid>
-                            <Grid item xs={12} md={3}>
+                            <Grid item xs={12} md={2}>
                                 <InputLabel htmlFor="currency" sx={inputLabelStyles}>{t('currency')}</InputLabel>
                                 <NativeSelect
                                     id="currency"
@@ -683,13 +931,31 @@ function Seafreights() {
                                     ))}
                                 </NativeSelect>
                             </Grid>
-                            <Grid item xs={12} md={3}>
+                            <Grid item xs={12} md={2}>
                                 <InputLabel htmlFor="transit-time" sx={inputLabelStyles}>{t('transitTime')} ({t('inDays')})</InputLabel>
                                 <BootstrapInput id="transit-time" type="number" value={transitTime} onChange={(e: any) => setTransitTime(e.target.value)} fullWidth />
                             </Grid>
-                            <Grid item xs={12} md={3}>
+                            <Grid item xs={12} md={2}>
                                 <InputLabel htmlFor="frequency" sx={inputLabelStyles}>{t('frequency')} ({t('everyxDays')})</InputLabel>
                                 <BootstrapInput id="frequency" type="number" value={frequency} onChange={(e: any) => setFrequency(e.target.value)} fullWidth />
+                            </Grid>
+                            <Grid item xs={12} md={3}>
+                                <InputLabel htmlFor="container-types" sx={inputLabelStyles}>{t('container')}</InputLabel>
+                                {
+                                    containers !== null ? 
+                                    <Autocomplete
+                                        id="container-types"
+                                        options={containers}
+                                        getOptionLabel={(option: any) => option.packageName}
+                                        value={containerTypes}
+                                        onChange={(event: any, newValue: any) => {
+                                            console.log(newValue);
+                                            setContainerTypes(newValue);
+                                        }}
+                                        renderInput={(params: any) => <TextField {...params} sx={{ mt: 1, textTransform: "lowercase" }} />}
+                                        fullWidth
+                                    /> : <Skeleton />
+                                }
                             </Grid>
                             <Grid item xs={12} md={12}>
                                 <Typography sx={{ fontSize: 18 }}><b>{t('listServices')}</b></Typography>
@@ -704,7 +970,7 @@ function Seafreights() {
                                         options={services}
                                         renderOption={(props, option, i) => {
                                             return (
-                                                <li {...props} key={option.portId}>
+                                                <li {...props} key={option.serviceId}>
                                                     {option.serviceName}
                                                 </li>
                                             );
@@ -724,22 +990,21 @@ function Seafreights() {
                                 }
                             </Grid>
                             <Grid item xs={12} md={4}>
-                                <InputLabel htmlFor="container-types" sx={inputLabelStyles}>{t('containers')}</InputLabel>
-                                {
-                                    containers !== null ? 
-                                    <Autocomplete
-                                        multiple
-                                        id="container-types"
-                                        options={containers}
-                                        getOptionLabel={(option: any) => option.packageName}
-                                        value={containerTypes}
-                                        onChange={(event: any, newValue: any) => {
-                                            setContainerTypes(newValue);
-                                        }}
-                                        renderInput={(params: any) => <TextField {...params} sx={{ mt: 1, textTransform: "lowercase" }} />}
-                                        fullWidth
-                                    /> : <Skeleton />
-                                }
+                                <InputLabel htmlFor="price-type" sx={inputLabelStyles}>{t('priceType')}</InputLabel>
+                                <NativeSelect
+                                    id="price-type"
+                                    value={priceType}
+                                    onChange={(e: any) => { 
+                                        setPriceType(e.target.value); 
+                                        setServices(allServices.filter((obj: any) => obj.servicesTypeId.includes(e.target.value === "Seafreight price" ? 1 : 5)));
+                                        setServiceName(null);
+                                    }}
+                                    input={<BootstrapInput />}
+                                    fullWidth
+                                >
+                                    <option value="Seafreight price">Seafreight price</option>
+                                    <option value="Miscellaneous price">Miscellaneous price</option>
+                                </NativeSelect>
                             </Grid>
                             <Grid item xs={12} md={2}>
                                 <InputLabel htmlFor="price-cs" sx={inputLabelStyles}>{t('price')}</InputLabel>
@@ -751,11 +1016,18 @@ function Seafreights() {
                                     style={{ marginTop: "30px", height: "42px", float: "right" }} 
                                     onClick={() => {
                                         if (serviceName !== null && containerTypes !== null && price > 0) {
-                                            console.log(serviceName); console.log(containerTypes); console.log(price);
-                                            setServicesSelection((prevItems: any) => [...prevItems, { 
-                                                service: { serviceId: serviceName.serviceId, serviceName: serviceName.serviceName, price: Number(price) }, containers: containerTypes
-                                            }]);
-                                            setServiceName(null); setContainerTypes([]); setPrice(0);
+                                            if (priceType === "Seafreight price") {
+                                                setServicesSelection((prevItems: any) => [...prevItems, { 
+                                                    service: { serviceId: serviceName.serviceId, serviceName: serviceName.serviceName, price: Number(price) }, containers: [containerTypes]
+                                                }]);
+                                                setServiceName(null); setPrice(0);
+                                            }
+                                            else {
+                                                setServicesSelection2((prevItems: any) => [...prevItems, { 
+                                                    service: { serviceId: serviceName.serviceId, serviceName: serviceName.serviceName, price: Number(price) }, containers: [containerTypes]
+                                                }]);
+                                                setServiceName(null); setPrice(0);
+                                            }
                                         } 
                                         else {
                                             enqueueSnackbar(t('fieldNeedTobeFilled'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
@@ -771,20 +1043,50 @@ function Seafreights() {
                                         <Grid container spacing={2}>
                                             {
                                                 servicesSelection.map((item: any, index: number) => (
-                                                    <Grid key={"serviceitem1-"+index} item xs={12} md={6}>
+                                                    <Grid key={"serviceitem1-"+index} item xs={12} md={4}>
                                                         <ListItem
                                                             sx={{ border: "1px solid #e5e5e5" }}
                                                             secondaryAction={
-                                                                <IconButton edge="end" onClick={() => {
+                                                                <IconButton edge="end" size="small" onClick={() => {
+                                                                    console.log(servicesSelection);
                                                                     setServicesSelection((prevItems: any) => prevItems.filter((item: any, i: number) => i !== index));
                                                                 }}>
-                                                                    <DeleteIcon />
+                                                                    <DeleteIcon fontSize="small" />
                                                                 </IconButton>
                                                             }
                                                         >
                                                             <ListItemText primary={
-                                                                t('serviceName')+" : "+item.service.serviceName+" | "+t('containers')+" : "+item.containers.map((elm: any) => elm.packageName).join(", ")+" | "+t('price')+" : "+item.service.price+" "+currency
-                                                            } />
+                                                                // t('serviceName')+" : "+item.service.serviceName+" | "+t('containers')+" : "+item.containers.map((elm: any) => elm.packageName).join(", ")+" | "+t('price')+" : "+item.service.price+" "+currency
+                                                                item.service.serviceName+" | "+item.service.price+" "+currency
+                                                            } primaryTypographyProps={{ fontSize: 14 }} />
+                                                        </ListItem>
+                                                    </Grid>
+                                                ))
+                                            }
+                                        </Grid>
+                                    : null  
+                                }
+                                {
+                                    servicesSelection2 !== undefined && servicesSelection2 !== null && servicesSelection2.length !== 0 ? 
+                                        <Grid container spacing={2} sx={{ mt: 0 }}>
+                                            {
+                                                servicesSelection2.map((item: any, index: number) => (
+                                                    <Grid key={"serviceitem2-"+index} item xs={12} md={4}>
+                                                        <ListItem
+                                                            sx={{ border: "1px solid #e5e5e5" }}
+                                                            secondaryAction={
+                                                                <IconButton edge="end" size="small" onClick={() => {
+                                                                    console.log(servicesSelection2);
+                                                                    setServicesSelection2((prevItems: any) => prevItems.filter((item: any, i: number) => i !== index));
+                                                                }}>
+                                                                    <DeleteIcon fontSize="small" />
+                                                                </IconButton>
+                                                            }
+                                                        >
+                                                            <ListItemText primary={
+                                                                // t('serviceName')+" : "+item.service.serviceName+" | "+t('containers')+" : "+item.containers.map((elm: any) => elm.packageName).join(", ")+" | "+t('price')+" : "+item.service.price+" "+currency
+                                                                item.service.serviceName+" | "+item.service.price+" "+currency
+                                                            } primaryTypographyProps={{ fontSize: 14 }} />
                                                         </ListItem>
                                                     </Grid>
                                                 ))
@@ -797,7 +1099,7 @@ function Seafreights() {
                     }
                 </DialogContent>
                 <DialogActions>
-                    <Button variant="contained" color={"primary"} onClick={() => { createUpdateSeafreight(); }} sx={{ mr: 1.5, textTransform: "none" }}>{t('validate')}</Button>
+                    <Button variant="contained" color={"primary"} onClick={() => { createUpdateSeafreight(); createMiscellaneous(); }} sx={{ mr: 1.5, textTransform: "none" }}>{t('validate')}</Button>
                     <Button variant="contained" onClick={() => setModal2(false)} sx={buttonCloseStyles}>{t('close')}</Button>
                 </DialogActions>
             </BootstrapDialog>

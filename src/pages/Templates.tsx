@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Accordion, AccordionDetails, AccordionSummary, Alert, Autocomplete, Box, Button, Chip, DialogActions, DialogContent, Grid, IconButton, InputLabel, ListItem, ListItemText, NativeSelect, Skeleton, TextField, Typography } from '@mui/material';
+import { Accordion, AccordionDetails, AccordionSummary, Alert, Autocomplete, Box, Button, Chip, DialogActions, DialogContent, Grid, IconButton, InputLabel, ListItem, ListItemText, NativeSelect, Skeleton, TextField, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material';
 import AddCircleOutlinedIcon from '@mui/icons-material/AddCircleOutlined';
 import SearchIcon from '@mui/icons-material/Search';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -37,6 +37,7 @@ import {
     type RichTextEditorRef,
 } from 'mui-tiptap';
 import { t } from 'i18next';
+import RichTextEditorGeneral from '../components/shared/RichTextEditorGeneral';
 
 const variableOptions = [
     { label: t('listContainers'), value: "listContainers" },
@@ -86,15 +87,17 @@ function Templates() {
     
     const [name, setName] = useState<string>("");
     const [content, setContent] = useState<string>("");
+    const [contentEn, setContentEn] = useState<string>("");
     const [currentVersion, setCurrentVersion] = useState<string>("");
     const [createdAfter, setCreatedAfter] = useState<Dayjs | null>(null);
     const [createdBefore, setCreatedBefore] = useState<Dayjs | null>(null);
     const [tags, setTags] = useState<MuiChipsInputChip[]>([]);
     
-    
+    const [mailLanguage, setMailLanguage] = useState<string>("fr");
     const [tempToken, setTempToken] = useState<string>("");
     
     const rteRef = useRef<RichTextEditorRef>(null);
+    const rteRef2 = useRef<RichTextEditorRef>(null);
     
     const { t } = useTranslation();
     
@@ -190,6 +193,7 @@ function Templates() {
                 setCurrentVersion(response.data.currentVersion);
                 setContent(response.data.content);
                 setTags(response.data.tags);
+                setContentEn("response.data.contentEn");
                 setLoadEdit(false);
             }
             else {
@@ -225,6 +229,7 @@ function Templates() {
                         "name": name,
                         "currentVersion": currentVersion,
                         "content": rteRef.current?.editor?.getHTML(),
+                        // "contentEn": rteRef2.current?.editor?.getHTML(),
                         "contentEn": rteRef.current?.editor?.getHTML(),
                         "author": "Cyrille Penaye",
                         "tags": tags
@@ -250,6 +255,7 @@ function Templates() {
                         "name": name,
                         "currentVersion": currentVersion,
                         "content": rteRef.current?.editor?.getHTML(),
+                        // "contentEn": rteRef2.current?.editor?.getHTML(),
                         "contentEn": rteRef.current?.editor?.getHTML(),
                         "author": "Cyrille Penaye",
                         "tags": tags
@@ -445,31 +451,61 @@ function Templates() {
                                     </Grid>
                                 </Grid>
                             </Grid>
+                            
                             <Grid item xs={6}>
-                                <InputLabel htmlFor="content" sx={inputLabelStyles}>{t('content')}</InputLabel>
-                                <Box sx={{ mt: 1 }}>
-                                    <RichTextEditor
-                                        ref={rteRef}
-                                        extensions={[StarterKit]}
-                                        content={content}
-                                        renderControls={() => (
-                                        <MenuControlsContainer>
-                                            <MenuSelectHeading />
-                                            <MenuDivider />
-                                            <MenuButtonBold />
-                                            <MenuButtonItalic />
-                                            <MenuButtonStrikethrough />
-                                            <MenuButtonOrderedList />
-                                            <MenuButtonBulletedList />
-                                            <MenuSelectTextAlign />
-                                            <MenuButtonEditLink />
-                                            <MenuButtonHorizontalRule />
-                                            <MenuButtonUndo />
-                                            <MenuButtonRedo />
-                                        </MenuControlsContainer>
-                                        )}
-                                    />
-                                </Box>
+                                <Grid container spacing={2}>
+                                    <Grid item xs={12}>
+                                        <InputLabel htmlFor="mailLanguage" sx={inputLabelStyles}>{t('mailLanguage')}</InputLabel>
+                                        <ToggleButtonGroup
+                                            color="primary"
+                                            value={mailLanguage}
+                                            exclusive
+                                            // size="small"
+                                            onChange={(event: React.MouseEvent<HTMLElement>, newValue: string,) => { 
+                                                setMailLanguage(newValue); 
+                                            }}
+                                            aria-label="Platform"
+                                            fullWidth
+                                            sx={{ mt: 1, maxHeight: "44px" }}
+                                        >
+                                            <ToggleButton value="fr"><img src="/assets/img/flags/flag-fr.png" style={{ width: "12px", marginRight: "6px" }} alt="flag english" /> Français</ToggleButton>
+                                            <ToggleButton value="en"><img src="/assets/img/flags/flag-en.png" style={{ width: "12px", marginRight: "6px" }} alt="flag english" /> English</ToggleButton>
+                                        </ToggleButtonGroup>
+                                    </Grid>
+                                    <Grid item xs={12}>
+                                        {
+                                            mailLanguage !== "en" ? 
+                                            <Box sx={{ mt: 1 }}>
+                                                <InputLabel htmlFor="content" sx={inputLabelStyles}>{t('content')} - FR</InputLabel>
+                                                <RichTextEditor
+                                                    ref={rteRef}
+                                                    extensions={[StarterKit]}
+                                                    content={content}
+                                                    renderControls={() => (
+                                                    <MenuControlsContainer>
+                                                        <MenuSelectHeading />
+                                                        <MenuDivider />
+                                                        <MenuButtonBold />
+                                                        <MenuButtonItalic />
+                                                        <MenuButtonStrikethrough />
+                                                        <MenuButtonOrderedList />
+                                                        <MenuButtonBulletedList />
+                                                        <MenuSelectTextAlign />
+                                                        <MenuButtonEditLink />
+                                                        <MenuButtonHorizontalRule />
+                                                        <MenuButtonUndo />
+                                                        <MenuButtonRedo />
+                                                    </MenuControlsContainer>
+                                                    )}
+                                                />
+                                            </Box> : 
+                                            <Box sx={{ mt: 1 }}>
+                                                <InputLabel htmlFor="contentEn" sx={inputLabelStyles}>{t('content')} - EN</InputLabel>
+                                                {/* <RichTextEditorGeneral content={contentEn} onUpdate={setContentEn} /> */}
+                                            </Box>
+                                        }
+                                    </Grid>
+                                </Grid>
                             </Grid>
                         </Grid> : <Skeleton />
                     }

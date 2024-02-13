@@ -251,10 +251,19 @@ function Request() {
     const [rowSelectionModel2, setRowSelectionModel2] = React.useState<GridRowSelectionModel>([]);
     const [rowSelectionModel3, setRowSelectionModel3] = React.useState<GridRowSelectionModel>([]);
 
-    const [templateBase, setTemplateBase] = useState<string>("");
+    const [templateBase, setTemplateBase] = useState<any>(null);
     const [loadTemplate, setLoadTemplate] = useState<boolean>(false);
     const [mailLanguage, setMailLanguage] = useState<string>("fr");
 
+    const [margin, setMargin] = useState<number>(22);
+    const [adding, setAdding] = useState<number>(0);
+    const [totalPurchase, setTotalPurchase] = useState<number>(0);
+    const [salesPrice, setSalesPrice] = useState<number>(0);
+
+    const [templates, setTemplates] = useState<any>([]);
+    const [loadTemplates, setLoadTemplates] = useState<boolean>(false);
+    const [selectedTemplate, setSelectedTemplate] = useState<string>(defaultTemplate);
+    
     const rteRef = useRef<RichTextEditorRef>(null);
     
     let { id } = useParams();
@@ -285,11 +294,11 @@ function Request() {
         { field: 'currency', headerName: t('prices'), renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box sx={{ my: 1, mr: 1 }}>
-                    <Box sx={{ my: 1 }} hidden={!getPackageNamesByIds((containersSelection.map((elm: any) => elm.id)), containers).includes("20' Dry")}>{params.row.price20dry !== 0 ? "20' Dry : "+params.row.price20dry+" "+t(params.row.currency) : "20' Dry : N/A"}</Box>
-                    <Box sx={{ my: 1 }} hidden={!getPackageNamesByIds((containersSelection.map((elm: any) => elm.id)), containers).includes("20' RF")}>{params.row.price20rf !== 0 ? "20' Rf : "+params.row.price20rf+" "+t(params.row.currency) : "20' Rf : N/A"}</Box>
-                    <Box sx={{ my: 1 }} hidden={!getPackageNamesByIds((containersSelection.map((elm: any) => elm.id)), containers).includes("40' Dry")}>{params.row.price40dry !== 0 ? "40' Dry : "+params.row.price40dry+" "+t(params.row.currency) : "40' Dry : N/A"}</Box>
-                    <Box sx={{ my: 1 }} hidden={!getPackageNamesByIds((containersSelection.map((elm: any) => elm.id)), containers).includes("40' HC")}>{params.row.price40hc !== 0 ? "40' Hc : "+params.row.price40hc+" "+t(params.row.currency) : "40' Hc : N/A"}</Box>
-                    <Box sx={{ my: 1 }} hidden={!getPackageNamesByIds((containersSelection.map((elm: any) => elm.id)), containers).includes("40' HC RF")}>{params.row.price40hcrf !== 0 ? "40' HcRf : "+params.row.price40hcrf+" "+t(params.row.currency) : "40' HcRf : N/A"}</Box>
+                    <Box sx={{ my: 1 }} hidden={!getPackageNamesByIds((containersSelection.map((elm: any) => elm.id)), containers).includes("20' Dry") || params.row.price20dry === 0}>{params.row.price20dry !== 0 ? "20' Dry : "+params.row.price20dry+" "+t(params.row.currency) : "20' Dry : N/A"}</Box>
+                    <Box sx={{ my: 1 }} hidden={!getPackageNamesByIds((containersSelection.map((elm: any) => elm.id)), containers).includes("20' RF") || params.row.price20rf === 0}>{params.row.price20rf !== 0 ? "20' Rf : "+params.row.price20rf+" "+t(params.row.currency) : "20' Rf : N/A"}</Box>
+                    <Box sx={{ my: 1 }} hidden={!getPackageNamesByIds((containersSelection.map((elm: any) => elm.id)), containers).includes("40' Dry") || params.row.price40dry === 0}>{params.row.price40dry !== 0 ? "40' Dry : "+params.row.price40dry+" "+t(params.row.currency) : "40' Dry : N/A"}</Box>
+                    <Box sx={{ my: 1 }} hidden={!getPackageNamesByIds((containersSelection.map((elm: any) => elm.id)), containers).includes("40' HC") || params.row.price40hc === 0}>{params.row.price40hc !== 0 ? "40' Hc : "+params.row.price40hc+" "+t(params.row.currency) : "40' Hc : N/A"}</Box>
+                    <Box sx={{ my: 1 }} hidden={!getPackageNamesByIds((containersSelection.map((elm: any) => elm.id)), containers).includes("40' HC RF") || params.row.price40hcrf === 0}>{params.row.price40hcrf !== 0 ? "40' HcRf : "+params.row.price40hcrf+" "+t(params.row.currency) : "40' HcRf : N/A"}</Box>
                 </Box>
             );
         }, renderHeader: (params: GridColumnHeaderParams) => (<>Haulage <br></br>per unit</>), flex: 0.875 },
@@ -402,6 +411,11 @@ function Request() {
         }, flex: 4 },
     ];
     
+    function allEmptyRows(paramsObj: any) {
+        // console.log((!getPackageNamesByIds((containersSelection.map((elm: any) => elm.id)), containers).includes("20' Dry") || paramsObj.price20dry === 0) && (!getPackageNamesByIds((containersSelection.map((elm: any) => elm.id)), containers).includes("20' RF") || paramsObj.price20rf === 0) && (!getPackageNamesByIds((containersSelection.map((elm: any) => elm.id)), containers).includes("40' Dry") || paramsObj.price40dry === 0) && (!getPackageNamesByIds((containersSelection.map((elm: any) => elm.id)), containers).includes("40' HC") || paramsObj.price40hc === 0) && (!getPackageNamesByIds((containersSelection.map((elm: any) => elm.id)), containers).includes("40' HC RF") || paramsObj.price40hcrf === 0));
+        return (!getPackageNamesByIds((containersSelection.map((elm: any) => elm.id)), containers).includes("20' Dry") || paramsObj.price20dry === 0) && (!getPackageNamesByIds((containersSelection.map((elm: any) => elm.id)), containers).includes("20' RF") || paramsObj.price20rf === 0) && (!getPackageNamesByIds((containersSelection.map((elm: any) => elm.id)), containers).includes("40' Dry") || paramsObj.price40dry === 0) && (!getPackageNamesByIds((containersSelection.map((elm: any) => elm.id)), containers).includes("40' HC") || paramsObj.price40hc === 0) && (!getPackageNamesByIds((containersSelection.map((elm: any) => elm.id)), containers).includes("40' HC RF") || paramsObj.price40hcrf === 0);
+    };
+
     const handleChangeHaulageType = (event: { target: { value: string } }) => {
         setHaulageType(event.target.value);
     };
@@ -574,8 +588,10 @@ function Request() {
                 miscPrices += selectedMisc.price40hcrf*containersSelection.find((elm: any) => elm.id === 15).quantity;
             }
         }
-
-        return ((seafreightPrices+haulagePrices+miscPrices)*0.22+seafreightPrices+haulagePrices+miscPrices).toFixed(2);
+        var finalValue = ((seafreightPrices+haulagePrices+miscPrices)*(margin/100)+seafreightPrices+haulagePrices+miscPrices).toFixed(2);
+        // setTotalPurchase(Number(finalValue)+Number(adding));
+        // setSalesPrice(Number((seafreightPrices+haulagePrices+miscPrices)*(margin/100)));
+        return Number(finalValue)+Number(adding);
     }
     
     function similar(str1: string, str2: string) {
@@ -617,6 +633,7 @@ function Request() {
     
     useEffect(() => {
         getTemplate(defaultTemplate);
+        getTemplates();
 
         // Here i try to get all the clients
         getClients();
@@ -626,6 +643,11 @@ function Request() {
         // Get everything essential too (Products, Ports, Request info)
         getAssignees();
     }, [context]);
+    
+    useEffect(() => {
+        getTemplate(selectedTemplate);
+    }, [selectedTemplate]);
+
     
     const getAssignees = async () => {
         if (context) {
@@ -784,6 +806,19 @@ function Request() {
         }
     }
 
+    function removeDuplicatesWithLatestUpdated(data: any) {
+        const latestElements:any = {};
+    
+        for (const item of data) {
+            const key = `${item.haulierName}_${item.loadingPort}`;
+            if (!latestElements[key] || (item.updated && (!latestElements[key].updated || item.updated > latestElements[key].updated))) {
+                latestElements[key] = item;
+            }
+        }
+    
+        return Object.values(latestElements);
+    }
+    
     const getHaulagePriceOffers = async () => {
         if (context && account) {
             const token = await instance.acquireTokenSilent({
@@ -810,7 +845,7 @@ function Request() {
             var urlSent = createGetRequestUrl(protectedResources.apiLisPricing.endPoint+"/Pricing/HaulagesOfferRequest?", haulageType, loadingCity.city.toUpperCase(), containersFormatted);
             const response = await (context as BackendService<any>).getWithToken(urlSent, token);
             setLoadResults(false);
-            setHaulages(response);
+            setHaulages(removeDuplicatesWithLatestUpdated(response));
             // console.log(response);  
         }
     }
@@ -840,8 +875,8 @@ function Request() {
             var urlSent = createGetRequestUrl2(protectedResources.apiLisPricing.endPoint+"/Pricing/SeaFreightsOffersRequest?", portDeparture.portId, portDestination.portId, containersFormatted);
             const response = await (context as BackendService<any>).getWithToken(urlSent, token);
             setLoadResults(false);
-            setSeafreights(response);
-            // console.log(response);  
+            setSeafreights(response.filter((elm: any) => !allEmptyRows(elm)));
+            // console.log(response.filter((elm: any) => !allEmptyRows(elm)));
         }
     }
     
@@ -1111,13 +1146,28 @@ function Request() {
         }
     }
 
+    const getTemplates = async () => {
+        if (context && account) {
+            const response = await (context as BackendService<any>).getSingle(protectedResources.apiLisTemplate.endPoint+"/Template");
+            if (response !== null && response.data !== undefined) {
+                setTemplates(response.data);
+                console.log(response);
+                setLoadTemplates(false);
+            }
+            else {
+                setLoadTemplates(false);
+            }
+            console.log(response);
+        }
+    }
+    
     // Work on the template
     const getTemplate = async (id: string) => {
         setLoadTemplate(true)
         if (context) {
             const response = await (context as BackendService<any>).getSingle(protectedResources.apiLisTemplate.endPoint+"/Template/"+id);
             if (response !== null && response !== undefined) {
-                setTemplateBase(response.data.content);
+                setTemplateBase(response.data);
                 setLoadTemplate(false);
             }
             else {
@@ -1175,8 +1225,8 @@ function Request() {
         var containersQuantities = displayContainers(containersSelection);
 
         const variables = { loadingCity, destinationPort, commodities, clientName, freeTime, overtimeTariff, frequency, transitTime, containersQuantities, listServices, pricesContainers };
-        rteRef.current?.editor?.commands.setContent(generateEmailContent(templateBase, variables));
-    }, [tags, departure, clientNumber, portDestination, selectedSeafreight, selectedHaulage, selectedMisc, containersSelection]);
+        rteRef.current?.editor?.commands.setContent(generateEmailContent(mailLanguage !== "en" ? templateBase.content : templateBase.contentEn, variables));
+    }, [tags, departure, clientNumber, portDestination, selectedSeafreight, selectedHaulage, selectedMisc, containersSelection, margin, adding]);
 
     
     return (
@@ -1918,7 +1968,7 @@ function Request() {
                                                         {
                                                             activeStep === 5 ?
                                                             <Grid container spacing={2} mt={1} px={2}>
-                                                                <Grid item xs={12}>
+                                                                {/* <Grid item xs={12}>
                                                                     <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>{t('selectedSeafreight')}</Typography>
                                                                     <Box sx={{ overflow: "auto" }}>
                                                                         <DataGrid
@@ -1965,59 +2015,87 @@ function Request() {
                                                                             />
                                                                         </Box>
                                                                     </Grid> : null
-                                                                }
-                                                                {/* <Grid item xs={4}>
+                                                                } */}
+                                                                {/* <Grid item xs={3}>
+                                                                    <InputLabel htmlFor="sales-price" sx={inputLabelStyles}>{t('salesPrice')}</InputLabel>
+                                                                    <BootstrapInput id="sales-price" type="number" inputProps={{ min: 0 }} value={salesPrice} onChange={(e: any) => {setSalesPrice(e.target.value)}} fullWidth />
+                                                                </Grid>
+                                                                <Grid item xs={3}>
+                                                                    <InputLabel htmlFor="total-purchase" sx={inputLabelStyles}>{t('totalPurchase')}</InputLabel>
+                                                                    <BootstrapInput id="total-purchase" type="number" inputProps={{ min: 0 }} value={totalPurchase} onChange={(e: any) => {setTotalPurchase(e.target.value)}} fullWidth />
+                                                                </Grid> */}
+                                                                {/* <Grid item xs={8}></Grid> */}
+                                                                <Grid item xs={4}>
+                                                                    <InputLabel htmlFor="selectedTemplate" sx={inputLabelStyles}>{t('selectedTemplate')}</InputLabel>
+                                                                    {
+                                                                        loadTemplates !== true ?
+                                                                        <NativeSelect
+                                                                            id="selectedTemplate"
+                                                                            value={selectedTemplate}
+                                                                            onChange={(e: any) => { setSelectedTemplate(e.target.value); }}
+                                                                            input={<BootstrapInput />}
+                                                                            fullWidth
+                                                                        >
+                                                                            {templates.map((elm: any, i: number) => (
+                                                                                <option key={"templateElm-"+i} value={elm.id}>{elm.name}</option>
+                                                                            ))}
+                                                                        </NativeSelect>
+                                                                        : <Skeleton />
+                                                                    }
+                                                                </Grid>
+                                                                <Grid item xs={4}>
                                                                     <InputLabel htmlFor="mailLanguage" sx={inputLabelStyles}>{t('mailLanguage')}</InputLabel>
                                                                     <ToggleButtonGroup
                                                                         color="primary"
                                                                         value={mailLanguage}
                                                                         exclusive
-                                                                        size="small"
+                                                                        // size="small"
                                                                         onChange={(event: React.MouseEvent<HTMLElement>, newValue: string,) => { 
                                                                             setMailLanguage(newValue); 
-                                                                            if (newValue === "fr") {
-                                                                                rteRef.current?.editor?.commands.setContent(
-                                                                                `<div>
-                                                                                <p>Bonjour ${clientNumber !== null && clientNumber.contactName !== undefined ? clientNumber.contactName : "{clientName}"},</p>
-                                                                                <p>Nous vous remercions pour votre demande.</p>
-                                                                                <p>En notre qualité de commissionnaire expéditeur nous pouvons organiser votre expédition de ${displayContainers(containersSelection)} conteneur(s) chargé(s) avec des ${tags.map((elm: any) => elm.productName).join(',')}, sur camion depuis ${loadingCity.city} à rendu port de ${selectedSeafreight.destinationPortName} comme suit :</p>
-                                                                                ${containersSelection !== null ? containersSelection.map((elm: any) => "<p>"+calculateContainerPrice(elm.container, elm.quantity)+" "+selectedSeafreight.currency+" / "+elm.container+"</p>").join('') : ""}
-                                                                                <p>Chargement de ${selectedHaulage.freeTime} heures inclus pour chaque conteneur, ensuite de ${selectedHaulage.overtimeTariff} ${selectedHaulage.currency} par heure indivisible.</p>
-                                                                                ${selectedMisc !== null ? selectedMisc.services.map((elm: any) => "<p>- "+elm.service.serviceName+" inclus</p>").join('') : "<br>"}
-                                                                                <p>Départs tous les ${selectedSeafreight.frequency} jours.</p>
-                                                                                <p>Délai de mer +/- ${selectedSeafreight.transitTime} jours.</p>
-                                                                                <p>Tarif valable ce jour. Tarifs à confirmer lors de votre réservation.</p>
-                                                                                <p>Ci-joint vous trouverez nos conditions de commande et de facturation qui, ensemble avec nos conditions générales, sont appliqués.</p>
-                                                                                <p>Cordialement</p>
-                                                                                <p>Jeffry COOLS</p>
-                                                                                </div>`);
-                                                                            }
-                                                                            else {
-                                                                                rteRef.current?.editor?.commands.setContent(
-                                                                                `<div>
-                                                                                <p>Hello ${clientNumber !== null && clientNumber.contactName !== undefined ? clientNumber.contactName : "{clientName}"},</p>
-                                                                                <p>We thank you for your request.</p>
-                                                                                <p>As a freight forwarder we can organize your shipment of ${displayContainers(containersSelection)} containers loaded with ${tags.map((elm: any) => elm.productName).join(',')}, on truck from ${loadingCity.city} up to arrival at ${selectedSeafreight.destinationPortName} with the following costs :</p>
-                                                                                ${containersSelection !== null ? containersSelection.map((elm: any) => "<p>"+calculateContainerPrice(elm.container, elm.quantity)+" "+selectedSeafreight.currency+" / "+elm.container+"</p>").join('') : ""}
-                                                                                <p>${selectedHaulage.freeTime} hours loading included for each container, after which ${selectedHaulage.overtimeTariff} ${selectedHaulage.currency} per hour is charged.</p>
-                                                                                ${selectedMisc !== null ? selectedMisc.services.map((elm: any) => "<p>- "+elm.service.serviceName+" included</p>").join('') : "<br>"}
-                                                                                <p>Departures every ${selectedSeafreight.frequency} days.</p>
-                                                                                <p>Sailing time ${selectedSeafreight.departurePortName} to ${selectedSeafreight.destinationPortName} approx. ${selectedSeafreight.transitTime} days.</p>
-                                                                                <p>This offer remains valid today, to be confirmed at the time of your booking..</p>
-                                                                                <p>We also send per attached pdf our order confirmation and invoice terms & conditions.</p>
-                                                                                <p>Best regards,</p>
-                                                                                <p>Jeffry COOLS</p>
-                                                                                </div>`);
-                                                                            }
+                                                                            // if (newValue === "fr") {
+                                                                            //     rteRef.current?.editor?.commands.setContent("");
+                                                                            // }
+                                                                            // else {
+                                                                            //     rteRef.current?.editor?.commands.setContent("");
+                                                                            // }
                                                                         }}
                                                                         aria-label="Platform"
                                                                         fullWidth
-                                                                        sx={{ mt: 1 }}
+                                                                        sx={{ mt: 1, maxHeight: "44px" }}
                                                                     >
                                                                         <ToggleButton value="fr"><img src="/assets/img/flags/flag-fr.png" style={{ width: "12px", marginRight: "6px" }} alt="flag english" /> Français</ToggleButton>
                                                                         <ToggleButton value="en"><img src="/assets/img/flags/flag-en.png" style={{ width: "12px", marginRight: "6px" }} alt="flag english" /> English</ToggleButton>
                                                                     </ToggleButtonGroup>
-                                                                </Grid> */}
+                                                                </Grid>
+                                                                <Grid item xs={2}>
+                                                                    <InputLabel htmlFor="margin" sx={inputLabelStyles}>{t('margin')} %</InputLabel>
+                                                                    <BootstrapInput id="margin" type="number" inputProps={{ min: 0, max: 100 }} value={margin} onChange={(e: any) => {setMargin(e.target.value)}} fullWidth />
+                                                                </Grid>
+                                                                <Grid item xs={2}>
+                                                                    <InputLabel htmlFor="adding" sx={inputLabelStyles}>{t('lumpSum')}</InputLabel>
+                                                                    <BootstrapInput id="adding" type="number" inputProps={{ min: 0 }} value={adding} onChange={(e: any) => {setAdding(e.target.value)}} fullWidth />
+                                                                </Grid>
+                                                                <Grid item xs={12}>
+                                                                    <Box sx={{ border: "1px solid #e5e5e5", p: 2 }}>
+                                                                        <Typography sx={{ fontWeight: "bold", fontFamily: "Helvetica", fontSize: 14 }}>
+                                                                            {
+                                                                                containersSelection !== null && selectedSeafreight !== null ?
+                                                                                containersSelection.map((elm: any) => {
+                                                                                    return (
+                                                                                        <Box sx={{ my: 1 }}>
+                                                                                        {
+                                                                                            "Container: "+elm.quantity+"x"+elm.container+
+                                                                                            " | Purchase price: "+Number(((calculateContainerPrice(elm.container, elm.quantity)-adding)/(1+margin/100)).toFixed(2))+" "+selectedSeafreight.currency+
+                                                                                            " | Profit: "+Number((calculateContainerPrice(elm.container, elm.quantity) - ((calculateContainerPrice(elm.container, elm.quantity)-adding)/(1+margin/100))).toFixed(2))+" "+selectedSeafreight.currency+
+                                                                                            " | Sale price: "+calculateContainerPrice(elm.container, elm.quantity)+" "+selectedSeafreight.currency
+                                                                                        }
+                                                                                        </Box>
+                                                                                    );
+                                                                                }) : null
+                                                                            }
+                                                                        </Typography>
+                                                                    </Box>
+                                                                </Grid>
                                                                 <Grid item xs={12}>
                                                                     <InputLabel htmlFor="details" sx={inputLabelStyles}>{t('detailsOffer')}</InputLabel>
                                                                     {
@@ -2028,7 +2106,7 @@ function Request() {
                                                                                 <RichTextEditor
                                                                                     ref={rteRef}
                                                                                     extensions={[StarterKit]}
-                                                                                    content={getDefaultContent(templateBase)}
+                                                                                    content={getDefaultContent(mailLanguage !== "en" ? templateBase.content : templateBase.contentEn)}
                                                                                     renderControls={() => (
                                                                                     <MenuControlsContainer>
                                                                                         <MenuSelectHeading />
@@ -2048,42 +2126,6 @@ function Request() {
                                                                                 />
                                                                                 : <Skeleton />
                                                                             }
-                                                                            {/* <RichTextEditor
-                                                                                ref={rteRef}
-                                                                                extensions={[StarterKit]}
-                                                                                content={
-                                                                                    `<div>
-                                                                                    <p>Bonjour ${clientNumber !== null && clientNumber.contactName !== undefined ? clientNumber.contactName : "{clientName}"},</p>
-                                                                                    <p>Nous vous remercions pour votre demande.</p>
-                                                                                    <p>En notre qualité de commissionnaire expéditeur nous pouvons organiser votre expédition de ${displayContainers(containersSelection)} conteneur(s) chargé(s) avec des ${tags.map((elm: any) => elm.productName).join(',')}, sur camion depuis ${loadingCity.city} à rendu port de ${selectedSeafreight.destinationPortName} comme suit :</p>
-                                                                                    ${containersSelection !== null ? containersSelection.map((elm: any) => "<p>"+calculateContainerPrice(elm.container, elm.quantity)+" "+selectedSeafreight.currency+" / "+elm.container+"</p>").join('') : ""}
-                                                                                    <p>Chargement de ${selectedHaulage.freeTime} heures inclus pour chaque conteneur, ensuite de ${selectedHaulage.overtimeTariff} ${selectedHaulage.currency} par heure indivisible.</p>
-                                                                                    ${selectedMisc !== null ? selectedMisc.services.map((elm: any) => "<p>- "+elm.service.serviceName+" inclus</p>").join('') : "<br>"}
-                                                                                    <p>Départs tous les ${selectedSeafreight.frequency} jours.</p>
-                                                                                    <p>Délai de mer +/- ${selectedSeafreight.transitTime} jours.</p>
-                                                                                    <p>Tarif valable ce jour. Tarifs à confirmer lors de votre réservation.</p>
-                                                                                    <p>Ci-joint vous trouverez nos conditions de commande et de facturation qui, ensemble avec nos conditions générales, sont appliqués.</p>
-                                                                                    <p>Cordialement</p>
-                                                                                    <p>Jeffry COOLS</p>
-                                                                                    </div>`
-                                                                                }
-                                                                                renderControls={() => (
-                                                                                <MenuControlsContainer>
-                                                                                    <MenuSelectHeading />
-                                                                                    <MenuDivider />
-                                                                                    <MenuButtonBold />
-                                                                                    <MenuButtonItalic />
-                                                                                    <MenuButtonStrikethrough />
-                                                                                    <MenuButtonOrderedList />
-                                                                                    <MenuButtonBulletedList />
-                                                                                    <MenuSelectTextAlign />
-                                                                                    <MenuButtonEditLink />
-                                                                                    <MenuButtonHorizontalRule />
-                                                                                    <MenuButtonUndo />
-                                                                                    <MenuButtonRedo />
-                                                                                </MenuControlsContainer>
-                                                                                )}
-                                                                            /> */}
                                                                         </Box>   
                                                                         : null
                                                                     }

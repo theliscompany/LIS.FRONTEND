@@ -169,7 +169,8 @@ function Miscellaneous() {
         if (context) {
             const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Service/Services", token);
             if (response !== null && response !== undefined) {
-                setServices(response);
+                console.log(response.filter((obj: any) => obj.servicesTypeId.includes(5)));
+                setServices(response.filter((obj: any) => obj.servicesTypeId.includes(5))); // Filter the services for miscellaneous (MISCELLANEOUS = 5)
             }  
         }
     }
@@ -687,7 +688,7 @@ function Miscellaneous() {
                                         options={services}
                                         renderOption={(props, option, i) => {
                                             return (
-                                                <li {...props} key={option.portId}>
+                                                <li {...props} key={option.serviceId}>
                                                     {option.serviceName}
                                                 </li>
                                             );
