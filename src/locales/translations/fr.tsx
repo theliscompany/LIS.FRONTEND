@@ -389,5 +389,10 @@ export const fr = {
   countryCode: "Code du pays",
   createNewContact: "Créer un nouveau contact",
   createNewCarrier: "Créer un nouveau transporteur maritime",
-  createNewHaulier: "Créer un nouveau transporteur routier"
+  createNewHaulier: "Créer un nouveau transporteur routier",
+  priceType: "Type de prix",
+  lumpSum: "Marge forfaitaire",
+  margin: "Marge",
+  salesPrice: "Sales price",
+  totalPurchase: "Total purchase"
 };

@@ -330,6 +330,7 @@ function Haulages() {
                         "emptyPickupDepot": emptyPickupDepot,
                         "comment": comment,
                         "validUntil": validUntil?.toISOString(),
+                        "updated": (new Date()).toISOString(),
                         "containers": containerTypes,
                     };    
                 }
@@ -350,6 +351,7 @@ function Haulages() {
                         "emptyPickupDepot": emptyPickupDepot,
                         "comment": comment,
                         "validUntil": validUntil?.toISOString(),
+                        "updated": (new Date()).toISOString(),
                         "containers": containerTypes,
                     };    
                 }
