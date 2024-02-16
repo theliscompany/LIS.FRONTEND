@@ -21,8 +21,9 @@ import { AuthenticationResult } from '@azure/msal-browser';
 import { useMsal, useAccount } from '@azure/msal-react';
 import { CategoryEnum } from '../utils/constants';
 import RequestPriceRequest from '../components/editRequestPage/RequestPriceRequest';
-import { Mail } from '@mui/icons-material';
+import { FileCopy, Mail } from '@mui/icons-material';
 import NewContact from '../components/editRequestPage/NewContact';
+import ServicesTable from '../components/seafreightPage/ServicesTable';
 
 function createGetRequestUrl(variable1: number, variable2: number, variable3: number) {
     let url = protectedResources.apiLisPricing.endPoint+"/SeaFreight/GetSeaFreights?";
@@ -78,6 +79,8 @@ function Seafreights() {
     const [priceType, setPriceType] = useState<string>("Seafreight price");
     
     const [price, setPrice] = useState<number>(0);
+    const [servicesData, setServicesData] = useState<any>([]);
+    const [servicesData2, setServicesData2] = useState<any>([]);
     const [servicesSelection, setServicesSelection] = useState<any>([]);
     const [servicesSelection2, setServicesSelection2] = useState<any>([]);
     const [miscellaneousId, setMiscellaneousId] = useState<string>("");
@@ -140,6 +143,9 @@ function Seafreights() {
                 <Box sx={{ my: 1, mr: 1 }}>
                     <IconButton size="small" title={t('editRowSeafreight')} sx={{ mr: 0.5 }} onClick={() => { setCurrentEditId(params.row.seaFreightId); getSeafreight(params.row.seaFreightId); setServicesSelection2([]); setModal2(true); }}>
                         <EditIcon fontSize="small" />
+                    </IconButton>
+                    <IconButton size="small" title={t('copyRowSeafreight')} onClick={() => { copySeafreightById(params.row.seaFreightId); }}>
+                        <FileCopy fontSize="small" />
                     </IconButton>
                     <IconButton size="small" title={t('deleteRowSeafreight')} onClick={() => { setCurrentId(params.row.seaFreightId); setModal(true); }}>
                         <DeleteIcon fontSize="small" />
@@ -211,7 +217,7 @@ function Seafreights() {
             try {
                 const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisClient.endPoint+"/Contact/GetContacts", token);
                 if (response !== null && response !== undefined) {
-                    console.log(response);
+                    // console.log(response);
                     // Removing duplicates from client array
                     setClients(response.filter((obj: any, index: number, self: any) => index === self.findIndex((o: any) => o.contactName === obj.contactName)));
                 }
@@ -259,7 +265,7 @@ function Seafreights() {
         if (context) {
             const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Service/Services", token);
             if (response !== null && response !== undefined) {
-                console.log(response.filter((obj: any) => obj.servicesTypeId.includes(1)));
+                // console.log(response.filter((obj: any) => obj.servicesTypeId.includes(1)));
                 setAllServices(response);
                 setServices(response.filter((obj: any) => obj.servicesTypeId.includes(1))); // Filter the services for seafreights (SEAFREIGHT = 1)
             }  
@@ -270,7 +276,7 @@ function Seafreights() {
         if (context) {
             const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Package/Containers", token);
             if (response !== null && response !== undefined) {
-                console.log(response);
+                // console.log(response);
                 setContainers(response);
             }  
         }
@@ -302,7 +308,7 @@ function Seafreights() {
             else {
                 setLoad(false);
             }
-            console.log(response);
+            // console.log(response);
         }
         
         // if (context) {
@@ -320,6 +326,30 @@ function Seafreights() {
         // }
     }
     
+    const flattenData = (data: any) => {
+        return data.map((item: any) => ({
+            id: item.seaFreightServiceId, // DataGrid requires a unique 'id' for each row
+            seaFreightServiceId: item.seaFreightServiceId,
+            serviceName: item.service.serviceName,
+            serviceId: item.service.serviceId,
+            price: item.service.price,
+            container: item.containers.map((container: any) => container.packageName).join(', '), // Join container names if multiple
+        }));
+    }
+
+    const deflattenData = (flattenedData: any) => {
+        return flattenedData.map((item: any) => ({
+            seaFreightServiceId: item.seaFreightServiceId,
+            service: {
+                serviceId: item.serviceId, // Original structure did not include this in the flattened data
+                serviceName: item.serviceName,
+                price: item.price,
+                containers: item.containers // Assuming this was not included in the flattened version
+            },
+            containers: [containerTypes]
+        }));
+    };
+
     const resetForm = () => {
         setCarrier(null);
         setCarrierAgent(null);
@@ -355,6 +385,10 @@ function Seafreights() {
                 setServicesSelection(response.services);
                 setLoadEdit(false);
 
+                // To edit later, bad coding pratice
+                setServicesData(flattenData(response.services));
+                console.log(response.services);
+                
                 // Initialize the container
                 if (response.services.length !== 0) {
                     setContainerTypes(response.services[0].containers[0]);
@@ -366,7 +400,7 @@ function Seafreights() {
             else {
                 setLoadEdit(false);
             }
-            console.log(response);
+            // console.log(response);
         }
     }
     
@@ -382,7 +416,7 @@ function Seafreights() {
             else {
                 setLoad(false);
             }
-            console.log(response);
+            // console.log(response);
         }
     }
 
@@ -406,7 +440,7 @@ function Seafreights() {
                         "transitTime": transitTime,
                         "frequency": frequency,
                         "comment": comment,
-                        "services": servicesSelection,
+                        "services": deflattenData(servicesData),
                         "updated": (new Date()).toISOString()
                     };    
                 }
@@ -426,10 +460,11 @@ function Seafreights() {
                         "transitTime": transitTime,
                         "frequency": frequency,
                         "comment": comment,
-                        "services": servicesSelection,
+                        "services": deflattenData(servicesData),
                         "updated": (new Date()).toISOString()
                     };    
                 }
+                console.log(dataSent);
                 const response = await (context as BackendService<any>).postWithToken(protectedResources.apiLisPricing.endPoint+"/SeaFreight/SeaFreight", dataSent, tempToken);
                 if (response !== null && response !== undefined) {
                     setModal2(false);
@@ -446,10 +481,60 @@ function Seafreights() {
         }
     }
 
+    const copySeafreightById = async (id: string) => {
+        setLoadEdit(true)
+        if (context) {
+            const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisPricing.endPoint+"/SeaFreight/SeaFreight?seaFreightId="+id, tempToken);
+            if (response !== null && response !== undefined) {
+                var auxCarrier = {contactId: response.carrierId, contactName: response.carrierName};
+                var auxCarrierAgent = {contactId: response.carrierAgentId, contactName: response.carrierAgentName};
+                var auxLoading = ports.find((elm: any) => elm.portId === response.departurePortId);
+                var auxDischarge = ports.find((elm: any) => elm.portId === response.destinationPortId);
+                var auxValidUntil = dayjs(response.validUntil);
+                // Now i get the miscs
+                // getMiscellaneouses(auxCarrier, auxLoading, auxDischarge, auxValidUntil);
+
+                // Now i create a new seafreight with the information i get
+                var dataSent = null;
+                dataSent = {
+                    // "seaFreightId": "string",
+                    "departurePortId": auxLoading.portId,
+                    "destinationPortId": auxDischarge.portId,
+                    "departurePortName": auxLoading.portName,
+                    "destinationPortName": auxDischarge.portName,
+                    "carrierId": auxCarrier.contactId,
+                    "carrierName": auxCarrier.contactName,
+                    "carrierAgentId": auxCarrierAgent.contactId,
+                    "carrierAgentName": auxCarrierAgent.contactName,
+                    "currency": response.currency,
+                    "validUntil": auxValidUntil?.toISOString(),
+                    "transitTime": response.transitTime,
+                    "frequency": response.frequency,
+                    "comment": response.comment,
+                    "services": response.services,
+                    "updated": (new Date()).toISOString()
+                };
+                // console.log(dataSent);
+                const response2 = await (context as BackendService<any>).postWithToken(protectedResources.apiLisPricing.endPoint+"/SeaFreight/SeaFreight", dataSent, tempToken);
+                if (response2 !== null && response2 !== undefined) {
+                    enqueueSnackbar(t('successCreated'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                    searchSeafreights();
+                }
+                // else {
+                //     enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                // }
+            }
+            else {
+                setLoadEdit(false);
+            }
+            // console.log(response);
+        }
+    }
+
     const deleteSeafreightPrice = async (id: string) => {
         if (context) {
             // alert("Function not available yet!");
-            const response = await (context as BackendService<any>).delete(protectedResources.apiLisPricing.endPoint+"/SeaFreight/DeleteSeaFreightPrice?id="+id);
+            const response = await (context as BackendService<any>).deleteWithToken(protectedResources.apiLisPricing.endPoint+"/SeaFreight/DeleteSeaFreightPrice?id="+id, tempToken);
             if (response !== null && response !== undefined) {
                 enqueueSnackbar(t('rowDeletedSuccess'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
                 setModal(false);
@@ -459,22 +544,6 @@ function Seafreights() {
                 enqueueSnackbar(t('rowDeletedError'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
             }
         }
-    }
-
-    function missingElements(containerType: any, dataArray: any) {
-        // Find all services associated with the specified container type
-        const servicesForContainer = dataArray
-            .filter(({containers}: any) => containers.some((container: any) => container.packageName === containerType))
-            .map(({service}: any) => service.serviceName);
-      
-        // Find all unique services across all container types
-        const allServices: any = new Set(dataArray.map(({service}: any) => service.serviceName));
-      
-        // Determine missing services for the specified container type
-        const missingServices = [...allServices].filter(service => !servicesForContainer.includes(service));
-        
-        console.log(missingServices);
-        return missingServices;
     }
 
     const getMiscellaneouses = async (carrier1: any, portLoading1: any, portDischarge1: any, validUntil1: any) => {
@@ -502,7 +571,7 @@ function Seafreights() {
             if (carrier1 !== null && portLoading1 !== null && portDischarge1 !== null) {
                 const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisPricing.endPoint+"/Miscellaneous/Miscellaneous?SupplierId="+carrier1.contactId+"&DeparturePortId="+portLoading1.portId+"&DestinationPortId="+portDischarge1.portId+"&withShipment=true", token !== null ? token : tempToken);
                 if (response !== null && response !== undefined) {
-                    setMiscs(response);
+                    // setMiscs(response);
                     // console.log(response);
                     console.log(mapServicesToEnhancedFormat(response, validUntil1.toISOString()));
                     // setServicesSelection2(mapServicesToEnhancedFormat(response, validUntil1.toISOString()))
@@ -544,22 +613,26 @@ function Seafreights() {
                 const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisPricing.endPoint+"/Miscellaneous/Miscellaneous?id="+miscId+"&withShipment=true", token !== null ? token : tempToken);
                 if (response !== null && response !== undefined) {
                     // setMiscs(response);
-                    console.log(response);
+                    // console.log(response);
                     setServicesSelection2(response.services);
                     setLoadMiscs(false);
+
+                    // To edit later, bad coding pratice
+                    setServicesData2(flattenData(response.services));
+                    console.log(response.services);
                 }
                 else {
                     setLoadMiscs(false);
                 }
             }
             else {
-                console.log("CHECK");
+                // console.log("CHECK");
             }
         }
     }
     
     const createMiscellaneous = async () => {
-        if (servicesSelection !== null && validUntil !== null) {
+        if (servicesSelection2 !== null && validUntil !== null) {
             if (context) {
                 var dataSent = null;
                 if (miscellaneousId !== "") {
@@ -575,7 +648,7 @@ function Seafreights() {
                             "currency": currency,
                             "validUntil": validUntil?.toISOString(),
                             "comment": "",
-                            "services": servicesSelection2,
+                            "services": deflattenData(servicesSelection2),
                             "updated": (new Date()).toISOString()
                         };
                     }
@@ -593,19 +666,20 @@ function Seafreights() {
                             "currency": currency,
                             "validUntil": validUntil?.toISOString(),
                             "comment": "",
-                            "services": servicesSelection2,
+                            "services": deflattenData(servicesSelection2),
                             "updated": (new Date()).toISOString()
                         };
                     }
                 }
+                // console.log(dataSent);
                 const response = await (context as BackendService<any>).postWithToken(protectedResources.apiLisPricing.endPoint+"/Miscellaneous/Miscellaneous", dataSent, tempToken);
                 if (response !== null && response !== undefined) {
                     setModal2(false);
-                    enqueueSnackbar(t('successCreated'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                    // enqueueSnackbar(t('successCreated'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
                     // getMiscellaneouses();
                 }
                 else {
-                    enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                    // enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
                 }
             }
         }
@@ -614,19 +688,19 @@ function Seafreights() {
         }
     }
 
-    const extractServicesByValidDate = (data: any, validUntilDate: string) => {
-        const services:any = [];
+    // const extractServicesByValidDate = (data: any, validUntilDate: string) => {
+    //     const services:any = [];
         
-        data.forEach((item: any) => {
-            item.suppliers.forEach((supplier: any) => {
-                if (new Date(supplier.validUntil) >= new Date(validUntilDate)) {
-                    services.push(...supplier.services);
-                }
-            });
-        });
+    //     data.forEach((item: any) => {
+    //         item.suppliers.forEach((supplier: any) => {
+    //             if (new Date(supplier.validUntil) >= new Date(validUntilDate)) {
+    //                 services.push(...supplier.services);
+    //             }
+    //         });
+    //     });
         
-        return services;
-    };
+    //     return services;
+    // };
     
     const mapServicesToEnhancedFormat = (data: any, validUntilDate: string) => {
         const enhancedServices: any = [];
@@ -951,148 +1025,46 @@ function Seafreights() {
                                         onChange={(event: any, newValue: any) => {
                                             console.log(newValue);
                                             setContainerTypes(newValue);
+                                            setServicesSelection((prevServices: any) => prevServices.map((elm: any) => {
+                                                return {...elm, containers: [newValue]};
+                                            }));
+                                            setServicesSelection2((prevServices: any) => prevServices.map((elm: any) => {
+                                                return {...elm, containers: [newValue]};
+                                            }));
                                         }}
                                         renderInput={(params: any) => <TextField {...params} sx={{ mt: 1, textTransform: "lowercase" }} />}
                                         fullWidth
                                     /> : <Skeleton />
                                 }
                             </Grid>
-                            <Grid item xs={12} md={12}>
-                                <Typography sx={{ fontSize: 18 }}><b>{t('listServices')}</b></Typography>
-                            </Grid>
-                            <Grid item xs={12} md={4}>
-                                <InputLabel htmlFor="service-name" sx={inputLabelStyles}>{t('serviceName')}</InputLabel>
+                            <Grid item xs={12}>
+                                <Typography sx={{ fontSize: 18, mb: 1 }}><b>{t('listServices')} - {t('seafreights')}</b></Typography>
                                 {
-                                    services !== null ?
-                                    <Autocomplete
-                                        disablePortal
-                                        id="service-name"
-                                        options={services}
-                                        renderOption={(props, option, i) => {
-                                            return (
-                                                <li {...props} key={option.serviceId}>
-                                                    {option.serviceName}
-                                                </li>
-                                            );
-                                        }}
-                                        getOptionLabel={(option: any) => { 
-                                            if (option !== null && option !== undefined) {
-                                                return option.serviceName;
-                                            }
-                                            return ""; 
-                                        }}
-                                        value={serviceName}
-                                        sx={{ mt: 1 }}
-                                        renderInput={(params: any) => <TextField {...params} />}
-                                        onChange={(e: any, value: any) => { setServiceName(value); }}
-                                        fullWidth
-                                    /> : <Skeleton />
+                                    allServices !== null && allServices !== undefined && allServices.length !== 0 ?
+                                    <ServicesTable 
+                                        services={servicesData} 
+                                        setServices={setServicesData}
+                                        allServices={allServices}
+                                        type="Seafreight"
+                                        container={containerTypes}
+                                        currency={currency}
+                                        servicesOptions={allServices.filter((obj: any) => obj.servicesTypeId.includes(1)).map((elm: any) => elm.serviceName)}
+                                    /> : null
                                 }
-                            </Grid>
-                            <Grid item xs={12} md={4}>
-                                <InputLabel htmlFor="price-type" sx={inputLabelStyles}>{t('priceType')}</InputLabel>
-                                <NativeSelect
-                                    id="price-type"
-                                    value={priceType}
-                                    onChange={(e: any) => { 
-                                        setPriceType(e.target.value); 
-                                        setServices(allServices.filter((obj: any) => obj.servicesTypeId.includes(e.target.value === "Seafreight price" ? 1 : 5)));
-                                        setServiceName(null);
-                                    }}
-                                    input={<BootstrapInput />}
-                                    fullWidth
-                                >
-                                    <option value="Seafreight price">Seafreight price</option>
-                                    <option value="Miscellaneous price">Miscellaneous price</option>
-                                </NativeSelect>
-                            </Grid>
-                            <Grid item xs={12} md={2}>
-                                <InputLabel htmlFor="price-cs" sx={inputLabelStyles}>{t('price')}</InputLabel>
-                                <BootstrapInput id="price-cs" type="number" value={price} onChange={(e: any) => setPrice(e.target.value)} fullWidth />
-                            </Grid>
-                            <Grid item xs={12} md={2}>
-                                <Button
-                                    variant="contained" color="inherit" fullWidth sx={whiteButtonStyles} 
-                                    style={{ marginTop: "30px", height: "42px", float: "right" }} 
-                                    onClick={() => {
-                                        if (serviceName !== null && containerTypes !== null && price > 0) {
-                                            if (priceType === "Seafreight price") {
-                                                setServicesSelection((prevItems: any) => [...prevItems, { 
-                                                    service: { serviceId: serviceName.serviceId, serviceName: serviceName.serviceName, price: Number(price) }, containers: [containerTypes]
-                                                }]);
-                                                setServiceName(null); setPrice(0);
-                                            }
-                                            else {
-                                                setServicesSelection2((prevItems: any) => [...prevItems, { 
-                                                    service: { serviceId: serviceName.serviceId, serviceName: serviceName.serviceName, price: Number(price) }, containers: [containerTypes]
-                                                }]);
-                                                setServiceName(null); setPrice(0);
-                                            }
-                                        } 
-                                        else {
-                                            enqueueSnackbar(t('fieldNeedTobeFilled'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
-                                        }
-                                    }} 
-                                >
-                                    {t('add')}
-                                </Button>
                             </Grid>
                             <Grid item xs={12}>
+                                <Typography sx={{ fontSize: 18, mb: 1 }}><b>{t('listServices')} - {t('miscellaneous')}</b></Typography>
                                 {
-                                    servicesSelection !== undefined && servicesSelection !== null && servicesSelection.length !== 0 ? 
-                                        <Grid container spacing={2}>
-                                            {
-                                                servicesSelection.map((item: any, index: number) => (
-                                                    <Grid key={"serviceitem1-"+index} item xs={12} md={4}>
-                                                        <ListItem
-                                                            sx={{ border: "1px solid #e5e5e5" }}
-                                                            secondaryAction={
-                                                                <IconButton edge="end" size="small" onClick={() => {
-                                                                    console.log(servicesSelection);
-                                                                    setServicesSelection((prevItems: any) => prevItems.filter((item: any, i: number) => i !== index));
-                                                                }}>
-                                                                    <DeleteIcon fontSize="small" />
-                                                                </IconButton>
-                                                            }
-                                                        >
-                                                            <ListItemText primary={
-                                                                // t('serviceName')+" : "+item.service.serviceName+" | "+t('containers')+" : "+item.containers.map((elm: any) => elm.packageName).join(", ")+" | "+t('price')+" : "+item.service.price+" "+currency
-                                                                item.service.serviceName+" | "+item.service.price+" "+currency
-                                                            } primaryTypographyProps={{ fontSize: 14 }} />
-                                                        </ListItem>
-                                                    </Grid>
-                                                ))
-                                            }
-                                        </Grid>
-                                    : null  
-                                }
-                                {
-                                    servicesSelection2 !== undefined && servicesSelection2 !== null && servicesSelection2.length !== 0 ? 
-                                        <Grid container spacing={2} sx={{ mt: 0 }}>
-                                            {
-                                                servicesSelection2.map((item: any, index: number) => (
-                                                    <Grid key={"serviceitem2-"+index} item xs={12} md={4}>
-                                                        <ListItem
-                                                            sx={{ border: "1px solid #e5e5e5" }}
-                                                            secondaryAction={
-                                                                <IconButton edge="end" size="small" onClick={() => {
-                                                                    console.log(servicesSelection2);
-                                                                    setServicesSelection2((prevItems: any) => prevItems.filter((item: any, i: number) => i !== index));
-                                                                }}>
-                                                                    <DeleteIcon fontSize="small" />
-                                                                </IconButton>
-                                                            }
-                                                        >
-                                                            <ListItemText primary={
-                                                                // t('serviceName')+" : "+item.service.serviceName+" | "+t('containers')+" : "+item.containers.map((elm: any) => elm.packageName).join(", ")+" | "+t('price')+" : "+item.service.price+" "+currency
-                                                                item.service.serviceName+" | "+item.service.price+" "+currency
-                                                            } primaryTypographyProps={{ fontSize: 14 }} />
-                                                        </ListItem>
-                                                    </Grid>
-                                                ))
-                                            }
-                                        </Grid>
-                                    : null  
+                                    allServices !== null && allServices !== undefined && allServices.length !== 0 ?
+                                    <ServicesTable 
+                                        services={servicesData2} 
+                                        setServices={setServicesData2}
+                                        allServices={allServices}
+                                        type="Miscellaneous"
+                                        container={containerTypes}
+                                        currency={currency}
+                                        servicesOptions={allServices.filter((obj: any) => obj.servicesTypeId.includes(5)).map((elm: any) => elm.serviceName)}
+                                    /> : null
                                 }
                             </Grid>
                         </Grid> : <Skeleton />

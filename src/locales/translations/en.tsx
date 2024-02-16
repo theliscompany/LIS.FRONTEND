@@ -147,6 +147,7 @@ export const en = {
   searchOffers: "Search for offers",
   listOffers: "List of offers",
   sendOffer: "Send an offer",
+  loadingText: "Loading...",
   typeSomething: "No results, type something...",
   typeSomethingSearch: "Type something to search...",
   generatedPriceOffers: "Sent price offers",
@@ -394,5 +395,6 @@ export const en = {
   lumpSum: "Margin lump sum",
   margin: "Margin",
   salesPrice: "Sales price",
-  totalPurchase: "Total purchase"
+  totalPurchase: "Total purchase",
+  copyRowSeafreight: "Copy seafreight price",
 };

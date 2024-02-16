@@ -1728,7 +1728,7 @@ function Request() {
                                                                                     getRowId={(row: any) => row?.id}
                                                                                     getRowHeight={() => "auto" }
                                                                                     sx={gridStyles}
-                                                                                    onRowSelectionModelChange={(newRowSelectionModel) => {
+                                                                                    onRowSelectionModelChange={(newRowSelectionModel: any) => {
                                                                                         setRowSelectionModel2(newRowSelectionModel);
                                                                                         setSelectedHaulage(newRowSelectionModel.length !== 0 ? haulages.find((elm: any) => elm.id === newRowSelectionModel[0]) : null);
                                                                                     }}
@@ -1800,7 +1800,7 @@ function Request() {
                                                                                 return ""; 
                                                                             }}
                                                                             value={portDeparture}
-                                                                            disabled={true}
+                                                                            // disabled={true}
                                                                             sx={{ mt: 1 }}
                                                                             renderInput={(params: any) => <TextField {...params} />}
                                                                             onChange={(e: any, value: any) => { setPortDeparture(value); }}
@@ -1887,7 +1887,7 @@ function Request() {
                                                                                 getRowId={(row: any) => row?.seaFreightId}
                                                                                 getRowHeight={() => "auto" }
                                                                                 sx={gridStyles}
-                                                                                onRowSelectionModelChange={(newRowSelectionModel) => {
+                                                                                onRowSelectionModelChange={(newRowSelectionModel: any) => {
                                                                                     setRowSelectionModel(newRowSelectionModel);
                                                                                     setSelectedSeafreight(newRowSelectionModel.length !== 0 ? seafreights.find((elm: any) => elm.seaFreightId === newRowSelectionModel[0]) : null);
                                                                                 }}
@@ -1951,7 +1951,7 @@ function Request() {
                                                                                     getRowId={(row: any) => row?.id}
                                                                                     getRowHeight={() => "auto" }
                                                                                     sx={gridStyles}
-                                                                                    onRowSelectionModelChange={(newRowSelectionModel) => {
+                                                                                    onRowSelectionModelChange={(newRowSelectionModel: any) => {
                                                                                         setRowSelectionModel3(newRowSelectionModel);
                                                                                         setSelectedMisc(newRowSelectionModel.length !== 0 ? miscs.find((elm: any) => elm.id === newRowSelectionModel[0]) : null);
                                                                                     }}
@@ -2069,11 +2069,29 @@ function Request() {
                                                                 </Grid>
                                                                 <Grid item xs={2}>
                                                                     <InputLabel htmlFor="margin" sx={inputLabelStyles}>{t('margin')} %</InputLabel>
-                                                                    <BootstrapInput id="margin" type="number" inputProps={{ min: 0, max: 100 }} value={margin} onChange={(e: any) => {setMargin(e.target.value)}} fullWidth />
+                                                                    <BootstrapInput 
+                                                                        id="margin" type="number" fullWidth 
+                                                                        inputProps={{ min: 0, max: 100 }} value={margin} 
+                                                                        onChange={(e: any) => {
+                                                                            if (adding !== 0) {
+                                                                                setAdding(0);
+                                                                            }
+                                                                            setMargin(e.target.value);
+                                                                        }} 
+                                                                    />
                                                                 </Grid>
                                                                 <Grid item xs={2}>
                                                                     <InputLabel htmlFor="adding" sx={inputLabelStyles}>{t('lumpSum')}</InputLabel>
-                                                                    <BootstrapInput id="adding" type="number" inputProps={{ min: 0 }} value={adding} onChange={(e: any) => {setAdding(e.target.value)}} fullWidth />
+                                                                    <BootstrapInput 
+                                                                        id="adding" type="number" fullWidth 
+                                                                        inputProps={{ min: 0 }} value={adding} 
+                                                                        onChange={(e: any) => {
+                                                                            if (margin !== 0) {
+                                                                                setMargin(0);
+                                                                            }
+                                                                            setAdding(e.target.value);
+                                                                        }} 
+                                                                    />
                                                                 </Grid>
                                                                 <Grid item xs={12}>
                                                                     <Box sx={{ border: "1px solid #e5e5e5", p: 2 }}>
