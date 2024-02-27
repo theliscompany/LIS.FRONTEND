@@ -21,8 +21,9 @@ import { AuthenticationResult } from '@azure/msal-browser';
 import { useMsal, useAccount } from '@azure/msal-react';
 import { CategoryEnum } from '../utils/constants';
 import RequestPriceRequest from '../components/editRequestPage/RequestPriceRequest';
-import { Mail } from '@mui/icons-material';
+import { FileCopy, Mail } from '@mui/icons-material';
 import NewContact from '../components/editRequestPage/NewContact';
+import ServicesTable from '../components/seafreightPage/ServicesTable';
 
 function createGetRequestUrl(variable1: number, variable2: number, variable3: number) {
     let url = protectedResources.apiLisPricing.endPoint+"/SeaFreight/GetSeaFreights?";
@@ -45,7 +46,7 @@ function createGetRequestUrl(variable1: number, variable2: number, variable3: nu
 function Seafreights() {
     const [load, setLoad] = useState<boolean>(true);
     const [loadEdit, setLoadEdit] = useState<boolean>(false);
-    const [loadMiscs, setLoadMiscs] = useState<boolean>(false);
+    const [loadMiscs, setLoadMiscs] = useState<boolean>(true);
     const [modal, setModal] = useState<boolean>(false);
     const [modal2, setModal2] = useState<boolean>(false);
     const [modal6, setModal6] = useState<boolean>(false);
@@ -72,12 +73,14 @@ function Seafreights() {
     const [currency, setCurrency] = useState<string>("EUR");
     const [comment, setComment] = useState<string>("");
     const [serviceName, setServiceName] = useState<any>(null);
-    const [miscs, setMiscs] = useState<any>(null);
+    const [otherMiscs, setOtherMiscs] = useState<any>(null);
     const [containerTypes, setContainerTypes] = useState<any>(null);
     // const [containerTypes, setContainerTypes] = useState<any>({packageId: 8, packageName: "20' Dry"});
     const [priceType, setPriceType] = useState<string>("Seafreight price");
     
     const [price, setPrice] = useState<number>(0);
+    const [servicesData, setServicesData] = useState<any>([]);
+    const [servicesData2, setServicesData2] = useState<any>([]);
     const [servicesSelection, setServicesSelection] = useState<any>([]);
     const [servicesSelection2, setServicesSelection2] = useState<any>([]);
     const [miscellaneousId, setMiscellaneousId] = useState<string>("");
@@ -138,8 +141,11 @@ function Seafreights() {
         { field: 'xxx', headerName: t('Actions'), renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box sx={{ my: 1, mr: 1 }}>
-                    <IconButton size="small" title={t('editRowSeafreight')} sx={{ mr: 0.5 }} onClick={() => { setCurrentEditId(params.row.seaFreightId); getSeafreight(params.row.seaFreightId); setServicesSelection2([]); setModal2(true); }}>
+                    <IconButton size="small" title={t('editRowSeafreight')} sx={{ mr: 0.5 }} onClick={() => { setCurrentEditId(params.row.seaFreightId); resetForm(); getSeafreight(params.row.seaFreightId, false); setModal2(true); }}>
                         <EditIcon fontSize="small" />
+                    </IconButton>
+                    <IconButton size="small" title={t('copyRowSeafreight')} onClick={() => { setContainerTypes(null); setCurrentEditId(""); resetForm(); getSeafreight(params.row.seaFreightId, true); setModal2(true); /*copySeafreightById(params.row.seaFreightId);*/ }}>
+                        <FileCopy fontSize="small" />
                     </IconButton>
                     <IconButton size="small" title={t('deleteRowSeafreight')} onClick={() => { setCurrentId(params.row.seaFreightId); setModal(true); }}>
                         <DeleteIcon fontSize="small" />
@@ -158,9 +164,9 @@ function Seafreights() {
         // getMiscellaneouses();
     }, []);
 
-    useEffect(() => {
-        getMiscellaneousesById(miscellaneousId);
-    }, [miscellaneousId]);
+    // useEffect(() => {
+    //     getMiscellaneousesById(miscellaneousId);
+    // }, [miscellaneousId]);
     
     const getProducts = async () => {
         if (context && account) {
@@ -211,7 +217,7 @@ function Seafreights() {
             try {
                 const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisClient.endPoint+"/Contact/GetContacts", token);
                 if (response !== null && response !== undefined) {
-                    console.log(response);
+                    // console.log(response);
                     // Removing duplicates from client array
                     setClients(response.filter((obj: any, index: number, self: any) => index === self.findIndex((o: any) => o.contactName === obj.contactName)));
                 }
@@ -259,7 +265,7 @@ function Seafreights() {
         if (context) {
             const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Service/Services", token);
             if (response !== null && response !== undefined) {
-                console.log(response.filter((obj: any) => obj.servicesTypeId.includes(1)));
+                // console.log(response.filter((obj: any) => obj.servicesTypeId.includes(1)));
                 setAllServices(response);
                 setServices(response.filter((obj: any) => obj.servicesTypeId.includes(1))); // Filter the services for seafreights (SEAFREIGHT = 1)
             }  
@@ -302,7 +308,7 @@ function Seafreights() {
             else {
                 setLoad(false);
             }
-            console.log(response);
+            // console.log(response);
         }
         
         // if (context) {
@@ -320,6 +326,52 @@ function Seafreights() {
         // }
     }
     
+    const flattenData = (data: any) => {
+        return data.map((item: any) => ({
+            id: item.seaFreightServiceId, // DataGrid requires a unique 'id' for each row
+            serviceName: item.service.serviceName,
+            serviceId: item.service.serviceId,
+            price: item.service.price,
+            container: item.containers.map((container: any) => container.packageName).join(', '), // Join container names if multiple
+        }));
+    }
+
+    const deflattenData = (flattenedData: any) => {
+        return flattenedData.map((item: any) => ({
+            seaFreightServiceId: item.id,
+            service: {
+                serviceId: item.serviceId, // Original structure did not include this in the flattened data
+                serviceName: item.serviceName,
+                price: item.price,
+                containers: item.containers // Assuming this was not included in the flattened version
+            },
+            containers: [containerTypes]
+        }));
+    };
+
+    const flattenData2 = (data: any) => {
+        return data.map((item: any) => ({
+            id: item.miscellaneousServiceId, // DataGrid requires a unique 'id' for each row
+            serviceName: item.service.serviceName,
+            serviceId: item.service.serviceId,
+            price: item.service.price,
+            container: item.containers.map((container: any) => container.packageName).join(', '), // Join container names if multiple
+        }));
+    }
+
+    const deflattenData2 = (flattenedData: any) => {
+        return flattenedData.map((item: any) => ({
+            miscellaneousServiceId: item.id,
+            service: {
+                serviceId: item.serviceId, // Original structure did not include this in the flattened data
+                serviceName: item.serviceName,
+                price: item.price,
+                containers: item.containers // Assuming this was not included in the flattened version
+            },
+            containers: [containerTypes]
+        }));
+    };
+
     const resetForm = () => {
         setCarrier(null);
         setCarrierAgent(null);
@@ -330,10 +382,14 @@ function Seafreights() {
         setTransitTime(0);
         setFrequency(0);
         setComment("");
-        setServicesSelection([]);
+        // setServicesSelection([]);
+        // setServicesSelection2([]);
+        setServicesData([]);
+        setServicesData2([]);
+        setMiscellaneousId("");
     }
     
-    const getSeafreight = async (id: string) => {
+    const getSeafreight = async (id: string, isCopy: boolean) => {
         setLoadEdit(true)
         if (context) {
             const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisPricing.endPoint+"/SeaFreight/SeaFreight?seaFreightId="+id, tempToken);
@@ -352,21 +408,24 @@ function Seafreights() {
                 setTransitTime(response.transitTime);
                 setFrequency(response.frequency);
                 setComment(response.comment);
-                setServicesSelection(response.services);
+                // setServicesSelection(response.services);
                 setLoadEdit(false);
 
+                // To edit later, bad coding practice
+                setServicesData(flattenData(response.services));
+                console.log(response.services);
+                
                 // Initialize the container
-                if (response.services.length !== 0) {
+                if (response.services.length !== 0 && isCopy === false) {
                     setContainerTypes(response.services[0].containers[0]);
                 }
 
                 // Now i get the miscs
-                getMiscellaneouses(auxCarrier, auxLoading, auxDischarge, auxValidUntil);
+                getMiscellaneouses(auxCarrier, auxLoading, auxDischarge, auxValidUntil, response.services[0].containers[0], isCopy);
             }
             else {
                 setLoadEdit(false);
             }
-            console.log(response);
         }
     }
     
@@ -382,12 +441,11 @@ function Seafreights() {
             else {
                 setLoad(false);
             }
-            console.log(response);
         }
     }
 
     const createUpdateSeafreight = async () => {
-        if (portLoading !== null && portDischarge !== null && carrier !== null && carrierAgent !== null && frequency !== 0 && transitTime !== 0 && servicesSelection !== null && validUntil !== null) {
+        if (servicesData.length !== 0 && portLoading !== null && portDischarge !== null && carrier !== null && carrierAgent !== null && frequency !== 0 && transitTime !== 0 && validUntil !== null) {
             if (context) {
                 var dataSent = null;
                 if (currentEditId !== "") {
@@ -406,7 +464,7 @@ function Seafreights() {
                         "transitTime": transitTime,
                         "frequency": frequency,
                         "comment": comment,
-                        "services": servicesSelection,
+                        "services": deflattenData(servicesData),
                         "updated": (new Date()).toISOString()
                     };    
                 }
@@ -426,10 +484,11 @@ function Seafreights() {
                         "transitTime": transitTime,
                         "frequency": frequency,
                         "comment": comment,
-                        "services": servicesSelection,
+                        "services": deflattenData(servicesData),
                         "updated": (new Date()).toISOString()
                     };    
                 }
+                console.log(dataSent);
                 const response = await (context as BackendService<any>).postWithToken(protectedResources.apiLisPricing.endPoint+"/SeaFreight/SeaFreight", dataSent, tempToken);
                 if (response !== null && response !== undefined) {
                     setModal2(false);
@@ -448,8 +507,7 @@ function Seafreights() {
 
     const deleteSeafreightPrice = async (id: string) => {
         if (context) {
-            // alert("Function not available yet!");
-            const response = await (context as BackendService<any>).delete(protectedResources.apiLisPricing.endPoint+"/SeaFreight/DeleteSeaFreightPrice?id="+id);
+            const response = await (context as BackendService<any>).deleteWithToken(protectedResources.apiLisPricing.endPoint+"/SeaFreight/DeleteSeaFreightPrice?id="+id, tempToken);
             if (response !== null && response !== undefined) {
                 enqueueSnackbar(t('rowDeletedSuccess'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
                 setModal(false);
@@ -461,25 +519,9 @@ function Seafreights() {
         }
     }
 
-    function missingElements(containerType: any, dataArray: any) {
-        // Find all services associated with the specified container type
-        const servicesForContainer = dataArray
-            .filter(({containers}: any) => containers.some((container: any) => container.packageName === containerType))
-            .map(({service}: any) => service.serviceName);
-      
-        // Find all unique services across all container types
-        const allServices: any = new Set(dataArray.map(({service}: any) => service.serviceName));
-      
-        // Determine missing services for the specified container type
-        const missingServices = [...allServices].filter(service => !servicesForContainer.includes(service));
-        
-        console.log(missingServices);
-        return missingServices;
-    }
-
-    const getMiscellaneouses = async (carrier1: any, portLoading1: any, portDischarge1: any, validUntil1: any) => {
+    const getMiscellaneouses = async (carrier1: any, portLoading1: any, portDischarge1: any, validUntil1: any, container: any, isCopy: boolean) => {
         if (context && account) {
-            setLoadMiscs(true);
+            // setLoadMiscs(true);
             
             var token = null;
             if (tempToken === "") {
@@ -502,14 +544,35 @@ function Seafreights() {
             if (carrier1 !== null && portLoading1 !== null && portDischarge1 !== null) {
                 const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisPricing.endPoint+"/Miscellaneous/Miscellaneous?SupplierId="+carrier1.contactId+"&DeparturePortId="+portLoading1.portId+"&DestinationPortId="+portDischarge1.portId+"&withShipment=true", token !== null ? token : tempToken);
                 if (response !== null && response !== undefined) {
-                    setMiscs(response);
-                    // console.log(response);
-                    console.log(mapServicesToEnhancedFormat(response, validUntil1.toISOString()));
                     // setServicesSelection2(mapServicesToEnhancedFormat(response, validUntil1.toISOString()))
-                    setLoadMiscs(false);
+                    // Here i set the miscellaneousId
+                    var auxMiscId = "";
+                    response.forEach((item: any) => {
+                        item.suppliers.forEach((supplier: any) => {
+                            if (supplier.validUntil.slice(0,10) === validUntil1.toISOString().slice(0,10)) {
+                                // Here i get the miscellaneous Id
+                                auxMiscId = supplier.miscellaneousId;
+                            }
+                        });
+                    });
+                    // setLoadMiscs(false);
+                    
+                    // Get the miscs
+                    if (auxMiscId !== "") {
+                        // if (isCopy === false) {
+                        //     alert('This');
+                        //     setMiscellaneousId(auxMiscId);
+                        // }
+                        setMiscellaneousId(auxMiscId);
+                        getMiscellaneousesById(auxMiscId, container);
+                    }
+                    else {
+                        setMiscellaneousId("");
+                        setLoadMiscs(false);
+                    }
                 }
                 else {
-                    setLoadMiscs(false);
+                    // setLoadMiscs(false);
                 }
             }
             else {
@@ -518,7 +581,7 @@ function Seafreights() {
         }
     }
     
-    const getMiscellaneousesById = async (miscId: string) => {
+    const getMiscellaneousesById = async (miscId: string, container: any) => {
         if (context && account) {
             setLoadMiscs(true);
             
@@ -542,67 +605,66 @@ function Seafreights() {
 
             if (miscId !== "") {
                 const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisPricing.endPoint+"/Miscellaneous/Miscellaneous?id="+miscId+"&withShipment=true", token !== null ? token : tempToken);
-                if (response !== null && response !== undefined) {
-                    // setMiscs(response);
-                    console.log(response);
-                    setServicesSelection2(response.services);
+                if (response !== null && response !== undefined && container !== null) {
+                    // alert(container.packageName);
+                    // setServicesSelection2(response.services);
                     setLoadMiscs(false);
+
+                    // To edit later, bad coding practice
+                    // setOtherMiscs(flattenData2(response.services.filter((elm: any) => elm.containers[0].packageName !== container.packageName)));
+                    setServicesData2(flattenData2(response.services.filter((elm: any) => elm.containers[0].packageName === container.packageName)));
+                    console.log(response.services);
                 }
                 else {
                     setLoadMiscs(false);
                 }
             }
             else {
-                console.log("CHECK");
+                // console.log("CHECK");
             }
         }
     }
     
     const createMiscellaneous = async () => {
-        if (servicesSelection !== null && validUntil !== null) {
+        if (servicesData2.length !== 0 && validUntil !== null && portLoading !== null && portDischarge !== null && carrier !== null) {
             if (context) {
                 var dataSent = null;
                 if (miscellaneousId !== "") {
-                    if (portLoading !== null && portDischarge !== null && carrier !== null) {
-                        dataSent = {
-                            "miscellaneousId": miscellaneousId,
-                            "departurePortId": portLoading.portId,
-                            "destinationPortId": portDischarge.portId,
-                            "departurePortName": portLoading.portName,
-                            "destinationPortName": portDischarge.portName,
-                            "supplierId": carrier.contactId,
-                            "supplierName": carrier.contactName,
-                            "currency": currency,
-                            "validUntil": validUntil?.toISOString(),
-                            "comment": "",
-                            "services": servicesSelection2,
-                            "updated": (new Date()).toISOString()
-                        };
-                    }
+                    dataSent = {
+                        "miscellaneousId": miscellaneousId,
+                        "departurePortId": portLoading.portId,
+                        "destinationPortId": portDischarge.portId,
+                        "departurePortName": portLoading.portName,
+                        "destinationPortName": portDischarge.portName,
+                        "supplierId": carrier.contactId,
+                        "supplierName": carrier.contactName,
+                        "currency": currency,
+                        "validUntil": validUntil?.toISOString(),
+                        "comment": "",
+                        "services": deflattenData2(servicesData2),
+                        "updated": (new Date()).toISOString()
+                    };
                 }
                 else {
-                    if (portLoading !== null && portDischarge !== null && carrier !== null) {
-                        dataSent = {
-                            // "miscellaneousId": currentEditId,
-                            "departurePortId": portLoading.portId,
-                            "destinationPortId": portDischarge.portId,
-                            "departurePortName": portLoading.portName,
-                            "destinationPortName": portDischarge.portName,
-                            "supplierId": carrier.contactId,
-                            "supplierName": carrier.contactName,
-                            "currency": currency,
-                            "validUntil": validUntil?.toISOString(),
-                            "comment": "",
-                            "services": servicesSelection2,
-                            "updated": (new Date()).toISOString()
-                        };
-                    }
+                    dataSent = {
+                        // "miscellaneousId": currentEditId,
+                        "departurePortId": portLoading.portId,
+                        "destinationPortId": portDischarge.portId,
+                        "departurePortName": portLoading.portName,
+                        "destinationPortName": portDischarge.portName,
+                        "supplierId": carrier.contactId,
+                        "supplierName": carrier.contactName,
+                        "currency": currency,
+                        "validUntil": validUntil?.toISOString(),
+                        "comment": "",
+                        "services": deflattenData2(servicesData2),
+                        "updated": (new Date()).toISOString()
+                    };
                 }
+                console.log(dataSent);
                 const response = await (context as BackendService<any>).postWithToken(protectedResources.apiLisPricing.endPoint+"/Miscellaneous/Miscellaneous", dataSent, tempToken);
                 if (response !== null && response !== undefined) {
                     setModal2(false);
-                    enqueueSnackbar(t('successCreated'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
-                    // getMiscellaneouses();
                 }
                 else {
                     enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
@@ -614,62 +676,44 @@ function Seafreights() {
         }
     }
 
-    const extractServicesByValidDate = (data: any, validUntilDate: string) => {
-        const services:any = [];
+    function findPricingOffer(offers: any, carrierId: string, departurePort: string, destinationPort: string, containerType: string) {
+        // console.log("Offers : ", offers);
+        // console.log("Carrier Id : ", carrierId);
+        // console.log("Departure : ", departurePort);
+        // console.log("Destination : ", destinationPort);
+        // console.log("Container : ", containerType);
         
-        data.forEach((item: any) => {
-            item.suppliers.forEach((supplier: any) => {
-                if (new Date(supplier.validUntil) >= new Date(validUntilDate)) {
-                    services.push(...supplier.services);
-                }
-            });
-        });
-        
-        return services;
-    };
+        // Map containerType to the key used in the offer objects
+        const containerTypeKeyMap: any = {
+            "20' Dry": "total20Dry",
+            "40' Dry": "total40Dry",
+            "40' HC RF": "total20HCRF",
+            "40' HC": "total40HC",
+            "20' RF": "total20RF"
+        };
     
-    const mapServicesToEnhancedFormat = (data: any, validUntilDate: string) => {
-        const enhancedServices: any = [];
-        
-        data.forEach((item: any) => {
-            item.suppliers.forEach((supplier: any) => {
-                if (supplier.validUntil.slice(0,10) === validUntilDate.slice(0,10)) {
-                    // Here i get the miscellaneous Id
-                    setMiscellaneousId(supplier.miscellaneousId);
-                    // Assuming we're mapping existing container data based on available non-zero totals
-                    var containers: any = [];
-                    if (supplier.total20Dry > 0) { 
-                        setContainerTypes({ packageId: 8, packageName: "20' Dry" });
-                        containers = [{ packageId: 8, packageName: "20' Dry" }];
+        const containerKey = containerTypeKeyMap[containerType];
+        if (!containerKey) {
+            console.log("Invalid container type");
+            return null;
+        }
+    
+        // Iterate through the offers to find a match
+        for (const offer of offers) {
+            if (offer.departurePortName === departurePort && offer.destinationPortName === destinationPort) {
+                for (const supplier of offer.suppliers) {
+                    if (supplier.carrierAgentName === carrierId && supplier[containerKey] > 0) {
+                        console.log("Matching offer found:", supplier);
+                        return supplier;
                     }
-                    if (supplier.total40Dry > 0) { 
-                        setContainerTypes({ packageId: 9, packageName: "40' Dry" });
-                        containers = [{ packageId: 9, packageName: "40' Dry" }];
-                    }
-                    if (supplier.total40HC > 0) { 
-                        setContainerTypes({ packageId: 10, packageName: "40' HC" });
-                        containers = [{ packageId: 10, packageName: "40' HC" }];
-                    }
-                    // Add similar conditions for other container types as needed
-                    
-                    supplier.services.forEach((service: any) => {
-                        enhancedServices.push({
-                            service: {
-                                // miscellaneousId: supplier.miscellaneousId,
-                                serviceId: service.serviceId,
-                                serviceName: service.serviceName,
-                                price: service.price,
-                            },
-                            containers: containers,
-                        });
-                    });
                 }
-            });
-        });
-      
-        return enhancedServices;
-    };
-      
+            }
+        }
+    
+        console.log("No matching offer found");
+        return null;
+    }
+    
     return (
         <div style={{ background: "#fff", borderTopLeftRadius: 20, borderTopRightRadius: 20 }}>
             <SnackbarProvider />
@@ -949,157 +993,85 @@ function Seafreights() {
                                         getOptionLabel={(option: any) => option.packageName}
                                         value={containerTypes}
                                         onChange={(event: any, newValue: any) => {
-                                            console.log(newValue);
                                             setContainerTypes(newValue);
+                                            // setServicesSelection((prevServices: any) => prevServices.map((elm: any) => {
+                                            //     return {...elm, containers: [newValue]};
+                                            // }));
+                                            // setServicesSelection2((prevServices: any) => prevServices.map((elm: any) => {
+                                            //     return {...elm, containers: [newValue]};
+                                            // }));
                                         }}
+                                        // isOptionEqualToValue={(option: any, value: any) => true}
+                                        disabled={currentEditId !== ""}
                                         renderInput={(params: any) => <TextField {...params} sx={{ mt: 1, textTransform: "lowercase" }} />}
                                         fullWidth
                                     /> : <Skeleton />
                                 }
                             </Grid>
-                            <Grid item xs={12} md={12}>
-                                <Typography sx={{ fontSize: 18 }}><b>{t('listServices')}</b></Typography>
-                            </Grid>
-                            <Grid item xs={12} md={4}>
-                                <InputLabel htmlFor="service-name" sx={inputLabelStyles}>{t('serviceName')}</InputLabel>
+                            <Grid item xs={12}>
+                                <Typography sx={{ fontSize: 18, mb: 1 }}><b>{t('listServices')} - {t('seafreights')}</b></Typography>
                                 {
-                                    services !== null ?
-                                    <Autocomplete
-                                        disablePortal
-                                        id="service-name"
-                                        options={services}
-                                        renderOption={(props, option, i) => {
-                                            return (
-                                                <li {...props} key={option.serviceId}>
-                                                    {option.serviceName}
-                                                </li>
-                                            );
-                                        }}
-                                        getOptionLabel={(option: any) => { 
-                                            if (option !== null && option !== undefined) {
-                                                return option.serviceName;
-                                            }
-                                            return ""; 
-                                        }}
-                                        value={serviceName}
-                                        sx={{ mt: 1 }}
-                                        renderInput={(params: any) => <TextField {...params} />}
-                                        onChange={(e: any, value: any) => { setServiceName(value); }}
-                                        fullWidth
-                                    /> : <Skeleton />
+                                    allServices !== null && allServices !== undefined && allServices.length !== 0 ?
+                                    <ServicesTable 
+                                        services={servicesData} 
+                                        setServices={setServicesData}
+                                        allServices={allServices}
+                                        type="Seafreight"
+                                        container={containerTypes}
+                                        currency={currency}
+                                        servicesOptions={allServices.filter((obj: any) => obj.servicesTypeId.includes(1)).map((elm: any) => elm.serviceName)}
+                                    /> : null
                                 }
-                            </Grid>
-                            <Grid item xs={12} md={4}>
-                                <InputLabel htmlFor="price-type" sx={inputLabelStyles}>{t('priceType')}</InputLabel>
-                                <NativeSelect
-                                    id="price-type"
-                                    value={priceType}
-                                    onChange={(e: any) => { 
-                                        setPriceType(e.target.value); 
-                                        setServices(allServices.filter((obj: any) => obj.servicesTypeId.includes(e.target.value === "Seafreight price" ? 1 : 5)));
-                                        setServiceName(null);
-                                    }}
-                                    input={<BootstrapInput />}
-                                    fullWidth
-                                >
-                                    <option value="Seafreight price">Seafreight price</option>
-                                    <option value="Miscellaneous price">Miscellaneous price</option>
-                                </NativeSelect>
-                            </Grid>
-                            <Grid item xs={12} md={2}>
-                                <InputLabel htmlFor="price-cs" sx={inputLabelStyles}>{t('price')}</InputLabel>
-                                <BootstrapInput id="price-cs" type="number" value={price} onChange={(e: any) => setPrice(e.target.value)} fullWidth />
-                            </Grid>
-                            <Grid item xs={12} md={2}>
-                                <Button
-                                    variant="contained" color="inherit" fullWidth sx={whiteButtonStyles} 
-                                    style={{ marginTop: "30px", height: "42px", float: "right" }} 
-                                    onClick={() => {
-                                        if (serviceName !== null && containerTypes !== null && price > 0) {
-                                            if (priceType === "Seafreight price") {
-                                                setServicesSelection((prevItems: any) => [...prevItems, { 
-                                                    service: { serviceId: serviceName.serviceId, serviceName: serviceName.serviceName, price: Number(price) }, containers: [containerTypes]
-                                                }]);
-                                                setServiceName(null); setPrice(0);
-                                            }
-                                            else {
-                                                setServicesSelection2((prevItems: any) => [...prevItems, { 
-                                                    service: { serviceId: serviceName.serviceId, serviceName: serviceName.serviceName, price: Number(price) }, containers: [containerTypes]
-                                                }]);
-                                                setServiceName(null); setPrice(0);
-                                            }
-                                        } 
-                                        else {
-                                            enqueueSnackbar(t('fieldNeedTobeFilled'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
-                                        }
-                                    }} 
-                                >
-                                    {t('add')}
-                                </Button>
                             </Grid>
                             <Grid item xs={12}>
+                                <Typography sx={{ fontSize: 18, mb: 1 }}><b>{t('listServices')} - {t('miscellaneous')}</b></Typography>
                                 {
-                                    servicesSelection !== undefined && servicesSelection !== null && servicesSelection.length !== 0 ? 
-                                        <Grid container spacing={2}>
-                                            {
-                                                servicesSelection.map((item: any, index: number) => (
-                                                    <Grid key={"serviceitem1-"+index} item xs={12} md={4}>
-                                                        <ListItem
-                                                            sx={{ border: "1px solid #e5e5e5" }}
-                                                            secondaryAction={
-                                                                <IconButton edge="end" size="small" onClick={() => {
-                                                                    console.log(servicesSelection);
-                                                                    setServicesSelection((prevItems: any) => prevItems.filter((item: any, i: number) => i !== index));
-                                                                }}>
-                                                                    <DeleteIcon fontSize="small" />
-                                                                </IconButton>
-                                                            }
-                                                        >
-                                                            <ListItemText primary={
-                                                                // t('serviceName')+" : "+item.service.serviceName+" | "+t('containers')+" : "+item.containers.map((elm: any) => elm.packageName).join(", ")+" | "+t('price')+" : "+item.service.price+" "+currency
-                                                                item.service.serviceName+" | "+item.service.price+" "+currency
-                                                            } primaryTypographyProps={{ fontSize: 14 }} />
-                                                        </ListItem>
-                                                    </Grid>
-                                                ))
-                                            }
-                                        </Grid>
-                                    : null  
-                                }
-                                {
-                                    servicesSelection2 !== undefined && servicesSelection2 !== null && servicesSelection2.length !== 0 ? 
-                                        <Grid container spacing={2} sx={{ mt: 0 }}>
-                                            {
-                                                servicesSelection2.map((item: any, index: number) => (
-                                                    <Grid key={"serviceitem2-"+index} item xs={12} md={4}>
-                                                        <ListItem
-                                                            sx={{ border: "1px solid #e5e5e5" }}
-                                                            secondaryAction={
-                                                                <IconButton edge="end" size="small" onClick={() => {
-                                                                    console.log(servicesSelection2);
-                                                                    setServicesSelection2((prevItems: any) => prevItems.filter((item: any, i: number) => i !== index));
-                                                                }}>
-                                                                    <DeleteIcon fontSize="small" />
-                                                                </IconButton>
-                                                            }
-                                                        >
-                                                            <ListItemText primary={
-                                                                // t('serviceName')+" : "+item.service.serviceName+" | "+t('containers')+" : "+item.containers.map((elm: any) => elm.packageName).join(", ")+" | "+t('price')+" : "+item.service.price+" "+currency
-                                                                item.service.serviceName+" | "+item.service.price+" "+currency
-                                                            } primaryTypographyProps={{ fontSize: 14 }} />
-                                                        </ListItem>
-                                                    </Grid>
-                                                ))
-                                            }
-                                        </Grid>
-                                    : null  
+                                    allServices !== null && allServices !== undefined && allServices.length !== 0 ?
+                                    !loadMiscs ? 
+                                    <ServicesTable 
+                                        services={servicesData2} 
+                                        setServices={setServicesData2}
+                                        allServices={allServices}
+                                        type="Miscellaneous"
+                                        container={containerTypes}
+                                        currency={currency}
+                                        servicesOptions={allServices.filter((obj: any) => obj.servicesTypeId.includes(5)).map((elm: any) => elm.serviceName)}
+                                    /> : <Skeleton />
+                                    : null
                                 }
                             </Grid>
                         </Grid> : <Skeleton />
                     }
                 </DialogContent>
                 <DialogActions>
-                    <Button variant="contained" color={"primary"} onClick={() => { createUpdateSeafreight(); createMiscellaneous(); }} sx={{ mr: 1.5, textTransform: "none" }}>{t('validate')}</Button>
+                    <Button 
+                        variant="contained" color={"primary"}
+                        onClick={() => { 
+                            if (containerTypes !== null && containerTypes !== undefined) {
+                                // Now i check if there is already a price for this seafreight
+                                if (currentEditId !== "") {
+                                    createUpdateSeafreight(); createMiscellaneous(); 
+                                }
+                                else {
+                                    if (carrier !== null && carrierAgent !== null && portLoading !== null && portDischarge !== null) {
+                                        if (findPricingOffer(seafreights, carrierAgent.contactName, portLoading.portName, portDischarge.portName, containerTypes.packageName) === null) {
+                                            createUpdateSeafreight(); createMiscellaneous(); 
+                                        }
+                                        else {
+                                            enqueueSnackbar("A similar pricing already exists, change the container type!", { variant: "warning", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                                        }
+                                    }
+                                    else {
+                                        enqueueSnackbar("You need to fill the fields carrier, agent, departure and destination ports!", { variant: "warning", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                                    }
+                                }
+                            }
+                            else {
+                                enqueueSnackbar("You need to select a container type!", { variant: "warning", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                            }
+                        }} 
+                        sx={{ mr: 1.5, textTransform: "none" }}
+                    >{t('validate')}</Button>
                     <Button variant="contained" onClick={() => setModal2(false)} sx={buttonCloseStyles}>{t('close')}</Button>
                 </DialogActions>
             </BootstrapDialog>

@@ -260,6 +260,9 @@ function Request() {
     const [totalPurchase, setTotalPurchase] = useState<number>(0);
     const [salesPrice, setSalesPrice] = useState<number>(0);
 
+    const [margins, setMargins] = useState([]);
+    const [addings, setAddings] = useState([]);
+    
     const [templates, setTemplates] = useState<any>([]);
     const [loadTemplates, setLoadTemplates] = useState<boolean>(false);
     const [selectedTemplate, setSelectedTemplate] = useState<string>(defaultTemplate);
@@ -394,7 +397,7 @@ function Request() {
                     })}
                 </Box>
             );
-        }, flex: 1.8 },
+        }, flex: 3.8 },
         { field: 'updated', headerName: t('lastUpdated'), renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box sx={{ my: 1, mr: 1 }}>
@@ -408,7 +411,7 @@ function Request() {
                     {params.row.comment}
                 </Box>
             );
-        }, flex: 4 },
+        }, flex: 3 },
     ];
     
     function allEmptyRows(paramsObj: any) {
@@ -416,6 +419,18 @@ function Request() {
         return (!getPackageNamesByIds((containersSelection.map((elm: any) => elm.id)), containers).includes("20' Dry") || paramsObj.price20dry === 0) && (!getPackageNamesByIds((containersSelection.map((elm: any) => elm.id)), containers).includes("20' RF") || paramsObj.price20rf === 0) && (!getPackageNamesByIds((containersSelection.map((elm: any) => elm.id)), containers).includes("40' Dry") || paramsObj.price40dry === 0) && (!getPackageNamesByIds((containersSelection.map((elm: any) => elm.id)), containers).includes("40' HC") || paramsObj.price40hc === 0) && (!getPackageNamesByIds((containersSelection.map((elm: any) => elm.id)), containers).includes("40' HC RF") || paramsObj.price40hcrf === 0);
     };
 
+    const handleMarginChange = (index: number, value: any) => {
+        const updatedMargins: any = [...margins];
+        updatedMargins[index] = value;
+        setMargins(updatedMargins);
+      };
+      
+      const handleAddingChange = (index: number, value: any) => {
+        const updatedAddings: any = [...addings];
+        updatedAddings[index] = value;
+        setAddings(updatedAddings);
+    };
+      
     const handleChangeHaulageType = (event: { target: { value: string } }) => {
         setHaulageType(event.target.value);
     };
@@ -428,6 +443,15 @@ function Request() {
         setAssignedManager(event.target.value);
     };
     
+    useEffect(() => {
+        // Initialize margins with default value 22 and addings with default value 0
+        const initialMargins = containersSelection.map(() => 22); // Default margin 22
+        const initialAddings = containersSelection.map(() => 0); // Default adding 0
+        
+        setMargins(initialMargins);
+        setAddings(initialAddings);
+    }, [containersSelection]); // Assuming containersSelection is a prop or state
+      
     // Stepper functions
     const [activeStep, setActiveStep] = React.useState(0);
     const [skipped, setSkipped] = React.useState(new Set<number>());
@@ -544,7 +568,7 @@ function Request() {
         setActiveStep(0);
     };
     
-    function calculateContainerPrice(type: string, quantity: number) {
+    function calculateContainerPrice(type: string, quantity: number, index: number) {
         // Calculate seafreight prices
         var seafreightPrices = 0;
         if (selectedSeafreight.price20dry !== 0 && type == "20' Dry") {
@@ -588,12 +612,58 @@ function Request() {
                 miscPrices += selectedMisc.price40hcrf*containersSelection.find((elm: any) => elm.id === 15).quantity;
             }
         }
-        var finalValue = ((seafreightPrices+haulagePrices+miscPrices)*(margin/100)+seafreightPrices+haulagePrices+miscPrices).toFixed(2);
-        // setTotalPurchase(Number(finalValue)+Number(adding));
-        // setSalesPrice(Number((seafreightPrices+haulagePrices+miscPrices)*(margin/100)));
-        return Number(finalValue)+Number(adding);
+        // var finalValue = ((seafreightPrices+haulagePrices+miscPrices)*(margin/100)+seafreightPrices+haulagePrices+miscPrices).toFixed(2);
+        // I removed miscPrices temporarily
+        var finalValue = ((seafreightPrices+haulagePrices)*(margins[index]/100)+seafreightPrices+haulagePrices).toFixed(2);
+        return Number(finalValue)+Number(addings[index]);
     }
     
+    function showSeafreightPrice(type: string) {
+        // Calculate seafreight prices
+        var seafreightPrices = 0;
+        if (selectedSeafreight.price20dry !== 0 && type == "20' Dry") {
+            return containersSelection.find((elm: any) => elm.id === 8).quantity+"x"+selectedSeafreight.price20dry;
+        }
+        if (selectedSeafreight.price20rf !== 0 && type == "20' Rf") {
+            return containersSelection.find((elm: any) => elm.id === 13).quantity+"x"+selectedSeafreight.price20rf;
+        }
+        if (selectedSeafreight.price40dry !== 0 && type == "40' Dry") {
+            return containersSelection.find((elm: any) => elm.id === 9).quantity+"x"+selectedSeafreight.price40dry;
+        }
+        if (selectedSeafreight.price40hc !== 0 && type == "40' Hc") {
+            return containersSelection.find((elm: any) => elm.id === 10).quantity+"x"+selectedSeafreight.price40hc;
+        }
+        if (selectedSeafreight.price40hcrf !== 0 && type == "40' HcRf") {
+            return containersSelection.find((elm: any) => elm.id === 15).quantity+"x"+selectedSeafreight.price40hcrf;
+        }
+
+        return "N/A";
+    }
+
+    function showMiscPrice(type: string) {
+        // Calculate miscellaneous prices
+        var miscPrices = 0;
+        if (selectedMisc !== null) {
+            if (selectedMisc.price20dry !== 0 && type == "20' Dry") {
+                return containersSelection.find((elm: any) => elm.id === 8).quantity+"x"+selectedMisc.price20dry;
+            }
+            if (selectedMisc.price20rf !== 0 && type == "20' Rf") {
+                return containersSelection.find((elm: any) => elm.id === 13).quantity+"x"+selectedMisc.price20rf;
+            }
+            if (selectedMisc.price40dry !== 0 && type == "40' Dry") {
+                return containersSelection.find((elm: any) => elm.id === 9).quantity+"x"+selectedMisc.price40dry;
+            }
+            if (selectedMisc.price40hc !== 0 && type == "40' Hc") {
+                return containersSelection.find((elm: any) => elm.id === 10).quantity+"x"+selectedMisc.price40hc;
+            }
+            if (selectedMisc.price40hcrf !== 0 && type == "40' HcRf") {
+                return containersSelection.find((elm: any) => elm.id === 15).quantity+"x"+selectedMisc.price40hcrf;
+            }
+        }
+
+        return "N/A";
+    }
+
     function similar(str1: string, str2: string) {
         const cleanStr1 = str1.replace(/[\s-]/g, '').toLowerCase();
         const cleanStr2 = str2.replace(/[\s-]/g, '').toLowerCase();
@@ -1197,7 +1267,7 @@ function Request() {
         var commodities:any = tags.map((elm: any) => elm.productName).join(',');
         var listServices = selectedMisc !== null ? selectedMisc.services.map((elm: any) => "<p>- "+elm.service.serviceName+" inclus</p>").join('') : "<br>";
         // var pricesContainers = "";
-        var pricesContainers = containersSelection !== null && selectedSeafreight !== null ? containersSelection.map((elm: any) => "<p>"+calculateContainerPrice(elm.container, elm.quantity)+" "+selectedSeafreight.currency+" / "+elm.container+"</p>").join('') : "";
+        var pricesContainers = containersSelection !== null && selectedSeafreight !== null ? containersSelection.map((elm: any, index: number) => "<p>"+calculateContainerPrice(elm.container, elm.quantity, index)+" "+selectedSeafreight.currency+" / "+elm.container+"</p>").join('') : "";
         var clientName = clientNumber !== null ? clientNumber.contactName : null;
         var freeTime = selectedHaulage !== null ? selectedHaulage.freeTime : "";
         var overtimeTariff = selectedHaulage !== null ? selectedHaulage.overtimeTariff : "";
@@ -1216,7 +1286,7 @@ function Request() {
         var commodities:any = tags.map((elm: any) => elm.productName).join(',');
         var listServices = selectedMisc !== null ? selectedMisc.services.map((elm: any) => "<p>- "+elm.service.serviceName+" inclus</p>").join('') : "<br>";
         // var pricesContainers = "";
-        var pricesContainers = containersSelection !== null && selectedSeafreight !== null ? containersSelection.map((elm: any) => "<p>"+calculateContainerPrice(elm.container, elm.quantity)+" "+selectedSeafreight.currency+" / "+elm.container+"</p>").join('') : "";
+        var pricesContainers = containersSelection !== null && selectedSeafreight !== null ? containersSelection.map((elm: any, index: number) => "<p>"+calculateContainerPrice(elm.container, elm.quantity, index)+" "+selectedSeafreight.currency+" / "+elm.container+"</p>").join('') : "";
         var clientName = clientNumber !== null ? clientNumber.contactName : null;
         var freeTime = selectedHaulage !== null ? selectedHaulage.freeTime : "";
         var overtimeTariff = selectedHaulage !== null ? selectedHaulage.overtimeTariff : "";
@@ -1226,7 +1296,7 @@ function Request() {
 
         const variables = { loadingCity, destinationPort, commodities, clientName, freeTime, overtimeTariff, frequency, transitTime, containersQuantities, listServices, pricesContainers };
         rteRef.current?.editor?.commands.setContent(generateEmailContent(mailLanguage !== "en" ? templateBase.content : templateBase.contentEn, variables));
-    }, [tags, departure, clientNumber, portDestination, selectedSeafreight, selectedHaulage, selectedMisc, containersSelection, margin, adding]);
+    }, [tags, departure, clientNumber, portDestination, selectedSeafreight, selectedHaulage, selectedMisc, containersSelection, margins, addings]);
 
     
     return (
@@ -1368,6 +1438,7 @@ function Request() {
                                             style={{ marginTop: "30px", height: "42px", float: "right" }} 
                                             onClick={() => {
                                                 if (containerType !== "" && quantity > 0) {
+                                                    console.log(containersSelection);
                                                     setContainersSelection((prevItems: any) => [...prevItems, { container: containerType, quantity: quantity, id: containers.find((item: any) => item.packageName === containerType).packageId }]);
                                                     setContainerType(""); setQuantity(1);
                                                 } 
@@ -1728,7 +1799,7 @@ function Request() {
                                                                                     getRowId={(row: any) => row?.id}
                                                                                     getRowHeight={() => "auto" }
                                                                                     sx={gridStyles}
-                                                                                    onRowSelectionModelChange={(newRowSelectionModel) => {
+                                                                                    onRowSelectionModelChange={(newRowSelectionModel: any) => {
                                                                                         setRowSelectionModel2(newRowSelectionModel);
                                                                                         setSelectedHaulage(newRowSelectionModel.length !== 0 ? haulages.find((elm: any) => elm.id === newRowSelectionModel[0]) : null);
                                                                                     }}
@@ -1800,7 +1871,7 @@ function Request() {
                                                                                 return ""; 
                                                                             }}
                                                                             value={portDeparture}
-                                                                            disabled={true}
+                                                                            // disabled={true}
                                                                             sx={{ mt: 1 }}
                                                                             renderInput={(params: any) => <TextField {...params} />}
                                                                             onChange={(e: any, value: any) => { setPortDeparture(value); }}
@@ -1887,7 +1958,7 @@ function Request() {
                                                                                 getRowId={(row: any) => row?.seaFreightId}
                                                                                 getRowHeight={() => "auto" }
                                                                                 sx={gridStyles}
-                                                                                onRowSelectionModelChange={(newRowSelectionModel) => {
+                                                                                onRowSelectionModelChange={(newRowSelectionModel: any) => {
                                                                                     setRowSelectionModel(newRowSelectionModel);
                                                                                     setSelectedSeafreight(newRowSelectionModel.length !== 0 ? seafreights.find((elm: any) => elm.seaFreightId === newRowSelectionModel[0]) : null);
                                                                                 }}
@@ -1951,7 +2022,7 @@ function Request() {
                                                                                     getRowId={(row: any) => row?.id}
                                                                                     getRowHeight={() => "auto" }
                                                                                     sx={gridStyles}
-                                                                                    onRowSelectionModelChange={(newRowSelectionModel) => {
+                                                                                    onRowSelectionModelChange={(newRowSelectionModel: any) => {
                                                                                         setRowSelectionModel3(newRowSelectionModel);
                                                                                         setSelectedMisc(newRowSelectionModel.length !== 0 ? miscs.find((elm: any) => elm.id === newRowSelectionModel[0]) : null);
                                                                                     }}
@@ -1968,7 +2039,7 @@ function Request() {
                                                         {
                                                             activeStep === 5 ?
                                                             <Grid container spacing={2} mt={1} px={2}>
-                                                                {/* <Grid item xs={12}>
+                                                                <Grid item xs={12}>
                                                                     <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>{t('selectedSeafreight')}</Typography>
                                                                     <Box sx={{ overflow: "auto" }}>
                                                                         <DataGrid
@@ -2015,7 +2086,7 @@ function Request() {
                                                                             />
                                                                         </Box>
                                                                     </Grid> : null
-                                                                } */}
+                                                                }
                                                                 {/* <Grid item xs={3}>
                                                                     <InputLabel htmlFor="sales-price" sx={inputLabelStyles}>{t('salesPrice')}</InputLabel>
                                                                     <BootstrapInput id="sales-price" type="number" inputProps={{ min: 0 }} value={salesPrice} onChange={(e: any) => {setSalesPrice(e.target.value)}} fullWidth />
@@ -2025,7 +2096,7 @@ function Request() {
                                                                     <BootstrapInput id="total-purchase" type="number" inputProps={{ min: 0 }} value={totalPurchase} onChange={(e: any) => {setTotalPurchase(e.target.value)}} fullWidth />
                                                                 </Grid> */}
                                                                 {/* <Grid item xs={8}></Grid> */}
-                                                                <Grid item xs={4}>
+                                                                <Grid item xs={8}>
                                                                     <InputLabel htmlFor="selectedTemplate" sx={inputLabelStyles}>{t('selectedTemplate')}</InputLabel>
                                                                     {
                                                                         loadTemplates !== true ?
@@ -2067,29 +2138,97 @@ function Request() {
                                                                         <ToggleButton value="en"><img src="/assets/img/flags/flag-en.png" style={{ width: "12px", marginRight: "6px" }} alt="flag english" /> English</ToggleButton>
                                                                     </ToggleButtonGroup>
                                                                 </Grid>
-                                                                <Grid item xs={2}>
+                                                                {/* <Grid item xs={2}>
                                                                     <InputLabel htmlFor="margin" sx={inputLabelStyles}>{t('margin')} %</InputLabel>
-                                                                    <BootstrapInput id="margin" type="number" inputProps={{ min: 0, max: 100 }} value={margin} onChange={(e: any) => {setMargin(e.target.value)}} fullWidth />
+                                                                    <BootstrapInput 
+                                                                        id="margin" type="number" fullWidth 
+                                                                        inputProps={{ min: 0, max: 100 }} value={margin} 
+                                                                        onChange={(e: any) => {
+                                                                            if (adding !== 0) {
+                                                                                setAdding(0);
+                                                                            }
+                                                                            setMargin(e.target.value);
+                                                                        }} 
+                                                                    />
                                                                 </Grid>
                                                                 <Grid item xs={2}>
                                                                     <InputLabel htmlFor="adding" sx={inputLabelStyles}>{t('lumpSum')}</InputLabel>
-                                                                    <BootstrapInput id="adding" type="number" inputProps={{ min: 0 }} value={adding} onChange={(e: any) => {setAdding(e.target.value)}} fullWidth />
-                                                                </Grid>
+                                                                    <BootstrapInput 
+                                                                        id="adding" type="number" fullWidth 
+                                                                        inputProps={{ min: 0 }} value={adding} 
+                                                                        onChange={(e: any) => {
+                                                                            if (margin !== 0) {
+                                                                                setMargin(0);
+                                                                            }
+                                                                            setAdding(e.target.value);
+                                                                        }} 
+                                                                    />
+                                                                </Grid> */}
                                                                 <Grid item xs={12}>
                                                                     <Box sx={{ border: "1px solid #e5e5e5", p: 2 }}>
                                                                         <Typography sx={{ fontWeight: "bold", fontFamily: "Helvetica", fontSize: 14 }}>
                                                                             {
                                                                                 containersSelection !== null && selectedSeafreight !== null ?
-                                                                                containersSelection.map((elm: any) => {
+                                                                                containersSelection.map((elm: any, index: number) => {
                                                                                     return (
-                                                                                        <Box sx={{ my: 1 }}>
-                                                                                        {
-                                                                                            "Container: "+elm.quantity+"x"+elm.container+
-                                                                                            " | Purchase price: "+Number(((calculateContainerPrice(elm.container, elm.quantity)-adding)/(1+margin/100)).toFixed(2))+" "+selectedSeafreight.currency+
-                                                                                            " | Profit: "+Number((calculateContainerPrice(elm.container, elm.quantity) - ((calculateContainerPrice(elm.container, elm.quantity)-adding)/(1+margin/100))).toFixed(2))+" "+selectedSeafreight.currency+
-                                                                                            " | Sale price: "+calculateContainerPrice(elm.container, elm.quantity)+" "+selectedSeafreight.currency
-                                                                                        }
-                                                                                        </Box>
+                                                                                        <Grid container spacing={2} key={"containerRow-"+index} sx={{ my: 1 }}>
+                                                                                            <Grid item xs={6}>
+                                                                                                <InputLabel htmlFor="margin" sx={inputLabelStyles}>{t('margin')} %</InputLabel>
+                                                                                                <BootstrapInput 
+                                                                                                    id="margin" type="number" fullWidth 
+                                                                                                    inputProps={{ min: 0, max: 100 }} 
+                                                                                                    value={margins[index]} 
+                                                                                                    onChange={(e: any) => {
+                                                                                                        if (adding !== 0) {
+                                                                                                            handleAddingChange(index, 0);
+                                                                                                        }
+                                                                                                        handleMarginChange(index, e.target.value);
+                                                                                                    }} 
+                                                                                                    // onChange={(e) => handleMarginChange(index, e.target.value)}
+                                                                                                />
+                                                                                            </Grid>
+                                                                                            <Grid item xs={6}>
+                                                                                                <InputLabel htmlFor="adding" sx={inputLabelStyles}>{t('lumpSum')}</InputLabel>
+                                                                                                <BootstrapInput 
+                                                                                                    id="adding" type="number" fullWidth 
+                                                                                                    inputProps={{ min: 0 }} 
+                                                                                                    value={addings[index]}
+                                                                                                    onChange={(e: any) => {
+                                                                                                        if (margins[index] !== 0) {
+                                                                                                            handleMarginChange(index, 0);
+                                                                                                        }
+                                                                                                        handleAddingChange(index, e.target.value);
+                                                                                                    }} 
+                                                                                                    // onChange={(e) => handleAddingChange(index, e.target.value)}
+                                                                                                />
+                                                                                            </Grid>
+                                                                                            <Grid item xs={12}>
+                                                                                                {
+                                                                                                    "Container: "+elm.quantity+"x"+elm.container+
+                                                                                                    " | Purchase price: "+Number(((calculateContainerPrice(elm.container, elm.quantity, index)-addings[index])/(1+margins[index]/100)).toFixed(2))+" "+selectedSeafreight.currency+
+                                                                                                    " (Haulage : "+elm.quantity+"x"+selectedHaulage.unitTariff+" "+selectedSeafreight.currency+" / Seafreight : "+showSeafreightPrice(elm.container)+"  "+selectedSeafreight.currency+")"+
+                                                                                                    " | Profit: "+Number((calculateContainerPrice(elm.container, elm.quantity, index) - ((calculateContainerPrice(elm.container, elm.quantity, index)-addings[index])/(1+margins[index]/100))).toFixed(2))+" "+selectedSeafreight.currency+
+                                                                                                    " | Sale price: "+calculateContainerPrice(elm.container, elm.quantity, index)+" "+selectedSeafreight.currency
+                                                                                                }
+                                                                                            </Grid>
+                                                                                            {/* <Popover
+                                                                                                id={idPop}
+                                                                                                open={openPop}
+                                                                                                anchorEl={anchorEl}
+                                                                                                onClose={handleClose}
+                                                                                                anchorOrigin={{
+                                                                                                    vertical: 'top',
+                                                                                                    horizontal: 'right',
+                                                                                                }}
+                                                                                            >
+                                                                                                <Typography sx={{ p: 2, fontSize: 12 }}>
+                                                                                                    
+                                                                                                </Typography>
+                                                                                            </Popover> */}
+                                                                                            {/* <Grid item xs={12}>
+                                                                                                <>Purchase price details - Haulage : {elm.quantity}x{selectedHaulage.unitTariff} {selectedSeafreight.currency} | Seafreight : {showSeafreightPrice(elm.container)}  {selectedSeafreight.currency}</>
+                                                                                            </Grid> */}
+                                                                                        </Grid>
                                                                                     );
                                                                                 }) : null
                                                                             }
