@@ -46,7 +46,7 @@ function createGetRequestUrl(variable1: number, variable2: number, variable3: nu
 function Seafreights() {
     const [load, setLoad] = useState<boolean>(true);
     const [loadEdit, setLoadEdit] = useState<boolean>(false);
-    const [loadMiscs, setLoadMiscs] = useState<boolean>(false);
+    const [loadMiscs, setLoadMiscs] = useState<boolean>(true);
     const [modal, setModal] = useState<boolean>(false);
     const [modal2, setModal2] = useState<boolean>(false);
     const [modal6, setModal6] = useState<boolean>(false);
@@ -73,7 +73,7 @@ function Seafreights() {
     const [currency, setCurrency] = useState<string>("EUR");
     const [comment, setComment] = useState<string>("");
     const [serviceName, setServiceName] = useState<any>(null);
-    const [miscs, setMiscs] = useState<any>(null);
+    const [otherMiscs, setOtherMiscs] = useState<any>(null);
     const [containerTypes, setContainerTypes] = useState<any>(null);
     // const [containerTypes, setContainerTypes] = useState<any>({packageId: 8, packageName: "20' Dry"});
     const [priceType, setPriceType] = useState<string>("Seafreight price");
@@ -141,10 +141,10 @@ function Seafreights() {
         { field: 'xxx', headerName: t('Actions'), renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box sx={{ my: 1, mr: 1 }}>
-                    <IconButton size="small" title={t('editRowSeafreight')} sx={{ mr: 0.5 }} onClick={() => { setCurrentEditId(params.row.seaFreightId); getSeafreight(params.row.seaFreightId); setServicesSelection2([]); setModal2(true); }}>
+                    <IconButton size="small" title={t('editRowSeafreight')} sx={{ mr: 0.5 }} onClick={() => { setCurrentEditId(params.row.seaFreightId); resetForm(); getSeafreight(params.row.seaFreightId, false); setModal2(true); }}>
                         <EditIcon fontSize="small" />
                     </IconButton>
-                    <IconButton size="small" title={t('copyRowSeafreight')} onClick={() => { copySeafreightById(params.row.seaFreightId); }}>
+                    <IconButton size="small" title={t('copyRowSeafreight')} onClick={() => { setContainerTypes(null); setCurrentEditId(""); resetForm(); getSeafreight(params.row.seaFreightId, true); setModal2(true); /*copySeafreightById(params.row.seaFreightId);*/ }}>
                         <FileCopy fontSize="small" />
                     </IconButton>
                     <IconButton size="small" title={t('deleteRowSeafreight')} onClick={() => { setCurrentId(params.row.seaFreightId); setModal(true); }}>
@@ -164,9 +164,9 @@ function Seafreights() {
         // getMiscellaneouses();
     }, []);
 
-    useEffect(() => {
-        getMiscellaneousesById(miscellaneousId);
-    }, [miscellaneousId]);
+    // useEffect(() => {
+    //     getMiscellaneousesById(miscellaneousId);
+    // }, [miscellaneousId]);
     
     const getProducts = async () => {
         if (context && account) {
@@ -276,7 +276,7 @@ function Seafreights() {
         if (context) {
             const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Package/Containers", token);
             if (response !== null && response !== undefined) {
-                // console.log(response);
+                console.log(response);
                 setContainers(response);
             }  
         }
@@ -329,7 +329,6 @@ function Seafreights() {
     const flattenData = (data: any) => {
         return data.map((item: any) => ({
             id: item.seaFreightServiceId, // DataGrid requires a unique 'id' for each row
-            seaFreightServiceId: item.seaFreightServiceId,
             serviceName: item.service.serviceName,
             serviceId: item.service.serviceId,
             price: item.service.price,
@@ -339,7 +338,30 @@ function Seafreights() {
 
     const deflattenData = (flattenedData: any) => {
         return flattenedData.map((item: any) => ({
-            seaFreightServiceId: item.seaFreightServiceId,
+            seaFreightServiceId: item.id,
+            service: {
+                serviceId: item.serviceId, // Original structure did not include this in the flattened data
+                serviceName: item.serviceName,
+                price: item.price,
+                containers: item.containers // Assuming this was not included in the flattened version
+            },
+            containers: [containerTypes]
+        }));
+    };
+
+    const flattenData2 = (data: any) => {
+        return data.map((item: any) => ({
+            id: item.miscellaneousServiceId, // DataGrid requires a unique 'id' for each row
+            serviceName: item.service.serviceName,
+            serviceId: item.service.serviceId,
+            price: item.service.price,
+            container: item.containers.map((container: any) => container.packageName).join(', '), // Join container names if multiple
+        }));
+    }
+
+    const deflattenData2 = (flattenedData: any) => {
+        return flattenedData.map((item: any) => ({
+            miscellaneousServiceId: item.id,
             service: {
                 serviceId: item.serviceId, // Original structure did not include this in the flattened data
                 serviceName: item.serviceName,
@@ -360,10 +382,14 @@ function Seafreights() {
         setTransitTime(0);
         setFrequency(0);
         setComment("");
-        setServicesSelection([]);
+        // setServicesSelection([]);
+        // setServicesSelection2([]);
+        setServicesData([]);
+        setServicesData2([]);
+        setMiscellaneousId("");
     }
     
-    const getSeafreight = async (id: string) => {
+    const getSeafreight = async (id: string, isCopy: boolean) => {
         setLoadEdit(true)
         if (context) {
             const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisPricing.endPoint+"/SeaFreight/SeaFreight?seaFreightId="+id, tempToken);
@@ -382,25 +408,24 @@ function Seafreights() {
                 setTransitTime(response.transitTime);
                 setFrequency(response.frequency);
                 setComment(response.comment);
-                setServicesSelection(response.services);
+                // setServicesSelection(response.services);
                 setLoadEdit(false);
 
-                // To edit later, bad coding pratice
+                // To edit later, bad coding practice
                 setServicesData(flattenData(response.services));
                 console.log(response.services);
                 
                 // Initialize the container
-                if (response.services.length !== 0) {
+                if (response.services.length !== 0 && isCopy === false) {
                     setContainerTypes(response.services[0].containers[0]);
                 }
 
                 // Now i get the miscs
-                getMiscellaneouses(auxCarrier, auxLoading, auxDischarge, auxValidUntil);
+                getMiscellaneouses(auxCarrier, auxLoading, auxDischarge, auxValidUntil, response.services[0].containers[0], isCopy);
             }
             else {
                 setLoadEdit(false);
             }
-            // console.log(response);
         }
     }
     
@@ -416,12 +441,11 @@ function Seafreights() {
             else {
                 setLoad(false);
             }
-            // console.log(response);
         }
     }
 
     const createUpdateSeafreight = async () => {
-        if (portLoading !== null && portDischarge !== null && carrier !== null && carrierAgent !== null && frequency !== 0 && transitTime !== 0 && servicesSelection !== null && validUntil !== null) {
+        if (servicesData.length !== 0 && portLoading !== null && portDischarge !== null && carrier !== null && carrierAgent !== null && frequency !== 0 && transitTime !== 0 && validUntil !== null) {
             if (context) {
                 var dataSent = null;
                 if (currentEditId !== "") {
@@ -481,59 +505,8 @@ function Seafreights() {
         }
     }
 
-    const copySeafreightById = async (id: string) => {
-        setLoadEdit(true)
-        if (context) {
-            const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisPricing.endPoint+"/SeaFreight/SeaFreight?seaFreightId="+id, tempToken);
-            if (response !== null && response !== undefined) {
-                var auxCarrier = {contactId: response.carrierId, contactName: response.carrierName};
-                var auxCarrierAgent = {contactId: response.carrierAgentId, contactName: response.carrierAgentName};
-                var auxLoading = ports.find((elm: any) => elm.portId === response.departurePortId);
-                var auxDischarge = ports.find((elm: any) => elm.portId === response.destinationPortId);
-                var auxValidUntil = dayjs(response.validUntil);
-                // Now i get the miscs
-                // getMiscellaneouses(auxCarrier, auxLoading, auxDischarge, auxValidUntil);
-
-                // Now i create a new seafreight with the information i get
-                var dataSent = null;
-                dataSent = {
-                    // "seaFreightId": "string",
-                    "departurePortId": auxLoading.portId,
-                    "destinationPortId": auxDischarge.portId,
-                    "departurePortName": auxLoading.portName,
-                    "destinationPortName": auxDischarge.portName,
-                    "carrierId": auxCarrier.contactId,
-                    "carrierName": auxCarrier.contactName,
-                    "carrierAgentId": auxCarrierAgent.contactId,
-                    "carrierAgentName": auxCarrierAgent.contactName,
-                    "currency": response.currency,
-                    "validUntil": auxValidUntil?.toISOString(),
-                    "transitTime": response.transitTime,
-                    "frequency": response.frequency,
-                    "comment": response.comment,
-                    "services": response.services,
-                    "updated": (new Date()).toISOString()
-                };
-                // console.log(dataSent);
-                const response2 = await (context as BackendService<any>).postWithToken(protectedResources.apiLisPricing.endPoint+"/SeaFreight/SeaFreight", dataSent, tempToken);
-                if (response2 !== null && response2 !== undefined) {
-                    enqueueSnackbar(t('successCreated'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
-                    searchSeafreights();
-                }
-                // else {
-                //     enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
-                // }
-            }
-            else {
-                setLoadEdit(false);
-            }
-            // console.log(response);
-        }
-    }
-
     const deleteSeafreightPrice = async (id: string) => {
         if (context) {
-            // alert("Function not available yet!");
             const response = await (context as BackendService<any>).deleteWithToken(protectedResources.apiLisPricing.endPoint+"/SeaFreight/DeleteSeaFreightPrice?id="+id, tempToken);
             if (response !== null && response !== undefined) {
                 enqueueSnackbar(t('rowDeletedSuccess'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
@@ -546,9 +519,9 @@ function Seafreights() {
         }
     }
 
-    const getMiscellaneouses = async (carrier1: any, portLoading1: any, portDischarge1: any, validUntil1: any) => {
+    const getMiscellaneouses = async (carrier1: any, portLoading1: any, portDischarge1: any, validUntil1: any, container: any, isCopy: boolean) => {
         if (context && account) {
-            setLoadMiscs(true);
+            // setLoadMiscs(true);
             
             var token = null;
             if (tempToken === "") {
@@ -571,14 +544,35 @@ function Seafreights() {
             if (carrier1 !== null && portLoading1 !== null && portDischarge1 !== null) {
                 const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisPricing.endPoint+"/Miscellaneous/Miscellaneous?SupplierId="+carrier1.contactId+"&DeparturePortId="+portLoading1.portId+"&DestinationPortId="+portDischarge1.portId+"&withShipment=true", token !== null ? token : tempToken);
                 if (response !== null && response !== undefined) {
-                    // setMiscs(response);
-                    // console.log(response);
-                    console.log(mapServicesToEnhancedFormat(response, validUntil1.toISOString()));
                     // setServicesSelection2(mapServicesToEnhancedFormat(response, validUntil1.toISOString()))
-                    setLoadMiscs(false);
+                    // Here i set the miscellaneousId
+                    var auxMiscId = "";
+                    response.forEach((item: any) => {
+                        item.suppliers.forEach((supplier: any) => {
+                            if (supplier.validUntil.slice(0,10) === validUntil1.toISOString().slice(0,10)) {
+                                // Here i get the miscellaneous Id
+                                auxMiscId = supplier.miscellaneousId;
+                            }
+                        });
+                    });
+                    // setLoadMiscs(false);
+                    
+                    // Get the miscs
+                    if (auxMiscId !== "") {
+                        // if (isCopy === false) {
+                        //     alert('This');
+                        //     setMiscellaneousId(auxMiscId);
+                        // }
+                        setMiscellaneousId(auxMiscId);
+                        getMiscellaneousesById(auxMiscId, container);
+                    }
+                    else {
+                        setMiscellaneousId("");
+                        setLoadMiscs(false);
+                    }
                 }
                 else {
-                    setLoadMiscs(false);
+                    // setLoadMiscs(false);
                 }
             }
             else {
@@ -587,7 +581,7 @@ function Seafreights() {
         }
     }
     
-    const getMiscellaneousesById = async (miscId: string) => {
+    const getMiscellaneousesById = async (miscId: string, container: any) => {
         if (context && account) {
             setLoadMiscs(true);
             
@@ -611,14 +605,14 @@ function Seafreights() {
 
             if (miscId !== "") {
                 const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisPricing.endPoint+"/Miscellaneous/Miscellaneous?id="+miscId+"&withShipment=true", token !== null ? token : tempToken);
-                if (response !== null && response !== undefined) {
-                    // setMiscs(response);
-                    // console.log(response);
-                    setServicesSelection2(response.services);
+                if (response !== null && response !== undefined && container !== null) {
+                    // alert(container.packageName);
+                    // setServicesSelection2(response.services);
                     setLoadMiscs(false);
 
-                    // To edit later, bad coding pratice
-                    setServicesData2(flattenData(response.services));
+                    // To edit later, bad coding practice
+                    // setOtherMiscs(flattenData2(response.services.filter((elm: any) => elm.containers[0].packageName !== container.packageName)));
+                    setServicesData2(flattenData2(response.services.filter((elm: any) => elm.containers[0].packageName === container.packageName)));
                     console.log(response.services);
                 }
                 else {
@@ -632,54 +626,48 @@ function Seafreights() {
     }
     
     const createMiscellaneous = async () => {
-        if (servicesSelection2 !== null && validUntil !== null) {
+        if (servicesData2.length !== 0 && validUntil !== null && portLoading !== null && portDischarge !== null && carrier !== null) {
             if (context) {
                 var dataSent = null;
                 if (miscellaneousId !== "") {
-                    if (portLoading !== null && portDischarge !== null && carrier !== null) {
-                        dataSent = {
-                            "miscellaneousId": miscellaneousId,
-                            "departurePortId": portLoading.portId,
-                            "destinationPortId": portDischarge.portId,
-                            "departurePortName": portLoading.portName,
-                            "destinationPortName": portDischarge.portName,
-                            "supplierId": carrier.contactId,
-                            "supplierName": carrier.contactName,
-                            "currency": currency,
-                            "validUntil": validUntil?.toISOString(),
-                            "comment": "",
-                            "services": deflattenData(servicesSelection2),
-                            "updated": (new Date()).toISOString()
-                        };
-                    }
+                    dataSent = {
+                        "miscellaneousId": miscellaneousId,
+                        "departurePortId": portLoading.portId,
+                        "destinationPortId": portDischarge.portId,
+                        "departurePortName": portLoading.portName,
+                        "destinationPortName": portDischarge.portName,
+                        "supplierId": carrier.contactId,
+                        "supplierName": carrier.contactName,
+                        "currency": currency,
+                        "validUntil": validUntil?.toISOString(),
+                        "comment": "",
+                        "services": deflattenData2(servicesData2),
+                        "updated": (new Date()).toISOString()
+                    };
                 }
                 else {
-                    if (portLoading !== null && portDischarge !== null && carrier !== null) {
-                        dataSent = {
-                            // "miscellaneousId": currentEditId,
-                            "departurePortId": portLoading.portId,
-                            "destinationPortId": portDischarge.portId,
-                            "departurePortName": portLoading.portName,
-                            "destinationPortName": portDischarge.portName,
-                            "supplierId": carrier.contactId,
-                            "supplierName": carrier.contactName,
-                            "currency": currency,
-                            "validUntil": validUntil?.toISOString(),
-                            "comment": "",
-                            "services": deflattenData(servicesSelection2),
-                            "updated": (new Date()).toISOString()
-                        };
-                    }
+                    dataSent = {
+                        // "miscellaneousId": currentEditId,
+                        "departurePortId": portLoading.portId,
+                        "destinationPortId": portDischarge.portId,
+                        "departurePortName": portLoading.portName,
+                        "destinationPortName": portDischarge.portName,
+                        "supplierId": carrier.contactId,
+                        "supplierName": carrier.contactName,
+                        "currency": currency,
+                        "validUntil": validUntil?.toISOString(),
+                        "comment": "",
+                        "services": deflattenData2(servicesData2),
+                        "updated": (new Date()).toISOString()
+                    };
                 }
-                // console.log(dataSent);
+                console.log(dataSent);
                 const response = await (context as BackendService<any>).postWithToken(protectedResources.apiLisPricing.endPoint+"/Miscellaneous/Miscellaneous", dataSent, tempToken);
                 if (response !== null && response !== undefined) {
                     setModal2(false);
-                    // enqueueSnackbar(t('successCreated'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
-                    // getMiscellaneouses();
                 }
                 else {
-                    // enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                    enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
                 }
             }
         }
@@ -688,62 +676,44 @@ function Seafreights() {
         }
     }
 
-    // const extractServicesByValidDate = (data: any, validUntilDate: string) => {
-    //     const services:any = [];
+    function findPricingOffer(offers: any, carrierId: string, departurePort: string, destinationPort: string, containerType: string) {
+        // console.log("Offers : ", offers);
+        // console.log("Carrier Id : ", carrierId);
+        // console.log("Departure : ", departurePort);
+        // console.log("Destination : ", destinationPort);
+        // console.log("Container : ", containerType);
         
-    //     data.forEach((item: any) => {
-    //         item.suppliers.forEach((supplier: any) => {
-    //             if (new Date(supplier.validUntil) >= new Date(validUntilDate)) {
-    //                 services.push(...supplier.services);
-    //             }
-    //         });
-    //     });
-        
-    //     return services;
-    // };
+        // Map containerType to the key used in the offer objects
+        const containerTypeKeyMap: any = {
+            "20' Dry": "total20Dry",
+            "40' Dry": "total40Dry",
+            "40' HC RF": "total20HCRF",
+            "40' HC": "total40HC",
+            "20' RF": "total20RF"
+        };
     
-    const mapServicesToEnhancedFormat = (data: any, validUntilDate: string) => {
-        const enhancedServices: any = [];
-        
-        data.forEach((item: any) => {
-            item.suppliers.forEach((supplier: any) => {
-                if (supplier.validUntil.slice(0,10) === validUntilDate.slice(0,10)) {
-                    // Here i get the miscellaneous Id
-                    setMiscellaneousId(supplier.miscellaneousId);
-                    // Assuming we're mapping existing container data based on available non-zero totals
-                    var containers: any = [];
-                    if (supplier.total20Dry > 0) { 
-                        setContainerTypes({ packageId: 8, packageName: "20' Dry" });
-                        containers = [{ packageId: 8, packageName: "20' Dry" }];
+        const containerKey = containerTypeKeyMap[containerType];
+        if (!containerKey) {
+            console.log("Invalid container type");
+            return null;
+        }
+    
+        // Iterate through the offers to find a match
+        for (const offer of offers) {
+            if (offer.departurePortName === departurePort && offer.destinationPortName === destinationPort) {
+                for (const supplier of offer.suppliers) {
+                    if (supplier.carrierAgentName === carrierId && supplier[containerKey] > 0) {
+                        console.log("Matching offer found:", supplier);
+                        return supplier;
                     }
-                    if (supplier.total40Dry > 0) { 
-                        setContainerTypes({ packageId: 9, packageName: "40' Dry" });
-                        containers = [{ packageId: 9, packageName: "40' Dry" }];
-                    }
-                    if (supplier.total40HC > 0) { 
-                        setContainerTypes({ packageId: 10, packageName: "40' HC" });
-                        containers = [{ packageId: 10, packageName: "40' HC" }];
-                    }
-                    // Add similar conditions for other container types as needed
-                    
-                    supplier.services.forEach((service: any) => {
-                        enhancedServices.push({
-                            service: {
-                                // miscellaneousId: supplier.miscellaneousId,
-                                serviceId: service.serviceId,
-                                serviceName: service.serviceName,
-                                price: service.price,
-                            },
-                            containers: containers,
-                        });
-                    });
                 }
-            });
-        });
-      
-        return enhancedServices;
-    };
-      
+            }
+        }
+    
+        console.log("No matching offer found");
+        return null;
+    }
+    
     return (
         <div style={{ background: "#fff", borderTopLeftRadius: 20, borderTopRightRadius: 20 }}>
             <SnackbarProvider />
@@ -1023,15 +993,16 @@ function Seafreights() {
                                         getOptionLabel={(option: any) => option.packageName}
                                         value={containerTypes}
                                         onChange={(event: any, newValue: any) => {
-                                            console.log(newValue);
                                             setContainerTypes(newValue);
-                                            setServicesSelection((prevServices: any) => prevServices.map((elm: any) => {
-                                                return {...elm, containers: [newValue]};
-                                            }));
-                                            setServicesSelection2((prevServices: any) => prevServices.map((elm: any) => {
-                                                return {...elm, containers: [newValue]};
-                                            }));
+                                            // setServicesSelection((prevServices: any) => prevServices.map((elm: any) => {
+                                            //     return {...elm, containers: [newValue]};
+                                            // }));
+                                            // setServicesSelection2((prevServices: any) => prevServices.map((elm: any) => {
+                                            //     return {...elm, containers: [newValue]};
+                                            // }));
                                         }}
+                                        // isOptionEqualToValue={(option: any, value: any) => true}
+                                        disabled={currentEditId !== ""}
                                         renderInput={(params: any) => <TextField {...params} sx={{ mt: 1, textTransform: "lowercase" }} />}
                                         fullWidth
                                     /> : <Skeleton />
@@ -1056,6 +1027,7 @@ function Seafreights() {
                                 <Typography sx={{ fontSize: 18, mb: 1 }}><b>{t('listServices')} - {t('miscellaneous')}</b></Typography>
                                 {
                                     allServices !== null && allServices !== undefined && allServices.length !== 0 ?
+                                    !loadMiscs ? 
                                     <ServicesTable 
                                         services={servicesData2} 
                                         setServices={setServicesData2}
@@ -1064,14 +1036,42 @@ function Seafreights() {
                                         container={containerTypes}
                                         currency={currency}
                                         servicesOptions={allServices.filter((obj: any) => obj.servicesTypeId.includes(5)).map((elm: any) => elm.serviceName)}
-                                    /> : null
+                                    /> : <Skeleton />
+                                    : null
                                 }
                             </Grid>
                         </Grid> : <Skeleton />
                     }
                 </DialogContent>
                 <DialogActions>
-                    <Button variant="contained" color={"primary"} onClick={() => { createUpdateSeafreight(); createMiscellaneous(); }} sx={{ mr: 1.5, textTransform: "none" }}>{t('validate')}</Button>
+                    <Button 
+                        variant="contained" color={"primary"}
+                        onClick={() => { 
+                            if (containerTypes !== null && containerTypes !== undefined) {
+                                // Now i check if there is already a price for this seafreight
+                                if (currentEditId !== "") {
+                                    createUpdateSeafreight(); createMiscellaneous(); 
+                                }
+                                else {
+                                    if (carrier !== null && carrierAgent !== null && portLoading !== null && portDischarge !== null) {
+                                        if (findPricingOffer(seafreights, carrierAgent.contactName, portLoading.portName, portDischarge.portName, containerTypes.packageName) === null) {
+                                            createUpdateSeafreight(); createMiscellaneous(); 
+                                        }
+                                        else {
+                                            enqueueSnackbar("A similar pricing already exists, change the container type!", { variant: "warning", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                                        }
+                                    }
+                                    else {
+                                        enqueueSnackbar("You need to fill the fields carrier, agent, departure and destination ports!", { variant: "warning", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                                    }
+                                }
+                            }
+                            else {
+                                enqueueSnackbar("You need to select a container type!", { variant: "warning", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                            }
+                        }} 
+                        sx={{ mr: 1.5, textTransform: "none" }}
+                    >{t('validate')}</Button>
                     <Button variant="contained" onClick={() => setModal2(false)} sx={buttonCloseStyles}>{t('close')}</Button>
                 </DialogActions>
             </BootstrapDialog>

@@ -131,6 +131,7 @@ const AutocompleteSearch: React.FC<LocationAutocompleteProps> = ({ id, value, on
             <Autocomplete
                 id={id}
                 fullWidth={fullWidth}
+                freeSolo
                 disablePortal
                 options={options}
                 loading={loading}
@@ -154,7 +155,7 @@ const AutocompleteSearch: React.FC<LocationAutocompleteProps> = ({ id, value, on
                     }
                     return "";
                 }}
-                // value={value}
+                value={value}
                 onChange={(event: any, newValue: any) => {
                     // console.log(value);
                     onChange(newValue);

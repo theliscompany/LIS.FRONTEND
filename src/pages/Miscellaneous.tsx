@@ -273,6 +273,7 @@ function Miscellaneous() {
         if (servicesSelection !== null && validUntil !== null) {
             if (context) {
                 var dataSent = null;
+                console.log(servicesSelection);
                 if (currentEditId !== "") {
                     if (portLoading !== null && portDischarge !== null) {
                         dataSent = {
@@ -352,7 +353,7 @@ function Miscellaneous() {
     const deleteMiscellaneous = async (id: string) => {
         if (context) {
             // alert("Function not available yet!");
-            const response = await (context as BackendService<any>).delete(protectedResources.apiLisPricing.endPoint+"/Miscellaneous/DeleteMiscellaneous/"+id);
+            const response = await (context as BackendService<any>).deleteWithToken(protectedResources.apiLisPricing.endPoint+"/Miscellaneous/DeleteMiscellaneous/"+id, tempToken);
             if (response !== null && response !== undefined) {
                 enqueueSnackbar(t('rowDeletedSuccess'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
                 setModal(false);

@@ -21,7 +21,7 @@ import {
     GridRenderCellParams,
 } from '@mui/x-data-grid';
 import { randomId } from '@mui/x-data-grid-generator';
-import { gridStyles } from '../../utils/misc/styles';
+import { gridStyles, whiteButtonStyles } from '../../utils/misc/styles';
 
 interface EditToolbarProps {
     setRows: (newRows: (oldRows: GridRowsProp) => GridRowsProp) => void;
@@ -44,7 +44,7 @@ function EditToolbar(props: EditToolbarProps) {
 
     return (
         <GridToolbarContainer>
-            <Button color="primary" startIcon={<AddIcon />} onClick={handleClick}>
+            <Button color="primary" startIcon={<AddIcon />} onClick={handleClick} sx={whiteButtonStyles}>
                 Add service
             </Button>
         </GridToolbarContainer>
@@ -71,7 +71,9 @@ function ServicesTable(props: any) {
     };
 
     const handleDeleteClick = (id: GridRowId) => () => {
-        setRows(rows.filter((row: any) => row.seaFreightServiceId !== id));
+        var updatedRows = rows.filter((row: any) => row.id !== id);
+        setRows(updatedRows);
+        props.setServices(updatedRows);
     };
 
     const handleCancelClick = (id: GridRowId) => () => {
@@ -80,17 +82,11 @@ function ServicesTable(props: any) {
             [id]: { mode: GridRowModes.View, ignoreModifications: true },
         });
 
-        const editedRow = rows.find((row: any) => row.seaFreightServiceId === id);
+        const editedRow = rows.find((row: any) => row.id === id);
         if (editedRow!.isNew) {
-            setRows(rows.filter((row: any) => row.seaFreightServiceId !== id));
+            setRows(rows.filter((row: any) => row.id !== id));
         }
     };
-    
-    // const processRowUpdate = (newRow: GridRowModel) => {
-    //     const updatedRow = { ...newRow, isNew: false };
-    //     setRows(rows.map((row: any) => (row.seaFreightServiceId === newRow.seaFreightServiceId ? updatedRow : row)));
-    //     return updatedRow;
-    // };
 
     const processRowUpdate = (newRow: GridRowModel) => {
         // Find the matching service object from allServices by serviceName.
@@ -115,7 +111,6 @@ function ServicesTable(props: any) {
     };
 
     const columns: GridColDef[] = [
-        // { field: 'seaFreightServiceId', headerName: 'Seafreight Service Id', editable: true, flex: 1 },
         { field: 'serviceId', headerName: 'Service Id', editable: true, flex: 1 },
         { field: 'serviceName', headerName: 'Service Name', editable: true, type: 'singleSelect', valueOptions: props.servicesOptions, flex: 3 },
         { field: 'price', headerName: 'Price', align: "left", headerAlign: "left", type: 'number', editable: true, renderCell: (params: GridRenderCellParams) => {
@@ -128,25 +123,17 @@ function ServicesTable(props: any) {
         { field: 'container', headerName: 'Container', renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box sx={{ my: 1, mr: 1 }}>
-                    {props.container.packageName}
+                    {props.container !== null && props.container !== undefined ? props.container.packageName : "N/A"}
                 </Box>
             );
         }, flex: 1 },
-        { field: 'seaFreightServiceId', headerName: 'Type', renderCell: (params: GridRenderCellParams) => {
+        { field: 'type', headerName: 'Type', renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box sx={{ my: 1, mr: 1 }}>
                     {props.type}
                 </Box>
             );
         }, flex: 1 },
-        // {
-        //     field: 'role',
-        //     headerName: 'Department',
-        //     width: 220,
-        //     editable: true,
-        //     type: 'singleSelect',
-        //     valueOptions: ['Market', 'Finance', 'Development'],
-        // },
         {
             field: 'actions',
             type: 'actions',
@@ -221,7 +208,7 @@ function ServicesTable(props: any) {
                 slotProps={{
                     toolbar: { setRows, setRowModesModel },
                 }}
-                // getRowId={(row: any) => row?.seaFreightServiceId}
+                // getRowId={(row: any) => row?.id}
                 sx={gridStyles}
             />
         </Box>
