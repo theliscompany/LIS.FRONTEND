@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useParams } from 'react-router-dom';
-import { Alert, Autocomplete, Box, Button, Chip, DialogActions, DialogContent, Grid, IconButton, InputLabel, ListItem, ListItemText, NativeSelect, Skeleton, Step, StepLabel, Stepper, TextField, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material';
+import { Alert, Autocomplete, Box, Button, Chip, DialogActions, DialogContent, Grid, IconButton, InputLabel, ListItem, ListItemText, NativeSelect, Popover, Skeleton, Step, StepLabel, Stepper, TextField, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material';
 import { MuiTelInput } from 'mui-tel-input';
 import AutocompleteSearch from '../components/shared/AutocompleteSearch';
 import { inputLabelStyles, BootstrapInput, BootstrapDialog, whiteButtonStyles, gridStyles, HtmlTooltip, BootstrapDialogTitle, buttonCloseStyles, sizeStyles } from '../utils/misc/styles';
@@ -55,6 +55,7 @@ import { calculateDistance, findClosestSeaPort } from '../utils/functions';
 import RequestPriceRequest from '../components/editRequestPage/RequestPriceRequest';
 import RequestPriceHaulage from '../components/editRequestPage/RequestPriceHaulage';
 import NewContact from '../components/editRequestPage/NewContact';
+import ContainerElement from '../components/editRequestPage/ContainerElement';
 // import { EditorContent, useEditor } from '@tiptap/react';
 
 //let statusTypes = ["EnAttente", "Valider", "Rejeter"];
@@ -210,6 +211,7 @@ function Request() {
     const [containerType, setContainerType] = useState<string>("20' Dry");
     const [quantity, setQuantity] = useState<number>(1);
     const [containersSelection, setContainersSelection] = useState<any>([]);
+    const [containersWithServices, setContainersWithServices] = useState<any>(null);
     
     const [unitName, setUnitName] = useState<string>("");
     const [unitHeight, setUnitHeight] = useState<number>(0);
@@ -297,11 +299,12 @@ function Request() {
         { field: 'currency', headerName: t('prices'), renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box sx={{ my: 1, mr: 1 }}>
-                    <Box sx={{ my: 1 }} hidden={!getPackageNamesByIds((containersSelection.map((elm: any) => elm.id)), containers).includes("20' Dry") || params.row.price20dry === 0}>{params.row.price20dry !== 0 ? "20' Dry : "+params.row.price20dry+" "+t(params.row.currency) : "20' Dry : N/A"}</Box>
-                    <Box sx={{ my: 1 }} hidden={!getPackageNamesByIds((containersSelection.map((elm: any) => elm.id)), containers).includes("20' RF") || params.row.price20rf === 0}>{params.row.price20rf !== 0 ? "20' Rf : "+params.row.price20rf+" "+t(params.row.currency) : "20' Rf : N/A"}</Box>
-                    <Box sx={{ my: 1 }} hidden={!getPackageNamesByIds((containersSelection.map((elm: any) => elm.id)), containers).includes("40' Dry") || params.row.price40dry === 0}>{params.row.price40dry !== 0 ? "40' Dry : "+params.row.price40dry+" "+t(params.row.currency) : "40' Dry : N/A"}</Box>
-                    <Box sx={{ my: 1 }} hidden={!getPackageNamesByIds((containersSelection.map((elm: any) => elm.id)), containers).includes("40' HC") || params.row.price40hc === 0}>{params.row.price40hc !== 0 ? "40' Hc : "+params.row.price40hc+" "+t(params.row.currency) : "40' Hc : N/A"}</Box>
-                    <Box sx={{ my: 1 }} hidden={!getPackageNamesByIds((containersSelection.map((elm: any) => elm.id)), containers).includes("40' HC RF") || params.row.price40hcrf === 0}>{params.row.price40hcrf !== 0 ? "40' HcRf : "+params.row.price40hcrf+" "+t(params.row.currency) : "40' HcRf : N/A"}</Box>
+                    <Box>
+                        {
+                            params.row.containers[0] ? 
+                            <>{formatObject(params.row.containers[0])+" "+params.row.currency}</> : "N/A"
+                        }
+                    </Box>
                 </Box>
             );
         }, renderHeader: (params: GridColumnHeaderParams) => (<>Haulage <br></br>per unit</>), flex: 0.875 },
@@ -349,21 +352,6 @@ function Request() {
         { field: 'comment', headerName: "Comment", renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box sx={{ my: 2 }}>
-                    {/* <HtmlTooltip
-                        title={
-                            params.row.comment === "" || params.row.comment === null ? 
-                            <Box sx={{ p: 1 }}>
-                                <Typography color="inherit" sx={{ fontSize: 13 }}>{t('noComment')}</Typography>
-                            </Box> : 
-                            <Box sx={{ p: 1 }}>
-                                <Typography color="inherit" sx={{ fontSize: 13 }}>{params.row.comment}</Typography>
-                            </Box>
-                        }
-                    >
-                        <IconButton size="small">
-                            <HelpIcon fontSize="small" />
-                        </IconButton>
-                    </HtmlTooltip> */}
                     {params.row.comment}
                 </Box>
             );
@@ -377,14 +365,15 @@ function Request() {
         { field: 'currency', headerName: t('costPrices'), renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box sx={{ my: 1, mr: 1 }}>
-                    <Box sx={{ my: 1 }} hidden={params.row.price20dry === 0 || !getPackageNamesByIds((containersSelection.map((elm: any) => elm.id)), containers).includes("20' Dry")}>{params.row.price20dry !== 0 ? "20' Dry : "+params.row.price20dry+" "+t(params.row.currency) : "20' Dry : N/A"}</Box>
-                    <Box sx={{ my: 1 }} hidden={params.row.price20rf === 0 || !getPackageNamesByIds((containersSelection.map((elm: any) => elm.id)), containers).includes("20' Rf")}>{params.row.price20rf !== 0 ? "20' Rf : "+params.row.price20rf+" "+t(params.row.currency) : "20' Rf : N/A"}</Box>
-                    <Box sx={{ my: 1 }} hidden={params.row.price40dry === 0 || !getPackageNamesByIds((containersSelection.map((elm: any) => elm.id)), containers).includes("40' Dry")}>{params.row.price40dry !== 0 ? "40' Dry : "+params.row.price40dry+" "+t(params.row.currency) : "40' Dry : N/A"}</Box>
-                    <Box sx={{ my: 1 }} hidden={params.row.price40hc === 0 || !getPackageNamesByIds((containersSelection.map((elm: any) => elm.id)), containers).includes("40' Hc")}>{params.row.price40hc !== 0 ? "40' Hc : "+params.row.price40hc+" "+t(params.row.currency) : "40' Hc : N/A"}</Box>
-                    <Box sx={{ my: 1 }} hidden={params.row.price40hcrf === 0 || !getPackageNamesByIds((containersSelection.map((elm: any) => elm.id)), containers).includes("40' HcRf")}>{params.row.price40hcrf !== 0 ? "40' HcRf : "+params.row.price40hcrf+" "+t(params.row.currency) : "40' HcRf : N/A"}</Box>
+                    <Box>
+                        {
+                            params.row.services[0] ? 
+                            <>{formatObject2(params.row.services[0])+" "+params.row.currency}</> : "N/A"
+                        }
+                    </Box>
                 </Box>
             );
-        }, flex: 1.5 },
+        }, flex: 2 },
         { field: 'services', headerName: 'Services', renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box sx={{ my: 1, mr: 1 }}>
@@ -397,7 +386,7 @@ function Request() {
                     })}
                 </Box>
             );
-        }, flex: 3.8 },
+        }, flex: 4 },
         { field: 'updated', headerName: t('lastUpdated'), renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box sx={{ my: 1, mr: 1 }}>
@@ -414,8 +403,33 @@ function Request() {
         }, flex: 3 },
     ];
     
+    function formatObject(obj: any) {
+        const packageName = obj.container.packageName;
+        const totalPrice = obj.services.reduce((sum: number, service: any) => sum + service.price, 0);
+        return `${packageName} : ${totalPrice}`;
+    }
+
+    function formatObject2(obj: any) {
+        const packageName = obj.containers[0].packageName;
+        const totalPrice = obj.service.price;
+        return `${packageName} : ${totalPrice}`;
+    }
+
+    function formatServices(obj: any, currency: string, targetPackageName: string) {
+        if (obj.container.packageName === targetPackageName) {
+            const servicesList = obj.services.map((service: any, index: number) => (
+                <React.Fragment key={index}>
+                    <span>- {service.serviceName} : {service.price} {currency}</span>
+                    {index !== obj.services.length - 1 && <br />} {/* Add <br /> except for the last item */}
+                </React.Fragment>
+            ));
+            return servicesList;
+        } else {
+            return null; // Return null if the package name doesn't match
+        }
+    }
+      
     function allEmptyRows(paramsObj: any) {
-        // console.log((!getPackageNamesByIds((containersSelection.map((elm: any) => elm.id)), containers).includes("20' Dry") || paramsObj.price20dry === 0) && (!getPackageNamesByIds((containersSelection.map((elm: any) => elm.id)), containers).includes("20' RF") || paramsObj.price20rf === 0) && (!getPackageNamesByIds((containersSelection.map((elm: any) => elm.id)), containers).includes("40' Dry") || paramsObj.price40dry === 0) && (!getPackageNamesByIds((containersSelection.map((elm: any) => elm.id)), containers).includes("40' HC") || paramsObj.price40hc === 0) && (!getPackageNamesByIds((containersSelection.map((elm: any) => elm.id)), containers).includes("40' HC RF") || paramsObj.price40hcrf === 0));
         return (!getPackageNamesByIds((containersSelection.map((elm: any) => elm.id)), containers).includes("20' Dry") || paramsObj.price20dry === 0) && (!getPackageNamesByIds((containersSelection.map((elm: any) => elm.id)), containers).includes("20' RF") || paramsObj.price20rf === 0) && (!getPackageNamesByIds((containersSelection.map((elm: any) => elm.id)), containers).includes("40' Dry") || paramsObj.price40dry === 0) && (!getPackageNamesByIds((containersSelection.map((elm: any) => elm.id)), containers).includes("40' HC") || paramsObj.price40hc === 0) && (!getPackageNamesByIds((containersSelection.map((elm: any) => elm.id)), containers).includes("40' HC RF") || paramsObj.price40hcrf === 0);
     };
 
@@ -475,7 +489,7 @@ function Request() {
             if (containersSelection.map((elm: any) => elm.container).length !== 0 && portDestination !== null) {
                 setContainersSelected(containersSelection.map((elm: any) => elm.id));
                 if (selectedHaulage === null) {
-                    if (loadingCity !== null && haulageType !== "") {
+                    if (loadingCity !== null) {
                         setLoadResults(true);
                         getHaulagePriceOffers();
                         setActiveStep((prevActiveStep) => prevActiveStep + 1);
@@ -531,17 +545,18 @@ function Request() {
     };
 
     const handleBack = () => {
-        if (activeStep === 1) {
-            setSelectedHaulage(null);
-            // setSelectedSeafreight(null);
-        }
-        if (activeStep === 3) {
-            setSelectedSeafreight(null);
-            // setSelectedHaulage(null);
-        }
-        if (activeStep === 4) {
-            setSelectedMisc(null);
-        }
+        // if (activeStep === 1) {
+        //     setSelectedHaulage(null);
+        //     // setRowSelectionModel([]);
+        // }
+        // if (activeStep === 3) {
+        //     setSelectedSeafreight(null);
+        //     // setRowSelectionModel2([]);
+        // }
+        // if (activeStep === 4) {
+        //     setSelectedMisc(null);
+        //     // setRowSelectionModel3([]);
+        // }
         
         setActiveStep((prevActiveStep) => prevActiveStep - 1);
     };
@@ -725,7 +740,6 @@ function Request() {
             const response = await (context as BackendService<any>).getSingle(protectedResources.apiLisQuotes.endPoint+"/Assignee");
             if (response !== null && response.code !== undefined) {
                 if (response.code === 200) {
-                    console.log("Assignees", response.data);
                     setAssignees(response.data);
                     setLoadAssignees(false);
 
@@ -748,8 +762,6 @@ function Request() {
             const response = await (context as BackendService<any>).getSingle(protectedResources.apiLisQuotes.endPoint+"/Request/"+id);
             if (response !== null && response.code !== undefined) {
                 if (response.code === 200) {
-                    console.log("Request", response.data);
-                    
                     setEmail(response.data.email !== "emailexample@gmail.com" ? response.data.email : "");
                     setPhone(response.data.whatsapp);
                     setDeparture(parseLocation(response.data.departure));
@@ -916,7 +928,6 @@ function Request() {
             const response = await (context as BackendService<any>).getWithToken(urlSent, token);
             setLoadResults(false);
             setHaulages(removeDuplicatesWithLatestUpdated(response));
-            // console.log(response);  
         }
     }
     
@@ -946,7 +957,7 @@ function Request() {
             const response = await (context as BackendService<any>).getWithToken(urlSent, token);
             setLoadResults(false);
             setSeafreights(response.filter((elm: any) => !allEmptyRows(elm)));
-            // console.log(response.filter((elm: any) => !allEmptyRows(elm)));
+            console.log(response);
         }
     }
     
@@ -957,7 +968,6 @@ function Request() {
             const response = await (context as BackendService<any>).getWithToken(urlSent, tempToken);
             setLoadResults(false);
             setMiscs(response);
-            // console.log(response);  
         }
     }
     
@@ -982,7 +992,6 @@ function Request() {
             
             const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisClient.endPoint+"/Contact/GetContacts", token);
             if (response !== null && response !== undefined) {
-                console.log(response);
                 // Removing duplicates from client array
                 setClients(response.filter((obj: any, index: number, self: any) => index === self.findIndex((o: any) => o.contactName === obj.contactName)));
             }  
@@ -1010,7 +1019,6 @@ function Request() {
             
             const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Package/Containers", token);
             if (response !== null && response !== undefined) {
-                console.log(response);
                 setContainers(response);
             }  
         }
@@ -1038,7 +1046,6 @@ function Request() {
             const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Port/Ports", token);
             if (response !== null && response !== undefined) {
                 var addedCoordinatesPorts = addedCoordinatesToPorts(response);
-                console.log("Ports", addedCoordinatesPorts);
                 setPorts(addedCoordinatesPorts);
                 // addCoordinatesToPorts(response);
 
@@ -1068,7 +1075,6 @@ function Request() {
             );
             
             const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Product/Products", token);
-            // console.log(response);
             if (response !== null && response !== undefined) {
                 setProducts(response);
 
@@ -1169,8 +1175,7 @@ function Request() {
                 
                 if (response !== null) {
                     enqueueSnackbar(t('offerSuccessSent'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
-                    console.log(response);
-
+                    
                     // var footer = `
                     // <div style="font-family: Verdana; padding-top: 60px;">
                     //     <a href="${"http://localhost:3000/acceptOffer/"+response.data.requestQuoteId}" style="display:inline-block;background-color:#008089;color:#fff;padding:10px 20px;text-decoration:none" target="_blank">Accept the offer</a>
@@ -1221,13 +1226,11 @@ function Request() {
             const response = await (context as BackendService<any>).getSingle(protectedResources.apiLisTemplate.endPoint+"/Template");
             if (response !== null && response.data !== undefined) {
                 setTemplates(response.data);
-                console.log(response);
                 setLoadTemplates(false);
             }
             else {
                 setLoadTemplates(false);
             }
-            console.log(response);
         }
     }
     
@@ -1243,7 +1246,6 @@ function Request() {
             else {
                 setLoadTemplate(false);
             }
-            console.log(response);
         }
     }
     
@@ -1304,7 +1306,7 @@ function Request() {
             <SnackbarProvider />
             <Box py={2.5}>
                 <Typography variant="h5" sx={{mt: {xs: 4, md: 1.5, lg: 1.5 }}} mx={5}><b>{t('manageRequestQuote')} {id}</b></Typography>
-                    <Box>
+                <Box>
                         {
                             !load ? 
                             <Grid container spacing={2} mt={1} px={5}>
@@ -1335,8 +1337,6 @@ function Request() {
                                         onChange={setClientNumber}
                                         disabled 
                                         callBack={(value: any) => {
-                                            console.log(value);
-                                            // console.log(clientNumber);
                                             setClientNumber(value);
                                             if (clientNumber !== null) {
                                                 setPhone(clientNumber.phone !== null ? clientNumber.phone : "");
@@ -1438,7 +1438,6 @@ function Request() {
                                             style={{ marginTop: "30px", height: "42px", float: "right" }} 
                                             onClick={() => {
                                                 if (containerType !== "" && quantity > 0) {
-                                                    console.log(containersSelection);
                                                     setContainersSelection((prevItems: any) => [...prevItems, { container: containerType, quantity: quantity, id: containers.find((item: any) => item.packageName === containerType).packageId }]);
                                                     setContainerType(""); setQuantity(1);
                                                 } 
@@ -2166,73 +2165,28 @@ function Request() {
                                                                 </Grid> */}
                                                                 <Grid item xs={12}>
                                                                     <Box sx={{ border: "1px solid #e5e5e5", p: 2 }}>
-                                                                        <Typography sx={{ fontWeight: "bold", fontFamily: "Helvetica", fontSize: 14 }}>
-                                                                            {
-                                                                                containersSelection !== null && selectedSeafreight !== null ?
-                                                                                containersSelection.map((elm: any, index: number) => {
-                                                                                    return (
-                                                                                        <Grid container spacing={2} key={"containerRow-"+index} sx={{ my: 1 }}>
-                                                                                            <Grid item xs={6}>
-                                                                                                <InputLabel htmlFor="margin" sx={inputLabelStyles}>{t('margin')} %</InputLabel>
-                                                                                                <BootstrapInput 
-                                                                                                    id="margin" type="number" fullWidth 
-                                                                                                    inputProps={{ min: 0, max: 100 }} 
-                                                                                                    value={margins[index]} 
-                                                                                                    onChange={(e: any) => {
-                                                                                                        if (adding !== 0) {
-                                                                                                            handleAddingChange(index, 0);
-                                                                                                        }
-                                                                                                        handleMarginChange(index, e.target.value);
-                                                                                                    }} 
-                                                                                                    // onChange={(e) => handleMarginChange(index, e.target.value)}
-                                                                                                />
-                                                                                            </Grid>
-                                                                                            <Grid item xs={6}>
-                                                                                                <InputLabel htmlFor="adding" sx={inputLabelStyles}>{t('lumpSum')}</InputLabel>
-                                                                                                <BootstrapInput 
-                                                                                                    id="adding" type="number" fullWidth 
-                                                                                                    inputProps={{ min: 0 }} 
-                                                                                                    value={addings[index]}
-                                                                                                    onChange={(e: any) => {
-                                                                                                        if (margins[index] !== 0) {
-                                                                                                            handleMarginChange(index, 0);
-                                                                                                        }
-                                                                                                        handleAddingChange(index, e.target.value);
-                                                                                                    }} 
-                                                                                                    // onChange={(e) => handleAddingChange(index, e.target.value)}
-                                                                                                />
-                                                                                            </Grid>
-                                                                                            <Grid item xs={12}>
-                                                                                                {
-                                                                                                    "Container: "+elm.quantity+"x"+elm.container+
-                                                                                                    " | Purchase price: "+Number(((calculateContainerPrice(elm.container, elm.quantity, index)-addings[index])/(1+margins[index]/100)).toFixed(2))+" "+selectedSeafreight.currency+
-                                                                                                    " (Haulage : "+elm.quantity+"x"+selectedHaulage.unitTariff+" "+selectedSeafreight.currency+" / Seafreight : "+showSeafreightPrice(elm.container)+"  "+selectedSeafreight.currency+")"+
-                                                                                                    " | Profit: "+Number((calculateContainerPrice(elm.container, elm.quantity, index) - ((calculateContainerPrice(elm.container, elm.quantity, index)-addings[index])/(1+margins[index]/100))).toFixed(2))+" "+selectedSeafreight.currency+
-                                                                                                    " | Sale price: "+calculateContainerPrice(elm.container, elm.quantity, index)+" "+selectedSeafreight.currency
-                                                                                                }
-                                                                                            </Grid>
-                                                                                            {/* <Popover
-                                                                                                id={idPop}
-                                                                                                open={openPop}
-                                                                                                anchorEl={anchorEl}
-                                                                                                onClose={handleClose}
-                                                                                                anchorOrigin={{
-                                                                                                    vertical: 'top',
-                                                                                                    horizontal: 'right',
-                                                                                                }}
-                                                                                            >
-                                                                                                <Typography sx={{ p: 2, fontSize: 12 }}>
-                                                                                                    
-                                                                                                </Typography>
-                                                                                            </Popover> */}
-                                                                                            {/* <Grid item xs={12}>
-                                                                                                <>Purchase price details - Haulage : {elm.quantity}x{selectedHaulage.unitTariff} {selectedSeafreight.currency} | Seafreight : {showSeafreightPrice(elm.container)}  {selectedSeafreight.currency}</>
-                                                                                            </Grid> */}
-                                                                                        </Grid>
-                                                                                    );
-                                                                                }) : null
-                                                                            }
-                                                                        </Typography>
+                                                                        {
+                                                                            containersSelection !== null && selectedSeafreight !== null ?
+                                                                            containersSelection.map((elm: any, index: number) => {
+                                                                                return (
+                                                                                    <React.Fragment key={"containerRow-"+index}>
+                                                                                        <ContainerElement 
+                                                                                            elm={elm}
+                                                                                            index={index}
+                                                                                            adding={addings[index]}
+                                                                                            margin={margins[index]}
+                                                                                            handleAddingChange={handleAddingChange}
+                                                                                            handleMarginChange={handleMarginChange}
+                                                                                            purchasePrice={Number(((calculateContainerPrice(elm.container, elm.quantity, index)-addings[index])/(1+margins[index]/100)).toFixed(2))+" "+selectedSeafreight.currency}
+                                                                                            profit={Number((calculateContainerPrice(elm.container, elm.quantity, index) - ((calculateContainerPrice(elm.container, elm.quantity, index)-addings[index])/(1+margins[index]/100))).toFixed(2))+" "+selectedSeafreight.currency}
+                                                                                            salePrice={calculateContainerPrice(elm.container, elm.quantity, index)+" "+selectedSeafreight.currency}
+                                                                                            haulagePrice={selectedHaulage !== null ? elm.quantity+"x"+selectedHaulage.unitTariff+" "+selectedSeafreight.currency : "N/A"}
+                                                                                            seafreightPrice={formatServices(selectedSeafreight.containers[0], selectedSeafreight.currency, elm.container) || "N/A"}
+                                                                                        />
+                                                                                    </React.Fragment>
+                                                                                );
+                                                                            }) : null
+                                                                        }
                                                                     </Box>
                                                                 </Grid>
                                                                 <Grid item xs={12}>

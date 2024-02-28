@@ -205,6 +205,9 @@ function NewRequest(props: any) {
                 else if (packingType === "Unit RoRo") {
                     auxUnits = unitsSelection;
                 }
+
+                var postcode1 = departure.postalCode !== null && departure.postalCode !== undefined ? departure.postalCode : "";
+                var postcode2 = arrival.postalCode !== null && arrival.postalCode !== undefined ? arrival.postalCode : "";
                 
                 var myHeaders = new Headers();
                 myHeaders.append('Accept', '');
@@ -214,8 +217,10 @@ function NewRequest(props: any) {
                     body: JSON.stringify({ 
                         email: email,
                         whatsapp: phone,
-                        departure: departure !== null && departure !== undefined ? departure.city.toUpperCase()+', '+departure.country+', '+departure.latitude+', '+departure.longitude : "",
-                        arrival: arrival !== null && arrival !== undefined ? arrival.city.toUpperCase()+', '+arrival.country+', '+arrival.latitude+', '+arrival.longitude : "",
+                        // departure: departure !== null && departure !== undefined ? departure.city.toUpperCase()+', '+departure.country+', '+departure.latitude+', '+departure.longitude : "",
+                        // arrival: arrival !== null && arrival !== undefined ? arrival.city.toUpperCase()+', '+arrival.country+', '+arrival.latitude+', '+arrival.longitude : "",
+                        departure: departure !== null && departure !== undefined ? [departure.city.toUpperCase(),departure.country,departure.latitude,departure.longitude,postcode1].filter((val: any) => { return val !== "" }).join(', ') : "",
+                        arrival: arrival !== null && arrival !== undefined ? [arrival.city.toUpperCase(),arrival.country,arrival.latitude,arrival.longitude,postcode2].filter((val: any) => { return val !== "" }).join(', ') : "",
                         cargoType: 0,
                         clientNumber: clientNumber !== null ? String(clientNumber.contactNumber)+", "+clientNumber.contactName : null,
                         packingType: packingType,
@@ -657,6 +662,7 @@ function NewRequest(props: any) {
                 fullWidth
             >
                 <NewContact 
+                    categories={[""]}
                     closeModal={() => setModal7(false)}
                 />
             </BootstrapDialog>
