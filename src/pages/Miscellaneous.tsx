@@ -1,3 +1,4 @@
+import React from 'react';
 import { useState, useEffect } from 'react';
 import { Accordion, AccordionDetails, AccordionSummary, Alert, Autocomplete, Box, Button, Chip, DialogActions, DialogContent, FormControlLabel, Grid, IconButton, InputLabel, ListItem, ListItemText, NativeSelect, Skeleton, Switch, TextField, Typography } from '@mui/material';
 import AddCircleOutlinedIcon from '@mui/icons-material/AddCircleOutlined';
@@ -5,6 +6,7 @@ import SearchIcon from '@mui/icons-material/Search';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import Popper from '@mui/material/Popper';
 import { SnackbarProvider, enqueueSnackbar } from 'notistack';
 import { useTranslation } from 'react-i18next';
 import { useAuthorizedBackendApi } from '../api/api';
@@ -74,6 +76,10 @@ function Miscellaneous() {
     const account = useAccount(accounts[0] || {});
     const context = useAuthorizedBackendApi();
     
+    const CustomPopper = React.forwardRef(function CustomPopper(props: any, ref: any) {
+        return <Popper {...props} ref={ref} placement="top-start" />;
+    });
+      
     const currencyOptions = [
         { code: "EUR", label: 'Euro - €' },
         { code: 'GBP', label: 'British pound - £' },
@@ -393,7 +399,7 @@ function Miscellaneous() {
                     </Grid>
                     <Grid item xs={12} md={4} mt={1}>
                         <InputLabel htmlFor="company-name" sx={inputLabelStyles}>{t('supplier')}</InputLabel>
-                        <CompanySearch id="company-name" value={searchedSupplier} onChange={setSearchedSupplier} category={CategoryEnum.SUPPLIERS} callBack={() => console.log(searchedSupplier)} fullWidth />
+                        <CompanySearch id="company-name" value={searchedSupplier} onChange={setSearchedSupplier} category={CategoryEnum.SHIPPING_LINES} callBack={() => console.log(searchedSupplier)} fullWidth />
                     </Grid>
                     <Grid item xs={12} md={3} mt={1}>
                         <InputLabel htmlFor="port-departure" sx={inputLabelStyles}>{t('departurePort')}</InputLabel>
@@ -581,7 +587,7 @@ function Miscellaneous() {
                                 <Grid container spacing={2}>
                                     <Grid item xs={12} md={6} mt={0.25}>
                                         <InputLabel htmlFor="supplier" sx={inputLabelStyles}>{t('supplier')}</InputLabel>
-                                        <CompanySearch id="supplier" value={supplier} onChange={setSupplier} category={CategoryEnum.SUPPLIERS} callBack={() => console.log(supplier)} fullWidth />
+                                        <CompanySearch id="supplier" value={supplier} onChange={setSupplier} category={CategoryEnum.SHIPPING_LINES} callBack={() => console.log(supplier)} fullWidth />
                                     </Grid>
                                     <Grid item xs={12} md={6} mt={0.25}>
                                         <InputLabel htmlFor="port-loading" sx={inputLabelStyles}>{t('departurePort')}</InputLabel>
@@ -702,6 +708,7 @@ function Miscellaneous() {
                                         }}
                                         value={serviceName}
                                         sx={{ mt: 1 }}
+                                        PopperComponent={CustomPopper}
                                         renderInput={(params: any) => <TextField {...params} />}
                                         onChange={(e: any, value: any) => { setServiceName(value); }}
                                         fullWidth

@@ -168,3 +168,7 @@ svg.MuiSvgIcon-root.MuiSvgIcon-fontSizeMedium.MuiNativeSelect-icon.MuiNativeSele
 .MuiDataGrid-columnHeaderTitleContainerContent {
   line-height: normal;
 }
+
+.MuiAutocomplete-popup {
+  z-index: 999999 !important;
+}

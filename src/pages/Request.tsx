@@ -1251,7 +1251,8 @@ function Request() {
     
     // Fonction pour remplacer les variables dans le template
     function generateEmailContent(template: string, variables: any) {
-        return template.replace(/\{\{(.*?)\}\}/g, (_, variableName: any) => {
+        var textToRemove = "Chargement de {{freeTime}} heures inclus pour chaque conteneur, ensuite de {{overtimeTariff}} EUR par heure indivisible.";
+        return template.replace(textToRemove,"").replace(/\{\{(.*?)\}\}/g, (_, variableName: any) => {
             const trimmedName = variableName.trim();
             // Si la variable est non nulle/vide, l'encapsuler dans <strong>
             if (variables[trimmedName]) {
