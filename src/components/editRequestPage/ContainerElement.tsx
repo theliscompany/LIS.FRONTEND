@@ -39,7 +39,6 @@ function ContainerElement(props: any) {
                         }
                         props.handleAddingChange(props.index, e.target.value);
                     }} 
-                    // onChange={(e) => handleAddingChange(index, e.target.value)}
                 />
             </Grid>
             <Grid item xs={12}>
@@ -69,6 +68,6 @@ function ContainerElement(props: any) {
             </Popover>
         </Grid>
     );
-  }
+}
 
-  export default ContainerElement;
+export default ContainerElement;

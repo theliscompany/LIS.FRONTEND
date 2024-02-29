@@ -994,12 +994,6 @@ function Seafreights() {
                                         value={containerTypes}
                                         onChange={(event: any, newValue: any) => {
                                             setContainerTypes(newValue);
-                                            // setServicesSelection((prevServices: any) => prevServices.map((elm: any) => {
-                                            //     return {...elm, containers: [newValue]};
-                                            // }));
-                                            // setServicesSelection2((prevServices: any) => prevServices.map((elm: any) => {
-                                            //     return {...elm, containers: [newValue]};
-                                            // }));
                                         }}
                                         // isOptionEqualToValue={(option: any, value: any) => true}
                                         disabled={currentEditId !== ""}
