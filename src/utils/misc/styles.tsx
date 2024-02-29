@@ -132,6 +132,7 @@ export const gridStyles = {
       outline: "none !important",
   },
   height: "auto",
+  fontSize: "13px",
   minHeight: "10px"
 }
 

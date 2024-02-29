@@ -56,6 +56,7 @@ import RequestPriceRequest from '../components/editRequestPage/RequestPriceReque
 import RequestPriceHaulage from '../components/editRequestPage/RequestPriceHaulage';
 import NewContact from '../components/editRequestPage/NewContact';
 import ContainerElement from '../components/editRequestPage/ContainerElement';
+import ContainerPrice from '../components/editRequestPage/ContainerPrice';
 // import { EditorContent, useEditor } from '@tiptap/react';
 
 //let statusTypes = ["EnAttente", "Valider", "Rejeter"];
@@ -294,20 +295,23 @@ function Request() {
         { field: 'carrierAgentName', headerName: t('carrierAgent'), flex: 1.2 },
         // { field: 'departurePortName', headerName: t('departurePort'), flex: 1 },
         // { field: 'destinationPortName', headerName: t('destinationPort'), flex: 1 },
-        { field: 'frequency', headerName: t('frequency'), valueFormatter: (params: GridValueFormatterParams) => `${t('every')} ${params.value || ''} `+t('days'), flex: 0.5 },
-        { field: 'transitTime', headerName: t('transitTime'), valueFormatter: (params: GridValueFormatterParams) => `${params.value || ''} `+t('days'), flex: 0.75 },
+        { field: 'frequency', headerName: t('frequency'), valueFormatter: (params: GridValueFormatterParams) => `${t('every')} ${params.value || ''} `+t('days'), flex: 0.75 },
+        { field: 'transitTime', headerName: t('transitTime'), valueFormatter: (params: GridValueFormatterParams) => `${params.value || ''} `+t('days'), flex: 0.5 },
         { field: 'currency', headerName: t('prices'), renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box sx={{ my: 1, mr: 1 }}>
                     <Box>
                         {
                             params.row.containers[0] ? 
-                            <>{formatObject(params.row.containers[0])+" "+params.row.currency}</> : "N/A"
+                            <ContainerPrice 
+                                price={formatObject(params.row.containers[0])+" "+t(params.row.currency)}
+                                seafreightPrice={formatServices(params.row.containers[0], t(params.row.currency), params.row.containers[0].container.packageName) || "N/A"} 
+                            /> : "N/A"
                         }
                     </Box>
                 </Box>
             );
-        }, renderHeader: (params: GridColumnHeaderParams) => (<>Haulage <br></br>per unit</>), flex: 0.875 },
+        }, renderHeader: (params: GridColumnHeaderParams) => (<>Haulage <br></br>per unit</>), flex: 1 },
         { field: 'validUntil', headerName: t('validUntil'), renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box sx={{ my: 1, mr: 1 }}>
@@ -331,6 +335,11 @@ function Request() {
                 <Box sx={{ my: 2 }}>{params.row.loadingPort}</Box>
             );
         }, flex: 1 },
+        { field: 'containerNames', headerName: t('containers'), renderCell: (params: GridRenderCellParams) => {
+            return (
+                <Box sx={{ my: 2 }}>{params.row.containerNames.join(", ")}</Box>
+            );
+        }, minWidth: 100, flex: 0.75 },
         { field: 'unitTariff', valueGetter: (params: GridValueGetterParams) => `${params.row.unitTariff || ''} ${t(params.row.currency)}`, renderHeader: (params: GridColumnHeaderParams) => (<>Haulage <br />per unit</>), flex: 0.75 },
         { field: 'freeTime', headerName: t('freeTime'), valueFormatter: (params: GridValueFormatterParams) => `${params.value || ''} ${t('hours')}`, flex: 0.5 },
         { field: 'overtimeTariff', headerName: t('overtimeTariff'), valueGetter: (params: GridValueGetterParams) => `${params.row.overtimeTariff || ''} ${t(params.row.currency)} / ${t('hour')}`, renderHeader: (params: GridColumnHeaderParams) => (<>Overtime <br />tariff</>), flex: 0.75 },
@@ -390,7 +399,11 @@ function Request() {
         { field: 'updated', headerName: t('lastUpdated'), renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box sx={{ my: 1, mr: 1 }}>
-                    <Chip label={(new Date(params.row.updated)).toLocaleDateString().slice(0,10)} color={(new Date()).getTime() - (new Date(params.row.updated)).getTime() > 0 ? "default" : "default"}></Chip>
+                    {
+                        params.row.updated !== null ? 
+                        <Chip label={(new Date(params.row.updated)).toLocaleDateString().slice(0,10)} color={(new Date()).getTime() - (new Date(params.row.updated)).getTime() > 0 ? "default" : "default"}></Chip> : 
+                        <Chip label={(new Date(params.row.created)).toLocaleDateString().slice(0,10)} color={(new Date()).getTime() - (new Date(params.row.created)).getTime() > 0 ? "default" : "default"}></Chip>
+                    }
                 </Box>
             );
         }, flex: 1 },
@@ -586,47 +599,53 @@ function Request() {
     function calculateContainerPrice(type: string, quantity: number, index: number) {
         // Calculate seafreight prices
         var seafreightPrices = 0;
-        if (selectedSeafreight.price20dry !== 0 && type == "20' Dry") {
-            seafreightPrices += selectedSeafreight.price20dry*containersSelection.find((elm: any) => elm.id === 8).quantity;
+        var seafreightSelected = seafreights.filter((elm: any) => rowSelectionModel.includes(elm.seaFreightId)).find((elm: any) => elm.containers[0].container.packageName === type);
+        if (seafreightSelected !== null && seafreightSelected !== undefined) {
+            seafreightPrices = seafreightSelected.containers[0].services.reduce((sum: number, service: any) => sum + service.price, 0)*quantity;
         }
-        if (selectedSeafreight.price20rf !== 0 && type == "20' Rf") {
-            seafreightPrices += selectedSeafreight.price20rf*containersSelection.find((elm: any) => elm.id === 13).quantity;
-        }
-        if (selectedSeafreight.price40dry !== 0 && type == "40' Dry") {
-            seafreightPrices += selectedSeafreight.price40dry*containersSelection.find((elm: any) => elm.id === 9).quantity;
-        }
-        if (selectedSeafreight.price40hc !== 0 && type == "40' Hc") {
-            seafreightPrices += selectedSeafreight.price40hc*containersSelection.find((elm: any) => elm.id === 10).quantity;
-        }
-        if (selectedSeafreight.price40hcrf !== 0 && type == "40' HcRf") {
-            seafreightPrices += selectedSeafreight.price40hcrf*containersSelection.find((elm: any) => elm.id === 15).quantity;
-        }
+        
+        // if (selectedSeafreight.price20dry !== 0 && type == "20' Dry") {
+        //     seafreightPrices += selectedSeafreight.price20dry*containersSelection.find((elm: any) => elm.id === 8).quantity;
+        // }
+        // if (selectedSeafreight.price20rf !== 0 && type == "20' Rf") {
+        //     seafreightPrices += selectedSeafreight.price20rf*containersSelection.find((elm: any) => elm.id === 13).quantity;
+        // }
+        // if (selectedSeafreight.price40dry !== 0 && type == "40' Dry") {
+        //     seafreightPrices += selectedSeafreight.price40dry*containersSelection.find((elm: any) => elm.id === 9).quantity;
+        // }
+        // if (selectedSeafreight.price40hc !== 0 && type == "40' Hc") {
+        //     seafreightPrices += selectedSeafreight.price40hc*containersSelection.find((elm: any) => elm.id === 10).quantity;
+        // }
+        // if (selectedSeafreight.price40hcrf !== 0 && type == "40' HcRf") {
+        //     seafreightPrices += selectedSeafreight.price40hcrf*containersSelection.find((elm: any) => elm.id === 15).quantity;
+        // }
 
         // Calculate haulage prices
         var haulagePrices = 0;
-        if (selectedHaulage !== null) {
+        if (selectedHaulage !== null && selectedHaulage.containerNames.includes(type)) {
             haulagePrices = haulagePrices + selectedHaulage.unitTariff*quantity;
         }    
         
         // Calculate miscellaneous prices
         var miscPrices = 0;
-        if (selectedMisc !== null) {
-            if (selectedMisc.price20dry !== 0 && type == "20' Dry") {
-                miscPrices += selectedMisc.price20dry*containersSelection.find((elm: any) => elm.id === 8).quantity;
-            }
-            if (selectedMisc.price20rf !== 0 && type == "20' Rf") {
-                miscPrices += selectedMisc.price20rf*containersSelection.find((elm: any) => elm.id === 13).quantity;
-            }
-            if (selectedMisc.price40dry !== 0 && type == "40' Dry") {
-                miscPrices += selectedMisc.price40dry*containersSelection.find((elm: any) => elm.id === 9).quantity;
-            }
-            if (selectedMisc.price40hc !== 0 && type == "40' Hc") {
-                miscPrices += selectedMisc.price40hc*containersSelection.find((elm: any) => elm.id === 10).quantity;
-            }
-            if (selectedMisc.price40hcrf !== 0 && type == "40' HcRf") {
-                miscPrices += selectedMisc.price40hcrf*containersSelection.find((elm: any) => elm.id === 15).quantity;
-            }
-        }
+        // if (selectedMisc !== null) {
+        //     if (selectedMisc.price20dry !== 0 && type == "20' Dry") {
+        //         miscPrices += selectedMisc.price20dry*containersSelection.find((elm: any) => elm.id === 8).quantity;
+        //     }
+        //     if (selectedMisc.price20rf !== 0 && type == "20' Rf") {
+        //         miscPrices += selectedMisc.price20rf*containersSelection.find((elm: any) => elm.id === 13).quantity;
+        //     }
+        //     if (selectedMisc.price40dry !== 0 && type == "40' Dry") {
+        //         miscPrices += selectedMisc.price40dry*containersSelection.find((elm: any) => elm.id === 9).quantity;
+        //     }
+        //     if (selectedMisc.price40hc !== 0 && type == "40' Hc") {
+        //         miscPrices += selectedMisc.price40hc*containersSelection.find((elm: any) => elm.id === 10).quantity;
+        //     }
+        //     if (selectedMisc.price40hcrf !== 0 && type == "40' HcRf") {
+        //         miscPrices += selectedMisc.price40hcrf*containersSelection.find((elm: any) => elm.id === 15).quantity;
+        //     }
+        // }
+        
         // var finalValue = ((seafreightPrices+haulagePrices+miscPrices)*(margin/100)+seafreightPrices+haulagePrices+miscPrices).toFixed(2);
         // I removed miscPrices temporarily
         var finalValue = ((seafreightPrices+haulagePrices)*(margins[index]/100)+seafreightPrices+haulagePrices).toFixed(2);
@@ -1251,7 +1270,8 @@ function Request() {
     
     // Fonction pour remplacer les variables dans le template
     function generateEmailContent(template: string, variables: any) {
-        return template.replace(/\{\{(.*?)\}\}/g, (_, variableName: any) => {
+        var textToRemove = selectedHaulage !== null ? "" : "Chargement de {{freeTime}} heures inclus pour chaque conteneur, ensuite de {{overtimeTariff}} EUR par heure indivisible.";
+        return template.replace(textToRemove,"").replace(/\{\{(.*?)\}\}/g, (_, variableName: any) => {
             const trimmedName = variableName.trim();
             // Si la variable est non nulle/vide, l'encapsuler dans <strong>
             if (variables[trimmedName]) {
@@ -1958,10 +1978,16 @@ function Request() {
                                                                                 getRowHeight={() => "auto" }
                                                                                 sx={gridStyles}
                                                                                 onRowSelectionModelChange={(newRowSelectionModel: any) => {
-                                                                                    setRowSelectionModel(newRowSelectionModel);
-                                                                                    setSelectedSeafreight(newRowSelectionModel.length !== 0 ? seafreights.find((elm: any) => elm.seaFreightId === newRowSelectionModel[0]) : null);
+                                                                                    if (newRowSelectionModel.length <= containersSelection.length) {
+                                                                                        setRowSelectionModel(newRowSelectionModel);
+                                                                                        setSelectedSeafreight(newRowSelectionModel.length !== 0 ? seafreights.find((elm: any) => elm.seaFreightId === newRowSelectionModel[0]) : null);
+                                                                                    }
+                                                                                    else {
+                                                                                        enqueueSnackbar("You can only select "+containersSelection.length+" offers!", { variant: "warning", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                                                                                    }
                                                                                 }}
                                                                                 rowSelectionModel={rowSelectionModel}
+                                                                                checkboxSelection
                                                                                 // onRowClick={handleRowSeafreightsClick}
                                                                             />
                                                                         </Box> : 
@@ -2042,7 +2068,7 @@ function Request() {
                                                                     <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>{t('selectedSeafreight')}</Typography>
                                                                     <Box sx={{ overflow: "auto" }}>
                                                                         <DataGrid
-                                                                            rows={[selectedSeafreight]}
+                                                                            rows={seafreights.filter((elm: any) => rowSelectionModel.includes(elm.seaFreightId))}
                                                                             columns={columnsSeafreights}
                                                                             hideFooter
                                                                             getRowId={(row: any) => row?.seaFreightId}
@@ -2134,54 +2160,31 @@ function Request() {
                                                                         sx={{ mt: 1, maxHeight: "44px" }}
                                                                     >
                                                                         <ToggleButton value="fr"><img src="/assets/img/flags/flag-fr.png" style={{ width: "12px", marginRight: "6px" }} alt="flag english" /> Français</ToggleButton>
-                                                                        <ToggleButton value="en"><img src="/assets/img/flags/flag-en.png" style={{ width: "12px", marginRight: "6px" }} alt="flag english" /> English</ToggleButton>
+                                                                        <ToggleButton disabled value="en"><img src="/assets/img/flags/flag-en.png" style={{ width: "12px", marginRight: "6px" }} alt="flag english" /> English</ToggleButton>
                                                                     </ToggleButtonGroup>
                                                                 </Grid>
-                                                                {/* <Grid item xs={2}>
-                                                                    <InputLabel htmlFor="margin" sx={inputLabelStyles}>{t('margin')} %</InputLabel>
-                                                                    <BootstrapInput 
-                                                                        id="margin" type="number" fullWidth 
-                                                                        inputProps={{ min: 0, max: 100 }} value={margin} 
-                                                                        onChange={(e: any) => {
-                                                                            if (adding !== 0) {
-                                                                                setAdding(0);
-                                                                            }
-                                                                            setMargin(e.target.value);
-                                                                        }} 
-                                                                    />
-                                                                </Grid>
-                                                                <Grid item xs={2}>
-                                                                    <InputLabel htmlFor="adding" sx={inputLabelStyles}>{t('lumpSum')}</InputLabel>
-                                                                    <BootstrapInput 
-                                                                        id="adding" type="number" fullWidth 
-                                                                        inputProps={{ min: 0 }} value={adding} 
-                                                                        onChange={(e: any) => {
-                                                                            if (margin !== 0) {
-                                                                                setMargin(0);
-                                                                            }
-                                                                            setAdding(e.target.value);
-                                                                        }} 
-                                                                    />
-                                                                </Grid> */}
                                                                 <Grid item xs={12}>
                                                                     <Box sx={{ border: "1px solid #e5e5e5", p: 2 }}>
                                                                         {
-                                                                            containersSelection !== null && selectedSeafreight !== null ?
-                                                                            containersSelection.map((elm: any, index: number) => {
+                                                                            containersSelection !== null && rowSelectionModel.length !== 0 ?
+                                                                            seafreights.filter((elm: any) => rowSelectionModel.includes(elm.seaFreightId))
+                                                                            .map((element: any, index: number) => {
+                                                                                var containerElm = containersSelection.find((val: any) => val.container === element.containers[0].container.packageName);
+                                                                                
                                                                                 return (
                                                                                     <React.Fragment key={"containerRow-"+index}>
                                                                                         <ContainerElement 
-                                                                                            elm={elm}
+                                                                                            elm={containerElm}
                                                                                             index={index}
                                                                                             adding={addings[index]}
                                                                                             margin={margins[index]}
                                                                                             handleAddingChange={handleAddingChange}
                                                                                             handleMarginChange={handleMarginChange}
-                                                                                            purchasePrice={Number(((calculateContainerPrice(elm.container, elm.quantity, index)-addings[index])/(1+margins[index]/100)).toFixed(2))+" "+selectedSeafreight.currency}
-                                                                                            profit={Number((calculateContainerPrice(elm.container, elm.quantity, index) - ((calculateContainerPrice(elm.container, elm.quantity, index)-addings[index])/(1+margins[index]/100))).toFixed(2))+" "+selectedSeafreight.currency}
-                                                                                            salePrice={calculateContainerPrice(elm.container, elm.quantity, index)+" "+selectedSeafreight.currency}
-                                                                                            haulagePrice={selectedHaulage !== null ? elm.quantity+"x"+selectedHaulage.unitTariff+" "+selectedSeafreight.currency : "N/A"}
-                                                                                            seafreightPrice={formatServices(selectedSeafreight.containers[0], selectedSeafreight.currency, elm.container) || "N/A"}
+                                                                                            purchasePrice={Number(((calculateContainerPrice(containerElm.container, containerElm.quantity, index)-addings[index])/(1+margins[index]/100)).toFixed(2))+" "+t(element.currency)}
+                                                                                            profit={Number((calculateContainerPrice(containerElm.container, containerElm.quantity, index) - ((calculateContainerPrice(containerElm.container, containerElm.quantity, index)-addings[index])/(1+margins[index]/100))).toFixed(2))+" "+t(element.currency)}
+                                                                                            salePrice={calculateContainerPrice(containerElm.container, containerElm.quantity, index)+" "+t(element.currency)}
+                                                                                            haulagePrice={selectedHaulage !== null && selectedHaulage.containerNames.includes(containerElm.container) ? containerElm.quantity+"x"+selectedHaulage.unitTariff+" "+t(element.currency) : "N/A"}
+                                                                                            seafreightPrice={formatServices(element.containers[0], element.currency, containerElm.container) || "N/A"}
                                                                                         />
                                                                                     </React.Fragment>
                                                                                 );

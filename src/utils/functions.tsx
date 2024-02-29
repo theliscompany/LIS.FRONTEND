@@ -17,6 +17,7 @@ export const calculateDistance = (coord1: any, coord2: any) => {
 }
 
 export const findClosestSeaPort = (myPort: any, seaPorts: any) => {
+    console.log("Myport : ",myPort);
     const myCoordinates = [myPort.latitude, myPort.longitude];
     let closestPort = null;
     let minDistance = Infinity;
