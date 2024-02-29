@@ -290,6 +290,45 @@ function Request() {
         { value: "Side loader, Loading with Interval, from floor to trailer", label: t('haulageType5') }
     ];
     
+    function calculateTotal(data: any) {
+        // Initialize total price and package name
+        let total = 0;
+        let packageName;
+    
+        // Loop through the data
+        for(let i = 0; i < data.length; i++) {
+            // If packageName is not set, set it to the first one
+            if(!packageName) {
+                packageName = data[i].container.packageName !== null ? data[i].container.packageName : "Général";
+            }
+    
+            // Loop through the services in the current data object
+            for(let j = 0; j < data[i].services.length; j++) {
+                // Add the price of the service to the total
+                total += data[i].services[j].price;
+            }
+        }
+    
+        // Return the package name and total price in the desired format
+        return packageName + ' : ' + total;
+    }
+
+    function getServicesTotal(data: any, currency: string) {
+        let services = [];
+    
+        // Loop through the data
+        for(let i = 0; i < data.length; i++) {
+            // Loop through the services in the current data object
+            for(let j = 0; j < data[i].services.length; j++) {
+                let service = data[i].services[j];
+                services.push(`${service.serviceName} : ${service.price} ${currency}`);
+            }
+        }
+    
+        // Return the services and their total price in the desired format
+        return services.join('; ');
+    }
+    
     const columnsSeafreights: GridColDef[] = [
         { field: 'carrierName', headerName: t('carrier'), flex: 1.2 },
         { field: 'carrierAgentName', headerName: t('carrierAgent'), flex: 1.2 },
@@ -376,23 +415,22 @@ function Request() {
                 <Box sx={{ my: 1, mr: 1 }}>
                     <Box>
                         {
-                            params.row.services[0] ? 
-                            <>{formatObject2(params.row.services[0])+" "+params.row.currency}</> : "N/A"
+                            params.row.containers !== null ?
+                            params.row.containers[0] ? 
+                            <>{calculateTotal(params.row.containers)+" "+params.row.currency}</> : "N/A" : null
                         }
                     </Box>
                 </Box>
             );
-        }, flex: 2 },
+        }, flex: 1.75 },
         { field: 'services', headerName: 'Services', renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box sx={{ my: 1, mr: 1 }}>
-                    {params.row.services.map((elm: any, i: number) => {
-                        return (
-                            <Box key={"idServ"+i} sx={{ my: 1 }}>
-                                {elm.service.serviceName} : {elm.service.price} {t(params.row.currency)}
-                            </Box>
-                        );
-                    })}
+                    {
+                        params.row.containers !== null ?
+                        params.row.containers[0] ? 
+                        <>{getServicesTotal(params.row.containers, params.row.currency)}</> : "N/A" : null
+                    }
                 </Box>
             );
         }, flex: 4 },
@@ -413,7 +451,7 @@ function Request() {
                     {params.row.comment}
                 </Box>
             );
-        }, flex: 3 },
+        }, flex: 2.5 },
     ];
     
     function formatObject(obj: any) {
@@ -480,7 +518,7 @@ function Request() {
     }, [containersSelection]); // Assuming containersSelection is a prop or state
       
     // Stepper functions
-    const [activeStep, setActiveStep] = React.useState(0);
+    const [activeStep, setActiveStep] = React.useState(2);
     const [skipped, setSkipped] = React.useState(new Set<number>());
 
     const isStepOptional = (step: number) => {
@@ -984,9 +1022,9 @@ function Request() {
         if (context && account) {
             var containersFormatted = (containersSelection.map((elm: any) => elm.id)).join("&ContainerTypesId=");
             var urlSent = createGetRequestUrl2(protectedResources.apiLisPricing.endPoint+"/Pricing/MiscellaneoussOffersRequest?", portDeparture.portId, portDestination.portId, containersFormatted);
-            const response = await (context as BackendService<any>).getWithToken(urlSent, tempToken);
+            const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisPricing.endPoint+"/Miscellaneous/Miscellaneous?departurePortId="+portDeparture.portId+"&destinationPortId="+portDestination.portId+"&withShipment=true", tempToken);
             setLoadResults(false);
-            setMiscs(response);
+            setMiscs(response.length !== 0 ? response[0].suppliers : []);
         }
     }
     
@@ -2044,12 +2082,12 @@ function Request() {
                                                                                     rows={miscs}
                                                                                     columns={columnsMiscs}
                                                                                     hideFooter
-                                                                                    getRowId={(row: any) => row?.id}
+                                                                                    getRowId={(row: any) => row?.miscellaneousId}
                                                                                     getRowHeight={() => "auto" }
                                                                                     sx={gridStyles}
                                                                                     onRowSelectionModelChange={(newRowSelectionModel: any) => {
                                                                                         setRowSelectionModel3(newRowSelectionModel);
-                                                                                        setSelectedMisc(newRowSelectionModel.length !== 0 ? miscs.find((elm: any) => elm.id === newRowSelectionModel[0]) : null);
+                                                                                        // setSelectedMisc(newRowSelectionModel.length !== 0 ? miscs.find((elm: any) => elm.id === newRowSelectionModel[0]) : null);
                                                                                     }}
                                                                                     rowSelectionModel={rowSelectionModel3}
                                                                                     // onRowClick={handleRowMiscsClick}
