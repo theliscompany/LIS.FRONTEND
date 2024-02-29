@@ -296,7 +296,7 @@ function Miscellaneous() {
                             "validUntil": validUntil?.toISOString(),
                             "comment": comment,
                             "services": servicesSelection,
-                            // "containers": servicesSelection.map((elm: any) => { return { container: elm.containers[0] !== null ? elm.containers[0] : null, services: [elm.service] } }),
+                            "containers": servicesSelection.map((elm: any) => { return { container: elm.containers[0] !== null ? elm.containers[0] : null, services: [elm.service] } }),
                             "updated": (new Date()).toISOString()
                         };
                     }
@@ -309,7 +309,7 @@ function Miscellaneous() {
                             "validUntil": validUntil?.toISOString(),
                             "comment": comment,
                             "services": servicesSelection,
-                            // "containers": servicesSelection.map((elm: any) => { return { container: elm.containers[0] !== null ? elm.containers[0] : null, services: [elm.service] } }),
+                            "containers": servicesSelection.map((elm: any) => { return { container: elm.containers[0] !== null ? elm.containers[0] : null, services: [elm.service] } }),
                             "updated": (new Date()).toISOString()
                         };
                     }
@@ -327,7 +327,7 @@ function Miscellaneous() {
                             "currency": currency,
                             "validUntil": validUntil?.toISOString(),
                             "comment": comment,
-                            // "containers": servicesSelection.map((elm: any) => { return { container: elm.containers[0] !== null ? elm.containers[0] : null, services: [elm.service] } }),
+                            "containers": servicesSelection.map((elm: any) => { return { container: elm.containers[0] !== null ? elm.containers[0] : null, services: [elm.service] } }),
                             "services": servicesSelection,
                             "updated": (new Date()).toISOString()
                         };
@@ -340,7 +340,7 @@ function Miscellaneous() {
                             "currency": currency,
                             "validUntil": validUntil?.toISOString(),
                             "comment": comment,
-                            // "containers": servicesSelection.map((elm: any) => { return { container: elm.containers[0] !== null ? elm.containers[0] : null, services: [elm.service] } }),
+                            "containers": servicesSelection.map((elm: any) => { return { container: elm.containers[0] !== null ? elm.containers[0] : null, services: [elm.service] } }),
                             "services": servicesSelection,
                             "updated": (new Date()).toISOString()
                         };
