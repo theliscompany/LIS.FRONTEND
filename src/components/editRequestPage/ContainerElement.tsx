@@ -14,9 +14,10 @@ function ContainerElement(props: any) {
     return (
         <Grid container spacing={2} sx={{ my: 1 }}>
             <Grid item xs={6}>
-                <InputLabel htmlFor="margin" sx={inputLabelStyles}>{t('margin')} %</InputLabel>
+                <InputLabel htmlFor={"margin-"+props.index} sx={inputLabelStyles}>{t('margin')} %</InputLabel>
                 <BootstrapInput 
-                    id="margin" type="number" fullWidth 
+                    id={"margin-"+props.index} 
+                    type="number" fullWidth 
                     inputProps={{ min: 0, max: 100 }} 
                     value={props.margin} 
                     onChange={(e: any) => {
@@ -28,9 +29,10 @@ function ContainerElement(props: any) {
                 />
             </Grid>
             <Grid item xs={6}>
-                <InputLabel htmlFor="adding" sx={inputLabelStyles}>{t('lumpSum')}</InputLabel>
+                <InputLabel htmlFor={"adding-"+props.index} sx={inputLabelStyles}>{t('lumpSum')}</InputLabel>
                 <BootstrapInput 
-                    id="adding" type="number" fullWidth 
+                    id={"adding-"+props.index} 
+                    type="number" fullWidth 
                     inputProps={{ min: 0 }} 
                     value={props.adding}
                     onChange={(e: any) => {
@@ -63,7 +65,8 @@ function ContainerElement(props: any) {
             >
                 <Typography sx={{ p: 2, fontSize: 13 }}>
                     Haulage : {props.haulagePrice} <br />
-                    Seafreight : {props.seafreightPrice !== "N/A" ? <><br /> {props.seafreightPrice}</> : props.seafreightPrice}
+                    Seafreight : {props.seafreightPrice !== "N/A" ? <><br /> {props.seafreightPrice}</> : props.seafreightPrice}<br />
+                    Miscellaneous : {props.miscellaneousPrice !== "N/A" ? <><br /> {props.miscellaneousPrice}</> : props.miscellaneousPrice}
                 </Typography>
             </Popover>
         </Grid>

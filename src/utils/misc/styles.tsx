@@ -133,7 +133,12 @@ export const gridStyles = {
   },
   height: "auto",
   fontSize: "13px",
-  minHeight: "10px"
+  minHeight: "10px",
+  backgroundColor: "#fff"
+}
+
+export const sizingStyles = { 
+  maxWidth: "calc(100vw - 365px)"
 }
 
 export const sizeStyles = { 
@@ -141,8 +146,10 @@ export const sizeStyles = {
       outline: "none !important",
   },
   height: "auto",
+  fontSize: "13px",
   minHeight: "10px",
-  maxWidth: "calc(100vw - 430px)"
+  maxWidth: "calc(100vw - 430px)",
+  backgroundColor: "#fff"
 }
 
 export const BootstrapInput = styled(InputBase)(({ theme }) => ({

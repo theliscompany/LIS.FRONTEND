@@ -17,7 +17,6 @@ export const calculateDistance = (coord1: any, coord2: any) => {
 }
 
 export const findClosestSeaPort = (myPort: any, seaPorts: any) => {
-    console.log("Myport : ",myPort);
     const myCoordinates = [myPort.latitude, myPort.longitude];
     let closestPort = null;
     let minDistance = Infinity;
@@ -44,3 +43,43 @@ export const findClosestSeaPort = (myPort: any, seaPorts: any) => {
     return closestPort;
 }
 
+export function sortByCloseness(myPort: any, seaPorts: any) {
+    const myCoordinates = [myPort.latitude, myPort.longitude];
+
+    // Calculate distances and add them to the sea ports
+    seaPorts.forEach((seaPort: any) => {
+        const seaPortCoordinates = seaPort.coordinates;
+        if (seaPortCoordinates !== undefined) {
+            const distance = calculateDistance(myCoordinates, seaPortCoordinates);
+            seaPort.distance = distance; // Add the distance to each sea port
+        } else {
+            seaPort.distance = Infinity; // Ports without coordinates are considered farthest
+        }
+    });
+
+    // Sort the sea ports by distance
+    seaPorts.sort((a: any, b: any) => a.distance - b.distance);
+
+    // Remove the "distance" property from the sorted ports
+    seaPorts.forEach((seaPort: any) => {
+        delete seaPort.distance;
+    });
+
+    return seaPorts;
+}
+
+export function generateRandomNumber() {
+    const maxNumbers = 100000;
+    const randomNumber = Math.floor(Math.random() * maxNumbers) + 1;
+    const bias = 0.01; // adjust this value to change the probability of getting the same number
+    const previousNumber = sessionStorage.getItem('previousNumber');
+  
+    if (previousNumber && Math.random() < bias) {
+      const offset = Math.floor(Math.random() * (maxNumbers - 1)) + 1;
+      return Number(previousNumber + offset) % maxNumbers || maxNumbers;
+    }
+  
+    sessionStorage.setItem('previousNumber', String(randomNumber));
+    return randomNumber;
+}
+  
