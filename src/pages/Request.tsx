@@ -462,7 +462,7 @@ function Request() {
     function formatServices(obj: any, currency: string, targetPackageName: string, qty: number) {
         if (obj.container.packageName === targetPackageName) {
             const servicesList = obj.services.map((service: any, index: number) => (
-                <React.Fragment key={index}>
+                <React.Fragment key={"someservice"+index}>
                     <span>- {service.serviceName} : {qty !== 0 ? qty+"x" : null}{service.price} {currency}</span>
                     {index !== obj.services.length - 1 && <br />} {/* Add <br /> except for the last item */}
                 </React.Fragment>
@@ -2485,7 +2485,17 @@ function Request() {
                     </Grid>
                 </DialogContent>
                 <DialogActions>
-                    <Button variant="contained" color="primary" className="mr-3" onClick={() => setModal8(false)} sx={{ textTransform: "none" }}>{t('validate')}</Button>
+                    <Button 
+                        variant="contained" 
+                        color="primary" className="mr-3" 
+                        onClick={() => {
+                            enqueueSnackbar(t('messageOkGeneralMiscs'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} }); 
+                            setModal8(false); 
+                        }} 
+                        sx={{ textTransform: "none" }}
+                    >
+                        {t('validate')}
+                    </Button>
                     <Button variant="contained" onClick={() => setModal8(false)} sx={buttonCloseStyles}>{t('close')}</Button>
                 </DialogActions>
             </BootstrapDialog>

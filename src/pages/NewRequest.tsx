@@ -291,12 +291,19 @@ function NewRequest(props: any) {
                                 id="client-number" 
                                 value={clientNumber} 
                                 onChange={setClientNumber} 
-                                callBack={() => {
-                                    console.log(clientNumber);
-                                    if (clientNumber !== null) {
-                                        setPhone(clientNumber.phone !== null ? clientNumber.phone : "");
-                                        setEmail(clientNumber.email !== null ? clientNumber.email : "");
-                                        // alert("check");
+                                callBack={(e: any) => {
+                                    if (e.phone !== null) {
+                                        setPhone(e.phone);
+                                    }
+                                    else {
+                                        setPhone("");
+                                    }
+
+                                    if (e.email !== null) {
+                                        setEmail(e.email);
+                                    }
+                                    else {
+                                        setEmail("");
                                     }
                                 }} 
                                 fullWidth 

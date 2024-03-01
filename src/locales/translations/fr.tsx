@@ -397,4 +397,5 @@ export const fr = {
   salesPrice: "Sales price",
   totalPurchase: "Total purchase",
   copyRowSeafreight: "Copier prix de frêt maritime",
+  messageOkGeneralMiscs: "Vos services miscs généraux ont été enregistrés!"
 };
