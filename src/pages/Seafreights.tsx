@@ -188,7 +188,6 @@ function Seafreights() {
             );
             
             const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Product/Products", token);
-            // console.log(response);
             if (response !== null && response !== undefined) {
                 setProducts(response);
             }  
@@ -217,7 +216,6 @@ function Seafreights() {
             try {
                 const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisClient.endPoint+"/Contact/GetContacts", token);
                 if (response !== null && response !== undefined) {
-                    // console.log(response);
                     // Removing duplicates from client array
                     setClients(response.filter((obj: any, index: number, self: any) => index === self.findIndex((o: any) => o.contactName === obj.contactName)));
                 }
@@ -265,7 +263,6 @@ function Seafreights() {
         if (context) {
             const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Service/Services", token);
             if (response !== null && response !== undefined) {
-                // console.log(response.filter((obj: any) => obj.servicesTypeId.includes(1)));
                 setAllServices(response);
                 setServices(response.filter((obj: any) => obj.servicesTypeId.includes(1))); // Filter the services for seafreights (SEAFREIGHT = 1)
             }  
@@ -276,7 +273,6 @@ function Seafreights() {
         if (context) {
             const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Package/Containers", token);
             if (response !== null && response !== undefined) {
-                console.log(response);
                 setContainers(response);
             }  
         }
@@ -308,22 +304,7 @@ function Seafreights() {
             else {
                 setLoad(false);
             }
-            // console.log(response);
         }
-        
-        // if (context) {
-        //     const response = await (context as BackendService<any>).get(protectedResources.apiLisPricing.endPoint+"/SeaFreight/GetSeaFreights");
-        //     console.log(response);
-        //     if (response !== null && response !== undefined) {
-        //         setSeafreights(response);
-        //         // setSeafreights([]);
-        //         setLoad(false);
-        //     }
-        //     else {
-        //         setLoad(false);
-        //     }
-        //     console.log(response);
-        // }
     }
     
     const flattenData = (data: any) => {
@@ -350,11 +331,11 @@ function Seafreights() {
     };
 
     const flattenData2 = (data: any) => {
-        return data.map((item: any) => ({
-            id: item.miscellaneousServiceId, // DataGrid requires a unique 'id' for each row
-            serviceName: item.service.serviceName,
-            serviceId: item.service.serviceId,
-            price: item.service.price,
+        return data.map((item: any, index: number) => ({
+            id: 'item.miscellaneousServiceId'+index, // DataGrid requires a unique 'id' for each row
+            serviceName: item.serviceName,
+            serviceId: item.serviceId,
+            price: item.price,
             container: item.containers.map((container: any) => container.packageName).join(', '), // Join container names if multiple
         }));
     }
@@ -413,7 +394,6 @@ function Seafreights() {
 
                 // To edit later, bad coding practice
                 setServicesData(flattenData(response.services));
-                console.log(response.services);
                 
                 // Initialize the container
                 if (response.services.length !== 0 && isCopy === false) {
@@ -464,6 +444,7 @@ function Seafreights() {
                         "transitTime": transitTime,
                         "frequency": frequency,
                         "comment": comment,
+                        "containers": transformArray(deflattenData(servicesData)),
                         "services": deflattenData(servicesData),
                         "updated": (new Date()).toISOString()
                     };    
@@ -484,6 +465,7 @@ function Seafreights() {
                         "transitTime": transitTime,
                         "frequency": frequency,
                         "comment": comment,
+                        "containers": transformArray(deflattenData(servicesData)),
                         "services": deflattenData(servicesData),
                         "updated": (new Date()).toISOString()
                     };    
@@ -519,69 +501,27 @@ function Seafreights() {
         }
     }
 
-    const getMiscellaneouses = async (carrier1: any, portLoading1: any, portDischarge1: any, validUntil1: any, container: any, isCopy: boolean) => {
-        if (context && account) {
-            // setLoadMiscs(true);
-            
-            var token = null;
-            if (tempToken === "") {
-                token = await instance.acquireTokenSilent({
-                    scopes: pricingRequest.scopes,
-                    account: account
-                }).then((response:AuthenticationResult)=>{
-                    return response.accessToken;
-                }).catch(() => {
-                    return instance.acquireTokenPopup({
-                        ...pricingRequest,
-                        account: account
-                        }).then((response) => {
-                            return response.accessToken;
-                    });
-                });
-                setTempToken(token);    
-            }
-
-            if (carrier1 !== null && portLoading1 !== null && portDischarge1 !== null) {
-                const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisPricing.endPoint+"/Miscellaneous/Miscellaneous?SupplierId="+carrier1.contactId+"&DeparturePortId="+portLoading1.portId+"&DestinationPortId="+portDischarge1.portId+"&withShipment=true", token !== null ? token : tempToken);
-                if (response !== null && response !== undefined) {
-                    // setServicesSelection2(mapServicesToEnhancedFormat(response, validUntil1.toISOString()))
-                    // Here i set the miscellaneousId
-                    var auxMiscId = "";
-                    response.forEach((item: any) => {
-                        item.suppliers.forEach((supplier: any) => {
-                            if (supplier.validUntil.slice(0,10) === validUntil1.toISOString().slice(0,10)) {
-                                // Here i get the miscellaneous Id
-                                auxMiscId = supplier.miscellaneousId;
-                            }
-                        });
-                    });
-                    // setLoadMiscs(false);
-                    
-                    // Get the miscs
-                    if (auxMiscId !== "") {
-                        // if (isCopy === false) {
-                        //     alert('This');
-                        //     setMiscellaneousId(auxMiscId);
-                        // }
-                        setMiscellaneousId(auxMiscId);
-                        getMiscellaneousesById(auxMiscId, container);
-                    }
-                    else {
-                        setMiscellaneousId("");
-                        setLoadMiscs(false);
-                    }
-                }
-                else {
-                    // setLoadMiscs(false);
-                }
-            }
-            else {
-                console.log("CHECK");
-            }
-        }
+    function transformArray(arr: any) {
+        return arr.map((item: any) => ({
+            container: item.containers[0],
+            services: [{
+                serviceId: item.service.serviceId,
+                serviceName: item.service.serviceName,
+                price: item.service.price
+            }]
+        }));
     }
-    
-    const getMiscellaneousesById = async (miscId: string, container: any) => {
+
+    function reverseTransformArray(arr: any) {
+        return arr.map((item: any) => ({
+            serviceId: item.services[0].serviceId,
+            serviceName: item.services[0].serviceName,
+            price: item.services[0].price,
+            containers: [item.container]
+        }));
+    }
+
+    const getMiscellaneouses = async (carrier1: any, portLoading1: any, portDischarge1: any, validUntil1: any, container: any, isCopy: boolean) => {
         if (context && account) {
             setLoadMiscs(true);
             
@@ -603,25 +543,32 @@ function Seafreights() {
                 setTempToken(token);    
             }
 
-            if (miscId !== "") {
-                const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisPricing.endPoint+"/Miscellaneous/Miscellaneous?id="+miscId+"&withShipment=true", token !== null ? token : tempToken);
-                if (response !== null && response !== undefined && container !== null) {
-                    // alert(container.packageName);
-                    // setServicesSelection2(response.services);
-                    setLoadMiscs(false);
-
-                    // To edit later, bad coding practice
-                    // setOtherMiscs(flattenData2(response.services.filter((elm: any) => elm.containers[0].packageName !== container.packageName)));
-                    setServicesData2(flattenData2(response.services.filter((elm: any) => elm.containers[0].packageName === container.packageName)));
-                    console.log(response.services);
+            if (carrier1 !== null && portLoading1 !== null && portDischarge1 !== null) {
+                const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisPricing.endPoint+"/Miscellaneous/Miscellaneous?SupplierId="+carrier1.contactId+"&DeparturePortId="+portLoading1.portId+"&DestinationPortId="+portDischarge1.portId+"&withShipment=true", token !== null ? token : tempToken);
+                if (response !== null && response !== undefined && response.length !== 0) {
+                    // Here i check if the result is good
+                    var selectedElement = response[0].suppliers.find((elm: any) => elm.containers[0].container.packageName === container.packageName);
+                    if (response.length !== 0 && selectedElement !== undefined) {
+                        setLoadMiscs(false);
+                        
+                        // Dont update the miscellaneousId is it's a new price
+                        if (!isCopy) {
+                            setMiscellaneousId(selectedElement.miscellaneousId);
+                        }
+                        
+                        setServicesData2(flattenData2(reverseTransformArray(selectedElement.containers).filter((elm: any) => elm.containers[0].packageName === container.packageName)));
+                    }
+                    else {
+                        setLoadMiscs(false);
+                    }
                 }
                 else {
                     setLoadMiscs(false);
                 }
             }
-            else {
-                // console.log("CHECK");
-            }
+        }
+        else {
+            setLoadMiscs(false)
         }
     }
     
@@ -629,9 +576,10 @@ function Seafreights() {
         if (servicesData2.length !== 0 && validUntil !== null && portLoading !== null && portDischarge !== null && carrier !== null) {
             if (context) {
                 var dataSent = null;
-                if (miscellaneousId !== "") {
+                if (miscellaneousId !== "" && miscellaneousId !== undefined) {
                     dataSent = {
                         "miscellaneousId": miscellaneousId,
+                        "id": miscellaneousId,
                         "departurePortId": portLoading.portId,
                         "destinationPortId": portDischarge.portId,
                         "departurePortName": portLoading.portName,
@@ -640,7 +588,8 @@ function Seafreights() {
                         "supplierName": carrier.contactName,
                         "currency": currency,
                         "validUntil": validUntil?.toISOString(),
-                        "comment": "",
+                        "comment": "with seafreight",
+                        "containers": transformArray(deflattenData2(servicesData2)),
                         "services": deflattenData2(servicesData2),
                         "updated": (new Date()).toISOString()
                     };
@@ -656,7 +605,8 @@ function Seafreights() {
                         "supplierName": carrier.contactName,
                         "currency": currency,
                         "validUntil": validUntil?.toISOString(),
-                        "comment": "",
+                        "comment": "with seafreight",
+                        "containers": transformArray(deflattenData2(servicesData2)),
                         "services": deflattenData2(servicesData2),
                         "updated": (new Date()).toISOString()
                     };
@@ -677,12 +627,6 @@ function Seafreights() {
     }
 
     function findPricingOffer(offers: any, carrierId: string, departurePort: string, destinationPort: string, containerType: string) {
-        // console.log("Offers : ", offers);
-        // console.log("Carrier Id : ", carrierId);
-        // console.log("Departure : ", departurePort);
-        // console.log("Destination : ", destinationPort);
-        // console.log("Container : ", containerType);
-        
         // Map containerType to the key used in the offer objects
         const containerTypeKeyMap: any = {
             "20' Dry": "total20Dry",
@@ -694,7 +638,6 @@ function Seafreights() {
     
         const containerKey = containerTypeKeyMap[containerType];
         if (!containerKey) {
-            console.log("Invalid container type");
             return null;
         }
     
@@ -703,14 +646,12 @@ function Seafreights() {
             if (offer.departurePortName === departurePort && offer.destinationPortName === destinationPort) {
                 for (const supplier of offer.suppliers) {
                     if (supplier.carrierAgentName === carrierId && supplier[containerKey] > 0) {
-                        console.log("Matching offer found:", supplier);
                         return supplier;
                     }
                 }
             }
         }
     
-        console.log("No matching offer found");
         return null;
     }
     
@@ -876,11 +817,11 @@ function Seafreights() {
                                 <Grid container spacing={2}>
                                     <Grid item xs={12} md={6} mt={0.25}>
                                         <InputLabel htmlFor="carrier" sx={inputLabelStyles}>{t('carrier')}</InputLabel>
-                                        <CompanySearch id="carrier" value={carrier} onChange={setCarrier} category={CategoryEnum.SHIPPING_LINES} callBack={() => console.log(carrier)} fullWidth />
+                                        <CompanySearch id="carrier" value={carrier} onChange={setCarrier} category={CategoryEnum.SHIPPING_LINES} fullWidth />
                                     </Grid>
                                     <Grid item xs={12} md={6} mt={0.25}>
                                         <InputLabel htmlFor="carrier-agent" sx={inputLabelStyles}>{t('carrierAgent')}</InputLabel>
-                                        <CompanySearch id="carrier-agent" value={carrierAgent} onChange={setCarrierAgent} category={CategoryEnum.SHIPPING_LINES} callBack={() => console.log(carrierAgent)} fullWidth />
+                                        <CompanySearch id="carrier-agent" value={carrierAgent} onChange={setCarrierAgent} category={CategoryEnum.SHIPPING_LINES} fullWidth />
                                     </Grid>
                                     <Grid item xs={12} md={6} mt={0.25}>
                                         <InputLabel htmlFor="port-loading" sx={inputLabelStyles}>{t('departurePort')}</InputLabel>

@@ -63,7 +63,7 @@ function Miscellaneous() {
     const [currency, setCurrency] = useState<string>("EUR");
     const [comment, setComment] = useState<string>("");
     const [serviceName, setServiceName] = useState<any>(null);
-    const [containerTypes, setContainerTypes] = useState<any>([]);
+    const [containerTypes, setContainerTypes] = useState<any>(null);
     const [price, setPrice] = useState<number>(0);
     const [servicesSelection, setServicesSelection] = useState<any>([]);
     const [withShipment, setWithShipment] = useState<boolean>(true);
@@ -87,33 +87,96 @@ function Miscellaneous() {
         { code: "FCFA", label: 'Franc CFA - FCFA' }
     ]
     
+    function calculateTotal(data: any) {
+        // Initialize total price and package name
+        let total = 0;
+        let packageName;
+    
+        // Loop through the data
+        for(let i = 0; i < data.length; i++) {
+            // If packageName is not set, set it to the first one
+            if(!packageName) {
+                packageName = data[i].container.packageName !== null ? data[i].container.packageName : "Général";
+            }
+    
+            // Loop through the services in the current data object
+            for(let j = 0; j < data[i].services.length; j++) {
+                // Add the price of the service to the total
+                total += data[i].services[j].price;
+            }
+        }
+    
+        // Return the package name and total price in the desired format
+        return packageName + ' : ' + total;
+    }
+
+    function getServicesTotal(data: any, currency: string) {
+        let services = [];
+    
+        // Loop through the data
+        for(let i = 0; i < data.length; i++) {
+            // Loop through the services in the current data object
+            for(let j = 0; j < data[i].services.length; j++) {
+                let service = data[i].services[j];
+                services.push(`${service.serviceName} : ${service.price} ${currency}`);
+            }
+        }
+    
+        // Return the services and their total price in the desired format
+        return services.join('; ');
+    }
+    
     const columnsMiscs: GridColDef[] = [
-        { field: 'supplierName', headerName: t('supplier'), minWidth: 120, flex: 1 },
-        { field: 'currency', headerName: t('prices'), renderCell: (params: GridRenderCellParams) => {
+        { field: 'supplierName', headerName: t('supplier'), minWidth: 120, flex: 2 },
+        { field: 'currency', headerName: t('costPrices'), renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box sx={{ my: 1, mr: 1 }}>
-                    <Box sx={{ my: 1 }} hidden={params.row.total20Dry === 0}>{params.row.total20Dry !== 0 ? "20' Dry : "+params.row.total20Dry+" "+t(params.row.currency) : "20' Dry : N/A"}</Box>
-                    <Box sx={{ my: 1 }} hidden={params.row.total20RF === 0}>{params.row.total20RF !== 0 ? "20' Rf : "+params.row.total20RF+" "+t(params.row.currency) : "20' Rf : N/A"}</Box>
-                    <Box sx={{ my: 1 }} hidden={params.row.total40Dry === 0}>{params.row.total40Dry !== 0 ? "40' Dry : "+params.row.total40Dry+" "+t(params.row.currency) : "40' Dry : N/A"}</Box>
-                    <Box sx={{ my: 1 }} hidden={params.row.total40HC === 0}>{params.row.total40HC !== 0 ? "40' Hc : "+params.row.total40HC+" "+t(params.row.currency) : "40' Hc : N/A"}</Box>
-                    <Box sx={{ my: 1 }} hidden={params.row.total20HCRF === 0}>{params.row.total20HCRF !== 0 ? "40' HcRf : "+params.row.total20HCRF+" "+t(params.row.currency) : "40' HcRf : N/A"}</Box>
+                    <Box>
+                        {
+                            params.row.containers !== null ?
+                            params.row.containers[0] ? 
+                            <>{calculateTotal(params.row.containers)+" "+params.row.currency}</> : "N/A" : null
+                        }
+                    </Box>
                 </Box>
             );
-        }, minWidth: 140, flex: 1 },
+        }, flex: 1 },
+        { field: 'services', headerName: 'Services', renderCell: (params: GridRenderCellParams) => {
+            return (
+                <Box sx={{ my: 1, mr: 1 }}>
+                    {
+                        params.row.containers !== null ?
+                        params.row.containers[0] ? 
+                        <>{getServicesTotal(params.row.containers, params.row.currency)}</> : "N/A" : null
+                    }
+                </Box>
+            );
+        }, flex: 2.5 },
         { field: 'validUntil', headerName: t('validUntil'), renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box sx={{ my: 1, mr: 1 }}>
                     <Chip label={(new Date(params.row.validUntil)).toLocaleDateString().slice(0,10)} color={(new Date()).getTime() - (new Date(params.row.validUntil)).getTime() > 0 ? "warning" : "success"}></Chip>
                 </Box>
             );
-        }, minWidth: 100, flex: 0.5 },
-        { field: 'created', headerName: t('created'), renderCell: (params: GridRenderCellParams) => {
+        }, minWidth: 100, flex: 0.75 },
+        { field: 'updated', headerName: t('created'), renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box sx={{ my: 1, mr: 1 }}>
-                    <Chip label={(new Date(params.row.created)).toLocaleDateString().slice(0,10)} color={(new Date()).getTime() - (new Date(params.row.created)).getTime() > 0 ? "default" : "default"}></Chip>
+                    {
+                        params.row.updated !== null ? 
+                        <Chip label={(new Date(params.row.updated)).toLocaleDateString().slice(0,10)} color={(new Date()).getTime() - (new Date(params.row.updated)).getTime() > 0 ? "default" : "default"}></Chip> : 
+                        <Chip label={(new Date(params.row.created)).toLocaleDateString().slice(0,10)} color={(new Date()).getTime() - (new Date(params.row.created)).getTime() > 0 ? "default" : "default"}></Chip>
+                    }
                 </Box>
             );
-        }, minWidth: 100, flex: 0.5 },
+        }, flex: 0.75 },
+        // { field: 'created', headerName: t('created'), renderCell: (params: GridRenderCellParams) => {
+        //     return (
+        //         <Box sx={{ my: 1, mr: 1 }}>
+        //             <Chip label={(new Date(params.row.created)).toLocaleDateString().slice(0,10)} color={(new Date()).getTime() - (new Date(params.row.created)).getTime() > 0 ? "default" : "default"}></Chip>
+        //         </Box>
+        //     );
+        // }, minWidth: 100, flex: 0.5 },
         { field: 'xxx', headerName: t('Actions'), renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box sx={{ my: 1, mr: 1 }}>
@@ -125,7 +188,7 @@ function Miscellaneous() {
                     </IconButton>
                 </Box>
             );
-        }, minWidth: 120, flex: 0.4 },
+        }, minWidth: 120, flex: 0.5 },
     ];
     
     useEffect(() => {
@@ -244,6 +307,7 @@ function Miscellaneous() {
         if (context) {
             const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisPricing.endPoint+"/Miscellaneous/Miscellaneous?id="+id+"&withShipment="+withShipment, tempToken);
             if (response !== null && response !== undefined) {
+                console.log(response.services);
                 setSupplier({contactId: response.supplierId, contactName: response.supplierName});
                 setPortLoading(ports.find((elm: any) => elm.portId === response.departurePortId));
                 setPortDischarge(ports.find((elm: any) => elm.portId === response.destinationPortId));
@@ -251,6 +315,7 @@ function Miscellaneous() {
                 setValidUntil(dayjs(response.validUntil));
                 setComment(response.comment);
                 setServicesSelection(response.services);
+                setContainerTypes(response.services.length !== 0 ? response.services[0].containers[0].packageId !== 0 ? response.services[0].containers[0] : null : null);
                 setLoadEdit(false);
             }
             else {
@@ -280,11 +345,13 @@ function Miscellaneous() {
         if (servicesSelection !== null && validUntil !== null) {
             if (context) {
                 var dataSent = null;
-                // console.log(servicesSelection);
+                var urlString = "";
+
                 if (currentEditId !== "") {
                     if (portLoading !== null && portDischarge !== null && portLoading !== undefined && portDischarge !== undefined) {
                         dataSent = {
                             "miscellaneousId": currentEditId,
+                            "id": currentEditId,
                             "departurePortId": portLoading.portId,
                             "destinationPortId": portDischarge.portId,
                             "departurePortName": portLoading.portName,
@@ -302,6 +369,7 @@ function Miscellaneous() {
                     else {
                         dataSent = {
                             "miscellaneousId": currentEditId,
+                            "id": currentEditId,
                             "supplierId": supplier.contactId,
                             "supplierName": supplier.contactName,
                             "currency": currency,
@@ -345,7 +413,6 @@ function Miscellaneous() {
                         };
                     }
                 }
-                // console.log(servicesSelection);
                 console.log(dataSent);
                 const response = await (context as BackendService<any>).postWithToken(protectedResources.apiLisPricing.endPoint+"/Miscellaneous/Miscellaneous", dataSent, tempToken);
                 if (response !== null && response !== undefined) {
@@ -376,6 +443,19 @@ function Miscellaneous() {
                 enqueueSnackbar(t('rowDeletedError'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
             }
         }
+    }
+    
+    function findMiscellaneous(supplierName: string, packageName: string, data: any) {
+        console.log(data);
+        const foundMiscellaneous = data.find((misc: any) => 
+            misc.supplierName === supplierName &&
+            misc.containers.some((container: any) => 
+                container.container.packageName === packageName &&
+                container.services.some((service: any) => service.price > 0) // Assuming you want to filter only if the service has a price > 0
+            )
+        );
+      
+        return foundMiscellaneous || null;
     }
     
     return (
@@ -590,77 +670,73 @@ function Miscellaneous() {
                     {
                         loadEdit === false ?
                         <Grid container spacing={2}>
-                            <Grid item xs={12} md={8}>
+                            <Grid item xs={12} md={9}>
                                 <Grid container spacing={2}>
                                     <Grid item xs={12} md={6} mt={0.25}>
                                         <InputLabel htmlFor="supplier" sx={inputLabelStyles}>{t('supplier')}</InputLabel>
                                         <CompanySearch id="supplier" value={supplier} onChange={setSupplier} category={CategoryEnum.SHIPPING_LINES} callBack={() => console.log(supplier)} fullWidth />
                                     </Grid>
-                                    {
-                                        withShipment ? 
-                                        <Grid item xs={12} md={6} mt={0.25}>
-                                            <InputLabel htmlFor="port-loading" sx={inputLabelStyles}>{t('departurePort')}</InputLabel>
-                                            {
-                                                ports !== null ?
-                                                <Autocomplete
-                                                    disablePortal
-                                                    id="port-loading"
-                                                    options={ports}
-                                                    renderOption={(props, option, i) => {
-                                                        return (
-                                                            <li {...props} key={option.portId}>
-                                                                {option.portName+", "+option.country}
-                                                            </li>
-                                                        );
-                                                    }}
-                                                    getOptionLabel={(option: any) => { 
-                                                        if (option !== null && option !== undefined) {
-                                                            return option.portName+', '+option.country;
-                                                        }
-                                                        return ""; 
-                                                    }}
-                                                    value={portLoading}
-                                                    sx={{ mt: 1 }}
-                                                    renderInput={(params: any) => <TextField {...params} />}
-                                                    onChange={(e: any, value: any) => { setPortLoading(value); }}
-                                                    fullWidth
-                                                /> : <Skeleton />
-                                            }
-                                        </Grid> : null
-                                    }
-                                    {
-                                        withShipment ? 
-                                        <Grid item xs={12} md={6} mt={0.25}>
-                                            <InputLabel htmlFor="discharge-port" sx={inputLabelStyles}>{t('arrivalPort')}</InputLabel>
-                                            {
-                                                ports !== null ?
-                                                <Autocomplete
-                                                    disablePortal
-                                                    id="discharge-port"
-                                                    options={ports}
-                                                    renderOption={(props, option, i) => {
-                                                        return (
-                                                            <li {...props} key={option.portId}>
-                                                                {option.portName+", "+option.country}
-                                                            </li>
-                                                        );
-                                                    }}
-                                                    getOptionLabel={(option: any) => { 
-                                                        if (option !== null && option !== undefined) {
-                                                            return option.portName+', '+option.country;
-                                                        }
-                                                        return ""; 
-                                                    }}
-                                                    value={portDischarge}
-                                                    sx={{ mt: 1 }}
-                                                    renderInput={(params: any) => <TextField {...params} />}
-                                                    onChange={(e: any, value: any) => { setPortDischarge(value); }}
-                                                    fullWidth
-                                                /> : <Skeleton />
-                                            }
-                                        </Grid> : null
-                                    }
-                                    <Grid item xs={12} md={3}>
+                                    <Grid item xs={12} md={6} mt={0.25}>
+                                        <InputLabel htmlFor="port-loading" sx={inputLabelStyles}>{t('departurePort')}</InputLabel>
+                                        {
+                                            ports !== null ?
+                                            <Autocomplete
+                                                disablePortal
+                                                id="port-loading"
+                                                options={ports}
+                                                renderOption={(props, option, i) => {
+                                                    return (
+                                                        <li {...props} key={option.portId}>
+                                                            {option.portName+", "+option.country}
+                                                        </li>
+                                                    );
+                                                }}
+                                                getOptionLabel={(option: any) => { 
+                                                    if (option !== null && option !== undefined) {
+                                                        return option.portName+', '+option.country;
+                                                    }
+                                                    return ""; 
+                                                }}
+                                                value={portLoading}
+                                                disabled={!withShipment}
+                                                sx={{ mt: 1 }}
+                                                renderInput={(params: any) => <TextField {...params} />}
+                                                onChange={(e: any, value: any) => { setPortLoading(value); }}
+                                                fullWidth
+                                            /> : <Skeleton />
+                                        }
+                                    </Grid>
+                                    <Grid item xs={12} md={6} mt={0.25}>
+                                        <InputLabel htmlFor="discharge-port" sx={inputLabelStyles}>{t('arrivalPort')}</InputLabel>
+                                        {
+                                            ports !== null ?
+                                            <Autocomplete
+                                                disablePortal
+                                                id="discharge-port"
+                                                options={ports}
+                                                renderOption={(props, option, i) => {
+                                                    return (
+                                                        <li {...props} key={option.portId}>
+                                                            {option.portName+", "+option.country}
+                                                        </li>
+                                                    );
+                                                }}
+                                                getOptionLabel={(option: any) => { 
+                                                    if (option !== null && option !== undefined) {
+                                                        return option.portName+', '+option.country;
+                                                    }
+                                                    return ""; 
+                                                }}
+                                                value={portDischarge}
+                                                disabled={!withShipment}
+                                                sx={{ mt: 1 }}
+                                                renderInput={(params: any) => <TextField {...params} />}
+                                                onChange={(e: any, value: any) => { setPortDischarge(value); }}
+                                                fullWidth
+                                            /> : <Skeleton />
+                                        }
+                                    </Grid>
+                                    <Grid item xs={12} md={2}>
                                         <InputLabel htmlFor="valid-until" sx={inputLabelStyles}>{t('validUntil')}</InputLabel>
                                         <LocalizationProvider dateAdapter={AdapterDayjs}>
                                             <DatePicker 
@@ -671,7 +747,7 @@ function Miscellaneous() {
                                             />
                                         </LocalizationProvider>
                                     </Grid>
-                                    <Grid item xs={12} md={3}>
+                                    <Grid item xs={12} md={2}>
                                         <InputLabel htmlFor="currency" sx={inputLabelStyles}>{t('currency')}</InputLabel>
                                         <NativeSelect
                                             id="currency"
@@ -685,9 +761,29 @@ function Miscellaneous() {
                                             ))}
                                         </NativeSelect>
                                     </Grid>
+                                    <Grid item xs={12} md={2}>
+                                        <InputLabel htmlFor="container-types" sx={inputLabelStyles}>{t('container')}</InputLabel>
+                                        {
+                                            containers !== null ? 
+                                            <Autocomplete
+                                                id="container-types"
+                                                options={containers || []}
+                                                getOptionLabel={(option: any) => option.packageName}
+                                                value={containerTypes}
+                                                disabled={servicesSelection.length !== 0 ? true : false}
+                                                onChange={(event: any, newValue: any) => {
+                                                    setContainerTypes(newValue);
+                                                }}
+                                                isOptionEqualToValue={(option, value) => option.packageId === value.packageId}
+                                                renderInput={(params: any) => <TextField {...params} sx={{ mt: 1, textTransform: "lowercase" }} />}
+                                                fullWidth
+                                            /> : <Skeleton />
+                                        }
+                                    </Grid>
                                 </Grid>
                             </Grid>
-                            <Grid item xs={12} md={4}>
+                            
+                            <Grid item xs={12} md={3}>
                                 <Grid container spacing={2}>
                                     <Grid item xs={12} md={12} mt={0}>
                                         <InputLabel htmlFor="comment" sx={inputLabelStyles}>{t('comment')}</InputLabel>
@@ -698,7 +794,7 @@ function Miscellaneous() {
                             <Grid item xs={12} md={12}>
                                 <Typography sx={{ fontSize: 18 }}><b>{t('listServices')}</b></Typography>
                             </Grid>
-                            <Grid item xs={12} md={4}>
+                            <Grid item xs={12} md={8}>
                                 <InputLabel htmlFor="service-name" sx={inputLabelStyles}>{t('serviceName')}</InputLabel>
                                 {
                                     services !== null ?
@@ -728,24 +824,6 @@ function Miscellaneous() {
                                     /> : <Skeleton />
                                 }
                             </Grid>
-                            <Grid item xs={12} md={4}>
-                                <InputLabel htmlFor="container-types" sx={inputLabelStyles}>{t('containers')}</InputLabel>
-                                {
-                                    containers !== null ? 
-                                    <Autocomplete
-                                        id="container-types"
-                                        options={containers || []}
-                                        getOptionLabel={(option: any) => option.packageName}
-                                        value={containerTypes}
-                                        onChange={(event: any, newValue: any) => {
-                                            setContainerTypes(newValue);
-                                        }}
-                                        isOptionEqualToValue={(option, value) => option.packageId === value.packageId}
-                                        renderInput={(params: any) => <TextField {...params} sx={{ mt: 1, textTransform: "lowercase" }} />}
-                                        fullWidth
-                                    /> : <Skeleton />
-                                }
-                            </Grid>
                             <Grid item xs={12} md={2}>
                                 <InputLabel htmlFor="price-cs" sx={inputLabelStyles}>{t('price')}</InputLabel>
                                 <BootstrapInput id="price-cs" type="number" value={price} onChange={(e: any) => setPrice(e.target.value)} fullWidth />
@@ -760,7 +838,7 @@ function Miscellaneous() {
                                             setServicesSelection((prevItems: any) => [...prevItems, { 
                                                 service: { serviceId: serviceName.serviceId, serviceName: serviceName.serviceName, price: Number(price) }, containers: [containerTypes]
                                             }]);
-                                            setServiceName(null); setContainerTypes(null); setPrice(0);
+                                            setServiceName(null); setPrice(0);
                                         } 
                                         else {
                                             enqueueSnackbar(t('fieldNeedTobeFilled'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
@@ -789,7 +867,7 @@ function Miscellaneous() {
                                                         >
                                                             <ListItemText primary={
                                                                 item.containers[0] !== null && item.containers[0] !== undefined ?
-                                                                t('serviceName')+" : "+item.service.serviceName+" | "+t('containers')+" : "+item.containers[0].packageName+" | "+t('price')+" : "+item.service.price+" "+currency : 
+                                                                t('serviceName')+" : "+item.service.serviceName+" | "+t('container')+" : "+item.containers[0].packageName+" | "+t('price')+" : "+item.service.price+" "+currency : 
                                                                 t('serviceName')+" : "+item.service.serviceName+" | "+t('price')+" : "+item.service.price+" "+currency
                                                             } />
                                                         </ListItem>
@@ -804,7 +882,30 @@ function Miscellaneous() {
                     }
                 </DialogContent>
                 <DialogActions>
-                    <Button variant="contained" color={"primary"} onClick={() => { createMiscellaneous(); }} sx={{ mr: 1.5, textTransform: "none" }}>{t('validate')}</Button>
+                    <Button
+                        variant="contained"
+                        color={"primary"} 
+                        onClick={() => { 
+                            if (currentEditId !== "") {
+                                createMiscellaneous(); 
+                            }
+                            else if (miscs !== null && portLoading !== null && portDischarge !== null) {
+                                var miscsFiltered = miscs.find((elm: any) => elm.departurePortName === portLoading.portName && elm.destinationPortName === portDischarge.portName);
+                                if (findMiscellaneous(supplier.contactName, containerTypes !== null ? containerTypes.packageName : null, miscsFiltered !== undefined ? miscsFiltered.suppliers : []) === null) {
+                                    createMiscellaneous(); 
+                                }
+                                else {
+                                    enqueueSnackbar("A similar pricing already exists, change the container type!", { variant: "warning", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                                }
+                            }
+                            else {
+                                createMiscellaneous(); 
+                            }
+                        }} 
+                        sx={{ mr: 1.5, textTransform: "none" }}
+                    >
+                        {t('validate')}
+                    </Button>
                     <Button variant="contained" onClick={() => setModal2(false)} sx={buttonCloseStyles}>{t('close')}</Button>
                 </DialogActions>
             </BootstrapDialog>

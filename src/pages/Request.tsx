@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import { Alert, Autocomplete, Box, Button, Chip, DialogActions, DialogContent, Grid, IconButton, InputLabel, ListItem, ListItemText, NativeSelect, Popover, Skeleton, Step, StepLabel, Stepper, TextField, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material';
 import { MuiTelInput } from 'mui-tel-input';
 import AutocompleteSearch from '../components/shared/AutocompleteSearch';
-import { inputLabelStyles, BootstrapInput, BootstrapDialog, whiteButtonStyles, gridStyles, HtmlTooltip, BootstrapDialogTitle, buttonCloseStyles, sizeStyles } from '../utils/misc/styles';
+import { inputLabelStyles, BootstrapInput, BootstrapDialog, whiteButtonStyles, gridStyles, HtmlTooltip, BootstrapDialogTitle, buttonCloseStyles, sizeStyles, sizingStyles } from '../utils/misc/styles';
 import { enqueueSnackbar, SnackbarProvider } from 'notistack';
 import DeleteIcon from '@mui/icons-material/Delete';
 import HelpIcon from '@mui/icons-material/Help';
@@ -43,7 +43,7 @@ import {
 import { JSON as seaPorts } from 'sea-ports';
 // @ts-ignore
 
-import { DataGrid, GridColDef, GridRenderCellParams, GridValueFormatterParams, GridValueGetterParams, GridRowSelectionModel, GridColumnHeaderParams } from '@mui/x-data-grid';
+import { DataGrid, GridColDef, GridRenderCellParams, GridValueFormatterParams, GridValueGetterParams, GridRowSelectionModel, GridColumnHeaderParams, GridToolbar } from '@mui/x-data-grid';
 import ClientSearch from '../components/shared/ClientSearch';
 import RequestListNotes from '../components/editRequestPage/RequestListNotes';
 import RequestAddNote from '../components/editRequestPage/RequestAddNote';
@@ -51,17 +51,13 @@ import RequestAskInformation from '../components/editRequestPage/RequestAskInfor
 import RequestChangeStatus from '../components/editRequestPage/RequestChangeStatus';
 // import { MailData } from '../utils/models/models';
 // import { MuiFileInput } from 'mui-file-input';
-import { calculateDistance, findClosestSeaPort } from '../utils/functions';
+import { calculateDistance, findClosestSeaPort, generateRandomNumber, sortByCloseness } from '../utils/functions';
 import RequestPriceRequest from '../components/editRequestPage/RequestPriceRequest';
 import RequestPriceHaulage from '../components/editRequestPage/RequestPriceHaulage';
 import NewContact from '../components/editRequestPage/NewContact';
 import ContainerElement from '../components/editRequestPage/ContainerElement';
 import ContainerPrice from '../components/editRequestPage/ContainerPrice';
-// import { EditorContent, useEditor } from '@tiptap/react';
 
-//let statusTypes = ["EnAttente", "Valider", "Rejeter"];
-// let cargoTypes = ["Container", "Conventional", "RollOnRollOff"];
-// let packingTypes = ["LCL", "Airfreight", "Cars", "Trucks", "Not containerised"];
 let packingOptions = ["Unit", "Bundle", "Bag", "Pallet", "Carton", "Lot", "Crate"];
 
 function createGetRequestUrl(url: string, variable2: string, variable3: string, variable4: string) {
@@ -104,19 +100,6 @@ function createGetRequestUrl2(url: string, variable1: string, variable2: string,
     return url;
 }
 
-function getPackageNamesByIds(ids: string[], packages: any) {
-    const packageNames = [];
-  
-    for (const id of ids) {
-        const foundPackage = packages.find((pkg: any) => pkg.packageId === id);
-        if (foundPackage) {
-            packageNames.push(foundPackage.packageName);
-        }
-    }
-    
-    return packageNames;
-}
-
 function parseLocation(inputString: string) {
     const parts = inputString.split(', ');
     
@@ -156,38 +139,13 @@ function displayContainers(value: any) {
     return '<ul>'+aux+'</ul>';
 }
 
-function sortByCloseness(myPort: any, seaPorts: any) {
-    const myCoordinates = [myPort.latitude, myPort.longitude];
-
-    // Calculate distances and add them to the sea ports
-    seaPorts.forEach((seaPort: any) => {
-        const seaPortCoordinates = seaPort.coordinates;
-        if (seaPortCoordinates !== undefined) {
-            const distance = calculateDistance(myCoordinates, seaPortCoordinates);
-            seaPort.distance = distance; // Add the distance to each sea port
-        } else {
-            seaPort.distance = Infinity; // Ports without coordinates are considered farthest
-        }
-    });
-
-    // Sort the sea ports by distance
-    seaPorts.sort((a: any, b: any) => a.distance - b.distance);
-
-    // Remove the "distance" property from the sorted ports
-    seaPorts.forEach((seaPort: any) => {
-        delete seaPort.distance;
-    });
-
-    return seaPorts;
-}
-
-// 
 const defaultTemplate = "65b74024891f9de80722fc6d";
 
 function Request() {
     const [load, setLoad] = useState<boolean>(true);
     const [loadAssignees, setLoadAssignees] = useState<boolean>(true);
     const [loadResults, setLoadResults] = useState<boolean>(false);
+    const [loadGeneralMiscs, setLoadGeneralMiscs] = useState<boolean>(false);
     const [email, setEmail] = useState<string>("");
     const [status, setStatus] = useState<string | null>(null);
     const [trackingNumber, setTrackingNumber] = useState<string>("");
@@ -205,6 +163,7 @@ function Request() {
     const [modal5, setModal5] = useState<boolean>(false);
     const [modal6, setModal6] = useState<boolean>(false);
     const [modal7, setModal7] = useState<boolean>(false);
+    const [modal8, setModal8] = useState<boolean>(false);
     
     const [assignedManager, setAssignedManager] = useState<string>("");
     const [assignees, setAssignees] = useState<any>(null);
@@ -212,7 +171,6 @@ function Request() {
     const [containerType, setContainerType] = useState<string>("20' Dry");
     const [quantity, setQuantity] = useState<number>(1);
     const [containersSelection, setContainersSelection] = useState<any>([]);
-    const [containersWithServices, setContainersWithServices] = useState<any>(null);
     
     const [unitName, setUnitName] = useState<string>("");
     const [unitHeight, setUnitHeight] = useState<number>(0);
@@ -241,12 +199,17 @@ function Request() {
     const [ports2, setPorts2] = useState<any>(null);
     const [clients, setClients] = useState<any>(null);
     const [containers, setContainers] = useState<any>(null);
-    const [miscs, setMiscs] = useState<any>(null);
+    const [miscs, setMiscs] = useState<any>([]);
     const [haulages, setHaulages] = useState<any>(null);
     const [seafreights, setSeafreights] = useState<any>(null);
+    const [generalMiscs, setGeneralMiscs] = useState<any>(null);
     const [selectedHaulage, setSelectedHaulage] = useState<any>(null);
     const [selectedSeafreight, setSelectedSeafreight] = useState<any>(null);
     const [selectedMisc, setSelectedMisc] = useState<any>(null);
+
+    const [myHaulages, setMyHaulages] = useState<any>([]);
+    const [mySeafreights, setMySeafreights] = useState<any>([]);
+    const [myMiscs, setMyMiscs] = useState<any>([]);
     
     const [tempToken, setTempToken] = useState<string>("");
     
@@ -257,11 +220,6 @@ function Request() {
     const [templateBase, setTemplateBase] = useState<any>(null);
     const [loadTemplate, setLoadTemplate] = useState<boolean>(false);
     const [mailLanguage, setMailLanguage] = useState<string>("fr");
-
-    const [margin, setMargin] = useState<number>(22);
-    const [adding, setAdding] = useState<number>(0);
-    const [totalPurchase, setTotalPurchase] = useState<number>(0);
-    const [salesPrice, setSalesPrice] = useState<number>(0);
 
     const [margins, setMargins] = useState([]);
     const [addings, setAddings] = useState([]);
@@ -328,15 +286,45 @@ function Request() {
         // Return the services and their total price in the desired format
         return services.join('; ');
     }
+
+    function getServicesTotal2(data: any, currency: string, quantity: number) {
+        let services = [];
+    
+        // Loop through the data
+        for(let i = 0; i < data.length; i++) {
+            // Loop through the services in the current data object
+            for(let j = 0; j < data[i].services.length; j++) {
+                let service = data[i].services[j];
+                services.push(`${service.serviceName} : ${quantity}x${service.price} ${currency}`);
+            }
+        }
+    
+        // Return the services and their total price in the desired format
+        return services.join('; ');
+    }
+    
+    function getServices(data: any, currency: string) {
+        let services = [];
+    
+        // Loop through the data
+        for(let i = 0; i < data.length; i++) {
+            // Loop through the services in the current data object
+            for(let j = 0; j < data[i].services.length; j++) {
+                let service = data[i].services[j];
+                services.push(`${service.serviceName}`);
+            }
+        }
+    
+        // Return the services and their total price in the desired format
+        return services.join('; ');
+    }
     
     const columnsSeafreights: GridColDef[] = [
-        { field: 'carrierName', headerName: t('carrier'), flex: 1.2 },
-        { field: 'carrierAgentName', headerName: t('carrierAgent'), flex: 1.2 },
-        // { field: 'departurePortName', headerName: t('departurePort'), flex: 1 },
-        // { field: 'destinationPortName', headerName: t('destinationPort'), flex: 1 },
+        { field: 'carrierName', headerName: t('carrier'), flex: 1.25 },
+        { field: 'carrierAgentName', headerName: t('carrierAgent'), flex: 1.25 },
         { field: 'frequency', headerName: t('frequency'), valueFormatter: (params: GridValueFormatterParams) => `${t('every')} ${params.value || ''} `+t('days'), flex: 0.75 },
         { field: 'transitTime', headerName: t('transitTime'), valueFormatter: (params: GridValueFormatterParams) => `${params.value || ''} `+t('days'), flex: 0.5 },
-        { field: 'currency', headerName: t('prices'), renderCell: (params: GridRenderCellParams) => {
+        { field: 'defaultContainer', headerName: t('prices'), renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box sx={{ my: 1, mr: 1 }}>
                     <Box>
@@ -344,13 +332,13 @@ function Request() {
                             params.row.containers[0] ? 
                             <ContainerPrice 
                                 price={formatObject(params.row.containers[0])+" "+t(params.row.currency)}
-                                seafreightPrice={formatServices(params.row.containers[0], t(params.row.currency), params.row.containers[0].container.packageName) || "N/A"} 
+                                seafreightPrice={formatServices(params.row.containers[0], t(params.row.currency), params.row.containers[0].container.packageName, 0) || "N/A"} 
                             /> : "N/A"
                         }
                     </Box>
                 </Box>
             );
-        }, renderHeader: (params: GridColumnHeaderParams) => (<>Haulage <br></br>per unit</>), flex: 1 },
+        }, renderHeader: (params: GridColumnHeaderParams) => t('prices'), flex: 1 },
         { field: 'validUntil', headerName: t('validUntil'), renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box sx={{ my: 1, mr: 1 }}>
@@ -408,8 +396,6 @@ function Request() {
     
     const columnsMiscs: GridColDef[] = [
         { field: 'supplierName', headerName: t('supplier'), flex: 2.7 },
-        // { field: 'departurePortName', headerName: t('departurePort'), valueFormatter: (params: GridValueFormatterParams) => `${portDeparture.portName || ''}`, flex: 1 },
-        // { field: 'destinationPortName', headerName: t('destinationPort'), valueFormatter: (params: GridValueFormatterParams) => `${portDestination.portName || ''}`, flex: 1 },
         { field: 'currency', headerName: t('costPrices'), renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box sx={{ my: 1, mr: 1 }}>
@@ -417,7 +403,7 @@ function Request() {
                         {
                             params.row.containers !== null ?
                             params.row.containers[0] ? 
-                            <>{calculateTotal(params.row.containers)+" "+params.row.currency}</> : "N/A" : null
+                            <>{calculateTotal(params.row.containers)+" "+t(params.row.currency)}</> : "N/A" : null
                         }
                     </Box>
                 </Box>
@@ -429,22 +415,29 @@ function Request() {
                     {
                         params.row.containers !== null ?
                         params.row.containers[0] ? 
-                        <>{getServicesTotal(params.row.containers, params.row.currency)}</> : "N/A" : null
+                        <>{getServicesTotal(params.row.containers, t(params.row.currency))}</> : "N/A" : null
                     }
                 </Box>
             );
         }, flex: 4 },
-        { field: 'updated', headerName: t('lastUpdated'), renderCell: (params: GridRenderCellParams) => {
+        { field: 'validUntil', headerName: t('validUntil'), renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box sx={{ my: 1, mr: 1 }}>
-                    {
-                        params.row.updated !== null ? 
-                        <Chip label={(new Date(params.row.updated)).toLocaleDateString().slice(0,10)} color={(new Date()).getTime() - (new Date(params.row.updated)).getTime() > 0 ? "default" : "default"}></Chip> : 
-                        <Chip label={(new Date(params.row.created)).toLocaleDateString().slice(0,10)} color={(new Date()).getTime() - (new Date(params.row.created)).getTime() > 0 ? "default" : "default"}></Chip>
-                    }
+                    <Chip label={(new Date(params.row.validUntil)).toLocaleDateString().slice(0,10)} color={(new Date()).getTime() - (new Date(params.row.validUntil)).getTime() > 0 ? "warning" : "success"}></Chip>
                 </Box>
             );
-        }, flex: 1 },
+        }, flex: 1.25 },
+        // { field: 'updated', headerName: t('lastUpdated'), renderCell: (params: GridRenderCellParams) => {
+        //     return (
+        //         <Box sx={{ my: 1, mr: 1 }}>
+        //             {
+        //                 params.row.updated !== null ? 
+        //                 <Chip label={(new Date(params.row.updated)).toLocaleDateString().slice(0,10)} color={(new Date()).getTime() - (new Date(params.row.updated)).getTime() > 0 ? "default" : "default"}></Chip> : 
+        //                 <Chip label={(new Date(params.row.created)).toLocaleDateString().slice(0,10)} color={(new Date()).getTime() - (new Date(params.row.created)).getTime() > 0 ? "default" : "default"}></Chip>
+        //             }
+        //         </Box>
+        //     );
+        // }, flex: 1 },
         { field: 'comment', headerName: "Comment", renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box sx={{ my: 2 }}>
@@ -466,11 +459,11 @@ function Request() {
         return `${packageName} : ${totalPrice}`;
     }
 
-    function formatServices(obj: any, currency: string, targetPackageName: string) {
+    function formatServices(obj: any, currency: string, targetPackageName: string, qty: number) {
         if (obj.container.packageName === targetPackageName) {
             const servicesList = obj.services.map((service: any, index: number) => (
                 <React.Fragment key={index}>
-                    <span>- {service.serviceName} : {service.price} {currency}</span>
+                    <span>- {service.serviceName} : {qty !== 0 ? qty+"x" : null}{service.price} {currency}</span>
                     {index !== obj.services.length - 1 && <br />} {/* Add <br /> except for the last item */}
                 </React.Fragment>
             ));
@@ -480,10 +473,6 @@ function Request() {
         }
     }
       
-    function allEmptyRows(paramsObj: any) {
-        return (!getPackageNamesByIds((containersSelection.map((elm: any) => elm.id)), containers).includes("20' Dry") || paramsObj.price20dry === 0) && (!getPackageNamesByIds((containersSelection.map((elm: any) => elm.id)), containers).includes("20' RF") || paramsObj.price20rf === 0) && (!getPackageNamesByIds((containersSelection.map((elm: any) => elm.id)), containers).includes("40' Dry") || paramsObj.price40dry === 0) && (!getPackageNamesByIds((containersSelection.map((elm: any) => elm.id)), containers).includes("40' HC") || paramsObj.price40hc === 0) && (!getPackageNamesByIds((containersSelection.map((elm: any) => elm.id)), containers).includes("40' HC RF") || paramsObj.price40hcrf === 0);
-    };
-
     const handleMarginChange = (index: number, value: any) => {
         const updatedMargins: any = [...margins];
         updatedMargins[index] = value;
@@ -518,7 +507,7 @@ function Request() {
     }, [containersSelection]); // Assuming containersSelection is a prop or state
       
     // Stepper functions
-    const [activeStep, setActiveStep] = React.useState(2);
+    const [activeStep, setActiveStep] = React.useState(0);
     const [skipped, setSkipped] = React.useState(new Set<number>());
 
     const isStepOptional = (step: number) => {
@@ -642,22 +631,6 @@ function Request() {
             seafreightPrices = seafreightSelected.containers[0].services.reduce((sum: number, service: any) => sum + service.price, 0)*quantity;
         }
         
-        // if (selectedSeafreight.price20dry !== 0 && type == "20' Dry") {
-        //     seafreightPrices += selectedSeafreight.price20dry*containersSelection.find((elm: any) => elm.id === 8).quantity;
-        // }
-        // if (selectedSeafreight.price20rf !== 0 && type == "20' Rf") {
-        //     seafreightPrices += selectedSeafreight.price20rf*containersSelection.find((elm: any) => elm.id === 13).quantity;
-        // }
-        // if (selectedSeafreight.price40dry !== 0 && type == "40' Dry") {
-        //     seafreightPrices += selectedSeafreight.price40dry*containersSelection.find((elm: any) => elm.id === 9).quantity;
-        // }
-        // if (selectedSeafreight.price40hc !== 0 && type == "40' Hc") {
-        //     seafreightPrices += selectedSeafreight.price40hc*containersSelection.find((elm: any) => elm.id === 10).quantity;
-        // }
-        // if (selectedSeafreight.price40hcrf !== 0 && type == "40' HcRf") {
-        //     seafreightPrices += selectedSeafreight.price40hcrf*containersSelection.find((elm: any) => elm.id === 15).quantity;
-        // }
-
         // Calculate haulage prices
         var haulagePrices = 0;
         if (selectedHaulage !== null && selectedHaulage.containerNames.includes(type)) {
@@ -666,76 +639,18 @@ function Request() {
         
         // Calculate miscellaneous prices
         var miscPrices = 0;
-        // if (selectedMisc !== null) {
-        //     if (selectedMisc.price20dry !== 0 && type == "20' Dry") {
-        //         miscPrices += selectedMisc.price20dry*containersSelection.find((elm: any) => elm.id === 8).quantity;
-        //     }
-        //     if (selectedMisc.price20rf !== 0 && type == "20' Rf") {
-        //         miscPrices += selectedMisc.price20rf*containersSelection.find((elm: any) => elm.id === 13).quantity;
-        //     }
-        //     if (selectedMisc.price40dry !== 0 && type == "40' Dry") {
-        //         miscPrices += selectedMisc.price40dry*containersSelection.find((elm: any) => elm.id === 9).quantity;
-        //     }
-        //     if (selectedMisc.price40hc !== 0 && type == "40' Hc") {
-        //         miscPrices += selectedMisc.price40hc*containersSelection.find((elm: any) => elm.id === 10).quantity;
-        //     }
-        //     if (selectedMisc.price40hcrf !== 0 && type == "40' HcRf") {
-        //         miscPrices += selectedMisc.price40hcrf*containersSelection.find((elm: any) => elm.id === 15).quantity;
-        //     }
-        // }
+        var allMiscs = [...miscs, ...myMiscs];
+        var miscsSelected = allMiscs.filter((elm: any) => elm.defaultContainer === type);
+        for (var i = 0; i < miscsSelected.length; i++) {
+            miscPrices =  miscPrices + miscsSelected[i].containers[0].services.reduce((sum: number, service: any) => sum + service.price, 0)*quantity;
+        }
         
         // var finalValue = ((seafreightPrices+haulagePrices+miscPrices)*(margin/100)+seafreightPrices+haulagePrices+miscPrices).toFixed(2);
         // I removed miscPrices temporarily
-        var finalValue = ((seafreightPrices+haulagePrices)*(margins[index]/100)+seafreightPrices+haulagePrices).toFixed(2);
+        var finalValue = ((seafreightPrices+haulagePrices+miscPrices)*(margins[index]/100)+seafreightPrices+haulagePrices+miscPrices).toFixed(2);
         return Number(finalValue)+Number(addings[index]);
     }
     
-    function showSeafreightPrice(type: string) {
-        // Calculate seafreight prices
-        var seafreightPrices = 0;
-        if (selectedSeafreight.price20dry !== 0 && type == "20' Dry") {
-            return containersSelection.find((elm: any) => elm.id === 8).quantity+"x"+selectedSeafreight.price20dry;
-        }
-        if (selectedSeafreight.price20rf !== 0 && type == "20' Rf") {
-            return containersSelection.find((elm: any) => elm.id === 13).quantity+"x"+selectedSeafreight.price20rf;
-        }
-        if (selectedSeafreight.price40dry !== 0 && type == "40' Dry") {
-            return containersSelection.find((elm: any) => elm.id === 9).quantity+"x"+selectedSeafreight.price40dry;
-        }
-        if (selectedSeafreight.price40hc !== 0 && type == "40' Hc") {
-            return containersSelection.find((elm: any) => elm.id === 10).quantity+"x"+selectedSeafreight.price40hc;
-        }
-        if (selectedSeafreight.price40hcrf !== 0 && type == "40' HcRf") {
-            return containersSelection.find((elm: any) => elm.id === 15).quantity+"x"+selectedSeafreight.price40hcrf;
-        }
-
-        return "N/A";
-    }
-
-    function showMiscPrice(type: string) {
-        // Calculate miscellaneous prices
-        var miscPrices = 0;
-        if (selectedMisc !== null) {
-            if (selectedMisc.price20dry !== 0 && type == "20' Dry") {
-                return containersSelection.find((elm: any) => elm.id === 8).quantity+"x"+selectedMisc.price20dry;
-            }
-            if (selectedMisc.price20rf !== 0 && type == "20' Rf") {
-                return containersSelection.find((elm: any) => elm.id === 13).quantity+"x"+selectedMisc.price20rf;
-            }
-            if (selectedMisc.price40dry !== 0 && type == "40' Dry") {
-                return containersSelection.find((elm: any) => elm.id === 9).quantity+"x"+selectedMisc.price40dry;
-            }
-            if (selectedMisc.price40hc !== 0 && type == "40' Hc") {
-                return containersSelection.find((elm: any) => elm.id === 10).quantity+"x"+selectedMisc.price40hc;
-            }
-            if (selectedMisc.price40hcrf !== 0 && type == "40' HcRf") {
-                return containersSelection.find((elm: any) => elm.id === 15).quantity+"x"+selectedMisc.price40hcrf;
-            }
-        }
-
-        return "N/A";
-    }
-
     function similar(str1: string, str2: string) {
         const cleanStr1 = str1.replace(/[\s-]/g, '').toLowerCase();
         const cleanStr2 = str2.replace(/[\s-]/g, '').toLowerCase();
@@ -1013,18 +928,40 @@ function Request() {
             var urlSent = createGetRequestUrl2(protectedResources.apiLisPricing.endPoint+"/Pricing/SeaFreightsOffersRequest?", portDeparture.portId, portDestination.portId, containersFormatted);
             const response = await (context as BackendService<any>).getWithToken(urlSent, token);
             setLoadResults(false);
-            setSeafreights(response.filter((elm: any) => !allEmptyRows(elm)));
-            console.log(response);
+            
+            setSeafreights(response.map((elm: any) => { return {...elm, defaultContainer: elm.containers[0].container.packageName}}));
+            console.log(response.map((elm: any) => { return {...elm, defaultContainer: elm.containers[0].container.packageName}}));
         }
     }
     
     const getMiscellaneousPriceOffers = async () => {
+        setLoadResults(true);
         if (context && account) {
-            var containersFormatted = (containersSelection.map((elm: any) => elm.id)).join("&ContainerTypesId=");
-            var urlSent = createGetRequestUrl2(protectedResources.apiLisPricing.endPoint+"/Pricing/MiscellaneoussOffersRequest?", portDeparture.portId, portDestination.portId, containersFormatted);
+            // var containersFormatted = (containersSelection.map((elm: any) => elm.id)).join("&ContainerTypesId=");
+            // var urlSent = createGetRequestUrl2(protectedResources.apiLisPricing.endPoint+"/Pricing/MiscellaneoussOffersRequest?", portDeparture.portId, portDestination.portId, containersFormatted);
             const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisPricing.endPoint+"/Miscellaneous/Miscellaneous?departurePortId="+portDeparture.portId+"&destinationPortId="+portDestination.portId+"&withShipment=true", tempToken);
             setLoadResults(false);
-            setMiscs(response.length !== 0 ? response[0].suppliers : []);
+            
+            var suppliersRecentlySelected = mySeafreights.map((elm: any) => { return {carrierName: elm.carrierName, defaultContainer: elm.defaultContainer} });
+            setMiscs(response.length !== 0 ? 
+                response[0].suppliers.filter((elm: any) => new Date(elm.validUntil) > new Date()).filter((elm: any) => suppliersRecentlySelected.some((val: any) => val.carrierName === elm.supplierName && val.defaultContainer === elm.containers[0].container.packageName)).map((elm: any) => { return {...elm, defaultContainer: elm.containers[0].container.packageName}})
+            : []);
+        }
+    }
+    
+    const getGeneralMiscellaneousPriceOffers = async () => {
+        setLoadGeneralMiscs(true)
+        if (context && account) {
+            // var containersFormatted = (containersSelection.map((elm: any) => elm.id)).join("&ContainerTypesId=");
+            // var urlSent = createGetRequestUrl2(protectedResources.apiLisPricing.endPoint+"/Pricing/MiscellaneoussOffersRequest?", portDeparture.portId, portDestination.portId, containersFormatted);
+            const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisPricing.endPoint+"/Miscellaneous/Miscellaneous?withShipment=false", tempToken);
+            setLoadGeneralMiscs(false);
+            
+            console.log(response);
+            var suppliersRecentlySelected = mySeafreights.map((elm: any) => { return {carrierName: elm.carrierName, defaultContainer: elm.defaultContainer} });
+            setGeneralMiscs(response.length !== 0 ? 
+                response.filter((elm: any) => new Date(elm.validUntil) > new Date()).filter((elm: any) => suppliersRecentlySelected.some((val: any) => val.defaultContainer === elm.containers[0].container.packageName || elm.containers[0].container.packageName === null))
+            : []);
         }
     }
     
@@ -1104,7 +1041,6 @@ function Request() {
             if (response !== null && response !== undefined) {
                 var addedCoordinatesPorts = addedCoordinatesToPorts(response);
                 setPorts(addedCoordinatesPorts);
-                // addCoordinatesToPorts(response);
 
                 // Here i can get the products
                 getProducts(addedCoordinatesPorts);
@@ -1193,7 +1129,7 @@ function Request() {
                     // "quoteOfferNumber": transformId(uuidv4()),
                     "quoteOfferVm": 0,
                     "quoteOfferId": 10,
-                    "quoteOfferNumber": 10,
+                    "quoteOfferNumber": generateRandomNumber(),
                     "createdBy": account?.username,
                     "emailUser": email,
                     "haulage": haulage,
@@ -1309,7 +1245,8 @@ function Request() {
     // Fonction pour remplacer les variables dans le template
     function generateEmailContent(template: string, variables: any) {
         var textToRemove = selectedHaulage !== null ? "" : "Chargement de {{freeTime}} heures inclus pour chaque conteneur, ensuite de {{overtimeTariff}} EUR par heure indivisible.";
-        return template.replace(textToRemove,"").replace(/\{\{(.*?)\}\}/g, (_, variableName: any) => {
+        var textToRemove2 = selectedHaulage !== null ? "" : "Loading of {{freeTime}} hours included for each container, then {{overtimeTariff}} EUR per indivisible hour.";
+        return template.replace(textToRemove,"").replace(textToRemove2,"").replace(/\{\{(.*?)\}\}/g, (_, variableName: any) => {
             const trimmedName = variableName.trim();
             // Si la variable est non nulle/vide, l'encapsuler dans <strong>
             if (variables[trimmedName]) {
@@ -1323,11 +1260,30 @@ function Request() {
     function getDefaultContent(template: any) {
         var loadingCity = departure !== null ? departure.city.toUpperCase()+', '+departure.country.toUpperCase() : "";
         var destinationPort = portDestination !== null ? portDestination.portName+', '+portDestination.country.toUpperCase() : "";
-        
         var commodities:any = tags.map((elm: any) => elm.productName).join(',');
-        var listServices = selectedMisc !== null ? selectedMisc.services.map((elm: any) => "<p>- "+elm.service.serviceName+" inclus</p>").join('') : "<br>";
-        // var pricesContainers = "";
-        var pricesContainers = containersSelection !== null && selectedSeafreight !== null ? containersSelection.map((elm: any, index: number) => "<p>"+calculateContainerPrice(elm.container, elm.quantity, index)+" "+selectedSeafreight.currency+" / "+elm.container+"</p>").join('') : "";
+        
+        var auxServices = [...miscs,...myMiscs];
+        var listServices = auxServices !== null && auxServices.length !== 0 ? 
+            auxServices.map((elm: any) => elm.defaultContainer !== null ? "<p>- "+getServices(elm.containers, elm.currency)+" inclus</p>" : "<p>- "+getServicesTotal(elm.containers, elm.currency)+" supplémentaires</p>").join("")
+        : "<br>";
+        
+        var pricesContainers = containersSelection !== null && selectedSeafreight !== null ? 
+        containersSelection.map((elm: any, index: number) => 
+        {
+            var auxFrequency = 0;
+            var auxTransitTime = "";
+            var aux1 = seafreights.filter((val: any) => rowSelectionModel.includes(val.seaFreightId)).find((val: any) => val.defaultContainer === elm.container);
+            console.log()
+            if (aux1 !== undefined) {
+                auxFrequency = aux1.frequency;
+                auxTransitTime = aux1.transitTime;
+            }
+            return "<p><strong>"+calculateContainerPrice(elm.container, elm.quantity, index)+" "
+            +selectedSeafreight.currency+" / "+elm.container
+            +" / Tous les "+auxFrequency
+            +" jours / Délai de mer : "+auxTransitTime
+            +" jours</strong></p>"
+        }).join("") : "";
         var clientName = clientNumber !== null ? clientNumber.contactName : null;
         var freeTime = selectedHaulage !== null ? selectedHaulage.freeTime : "";
         var overtimeTariff = selectedHaulage !== null ? selectedHaulage.overtimeTariff : "";
@@ -1342,11 +1298,30 @@ function Request() {
     useEffect(() => {
         var loadingCity = departure !== null ? departure.city.toUpperCase()+', '+departure.country.toUpperCase() : "";
         var destinationPort = portDestination !== null ? portDestination.portName+', '+portDestination.country.toUpperCase() : "";
-        
         var commodities:any = tags.map((elm: any) => elm.productName).join(',');
-        var listServices = selectedMisc !== null ? selectedMisc.services.map((elm: any) => "<p>- "+elm.service.serviceName+" inclus</p>").join('') : "<br>";
-        // var pricesContainers = "";
-        var pricesContainers = containersSelection !== null && selectedSeafreight !== null ? containersSelection.map((elm: any, index: number) => "<p>"+calculateContainerPrice(elm.container, elm.quantity, index)+" "+selectedSeafreight.currency+" / "+elm.container+"</p>").join('') : "";
+        
+        var auxServices = [...miscs,...myMiscs];
+        // console.log(auxServices);
+        var listServices = auxServices !== null && auxServices.length !== 0 ? 
+            auxServices.map((elm: any) => elm.defaultContainer !== null ? "<p>- "+getServices(elm.containers, elm.currency)+" inclus</p>" : "<p>- "+getServicesTotal(elm.containers, elm.currency)+" supplémentaires</p>").join("")
+        : "<br>";
+        
+        var pricesContainers = containersSelection !== null && selectedSeafreight !== null ? 
+        containersSelection.map((elm: any, index: number) => 
+        {
+            var auxFrequency = 0;
+            var auxTransitTime = "";
+            var aux1 = seafreights.filter((val: any) => rowSelectionModel.includes(val.seaFreightId)).find((val: any) => val.defaultContainer === elm.container);
+            if (aux1 !== undefined) {
+                auxFrequency = aux1.frequency;
+                auxTransitTime = aux1.transitTime;
+            }
+            return "<p><strong>"+calculateContainerPrice(elm.container, elm.quantity, index)+" "
+            +selectedSeafreight.currency+" / "+elm.container
+            +" / Tous les "+auxFrequency
+            +" jours / Délai de mer : "+auxTransitTime
+            +" jours</strong></p>"
+        }).join("") : "";
         var clientName = clientNumber !== null ? clientNumber.contactName : null;
         var freeTime = selectedHaulage !== null ? selectedHaulage.freeTime : "";
         var overtimeTariff = selectedHaulage !== null ? selectedHaulage.overtimeTariff : "";
@@ -2014,11 +1989,22 @@ function Request() {
                                                                                 hideFooter
                                                                                 getRowId={(row: any) => row?.seaFreightId}
                                                                                 getRowHeight={() => "auto" }
+                                                                                style={sizingStyles}
                                                                                 sx={gridStyles}
+                                                                                disableDensitySelector
+                                                                                disableColumnSelector
+                                                                                slots={{ toolbar: GridToolbar }}
+                                                                                slotProps={{
+                                                                                    toolbar: {
+                                                                                        showQuickFilter: true,
+                                                                                    },
+                                                                                }}
                                                                                 onRowSelectionModelChange={(newRowSelectionModel: any) => {
                                                                                     if (newRowSelectionModel.length <= containersSelection.length) {
                                                                                         setRowSelectionModel(newRowSelectionModel);
                                                                                         setSelectedSeafreight(newRowSelectionModel.length !== 0 ? seafreights.find((elm: any) => elm.seaFreightId === newRowSelectionModel[0]) : null);
+                                                                                        setMySeafreights(newRowSelectionModel.length !== 0 ? seafreights.filter((elm: any) => newRowSelectionModel.includes(elm.seaFreightId)) : []);
+                                                                                        // setSelectedSeafreight(newRowSelectionModel.length !== 0 ? seafreights.filter((elm: any) => newRowSelectionModel.includes(elm.seaFreightId)) : null);
                                                                                     }
                                                                                     else {
                                                                                         enqueueSnackbar("You can only select "+containersSelection.length+" offers!", { variant: "warning", anchorOrigin: { horizontal: "right", vertical: "top"} });
@@ -2073,11 +2059,46 @@ function Request() {
                                                             activeStep === 4 ? 
                                                             <Grid container spacing={2} mt={1} px={2}>
                                                                 <Grid item xs={12}>
+                                                                    <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>{t('listMiscPricingOffers')+t('fromDotted')+portDeparture.portName+"-"+portDestination.portName}</Typography>
+                                                                    <Grid container sx={{ alignItems: "center" }}>
+                                                                        <Grid item xs={12} md={8}>
+                                                                            <Typography variant="h6" sx={{ my: 2, fontSize: 17, fontWeight: "bold" }}>
+                                                                                Seafreight miscs (auto selected)
+                                                                            </Typography>
+                                                                        </Grid>
+                                                                        <Grid item xs={12} md={4}>
+                                                                            <Button 
+                                                                                variant="contained" 
+                                                                                color="inherit" 
+                                                                                sx={{ 
+                                                                                    textTransform: "none", backgroundColor: "#fff", 
+                                                                                    color: "#333", float: "right", marginTop: "0px", marginLeft: "10px" 
+                                                                                }} 
+                                                                                onClick={getMiscellaneousPriceOffers}
+                                                                            >
+                                                                                {t('reload')} <RestartAltIcon fontSize='small' />
+                                                                            </Button>
+                                                                            <Button 
+                                                                                variant="contained" 
+                                                                                color="inherit" 
+                                                                                sx={whiteButtonStyles} 
+                                                                                style={{ marginTop: "0px", float: "right" }} 
+                                                                                onClick={() => { 
+                                                                                    // if (!(generalMiscs !== null && generalMiscs.length !== 0)) {
+                                                                                    //     getGeneralMiscellaneousPriceOffers();
+                                                                                    // }
+                                                                                    getGeneralMiscellaneousPriceOffers();
+                                                                                    setModal8(true); 
+                                                                                }}
+                                                                            >
+                                                                                Add general miscs
+                                                                            </Button>
+                                                                        </Grid>
+                                                                    </Grid>
                                                                     {
                                                                         !loadResults ? 
                                                                         miscs !== null && miscs.length !== 0 ?
-                                                                            <Box sx={{ overflow: "auto", maxWidth: 'calc(80vw - 130px)' }}>
-                                                                                <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>{t('listMiscPricingOffers')+t('fromDotted')+portDeparture.portName+"-"+portDestination.portName}</Typography>
+                                                                            <Box sx={{ overflow: "auto" }}>
                                                                                 <DataGrid
                                                                                     rows={miscs}
                                                                                     columns={columnsMiscs}
@@ -2085,11 +2106,12 @@ function Request() {
                                                                                     getRowId={(row: any) => row?.miscellaneousId}
                                                                                     getRowHeight={() => "auto" }
                                                                                     sx={gridStyles}
-                                                                                    onRowSelectionModelChange={(newRowSelectionModel: any) => {
-                                                                                        setRowSelectionModel3(newRowSelectionModel);
-                                                                                        // setSelectedMisc(newRowSelectionModel.length !== 0 ? miscs.find((elm: any) => elm.id === newRowSelectionModel[0]) : null);
-                                                                                    }}
-                                                                                    rowSelectionModel={rowSelectionModel3}
+                                                                                    disableRowSelectionOnClick
+                                                                                    // onRowSelectionModelChange={(newRowSelectionModel: any) => {
+                                                                                    //     setRowSelectionModel3(newRowSelectionModel);
+                                                                                    //     // setSelectedMisc(newRowSelectionModel.length !== 0 ? miscs.find((elm: any) => elm.id === newRowSelectionModel[0]) : null);
+                                                                                    // }}
+                                                                                    // rowSelectionModel={rowSelectionModel3}
                                                                                     // onRowClick={handleRowMiscsClick}
                                                                                 />
                                                                             </Box> : <Alert severity="error">{t('noResults')}</Alert>
@@ -2112,7 +2134,7 @@ function Request() {
                                                                             getRowId={(row: any) => row?.seaFreightId}
                                                                             getRowHeight={() => "auto" }
                                                                             sx={sizeStyles}
-                                                                            isRowSelectable={(params: any) => false}
+                                                                            disableRowSelectionOnClick
                                                                         />
                                                                     </Box>
                                                                 </Grid>
@@ -2128,37 +2150,45 @@ function Request() {
                                                                                 getRowId={(row: any) => row?.id}
                                                                                 getRowHeight={() => "auto" }
                                                                                 sx={sizeStyles}
-                                                                                isRowSelectable={(params: any) => false}
+                                                                                disableRowSelectionOnClick
                                                                             />
                                                                         </Box>
                                                                     </Grid> : null
                                                                 }
                                                                 {
-                                                                    selectedMisc !== null ? 
+                                                                    miscs !== null && miscs.length !== 0 ? 
                                                                     <Grid item xs={12}>
-                                                                        <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>{t('selectedMisc')}</Typography>
+                                                                        <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>Seafreight miscs</Typography>
                                                                         <Box sx={{ overflow: "auto" }}>
                                                                             <DataGrid
-                                                                                rows={[selectedMisc]}
+                                                                                rows={miscs}
                                                                                 columns={columnsMiscs}
                                                                                 hideFooter
-                                                                                getRowId={(row: any) => row?.id}
+                                                                                getRowId={(row: any) => row?.miscellaneousId}
                                                                                 getRowHeight={() => "auto" }
                                                                                 sx={sizeStyles}
-                                                                                isRowSelectable={(params: any) => false}
+                                                                                disableRowSelectionOnClick
                                                                             />
                                                                         </Box>
                                                                     </Grid> : null
                                                                 }
-                                                                {/* <Grid item xs={3}>
-                                                                    <InputLabel htmlFor="sales-price" sx={inputLabelStyles}>{t('salesPrice')}</InputLabel>
-                                                                    <BootstrapInput id="sales-price" type="number" inputProps={{ min: 0 }} value={salesPrice} onChange={(e: any) => {setSalesPrice(e.target.value)}} fullWidth />
-                                                                </Grid>
-                                                                <Grid item xs={3}>
-                                                                    <InputLabel htmlFor="total-purchase" sx={inputLabelStyles}>{t('totalPurchase')}</InputLabel>
-                                                                    <BootstrapInput id="total-purchase" type="number" inputProps={{ min: 0 }} value={totalPurchase} onChange={(e: any) => {setTotalPurchase(e.target.value)}} fullWidth />
-                                                                </Grid> */}
-                                                                {/* <Grid item xs={8}></Grid> */}
+                                                                {
+                                                                    myMiscs !== null && myMiscs.length !== 0 ? 
+                                                                    <Grid item xs={12}>
+                                                                        <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>General miscs</Typography>
+                                                                        <Box sx={{ overflow: "auto" }}>
+                                                                            <DataGrid
+                                                                                rows={myMiscs}
+                                                                                columns={columnsMiscs}
+                                                                                hideFooter
+                                                                                getRowId={(row: any) => row?.miscellaneousId}
+                                                                                getRowHeight={() => "auto" }
+                                                                                sx={sizeStyles}
+                                                                                disableRowSelectionOnClick
+                                                                            />
+                                                                        </Box>
+                                                                    </Grid> : null
+                                                                }
                                                                 <Grid item xs={8}>
                                                                     <InputLabel htmlFor="selectedTemplate" sx={inputLabelStyles}>{t('selectedTemplate')}</InputLabel>
                                                                     {
@@ -2202,13 +2232,15 @@ function Request() {
                                                                     </ToggleButtonGroup>
                                                                 </Grid>
                                                                 <Grid item xs={12}>
-                                                                    <Box sx={{ border: "1px solid #e5e5e5", p: 2 }}>
+                                                                    <Box sx={{ border: "1px solid #e5e5e5", backgroundColor: "#fff", p: 2 }}>
                                                                         {
                                                                             containersSelection !== null && rowSelectionModel.length !== 0 ?
                                                                             seafreights.filter((elm: any) => rowSelectionModel.includes(elm.seaFreightId))
                                                                             .map((element: any, index: number) => {
                                                                                 var containerElm = containersSelection.find((val: any) => val.container === element.containers[0].container.packageName);
-                                                                                
+                                                                                var allMiscs = [...miscs, ...myMiscs];
+                                                                                var miscsSelected = allMiscs.filter((elm: any) => elm.defaultContainer === containerElm.container);
+
                                                                                 return (
                                                                                     <React.Fragment key={"containerRow-"+index}>
                                                                                         <ContainerElement 
@@ -2222,7 +2254,13 @@ function Request() {
                                                                                             profit={Number((calculateContainerPrice(containerElm.container, containerElm.quantity, index) - ((calculateContainerPrice(containerElm.container, containerElm.quantity, index)-addings[index])/(1+margins[index]/100))).toFixed(2))+" "+t(element.currency)}
                                                                                             salePrice={calculateContainerPrice(containerElm.container, containerElm.quantity, index)+" "+t(element.currency)}
                                                                                             haulagePrice={selectedHaulage !== null && selectedHaulage.containerNames.includes(containerElm.container) ? containerElm.quantity+"x"+selectedHaulage.unitTariff+" "+t(element.currency) : "N/A"}
-                                                                                            seafreightPrice={formatServices(element.containers[0], element.currency, containerElm.container) || "N/A"}
+                                                                                            seafreightPrice={formatServices(element.containers[0], t(element.currency), containerElm.container, containerElm.quantity) || "N/A"}
+                                                                                            miscellaneousPrice={miscsSelected.length !== 0 ? miscsSelected.map((value: any, id: number) => {
+                                                                                                return <>
+                                                                                                    <span>- {getServicesTotal2(value.containers, t(element.currency), containerElm.quantity)}</span>
+                                                                                                    {id !== miscsSelected.length - 1 && <br />}
+                                                                                                </>
+                                                                                            }) : "N/A"}
                                                                                         />
                                                                                     </React.Fragment>
                                                                                 );
@@ -2401,6 +2439,55 @@ function Request() {
                     categories={[""]}
                     closeModal={() => setModal7(false)}
                 />
+            </BootstrapDialog>
+
+            {/* General miscs selection */}
+            <BootstrapDialog
+                onClose={() => setModal8(false)}
+                aria-labelledby="custom-dialog-title8"
+                open={modal8}
+                maxWidth="lg"
+                fullWidth
+            >
+                <BootstrapDialogTitle id="custom-dialog-title" onClose={() => setModal8(false)}>
+                    <b>Add general miscs</b>
+                </BootstrapDialogTitle>
+                <DialogContent dividers>
+                    <Typography variant="subtitle1" gutterBottom px={2}>
+                        You can select some general miscellaneous services.
+                    </Typography>
+                    <Grid container spacing={2} mt={1} px={2}>
+                        <Grid item xs={12}>
+                            {
+                                !loadGeneralMiscs ? 
+                                generalMiscs !== null && generalMiscs.length !== 0 ?
+                                    <Box sx={{ overflow: "auto" }}>
+                                        <DataGrid
+                                            rows={generalMiscs}
+                                            columns={columnsMiscs}
+                                            hideFooter
+                                            getRowId={(row: any) => row?.miscellaneousId}
+                                            getRowHeight={() => "auto" }
+                                            sx={gridStyles}
+                                            onRowSelectionModelChange={(newRowSelectionModel: any) => {
+                                                setRowSelectionModel3(newRowSelectionModel);
+                                                setMyMiscs(newRowSelectionModel.length !== 0 ? generalMiscs.filter((elm: any) => newRowSelectionModel.includes(elm.miscellaneousId)).map((elm: any) => { return {...elm, defaultContainer: elm.containers[0].container.packageName}}) : []);
+                                                // setSelectedMisc(newRowSelectionModel.length !== 0 ? generalMiscs.find((elm: any) => elm.id === newRowSelectionModel[0]) : null);
+                                            }}
+                                            rowSelectionModel={rowSelectionModel3}
+                                            checkboxSelection
+                                            // onRowClick={handleRowMiscsClick}
+                                        />
+                                    </Box> : <Alert severity="error">{t('noResults')}</Alert>
+                                : <Skeleton />
+                            }
+                        </Grid>
+                    </Grid>
+                </DialogContent>
+                <DialogActions>
+                    <Button variant="contained" color="primary" className="mr-3" onClick={() => setModal8(false)} sx={{ textTransform: "none" }}>{t('validate')}</Button>
+                    <Button variant="contained" onClick={() => setModal8(false)} sx={buttonCloseStyles}>{t('close')}</Button>
+                </DialogActions>
             </BootstrapDialog>
         </div>
     );

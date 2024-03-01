@@ -27,7 +27,6 @@ import Miscellaneous from './pages/Miscellaneous';
 import AcceptOffer from './pages/AcceptOffer';
 import RefuseOffer from './pages/RefuseOffer';
 import Templates from './pages/Templates';
-// import Seafreights from './utils/others/Seafreights';
 
 const App = () => {
   return (

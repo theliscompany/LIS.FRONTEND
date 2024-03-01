@@ -46,6 +46,7 @@ function ManagePriceOffer(props: any) {
 	const [margin, setMargin] = useState<number>(22);
 	const [reduction, setReduction] = useState<number>(0);
 	const [adding, setAdding] = useState<number>(0);
+	const [offerNumber, setOfferNumber] = useState<string>("");
 	const [details, setDetails] = useState<string>("");
 	const [clientName, setClientName] = useState<string>("");
 	const [containers, setContainers] = useState<any>(null);
@@ -77,6 +78,7 @@ function ManagePriceOffer(props: any) {
 					setAdding(response.data.extraFee);
 					setDetails(response.data.comment);
 					setContainersId(response.data.containers.map((elm: any) => { return elm.containerId }))
+					setOfferNumber(response.data.quoteOfferNumber);
 					setLoad(false);
 				}
 				else {
@@ -258,7 +260,7 @@ function ManagePriceOffer(props: any) {
 		<div style={{ background: "#fff", borderTopLeftRadius: 20, borderTopRightRadius: 20 }}>
 			<SnackbarProvider />
 			<Box py={2.5}>
-				<Typography variant="h5" sx={{ mt: { xs: 4, md: 1.5, lg: 1.5 } }} mx={5}><b>{t('manageOffer')} N° {id}</b></Typography>
+				<Typography variant="h5" sx={{ mt: { xs: 4, md: 1.5, lg: 1.5 } }} mx={5}><b>{t('manageOffer')} N° {offerNumber}</b></Typography>
 				<Box>
 				{
 					!load ?
@@ -283,7 +285,7 @@ function ManagePriceOffer(props: any) {
 								</Grid>
 							}
 						</Grid>
-						<Grid item xs={12}>
+						{/* <Grid item xs={12}>
 							<Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>{t('selectedSeafreight')}</Typography>
 							<DataGrid
 								rows={[offer.seaFreight]}
@@ -313,8 +315,8 @@ function ManagePriceOffer(props: any) {
 								sx={gridStyles}
 								isRowSelectable={(params: any) => false}
 							/>
-						</Grid>
-						{
+						</Grid> */}
+						{/* {
 							offer.haulage !== null && offer.haulage !== undefined ?
 							<Grid item xs={12}>
 								<Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>{t('selectedHaulage')}</Typography>
@@ -346,8 +348,8 @@ function ManagePriceOffer(props: any) {
 									isRowSelectable={(params: any) => false}
 								/>
 							</Grid> : null
-						}
-						{
+						} */}
+						{/* {
 						offer.miscellaneousList !== null && offer.miscellaneousList[0] !== null ?
 							<Grid item xs={12}>
 								<Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>{t('selectedMisc')}</Typography>
@@ -390,7 +392,7 @@ function ManagePriceOffer(props: any) {
 									isRowSelectable={(params: any) => false}
 								/>
 							</Grid> : null
-						}
+						} */}
 						{/* <Grid item xs={12} md={6}>
 							<InputLabel htmlFor="client-name" sx={inputLabelStyles}>{t('clientName')}</InputLabel>
 							<BootstrapInput id="clien-name" type="text" value={clientName} onChange={(e: any) => setClientName(e.target.value)} fullWidth />
