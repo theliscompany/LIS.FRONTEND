@@ -51,7 +51,7 @@ import RequestAskInformation from '../components/editRequestPage/RequestAskInfor
 import RequestChangeStatus from '../components/editRequestPage/RequestChangeStatus';
 // import { MailData } from '../utils/models/models';
 // import { MuiFileInput } from 'mui-file-input';
-import { calculateDistance, findClosestSeaPort, generateRandomNumber, sortByCloseness } from '../utils/functions';
+import { findClosestSeaPort, generateRandomNumber, sortByCloseness } from '../utils/functions';
 import RequestPriceRequest from '../components/editRequestPage/RequestPriceRequest';
 import RequestPriceHaulage from '../components/editRequestPage/RequestPriceHaulage';
 import NewContact from '../components/editRequestPage/NewContact';
@@ -929,8 +929,8 @@ function Request() {
             const response = await (context as BackendService<any>).getWithToken(urlSent, token);
             setLoadResults(false);
             
-            setSeafreights(response.map((elm: any) => { return {...elm, defaultContainer: elm.containers[0].container.packageName}}));
-            console.log(response.map((elm: any) => { return {...elm, defaultContainer: elm.containers[0].container.packageName}}));
+            var myContainers = containersSelection.map((elm: any) => elm.container);
+            setSeafreights(response.filter((elm: any) => myContainers.includes(elm.containers[0].container.packageName)).map((elm: any) => { return {...elm, defaultContainer: elm.containers[0].container.packageName}}));
         }
     }
     
@@ -2239,8 +2239,11 @@ function Request() {
                                                                             .map((element: any, index: number) => {
                                                                                 var containerElm = containersSelection.find((val: any) => val.container === element.containers[0].container.packageName);
                                                                                 var allMiscs = [...miscs, ...myMiscs];
-                                                                                var miscsSelected = allMiscs.filter((elm: any) => elm.defaultContainer === containerElm.container);
-
+                                                                                var miscsSelected = [];
+                                                                                if (containerElm !== undefined && containerElm !== null) {
+                                                                                    miscsSelected = allMiscs.filter((elm: any) => elm.defaultContainer === containerElm.container);
+                                                                                }
+                                                                                
                                                                                 return (
                                                                                     <React.Fragment key={"containerRow-"+index}>
                                                                                         <ContainerElement 
@@ -2255,6 +2258,7 @@ function Request() {
                                                                                             salePrice={calculateContainerPrice(containerElm.container, containerElm.quantity, index)+" "+t(element.currency)}
                                                                                             haulagePrice={selectedHaulage !== null && selectedHaulage.containerNames.includes(containerElm.container) ? containerElm.quantity+"x"+selectedHaulage.unitTariff+" "+t(element.currency) : "N/A"}
                                                                                             seafreightPrice={formatServices(element.containers[0], t(element.currency), containerElm.container, containerElm.quantity) || "N/A"}
+                                                                                            // miscellaneousPrice=""
                                                                                             miscellaneousPrice={miscsSelected.length !== 0 ? miscsSelected.map((value: any, id: number) => {
                                                                                                 return <>
                                                                                                     <span>- {getServicesTotal2(value.containers, t(element.currency), containerElm.quantity)}</span>
