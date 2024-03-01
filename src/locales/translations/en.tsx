@@ -397,4 +397,5 @@ export const en = {
   salesPrice: "Sales price",
   totalPurchase: "Total purchase",
   copyRowSeafreight: "Copy seafreight price",
+  messageOkGeneralMiscs: "Your general misc services have been recorded!"
 };
