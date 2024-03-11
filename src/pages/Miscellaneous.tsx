@@ -51,6 +51,7 @@ function Miscellaneous() {
     const [currentId, setCurrentId] = useState<string>("");
     const [currentEditId, setCurrentEditId] = useState<string>("");
     const [miscs, setMiscs] = useState<any>(null);
+    const [allMiscs, setAllMiscs] = useState<any>(null);
     const [miscsWithoutShipment, setMiscsWithoutShipment] = useState<any>(null);
     const [searchedSupplier, setSearchedSupplier] = useState<any>(null);
     const [portDeparture, setPortDeparture] = useState<any>(null);
@@ -67,6 +68,7 @@ function Miscellaneous() {
     const [price, setPrice] = useState<number>(0);
     const [servicesSelection, setServicesSelection] = useState<any>([]);
     const [withShipment, setWithShipment] = useState<boolean>(true);
+    const [showHaulages, setShowHaulages] = useState<boolean>(false);
 
     const [tempToken, setTempToken] = useState<string>("");
     
@@ -198,8 +200,22 @@ function Miscellaneous() {
     }, []);
 
     useEffect(() => {
-        getMiscellaneouses();
-    }, [withShipment]);
+        if (ports !== null) {
+            getMiscellaneouses();
+        }
+    }, [withShipment, ports]);
+    
+    useEffect(() => {
+        if (ports !== null && allMiscs !== null) {
+            var portsIds = ports.map((elm: any) => elm.portName);
+            if (showHaulages === false) {
+                setMiscs(allMiscs.filter((elm: any) => portsIds.includes(elm.departurePortName)));
+            }
+            else {
+                setMiscs(allMiscs.filter((elm: any) => !portsIds.includes(elm.departurePortName)));
+            }
+        }
+    }, [showHaulages, ports]);
     
     const getPorts = async () => {
         if (context) {
@@ -276,8 +292,15 @@ function Miscellaneous() {
             
             const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisPricing.endPoint+"/Miscellaneous/Miscellaneous?withShipment="+withShipment, token !== null ? token : tempToken);
             if (response !== null && response !== undefined) {
-                // setMiscs([]);
-                setMiscs(response);
+                setAllMiscs(response);
+                var portsIds = ports.map((elm: any) => elm.portName);
+                if (!showHaulages) {
+                    setMiscs(response.filter((elm: any) => portsIds.includes(elm.departurePortName)));
+                }
+                else {
+                    setMiscs(response.filter((elm: any) => !portsIds.includes(elm.departurePortName)));
+                }
+                
                 if (withShipment === false) {
                     setMiscsWithoutShipment(response);
                 }
@@ -331,7 +354,8 @@ function Miscellaneous() {
             var requestFormatted = createGetRequestUrl(portDeparture?.portId, portDestination?.portId, searchedSupplier?.contactId);
             const response = await (context as BackendService<any>).getWithToken(requestFormatted+"&withShipment="+withShipment, tempToken);
             if (response !== null && response !== undefined) {
-                setMiscs(response);
+                var portsIds = ports.map((elm: any) => elm.portName);
+                setMiscs(response.filter((elm: any) => portsIds.includes(elm.departurePortName)));
                 setLoad(false);
             }
             else {
@@ -464,18 +488,31 @@ function Miscellaneous() {
             <Box sx={{ py: 2.5 }}>
                 <Typography variant="h5" sx={{mt: {xs: 4, md: 1.5, lg: 1.5 }}} mx={5}><b>{t('listMiscellaneous')}</b></Typography>
                 <Grid container spacing={2} mt={0} px={5}>
-                    <Grid item xs={12} md={9}>
+                    <Grid item xs={12} md={6}>
                         <FormControlLabel 
                             control={
                             <Switch
                                 checked={withShipment}
                                 onChange={(event: React.ChangeEvent<HTMLInputElement>) => { 
-                                    // setMiscs(null); setMiscsWithoutShipment(null);
                                     console.log(event.target.checked); setWithShipment(event.target.checked); setLoad(true);
                                 }}
                                 inputProps={{ 'aria-label': 'controlled' }}
                             />}
                             label={t('withShipment')} 
+                            sx={{ float: "right" }}
+                        />
+                    </Grid>
+                    <Grid item xs={12} md={3}>
+                        <FormControlLabel 
+                            control={
+                            <Switch
+                                checked={showHaulages}
+                                onChange={(event: React.ChangeEvent<HTMLInputElement>) => { 
+                                    console.log(event.target.checked); setShowHaulages(event.target.checked);
+                                }}
+                                inputProps={{ 'aria-label': 'controlled' }}
+                            />}
+                            label={"Show haulage miscs"} 
                             sx={{ float: "right" }}
                         />
                     </Grid>
