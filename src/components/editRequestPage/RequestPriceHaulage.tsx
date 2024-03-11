@@ -210,7 +210,12 @@ function RequestPriceHaulage(props: any) {
     }
     
     function getDefaultContent(template: any) {
+        var postalCode = loadingCityObj !== null ? loadingCityObj.postalCode !== undefined ? loadingCityObj.postalCode : "" : ""; 
         var loadingCity = loadingCityObj !== null ? loadingCityObj.city.toUpperCase()+', '+loadingCityObj.country.toUpperCase() : "";
+        if (postalCode !== "") {
+            loadingCity = loadingCityObj.city.toUpperCase()+', '+postalCode+', '+loadingCityObj.country.toUpperCase();
+        }
+
         var destinationPort = deliveryPort !== null ? deliveryPort.portName+', '+deliveryPort.country.toUpperCase() : "";
         
         const variables = { loadingCity, destinationPort, emptyPickupDepot };
@@ -218,8 +223,14 @@ function RequestPriceHaulage(props: any) {
     }
 
     useEffect(() => {
+        var postalCode = loadingCityObj !== null ? loadingCityObj.postalCode !== undefined ? loadingCityObj.postalCode : "" : ""; 
+        var loadingCity = loadingCityObj !== null ? loadingCityObj.city.toUpperCase()+', '+loadingCityObj.country.toUpperCase() : "";
+        if (postalCode !== "") {
+            loadingCity = loadingCityObj.city.toUpperCase()+', '+postalCode+', '+loadingCityObj.country.toUpperCase();
+        }
+        
         if (loadingCityObj !== null) {
-            setSubject(loadingCityObj.city.toUpperCase()+","+loadingCityObj.country.toUpperCase()+" / RATE REQUEST HAULAGE");
+            setSubject(loadingCity+" / RATE REQUEST HAULAGE");
         }
         else {
             setSubject("");
@@ -231,7 +242,12 @@ function RequestPriceHaulage(props: any) {
     }, [selectedTemplate]);
 
     useEffect(() => {
+        var postalCode = loadingCityObj !== null ? loadingCityObj.postalCode !== undefined ? loadingCityObj.postalCode : "" : ""; 
         var loadingCity = loadingCityObj !== null ? loadingCityObj.city.toUpperCase()+', '+loadingCityObj.country.toUpperCase() : "";
+        if (postalCode !== "") {
+            loadingCity = loadingCityObj.city.toUpperCase()+', '+postalCode+', '+loadingCityObj.country.toUpperCase();
+        }
+
         var destinationPort = deliveryPort !== null ? deliveryPort.portName+', '+deliveryPort.country : "";
         
         const variables = { loadingCity, destinationPort, emptyPickupDepot };

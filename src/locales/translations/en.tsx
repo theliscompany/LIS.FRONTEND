@@ -315,7 +315,7 @@ export const en = {
   haulages: "Haulages",
   listHaulages: "List of haulages prices",
   emptyPickupDepot: "Empty pickup depot",
-  unitTariff2: "Unit tariff",
+  unitTariff2: "Haulage tariff",
   freeTime2: "Free time at loading place (in hours)",
   miscellaneous: "Miscellaneous",
   labelEnAttente: "Waiting",

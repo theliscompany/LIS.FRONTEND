@@ -24,6 +24,7 @@ import RequestPriceRequest from '../components/editRequestPage/RequestPriceReque
 import { FileCopy, Mail } from '@mui/icons-material';
 import NewContact from '../components/editRequestPage/NewContact';
 import ServicesTable from '../components/seafreightPage/ServicesTable';
+import { transformArray, reverseTransformArray, flattenData, flattenData2 } from '../utils/functions';
 
 function createGetRequestUrl(variable1: number, variable2: number, variable3: number) {
     let url = protectedResources.apiLisPricing.endPoint+"/SeaFreight/GetSeaFreights?";
@@ -307,16 +308,6 @@ function Seafreights() {
         }
     }
     
-    const flattenData = (data: any) => {
-        return data.map((item: any) => ({
-            id: item.seaFreightServiceId, // DataGrid requires a unique 'id' for each row
-            serviceName: item.service.serviceName,
-            serviceId: item.service.serviceId,
-            price: item.service.price,
-            container: item.containers.map((container: any) => container.packageName).join(', '), // Join container names if multiple
-        }));
-    }
-
     const deflattenData = (flattenedData: any) => {
         return flattenedData.map((item: any) => ({
             seaFreightServiceId: item.id,
@@ -329,16 +320,6 @@ function Seafreights() {
             containers: [containerTypes]
         }));
     };
-
-    const flattenData2 = (data: any) => {
-        return data.map((item: any, index: number) => ({
-            id: 'item.miscellaneousServiceId'+index, // DataGrid requires a unique 'id' for each row
-            serviceName: item.serviceName,
-            serviceId: item.serviceId,
-            price: item.price,
-            container: item.containers.map((container: any) => container.packageName).join(', '), // Join container names if multiple
-        }));
-    }
 
     const deflattenData2 = (flattenedData: any) => {
         return flattenedData.map((item: any) => ({
@@ -499,26 +480,6 @@ function Seafreights() {
                 enqueueSnackbar(t('rowDeletedError'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
             }
         }
-    }
-
-    function transformArray(arr: any) {
-        return arr.map((item: any) => ({
-            container: item.containers[0],
-            services: [{
-                serviceId: item.service.serviceId,
-                serviceName: item.service.serviceName,
-                price: item.service.price
-            }]
-        }));
-    }
-
-    function reverseTransformArray(arr: any) {
-        return arr.map((item: any) => ({
-            serviceId: item.services[0].serviceId,
-            serviceName: item.services[0].serviceName,
-            price: item.services[0].price,
-            containers: [item.container]
-        }));
     }
 
     const getMiscellaneouses = async (carrier1: any, portLoading1: any, portDischarge1: any, validUntil1: any, container: any, isCopy: boolean) => {

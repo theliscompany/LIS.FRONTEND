@@ -534,18 +534,6 @@ function Layout(props: {children?: React.ReactNode}) {
                             </ListItem>
                             <Collapse in={openPrices} timeout="auto" unmountOnExit>
                                 <List component="div" disablePadding>
-                                    <NavLink to="/admin/seafreights" className={({ isActive }) => isActive ? "cs-navlink-active" : "cs-navlink"}>
-                                        <ListItem className="cs-listitem" key={"Seafreights"} disablePadding disableGutters sx={{ pl: 2 }}>
-                                        <DarkTooltip title={t('seafreights')} placement="right" arrow>
-                                            <ListItemButton className="cs-listitembutton">
-                                                <ListItemIcon className="cs-listitemicon">
-                                                    <DirectionsBoatIcon fontSize="small" />
-                                                </ListItemIcon>
-                                                <ListItemText primary={t('seafreights')} primaryTypographyProps={{ fontSize: 14 }} />
-                                            </ListItemButton>
-                                        </DarkTooltip>
-                                        </ListItem>
-                                    </NavLink>
                                     <NavLink to="/admin/haulages" className={({ isActive }) => isActive ? "cs-navlink-active" : "cs-navlink"}>
                                         <ListItem className="cs-listitem" key={"Haulages"} disablePadding disableGutters sx={{ pl: 2 }}>
                                         <DarkTooltip title={t('haulages')} placement="right" arrow>
@@ -554,6 +542,18 @@ function Layout(props: {children?: React.ReactNode}) {
                                                     <LocalShippingIcon fontSize="small" />
                                                 </ListItemIcon>
                                                 <ListItemText primary={t('haulages')} primaryTypographyProps={{ fontSize: 14 }} />
+                                            </ListItemButton>
+                                        </DarkTooltip>
+                                        </ListItem>
+                                    </NavLink>
+                                    <NavLink to="/admin/seafreights" className={({ isActive }) => isActive ? "cs-navlink-active" : "cs-navlink"}>
+                                        <ListItem className="cs-listitem" key={"Seafreights"} disablePadding disableGutters sx={{ pl: 2 }}>
+                                        <DarkTooltip title={t('seafreights')} placement="right" arrow>
+                                            <ListItemButton className="cs-listitembutton">
+                                                <ListItemIcon className="cs-listitemicon">
+                                                    <DirectionsBoatIcon fontSize="small" />
+                                                </ListItemIcon>
+                                                <ListItemText primary={t('seafreights')} primaryTypographyProps={{ fontSize: 14 }} />
                                             </ListItemButton>
                                         </DarkTooltip>
                                         </ListItem>
