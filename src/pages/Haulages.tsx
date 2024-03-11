@@ -23,6 +23,8 @@ import AutocompleteSearch from '../components/shared/AutocompleteSearch';
 import RequestPriceHaulage from '../components/editRequestPage/RequestPriceHaulage';
 import { Mail } from '@mui/icons-material';
 import NewContact from '../components/editRequestPage/NewContact';
+import { extractCityAndPostalCode, flattenData2, hashCode, parseLocation, parseLocation2, reverseTransformArray, transformArray } from '../utils/functions';
+import ServicesTable from '../components/seafreightPage/ServicesTable';
 
 function createGetRequestUrl(variable1: number, variable2: number, variable3: string) {
     let url = protectedResources.apiLisPricing.endPoint+"/Haulage/Haulages?";
@@ -48,6 +50,7 @@ function createGetRequestUrl(variable1: number, variable2: number, variable3: st
 function Haulages() {
     const [load, setLoad] = useState<boolean>(true);
     const [loadEdit, setLoadEdit] = useState<boolean>(false);
+    const [loadMiscs, setLoadMiscs] = useState<boolean>(false);
     const [modal, setModal] = useState<boolean>(false);
     const [modal2, setModal2] = useState<boolean>(false);
     const [modal5, setModal5] = useState<boolean>(false);
@@ -80,6 +83,11 @@ function Haulages() {
 
     const [tempToken, setTempToken] = useState<string>("");
     
+    const [servicesData2, setServicesData2] = useState<any>([]);
+    const [miscellaneousId, setMiscellaneousId] = useState<string>("");
+    const [allServices, setAllServices] = useState<any>(null);
+    const [services, setServices] = useState<any>(null);
+
     const { t } = useTranslation();
     
     const { instance, accounts } = useMsal();
@@ -134,7 +142,7 @@ function Haulages() {
         { field: 'xxx', headerName: t('Actions'), renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box sx={{ my: 1, mr: 1 }}>
-                    <IconButton size="small" title={t('editRowHaulage')} sx={{ mr: 0.5 }} onClick={() => { setCurrentEditId(params.row.id); getHaulage(params.row.id); setModal2(true); }}>
+                    <IconButton size="small" title={t('editRowHaulage')} sx={{ mr: 0.5 }} onClick={() => { setCurrentEditId(params.row.id); setContainerTypes(null); resetForm(); getHaulage(params.row.id); setModal2(true); }}>
                         <EditIcon fontSize="small" />
                     </IconButton>
                     <IconButton size="small" title={t('deleteRowHaulage')} onClick={() => { setCurrentId(params.row.id); setModal(true); }}>
@@ -149,9 +157,22 @@ function Haulages() {
         getClients();
         getPorts();
         getHaulages();
-        getContainers();
+        getProtectedData();
     }, []);
     
+    const deflattenData2 = (flattenedData: any) => {
+        return flattenedData.map((item: any) => ({
+            miscellaneousServiceId: item.id,
+            service: {
+                serviceId: item.serviceId, // Original structure did not include this in the flattened data
+                serviceName: item.serviceName,
+                price: item.price,
+                containers: item.containers // Assuming this was not included in the flattened version
+            },
+            containers: containerTypes
+        }));
+    };
+
     const getClients = async () => {
         if (context && account) {
             const token = await instance.acquireTokenSilent({
@@ -174,7 +195,7 @@ function Haulages() {
             try {
                 const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisClient.endPoint+"/Contact/GetContacts", token);
                 if (response !== null && response !== undefined) {
-                    console.log(response);
+                    // console.log(response);
                     // Removing duplicates from client array
                     setClients(response.filter((obj: any, index: number, self: any) => index === self.findIndex((o: any) => o.contactName === obj.contactName)));
                 }
@@ -194,7 +215,7 @@ function Haulages() {
         }
     }
     
-    const getContainers = async () => {
+    const getProtectedData = async () => {
         if (context && account) {
             const token = await instance.acquireTokenSilent({
                 scopes: transportRequest.scopes,
@@ -213,6 +234,23 @@ function Haulages() {
                 }
             );
             
+            getServices(token);
+            getContainers(token);
+        }
+    }
+    
+    const getServices = async (token: string) => {
+        if (context) {
+            const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Service/Services", token);
+            if (response !== null && response !== undefined) {
+                setAllServices(response);
+                setServices(response.filter((obj: any) => obj.servicesTypeId.includes(2))); // Filter the services for haulages (HAULAGE = 1)
+            }  
+        }
+    }
+    
+    const getContainers = async (token: string) => {
+        if (context) {
             const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Package/Containers", token);
             if (response !== null && response !== undefined) {
                 setContainers(response);
@@ -264,6 +302,8 @@ function Haulages() {
         setEmptyPickupDepot("");
         setComment("");
         setContainerTypes([]);
+        setServicesData2([]);
+        setMiscellaneousId("");
     }
     
     const getHaulage = async (id: string) => {
@@ -271,9 +311,14 @@ function Haulages() {
         if (context && account) {
             const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisPricing.endPoint+"/Haulage/Haulage?offerId="+id, tempToken);
             if (response !== null && response !== undefined) {
-                setHaulier({contactId: response.haulierId, contactName: response.haulierName});
-                setLoadingCity({city: response.loadingCity});
-                setLoadingPort(ports.find((elm: any) => elm.portId === response.loadingPortId));
+                var auxHaulier = {contactId: response.haulierId, contactName: response.haulierName};
+                var auxValidUntil = dayjs(response.validUntil);
+                var auxCity = parseLocation2(response.loadingCity);
+                var auxPort = ports.find((elm: any) => elm.portId === response.loadingPortId);
+
+                setHaulier(auxHaulier);
+                setLoadingCity(auxCity);
+                setLoadingPort(auxPort);
                 setCurrency(response.currency);
                 setValidUntil(dayjs(response.validUntil));
                 setFreeTime(response.freeTime);
@@ -285,11 +330,14 @@ function Haulages() {
                 setComment(response.comment);
                 setContainerTypes(response.containers);
                 setLoadEdit(false);
+
+                // Now i get the miscs
+                getMiscellaneouses(auxHaulier, auxCity, auxPort, auxValidUntil, response.containers[0], false);
             }
             else {
                 setLoadEdit(false);
             }
-            console.log(response);
+            // console.log(response);
         }
     }
     
@@ -305,7 +353,7 @@ function Haulages() {
             else {
                 setLoad(false);
             }
-            console.log(response);
+            // console.log(response);
         }
     }
 
@@ -313,13 +361,25 @@ function Haulages() {
         if (haulier !== null && loadingCity !== null && loadingPort !== null && freeTime > 0 && unitTariff > 0 && overtimeTariff > 0 && multiStop > 0 && validUntil !== null && containerTypes.length > 0) {
             if (context && account) {
                 var dataSent = null;
+                
+                var postalCode = loadingCity !== null ? loadingCity.postalCode !== undefined ? loadingCity.postalCode : "" : ""; 
+                var city = loadingCity !== null ? loadingCity.city.toUpperCase()+', '+loadingCity.country.toUpperCase() : "";
+                if (postalCode !== "") {
+                    if (postalCode === null) {
+                        city = loadingCity.city.toUpperCase()+', '+loadingCity.country.toUpperCase();
+                    }
+                    else {
+                        city = loadingCity.city.toUpperCase()+', '+loadingCity.country.toUpperCase()+', '+postalCode;
+                    }
+                }
+
                 if (currentEditId !== "") {
                     dataSent = {
                         "offerId": currentEditId,
                         "haulierId": haulier.contactId,
                         "haulierName": haulier.contactName,
                         "currency": currency,
-                        "loadingCity": loadingCity.city.toUpperCase(),
+                        "loadingCity": city,
                         "loadingPortId": loadingPort.portId,
                         "loadingPort": loadingPort.portName,
                         "freeTime": freeTime,
@@ -340,7 +400,7 @@ function Haulages() {
                         "haulierId": haulier.contactId,
                         "haulierName": haulier.contactName,
                         "currency": currency,
-                        "loadingCity": loadingCity.city.toUpperCase(),
+                        "loadingCity": city,
                         "loadingPortId": loadingPort.portId,
                         "loadingPort": loadingPort.portName,
                         "freeTime": freeTime,
@@ -386,6 +446,134 @@ function Haulages() {
         }
     }
     
+    const getMiscellaneouses = async (carrier1: any, auxCity: any, auxPort: any, validUntil1: any, container: any, isCopy: boolean) => {
+        if (context && account) {
+            setLoadMiscs(true);
+            
+            var token = null;
+            if (tempToken === "") {
+                token = await instance.acquireTokenSilent({
+                    scopes: pricingRequest.scopes,
+                    account: account
+                }).then((response:AuthenticationResult)=>{
+                    return response.accessToken;
+                }).catch(() => {
+                    return instance.acquireTokenPopup({
+                        ...pricingRequest,
+                        account: account
+                        }).then((response) => {
+                            return response.accessToken;
+                    });
+                });
+                setTempToken(token);    
+            }
+
+            if (carrier1 !== null) {
+                var postalCode = auxCity !== null ? auxCity.postalCode !== undefined ? auxCity.postalCode : "" : ""; 
+                var city = "";
+                if (postalCode !== "") {
+                    if (postalCode === null) {
+                        city = auxCity.city;
+                    }
+                    else {
+                        city = auxCity.city+' '+postalCode;
+                    }
+                }
+                
+                // const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisPricing.endPoint+"/Miscellaneous/Miscellaneous?SupplierId="+carrier1.contactId+"&withShipment=false", token !== null ? token : tempToken);
+                const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisPricing.endPoint+"/Miscellaneous/Miscellaneous?SupplierId="+carrier1.contactId+"&departurePortId="+Number(hashCode(city))+"&destinationPortId="+auxPort.portId+"&withShipment=true", token !== null ? token : tempToken);
+                if (response !== null && response !== undefined && response.length !== 0) {
+                    // Here i check if the result is good
+                    var selectedElement = response[0].suppliers[0];
+                    if (response.length !== 0 && selectedElement !== undefined) {
+                        setLoadMiscs(false);
+                        
+                        // Dont update the miscellaneousId is it's a new price
+                        if (!isCopy) {
+                            setMiscellaneousId(selectedElement.miscellaneousId);
+                        }
+                        
+                        setServicesData2(flattenData2(reverseTransformArray(selectedElement.containers)));
+                    }
+                    else {
+                        setLoadMiscs(false);
+                    }
+                }
+                else {
+                    setLoadMiscs(false);
+                }
+            }
+        }
+        else {
+            setLoadMiscs(false)
+        }
+    }
+    
+    const createMiscellaneous = async () => {
+        if (validUntil !== null && haulier !== null) {
+            if (context) {
+                var postalCode = loadingCity !== null ? loadingCity.postalCode !== undefined ? loadingCity.postalCode : "" : ""; 
+                var city = loadingCity !== null ? loadingCity.city.toUpperCase()+', '+loadingCity.country.toUpperCase() : "";
+                if (postalCode !== "") {
+                    if (postalCode === null) {
+                        city = loadingCity.city;
+                    }
+                    else {
+                        city = loadingCity.city+' '+postalCode;
+                    }
+                }
+                
+                var dataSent = null;
+                if (miscellaneousId !== "" && miscellaneousId !== undefined) {
+                    dataSent = {
+                        "miscellaneousId": miscellaneousId,
+                        "id": miscellaneousId,
+                        "departurePortId": hashCode(city),
+                        "destinationPortId": loadingPort.portId,
+                        "departurePortName": city,
+                        "destinationPortName": loadingPort.portName,
+                        "supplierId": haulier.contactId,
+                        "supplierName": haulier.contactName,
+                        "currency": currency,
+                        "validUntil": validUntil?.toISOString(),
+                        "comment": "with haulage",
+                        "containers": transformArray(deflattenData2(servicesData2)),
+                        "services": deflattenData2(servicesData2),
+                        "updated": (new Date()).toISOString()
+                    };
+                }
+                else {
+                    dataSent = {
+                        // "miscellaneousId": currentEditId,
+                        "departurePortId": hashCode(city),
+                        "destinationPortId": loadingPort.portId,
+                        "departurePortName": city,
+                        "destinationPortName": loadingPort.portName,
+                        "supplierId": haulier.contactId,
+                        "supplierName": haulier.contactName,
+                        "currency": currency,
+                        "validUntil": validUntil?.toISOString(),
+                        "comment": "with haulage",
+                        "containers": transformArray(deflattenData2(servicesData2)),
+                        "services": deflattenData2(servicesData2),
+                        "updated": (new Date()).toISOString()
+                    };
+                }
+                console.log(dataSent);
+                const response = await (context as BackendService<any>).postWithToken(protectedResources.apiLisPricing.endPoint+"/Miscellaneous/Miscellaneous", dataSent, tempToken);
+                if (response !== null && response !== undefined) {
+                    setModal2(false);
+                }
+                else {
+                    enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                }
+            }
+        }
+        // else {
+        //     enqueueSnackbar(t('fieldsEmptySeafreight'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+        // }
+    }
+
     return (
         <div style={{ background: "#fff", borderTopLeftRadius: 20, borderTopRightRadius: 20 }}>
             <SnackbarProvider />
@@ -403,7 +591,7 @@ function Haulages() {
                     </Grid>
                     <Grid item xs={12} md={4} mt={1}>
                         <InputLabel htmlFor="company-name" sx={inputLabelStyles}>{t('haulier')}</InputLabel>
-                        <CompanySearch id="company-name" value={searchedHaulier} onChange={setSearchedHaulier} category={CategoryEnum.CUSTOMERS} callBack={() => console.log(searchedHaulier)} fullWidth />
+                        <CompanySearch id="company-name" value={searchedHaulier} onChange={setSearchedHaulier} category={CategoryEnum.CUSTOMERS} fullWidth />
                     </Grid>
                     <Grid item xs={12} md={3} mt={1}>
                         <InputLabel htmlFor="loading-city-searched" sx={inputLabelStyles}>{t('loadingCity')}</InputLabel>
@@ -464,7 +652,7 @@ function Haulages() {
                                             return (
                                                 <Accordion key={"seaf"+i} sx={{ border: 1, borderColor: "#e5e5e5" }}>
                                                     <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="panel1a-content" id="panel1a-header">
-                                                        <Chip variant="outlined" label={item.loadingCity} sx={{ mr: 1 }} />
+                                                        <Chip variant="outlined" label={extractCityAndPostalCode(item.loadingCity)} sx={{ mr: 1 }} />
                                                         <Chip variant="outlined" label={item.loadingPort} />
                                                         {/* <Typography>{t('from')} {item.departurePortName} {t('to')} {item.destinationPortName}</Typography> */}
                                                     </AccordionSummary>
@@ -519,11 +707,14 @@ function Haulages() {
                     {
                         loadEdit === false ?
                         <Grid container spacing={2}>
+                            <Grid item xs={12} md={12}>
+                                <Typography sx={{ fontSize: 18, mb: 1 }}><b>Haulage price information</b></Typography>
+                            </Grid>
                             <Grid item xs={12} md={8}>
                                 <Grid container spacing={2}>
                                     <Grid item xs={12} md={6} mt={0.25}>
                                         <InputLabel htmlFor="haulier" sx={inputLabelStyles}>{t('haulier')}</InputLabel>
-                                        <CompanySearch id="haulier" value={haulier} onChange={setHaulier} category={CategoryEnum.SUPPLIERS} callBack={() => console.log(haulier)} fullWidth />
+                                        <CompanySearch id="haulier" value={haulier} onChange={setHaulier} category={CategoryEnum.SUPPLIERS} fullWidth />
                                     </Grid>
                                     <Grid item xs={12} md={6} mt={0.25}>
                                         <InputLabel htmlFor="loading-city" sx={inputLabelStyles}>{t('loadingCity')}</InputLabel>
@@ -617,6 +808,7 @@ function Haulages() {
                                     containers !== null ? 
                                     <Autocomplete
                                         multiple
+                                        disableCloseOnSelect
                                         id="container-types"
                                         options={containers}
                                         getOptionLabel={(option: any) => option.packageName}
@@ -645,11 +837,38 @@ function Haulages() {
                                 <InputLabel htmlFor="multiStop" sx={inputLabelStyles}>{t('multiStop')}</InputLabel>
                                 <BootstrapInput id="multiStop" type="number" value={multiStop} onChange={(e: any) => setMultiStop(e.target.value)} fullWidth />
                             </Grid>
+
+                            <Grid item xs={12}>
+                                <Typography sx={{ fontSize: 18, mb: 1 }}><b>{t('listServices')} - {t('miscellaneous')}</b></Typography>
+                                {
+                                    allServices !== null && allServices !== undefined && allServices.length !== 0 ?
+                                    !loadMiscs ? 
+                                    <ServicesTable 
+                                        services={servicesData2} 
+                                        setServices={setServicesData2}
+                                        allServices={allServices}
+                                        type="Miscellaneous"
+                                        container={containerTypes}
+                                        currency={currency}
+                                        servicesOptions={allServices.filter((obj: any) => obj.servicesTypeId.includes(2)).map((elm: any) => elm.serviceName)} // 2 for HAULAGE
+                                    /> : <Skeleton />
+                                    : null
+                                }
+                            </Grid>
                         </Grid> : <Skeleton />
                     }
                 </DialogContent>
                 <DialogActions>
-                    <Button variant="contained" color={"primary"} onClick={() => { createUpdateHaulage(); }} sx={{ mr: 1.5, textTransform: "none" }}>{t('validate')}</Button>
+                    <Button 
+                        variant="contained" color={"primary"} 
+                        onClick={() => { 
+                            createUpdateHaulage(); 
+                            createMiscellaneous();
+                        }} 
+                        sx={{ mr: 1.5, textTransform: "none" }}
+                    >
+                        {t('validate')}
+                    </Button>
                     <Button variant="contained" onClick={() => setModal2(false)} sx={buttonCloseStyles}>{t('close')}</Button>
                 </DialogActions>
             </BootstrapDialog>

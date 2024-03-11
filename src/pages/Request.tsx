@@ -51,7 +51,7 @@ import RequestAskInformation from '../components/editRequestPage/RequestAskInfor
 import RequestChangeStatus from '../components/editRequestPage/RequestChangeStatus';
 // import { MailData } from '../utils/models/models';
 // import { MuiFileInput } from 'mui-file-input';
-import { calculateDistance, findClosestSeaPort, generateRandomNumber, sortByCloseness } from '../utils/functions';
+import { calculateTotal, checkCarrierConsistency, checkDifferentDefaultContainer, displayContainers, findClosestSeaPort, generateRandomNumber, getServices, getServicesTotal, getServicesTotal2, hashCode, parseContact, parseLocation, removeDuplicatesWithLatestUpdated, similar, sortByCloseness } from '../utils/functions';
 import RequestPriceRequest from '../components/editRequestPage/RequestPriceRequest';
 import RequestPriceHaulage from '../components/editRequestPage/RequestPriceHaulage';
 import NewContact from '../components/editRequestPage/NewContact';
@@ -100,45 +100,6 @@ function createGetRequestUrl2(url: string, variable1: string, variable2: string,
     return url;
 }
 
-function parseLocation(inputString: string) {
-    const parts = inputString.split(', ');
-    
-    const city = parts[0];
-    const country = parts[1];
-    const latitude = parseFloat(parts[2]);
-    const longitude = parseFloat(parts[3]);
-    const postalCode = parts[4] || null; 
-    
-    const locationObject = {
-        city: city,
-        country: country,
-        latitude: latitude,
-        longitude: longitude,
-        postalCode: postalCode
-    };
-    
-    return locationObject;
-}
-
-function parseContact(inputString: string) {
-    const parts = inputString.split(', ');
-    
-    const number = parts[0];
-    const name = parts[1];
-    
-    const contactObject = {
-        contactNumber: number,
-        contactName: name,
-    };
-    
-    return contactObject;
-}
-
-function displayContainers(value: any) {
-    var aux = value.map((elm: any) => '<li>'+elm.quantity+"x"+elm.container+'</li>').join('');
-    return '<ul>'+aux+'</ul>';
-}
-
 const defaultTemplate = "65b74024891f9de80722fc6d";
 
 function Request() {
@@ -146,6 +107,7 @@ function Request() {
     const [loadAssignees, setLoadAssignees] = useState<boolean>(true);
     const [loadResults, setLoadResults] = useState<boolean>(false);
     const [loadGeneralMiscs, setLoadGeneralMiscs] = useState<boolean>(false);
+    const [loadMiscsHaulage, setLoadMiscsHaulage] = useState<boolean>(false);
     const [email, setEmail] = useState<string>("");
     const [status, setStatus] = useState<string | null>(null);
     const [trackingNumber, setTrackingNumber] = useState<string>("");
@@ -188,7 +150,6 @@ function Request() {
     const [packageQuantity, setPackageQuantity] = useState<number>(1);
     const [packagesSelection, setPackagesSelection] = useState<any>([]);
     
-    const [containersSelected, setContainersSelected] = useState<string[]>([]);
     const [portDestination, setPortDestination] = useState<any>(null);
     const [portDeparture, setPortDeparture] = useState<any>(null);
     const [loadingCity, setLoadingCity] = useState<any>(null);
@@ -210,6 +171,7 @@ function Request() {
     const [myHaulages, setMyHaulages] = useState<any>([]);
     const [mySeafreights, setMySeafreights] = useState<any>([]);
     const [myMiscs, setMyMiscs] = useState<any>([]);
+    const [miscsHaulage, setMiscsHaulage] = useState<any>([]);
     
     const [tempToken, setTempToken] = useState<string>("");
     
@@ -239,7 +201,7 @@ function Request() {
 
     const { t } = useTranslation();
     
-    const steps = [t('searchHaulage'), t('selectHaulage'), t('searchSeafreight'), t('selectSeafreight'), t('selectMisc'), t('sendOffer')];
+    const steps = [t('selectHaulage'), t('selectSeafreight'), t('selectMisc'), t('sendOffer')];
     const haulageTypeOptions = [
         { value: "On trailer, direct loading", label: t('haulageType1') },
         { value: "On trailer, Loading with Interval", label: t('haulageType2') },
@@ -247,77 +209,6 @@ function Request() {
         { value: "Side loader, Loading with Interval, from trailer to floor", label: t('haulageType4') },
         { value: "Side loader, Loading with Interval, from floor to trailer", label: t('haulageType5') }
     ];
-    
-    function calculateTotal(data: any) {
-        // Initialize total price and package name
-        let total = 0;
-        let packageName;
-    
-        // Loop through the data
-        for(let i = 0; i < data.length; i++) {
-            // If packageName is not set, set it to the first one
-            if(!packageName) {
-                packageName = data[i].container.packageName !== null ? data[i].container.packageName : "Général";
-            }
-    
-            // Loop through the services in the current data object
-            for(let j = 0; j < data[i].services.length; j++) {
-                // Add the price of the service to the total
-                total += data[i].services[j].price;
-            }
-        }
-    
-        // Return the package name and total price in the desired format
-        return packageName + ' : ' + total;
-    }
-
-    function getServicesTotal(data: any, currency: string) {
-        let services = [];
-    
-        // Loop through the data
-        for(let i = 0; i < data.length; i++) {
-            // Loop through the services in the current data object
-            for(let j = 0; j < data[i].services.length; j++) {
-                let service = data[i].services[j];
-                services.push(`${service.serviceName} : ${service.price} ${currency}`);
-            }
-        }
-    
-        // Return the services and their total price in the desired format
-        return services.join('; ');
-    }
-
-    function getServicesTotal2(data: any, currency: string, quantity: number) {
-        let services = [];
-    
-        // Loop through the data
-        for(let i = 0; i < data.length; i++) {
-            // Loop through the services in the current data object
-            for(let j = 0; j < data[i].services.length; j++) {
-                let service = data[i].services[j];
-                services.push(`${service.serviceName} : ${quantity}x${service.price} ${currency}`);
-            }
-        }
-    
-        // Return the services and their total price in the desired format
-        return services.join('; ');
-    }
-    
-    function getServices(data: any, currency: string) {
-        let services = [];
-    
-        // Loop through the data
-        for(let i = 0; i < data.length; i++) {
-            // Loop through the services in the current data object
-            for(let j = 0; j < data[i].services.length; j++) {
-                let service = data[i].services[j];
-                services.push(`${service.serviceName}`);
-            }
-        }
-    
-        // Return the services and their total price in the desired format
-        return services.join('; ');
-    }
     
     const columnsSeafreights: GridColDef[] = [
         { field: 'carrierName', headerName: t('carrier'), flex: 1.25 },
@@ -453,12 +344,6 @@ function Request() {
         return `${packageName} : ${totalPrice}`;
     }
 
-    function formatObject2(obj: any) {
-        const packageName = obj.containers[0].packageName;
-        const totalPrice = obj.service.price;
-        return `${packageName} : ${totalPrice}`;
-    }
-
     function formatServices(obj: any, currency: string, targetPackageName: string, qty: number) {
         if (obj.container.packageName === targetPackageName) {
             const servicesList = obj.services.map((service: any, index: number) => (
@@ -511,7 +396,7 @@ function Request() {
     const [skipped, setSkipped] = React.useState(new Set<number>());
 
     const isStepOptional = (step: number) => {
-        return step === 0 || step === 1;
+        return step === 0;
         // return false;
     };
 
@@ -526,26 +411,14 @@ function Request() {
             newSkipped.delete(activeStep);
         }
         if (activeStep === 0) {
-            if (containersSelection.map((elm: any) => elm.container).length !== 0 && portDestination !== null) {
-                setContainersSelected(containersSelection.map((elm: any) => elm.id));
-                if (selectedHaulage === null) {
-                    if (loadingCity !== null) {
-                        setLoadResults(true);
-                        getHaulagePriceOffers();
-                        setActiveStep((prevActiveStep) => prevActiveStep + 1);
-                    }
-                    else {
-                        enqueueSnackbar(t('msgValidateHaulageStep'), { variant: "warning", anchorOrigin: { horizontal: "right", vertical: "top"} });
-                    }
-                }
-            }
-            else {
-                enqueueSnackbar(t('msgValidateStartStep'), { variant: "warning", anchorOrigin: { horizontal: "right", vertical: "top"} });
-            }
-        }
-        if (activeStep === 1) {
             if (selectedHaulage !== null) {
                 setPortDeparture(ports1.find((elm: any) => elm.portName === selectedHaulage.loadingPort));
+                
+                if (selectedSeafreight === null) {
+                    setLoadResults(true);
+                    getSeaFreightPriceOffers();
+                }
+                
                 setActiveStep((prevActiveStep) => prevActiveStep + 1);
                 setSkipped(newSkipped);
             }
@@ -553,62 +426,50 @@ function Request() {
                 enqueueSnackbar(t('youNeedSelectHaulage'), { variant: "warning", anchorOrigin: { horizontal: "right", vertical: "top"} });
             }
         }
-        if (activeStep === 2) {
-            if (selectedSeafreight === null) {
-                setLoadResults(true);
-                getSeaFreightPriceOffers();
+        if (activeStep === 1) {
+            // Check if seafreights have the same carrier
+            var seafreightSelected = seafreights.filter((elm: any) => rowSelectionModel.includes(elm.seaFreightId));
+            if (checkCarrierConsistency(seafreightSelected) || (!checkCarrierConsistency(seafreightSelected) && window.confirm("All the selected offers must be related to the same carrier, do you want to continue?"))) {
+                if (selectedSeafreight !== null) {
+                    if (selectedMisc === null) {
+                        setLoadResults(true);
+                        getMiscellaneousPriceOffers();
+                    }
+                    if (selectedHaulage !== null) {
+                        setLoadMiscsHaulage(true);
+                        getHaulageMiscellaneousPriceOffers();
+                    }
+                    setLoadGeneralMiscs(true);
+                    getGeneralMiscellaneousPriceOffers();
+                    
+                    setActiveStep((prevActiveStep) => prevActiveStep + 1);
+                    setSkipped(newSkipped);
+                }
+                else {
+                    enqueueSnackbar(t('youNeedSelectSeafreight'), { variant: "warning", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                }
             }
+        }
+        if (activeStep === 2) {
             setActiveStep((prevActiveStep) => prevActiveStep + 1);
             setSkipped(newSkipped);
         }
         if (activeStep === 3) {
-            if (selectedSeafreight !== null) {
-                if (selectedMisc === null) {
-                    setLoadResults(true);
-                    getMiscellaneousPriceOffers();
-                }
-                
-                setActiveStep((prevActiveStep) => prevActiveStep + 1);
-                setSkipped(newSkipped);
-            }
-            else {
-                enqueueSnackbar(t('youNeedSelectSeafreight'), { variant: "warning", anchorOrigin: { horizontal: "right", vertical: "top"} });
-            }
-        }
-        if (activeStep === 4) {
-            setActiveStep((prevActiveStep) => prevActiveStep + 1);
-            setSkipped(newSkipped);
-        }
-        if (activeStep === 5) {
             createNewOffer();
         }
     };
 
     const handleBack = () => {
-        // if (activeStep === 1) {
-        //     setSelectedHaulage(null);
-        //     // setRowSelectionModel([]);
-        // }
-        // if (activeStep === 3) {
-        //     setSelectedSeafreight(null);
-        //     // setRowSelectionModel2([]);
-        // }
-        // if (activeStep === 4) {
-        //     setSelectedMisc(null);
-        //     // setRowSelectionModel3([]);
-        // }
-        
         setActiveStep((prevActiveStep) => prevActiveStep - 1);
     };
 
     const handleSkip = () => {
         if (!isStepOptional(activeStep)) {
-            // You probably want to guard against something like this,
-            // it should never occur unless someone's actively trying to break something.
             throw new Error("You can't skip a step that isn't optional.");
         }
         if (activeStep === 0) {
-            getHaulagePriceOffers();
+            setLoadResults(true);
+            getSeaFreightPriceOffers();
         }
 
         setActiveStep((prevActiveStep) => prevActiveStep + 1);
@@ -639,7 +500,7 @@ function Request() {
         
         // Calculate miscellaneous prices
         var miscPrices = 0;
-        var allMiscs = [...miscs, ...myMiscs];
+        var allMiscs = [...miscs, ...myMiscs, ...miscsHaulage];
         var miscsSelected = allMiscs.filter((elm: any) => elm.defaultContainer === type);
         for (var i = 0; i < miscsSelected.length; i++) {
             miscPrices =  miscPrices + miscsSelected[i].containers[0].services.reduce((sum: number, service: any) => sum + service.price, 0)*quantity;
@@ -651,13 +512,6 @@ function Request() {
         return Number(finalValue)+Number(addings[index]);
     }
     
-    function similar(str1: string, str2: string) {
-        const cleanStr1 = str1.replace(/[\s-]/g, '').toLowerCase();
-        const cleanStr2 = str2.replace(/[\s-]/g, '').toLowerCase();
-    
-        return cleanStr1 === cleanStr2;
-    }
-       
     function initializeSeaPorts() {
         var auxArray = [];
         for (const [key, value] of Object.entries(seaPorts)) {
@@ -691,19 +545,28 @@ function Request() {
     useEffect(() => {
         getTemplate(defaultTemplate);
         getTemplates();
-
-        // Here i try to get all the clients
         getClients();
-        // Here i initialize the sea ports
-        initializeSeaPorts();
         getContainers();
-        // Get everything essential too (Products, Ports, Request info)
         getAssignees();
+        getPorts();
+        getProducts();
     }, [context]);
     
     useEffect(() => {
         getTemplate(selectedTemplate);
     }, [selectedTemplate]);
+
+    useEffect(() => {
+        if (ports !== null && products !== null) {
+            loadRequest(ports, products);
+        }
+    }, [ports, products]);
+
+    useEffect(() => {
+        if (loadingCity !== null) {
+            getHaulagePriceOffers();
+        }
+    }, [loadingCity]);
 
     
     const getAssignees = async () => {
@@ -716,7 +579,7 @@ function Request() {
                     setLoadAssignees(false);
 
                     // Now i can load the ports (who loads the request later)
-                    getPorts();
+                    // getPorts();
                 }
                 else {
                     setLoadAssignees(false);
@@ -730,7 +593,7 @@ function Request() {
     
     const loadRequest = async (allPorts: any, allProducts: any) => {
         if (context) {
-            setLoad(true);
+            // setLoad(true);
             const response = await (context as BackendService<any>).getSingle(protectedResources.apiLisQuotes.endPoint+"/Request/"+id);
             if (response !== null && response.code !== undefined) {
                 if (response.code === 200) {
@@ -860,19 +723,6 @@ function Request() {
         }
     }
 
-    function removeDuplicatesWithLatestUpdated(data: any) {
-        const latestElements:any = {};
-    
-        for (const item of data) {
-            const key = `${item.haulierName}_${item.loadingPort}`;
-            if (!latestElements[key] || (item.updated && (!latestElements[key].updated || item.updated > latestElements[key].updated))) {
-                latestElements[key] = item;
-            }
-        }
-    
-        return Object.values(latestElements);
-    }
-    
     const getHaulagePriceOffers = async () => {
         if (context && account) {
             const token = await instance.acquireTokenSilent({
@@ -894,9 +744,20 @@ function Request() {
             setTempToken(token);
             
             setLoadResults(true);
+            var postalCode = loadingCity !== null ? loadingCity.postalCode !== undefined ? loadingCity.postalCode : "" : ""; 
+            var city = loadingCity !== null ? loadingCity.city.toUpperCase()+', '+loadingCity.country.toUpperCase() : "";
+            if (postalCode !== "") {
+                if (postalCode === null) {
+                    city = loadingCity.city.toUpperCase()+', '+loadingCity.country.toUpperCase();
+                }
+                else {
+                    city = loadingCity.city.toUpperCase()+', '+loadingCity.country.toUpperCase()+', '+postalCode;
+                }
+            }
+
             // I removed the loadingDate
-            var containersFormatted = (containersSelection.map((elm: any) => elm.id)).join("&ContainerTypesId=");
-            var urlSent = createGetRequestUrl(protectedResources.apiLisPricing.endPoint+"/Pricing/HaulagesOfferRequest?", haulageType, loadingCity.city.toUpperCase(), containersFormatted);
+            var containersFormatted = (containersSelection.map((elm: any) => elm.id)).join("&ContainerTypesId="); 
+            var urlSent = createGetRequestUrl(protectedResources.apiLisPricing.endPoint+"/Pricing/HaulagesOfferRequest?", haulageType, city, containersFormatted);
             const response = await (context as BackendService<any>).getWithToken(urlSent, token);
             setLoadResults(false);
             setHaulages(removeDuplicatesWithLatestUpdated(response));
@@ -929,16 +790,14 @@ function Request() {
             const response = await (context as BackendService<any>).getWithToken(urlSent, token);
             setLoadResults(false);
             
-            setSeafreights(response.map((elm: any) => { return {...elm, defaultContainer: elm.containers[0].container.packageName}}));
-            console.log(response.map((elm: any) => { return {...elm, defaultContainer: elm.containers[0].container.packageName}}));
+            var myContainers = containersSelection.map((elm: any) => elm.container);
+            setSeafreights(response.filter((elm: any) => myContainers.includes(elm.containers[0].container.packageName)).map((elm: any) => { return {...elm, defaultContainer: elm.containers[0].container.packageName}}));
         }
     }
     
     const getMiscellaneousPriceOffers = async () => {
         setLoadResults(true);
         if (context && account) {
-            // var containersFormatted = (containersSelection.map((elm: any) => elm.id)).join("&ContainerTypesId=");
-            // var urlSent = createGetRequestUrl2(protectedResources.apiLisPricing.endPoint+"/Pricing/MiscellaneoussOffersRequest?", portDeparture.portId, portDestination.portId, containersFormatted);
             const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisPricing.endPoint+"/Miscellaneous/Miscellaneous?departurePortId="+portDeparture.portId+"&destinationPortId="+portDestination.portId+"&withShipment=true", tempToken);
             setLoadResults(false);
             
@@ -952,16 +811,37 @@ function Request() {
     const getGeneralMiscellaneousPriceOffers = async () => {
         setLoadGeneralMiscs(true)
         if (context && account) {
-            // var containersFormatted = (containersSelection.map((elm: any) => elm.id)).join("&ContainerTypesId=");
-            // var urlSent = createGetRequestUrl2(protectedResources.apiLisPricing.endPoint+"/Pricing/MiscellaneoussOffersRequest?", portDeparture.portId, portDestination.portId, containersFormatted);
-            const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisPricing.endPoint+"/Miscellaneous/Miscellaneous?withShipment=false", tempToken);
+            var response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisPricing.endPoint+"/Miscellaneous/Miscellaneous?withShipment=false", tempToken);
             setLoadGeneralMiscs(false);
             
             console.log(response);
             var suppliersRecentlySelected = mySeafreights.map((elm: any) => { return {carrierName: elm.carrierName, defaultContainer: elm.defaultContainer} });
+            
             setGeneralMiscs(response.length !== 0 ? 
                 response.filter((elm: any) => new Date(elm.validUntil) > new Date()).filter((elm: any) => suppliersRecentlySelected.some((val: any) => val.defaultContainer === elm.containers[0].container.packageName || elm.containers[0].container.packageName === null))
             : []);
+        }
+    }
+    
+    const getHaulageMiscellaneousPriceOffers = async () => {
+        setLoadMiscsHaulage(true)
+        if (context && account) {
+            var postalCode = loadingCity !== null ? loadingCity.postalCode !== undefined ? loadingCity.postalCode : "" : ""; 
+            var city = "";
+            if (postalCode !== "") {
+                if (postalCode === null) {
+                    city = loadingCity.city;
+                }
+                else {
+                    city = loadingCity.city+' '+postalCode;
+                }
+            }
+            
+            const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisPricing.endPoint+"/Miscellaneous/Miscellaneous?supplierId="+selectedHaulage.haulierId+"&departurePortId="+Number(hashCode(city))+"&destinationPortId="+selectedHaulage.loadingPortId+"&withShipment=true", tempToken);
+            setLoadMiscsHaulage(false);
+            
+            console.log(response);
+            setMiscsHaulage(response.length !== 0 ? response[0].suppliers.filter((elm: any) => new Date(elm.validUntil) > new Date()) : []);
         }
     }
     
@@ -1043,12 +923,12 @@ function Request() {
                 setPorts(addedCoordinatesPorts);
 
                 // Here i can get the products
-                getProducts(addedCoordinatesPorts);
+                // getProducts(addedCoordinatesPorts);
             }  
         }
     }
     
-    const getProducts = async (allPorts: any) => {
+    const getProducts = async () => {
         if (context && account) {
             const token = await instance.acquireTokenSilent({
                 scopes: transportRequest.scopes,
@@ -1072,7 +952,7 @@ function Request() {
                 setProducts(response);
 
                 // Here i can load the request information
-                loadRequest(allPorts, response);
+                // loadRequest(allPorts, response);
             }  
         }
     }
@@ -1258,7 +1138,12 @@ function Request() {
     }
     
     function getDefaultContent(template: any) {
+        var postalCode = departure !== null ? departure.postalCode !== undefined ? departure.postalCode : "" : ""; 
         var loadingCity = departure !== null ? departure.city.toUpperCase()+', '+departure.country.toUpperCase() : "";
+        if (postalCode !== "") {
+            loadingCity = departure.city.toUpperCase()+', '+postalCode+', '+departure.country.toUpperCase();
+        }
+        
         var destinationPort = portDestination !== null ? portDestination.portName+', '+portDestination.country.toUpperCase() : "";
         var commodities:any = tags.map((elm: any) => elm.productName).join(',');
         
@@ -1296,7 +1181,12 @@ function Request() {
     }
 
     useEffect(() => {
+        var postalCode = departure !== null ? departure.postalCode !== undefined ? departure.postalCode : "" : ""; 
         var loadingCity = departure !== null ? departure.city.toUpperCase()+', '+departure.country.toUpperCase() : "";
+        if (postalCode !== "") {
+            loadingCity = departure.city.toUpperCase()+', '+postalCode+', '+departure.country.toUpperCase();
+        }
+        
         var destinationPort = portDestination !== null ? portDestination.portName+', '+portDestination.country.toUpperCase() : "";
         var commodities:any = tags.map((elm: any) => elm.productName).join(',');
         
@@ -1763,7 +1653,7 @@ function Request() {
                                                             <Grid container spacing={2} mt={1} px={2}>
                                                                 <Grid item xs={12} md={6} mt={1}>
                                                                     <InputLabel htmlFor="loading-city" sx={inputLabelStyles}>{t('departure')} / {t('loadingCity')}</InputLabel>
-                                                                    <AutocompleteSearch id="loading-city" value={loadingCity} onChange={setLoadingCity} fullWidth />
+                                                                    <AutocompleteSearch id="loading-city" value={loadingCity} onChange={setLoadingCity} fullWidth callBack={() => { setDeparture(loadingCity); }} />
                                                                 </Grid>
                                                                 <Grid item xs={12} md={6} mt={1}>
                                                                     <InputLabel htmlFor="haulage-type" sx={inputLabelStyles}>{t('haulageType')}</InputLabel>
@@ -1782,11 +1672,6 @@ function Request() {
                                                                         }
                                                                     </NativeSelect>
                                                                 </Grid>
-                                                            </Grid> : null
-                                                        }
-                                                        {
-                                                            activeStep === 1 ?
-                                                            <Grid container spacing={2} mt={1} px={2}>
                                                                 <Grid item xs={12}>
                                                                     {
                                                                         !loadResults ? 
@@ -1879,7 +1764,7 @@ function Request() {
                                                             </Grid> : null
                                                         }
                                                         {
-                                                            activeStep === 2 ? 
+                                                            activeStep === 1 ? 
                                                             <Grid container spacing={2} mt={1} px={2}>
                                                                 <Grid item xs={12} md={6} mt={1}>
                                                                     <InputLabel htmlFor="port-departure" sx={inputLabelStyles}>{t('departurePort')}</InputLabel>
@@ -1940,12 +1825,6 @@ function Request() {
                                                                         /> : <Skeleton />
                                                                     }
                                                                 </Grid>
-                                                            </Grid>
-                                                            : null
-                                                        }
-                                                        {
-                                                            activeStep === 3 ? 
-                                                            <Grid container spacing={2} mt={1} px={2}>
                                                                 <Grid item xs={12}>
                                                                     <Alert severity="info" sx={{ mb: 2 }}>{t('selectOfferMessage')}</Alert>
                                                                     {
@@ -2001,10 +1880,16 @@ function Request() {
                                                                                 }}
                                                                                 onRowSelectionModelChange={(newRowSelectionModel: any) => {
                                                                                     if (newRowSelectionModel.length <= containersSelection.length) {
-                                                                                        setRowSelectionModel(newRowSelectionModel);
-                                                                                        setSelectedSeafreight(newRowSelectionModel.length !== 0 ? seafreights.find((elm: any) => elm.seaFreightId === newRowSelectionModel[0]) : null);
-                                                                                        setMySeafreights(newRowSelectionModel.length !== 0 ? seafreights.filter((elm: any) => newRowSelectionModel.includes(elm.seaFreightId)) : []);
-                                                                                        // setSelectedSeafreight(newRowSelectionModel.length !== 0 ? seafreights.filter((elm: any) => newRowSelectionModel.includes(elm.seaFreightId)) : null);
+                                                                                        var myFreights = newRowSelectionModel.length !== 0 ? seafreights.filter((elm: any) => newRowSelectionModel.includes(elm.seaFreightId)) : [];
+                                                                                        if (checkDifferentDefaultContainer(myFreights)) {
+                                                                                            setRowSelectionModel(newRowSelectionModel);
+                                                                                            setSelectedSeafreight(newRowSelectionModel.length !== 0 ? seafreights.find((elm: any) => elm.seaFreightId === newRowSelectionModel[0]) : null);
+                                                                                            setMySeafreights(myFreights);
+                                                                                            // setSelectedSeafreight(newRowSelectionModel.length !== 0 ? seafreights.filter((elm: any) => newRowSelectionModel.includes(elm.seaFreightId)) : null);
+                                                                                        }
+                                                                                        else {
+                                                                                            enqueueSnackbar("You can only select offers with different container types!", { variant: "warning", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                                                                                        }
                                                                                     }
                                                                                     else {
                                                                                         enqueueSnackbar("You can only select "+containersSelection.length+" offers!", { variant: "warning", anchorOrigin: { horizontal: "right", vertical: "top"} });
@@ -2056,10 +1941,36 @@ function Request() {
                                                             : null
                                                         }
                                                         {
-                                                            activeStep === 4 ? 
+                                                            activeStep === 2 ? 
                                                             <Grid container spacing={2} mt={1} px={2}>
                                                                 <Grid item xs={12}>
                                                                     <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>{t('listMiscPricingOffers')+t('fromDotted')+portDeparture.portName+"-"+portDestination.portName}</Typography>
+                                                                    <Typography variant="h6" sx={{ my: 2, fontSize: 17, fontWeight: "bold" }}>
+                                                                        Haulage miscs (auto selected)
+                                                                    </Typography>
+                                                                    {
+                                                                        !loadMiscsHaulage ? 
+                                                                        miscsHaulage !== null && miscsHaulage.length !== 0 ?
+                                                                            <Box sx={{ overflow: "auto", mt: 1 }}>
+                                                                                <DataGrid
+                                                                                    rows={miscsHaulage}
+                                                                                    columns={columnsMiscs}
+                                                                                    hideFooter
+                                                                                    getRowId={(row: any) => row?.miscellaneousId}
+                                                                                    getRowHeight={() => "auto" }
+                                                                                    sx={gridStyles}
+                                                                                    disableRowSelectionOnClick
+                                                                                    // onRowSelectionModelChange={(newRowSelectionModel: any) => {
+                                                                                    //     setRowSelectionModel3(newRowSelectionModel);
+                                                                                    //     // setSelectedMisc(newRowSelectionModel.length !== 0 ? miscs.find((elm: any) => elm.id === newRowSelectionModel[0]) : null);
+                                                                                    // }}
+                                                                                    // rowSelectionModel={rowSelectionModel3}
+                                                                                    // onRowClick={handleRowMiscsClick}
+                                                                                />
+                                                                            </Box> : <Alert severity="error">{t('noResults')}</Alert>
+                                                                        : <Skeleton />
+                                                                    }
+
                                                                     <Grid container sx={{ alignItems: "center" }}>
                                                                         <Grid item xs={12} md={8}>
                                                                             <Typography variant="h6" sx={{ my: 2, fontSize: 17, fontWeight: "bold" }}>
@@ -2077,21 +1988,6 @@ function Request() {
                                                                                 onClick={getMiscellaneousPriceOffers}
                                                                             >
                                                                                 {t('reload')} <RestartAltIcon fontSize='small' />
-                                                                            </Button>
-                                                                            <Button 
-                                                                                variant="contained" 
-                                                                                color="inherit" 
-                                                                                sx={whiteButtonStyles} 
-                                                                                style={{ marginTop: "0px", float: "right" }} 
-                                                                                onClick={() => { 
-                                                                                    // if (!(generalMiscs !== null && generalMiscs.length !== 0)) {
-                                                                                    //     getGeneralMiscellaneousPriceOffers();
-                                                                                    // }
-                                                                                    getGeneralMiscellaneousPriceOffers();
-                                                                                    setModal8(true); 
-                                                                                }}
-                                                                            >
-                                                                                Add general miscs
                                                                             </Button>
                                                                         </Grid>
                                                                     </Grid>
@@ -2117,12 +2013,45 @@ function Request() {
                                                                             </Box> : <Alert severity="error">{t('noResults')}</Alert>
                                                                         : <Skeleton />
                                                                     }
+                                                                    
+                                                                    <Grid container spacing={2}>
+                                                                        <Grid item xs={12}>
+                                                                            <Typography variant="h6" sx={{ mt: 2, fontSize: 17, fontWeight: "bold" }}>
+                                                                                General miscs (select any)
+                                                                            </Typography>    
+                                                                        </Grid>
+                                                                        <Grid item xs={12}>
+                                                                            {
+                                                                                !loadGeneralMiscs ? 
+                                                                                generalMiscs !== null && generalMiscs.length !== 0 ?
+                                                                                    <Box sx={{ overflow: "auto" }}>
+                                                                                        <DataGrid
+                                                                                            rows={generalMiscs}
+                                                                                            columns={columnsMiscs}
+                                                                                            hideFooter
+                                                                                            getRowId={(row: any) => row?.miscellaneousId}
+                                                                                            getRowHeight={() => "auto" }
+                                                                                            sx={gridStyles}
+                                                                                            onRowSelectionModelChange={(newRowSelectionModel: any) => {
+                                                                                                setRowSelectionModel3(newRowSelectionModel);
+                                                                                                setMyMiscs(newRowSelectionModel.length !== 0 ? generalMiscs.filter((elm: any) => newRowSelectionModel.includes(elm.miscellaneousId)).map((elm: any) => { return {...elm, defaultContainer: elm.containers[0].container.packageName}}) : []);
+                                                                                                // setSelectedMisc(newRowSelectionModel.length !== 0 ? generalMiscs.find((elm: any) => elm.id === newRowSelectionModel[0]) : null);
+                                                                                            }}
+                                                                                            rowSelectionModel={rowSelectionModel3}
+                                                                                            checkboxSelection
+                                                                                            // onRowClick={handleRowMiscsClick}
+                                                                                        />
+                                                                                    </Box> : <Alert severity="error">{t('noResults')}</Alert>
+                                                                                : <Skeleton />
+                                                                            }
+                                                                        </Grid>
+                                                                    </Grid>
                                                                 </Grid>
                                                             </Grid>
                                                             : null
                                                         }
                                                         {
-                                                            activeStep === 5 ?
+                                                            activeStep === 3 ?
                                                             <Grid container spacing={2} mt={1} px={2}>
                                                                 <Grid item xs={12}>
                                                                     <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>{t('selectedSeafreight')}</Typography>
@@ -2148,6 +2077,23 @@ function Request() {
                                                                                 columns={columnsHaulages}
                                                                                 hideFooter
                                                                                 getRowId={(row: any) => row?.id}
+                                                                                getRowHeight={() => "auto" }
+                                                                                sx={sizeStyles}
+                                                                                disableRowSelectionOnClick
+                                                                            />
+                                                                        </Box>
+                                                                    </Grid> : null
+                                                                }
+                                                                {
+                                                                    miscsHaulage !== null && miscsHaulage.length !== 0 ? 
+                                                                    <Grid item xs={12}>
+                                                                        <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>Haulage miscs</Typography>
+                                                                        <Box sx={{ overflow: "auto" }}>
+                                                                            <DataGrid
+                                                                                rows={miscsHaulage}
+                                                                                columns={columnsMiscs}
+                                                                                hideFooter
+                                                                                getRowId={(row: any) => row?.miscellaneousId}
                                                                                 getRowHeight={() => "auto" }
                                                                                 sx={sizeStyles}
                                                                                 disableRowSelectionOnClick
@@ -2216,12 +2162,6 @@ function Request() {
                                                                         // size="small"
                                                                         onChange={(event: React.MouseEvent<HTMLElement>, newValue: string,) => { 
                                                                             setMailLanguage(newValue); 
-                                                                            // if (newValue === "fr") {
-                                                                            //     rteRef.current?.editor?.commands.setContent("");
-                                                                            // }
-                                                                            // else {
-                                                                            //     rteRef.current?.editor?.commands.setContent("");
-                                                                            // }
                                                                         }}
                                                                         aria-label="Platform"
                                                                         fullWidth
@@ -2238,9 +2178,12 @@ function Request() {
                                                                             seafreights.filter((elm: any) => rowSelectionModel.includes(elm.seaFreightId))
                                                                             .map((element: any, index: number) => {
                                                                                 var containerElm = containersSelection.find((val: any) => val.container === element.containers[0].container.packageName);
-                                                                                var allMiscs = [...miscs, ...myMiscs];
-                                                                                var miscsSelected = allMiscs.filter((elm: any) => elm.defaultContainer === containerElm.container);
-
+                                                                                var allMiscs = [...miscs, ...myMiscs, ...miscsHaulage];
+                                                                                var miscsSelected = [];
+                                                                                if (containerElm !== undefined && containerElm !== null) {
+                                                                                    miscsSelected = allMiscs.filter((elm: any) => elm.defaultContainer === containerElm.container);
+                                                                                }
+                                                                                
                                                                                 return (
                                                                                     <React.Fragment key={"containerRow-"+index}>
                                                                                         <ContainerElement 
@@ -2456,33 +2399,7 @@ function Request() {
                     <Typography variant="subtitle1" gutterBottom px={2}>
                         You can select some general miscellaneous services.
                     </Typography>
-                    <Grid container spacing={2} mt={1} px={2}>
-                        <Grid item xs={12}>
-                            {
-                                !loadGeneralMiscs ? 
-                                generalMiscs !== null && generalMiscs.length !== 0 ?
-                                    <Box sx={{ overflow: "auto" }}>
-                                        <DataGrid
-                                            rows={generalMiscs}
-                                            columns={columnsMiscs}
-                                            hideFooter
-                                            getRowId={(row: any) => row?.miscellaneousId}
-                                            getRowHeight={() => "auto" }
-                                            sx={gridStyles}
-                                            onRowSelectionModelChange={(newRowSelectionModel: any) => {
-                                                setRowSelectionModel3(newRowSelectionModel);
-                                                setMyMiscs(newRowSelectionModel.length !== 0 ? generalMiscs.filter((elm: any) => newRowSelectionModel.includes(elm.miscellaneousId)).map((elm: any) => { return {...elm, defaultContainer: elm.containers[0].container.packageName}}) : []);
-                                                // setSelectedMisc(newRowSelectionModel.length !== 0 ? generalMiscs.find((elm: any) => elm.id === newRowSelectionModel[0]) : null);
-                                            }}
-                                            rowSelectionModel={rowSelectionModel3}
-                                            checkboxSelection
-                                            // onRowClick={handleRowMiscsClick}
-                                        />
-                                    </Box> : <Alert severity="error">{t('noResults')}</Alert>
-                                : <Skeleton />
-                            }
-                        </Grid>
-                    </Grid>
+                    
                 </DialogContent>
                 <DialogActions>
                     <Button 
