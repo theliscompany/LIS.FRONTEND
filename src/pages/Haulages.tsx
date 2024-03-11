@@ -23,7 +23,7 @@ import AutocompleteSearch from '../components/shared/AutocompleteSearch';
 import RequestPriceHaulage from '../components/editRequestPage/RequestPriceHaulage';
 import { Mail } from '@mui/icons-material';
 import NewContact from '../components/editRequestPage/NewContact';
-import { extractCityAndPostalCode, flattenData2, parseLocation, parseLocation2, reverseTransformArray, transformArray } from '../utils/functions';
+import { extractCityAndPostalCode, flattenData2, hashCode, parseLocation, parseLocation2, reverseTransformArray, transformArray } from '../utils/functions';
 import ServicesTable from '../components/seafreightPage/ServicesTable';
 
 function createGetRequestUrl(variable1: number, variable2: number, variable3: string) {
@@ -195,7 +195,7 @@ function Haulages() {
             try {
                 const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisClient.endPoint+"/Contact/GetContacts", token);
                 if (response !== null && response !== undefined) {
-                    console.log(response);
+                    // console.log(response);
                     // Removing duplicates from client array
                     setClients(response.filter((obj: any, index: number, self: any) => index === self.findIndex((o: any) => o.contactName === obj.contactName)));
                 }
@@ -303,6 +303,7 @@ function Haulages() {
         setComment("");
         setContainerTypes([]);
         setServicesData2([]);
+        setMiscellaneousId("");
     }
     
     const getHaulage = async (id: string) => {
@@ -312,10 +313,12 @@ function Haulages() {
             if (response !== null && response !== undefined) {
                 var auxHaulier = {contactId: response.haulierId, contactName: response.haulierName};
                 var auxValidUntil = dayjs(response.validUntil);
+                var auxCity = parseLocation2(response.loadingCity);
+                var auxPort = ports.find((elm: any) => elm.portId === response.loadingPortId);
 
                 setHaulier(auxHaulier);
-                setLoadingCity(parseLocation2(response.loadingCity));
-                setLoadingPort(ports.find((elm: any) => elm.portId === response.loadingPortId));
+                setLoadingCity(auxCity);
+                setLoadingPort(auxPort);
                 setCurrency(response.currency);
                 setValidUntil(dayjs(response.validUntil));
                 setFreeTime(response.freeTime);
@@ -329,12 +332,12 @@ function Haulages() {
                 setLoadEdit(false);
 
                 // Now i get the miscs
-                getMiscellaneouses(auxHaulier, auxValidUntil, response.containers[0], false);
+                getMiscellaneouses(auxHaulier, auxCity, auxPort, auxValidUntil, response.containers[0], false);
             }
             else {
                 setLoadEdit(false);
             }
-            console.log(response);
+            // console.log(response);
         }
     }
     
@@ -350,7 +353,7 @@ function Haulages() {
             else {
                 setLoad(false);
             }
-            console.log(response);
+            // console.log(response);
         }
     }
 
@@ -443,7 +446,7 @@ function Haulages() {
         }
     }
     
-    const getMiscellaneouses = async (carrier1: any, validUntil1: any, container: any, isCopy: boolean) => {
+    const getMiscellaneouses = async (carrier1: any, auxCity: any, auxPort: any, validUntil1: any, container: any, isCopy: boolean) => {
         if (context && account) {
             setLoadMiscs(true);
             
@@ -466,12 +469,22 @@ function Haulages() {
             }
 
             if (carrier1 !== null) {
-                const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisPricing.endPoint+"/Miscellaneous/Miscellaneous?SupplierId="+carrier1.contactId+"&withShipment=false", token !== null ? token : tempToken);
+                var postalCode = auxCity !== null ? auxCity.postalCode !== undefined ? auxCity.postalCode : "" : ""; 
+                var city = "";
+                if (postalCode !== "") {
+                    if (postalCode === null) {
+                        city = auxCity.city;
+                    }
+                    else {
+                        city = auxCity.city+' '+postalCode;
+                    }
+                }
+                
+                // const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisPricing.endPoint+"/Miscellaneous/Miscellaneous?SupplierId="+carrier1.contactId+"&withShipment=false", token !== null ? token : tempToken);
+                const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisPricing.endPoint+"/Miscellaneous/Miscellaneous?SupplierId="+carrier1.contactId+"&departurePortId="+Number(hashCode(city))+"&destinationPortId="+auxPort.portId+"&withShipment=true", token !== null ? token : tempToken);
                 if (response !== null && response !== undefined && response.length !== 0) {
                     // Here i check if the result is good
-                    console.log(response[0]);
-                    console.log(container);
-                    var selectedElement = response[0];
+                    var selectedElement = response[0].suppliers[0];
                     if (response.length !== 0 && selectedElement !== undefined) {
                         setLoadMiscs(false);
                         
@@ -497,17 +510,28 @@ function Haulages() {
     }
     
     const createMiscellaneous = async () => {
-        if (servicesData2.length !== 0 && validUntil !== null && haulier !== null) {
+        if (validUntil !== null && haulier !== null) {
             if (context) {
+                var postalCode = loadingCity !== null ? loadingCity.postalCode !== undefined ? loadingCity.postalCode : "" : ""; 
+                var city = loadingCity !== null ? loadingCity.city.toUpperCase()+', '+loadingCity.country.toUpperCase() : "";
+                if (postalCode !== "") {
+                    if (postalCode === null) {
+                        city = loadingCity.city;
+                    }
+                    else {
+                        city = loadingCity.city+' '+postalCode;
+                    }
+                }
+                
                 var dataSent = null;
                 if (miscellaneousId !== "" && miscellaneousId !== undefined) {
                     dataSent = {
                         "miscellaneousId": miscellaneousId,
                         "id": miscellaneousId,
-                        // "departurePortId": portLoading.portId,
-                        // "destinationPortId": portDischarge.portId,
-                        // "departurePortName": portLoading.portName,
-                        // "destinationPortName": portDischarge.portName,
+                        "departurePortId": hashCode(city),
+                        "destinationPortId": loadingPort.portId,
+                        "departurePortName": city,
+                        "destinationPortName": loadingPort.portName,
                         "supplierId": haulier.contactId,
                         "supplierName": haulier.contactName,
                         "currency": currency,
@@ -521,10 +545,10 @@ function Haulages() {
                 else {
                     dataSent = {
                         // "miscellaneousId": currentEditId,
-                        // "departurePortId": portLoading.portId,
-                        // "destinationPortId": portDischarge.portId,
-                        // "departurePortName": portLoading.portName,
-                        // "destinationPortName": portDischarge.portName,
+                        "departurePortId": hashCode(city),
+                        "destinationPortId": loadingPort.portId,
+                        "departurePortName": city,
+                        "destinationPortName": loadingPort.portName,
                         "supplierId": haulier.contactId,
                         "supplierName": haulier.contactName,
                         "currency": currency,
@@ -567,7 +591,7 @@ function Haulages() {
                     </Grid>
                     <Grid item xs={12} md={4} mt={1}>
                         <InputLabel htmlFor="company-name" sx={inputLabelStyles}>{t('haulier')}</InputLabel>
-                        <CompanySearch id="company-name" value={searchedHaulier} onChange={setSearchedHaulier} category={CategoryEnum.CUSTOMERS} callBack={() => console.log(searchedHaulier)} fullWidth />
+                        <CompanySearch id="company-name" value={searchedHaulier} onChange={setSearchedHaulier} category={CategoryEnum.CUSTOMERS} fullWidth />
                     </Grid>
                     <Grid item xs={12} md={3} mt={1}>
                         <InputLabel htmlFor="loading-city-searched" sx={inputLabelStyles}>{t('loadingCity')}</InputLabel>
@@ -683,14 +707,14 @@ function Haulages() {
                     {
                         loadEdit === false ?
                         <Grid container spacing={2}>
+                            <Grid item xs={12} md={12}>
+                                <Typography sx={{ fontSize: 18, mb: 1 }}><b>Haulage price information</b></Typography>
+                            </Grid>
                             <Grid item xs={12} md={8}>
                                 <Grid container spacing={2}>
-                                    <Grid item xs={12}>
-                                        <Typography sx={{ fontSize: 18, mb: 1 }}><b>Haulage price information</b></Typography>
-                                    </Grid>
                                     <Grid item xs={12} md={6} mt={0.25}>
                                         <InputLabel htmlFor="haulier" sx={inputLabelStyles}>{t('haulier')}</InputLabel>
-                                        <CompanySearch id="haulier" value={haulier} onChange={setHaulier} category={CategoryEnum.SUPPLIERS} callBack={() => console.log(haulier)} fullWidth />
+                                        <CompanySearch id="haulier" value={haulier} onChange={setHaulier} category={CategoryEnum.SUPPLIERS} fullWidth />
                                     </Grid>
                                     <Grid item xs={12} md={6} mt={0.25}>
                                         <InputLabel htmlFor="loading-city" sx={inputLabelStyles}>{t('loadingCity')}</InputLabel>

@@ -534,7 +534,7 @@ function Seafreights() {
     }
     
     const createMiscellaneous = async () => {
-        if (servicesData2.length !== 0 && validUntil !== null && portLoading !== null && portDischarge !== null && carrier !== null) {
+        if (validUntil !== null && portLoading !== null && portDischarge !== null && carrier !== null) {
             if (context) {
                 var dataSent = null;
                 if (miscellaneousId !== "" && miscellaneousId !== undefined) {

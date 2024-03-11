@@ -51,7 +51,7 @@ import RequestAskInformation from '../components/editRequestPage/RequestAskInfor
 import RequestChangeStatus from '../components/editRequestPage/RequestChangeStatus';
 // import { MailData } from '../utils/models/models';
 // import { MuiFileInput } from 'mui-file-input';
-import { calculateTotal, checkCarrierConsistency, checkDifferentDefaultContainer, displayContainers, findClosestSeaPort, generateRandomNumber, getServices, getServicesTotal, getServicesTotal2, parseContact, parseLocation, removeDuplicatesWithLatestUpdated, similar, sortByCloseness } from '../utils/functions';
+import { calculateTotal, checkCarrierConsistency, checkDifferentDefaultContainer, displayContainers, findClosestSeaPort, generateRandomNumber, getServices, getServicesTotal, getServicesTotal2, hashCode, parseContact, parseLocation, removeDuplicatesWithLatestUpdated, similar, sortByCloseness } from '../utils/functions';
 import RequestPriceRequest from '../components/editRequestPage/RequestPriceRequest';
 import RequestPriceHaulage from '../components/editRequestPage/RequestPriceHaulage';
 import NewContact from '../components/editRequestPage/NewContact';
@@ -410,24 +410,6 @@ function Request() {
             newSkipped = new Set(newSkipped.values());
             newSkipped.delete(activeStep);
         }
-        // if (activeStep === 0) {
-        //     if (containersSelection.map((elm: any) => elm.container).length !== 0 && portDestination !== null) {
-        //         setContainersSelected(containersSelection.map((elm: any) => elm.id));
-        //         if (selectedHaulage === null) {
-        //             if (loadingCity !== null) {
-        //                 setLoadResults(true);
-        //                 getHaulagePriceOffers();
-        //                 setActiveStep((prevActiveStep) => prevActiveStep + 1);
-        //             }
-        //             else {
-        //                 enqueueSnackbar(t('msgValidateHaulageStep'), { variant: "warning", anchorOrigin: { horizontal: "right", vertical: "top"} });
-        //             }
-        //         }
-        //     }
-        //     else {
-        //         enqueueSnackbar(t('msgValidateStartStep'), { variant: "warning", anchorOrigin: { horizontal: "right", vertical: "top"} });
-        //     }
-        // }
         if (activeStep === 0) {
             if (selectedHaulage !== null) {
                 setPortDeparture(ports1.find((elm: any) => elm.portName === selectedHaulage.loadingPort));
@@ -457,6 +439,8 @@ function Request() {
                         setLoadMiscsHaulage(true);
                         getHaulageMiscellaneousPriceOffers();
                     }
+                    setLoadGeneralMiscs(true);
+                    getGeneralMiscellaneousPriceOffers();
                     
                     setActiveStep((prevActiveStep) => prevActiveStep + 1);
                     setSkipped(newSkipped);
@@ -832,10 +816,6 @@ function Request() {
             
             console.log(response);
             var suppliersRecentlySelected = mySeafreights.map((elm: any) => { return {carrierName: elm.carrierName, defaultContainer: elm.defaultContainer} });
-            // I also remove haulage miscs from general miscs
-            if (selectedHaulage !== null) {
-                response = response.filter((elm: any) => elm.supplierName !== selectedHaulage.haulierName);
-            }
             
             setGeneralMiscs(response.length !== 0 ? 
                 response.filter((elm: any) => new Date(elm.validUntil) > new Date()).filter((elm: any) => suppliersRecentlySelected.some((val: any) => val.defaultContainer === elm.containers[0].container.packageName || elm.containers[0].container.packageName === null))
@@ -846,11 +826,22 @@ function Request() {
     const getHaulageMiscellaneousPriceOffers = async () => {
         setLoadMiscsHaulage(true)
         if (context && account) {
-            const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisPricing.endPoint+"/Miscellaneous/Miscellaneous?supplierId="+selectedHaulage.haulierId+"&withShipment=false", tempToken);
+            var postalCode = loadingCity !== null ? loadingCity.postalCode !== undefined ? loadingCity.postalCode : "" : ""; 
+            var city = "";
+            if (postalCode !== "") {
+                if (postalCode === null) {
+                    city = loadingCity.city;
+                }
+                else {
+                    city = loadingCity.city+' '+postalCode;
+                }
+            }
+            
+            const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisPricing.endPoint+"/Miscellaneous/Miscellaneous?supplierId="+selectedHaulage.haulierId+"&departurePortId="+Number(hashCode(city))+"&destinationPortId="+selectedHaulage.loadingPortId+"&withShipment=true", tempToken);
             setLoadMiscsHaulage(false);
             
             console.log(response);
-            setMiscsHaulage(response.length !== 0 ? response.filter((elm: any) => new Date(elm.validUntil) > new Date()) : []);
+            setMiscsHaulage(response.length !== 0 ? response[0].suppliers.filter((elm: any) => new Date(elm.validUntil) > new Date()) : []);
         }
     }
     
@@ -1954,6 +1945,32 @@ function Request() {
                                                             <Grid container spacing={2} mt={1} px={2}>
                                                                 <Grid item xs={12}>
                                                                     <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>{t('listMiscPricingOffers')+t('fromDotted')+portDeparture.portName+"-"+portDestination.portName}</Typography>
+                                                                    <Typography variant="h6" sx={{ my: 2, fontSize: 17, fontWeight: "bold" }}>
+                                                                        Haulage miscs (auto selected)
+                                                                    </Typography>
+                                                                    {
+                                                                        !loadMiscsHaulage ? 
+                                                                        miscsHaulage !== null && miscsHaulage.length !== 0 ?
+                                                                            <Box sx={{ overflow: "auto", mt: 1 }}>
+                                                                                <DataGrid
+                                                                                    rows={miscsHaulage}
+                                                                                    columns={columnsMiscs}
+                                                                                    hideFooter
+                                                                                    getRowId={(row: any) => row?.miscellaneousId}
+                                                                                    getRowHeight={() => "auto" }
+                                                                                    sx={gridStyles}
+                                                                                    disableRowSelectionOnClick
+                                                                                    // onRowSelectionModelChange={(newRowSelectionModel: any) => {
+                                                                                    //     setRowSelectionModel3(newRowSelectionModel);
+                                                                                    //     // setSelectedMisc(newRowSelectionModel.length !== 0 ? miscs.find((elm: any) => elm.id === newRowSelectionModel[0]) : null);
+                                                                                    // }}
+                                                                                    // rowSelectionModel={rowSelectionModel3}
+                                                                                    // onRowClick={handleRowMiscsClick}
+                                                                                />
+                                                                            </Box> : <Alert severity="error">{t('noResults')}</Alert>
+                                                                        : <Skeleton />
+                                                                    }
+
                                                                     <Grid container sx={{ alignItems: "center" }}>
                                                                         <Grid item xs={12} md={8}>
                                                                             <Typography variant="h6" sx={{ my: 2, fontSize: 17, fontWeight: "bold" }}>
@@ -1971,21 +1988,6 @@ function Request() {
                                                                                 onClick={getMiscellaneousPriceOffers}
                                                                             >
                                                                                 {t('reload')} <RestartAltIcon fontSize='small' />
-                                                                            </Button>
-                                                                            <Button 
-                                                                                variant="contained" 
-                                                                                color="inherit" 
-                                                                                sx={whiteButtonStyles} 
-                                                                                style={{ marginTop: "0px", float: "right" }} 
-                                                                                onClick={() => { 
-                                                                                    // if (!(generalMiscs !== null && generalMiscs.length !== 0)) {
-                                                                                    //     getGeneralMiscellaneousPriceOffers();
-                                                                                    // }
-                                                                                    getGeneralMiscellaneousPriceOffers();
-                                                                                    setModal8(true); 
-                                                                                }}
-                                                                            >
-                                                                                Add general miscs
                                                                             </Button>
                                                                         </Grid>
                                                                     </Grid>
@@ -2012,31 +2014,38 @@ function Request() {
                                                                         : <Skeleton />
                                                                     }
                                                                     
-                                                                    <Typography variant="h6" sx={{ my: 2, fontSize: 17, fontWeight: "bold" }}>
-                                                                        Haulage miscs (auto selected)
-                                                                    </Typography>
-                                                                    {
-                                                                        !loadMiscsHaulage ? 
-                                                                        miscsHaulage !== null && miscsHaulage.length !== 0 ?
-                                                                            <Box sx={{ overflow: "auto", mt: 1 }}>
-                                                                                <DataGrid
-                                                                                    rows={miscsHaulage}
-                                                                                    columns={columnsMiscs}
-                                                                                    hideFooter
-                                                                                    getRowId={(row: any) => row?.miscellaneousId}
-                                                                                    getRowHeight={() => "auto" }
-                                                                                    sx={gridStyles}
-                                                                                    disableRowSelectionOnClick
-                                                                                    // onRowSelectionModelChange={(newRowSelectionModel: any) => {
-                                                                                    //     setRowSelectionModel3(newRowSelectionModel);
-                                                                                    //     // setSelectedMisc(newRowSelectionModel.length !== 0 ? miscs.find((elm: any) => elm.id === newRowSelectionModel[0]) : null);
-                                                                                    // }}
-                                                                                    // rowSelectionModel={rowSelectionModel3}
-                                                                                    // onRowClick={handleRowMiscsClick}
-                                                                                />
-                                                                            </Box> : <Alert severity="error">{t('noResults')}</Alert>
-                                                                        : <Skeleton />
-                                                                    }
+                                                                    <Grid container spacing={2}>
+                                                                        <Grid item xs={12}>
+                                                                            <Typography variant="h6" sx={{ mt: 2, fontSize: 17, fontWeight: "bold" }}>
+                                                                                General miscs (select any)
+                                                                            </Typography>    
+                                                                        </Grid>
+                                                                        <Grid item xs={12}>
+                                                                            {
+                                                                                !loadGeneralMiscs ? 
+                                                                                generalMiscs !== null && generalMiscs.length !== 0 ?
+                                                                                    <Box sx={{ overflow: "auto" }}>
+                                                                                        <DataGrid
+                                                                                            rows={generalMiscs}
+                                                                                            columns={columnsMiscs}
+                                                                                            hideFooter
+                                                                                            getRowId={(row: any) => row?.miscellaneousId}
+                                                                                            getRowHeight={() => "auto" }
+                                                                                            sx={gridStyles}
+                                                                                            onRowSelectionModelChange={(newRowSelectionModel: any) => {
+                                                                                                setRowSelectionModel3(newRowSelectionModel);
+                                                                                                setMyMiscs(newRowSelectionModel.length !== 0 ? generalMiscs.filter((elm: any) => newRowSelectionModel.includes(elm.miscellaneousId)).map((elm: any) => { return {...elm, defaultContainer: elm.containers[0].container.packageName}}) : []);
+                                                                                                // setSelectedMisc(newRowSelectionModel.length !== 0 ? generalMiscs.find((elm: any) => elm.id === newRowSelectionModel[0]) : null);
+                                                                                            }}
+                                                                                            rowSelectionModel={rowSelectionModel3}
+                                                                                            checkboxSelection
+                                                                                            // onRowClick={handleRowMiscsClick}
+                                                                                        />
+                                                                                    </Box> : <Alert severity="error">{t('noResults')}</Alert>
+                                                                                : <Skeleton />
+                                                                            }
+                                                                        </Grid>
+                                                                    </Grid>
                                                                 </Grid>
                                                             </Grid>
                                                             : null
@@ -2390,33 +2399,7 @@ function Request() {
                     <Typography variant="subtitle1" gutterBottom px={2}>
                         You can select some general miscellaneous services.
                     </Typography>
-                    <Grid container spacing={2} mt={1} px={2}>
-                        <Grid item xs={12}>
-                            {
-                                !loadGeneralMiscs ? 
-                                generalMiscs !== null && generalMiscs.length !== 0 ?
-                                    <Box sx={{ overflow: "auto" }}>
-                                        <DataGrid
-                                            rows={generalMiscs}
-                                            columns={columnsMiscs}
-                                            hideFooter
-                                            getRowId={(row: any) => row?.miscellaneousId}
-                                            getRowHeight={() => "auto" }
-                                            sx={gridStyles}
-                                            onRowSelectionModelChange={(newRowSelectionModel: any) => {
-                                                setRowSelectionModel3(newRowSelectionModel);
-                                                setMyMiscs(newRowSelectionModel.length !== 0 ? generalMiscs.filter((elm: any) => newRowSelectionModel.includes(elm.miscellaneousId)).map((elm: any) => { return {...elm, defaultContainer: elm.containers[0].container.packageName}}) : []);
-                                                // setSelectedMisc(newRowSelectionModel.length !== 0 ? generalMiscs.find((elm: any) => elm.id === newRowSelectionModel[0]) : null);
-                                            }}
-                                            rowSelectionModel={rowSelectionModel3}
-                                            checkboxSelection
-                                            // onRowClick={handleRowMiscsClick}
-                                        />
-                                    </Box> : <Alert severity="error">{t('noResults')}</Alert>
-                                : <Skeleton />
-                            }
-                        </Grid>
-                    </Grid>
+                    
                 </DialogContent>
                 <DialogActions>
                     <Button 
