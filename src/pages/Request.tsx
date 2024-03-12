@@ -51,7 +51,7 @@ import RequestAskInformation from '../components/editRequestPage/RequestAskInfor
 import RequestChangeStatus from '../components/editRequestPage/RequestChangeStatus';
 // import { MailData } from '../utils/models/models';
 // import { MuiFileInput } from 'mui-file-input';
-import { calculateTotal, checkCarrierConsistency, checkDifferentDefaultContainer, displayContainers, findClosestSeaPort, generateRandomNumber, getServices, getServicesTotal, getServicesTotal2, hashCode, parseContact, parseLocation, removeDuplicatesWithLatestUpdated, similar, sortByCloseness } from '../utils/functions';
+import { calculateTotal, checkCarrierConsistency, checkDifferentDefaultContainer, displayContainers, findClosestSeaPort, generateRandomNumber, getServices, getServicesTotal, getServicesTotal2, getTotalNumber, hashCode, parseContact, parseLocation, removeDuplicatesWithLatestUpdated, similar, sortByCloseness } from '../utils/functions';
 import RequestPriceRequest from '../components/editRequestPage/RequestPriceRequest';
 import RequestPriceHaulage from '../components/editRequestPage/RequestPriceHaulage';
 import NewContact from '../components/editRequestPage/NewContact';
@@ -287,7 +287,7 @@ function Request() {
     
     const columnsMiscs: GridColDef[] = [
         { field: 'supplierName', headerName: t('supplier'), flex: 2.7 },
-        { field: 'currency', headerName: t('costPrices'), renderCell: (params: GridRenderCellParams) => {
+        { field: 'costTotal', headerName: t('costPrices'), renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box sx={{ my: 1, mr: 1 }}>
                     <Box>
@@ -300,17 +300,16 @@ function Request() {
                 </Box>
             );
         }, flex: 1.75 },
-        { field: 'services', headerName: 'Services', renderCell: (params: GridRenderCellParams) => {
+        { field: 'textServices', headerName: 'Services', renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box sx={{ my: 1, mr: 1 }}>
                     {
-                        params.row.containers !== null ?
-                        params.row.containers[0] ? 
-                        <>{getServicesTotal(params.row.containers, t(params.row.currency))}</> : "N/A" : null
+                        params.row.containers !== null ? params.row.containers[0] ? <>{getServicesTotal(params.row.containers, t(params.row.currency))}</> : "N/A" : null
                     }
                 </Box>
             );
         }, flex: 4 },
+        // { field: 'textServices', headerName: t('costPrices'), flex: 2 },
         { field: 'validUntil', headerName: t('validUntil'), renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box sx={{ my: 1, mr: 1 }}>
@@ -818,7 +817,14 @@ function Request() {
             var suppliersRecentlySelected = mySeafreights.map((elm: any) => { return {carrierName: elm.carrierName, defaultContainer: elm.defaultContainer} });
             
             setGeneralMiscs(response.length !== 0 ? 
-                response.filter((elm: any) => new Date(elm.validUntil) > new Date()).filter((elm: any) => suppliersRecentlySelected.some((val: any) => val.defaultContainer === elm.containers[0].container.packageName || elm.containers[0].container.packageName === null))
+                response
+                .filter((elm: any) => new Date(elm.validUntil) > new Date())
+                .filter((elm: any) => suppliersRecentlySelected.some((val: any) => val.defaultContainer === elm.containers[0].container.packageName || elm.containers[0].container.packageName === null))
+                .map((elm: any) => { return {
+                    ...elm, 
+                    textServices: elm.containers !== null ? elm.containers[0] ? getServicesTotal(elm.containers, t(elm.currency)) : "N/A" : null,
+                    costTotal: elm.containers !== null ? elm.containers[0] ? getTotalNumber(elm.containers) : "N/A" : null
+                }})
             : []);
         }
     }
@@ -1680,7 +1686,7 @@ function Request() {
                                                                                 <Grid container>
                                                                                     <Grid item xs={8}>
                                                                                         <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>
-                                                                                            {t('listHaulagesPricingOffers')+t('fromDotted')+loadingCity.city}
+                                                                                            {t('listHaulagesPricingOffers')+t('fromDotted')+loadingCity.city} (select one)
                                                                                         </Typography>
                                                                                     </Grid>
                                                                                     <Grid item xs={4}>
@@ -1712,7 +1718,15 @@ function Request() {
                                                                                 <DataGrid
                                                                                     rows={haulages}
                                                                                     columns={columnsHaulages}
-                                                                                    hideFooter
+                                                                                    // hideFooter
+                                                                                    initialState={{
+                                                                                        pagination: {
+                                                                                            paginationModel: {
+                                                                                                pageSize: 7,
+                                                                                            },
+                                                                                        },
+                                                                                    }}
+                                                                                    pageSizeOptions={[5, 10]}
                                                                                     getRowId={(row: any) => row?.id}
                                                                                     getRowHeight={() => "auto" }
                                                                                     sx={gridStyles}
@@ -1865,7 +1879,15 @@ function Request() {
                                                                             <DataGrid
                                                                                 rows={seafreights}
                                                                                 columns={columnsSeafreights}
-                                                                                hideFooter
+                                                                                // hideFooter
+                                                                                initialState={{
+                                                                                    pagination: {
+                                                                                        paginationModel: {
+                                                                                            pageSize: 7,
+                                                                                        },
+                                                                                    },
+                                                                                }}
+                                                                                pageSizeOptions={[5, 10]}
                                                                                 getRowId={(row: any) => row?.seaFreightId}
                                                                                 getRowHeight={() => "auto" }
                                                                                 style={sizingStyles}
@@ -1955,7 +1977,15 @@ function Request() {
                                                                                 <DataGrid
                                                                                     rows={miscsHaulage}
                                                                                     columns={columnsMiscs}
-                                                                                    hideFooter
+                                                                                    // hideFooter
+                                                                                    initialState={{
+                                                                                        pagination: {
+                                                                                            paginationModel: {
+                                                                                                pageSize: 7,
+                                                                                            },
+                                                                                        },
+                                                                                    }}
+                                                                                    pageSizeOptions={[5, 10]}
                                                                                     getRowId={(row: any) => row?.miscellaneousId}
                                                                                     getRowHeight={() => "auto" }
                                                                                     sx={gridStyles}
@@ -1998,7 +2028,15 @@ function Request() {
                                                                                 <DataGrid
                                                                                     rows={miscs}
                                                                                     columns={columnsMiscs}
-                                                                                    hideFooter
+                                                                                    // hideFooter
+                                                                                    initialState={{
+                                                                                        pagination: {
+                                                                                            paginationModel: {
+                                                                                                pageSize: 7,
+                                                                                            },
+                                                                                        },
+                                                                                    }}
+                                                                                    pageSizeOptions={[5, 10]}
                                                                                     getRowId={(row: any) => row?.miscellaneousId}
                                                                                     getRowHeight={() => "auto" }
                                                                                     sx={gridStyles}
@@ -2028,10 +2066,27 @@ function Request() {
                                                                                         <DataGrid
                                                                                             rows={generalMiscs}
                                                                                             columns={columnsMiscs}
-                                                                                            hideFooter
+                                                                                            // hideFooter
+                                                                                            initialState={{
+                                                                                                pagination: {
+                                                                                                    paginationModel: {
+                                                                                                        pageSize: 7,
+                                                                                                    },
+                                                                                                },
+                                                                                            }}
+                                                                                            pageSizeOptions={[5, 10]}
                                                                                             getRowId={(row: any) => row?.miscellaneousId}
                                                                                             getRowHeight={() => "auto" }
+                                                                                            style={sizingStyles}
                                                                                             sx={gridStyles}
+                                                                                            disableDensitySelector
+                                                                                            disableColumnSelector
+                                                                                            slots={{ toolbar: GridToolbar }}
+                                                                                            slotProps={{
+                                                                                                toolbar: {
+                                                                                                    showQuickFilter: true,
+                                                                                                },
+                                                                                            }}
                                                                                             onRowSelectionModelChange={(newRowSelectionModel: any) => {
                                                                                                 setRowSelectionModel3(newRowSelectionModel);
                                                                                                 setMyMiscs(newRowSelectionModel.length !== 0 ? generalMiscs.filter((elm: any) => newRowSelectionModel.includes(elm.miscellaneousId)).map((elm: any) => { return {...elm, defaultContainer: elm.containers[0].container.packageName}}) : []);
@@ -2059,7 +2114,15 @@ function Request() {
                                                                         <DataGrid
                                                                             rows={seafreights.filter((elm: any) => rowSelectionModel.includes(elm.seaFreightId))}
                                                                             columns={columnsSeafreights}
-                                                                            hideFooter
+                                                                            // hideFooter
+                                                                            initialState={{
+                                                                                pagination: {
+                                                                                    paginationModel: {
+                                                                                        pageSize: 7,
+                                                                                    },
+                                                                                },
+                                                                            }}
+                                                                            pageSizeOptions={[5, 10]}
                                                                             getRowId={(row: any) => row?.seaFreightId}
                                                                             getRowHeight={() => "auto" }
                                                                             sx={sizeStyles}
@@ -2075,7 +2138,15 @@ function Request() {
                                                                             <DataGrid
                                                                                 rows={[selectedHaulage]}
                                                                                 columns={columnsHaulages}
-                                                                                hideFooter
+                                                                                // hideFooter
+                                                                                initialState={{
+                                                                                    pagination: {
+                                                                                        paginationModel: {
+                                                                                            pageSize: 7,
+                                                                                        },
+                                                                                    },
+                                                                                }}
+                                                                                pageSizeOptions={[5, 10]}
                                                                                 getRowId={(row: any) => row?.id}
                                                                                 getRowHeight={() => "auto" }
                                                                                 sx={sizeStyles}
@@ -2092,7 +2163,15 @@ function Request() {
                                                                             <DataGrid
                                                                                 rows={miscsHaulage}
                                                                                 columns={columnsMiscs}
-                                                                                hideFooter
+                                                                                // hideFooter
+                                                                                initialState={{
+                                                                                    pagination: {
+                                                                                        paginationModel: {
+                                                                                            pageSize: 7,
+                                                                                        },
+                                                                                    },
+                                                                                }}
+                                                                                pageSizeOptions={[5, 10]}
                                                                                 getRowId={(row: any) => row?.miscellaneousId}
                                                                                 getRowHeight={() => "auto" }
                                                                                 sx={sizeStyles}
@@ -2109,7 +2188,15 @@ function Request() {
                                                                             <DataGrid
                                                                                 rows={miscs}
                                                                                 columns={columnsMiscs}
-                                                                                hideFooter
+                                                                                // hideFooter
+                                                                                initialState={{
+                                                                                    pagination: {
+                                                                                        paginationModel: {
+                                                                                            pageSize: 7,
+                                                                                        },
+                                                                                    },
+                                                                                }}
+                                                                                pageSizeOptions={[5, 10]}
                                                                                 getRowId={(row: any) => row?.miscellaneousId}
                                                                                 getRowHeight={() => "auto" }
                                                                                 sx={sizeStyles}
@@ -2126,7 +2213,15 @@ function Request() {
                                                                             <DataGrid
                                                                                 rows={myMiscs}
                                                                                 columns={columnsMiscs}
-                                                                                hideFooter
+                                                                                // hideFooter
+                                                                                initialState={{
+                                                                                    pagination: {
+                                                                                        paginationModel: {
+                                                                                            pageSize: 7,
+                                                                                        },
+                                                                                    },
+                                                                                }}
+                                                                                pageSizeOptions={[5, 10]}
                                                                                 getRowId={(row: any) => row?.miscellaneousId}
                                                                                 getRowHeight={() => "auto" }
                                                                                 sx={sizeStyles}

@@ -113,6 +113,29 @@ export function calculateTotal(data: any) {
     return packageName + ' : ' + total;
 }
 
+export function getTotalNumber(data: any) {
+    // Initialize total price and package name
+    let total = 0;
+    let packageName;
+
+    // Loop through the data
+    for(let i = 0; i < data.length; i++) {
+        // If packageName is not set, set it to the first one
+        if(!packageName) {
+            packageName = data[i].container.packageName !== null ? data[i].container.packageName : "Général";
+        }
+
+        // Loop through the services in the current data object
+        for(let j = 0; j < data[i].services.length; j++) {
+            // Add the price of the service to the total
+            total += data[i].services[j].price;
+        }
+    }
+
+    // Return the package name and total price in the desired format
+    return Number(total);
+}
+
 export function getServicesTotal(data: any, currency: string) {
     let services = [];
 
