@@ -228,7 +228,7 @@ function Seafreights() {
     }
     
     const getPorts = async () => {
-        if (context) {
+        if (context && account) {
             const response = await (context as BackendService<any>).getSingle(protectedResources.apiLisTransport.endPoint+"/Port/Ports");
             if (response !== null && response !== undefined) {
                 setPorts(response);
@@ -261,7 +261,7 @@ function Seafreights() {
     }
 
     const getServices = async (token: string) => {
-        if (context) {
+        if (context && account) {
             const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Service/Services", token);
             if (response !== null && response !== undefined) {
                 setAllServices(response);
@@ -271,7 +271,7 @@ function Seafreights() {
     }
     
     const getContainers = async (token: string) => {
-        if (context) {
+        if (context && account) {
             const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Package/Containers", token);
             if (response !== null && response !== undefined) {
                 setContainers(response);
@@ -353,7 +353,7 @@ function Seafreights() {
     
     const getSeafreight = async (id: string, isCopy: boolean) => {
         setLoadEdit(true)
-        if (context) {
+        if (context && account) {
             const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisPricing.endPoint+"/SeaFreight/SeaFreight?seaFreightId="+id, tempToken);
             if (response !== null && response !== undefined) {
                 var auxCarrier = {contactId: response.carrierId, contactName: response.carrierName};
@@ -391,7 +391,7 @@ function Seafreights() {
     }
     
     const searchSeafreights = async () => {
-        if (context) {
+        if (context && account) {
             setLoad(true);
             var requestFormatted = createGetRequestUrl(portDeparture?.portId, portDestination?.portId, searchedCarrier?.contactId);
             const response = await (context as BackendService<any>).getWithToken(requestFormatted, tempToken);
@@ -407,7 +407,7 @@ function Seafreights() {
 
     const createUpdateSeafreight = async () => {
         if (servicesData.length !== 0 && portLoading !== null && portDischarge !== null && carrier !== null && carrierAgent !== null && frequency !== 0 && transitTime !== 0 && validUntil !== null) {
-            if (context) {
+            if (context && account) {
                 var dataSent = null;
                 if (currentEditId !== "") {
                     dataSent = {
@@ -469,7 +469,7 @@ function Seafreights() {
     }
 
     const deleteSeafreightPrice = async (id: string) => {
-        if (context) {
+        if (context && account) {
             const response = await (context as BackendService<any>).deleteWithToken(protectedResources.apiLisPricing.endPoint+"/SeaFreight/DeleteSeaFreightPrice?id="+id, tempToken);
             if (response !== null && response !== undefined) {
                 enqueueSnackbar(t('rowDeletedSuccess'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
@@ -535,7 +535,7 @@ function Seafreights() {
     
     const createMiscellaneous = async () => {
         if (validUntil !== null && portLoading !== null && portDischarge !== null && carrier !== null) {
-            if (context) {
+            if (context && account) {
                 var dataSent = null;
                 if (miscellaneousId !== "" && miscellaneousId !== undefined) {
                     dataSent = {
@@ -774,6 +774,12 @@ function Seafreights() {
                     {
                         loadEdit === false ?
                         <Grid container spacing={2}>
+                            <Grid item xs={12} md={8}>
+                                <Typography sx={{ fontSize: 18, mb: 1 }}><b>Seafreight price information</b></Typography>
+                            </Grid>
+                            <Grid item xs={12} md={4}>
+                                <Button variant="contained" color="inherit" sx={{ float: "right", backgroundColor: "#fff", textTransform: "none" }} onClick={() => { setModal7(true); }} >{t('createNewCarrier')}</Button>
+                            </Grid> 
                             <Grid item xs={12} md={8}>
                                 <Grid container spacing={2}>
                                     <Grid item xs={12} md={6} mt={0.25}>

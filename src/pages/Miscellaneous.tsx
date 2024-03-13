@@ -218,7 +218,7 @@ function Miscellaneous() {
     }, [showHaulages, ports]);
     
     const getPorts = async () => {
-        if (context) {
+        if (context && account) {
             const response = await (context as BackendService<any>).getSingle(protectedResources.apiLisTransport.endPoint+"/Port/Ports");
             if (response !== null && response !== undefined) {
                 setPorts(response);
@@ -251,7 +251,7 @@ function Miscellaneous() {
     }
 
     const getServices = async (token: string) => {
-        if (context) {
+        if (context && account) {
             const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Service/Services", token);
             if (response !== null && response !== undefined) {
                 setServices(response.filter((obj: any) => obj.servicesTypeId.includes(5))); // Filter the services for miscellaneous (MISCELLANEOUS = 5)
@@ -260,7 +260,7 @@ function Miscellaneous() {
     }
     
     const getContainers = async (token: string) => {
-        if (context) {
+        if (context && account) {
             const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Package/Containers", token);
             if (response !== null && response !== undefined) {
                 setContainers(response);
@@ -327,7 +327,7 @@ function Miscellaneous() {
     
     const getMiscellaneous = async (id: string) => {
         setLoadEdit(true)
-        if (context) {
+        if (context && account) {
             const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisPricing.endPoint+"/Miscellaneous/Miscellaneous?id="+id+"&withShipment="+withShipment, tempToken);
             if (response !== null && response !== undefined) {
                 console.log(response.services);
@@ -349,7 +349,7 @@ function Miscellaneous() {
     }
     
     const searchMiscellaneous = async () => {
-        if (context) {
+        if (context && account) {
             setLoad(true);
             var requestFormatted = createGetRequestUrl(portDeparture?.portId, portDestination?.portId, searchedSupplier?.contactId);
             const response = await (context as BackendService<any>).getWithToken(requestFormatted+"&withShipment="+withShipment, tempToken);
@@ -367,7 +367,7 @@ function Miscellaneous() {
 
     const createMiscellaneous = async () => {
         if (servicesSelection !== null && validUntil !== null) {
-            if (context) {
+            if (context && account) {
                 var dataSent = null;
                 var urlString = "";
 
@@ -455,7 +455,7 @@ function Miscellaneous() {
     }
 
     const deleteMiscellaneous = async (id: string) => {
-        if (context) {
+        if (context && account) {
             // alert("Function not available yet!");
             const response = await (context as BackendService<any>).deleteWithToken(protectedResources.apiLisPricing.endPoint+"/Miscellaneous/DeleteMiscellaneous/"+id, tempToken);
             if (response !== null && response !== undefined) {

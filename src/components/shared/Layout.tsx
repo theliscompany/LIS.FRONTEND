@@ -179,7 +179,7 @@ function Layout(props: {children?: React.ReactNode}) {
     };
 
     // const loadRequests = async () => {
-    //     if (context) {
+    //     if (context && account) {
     //         const response = await (context as BackendService<any>).getSingle(protectedResources.apiLisQuotes.endPoint+"/Request");
     //         if (response !== null && response.code !== undefined) {
     //             if (response.code === 200) {

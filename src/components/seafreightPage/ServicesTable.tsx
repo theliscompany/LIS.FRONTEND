@@ -22,6 +22,7 @@ import {
 } from '@mui/x-data-grid';
 import { randomId } from '@mui/x-data-grid-generator';
 import { gridStyles, whiteButtonStyles } from '../../utils/misc/styles';
+import { Typography } from '@mui/material';
 
 interface EditToolbarProps {
     setRows: (newRows: (oldRows: GridRowsProp) => GridRowsProp) => void;
@@ -110,6 +111,10 @@ function ServicesTable(props: any) {
         setRowModesModel(newRowModesModel);
     };
 
+    const calculateTotalPrice = () => {
+        return rows.reduce((total: any, row: any) => total + row.price, 0);
+    };
+    
     const columns: GridColDef[] = [
         { field: 'serviceId', headerName: 'Service Id', editable: true, flex: 1 },
         { field: 'serviceName', headerName: 'Service Name', editable: true, type: 'singleSelect', valueOptions: props.servicesOptions, flex: 3 },
@@ -204,6 +209,13 @@ function ServicesTable(props: any) {
                 processRowUpdate={processRowUpdate}
                 slots={{
                     toolbar: EditToolbar,
+                    footer: () => (
+                        <Box sx={{ p: 1, display: 'flex', justifyContent: 'flex-end' }}>
+                            <Typography variant="h6" fontSize={16}>
+                                Total Price: {calculateTotalPrice()} {props.currency}
+                            </Typography>
+                        </Box>
+                    ),
                 }}
                 slotProps={{
                     toolbar: { setRows, setRowModesModel },

@@ -63,7 +63,7 @@ function UsersAssignment(props: any) {
     }, [account, instance]);
     
     const getAssignees = async () => {
-        if (context) {
+        if (context && account) {
             setLoad(true);
             const response = await (context as BackendService<any>).getSingle(protectedResources.apiLisQuotes.endPoint+"/Assignee");
             if (response !== null && response.code !== undefined) {
@@ -133,7 +133,7 @@ function UsersAssignment(props: any) {
     const removeAsManager = async (email: string) => {
         var assignee = assignees.find((user: any) => user.email === email);
         if (assignee) {
-            if (context) {
+            if (context && account) {
                 setLoad(true);
                 const response = await (context as any).delete(protectedResources.apiLisQuotes.endPoint+"/Assignee/"+assignee.id);
                 if (response !== null && response.code !== undefined) {
@@ -164,7 +164,7 @@ function UsersAssignment(props: any) {
     }
 
     const assignAsManager = async (name: string, email: string, idUser: string) => {
-        if (context) {
+        if (context && account) {
             let content = { "name": name, "email": email, "idUser": idUser };
             const response = await (context as BackendService<any>).post(protectedResources.apiLisQuotes.endPoint+"/Assignee", content);
             if (response !== null && response.status === 201) {

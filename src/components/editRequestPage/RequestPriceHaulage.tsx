@@ -145,7 +145,7 @@ function RequestPriceHaulage(props: any) {
     }
 
     const searchHaulages = async () => {
-        if (context) {
+        if (context && account) {
             setLoad(true);
             // setHauliersData([]);
             var requestFormatted = createGetRequestUrl(loadingCityObj?.portId, deliveryPort?.portId);
@@ -184,7 +184,7 @@ function RequestPriceHaulage(props: any) {
     
     const getTemplate = async (id: string) => {
         setLoadTemplate(true)
-        if (context) {
+        if (context && account) {
             const response = await (context as BackendService<any>).getSingle(protectedResources.apiLisTemplate.endPoint+"/Template/"+id);
             if (response !== null && response !== undefined) {
                 setTemplateBase(response.data.content);

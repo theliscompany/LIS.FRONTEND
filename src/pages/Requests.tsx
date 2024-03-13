@@ -18,6 +18,7 @@ import { RequestResponseDto } from '../utils/models/models';
 import { useTranslation } from 'react-i18next';
 import RequestViewItem from '../components/requestsPage/RequestViewItem';
 import AutocompleteSearch from '../components/shared/AutocompleteSearch';
+import { useAccount, useMsal } from '@azure/msal-react';
 
 function createGetRequestUrl(variable1: string, variable2: string, variable3: string, variable4: string, variable5: Dayjs|null, variable6: Dayjs|null, variable7: Dayjs|null, variable8: Dayjs|null) {
     let url = protectedResources.apiLisQuotes.endPoint+'/Request?';
@@ -70,6 +71,8 @@ function Requests() {
     let { search } = useParams();
 
     const context = useAuthorizedBackendApi();
+    const { instance, accounts } = useMsal();
+    const account = useAccount(accounts[0] || {});
 
     const { t } = useTranslation();
     
@@ -86,7 +89,7 @@ function Requests() {
     }, [context]);
 
     const loadRequests = async () => {
-        if (context) {
+        if (context && account) {
             setLoad(true);
             const response: RequestResponseDto = await (context as BackendService<any>).getSingle(search !== undefined ? protectedResources.apiLisQuotes.endPoint+"/Request?Search="+search : protectedResources.apiLisQuotes.endPoint+"/Request");
             if (response !== null && response.code !== undefined && response.data !== undefined) {
@@ -103,7 +106,7 @@ function Requests() {
     }
 
     const searchRequests = async () => {
-        if (context) {
+        if (context && account) {
             setLoad(true);
             
             var postcode1 = "";

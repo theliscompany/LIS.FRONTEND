@@ -92,7 +92,7 @@ function PriceOffers() {
     }, []);
     
     const getPriceOffers = async () => {
-        if (context) {
+        if (context && account) {
             setLoad(true);
             const response = await (context as BackendService<any>).getSingle(protectedResources.apiLisOffer.endPoint+"/QuoteOffer");
             if (response !== null && response.code !== undefined) {
@@ -111,7 +111,7 @@ function PriceOffers() {
     }
     
     const deleteOffer = async (id: string) => {
-        if (context) {
+        if (context && account) {
             const response = await (context as any).delete(protectedResources.apiLisOffer.endPoint+"/QuoteOffer/"+id);
             if (response !== null && response.code !== undefined) {
                 if (response.code === 200) {

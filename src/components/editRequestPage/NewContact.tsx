@@ -24,7 +24,7 @@ function NewContact(props: any) {
     const { t } = useTranslation();
     
     var namesArray = [
-        {type: "", name: t('clientName')},
+        {type: "", name: t('client')},
         {type: "SUPPLIERS", name: t('haulier')},
         {type: "SHIPPING_LINES", name: t('carrier')}
     ];
@@ -87,7 +87,7 @@ function NewContact(props: any) {
     return (
         <>
             <BootstrapDialogTitle id="custom-dialog-title7" onClose={props.closeModal}>
-                <b>{t('createNewContact')}</b>
+                <b>Create new {getFirstMatchingName(namesArray, props.categories)}</b>
             </BootstrapDialogTitle>
             <DialogContent dividers>
                 <Grid container spacing={2}>

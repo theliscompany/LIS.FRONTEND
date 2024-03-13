@@ -13,6 +13,7 @@ import { Dayjs } from 'dayjs';
 import { RequestResponseDto } from '../utils/models/models';
 import { useTranslation } from 'react-i18next';
 import { GridColDef, GridValueFormatterParams, GridRenderCellParams, DataGrid } from '@mui/x-data-grid';
+import { useAccount, useMsal } from '@azure/msal-react';
 
 function createGetRequestUrl(variable1: Dayjs|null, variable2: Dayjs|null, variable3: string, variable4: string) {
     let url = protectedResources.apiLisQuotes.endPoint+'/RequestQuoteHistory?';
@@ -44,7 +45,9 @@ function Histories(props: any) {
     const [assignedDateEnd, setAssignedDateEnd] = useState<Dayjs | null>(null);
 
     const context = useAuthorizedBackendApi();
-    
+    const { instance, accounts } = useMsal();
+    const account = useAccount(accounts[0] || {});
+
     const { t } = useTranslation();
     
     useEffect(() => {
@@ -85,7 +88,7 @@ function Histories(props: any) {
     ];
     
     const getHistories = async () => {
-        if (context) {
+        if (context && account) {
             setLoad(true);
             const response = await (context as BackendService<any>).getSingle(protectedResources.apiLisQuotes.endPoint+"/RequestQuoteHistory");
             if (response !== null && response.code !== undefined) {
@@ -102,7 +105,7 @@ function Histories(props: any) {
     }
 
     const searchHistories = async () => {
-        if (context) {
+        if (context && account) {
             setLoad(true);
             var requestFormatted = createGetRequestUrl(assignedDateStart, assignedDateEnd, assigneeId, requestQuoteId);
             const response: RequestResponseDto = await (context as BackendService<any>).getSingle(requestFormatted);

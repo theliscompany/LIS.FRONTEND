@@ -131,6 +131,21 @@ function NewRequest(props: any) {
             }  
         }
     }
+
+    const resetForm = () => {
+        setEmail("");
+        setPhone("");
+        setMessage("");
+        setPackingType("FCL");
+        setClientNumber(null);
+        setDeparture(null);
+        setArrival(null);
+        setTags([]);
+        setAssignedManager("null");
+        setContainerType("20' Dry");
+        setQuantity(1);
+        setContainersSelection([]);
+    }
     
     useEffect(() => {
         getContainers();
@@ -140,7 +155,7 @@ function NewRequest(props: any) {
 
     const assignManager = async (idQuote: string) => {
         if (currentUser !== null && currentUser !== undefined && currentUser !== "") {
-            if (context) {
+            if (context && account) {
                 const response = await (context as BackendService<any>).put(protectedResources.apiLisQuotes.endPoint+"/Assignee/"+idQuote+"/"+assignedManager, []);
                 if (response !== null) {
                     setLoad(false);
@@ -155,12 +170,12 @@ function NewRequest(props: any) {
         }
         else {
             setLoad(false);
-            enqueueSnackbar(t('requestCreated'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+            enqueueSnackbar(t('errorHappenedRequest'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
         }
     }
 
     const getAssignees = async () => {
-        if (context) {
+        if (context && account) {
             setLoadUser(true);
             const response = await (context as BackendService<any>).getSingle(protectedResources.apiLisQuotes.endPoint+"/Assignee");
             if (response !== null && response.code !== undefined) {
@@ -196,7 +211,8 @@ function NewRequest(props: any) {
 
     function sendQuotationForm() {
         if (phone !== "" && email !== "" && arrival !== null && departure !== null) {
-            if (email === "" || (email !== "" && validMail(email))) {
+            // Old test : email === "" || (email !== "" && validMail(email))
+            if (validMail(email)) {
                 setLoad(true);
                 var auxUnits = [];
                 if (packingType === "Breakbulk/LCL") {
@@ -217,8 +233,6 @@ function NewRequest(props: any) {
                     body: JSON.stringify({ 
                         email: email,
                         whatsapp: phone,
-                        // departure: departure !== null && departure !== undefined ? departure.city.toUpperCase()+', '+departure.country+', '+departure.latitude+', '+departure.longitude : "",
-                        // arrival: arrival !== null && arrival !== undefined ? arrival.city.toUpperCase()+', '+arrival.country+', '+arrival.latitude+', '+arrival.longitude : "",
                         departure: departure !== null && departure !== undefined ? [departure.city.toUpperCase(),departure.country,departure.latitude,departure.longitude,postcode1].filter((val: any) => { return val !== "" }).join(', ') : "",
                         arrival: arrival !== null && arrival !== undefined ? [arrival.city.toUpperCase(),arrival.country,arrival.latitude,arrival.longitude,postcode2].filter((val: any) => { return val !== "" }).join(', ') : "",
                         cargoType: 0,
@@ -244,13 +258,8 @@ function NewRequest(props: any) {
                 })
                 .then((response: any) => response.json())
                 .then((data: any) => {
-                    //setLoad(false);
                     if (data.code === 201) {
-                        //enqueueSnackbar("Your request has been created with success.", { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
-                        setPhone("");
-                        setEmail("");
-                        setMessage("");
-
+                        resetForm();
                         assignManager(data.data.id);
                     }
                     else {
@@ -336,7 +345,7 @@ function NewRequest(props: any) {
                                 <Alert severity="info" sx={{ mt: 1 }}>{t('requestAssignedTo')} {account?.name} {t('byDefault')}</Alert> : 
                                 <Alert severity="warning" sx={{ mt: 1 }}>{t('requestNotAssignedCurrentUser')} <Link to="/admin/users" style={{ textDecoration: "none" }}>{t('users')}</Link>.</Alert>
                                 : <Skeleton sx={{ my: 1 }} />
-                            }             */}
+                            } */}
                         </Grid>
                         
                         <Grid item xs={12} md={6}>
@@ -349,11 +358,11 @@ function NewRequest(props: any) {
                         </Grid>
                         <Grid item xs={12} md={6} mt={1}>
                             <InputLabel htmlFor="departure" sx={inputLabelStyles}>{t('departure')}</InputLabel>
-                            <AutocompleteSearch id="departure" value={departure} onChange={setDeparture} fullWidth />
+                            <AutocompleteSearch id="departure" value={departure} onChange={setDeparture} fullWidth /*callBack={(val: any) => { setDeparture(val); }}*/ />
                         </Grid>
                         <Grid item xs={12} md={6} mt={1}>
                             <InputLabel htmlFor="arrival" sx={inputLabelStyles}>{t('arrival')}</InputLabel>
-                            <AutocompleteSearch id="arrival" value={arrival} onChange={setArrival} fullWidth />
+                            <AutocompleteSearch id="arrival" value={arrival} onChange={setArrival} fullWidth /*callBack={(val: any) => { setArrival(val); }}*/ />
                         </Grid>
                         <Grid item xs={12} md={2} mt={1}>
                             <InputLabel htmlFor="packing-type" sx={inputLabelStyles}>{t('packingType')}</InputLabel>
