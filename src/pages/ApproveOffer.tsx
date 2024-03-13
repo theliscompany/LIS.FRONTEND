@@ -36,7 +36,7 @@ function ApproveOffer(props: any) {
     }, [context]);
 
     const loadOffer = async () => {
-        if (context) {
+        if (context && account) {
             const response = await (context as BackendService<any>).getSingle(protectedResources.apiLisOffer.endPoint+"/QuoteOffer/"+id);
             if (response !== null && response.code !== undefined) {
                 if (response.code === 200) {

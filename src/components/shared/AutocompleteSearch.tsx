@@ -15,13 +15,13 @@ interface LocationAutocompleteProps {
 }
 
 const AutocompleteSearch: React.FC<LocationAutocompleteProps> = ({ id, value, onChange, fullWidth, disabled, callBack }) => {
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(value === null ? false : true);
     const [open, setOpen] = useState(false);
     const [options, setOptions] = useState<any[]>([]);
-
-    const regionNames = new Intl.DisplayNames(['en'], {type: 'region'});
-    
     const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
+    
+    const regionNames = new Intl.DisplayNames(['en'], {type: 'region'});
+    const { t } = useTranslation();
 
     const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
         setAnchorEl(event.currentTarget);
@@ -103,8 +103,6 @@ const AutocompleteSearch: React.FC<LocationAutocompleteProps> = ({ id, value, on
         setLoading(false);
     }, 1000);
 
-    const { t } = useTranslation();
-
     return (
         <Box sx={{ position: "relative "}}>
         <IconButton onClick={handleClick} size="small" sx={!loading ? { position: "absolute", top: "-24px", right: "-4px" } : { position: "absolute", top: "-32px", right: "-4px" }}>
@@ -121,14 +119,15 @@ const AutocompleteSearch: React.FC<LocationAutocompleteProps> = ({ id, value, on
             }}
         >
             <Typography sx={{ p: 2, fontSize: 12 }}>
-                - Type the name of the city you want. Eg : "Douala"<br />
-                - If no result, add the country code. Eg : "Douala / en"<br />
-                - If you cant find a town, try this. Eg : "Douala, en"<br />
+                - Type the name of the city you want. Eg : "Dakar"<br />
+                - If no result, add the country code. Eg : "Dakar / sen"<br />
+                - If you cant find a town, try this. Eg : "Dakar, sen"<br />
             </Typography>
         </Popover>
         {
             !loading ?
             <Autocomplete
+                key={value || 'empty'}
                 id={id}
                 fullWidth={fullWidth}
                 freeSolo
@@ -157,7 +156,6 @@ const AutocompleteSearch: React.FC<LocationAutocompleteProps> = ({ id, value, on
                 }}
                 value={value}
                 onChange={(event: any, newValue: any) => {
-                    // console.log(value);
                     onChange(newValue);
                     if (callBack) {
                         callBack(newValue);

@@ -207,7 +207,7 @@ function Haulages() {
     }
     
     const getPorts = async () => {
-        if (context) {
+        if (context && account) {
             const response = await (context as BackendService<any>).getSingle(protectedResources.apiLisTransport.endPoint+"/Port/Ports");
             if (response !== null && response !== undefined) {
                 setPorts(response);
@@ -240,7 +240,7 @@ function Haulages() {
     }
     
     const getServices = async (token: string) => {
-        if (context) {
+        if (context && account) {
             const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Service/Services", token);
             if (response !== null && response !== undefined) {
                 setAllServices(response);
@@ -250,7 +250,7 @@ function Haulages() {
     }
     
     const getContainers = async (token: string) => {
-        if (context) {
+        if (context && account) {
             const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Package/Containers", token);
             if (response !== null && response !== undefined) {
                 setContainers(response);
@@ -432,7 +432,7 @@ function Haulages() {
     }
 
     const deleteHaulagePrice = async (id: string) => {
-        if (context) {
+        if (context && account) {
             // alert("Function not available yet!");
             const response = await (context as BackendService<any>).deleteWithToken(protectedResources.apiLisPricing.endPoint+"/Haulage/DeleteHaulage?offerId="+id, tempToken);
             if (response !== null && response !== undefined) {
@@ -511,7 +511,7 @@ function Haulages() {
     
     const createMiscellaneous = async () => {
         if (validUntil !== null && haulier !== null) {
-            if (context) {
+            if (context && account) {
                 var postalCode = loadingCity !== null ? loadingCity.postalCode !== undefined ? loadingCity.postalCode : "" : ""; 
                 var city = loadingCity !== null ? loadingCity.city.toUpperCase()+', '+loadingCity.country.toUpperCase() : "";
                 if (postalCode !== "") {
@@ -591,7 +591,7 @@ function Haulages() {
                     </Grid>
                     <Grid item xs={12} md={4} mt={1}>
                         <InputLabel htmlFor="company-name" sx={inputLabelStyles}>{t('haulier')}</InputLabel>
-                        <CompanySearch id="company-name" value={searchedHaulier} onChange={setSearchedHaulier} category={CategoryEnum.CUSTOMERS} fullWidth />
+                        <CompanySearch id="company-name" value={searchedHaulier} onChange={setSearchedHaulier} category={CategoryEnum.SUPPLIERS} fullWidth />
                     </Grid>
                     <Grid item xs={12} md={3} mt={1}>
                         <InputLabel htmlFor="loading-city-searched" sx={inputLabelStyles}>{t('loadingCity')}</InputLabel>
@@ -707,8 +707,11 @@ function Haulages() {
                     {
                         loadEdit === false ?
                         <Grid container spacing={2}>
-                            <Grid item xs={12} md={12}>
+                            <Grid item xs={12} md={8}>
                                 <Typography sx={{ fontSize: 18, mb: 1 }}><b>Haulage price information</b></Typography>
+                            </Grid>
+                            <Grid item xs={12} md={4}>
+                                <Button variant="contained" color="inherit" sx={{ float: "right", backgroundColor: "#fff", textTransform: "none" }} onClick={() => { setModal7(true); }} >{t('createNewHaulier')}</Button>
                             </Grid>
                             <Grid item xs={12} md={8}>
                                 <Grid container spacing={2}>

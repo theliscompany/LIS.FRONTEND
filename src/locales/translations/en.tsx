@@ -290,6 +290,7 @@ export const en = {
   height: "Height",
   fieldNeedTobeFilled: "You need to fill the fields required",
   clientName: "Client name",
+  client: "Client",
   costPrices: "Cost per unit",
   quoteNumber: "Quote number",
   lastUpdated: "Last updated",

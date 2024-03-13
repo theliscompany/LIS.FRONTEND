@@ -160,7 +160,7 @@ function RequestPriceRequest(props: any) {
     }
 
     const searchSeafreights = async () => {
-        if (context) {
+        if (context && account) {
             setLoad(true);
             // setCarriersData([]);
             var requestFormatted = createGetRequestUrl(portLoading?.portId, portDischarge?.portId);
@@ -199,7 +199,7 @@ function RequestPriceRequest(props: any) {
     
     const getTemplate = async (id: string) => {
         setLoadTemplate(true)
-        if (context) {
+        if (context && account) {
             const response = await (context as BackendService<any>).getSingle(protectedResources.apiLisTemplate.endPoint+"/Template/"+id);
             if (response !== null && response !== undefined) {
                 setTemplateBase(response.data.content);

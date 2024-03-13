@@ -569,7 +569,7 @@ function Request() {
 
     
     const getAssignees = async () => {
-        if (context) {
+        if (context && account) {
             setLoadAssignees(true);
             const response = await (context as BackendService<any>).getSingle(protectedResources.apiLisQuotes.endPoint+"/Assignee");
             if (response !== null && response.code !== undefined) {
@@ -591,7 +591,7 @@ function Request() {
     }
     
     const loadRequest = async (allPorts: any, allProducts: any) => {
-        if (context) {
+        if (context && account) {
             // setLoad(true);
             const response = await (context as BackendService<any>).getSingle(protectedResources.apiLisQuotes.endPoint+"/Request/"+id);
             if (response !== null && response.code !== undefined) {
@@ -643,7 +643,7 @@ function Request() {
     
     const assignManager = async () => {
         if (assignedManager !== null && assignedManager !== undefined && assignedManager !== "") {
-            if (context) {
+            if (context && account) {
                 const response = await (context as BackendService<any>).put(protectedResources.apiLisQuotes.endPoint+"/Assignee/"+id+"/"+assignedManager, []);
                 if (response !== null) {
                     enqueueSnackbar(t('managerAssignedRequest'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
@@ -659,7 +659,7 @@ function Request() {
     }
 
     const removeManager = async () => {
-        if (context) {
+        if (context && account) {
             const response = await (context as BackendService<any>).put(protectedResources.apiLisQuotes.endPoint+"/Assignee/unassign/"+id, []);
             if (response !== null) {
                 enqueueSnackbar(t('managerRemovedRequest'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
@@ -680,7 +680,7 @@ function Request() {
             auxUnits = unitsSelection;
         }
         
-        if (context) {
+        if (context && account) {
             var postcode1 = departure.postalCode !== null && departure.postalCode !== undefined ? departure.postalCode : "";
             var postcode2 = arrival.postalCode !== null && arrival.postalCode !== undefined ? arrival.postalCode : "";
 
@@ -965,7 +965,7 @@ function Request() {
 
     const createNewOffer = async () => {
         if (selectedSeafreight !== null) {
-            if (context) {
+            if (context && account) {
                 var haulage = null;
                 var miscellaneous = null;
                 if (selectedHaulage !== null) {
@@ -1116,7 +1116,7 @@ function Request() {
     // Work on the template
     const getTemplate = async (id: string) => {
         setLoadTemplate(true)
-        if (context) {
+        if (context && account) {
             const response = await (context as BackendService<any>).getSingle(protectedResources.apiLisTemplate.endPoint+"/Template/"+id);
             if (response !== null && response !== undefined) {
                 setTemplateBase(response.data);

@@ -86,7 +86,7 @@ function MyRequests() {
     }, [instance, account, context]);
 
     const getAssignees = async () => {
-        if (context) {
+        if (context && account) {
             setLoad(true);
             const response = await (context as BackendService<any>).getSingle(protectedResources.apiLisQuotes.endPoint+"/Assignee");
             if (response !== null && response.code !== undefined) {
@@ -104,7 +104,7 @@ function MyRequests() {
     }
 
     const loadRequests = async (assigneesList: any) => {
-        if (context) {
+        if (context && account) {
             //setLoad(true);
             var auxAssignee = assigneesList.find((elm: any) => elm.email === account?.username);
             if (auxAssignee !== undefined) {
@@ -128,7 +128,7 @@ function MyRequests() {
     }
 
     const searchRequests = async () => {
-        if (context) {
+        if (context && account) {
             setLoad(true);
             var idAssignee = currentUser.id;
             

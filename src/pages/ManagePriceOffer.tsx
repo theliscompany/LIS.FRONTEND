@@ -67,7 +67,7 @@ function ManagePriceOffer(props: any) {
 	}, [context]);
 
 	const loadOffer = async () => {
-		if (context) {
+		if (context && account) {
 			const response = await (context as BackendService<any>).getSingle(protectedResources.apiLisOffer.endPoint + "/QuoteOffer/" + id);
 			if (response !== null && response.code !== undefined) {
 				if (response.code === 200) {
@@ -120,7 +120,7 @@ function ManagePriceOffer(props: any) {
 	}
 
 	const updateOffer = async () => {
-		if (context) {
+		if (context && account) {
 			const body: any = {
 				"requestQuoteId": offer.requestQuoteId,
 				"comment": rteRef.current?.editor?.getHTML(),
@@ -188,7 +188,7 @@ function ManagePriceOffer(props: any) {
 	}
 
 	const acceptOffer = async () => {
-		if (context) {
+		if (context && account) {
 			const body: any = {
 				id: id,
 				newStatus: "Accepted",
@@ -226,7 +226,7 @@ function ManagePriceOffer(props: any) {
 	}
 
 	const rejectOffer = async () => {
-		if (context) {
+		if (context && account) {
 			const body: any = {
 				id: id,
 				newStatus: "Rejected",

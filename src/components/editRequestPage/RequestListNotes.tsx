@@ -7,6 +7,7 @@ import { useAuthorizedBackendApi } from '../../api/api';
 import { enqueueSnackbar } from 'notistack';
 import { protectedResources } from '../../config/authConfig';
 import { BackendService } from '../../utils/services/fetch';
+import { useAccount, useMsal } from '@azure/msal-react';
 
 function RequestListNotes(props: any) {
     const [loadNotes, setLoadNotes] = useState<boolean>(true);
@@ -14,14 +15,16 @@ function RequestListNotes(props: any) {
     
     const context = useAuthorizedBackendApi();
     const { t } = useTranslation();
-    
+    const { instance, accounts } = useMsal();
+    const account = useAccount(accounts[0] || {});
+
     useEffect(() => {
         // Here i initialize the sea ports
         getNotes(props.id);
     }, [context]);
     
     const getNotes = async (idRequest: string|undefined) => {
-        if (context) {
+        if (context && account) {
             setLoadNotes(true);
             const response = await (context as BackendService<any>).getSingle(protectedResources.apiLisQuotes.endPoint+"/RequestQuoteNotes?requestQuoteId="+idRequest);
             if (response !== null && response.code !== undefined) {
@@ -38,7 +41,7 @@ function RequestListNotes(props: any) {
     }
     
     const deleteNote = async (idNote: string) => {
-        if (context) {
+        if (context && account) {
             const response = await (context as any).delete(protectedResources.apiLisQuotes.endPoint+"/RequestQuoteNotes/"+idNote);
             if (response !== null && response.code !== undefined) {
                 if (response.code === 200) {

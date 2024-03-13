@@ -22,6 +22,7 @@ export const fr = {
   name: "Nom",
   specifics: "Spécificités",
   clientNumber: "Nom du client (ou numéro)",
+  client: "Client",
   details: "Autres détails concernant la demande (Optionnel)",
   assignedManager: "Gestionnaire assigné",
   overviewTitle: "Historique des demandes de devis",
