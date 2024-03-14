@@ -15,7 +15,7 @@ interface LocationAutocompleteProps {
 }
 
 const AutocompleteSearch: React.FC<LocationAutocompleteProps> = ({ id, value, onChange, fullWidth, disabled, callBack }) => {
-    const [loading, setLoading] = useState(value === null ? false : true);
+    const [loading, setLoading] = useState(false);
     const [open, setOpen] = useState(false);
     const [options, setOptions] = useState<any[]>([]);
     const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
@@ -127,7 +127,7 @@ const AutocompleteSearch: React.FC<LocationAutocompleteProps> = ({ id, value, on
         {
             !loading ?
             <Autocomplete
-                key={value || 'empty'}
+                key={value || "key+"+id}
                 id={id}
                 fullWidth={fullWidth}
                 freeSolo
