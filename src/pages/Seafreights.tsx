@@ -47,7 +47,7 @@ function createGetRequestUrl(variable1: number, variable2: number, variable3: nu
 function Seafreights() {
     const [load, setLoad] = useState<boolean>(true);
     const [loadEdit, setLoadEdit] = useState<boolean>(false);
-    const [loadMiscs, setLoadMiscs] = useState<boolean>(true);
+    const [loadMiscs, setLoadMiscs] = useState<boolean>(false);
     const [modal, setModal] = useState<boolean>(false);
     const [modal2, setModal2] = useState<boolean>(false);
     const [modal6, setModal6] = useState<boolean>(false);
@@ -215,7 +215,7 @@ function Seafreights() {
             );
             
             try {
-                const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisClient.endPoint+"/Contact/GetContacts", token);
+                const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisCrm.endPoint+"/Contact/GetContacts", token);
                 if (response !== null && response !== undefined) {
                     // Removing duplicates from client array
                     setClients(response.filter((obj: any, index: number, self: any) => index === self.findIndex((o: any) => o.contactName === obj.contactName)));
@@ -508,7 +508,8 @@ function Seafreights() {
                 const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisPricing.endPoint+"/Miscellaneous/Miscellaneous?SupplierId="+carrier1.contactId+"&DeparturePortId="+portLoading1.portId+"&DestinationPortId="+portDischarge1.portId+"&withShipment=true", token !== null ? token : tempToken);
                 if (response !== null && response !== undefined && response.length !== 0) {
                     // Here i check if the result is good
-                    var selectedElement = response[0].suppliers.find((elm: any) => elm.containers[0].container.packageName === container.packageName);
+                    // console.log(container);
+                    var selectedElement = response[0].suppliers.find((elm: any) => elm.containers.length !== 0 ? elm.containers[0].container.packageName === container.packageName : null);
                     if (response.length !== 0 && selectedElement !== undefined) {
                         setLoadMiscs(false);
                         
@@ -534,56 +535,58 @@ function Seafreights() {
     }
     
     const createMiscellaneous = async () => {
-        if (validUntil !== null && portLoading !== null && portDischarge !== null && carrier !== null) {
-            if (context && account) {
-                var dataSent = null;
-                if (miscellaneousId !== "" && miscellaneousId !== undefined) {
-                    dataSent = {
-                        "miscellaneousId": miscellaneousId,
-                        "id": miscellaneousId,
-                        "departurePortId": portLoading.portId,
-                        "destinationPortId": portDischarge.portId,
-                        "departurePortName": portLoading.portName,
-                        "destinationPortName": portDischarge.portName,
-                        "supplierId": carrier.contactId,
-                        "supplierName": carrier.contactName,
-                        "currency": currency,
-                        "validUntil": validUntil?.toISOString(),
-                        "comment": "with seafreight",
-                        "containers": transformArray(deflattenData2(servicesData2)),
-                        "services": deflattenData2(servicesData2),
-                        "updated": (new Date()).toISOString()
-                    };
-                }
-                else {
-                    dataSent = {
-                        // "miscellaneousId": currentEditId,
-                        "departurePortId": portLoading.portId,
-                        "destinationPortId": portDischarge.portId,
-                        "departurePortName": portLoading.portName,
-                        "destinationPortName": portDischarge.portName,
-                        "supplierId": carrier.contactId,
-                        "supplierName": carrier.contactName,
-                        "currency": currency,
-                        "validUntil": validUntil?.toISOString(),
-                        "comment": "with seafreight",
-                        "containers": transformArray(deflattenData2(servicesData2)),
-                        "services": deflattenData2(servicesData2),
-                        "updated": (new Date()).toISOString()
-                    };
-                }
-                console.log(dataSent);
-                const response = await (context as BackendService<any>).postWithToken(protectedResources.apiLisPricing.endPoint+"/Miscellaneous/Miscellaneous", dataSent, tempToken);
-                if (response !== null && response !== undefined) {
-                    setModal2(false);
-                }
-                else {
-                    enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+        if (miscellaneousId !== "" || servicesData2.length !== 0) {
+            if (validUntil !== null && portLoading !== null && portDischarge !== null && carrier !== null) {
+                if (context && account) {
+                    var dataSent = null;
+                    if (miscellaneousId !== "" && miscellaneousId !== undefined) {
+                        dataSent = {
+                            "miscellaneousId": miscellaneousId,
+                            "id": miscellaneousId,
+                            "departurePortId": portLoading.portId,
+                            "destinationPortId": portDischarge.portId,
+                            "departurePortName": portLoading.portName,
+                            "destinationPortName": portDischarge.portName,
+                            "supplierId": carrier.contactId,
+                            "supplierName": carrier.contactName,
+                            "currency": currency,
+                            "validUntil": validUntil?.toISOString(),
+                            "comment": "with seafreight",
+                            "containers": transformArray(deflattenData2(servicesData2)),
+                            "services": deflattenData2(servicesData2),
+                            "updated": (new Date()).toISOString()
+                        };
+                    }
+                    else {
+                        dataSent = {
+                            // "miscellaneousId": currentEditId,
+                            "departurePortId": portLoading.portId,
+                            "destinationPortId": portDischarge.portId,
+                            "departurePortName": portLoading.portName,
+                            "destinationPortName": portDischarge.portName,
+                            "supplierId": carrier.contactId,
+                            "supplierName": carrier.contactName,
+                            "currency": currency,
+                            "validUntil": validUntil?.toISOString(),
+                            "comment": "with seafreight",
+                            "containers": transformArray(deflattenData2(servicesData2)),
+                            "services": deflattenData2(servicesData2),
+                            "updated": (new Date()).toISOString()
+                        };
+                    }
+                    console.log(dataSent);
+                    const response = await (context as BackendService<any>).postWithToken(protectedResources.apiLisPricing.endPoint+"/Miscellaneous/Miscellaneous", dataSent, tempToken);
+                    if (response !== null && response !== undefined) {
+                        setModal2(false);
+                    }
+                    else {
+                        enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                    }
                 }
             }
-        }
-        else {
-            enqueueSnackbar(t('fieldsEmptySeafreight'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+            else {
+                enqueueSnackbar(t('fieldsEmptySeafreight'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+            }
         }
     }
 

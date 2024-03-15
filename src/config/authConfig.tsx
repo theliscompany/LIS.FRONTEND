@@ -60,7 +60,7 @@ export const protectedResources = {
   apiLisOffer: {
     endPoint: process.env.REACT_APP_API_LIS_OFFER_ENDPOINT
   },
-  apiLisClient: {
+  apiLisCrm: {
     endPoint: process.env.REACT_APP_API_LIS_CLIENT_ENDPOINT
   },
   apiLisTemplate: {

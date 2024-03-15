@@ -25,6 +25,7 @@ function NewContact(props: any) {
     
     var namesArray = [
         {type: "", name: t('client')},
+        {type: "OTHERS", name: t('supplier')},
         {type: "SUPPLIERS", name: t('haulier')},
         {type: "SHIPPING_LINES", name: t('carrier')}
     ];
@@ -62,13 +63,14 @@ function NewContact(props: any) {
                 "email": testEmail
             }
             
-            var categoriesText = props.categories.length !== 0 ? "?"+ props.categories.map((category: any) => `categories=${category}`).join('&') : "";
+            var categoriesText = props.categories.length !== 0 ? "?"+ props.categories.map((category: any) => category !== "OTHERS" ? `categories=${category}`  : "").join('&') : "";
             if (categoriesText === "?categories=") {
                 categoriesText = "";
             }
+            console.log(categoriesText);
 
             try {
-                const response = await (context as BackendService<any>).postWithToken(protectedResources.apiLisClient.endPoint+"/Contact/CreateCustomerContact"+categoriesText, dataSent, token);
+                const response = await (context as BackendService<any>).postWithToken(protectedResources.apiLisCrm.endPoint+"/Contact/CreateCustomerContact"+categoriesText, dataSent, token);
                 if (response !== null) {
                     enqueueSnackbar("The contact has been added with success!", { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
                     props.closeModal();

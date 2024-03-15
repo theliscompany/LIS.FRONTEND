@@ -21,6 +21,7 @@ import dayjs, { Dayjs } from 'dayjs';
 import { AuthenticationResult } from '@azure/msal-browser';
 import { useMsal, useAccount } from '@azure/msal-react';
 import { CategoryEnum } from '../utils/constants';
+import NewContact from '../components/editRequestPage/NewContact';
 
 function createGetRequestUrl(variable1: number, variable2: number, variable3: number) {
     let url = protectedResources.apiLisPricing.endPoint+"/Miscellaneous/Miscellaneous?";
@@ -45,6 +46,7 @@ function Miscellaneous() {
     const [loadEdit, setLoadEdit] = useState<boolean>(false);
     const [modal, setModal] = useState<boolean>(false);
     const [modal2, setModal2] = useState<boolean>(false);
+    const [modal7, setModal7] = useState<boolean>(false);
     const [ports, setPorts] = useState<any>(null);
     const [containers, setContainers] = useState<any>(null);
     const [services, setServices] = useState<any>(null);
@@ -488,7 +490,19 @@ function Miscellaneous() {
             <Box sx={{ py: 2.5 }}>
                 <Typography variant="h5" sx={{mt: {xs: 4, md: 1.5, lg: 1.5 }}} mx={5}><b>{t('listMiscellaneous')}</b></Typography>
                 <Grid container spacing={2} mt={0} px={5}>
-                    <Grid item xs={12} md={6}>
+                    <Grid item xs={12} md={7.5}>
+                        <FormControlLabel 
+                            control={
+                            <Switch
+                                checked={showHaulages}
+                                onChange={(event: React.ChangeEvent<HTMLInputElement>) => { 
+                                    console.log(event.target.checked); setShowHaulages(event.target.checked);
+                                }}
+                                inputProps={{ 'aria-label': 'controlled' }}
+                            />}
+                            label={"Show haulage miscs"} 
+                            sx={{ float: "right" }}
+                        />
                         <FormControlLabel 
                             control={
                             <Switch
@@ -502,25 +516,13 @@ function Miscellaneous() {
                             sx={{ float: "right" }}
                         />
                     </Grid>
-                    <Grid item xs={12} md={3}>
-                        <FormControlLabel 
-                            control={
-                            <Switch
-                                checked={showHaulages}
-                                onChange={(event: React.ChangeEvent<HTMLInputElement>) => { 
-                                    console.log(event.target.checked); setShowHaulages(event.target.checked);
-                                }}
-                                inputProps={{ 'aria-label': 'controlled' }}
-                            />}
-                            label={"Show haulage miscs"} 
-                            sx={{ float: "right" }}
-                        />
-                    </Grid>
-                    <Grid item xs={12} md={3}>
+                    <Grid item xs={12} md={4.5}>
                         <Button variant="contained" sx={actionButtonStyles} onClick={() => { setCurrentEditId(""); resetForm(); setModal2(true); }}>
                             {t('newMiscellaneousPrice')} <AddCircleOutlinedIcon sx={{ ml: 0.5, pb: 0.25, justifyContent: "center", alignItems: "center" }} fontSize="small" />
                         </Button>
+                        <Button variant="contained" color="inherit" sx={{ float: "right", backgroundColor: "#fff", textTransform: "none" }} onClick={() => { setModal7(true); }} >Create new supplier</Button>
                     </Grid>
+                    
                     <Grid item xs={12} md={4} mt={1}>
                         <InputLabel htmlFor="company-name" sx={inputLabelStyles}>{t('supplier')}</InputLabel>
                         <CompanySearch id="company-name" value={searchedSupplier} onChange={setSearchedSupplier} category={0} callBack={() => console.log(searchedSupplier)} fullWidth />
@@ -707,6 +709,12 @@ function Miscellaneous() {
                     {
                         loadEdit === false ?
                         <Grid container spacing={2}>
+                            <Grid item xs={12} md={8}>
+                                <Typography sx={{ fontSize: 18 }}><b>Miscellaneous price information</b></Typography>
+                            </Grid>
+                            <Grid item xs={12} md={4}>
+                                <Button variant="contained" color="inherit" sx={{ float: "right", backgroundColor: "#fff", textTransform: "none" }} onClick={() => { setModal7(true); }} >Create new supplier</Button>
+                            </Grid>
                             <Grid item xs={12} md={9}>
                                 <Grid container spacing={2}>
                                     <Grid item xs={12} md={6} mt={0.25}>
@@ -945,6 +953,20 @@ function Miscellaneous() {
                     </Button>
                     <Button variant="contained" onClick={() => setModal2(false)} sx={buttonCloseStyles}>{t('close')}</Button>
                 </DialogActions>
+            </BootstrapDialog>
+
+            {/* Add a new contact */}
+            <BootstrapDialog
+                onClose={() => setModal7(false)}
+                aria-labelledby="custom-dialog-title7"
+                open={modal7}
+                maxWidth="md"
+                fullWidth
+            >
+                <NewContact 
+                    categories={["OTHERS","SUPPLIERS"]}
+                    closeModal={() => setModal7(false)}
+                />
             </BootstrapDialog>
         </div>
     );

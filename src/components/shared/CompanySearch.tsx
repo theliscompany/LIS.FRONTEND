@@ -47,9 +47,9 @@ const CompanySearch: React.FC<CompanyAutocompleteProps> = ({ id, value, onChange
                 }
             );
             
-            var requestString = protectedResources.apiLisClient.endPoint+"/Contact/GetContactsByCategory?contactName="+search+"&category="+category;
+            var requestString = protectedResources.apiLisCrm.endPoint+"/Contact/GetContactsByCategory?contactName="+search+"&category="+category;
             if (category === 0) {
-                requestString = protectedResources.apiLisClient.endPoint+"/Contact/GetContactsByName?value="+search;
+                requestString = protectedResources.apiLisCrm.endPoint+"/Contact/GetContactsByName?value="+search;
             }
             
             const response = await (context as BackendService<any>).getWithToken(requestString, token);
