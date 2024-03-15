@@ -62,8 +62,8 @@ const ClientSearch: React.FC<LocationAutocompleteProps> = ({ id, value, onChange
             
             if (checkFormatCode(search)) {
                 // First i search by contact number
-                const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisClient.endPoint+"/Contact/GetContactsByContactNumber?contactNumber="+search+"&category=1", token);
-                // const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisClient.endPoint+"/Contact/GetContacts", token);
+                const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisCrm.endPoint+"/Contact/GetContactsByContactNumber?contactNumber="+search+"&category=1", token);
+                // const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisCrm.endPoint+"/Contact/GetContacts", token);
                 if (response !== null && response !== undefined && response.length !== 0) {
                     console.log(response);
                     // Removing duplicates from result before rendering
@@ -72,7 +72,7 @@ const ClientSearch: React.FC<LocationAutocompleteProps> = ({ id, value, onChange
             } 
             else {
                 // If i dont find i search by contact name
-                const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisClient.endPoint+"/Contact/GetContactsByCategory?contactName="+search+"&category=1", token);
+                const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisCrm.endPoint+"/Contact/GetContactsByCategory?contactName="+search+"&category=1", token);
                 if (response !== null && response !== undefined) {
                     console.log(response);
                     // Removing duplicates from result before rendering

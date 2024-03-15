@@ -164,6 +164,7 @@ function Request() {
     const [haulages, setHaulages] = useState<any>(null);
     const [seafreights, setSeafreights] = useState<any>(null);
     const [generalMiscs, setGeneralMiscs] = useState<any>(null);
+    const [tableMiscs, setTableMiscs] = useState<any>(null);
     const [selectedHaulage, setSelectedHaulage] = useState<any>(null);
     const [selectedSeafreight, setSelectedSeafreight] = useState<any>(null);
     const [selectedMisc, setSelectedMisc] = useState<any>(null);
@@ -389,6 +390,13 @@ function Request() {
         setMargins(initialMargins);
         setAddings(initialAddings);
     }, [containersSelection]); // Assuming containersSelection is a prop or state
+      
+    useEffect(() => {
+        if (generalMiscs !== null && miscs !== null && miscsHaulage !== null) {
+            setTableMiscs([...miscsHaulage, ...miscs, ...generalMiscs]);
+            setRowSelectionModel3([...miscsHaulage, ...miscs].map((elm: any) => elm.miscellaneousId));
+        }
+    }, [generalMiscs, miscs, miscsHaulage]); // Assuming containersSelection is a prop or state
       
     // Stepper functions
     const [activeStep, setActiveStep] = React.useState(0);
@@ -870,7 +878,7 @@ function Request() {
                 }
             );
             
-            const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisClient.endPoint+"/Contact/GetContacts", token);
+            const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisCrm.endPoint+"/Contact/GetContacts", token);
             if (response !== null && response !== undefined) {
                 // Removing duplicates from client array
                 setClients(response.filter((obj: any, index: number, self: any) => index === self.findIndex((o: any) => o.contactName === obj.contactName)));
@@ -1967,7 +1975,7 @@ function Request() {
                                                             <Grid container spacing={2} mt={1} px={2}>
                                                                 <Grid item xs={12}>
                                                                     <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>{t('listMiscPricingOffers')+t('fromDotted')+portDeparture.portName+"-"+portDestination.portName}</Typography>
-                                                                    <Typography variant="h6" sx={{ my: 2, fontSize: 17, fontWeight: "bold" }}>
+                                                                    {/* <Typography variant="h6" sx={{ my: 2, fontSize: 17, fontWeight: "bold" }}>
                                                                         Haulage miscs (auto selected)
                                                                     </Typography>
                                                                     {
@@ -2050,8 +2058,7 @@ function Request() {
                                                                                 />
                                                                             </Box> : <Alert severity="error">{t('noResults')}</Alert>
                                                                         : <Skeleton />
-                                                                    }
-                                                                    
+                                                                    } */}
                                                                     <Grid container spacing={2}>
                                                                         <Grid item xs={12}>
                                                                             <Typography variant="h6" sx={{ mt: 2, fontSize: 17, fontWeight: "bold" }}>
@@ -2060,11 +2067,11 @@ function Request() {
                                                                         </Grid>
                                                                         <Grid item xs={12}>
                                                                             {
-                                                                                !loadGeneralMiscs ? 
-                                                                                generalMiscs !== null && generalMiscs.length !== 0 ?
+                                                                                !loadGeneralMiscs && !loadResults && !loadMiscsHaulage ? 
+                                                                                tableMiscs !== null && tableMiscs.length !== 0 ?
                                                                                     <Box sx={{ overflow: "auto" }}>
                                                                                         <DataGrid
-                                                                                            rows={generalMiscs}
+                                                                                            rows={tableMiscs}
                                                                                             columns={columnsMiscs}
                                                                                             // hideFooter
                                                                                             initialState={{
@@ -2089,7 +2096,11 @@ function Request() {
                                                                                             }}
                                                                                             onRowSelectionModelChange={(newRowSelectionModel: any) => {
                                                                                                 setRowSelectionModel3(newRowSelectionModel);
-                                                                                                setMyMiscs(newRowSelectionModel.length !== 0 ? generalMiscs.filter((elm: any) => newRowSelectionModel.includes(elm.miscellaneousId)).map((elm: any) => { return {...elm, defaultContainer: elm.containers[0].container.packageName}}) : []);
+                                                                                                setMyMiscs(newRowSelectionModel.length !== 0 ? 
+                                                                                                    tableMiscs
+                                                                                                    .filter((elm: any) => newRowSelectionModel.includes(elm.miscellaneousId))
+                                                                                                    .map((elm: any) => { return {...elm, defaultContainer: elm.containers[0].container.packageName}}) : 
+                                                                                                []);
                                                                                                 // setSelectedMisc(newRowSelectionModel.length !== 0 ? generalMiscs.find((elm: any) => elm.id === newRowSelectionModel[0]) : null);
                                                                                             }}
                                                                                             rowSelectionModel={rowSelectionModel3}
@@ -2155,7 +2166,7 @@ function Request() {
                                                                         </Box>
                                                                     </Grid> : null
                                                                 }
-                                                                {
+                                                                {/* {
                                                                     miscsHaulage !== null && miscsHaulage.length !== 0 ? 
                                                                     <Grid item xs={12}>
                                                                         <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>Haulage miscs</Typography>
@@ -2204,11 +2215,11 @@ function Request() {
                                                                             />
                                                                         </Box>
                                                                     </Grid> : null
-                                                                }
+                                                                } */}
                                                                 {
                                                                     myMiscs !== null && myMiscs.length !== 0 ? 
                                                                     <Grid item xs={12}>
-                                                                        <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>General miscs</Typography>
+                                                                        <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>Selected miscellaneous</Typography>
                                                                         <Box sx={{ overflow: "auto" }}>
                                                                             <DataGrid
                                                                                 rows={myMiscs}
