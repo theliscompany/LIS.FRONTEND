@@ -159,18 +159,18 @@ function NewRequest(props: any) {
                 const response = await (context as BackendService<any>).put(protectedResources.apiLisQuotes.endPoint+"/Assignee/"+idQuote+"/"+assignedManager, []);
                 if (response !== null) {
                     setLoad(false);
-                    enqueueSnackbar(t('requestCreatedAssigned'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                    // enqueueSnackbar(t('requestCreatedAssigned'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
                     //enqueueSnackbar("The manager has been assigned to this request.", { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
                 }
                 else {
                     setLoad(false);
-                    enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                    // enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
                 }
             }
         }
         else {
             setLoad(false);
-            enqueueSnackbar(t('errorHappenedRequest'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+            // enqueueSnackbar(t('errorHappenedRequest'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
         }
     }
 
@@ -210,7 +210,7 @@ function NewRequest(props: any) {
     // }
 
     function sendQuotationForm() {
-        if (phone !== "" && email !== "" && arrival !== null && departure !== null) {
+        if (phone !== "" && email !== "" && arrival !== null && departure !== null && containersSelection.length !== 0 && clientNumber !== null) {
             // Old test : email === "" || (email !== "" && validMail(email))
             if (validMail(email)) {
                 setLoad(true);
@@ -260,7 +260,10 @@ function NewRequest(props: any) {
                 .then((data: any) => {
                     if (data.code === 201) {
                         resetForm();
-                        assignManager(data.data.id);
+                        enqueueSnackbar(t('requestCreatedAssigned'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                        if (assignedManager !== null && assignedManager !== "null" && assignedManager !== undefined && assignedManager !== "") {
+                            assignManager(data.data.id);
+                        }
                     }
                     else {
                         setLoad(false);
@@ -339,13 +342,6 @@ function NewRequest(props: any) {
                                     </NativeSelect>
                                 </> : <Skeleton sx={{ mt: 3 }} />   
                             }
-                            {/* {
-                                !loadUser ? 
-                                currentUser !== null && currentUser !== undefined ? 
-                                <Alert severity="info" sx={{ mt: 1 }}>{t('requestAssignedTo')} {account?.name} {t('byDefault')}</Alert> : 
-                                <Alert severity="warning" sx={{ mt: 1 }}>{t('requestNotAssignedCurrentUser')} <Link to="/admin/users" style={{ textDecoration: "none" }}>{t('users')}</Link>.</Alert>
-                                : <Skeleton sx={{ my: 1 }} />
-                            } */}
                         </Grid>
                         
                         <Grid item xs={12} md={6}>
