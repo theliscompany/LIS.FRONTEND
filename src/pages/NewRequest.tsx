@@ -264,6 +264,9 @@ function NewRequest(props: any) {
                         if (assignedManager !== null && assignedManager !== "null" && assignedManager !== undefined && assignedManager !== "") {
                             assignManager(data.data.id);
                         }
+                        else {
+                            setLoad(false);
+                        }
                     }
                     else {
                         setLoad(false);
