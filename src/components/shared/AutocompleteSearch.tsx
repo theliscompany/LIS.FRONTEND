@@ -130,7 +130,7 @@ const AutocompleteSearch: React.FC<LocationAutocompleteProps> = ({ id, value, on
                 key={value || "key+"+id}
                 id={id}
                 fullWidth={fullWidth}
-                freeSolo
+                // freeSolo
                 disablePortal
                 options={options}
                 loading={loading}
