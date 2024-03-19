@@ -11,7 +11,7 @@ import { useAuthorizedBackendApi } from '../api/api';
 import { crmRequest, pricingRequest, protectedResources, transportRequest } from '../config/authConfig';
 import { BackendService } from '../utils/services/fetch';
 import { GridColDef, GridValueFormatterParams, GridRenderCellParams, DataGrid, GridValueGetterParams, GridColumnHeaderParams } from '@mui/x-data-grid';
-import { BootstrapDialog, BootstrapDialogTitle, BootstrapInput, actionButtonStyles, buttonCloseStyles, datetimeStyles, gridStyles, inputLabelStyles } from '../utils/misc/styles';
+import { BootstrapDialog, BootstrapDialogTitle, BootstrapInput, actionButtonStyles, buttonCloseStyles, datetimeStyles, gridStyles, inputIconStyles, inputLabelStyles } from '../utils/misc/styles';
 import CompanySearch from '../components/shared/CompanySearch';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
@@ -21,7 +21,7 @@ import { useMsal, useAccount } from '@azure/msal-react';
 import { CategoryEnum } from '../utils/constants';
 import AutocompleteSearch from '../components/shared/AutocompleteSearch';
 import RequestPriceHaulage from '../components/editRequestPage/RequestPriceHaulage';
-import { Mail } from '@mui/icons-material';
+import { Anchor, Mail } from '@mui/icons-material';
 import NewContact from '../components/editRequestPage/NewContact';
 import { extractCityAndPostalCode, flattenData2, hashCode, parseLocation, parseLocation2, reverseTransformArray, transformArray } from '../utils/functions';
 import ServicesTable from '../components/seafreightPage/ServicesTable';
@@ -193,7 +193,7 @@ function Haulages() {
             );
             
             try {
-                const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisCrm.endPoint+"/Contact/GetContactsByCategory?contactName=a&category=1", token);
+                const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisCrm.endPoint+"/Contact/GetContactsByCategory?category=2&pageSize=1000", token);
                 if (response !== null && response !== undefined) {
                     // console.log(response);
                     // Removing duplicates from client array
@@ -599,7 +599,7 @@ function Haulages() {
                         <AutocompleteSearch id="loading-city-searched" value={searchedLoadingCity} onChange={setSearchedLoadingCity} fullWidth />
                     </Grid>
                     <Grid item xs={12} md={3} mt={1}>
-                        <InputLabel htmlFor="loading-port-searched" sx={inputLabelStyles}>{t('deliveryPort')}</InputLabel>
+                        <InputLabel htmlFor="loading-port-searched" sx={inputLabelStyles}><Anchor fontSize="small" sx={inputIconStyles} /> {t('deliveryPort')}</InputLabel>
                         {
                             ports !== null ?
                             <Autocomplete
@@ -725,7 +725,7 @@ function Haulages() {
                                         <AutocompleteSearch id="loading-city" value={loadingCity} onChange={setLoadingCity} fullWidth />
                                     </Grid>
                                     <Grid item xs={12} md={6} mt={0.25}>
-                                        <InputLabel htmlFor="loading-port" sx={inputLabelStyles}>{t('deliveryPort')}</InputLabel>
+                                        <InputLabel htmlFor="loading-port" sx={inputLabelStyles}><Anchor fontSize="small" sx={inputIconStyles} /> {t('deliveryPort')}</InputLabel>
                                         {
                                             ports !== null ?
                                             <Autocomplete
@@ -909,6 +909,7 @@ function Haulages() {
                 <NewContact 
                     categories={["SUPPLIERS"]}
                     closeModal={() => setModal7(false)}
+                    callBack={getClients}
                 />
             </BootstrapDialog>
         </div>

@@ -12,7 +12,7 @@ import { useAuthorizedBackendApi } from '../api/api';
 import { crmRequest, pricingRequest, protectedResources, transportRequest } from '../config/authConfig';
 import { BackendService } from '../utils/services/fetch';
 import { GridColDef, GridValueFormatterParams, GridRenderCellParams, DataGrid } from '@mui/x-data-grid';
-import { BootstrapDialog, BootstrapDialogTitle, BootstrapInput, actionButtonStyles, buttonCloseStyles, datetimeStyles, gridStyles, inputLabelStyles, whiteButtonStyles } from '../utils/misc/styles';
+import { BootstrapDialog, BootstrapDialogTitle, BootstrapInput, actionButtonStyles, buttonCloseStyles, datetimeStyles, gridStyles, inputIconStyles, inputLabelStyles, whiteButtonStyles } from '../utils/misc/styles';
 import CompanySearch from '../components/shared/CompanySearch';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
@@ -21,7 +21,7 @@ import { AuthenticationResult } from '@azure/msal-browser';
 import { useMsal, useAccount } from '@azure/msal-react';
 import { CategoryEnum } from '../utils/constants';
 import RequestPriceRequest from '../components/editRequestPage/RequestPriceRequest';
-import { FileCopy, Mail } from '@mui/icons-material';
+import { Anchor, FileCopy, Mail } from '@mui/icons-material';
 import NewContact from '../components/editRequestPage/NewContact';
 import ServicesTable from '../components/seafreightPage/ServicesTable';
 import { transformArray, reverseTransformArray, flattenData, flattenData2 } from '../utils/functions';
@@ -215,7 +215,7 @@ function Seafreights() {
             );
             
             try {
-                const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisCrm.endPoint+"/Contact/GetContacts", token);
+                const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisCrm.endPoint+"/Contact/GetContactsByCategory?category=5&pageSize=1000", token);
                 if (response !== null && response !== undefined) {
                     // Removing duplicates from client array
                     setClients(response.filter((obj: any, index: number, self: any) => index === self.findIndex((o: any) => o.contactName === obj.contactName)));
@@ -639,7 +639,7 @@ function Seafreights() {
                         <CompanySearch id="company-name" value={searchedCarrier} onChange={setSearchedCarrier} category={CategoryEnum.SHIPPING_LINES} fullWidth />
                     </Grid>
                     <Grid item xs={12} md={3} mt={1}>
-                        <InputLabel htmlFor="port-departure" sx={inputLabelStyles}>{t('departurePort')}</InputLabel>
+                        <InputLabel htmlFor="port-departure" sx={inputLabelStyles}><Anchor fontSize="small" sx={inputIconStyles} /> {t('departurePort')}</InputLabel>
                         {
                             ports !== null ?
                             <Autocomplete
@@ -668,7 +668,7 @@ function Seafreights() {
                         }
                     </Grid>
                     <Grid item xs={12} md={3} mt={1}>
-                        <InputLabel htmlFor="destination-port" sx={inputLabelStyles}>{t('arrivalPort')}</InputLabel>
+                        <InputLabel htmlFor="destination-port" sx={inputLabelStyles}><Anchor fontSize="small" sx={inputIconStyles} /> {t('arrivalPort')}</InputLabel>
                         {
                             ports !== null ?
                             <Autocomplete
@@ -794,7 +794,7 @@ function Seafreights() {
                                         <CompanySearch id="carrier-agent" value={carrierAgent} onChange={setCarrierAgent} category={CategoryEnum.SHIPPING_LINES} fullWidth />
                                     </Grid>
                                     <Grid item xs={12} md={6} mt={0.25}>
-                                        <InputLabel htmlFor="port-loading" sx={inputLabelStyles}>{t('departurePort')}</InputLabel>
+                                        <InputLabel htmlFor="port-loading" sx={inputLabelStyles}><Anchor fontSize="small" sx={inputIconStyles} /> {t('departurePort')}</InputLabel>
                                         {
                                             ports !== null ?
                                             <Autocomplete
@@ -823,7 +823,7 @@ function Seafreights() {
                                         }
                                     </Grid>
                                     <Grid item xs={12} md={6} mt={0.25}>
-                                        <InputLabel htmlFor="discharge-port" sx={inputLabelStyles}>{t('arrivalPort')}</InputLabel>
+                                        <InputLabel htmlFor="discharge-port" sx={inputLabelStyles}><Anchor fontSize="small" sx={inputIconStyles} /> {t('arrivalPort')}</InputLabel>
                                         {
                                             ports !== null ?
                                             <Autocomplete
@@ -1017,6 +1017,7 @@ function Seafreights() {
                 <NewContact 
                     categories={["SHIPPING_LINES"]}
                     closeModal={() => setModal7(false)}
+                    callBack={getClients}
                 />
             </BootstrapDialog>
         </div>

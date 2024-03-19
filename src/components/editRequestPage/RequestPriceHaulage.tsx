@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { BootstrapDialogTitle, BootstrapInput, buttonCloseStyles, inputLabelStyles } from '../../utils/misc/styles';
+import { BootstrapDialogTitle, BootstrapInput, buttonCloseStyles, inputIconStyles, inputLabelStyles } from '../../utils/misc/styles';
 import { Autocomplete, Box, Button, DialogActions, DialogContent, Grid, InputLabel, NativeSelect, Skeleton, TextField, ToggleButton, ToggleButtonGroup } from '@mui/material';
 import { useAuthorizedBackendApi } from '../../api/api';
 import { useTranslation } from 'react-i18next';
@@ -11,6 +11,7 @@ import StarterKit from '@tiptap/starter-kit';
 import { RichTextEditor, MenuControlsContainer, MenuSelectHeading, MenuDivider, MenuButtonBold, MenuButtonItalic, MenuButtonStrikethrough, MenuButtonOrderedList, MenuButtonBulletedList, MenuSelectTextAlign, MenuButtonEditLink, MenuButtonHorizontalRule, MenuButtonUndo, MenuButtonRedo, type RichTextEditorRef, } from 'mui-tiptap';
 import './../../App.css';
 import AutocompleteSearch from '../shared/AutocompleteSearch';
+import { Anchor } from '@mui/icons-material';
 
 function createGetRequestUrl(variable1: number, variable2: number) {
     let url = protectedResources.apiLisPricing.endPoint+"/Haulage/Haulages?";
@@ -311,7 +312,7 @@ function RequestPriceHaulage(props: any) {
                                 <AutocompleteSearch id="loading-city" value={loadingCityObj} onChange={setLoadingCityObj} fullWidth  />
                             </Grid>
                             <Grid item xs={12} md={12} mt={0.5}>
-                                <InputLabel htmlFor="deliveryPort" sx={inputLabelStyles}>{t('destinationPort')}</InputLabel>
+                                <InputLabel htmlFor="deliveryPort" sx={inputLabelStyles}><Anchor fontSize="small" sx={inputIconStyles} /> {t('destinationPort')}</InputLabel>
                                 {
                                     props.ports !== null ?
                                     <Autocomplete

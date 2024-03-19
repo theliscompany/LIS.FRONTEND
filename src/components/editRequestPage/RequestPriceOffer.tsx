@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { BootstrapDialogTitle, BootstrapInput, buttonCloseStyles, datetimeStyles, inputLabelStyles, whiteButtonStyles } from '../../utils/misc/styles';
+import { BootstrapDialogTitle, BootstrapInput, buttonCloseStyles, datetimeStyles, inputIconStyles, inputLabelStyles, whiteButtonStyles } from '../../utils/misc/styles';
 import { Alert, Autocomplete, Box, Button, DialogActions, DialogContent, Grid, IconButton, InputLabel, ListItem, ListItemText, NativeSelect, Skeleton, TextField, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material';
 import { useAuthorizedBackendApi } from '../../api/api';
 import { useTranslation } from 'react-i18next';
@@ -16,6 +16,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import StarterKit from '@tiptap/starter-kit';
 import { RichTextEditor, MenuControlsContainer, MenuSelectHeading, MenuDivider, MenuButtonBold, MenuButtonItalic, MenuButtonStrikethrough, MenuButtonOrderedList, MenuButtonBulletedList, MenuSelectTextAlign, MenuButtonEditLink, MenuButtonHorizontalRule, MenuButtonUndo, MenuButtonRedo, type RichTextEditorRef, } from 'mui-tiptap';
 import './../../App.css';
+import { Anchor } from '@mui/icons-material';
 
 function createGetRequestUrl(variable1: number, variable2: number) {
     let url = protectedResources.apiLisPricing.endPoint+"/SeaFreight/GetSeaFreights?";
@@ -319,7 +320,7 @@ function RequestPriceOffer(props: any) {
                                 }
                             </Grid>
                             <Grid item xs={12} md={6} mt={0.5}>
-                                <InputLabel htmlFor="portLoading" sx={inputLabelStyles}>{t('departurePort')}</InputLabel>
+                                <InputLabel htmlFor="portLoading" sx={inputLabelStyles}><Anchor fontSize="small" sx={inputIconStyles} /> {t('departurePort')}</InputLabel>
                                 {
                                     props.ports !== null ?
                                     <Autocomplete
@@ -362,7 +363,7 @@ function RequestPriceOffer(props: any) {
                                 }
                             </Grid>
                             <Grid item xs={12} md={6} mt={0.5}>
-                                <InputLabel htmlFor="portDischarge" sx={inputLabelStyles}>{t('destinationPort')}</InputLabel>
+                                <InputLabel htmlFor="portDischarge" sx={inputLabelStyles}><Anchor fontSize="small" sx={inputIconStyles} /> {t('destinationPort')}</InputLabel>
                                 {
                                     props.ports !== null ?
                                     <Autocomplete
