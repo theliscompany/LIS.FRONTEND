@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import { Alert, Autocomplete, Box, Button, Chip, DialogActions, DialogContent, Grid, IconButton, InputLabel, ListItem, ListItemText, NativeSelect, Popover, Skeleton, Step, StepLabel, Stepper, TextField, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material';
 import { MuiTelInput } from 'mui-tel-input';
 import AutocompleteSearch from '../components/shared/AutocompleteSearch';
-import { inputLabelStyles, BootstrapInput, BootstrapDialog, whiteButtonStyles, gridStyles, HtmlTooltip, BootstrapDialogTitle, buttonCloseStyles, sizeStyles, sizingStyles } from '../utils/misc/styles';
+import { inputLabelStyles, BootstrapInput, BootstrapDialog, whiteButtonStyles, gridStyles, HtmlTooltip, BootstrapDialogTitle, buttonCloseStyles, sizeStyles, sizingStyles, inputIconStyles } from '../utils/misc/styles';
 import { enqueueSnackbar, SnackbarProvider } from 'notistack';
 import DeleteIcon from '@mui/icons-material/Delete';
 import HelpIcon from '@mui/icons-material/Help';
@@ -51,12 +51,14 @@ import RequestAskInformation from '../components/editRequestPage/RequestAskInfor
 import RequestChangeStatus from '../components/editRequestPage/RequestChangeStatus';
 // import { MailData } from '../utils/models/models';
 // import { MuiFileInput } from 'mui-file-input';
-import { calculateTotal, checkCarrierConsistency, checkDifferentDefaultContainer, displayContainers, findClosestSeaPort, generateRandomNumber, getServices, getServicesTotal, getServicesTotal2, getTotalNumber, hashCode, parseContact, parseLocation, removeDuplicatesWithLatestUpdated, similar, sortByCloseness } from '../utils/functions';
+import { calculateTotal, checkCarrierConsistency, checkDifferentDefaultContainer, findClosestSeaPort, generateRandomNumber, getServices, getServicesTotal, getServicesTotal2, getTotalNumber, hashCode, parseContact, parseLocation, removeDuplicatesWithLatestUpdated, similar, sortByCloseness } from '../utils/functions';
 import RequestPriceRequest from '../components/editRequestPage/RequestPriceRequest';
 import RequestPriceHaulage from '../components/editRequestPage/RequestPriceHaulage';
 import NewContact from '../components/editRequestPage/NewContact';
 import ContainerElement from '../components/editRequestPage/ContainerElement';
 import ContainerPrice from '../components/editRequestPage/ContainerPrice';
+import NewMiscellaneous from '../components/editRequestPage/NewMiscellaneous';
+import { Anchor } from '@mui/icons-material';
 
 let packingOptions = ["Unit", "Bundle", "Bag", "Pallet", "Carton", "Lot", "Crate"];
 
@@ -126,6 +128,7 @@ function Request() {
     const [modal6, setModal6] = useState<boolean>(false);
     const [modal7, setModal7] = useState<boolean>(false);
     const [modal8, setModal8] = useState<boolean>(false);
+    const [modal9, setModal9] = useState<boolean>(false);
     
     const [assignedManager, setAssignedManager] = useState<string>("");
     const [assignees, setAssignees] = useState<any>(null);
@@ -491,6 +494,19 @@ function Request() {
         setActiveStep(0);
     };
     
+    function displayContainers(value: any) {
+        var aux = value.map((elm: any, index: number) => {
+            if (calculateSeafreightPrice(elm.container, elm.quantity, index) !== 0) {
+                return '<li>'+elm.quantity+"x"+elm.container+'</li>';
+            }
+            else {
+                return null;
+            }
+        }).join('');
+        return '<ul>'+aux+'</ul>';
+    }
+    
+    
     function calculateContainerPrice(type: string, quantity: number, index: number) {
         // Calculate seafreight prices
         var seafreightPrices = 0;
@@ -512,6 +528,28 @@ function Request() {
         for (var i = 0; i < miscsSelected.length; i++) {
             miscPrices =  miscPrices + miscsSelected[i].containers[0].services.reduce((sum: number, service: any) => sum + service.price, 0)*quantity;
         }
+        
+        // var finalValue = ((seafreightPrices+haulagePrices+miscPrices)*(margin/100)+seafreightPrices+haulagePrices+miscPrices).toFixed(2);
+        // I removed miscPrices temporarily
+        var finalValue = ((seafreightPrices+haulagePrices+miscPrices)*(margins[index]/100)+seafreightPrices+haulagePrices+miscPrices).toFixed(2);
+        return Number(finalValue)+Number(addings[index]);
+    }
+    
+    function calculateSeafreightPrice(type: string, quantity: number, index: number) {
+        // Calculate seafreight prices
+        var seafreightPrices = 0;
+        if (seafreights !== null) {
+            var seafreightSelected = seafreights.filter((elm: any) => rowSelectionModel.includes(elm.seaFreightId)).find((elm: any) => elm.containers[0].container.packageName === type);
+            if (seafreightSelected !== null && seafreightSelected !== undefined) {
+                seafreightPrices = seafreightSelected.containers[0].services.reduce((sum: number, service: any) => sum + service.price, 0)*quantity;
+            }
+        }
+        
+        // Calculate haulage prices
+        var haulagePrices = 0;
+        
+        // Calculate miscellaneous prices
+        var miscPrices = 0;
         
         // var finalValue = ((seafreightPrices+haulagePrices+miscPrices)*(margin/100)+seafreightPrices+haulagePrices+miscPrices).toFixed(2);
         // I removed miscPrices temporarily
@@ -1172,16 +1210,21 @@ function Request() {
             var auxFrequency = 0;
             var auxTransitTime = "";
             var aux1 = seafreights.filter((val: any) => rowSelectionModel.includes(val.seaFreightId)).find((val: any) => val.defaultContainer === elm.container);
-            console.log()
-            if (aux1 !== undefined) {
-                auxFrequency = aux1.frequency;
-                auxTransitTime = aux1.transitTime;
+            console.log();
+            if (calculateSeafreightPrice(elm.container, elm.quantity, index) !== 0) {
+                if (aux1 !== undefined) {
+                    auxFrequency = aux1.frequency;
+                    auxTransitTime = aux1.transitTime;
+                }
+                return "<p><strong>"+calculateContainerPrice(elm.container, elm.quantity, index)+" "
+                +selectedSeafreight.currency+" / "+elm.container
+                +" / Tous les "+auxFrequency
+                +" jours / Délai de mer : "+auxTransitTime
+                +" jours</strong></p>"
             }
-            return "<p><strong>"+calculateContainerPrice(elm.container, elm.quantity, index)+" "
-            +selectedSeafreight.currency+" / "+elm.container
-            +" / Tous les "+auxFrequency
-            +" jours / Délai de mer : "+auxTransitTime
-            +" jours</strong></p>"
+            else {
+                return null;
+            }
         }).join("") : "";
         var clientName = clientNumber !== null ? clientNumber.contactName : null;
         var freeTime = selectedHaulage !== null ? selectedHaulage.freeTime : "";
@@ -1216,15 +1259,20 @@ function Request() {
             var auxFrequency = 0;
             var auxTransitTime = "";
             var aux1 = seafreights.filter((val: any) => rowSelectionModel.includes(val.seaFreightId)).find((val: any) => val.defaultContainer === elm.container);
-            if (aux1 !== undefined) {
-                auxFrequency = aux1.frequency;
-                auxTransitTime = aux1.transitTime;
+            if (calculateSeafreightPrice(elm.container, elm.quantity, index) !== 0) {
+                if (aux1 !== undefined) {
+                    auxFrequency = aux1.frequency;
+                    auxTransitTime = aux1.transitTime;
+                }
+                return "<p><strong>"+calculateContainerPrice(elm.container, elm.quantity, index)+" "
+                +selectedSeafreight.currency+" / "+elm.container
+                +" / Tous les "+auxFrequency
+                +" jours / Délai de mer : "+auxTransitTime
+                +" jours</strong></p>"
             }
-            return "<p><strong>"+calculateContainerPrice(elm.container, elm.quantity, index)+" "
-            +selectedSeafreight.currency+" / "+elm.container
-            +" / Tous les "+auxFrequency
-            +" jours / Délai de mer : "+auxTransitTime
-            +" jours</strong></p>"
+            else {
+                return null;
+            }
         }).join("") : "";
         var clientName = clientNumber !== null ? clientNumber.contactName : null;
         var freeTime = selectedHaulage !== null ? selectedHaulage.freeTime : "";
@@ -1789,7 +1837,7 @@ function Request() {
                                                             activeStep === 1 ? 
                                                             <Grid container spacing={2} mt={1} px={2}>
                                                                 <Grid item xs={12} md={6} mt={1}>
-                                                                    <InputLabel htmlFor="port-departure" sx={inputLabelStyles}>{t('departurePort')}</InputLabel>
+                                                                    <InputLabel htmlFor="port-departure" sx={inputLabelStyles}><Anchor fontSize="small" sx={inputIconStyles} /> {t('departurePort')}</InputLabel>
                                                                     {
                                                                         ports !== null ?
                                                                         <Autocomplete
@@ -1819,7 +1867,7 @@ function Request() {
                                                                     }
                                                                 </Grid>
                                                                 <Grid item xs={12} md={6} mt={1}>
-                                                                    <InputLabel htmlFor="destination-port" sx={inputLabelStyles}>{t('arrivalPort')}</InputLabel>
+                                                                    <InputLabel htmlFor="destination-port" sx={inputLabelStyles}><Anchor fontSize="small" sx={inputIconStyles} /> {t('arrivalPort')}</InputLabel>
                                                                     {
                                                                         ports !== null ?
                                                                         <Autocomplete
@@ -2060,10 +2108,23 @@ function Request() {
                                                                         : <Skeleton />
                                                                     } */}
                                                                     <Grid container spacing={2}>
-                                                                        <Grid item xs={12}>
+                                                                        <Grid item xs={8}>
                                                                             <Typography variant="h6" sx={{ mt: 2, fontSize: 17, fontWeight: "bold" }}>
                                                                                 General miscs (select any)
                                                                             </Typography>    
+                                                                        </Grid>
+                                                                        <Grid item xs={4}>
+                                                                            <Button 
+                                                                                variant="contained" 
+                                                                                color="inherit" 
+                                                                                sx={{ 
+                                                                                    textTransform: "none", backgroundColor: "#fff", 
+                                                                                    color: "#333", float: "right", marginTop: "8px" 
+                                                                                }}
+                                                                                onClick={() => setModal9(true)}
+                                                                            >
+                                                                                Create a misc
+                                                                            </Button>
                                                                         </Grid>
                                                                         <Grid item xs={12}>
                                                                             {
@@ -2521,6 +2582,20 @@ function Request() {
                     </Button>
                     <Button variant="contained" onClick={() => setModal8(false)} sx={buttonCloseStyles}>{t('close')}</Button>
                 </DialogActions>
+            </BootstrapDialog>
+
+            {/* Create new misc */}
+            <BootstrapDialog
+                onClose={() => setModal9(false)}
+                aria-labelledby="custom-dialog-title9"
+                open={modal9}
+                maxWidth="lg"
+                fullWidth
+            >
+                <BootstrapDialogTitle id="custom-dialog-title" onClose={() => setModal9(false)}>
+                    <b>{t('createRowMisc')}</b>
+                </BootstrapDialogTitle>
+                <NewMiscellaneous closeModal={() => setModal9(false)} updateMiscs={getGeneralMiscellaneousPriceOffers} />
             </BootstrapDialog>
         </div>
     );

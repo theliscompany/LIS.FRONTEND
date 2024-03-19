@@ -9,11 +9,13 @@ import { crmRequest, protectedResources } from '../../config/authConfig';
 import { useAccount, useMsal } from '@azure/msal-react';
 import { AuthenticationResult } from '@azure/msal-browser';
 import { MuiTelInput } from 'mui-tel-input';
+import CountrySelect from '../shared/CountrySelect';
 
 function NewContact(props: any) {
     const [testName, setTestName] = useState<string>("");
     const [addressCountry, setAddressCountry] = useState<string>("");
     const [countryCode, setCountryCode] = useState<string>("CM");
+    const [country, setCountry] = useState<any>(null);
     const [testPhone, setTestPhone] = useState<string>("");
     const [testEmail, setTestEmail] = useState<string>("");
     
@@ -36,53 +38,63 @@ function NewContact(props: any) {
     };
     
     const createNewContact = async () => {
-        if (account && context) {
-            const token = await instance.acquireTokenSilent({
-                scopes: crmRequest.scopes,
-                account: account
-            })
-            .then((response: AuthenticationResult) => {
-                return response.accessToken;
-            })
-            .catch(() => {
-                return instance.acquireTokenPopup({
-                    ...crmRequest,
+        console.log(country);
+        if (country !== null && testName !== "" && testPhone !== "" && testEmail !== "" && addressCountry !== "") {
+            if (account && context) {
+                const token = await instance.acquireTokenSilent({
+                    scopes: crmRequest.scopes,
                     account: account
-                    }).then((response) => {
-                        return response.accessToken;
-                    });
+                })
+                .then((response: AuthenticationResult) => {
+                    return response.accessToken;
+                })
+                .catch(() => {
+                    return instance.acquireTokenPopup({
+                        ...crmRequest,
+                        account: account
+                        }).then((response) => {
+                            return response.accessToken;
+                        });
+                    }
+                );
+    
+                var dataSent = {
+                    "contactName": testName,
+                    "addressCountry": addressCountry,
+                    "createdBy": 5,
+                    "countryCode": country.code,
+                    "phone": testPhone,
+                    "email": testEmail
                 }
-            );
-
-            var dataSent = {
-                "contactName": testName,
-                "addressCountry": addressCountry,
-                "createdBy": 5,
-                "countryCode": countryCode,
-                "phone": testPhone,
-                "email": testEmail
-            }
-            
-            var categoriesText = props.categories.length !== 0 ? "?"+ props.categories.map((category: any) => category !== "OTHERS" ? `categories=${category}`  : "").join('&') : "";
-            if (categoriesText === "?categories=") {
-                categoriesText = "";
-            }
-            console.log(categoriesText);
-
-            try {
-                const response = await (context as BackendService<any>).postWithToken(protectedResources.apiLisCrm.endPoint+"/Contact/CreateCustomerContact"+categoriesText, dataSent, token);
-                if (response !== null) {
-                    enqueueSnackbar("The contact has been added with success!", { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
-                    props.closeModal();
+                
+                var categoriesText = props.categories.length !== 0 ? "?"+ props.categories.map((category: any) => category !== "OTHERS" ? `categories=${category}`  : "").join('&') : "";
+                if (categoriesText === "?categories=") {
+                    categoriesText = "";
                 }
-                else {
+                console.log(categoriesText);
+    
+                try {
+                    const response = await (context as BackendService<any>).postWithToken(protectedResources.apiLisCrm.endPoint+"/Contact/CreateCustomerContact"+categoriesText, dataSent, token);
+                    if (response !== null) {
+                        enqueueSnackbar("The contact has been added with success!", { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                        
+                        if (props.callBack !== undefined && props.callBack !== null) {
+                            props.callBack();
+                        }
+                        props.closeModal();
+                    }
+                    else {
+                        enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                    }
+                }
+                catch (err: any) {
+                    console.log(err);
                     enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
                 }
             }
-            catch (err: any) {
-                console.log(err);
-                enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
-            }
+        }
+        else {
+            enqueueSnackbar("One or many the fields are empty, please verify the form and fill everything.", { variant: "warning", anchorOrigin: { horizontal: "right", vertical: "top"} });
         }
     }
     
@@ -103,9 +115,13 @@ function NewContact(props: any) {
                         <InputLabel htmlFor="addressCountry" sx={inputLabelStyles}>{t('addressCountry')}</InputLabel>
                         <BootstrapInput id="addressCountry" type="text" value={addressCountry} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setAddressCountry(e.target.value)} fullWidth />
                     </Grid>
-                    <Grid item xs={12}>
+                    {/* <Grid item xs={12}>
                         <InputLabel htmlFor="countryCode" sx={inputLabelStyles}>{t('countryCode')}</InputLabel>
                         <BootstrapInput id="countryCode" type="text" value={countryCode} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setCountryCode(e.target.value)} fullWidth />
+                    </Grid> */}
+                    <Grid item xs={12}>
+                        <InputLabel htmlFor="countryCode" sx={inputLabelStyles}>{t('countryCode')}</InputLabel>
+                        <CountrySelect id="countryCode" value={country} onChange={setCountry} fullWidth />
                     </Grid>
                     <Grid item xs={12}>
                         <InputLabel htmlFor="my-email" sx={inputLabelStyles}>{t('emailAddress')}</InputLabel>

@@ -285,10 +285,10 @@ export function parseContact(inputString: string) {
     return contactObject;
 }
 
-export function displayContainers(value: any) {
-    var aux = value.map((elm: any) => '<li>'+elm.quantity+"x"+elm.container+'</li>').join('');
-    return '<ul>'+aux+'</ul>';
-}
+// export function displayContainers(value: any) {
+//     var aux = value.map((elm: any) => '<li>'+elm.quantity+"x"+elm.container+'</li>').join('');
+//     return '<ul>'+aux+'</ul>';
+// }
 
 export function extractCityAndPostalCode(inputString: string) {
     const parts = inputString.split(', ');

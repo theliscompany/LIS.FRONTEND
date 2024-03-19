@@ -22,6 +22,12 @@ export const imageStyles = {
     width: "100vw"
 };
   
+export const inputIconStyles = {
+  position: "relative",
+  top: "2px",
+  fontSize: 15 
+};
+
 export const contentStyles = {
     position: 'absolute',
     top: '47.5%',
