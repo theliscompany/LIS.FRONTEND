@@ -396,7 +396,8 @@ export const fr = {
   lumpSum: "Marge forfaitaire",
   margin: "Marge",
   salesPrice: "Sales price",
-  totalPurchase: "Total purchase",
+  totalPurchase: "Coût total",
   copyRowSeafreight: "Copier prix de frêt maritime",
-  messageOkGeneralMiscs: "Vos services miscs généraux ont été enregistrés!"
+  messageOkGeneralMiscs: "Vos services miscs généraux ont été enregistrés!",
+  included: "inclus"
 };

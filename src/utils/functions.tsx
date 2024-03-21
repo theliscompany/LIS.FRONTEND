@@ -90,6 +90,10 @@ export function similar(str1: string, str2: string) {
     return cleanStr1 === cleanStr2;
 }
    
+export function complexEquality(str1: string, str2: string) {
+    return str1.includes(str2) || str2.includes(str1);
+}
+   
 export function calculateTotal(data: any) {
     // Initialize total price and package name
     let total = 0;
@@ -136,7 +140,7 @@ export function getTotalNumber(data: any) {
     return Number(total);
 }
 
-export function getServicesTotal(data: any, currency: string) {
+export function getServicesTotal(data: any, currency: string, margin: number) {
     let services = [];
 
     // Loop through the data
@@ -144,7 +148,7 @@ export function getServicesTotal(data: any, currency: string) {
         // Loop through the services in the current data object
         for(let j = 0; j < data[i].services.length; j++) {
             let service = data[i].services[j];
-            services.push(`${service.serviceName} : ${service.price} ${currency}`);
+            services.push(`${service.serviceName} : ${service.price*(1+margin/100)} ${currency}`);
         }
     }
 
@@ -154,7 +158,7 @@ export function getServicesTotal(data: any, currency: string) {
 
 export function getServicesTotal2(data: any, currency: string, quantity: number) {
     let services = [];
-
+    // console.log(data);
     // Loop through the data
     for(let i = 0; i < data.length; i++) {
         // Loop through the services in the current data object
@@ -352,4 +356,169 @@ export function hashCode(str: string) {
         hash |= 0; // Convert to 32bit integer
     }
     return hash;
+}
+
+function soundex(word: string) {
+    // Convert the word to uppercase and remove any non-alphabetic characters
+    word = word.toUpperCase().replace(/[^A-Z]/g, '');
+
+    // Map each letter to its Soundex code
+    const codeMap: any = {
+        'BFPV': 1,
+        'CGJKQSXZ': 2,
+        'DT': 3,
+        'L': 4,
+        'MN': 5,
+        'R': 6
+    };
+
+    // Initialize the Soundex string with the first letter
+    let soundex = word.charAt(0);
+
+    // Iterate over the rest of the word
+    let i = 1;
+    while (i < word.length) {
+        // Get the current character and its code
+        const char = word.charAt(i);
+        const code = codeMap[char];
+
+        // Handle special cases
+        if (char === 'H' || char === 'W') {
+            // If the previous character is the same, skip this character
+            if (char === word.charAt(i - 1)) {
+                i++;
+                continue;
+            }
+            // If the previous character is a vowel, skip this character
+            if ('AEIOU'.indexOf(word.charAt(i - 1)) !== -1) {
+                i++;
+                continue;
+            }
+        }
+
+        // If the character is a valid code and is different from the previous code
+        if (code && code !== codeMap[word.charAt(i - 1)]) {
+            // Add the code to the Soundex string
+            soundex += code;
+        }
+
+        // Move to the next character
+        i++;
+    }
+
+    // Remove any non-numeric characters
+    soundex = soundex.replace(/[^\d]/g, '');
+
+    // Pad with zeros to ensure a length of 4
+    soundex = soundex.padEnd(4, '0');
+
+    // Cut off any excess characters
+    soundex = soundex.substring(0, 4);
+
+    return soundex;
+}
+
+function metaphone(word: string) {
+    // Map each character to its Metaphone code
+    const codeMap: any = {
+        'A': 'A',
+        'E': 'A',
+        'I': 'A',
+        'O': 'A',
+        'U': 'A',
+        'B': 'P',
+        'F': 'F',
+        'P': 'F',
+        'V': 'F',
+        'C': 'K',
+        'G': 'K',
+        'J': 'K',
+        'K': 'K',
+        'Q': 'K',
+        'S': 'K',
+        'X': 'K',
+        'Z': 'K',
+        'D': 'T',
+        'T': 'T',
+        'L': 'L',
+        'M': 'M',
+        'N': 'N',
+        'R': 'R',
+        'H': 'H',
+        'W': 'W',
+        'Y': 'Y'
+    };
+
+    // Convert the word to uppercase
+    word = word.toUpperCase();
+
+    // Initialize the Metaphone string
+    let metaphone = '';
+
+    // Iterate over the word
+    for (let i = 0; i < word.length; i++) {
+        // Get the current character and its code
+        const char = word.charAt(i);
+        const code = codeMap[char];
+
+        // If the character is a valid code
+        if (code) {
+            // Add the code to the Metaphone string
+            metaphone += code;
+        }
+
+        // Handle special cases
+        if (char === 'C') {
+            // If the next character is 'H' or 'K', replace the code with 'X'
+            if (i + 1 < word.length && (word.charAt(i + 1) === 'H' || word.charAt(i + 1) === 'K')) {
+                metaphone = metaphone.substring(0, metaphone.length - 1) + 'X';
+                i++;
+            }
+        } else if (char === 'G') {
+            // If the next character is 'H' or 'N', replace the code with 'K'
+            if (i + 1 < word.length && (word.charAt(i + 1) === 'H' || word.charAt(i + 1) === 'N')) {
+                metaphone = metaphone.substring(0, metaphone.length - 1) + 'K';
+                i++;
+            }
+        } else if (char === 'P') {
+            // If the next character is 'H', replace the code with 'F'
+            if (i + 1 < word.length && word.charAt(i + 1) === 'H') {
+                metaphone = metaphone.substring(0, metaphone.length - 1) + 'F';
+                i++;
+            }
+        } else if (char === 'S') {
+            // If the next character is 'H', replace the code with 'X'
+            if (i + 1 < word.length && word.charAt(i + 1) === 'H') {
+                metaphone = metaphone.substring(0, metaphone.length - 1) + 'X';
+                i++;
+            }
+        } else if (char === 'X') {
+            // If the next character is 'C', replace the code with 'KS'
+            if (i + 1 < word.length && word.charAt(i + 1) === 'C') {
+                metaphone = metaphone.substring(0, metaphone.length - 1) + 'KS';
+                i++;
+            }
+        }
+    }
+
+    // Remove any duplicate consecutive codes
+    metaphone = metaphone.replace(/(.)\1+/g, '$1');
+
+    // Remove any non-alphabetic characters
+    metaphone = metaphone.replace(/[^A-Z]/g, '');
+
+    // Pad with 'A's to ensure a length of 4
+    metaphone = metaphone.padEnd(4, 'A');
+
+    // Cut off any excess characters
+    metaphone = metaphone.substring(0, 4);
+
+    return metaphone;
+}
+
+export function arePhoneticallyClose(word1: string, word2: string) {
+    const metaphone1 = metaphone(word1);
+    const metaphone2 = metaphone(word2);
+
+    return metaphone1 === metaphone2;
 }
