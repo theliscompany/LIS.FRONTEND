@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { Alert, Autocomplete, Box, Button, Chip, DialogActions, DialogContent, Grid, IconButton, InputLabel, ListItem, ListItemText, NativeSelect, Popover, Skeleton, Step, StepLabel, Stepper, TextField, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material';
 import { MuiTelInput } from 'mui-tel-input';
 import AutocompleteSearch from '../components/shared/AutocompleteSearch';
@@ -196,14 +196,12 @@ function Request() {
     const [selectedTemplate, setSelectedTemplate] = useState<string>(defaultTemplate);
     
     const rteRef = useRef<RichTextEditorRef>(null);
-    
     let { id } = useParams();
+    const navigate = useNavigate();
 
     const { instance, accounts } = useMsal();
     const account = useAccount(accounts[0] || {});
-        
     const context = useAuthorizedBackendApi();
-
     const { t } = useTranslation();
     
     const steps = [t('selectHaulage'), t('selectSeafreight'), t('selectMisc'), t('sendOffer')];
@@ -1307,744 +1305,333 @@ function Request() {
             <Box py={2.5}>
                 <Typography variant="h5" sx={{mt: {xs: 4, md: 1.5, lg: 1.5 }}} mx={5}><b>{t('manageRequestQuote')} {id}</b></Typography>
                 <Box>
-                    {
-                        !load ? 
-                        <Grid container spacing={2} mt={1} px={5}>
-                            <Grid item xs={9}>
-                                <Typography variant="body2" color="dodgerblue" sx={{ fontWeight: "bold" }}>
-                                    <span style={{ color: 'red' }}>{t('quoteNumber')} : </span> N° {trackingNumber}
-                                </Typography>
-                            </Grid>
-                            <Grid item xs={3}>
-                                <Button variant="contained" color="inherit" sx={{ float: "right", backgroundColor: "#fff", textTransform: "none" }} onClick={() => { setModal7(true); }} >{t('createNewContact')}</Button>
-                            </Grid>
+                {
+                    !load ? 
+                    <Grid container spacing={2} mt={1} px={5}>
+                        <Grid item xs={9}>
+                            <Typography variant="body2" color="dodgerblue" sx={{ fontWeight: "bold" }}>
+                                <span style={{ color: 'red' }}>{t('quoteNumber')} : </span> N° {trackingNumber}
+                            </Typography>
+                        </Grid>
+                        <Grid item xs={3}>
+                            <Button variant="contained" color="inherit" sx={{ float: "right", backgroundColor: "#fff", textTransform: "none" }} onClick={() => { setModal7(true); }} >{t('createNewContact')}</Button>
+                        </Grid>
 
-                            <Grid item xs={12}>
-                                <Alert 
-                                    severity="info" 
-                                    sx={{ display: { xs: "block", md: "flex" }, alignItems: "center", justifyContent: "left" }}
-                                    action={<Button variant="contained" color="inherit" sx={{ background: "#fff", color: "#333", float: "right", textTransform: "none", position: "relative", bottom: "2px" }} onClick={() => { setModal(true); }}>{t('askMoreInformation')}</Button>}
-                                >
-                                    <Typography variant="subtitle1" display="inline">{t('doYouThinkInformation')}</Typography>
-                                </Alert>
-                            </Grid>
-                            
-                            <Grid item xs={12} md={6} mt={1}>
-                                <InputLabel htmlFor="client-number" sx={inputLabelStyles}>{t('clientNumber')}</InputLabel>
-                                <ClientSearch 
-                                    id="client-number" 
-                                    value={clientNumber} 
-                                    onChange={setClientNumber}
-                                    disabled 
-                                    callBack={(value: any) => {
-                                        setClientNumber(value);
-                                        if (clientNumber !== null) {
-                                            setPhone(clientNumber.phone !== null ? clientNumber.phone : "");
-                                            // alert("check");
+                        <Grid item xs={12}>
+                            <Alert 
+                                severity="info" 
+                                sx={{ display: { xs: "block", md: "flex" }, alignItems: "center", justifyContent: "left" }}
+                                action={<Button variant="contained" color="inherit" sx={{ background: "#fff", color: "#333", float: "right", textTransform: "none", position: "relative", bottom: "2px" }} onClick={() => { setModal(true); }}>{t('askMoreInformation')}</Button>}
+                            >
+                                <Typography variant="subtitle1" display="inline">{t('doYouThinkInformation')}</Typography>
+                            </Alert>
+                        </Grid>
+                        
+                        <Grid item xs={12}>
+                            <Button variant="contained" color="primary" sx={{ mt: 2, mr: 2, textTransform: "none" }} onClick={editRequest} >{t('editRequest')}</Button>
+                            <Button variant="contained" color="inherit" sx={whiteButtonStyles} onClick={() => { setModal2(true); }} >{t('changeStatus')}</Button>
+                            <Button variant="contained" color="inherit" sx={whiteButtonStyles} style={{ float: "right" }} onClick={() => { setModal3(true); }} >{t('addCommentNote')}</Button>
+                            <Button variant="contained" color="inherit" sx={whiteButtonStyles} style={{ float: "right", marginRight: "10px" }} onClick={() => { setModal4(true); /*getNotes(id);*/ }} >{t('listNotes')}</Button>
+                        </Grid>
+                        
+                        <Grid item xs={12} md={6} mt={1}>
+                            <InputLabel htmlFor="client-number" sx={inputLabelStyles}>{t('clientNumber')}</InputLabel>
+                            <ClientSearch 
+                                id="client-number" 
+                                value={clientNumber} 
+                                onChange={setClientNumber}
+                                disabled 
+                                callBack={(value: any) => {
+                                    setClientNumber(value);
+                                    if (clientNumber !== null) {
+                                        setPhone(clientNumber.phone !== null ? clientNumber.phone : "");
+                                        // alert("check");
+                                    }
+                                }} 
+                                fullWidth 
+                            />
+                        </Grid>
+                        <Grid item xs={12} md={6} mt={1}>
+                            <InputLabel htmlFor="tags" sx={inputLabelStyles}>{t('specifics')}</InputLabel>
+                            {
+                                products !== null ?
+                                <Autocomplete
+                                    multiple    
+                                    disablePortal
+                                    id="tags"
+                                    placeholder="Machinery, Household goods, etc"
+                                    options={products}
+                                    getOptionLabel={(option: any) => { 
+                                        if (option !== null && option !== undefined) {
+                                            return option.productName !== undefined ? option.productName : option;
                                         }
-                                    }} 
-                                    fullWidth 
-                                />
-                            </Grid>
-                            <Grid item xs={12} md={6} mt={1}>
-                                <InputLabel htmlFor="tags" sx={inputLabelStyles}>{t('specifics')}</InputLabel>
-                                {
-                                    products !== null ?
-                                    <Autocomplete
-                                        multiple    
-                                        disablePortal
-                                        id="tags"
-                                        placeholder="Machinery, Household goods, etc"
-                                        options={products}
-                                        getOptionLabel={(option: any) => { 
-                                            if (option !== null && option !== undefined) {
-                                                return option.productName !== undefined ? option.productName : option;
-                                            }
-                                            return ""; 
-                                        }}
-                                        value={tags}
-                                        sx={{ mt: 1 }}
-                                        renderInput={(params: any) => <TextField {...params} sx={{ textTransform: "lowercase" }} />}
-                                        onChange={(e: any, value: any) => { setTags(value); }}
-                                        fullWidth
-                                    /> : <Skeleton />
-                                }
-                            </Grid>
-                            <Grid item xs={12} md={6}>
-                                <InputLabel htmlFor="whatsapp-phone-number" sx={inputLabelStyles}>{t('whatsappNumber')}</InputLabel>
-                                <MuiTelInput 
-                                    id="whatsapp-phone-number" 
-                                    value={phone} onChange={setPhone} 
-                                    defaultCountry="CM" preferredCountries={["CM", "BE", "KE"]} 
-                                    fullWidth sx={{ mt: 1 }} disabled 
-                                />
-                            </Grid>
-                            <Grid item xs={12} md={6}>
-                                <InputLabel htmlFor="request-email" sx={inputLabelStyles}>{t('emailAddress')}</InputLabel>
-                                <BootstrapInput id="request-email" type="email" value={email} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)} fullWidth disabled />
-                            </Grid>
-                            <Grid item xs={12} md={6} mt={1}>
-                                <InputLabel htmlFor="departure" sx={inputLabelStyles}>{t('departure')}</InputLabel>
-                                <AutocompleteSearch id="departure" value={departure} onChange={setDeparture} callBack={getClosestDeparture} fullWidth />
-                            </Grid>
-                            <Grid item xs={12} md={6} mt={1}>
-                                <InputLabel htmlFor="arrival" sx={inputLabelStyles}>{t('arrival')}</InputLabel>
-                                <AutocompleteSearch id="arrival" value={arrival} onChange={setArrival} callBack={getClosestArrival} fullWidth />
-                            </Grid>
-                            
-                            <Grid item xs={9} container direction="column" alignItems="flex-start">
-                                <InputLabel htmlFor="listContainers" sx={inputLabelStyles} style={{ marginBottom: "8px", position: "relative", top: "12px" }}>{t('listContainers')}</InputLabel>
-                            </Grid>
-                            <Grid item xs={3}>
-                                <Button variant="contained" color="inherit" sx={whiteButtonStyles} style={{ float: "right" }} onClick={() => setModal10(true)} >{t('addContainer')}</Button>
-                            </Grid>
+                                        return ""; 
+                                    }}
+                                    value={tags}
+                                    sx={{ mt: 1 }}
+                                    renderInput={(params: any) => <TextField {...params} sx={{ textTransform: "lowercase" }} />}
+                                    onChange={(e: any, value: any) => { setTags(value); }}
+                                    fullWidth
+                                /> : <Skeleton />
+                            }
+                        </Grid>
+                        <Grid item xs={12} md={6}>
+                            <InputLabel htmlFor="whatsapp-phone-number" sx={inputLabelStyles}>{t('whatsappNumber')}</InputLabel>
+                            <MuiTelInput 
+                                id="whatsapp-phone-number" 
+                                value={phone} onChange={setPhone} 
+                                defaultCountry="CM" preferredCountries={["CM", "BE", "KE"]} 
+                                fullWidth sx={{ mt: 1 }} disabled 
+                            />
+                        </Grid>
+                        <Grid item xs={12} md={6}>
+                            <InputLabel htmlFor="request-email" sx={inputLabelStyles}>{t('emailAddress')}</InputLabel>
+                            <BootstrapInput id="request-email" type="email" value={email} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)} fullWidth disabled />
+                        </Grid>
+                        <Grid item xs={12} md={6} mt={1}>
+                            <InputLabel htmlFor="departure" sx={inputLabelStyles}>{t('departure')}</InputLabel>
+                            <AutocompleteSearch id="departure" value={departure} onChange={setDeparture} callBack={getClosestDeparture} fullWidth />
+                        </Grid>
+                        <Grid item xs={12} md={6} mt={1}>
+                            <InputLabel htmlFor="arrival" sx={inputLabelStyles}>{t('arrival')}</InputLabel>
+                            <AutocompleteSearch id="arrival" value={arrival} onChange={setArrival} callBack={getClosestArrival} fullWidth />
+                        </Grid>
+                        
+                        <Grid item xs={9} container direction="column" alignItems="flex-start">
+                            <InputLabel htmlFor="listContainers" sx={inputLabelStyles} style={{ marginBottom: "8px", position: "relative", top: "12px" }}>{t('listContainers')}</InputLabel>
+                        </Grid>
+                        <Grid item xs={3}>
+                            <Button variant="contained" color="inherit" sx={whiteButtonStyles} style={{ float: "right" }} onClick={() => setModal10(true)} >{t('addContainer')}</Button>
+                        </Grid>
 
-                            <Grid item xs={12}>
+                        <Grid item xs={12}>
+                            {
+                                packingType === "FCL" ?
+                                <>
                                 {
-                                    packingType === "FCL" ?
-                                    <>
+                                    containersSelection !== undefined && containersSelection !== null && containersSelection.length !== 0 && containers !== null ? 
+                                    <Grid container spacing={2}>
                                     {
-                                        containersSelection !== undefined && containersSelection !== null && containersSelection.length !== 0 && containers !== null ? 
-                                        <Grid container spacing={2}>
+                                        containersSelection.map((item: any, index: number) => (
+                                            <Grid key={"listitem1-"+index} item xs={12} md={4}>
+                                                <ListItem
+                                                    sx={{ border: "1px solid #e5e5e5" }}
+                                                    secondaryAction={
+                                                        <IconButton edge="end" onClick={() => {
+                                                            setContainersSelection((prevItems: any) => prevItems.filter((item: any, i: number) => i !== index));
+                                                        }}>
+                                                            <DeleteIcon />
+                                                        </IconButton>
+                                                    }
+                                                >
+                                                    <ListItemText primary={
+                                                        t('container')+" : "+item.container+" | "+t('quantity')+" : "+item.quantity
+                                                    } />
+                                                </ListItem>
+                                            </Grid>
+                                        ))
+                                    }
+                                    </Grid> : null  
+                                }
+                                </> : null
+                            }
+                            {
+                                packingType === "Breakbulk/LCL" ?
+                                <>
+                                {
+                                    packagesSelection !== undefined && packagesSelection !== null && packagesSelection.length !== 0 ? 
+                                    <Grid container spacing={2}>
                                         {
-                                            containersSelection.map((item: any, index: number) => (
-                                                <Grid key={"listitem1-"+index} item xs={12} md={4}>
+                                            packagesSelection.map((item: any, index: number) => (
+                                                <Grid key={"packageitem1-"+index} item xs={12} md={6}>
                                                     <ListItem
                                                         sx={{ border: "1px solid #e5e5e5" }}
                                                         secondaryAction={
                                                             <IconButton edge="end" onClick={() => {
-                                                                setContainersSelection((prevItems: any) => prevItems.filter((item: any, i: number) => i !== index));
+                                                                setPackagesSelection((prevItems: any) => prevItems.filter((item: any, i: number) => i !== index));
                                                             }}>
                                                                 <DeleteIcon />
                                                             </IconButton>
                                                         }
                                                     >
                                                         <ListItemText primary={
-                                                            t('container')+" : "+item.container+" | "+t('quantity')+" : "+item.quantity
+                                                            t('name')+" : "+item.name+" | "+t('quantity')+" : "+item.quantity+" | "+t('dimensions')+" : "+item.dimensions+" | Cubage ("+item.volume+" \u33A5) | "+t('weight')+" : "+item.weight+" Kg"
                                                         } />
                                                     </ListItem>
                                                 </Grid>
                                             ))
                                         }
-                                        </Grid> : null  
-                                    }
-                                    </> : null
+                                    </Grid> : null  
                                 }
+                                </> : null
+                            }
+                            {
+                                packingType === "Unit RoRo" ?
+                                <>
                                 {
-                                    packingType === "Breakbulk/LCL" ?
-                                    <>
-                                    {
-                                        packagesSelection !== undefined && packagesSelection !== null && packagesSelection.length !== 0 ? 
-                                        <Grid container spacing={2}>
-                                            {
-                                                packagesSelection.map((item: any, index: number) => (
-                                                    <Grid key={"packageitem1-"+index} item xs={12} md={6}>
-                                                        <ListItem
-                                                            sx={{ border: "1px solid #e5e5e5" }}
-                                                            secondaryAction={
-                                                                <IconButton edge="end" onClick={() => {
-                                                                    setPackagesSelection((prevItems: any) => prevItems.filter((item: any, i: number) => i !== index));
-                                                                }}>
-                                                                    <DeleteIcon />
-                                                                </IconButton>
-                                                            }
-                                                        >
-                                                            <ListItemText primary={
-                                                                t('name')+" : "+item.name+" | "+t('quantity')+" : "+item.quantity+" | "+t('dimensions')+" : "+item.dimensions+" | Cubage ("+item.volume+" \u33A5) | "+t('weight')+" : "+item.weight+" Kg"
-                                                            } />
-                                                        </ListItem>
-                                                    </Grid>
-                                                ))
-                                            }
-                                        </Grid> : null  
-                                    }
-                                    </> : null
+                                    unitsSelection !== undefined && unitsSelection !== null && unitsSelection.length !== 0 ? 
+                                    <Grid container spacing={2}>
+                                        {
+                                            unitsSelection.map((item: any, index: number) => (
+                                                <Grid key={"unititem1-"+index} item xs={12} md={6}>
+                                                    <ListItem
+                                                        sx={{ border: "1px solid #e5e5e5" }}
+                                                        secondaryAction={
+                                                            <IconButton edge="end" onClick={() => {
+                                                                setUnitsSelection((prevItems: any) => prevItems.filter((item: any, i: number) => i !== index));
+                                                            }}>
+                                                                <DeleteIcon />
+                                                            </IconButton>
+                                                        }
+                                                    >
+                                                        <ListItemText primary={
+                                                            t('name')+" : "+item.name+" | "+t('quantity')+" : "+item.quantity+" | "+t('dimensions')+" : "+item.dimensions+" | Cubage ("+item.volume+" \u33A5) | "+t('weight')+" : "+item.weight+" Kg"
+                                                        } />
+                                                    </ListItem>
+                                                </Grid>
+                                            ))
+                                        }
+                                    </Grid> : null  
                                 }
-                                {
-                                    packingType === "Unit RoRo" ?
-                                    <>
-                                    {
-                                        unitsSelection !== undefined && unitsSelection !== null && unitsSelection.length !== 0 ? 
-                                        <Grid container spacing={2}>
-                                            {
-                                                unitsSelection.map((item: any, index: number) => (
-                                                    <Grid key={"unititem1-"+index} item xs={12} md={6}>
-                                                        <ListItem
-                                                            sx={{ border: "1px solid #e5e5e5" }}
-                                                            secondaryAction={
-                                                                <IconButton edge="end" onClick={() => {
-                                                                    setUnitsSelection((prevItems: any) => prevItems.filter((item: any, i: number) => i !== index));
-                                                                }}>
-                                                                    <DeleteIcon />
-                                                                </IconButton>
-                                                            }
-                                                        >
-                                                            <ListItemText primary={
-                                                                t('name')+" : "+item.name+" | "+t('quantity')+" : "+item.quantity+" | "+t('dimensions')+" : "+item.dimensions+" | Cubage ("+item.volume+" \u33A5) | "+t('weight')+" : "+item.weight+" Kg"
-                                                            } />
-                                                        </ListItem>
-                                                    </Grid>
-                                                ))
-                                            }
-                                        </Grid> : null  
-                                    }
-                                    </> : null
-                                }
-                            </Grid>
-                            
+                                </> : null
+                            }
+                        </Grid>
+                        
 
-                            <Grid item xs={12} md={6} mt={.5} sx={{ display: { xs: 'none', md: 'block' } }}>
-                                <InputLabel htmlFor="request-message" sx={inputLabelStyles}>{t('details')}</InputLabel>
-                                <BootstrapInput id="request-message" type="text" multiline rows={3.5} value={message} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setMessage(e.target.value)} fullWidth />
-                            </Grid>
-                            <Grid item xs={12} md={6} mt={1}>
-                                <InputLabel htmlFor="assigned-manager" sx={inputLabelStyles}>{t('assignedManager')}</InputLabel>
-                                {
-                                    !loadAssignees ? 
-                                    <>
-                                        <NativeSelect
-                                            id="assigned-manager"
-                                            value={assignedManager}
-                                            onChange={handleChangeAssignedManager}
-                                            input={<BootstrapInput />}
-                                            fullWidth
-                                        >
-                                            <option value="">{t('noAgentAssigned')}</option>
-                                            {
-                                                assignees.map((row: any, i: number) => (
-                                                    <option key={"assigneeId-"+i} value={String(row.id)}>{row.name}</option>
-                                                ))
-                                            }
-                                        </NativeSelect>
-                                        <Button variant="contained" color="inherit" sx={whiteButtonStyles} style={{ marginRight: "10px" }} onClick={assignManager} >{t('updateManager')}</Button>
-                                        <Button variant="contained" color="inherit" sx={whiteButtonStyles} onClick={removeManager} >{t('removeManager')}</Button>
-                                    </> : <Skeleton sx={{ mt: 3 }} />   
-                                }
-                            </Grid>
-                            
-                            <Grid item xs={12}>
-                                <Accordion sx={{ backgroundColor: "#fbfbfb" }}>
-                                    <AccordionSummary
-                                        expandIcon={<ExpandMoreIcon />}
-                                        aria-controls="panel1a-content"
-                                        id="panel1a-header"
+                        <Grid item xs={12} md={6} mt={.5} sx={{ display: { xs: 'none', md: 'block' } }}>
+                            <InputLabel htmlFor="request-message" sx={inputLabelStyles}>{t('details')}</InputLabel>
+                            <BootstrapInput id="request-message" type="text" multiline rows={3.5} value={message} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setMessage(e.target.value)} fullWidth />
+                        </Grid>
+                        <Grid item xs={12} md={6} mt={1}>
+                            <InputLabel htmlFor="assigned-manager" sx={inputLabelStyles}>{t('assignedManager')}</InputLabel>
+                            {
+                                !loadAssignees ? 
+                                <>
+                                    <NativeSelect
+                                        id="assigned-manager"
+                                        value={assignedManager}
+                                        onChange={handleChangeAssignedManager}
+                                        input={<BootstrapInput />}
+                                        fullWidth
                                     >
-                                        <Typography variant="h6" sx={{ mx: 0 }}><b>{t('generatePriceOffer')}</b></Typography>
-                                    </AccordionSummary>
-                                    <AccordionDetails>
-                                        <Box sx={{ px: 0 }}>
-                                            <Stepper activeStep={activeStep} sx={{ px: 1 }}>
-                                                {steps.map((label, index) => {
-                                                    const stepProps: { completed?: boolean } = {};
-                                                    const labelProps: {
-                                                        optional?: React.ReactNode;
-                                                    } = {};
-                                                    if (isStepOptional(index)) {
-                                                        labelProps.optional = (<Typography variant="caption">{t('optional')}</Typography>);
-                                                    }
-                                                    if (isStepSkipped(index)) {
-                                                        stepProps.completed = false;
-                                                    }
-                                                    return (
-                                                        <Step key={label} {...stepProps}>
-                                                            <StepLabel {...labelProps}>{label}</StepLabel>
-                                                        </Step>
-                                                    );
-                                                })}
-                                            </Stepper>
-                                            {activeStep === steps.length ? (
-                                                <React.Fragment>
-                                                    <Typography sx={{ mt: 2, mb: 1 }}>
-                                                        All steps completed - you&apos;re finished
-                                                    </Typography>
-                                                    <Box sx={{ display: 'flex', flexDirection: 'row', pt: 2 }}>
-                                                        <Box sx={{ flex: '1 1 auto' }} />
-                                                        <Button onClick={handleReset}>Reset</Button>
-                                                    </Box>
-                                                </React.Fragment>
-                                            ) : (
-                                                <React.Fragment>
-                                                    {
-                                                        activeStep === 0 ?
-                                                        <Grid container spacing={2} mt={1} px={2}>
-                                                            <Grid item xs={12} md={6} mt={1}>
-                                                                <InputLabel htmlFor="loading-city" sx={inputLabelStyles}>{t('departure')} / {t('loadingCity')}</InputLabel>
-                                                                <AutocompleteSearch id="loading-city" value={loadingCity} onChange={setLoadingCity} fullWidth callBack={() => { setDeparture(loadingCity); }} />
-                                                            </Grid>
-                                                            <Grid item xs={12} md={6} mt={1}>
-                                                                <InputLabel htmlFor="haulage-type" sx={inputLabelStyles}>{t('haulageType')}</InputLabel>
-                                                                <NativeSelect
-                                                                    id="haulage-type"
-                                                                    value={haulageType}
-                                                                    onChange={handleChangeHaulageType}
-                                                                    input={<BootstrapInput />}
-                                                                    fullWidth
-                                                                >
-                                                                    <option key={"kdq-"} value="">{t('anyType')}</option>
-                                                                    {
-                                                                        haulageTypeOptions.map((item: any, i: number) => (
-                                                                            <option key={"kdq"+i} value={item.value}>{item.label}</option>
-                                                                        ))
-                                                                    }
-                                                                </NativeSelect>
-                                                            </Grid>
-                                                            <Grid item xs={12}>
-                                                                {
-                                                                    !loadResults ? 
-                                                                    haulages !== null && haulages.length !== 0 ?
-                                                                        <Box sx={{ overflow: "auto" }}>
-                                                                            <Grid container>
-                                                                                <Grid item xs={8}>
-                                                                                    <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>
-                                                                                        {t('listHaulagesPricingOffers')+t('fromDotted')+loadingCity.city} (select one)
-                                                                                    </Typography>
-                                                                                </Grid>
-                                                                                <Grid item xs={4}>
-                                                                                    <Button 
-                                                                                        variant="contained" 
-                                                                                        color="inherit" 
-                                                                                        sx={{ 
-                                                                                            textTransform: "none", backgroundColor: "#fff", 
-                                                                                            color: "#333", float: "right", marginTop: "8px", marginLeft: "10px" 
-                                                                                        }} 
-                                                                                        onClick={getHaulagePriceOffers}
-                                                                                    >
-                                                                                        {t('reload')} <RestartAltIcon fontSize='small' />
-                                                                                    </Button>
-                                                                                    <Button 
-                                                                                        variant="contained" 
-                                                                                        color="inherit" 
-                                                                                        sx={{ 
-                                                                                            textTransform: "none", backgroundColor: "#fff", 
-                                                                                            color: "#333", float: "right", marginTop: "8px" 
-                                                                                        }}
-                                                                                        onClick={() => setModal5(true)}
-                                                                                    >
-                                                                                        {t('requestHaulagePrice')}
-                                                                                    </Button>
-                                                                                </Grid>
-                                                                            </Grid>
-                                                                            
-                                                                            <DataGrid
-                                                                                rows={haulages}
-                                                                                columns={columnsHaulages}
-                                                                                // hideFooter
-                                                                                initialState={{
-                                                                                    pagination: {
-                                                                                        paginationModel: {
-                                                                                            pageSize: 7,
-                                                                                        },
-                                                                                    },
-                                                                                }}
-                                                                                pageSizeOptions={[5, 10]}
-                                                                                getRowId={(row: any) => row?.id}
-                                                                                getRowHeight={() => "auto" }
-                                                                                sx={gridStyles}
-                                                                                onRowSelectionModelChange={(newRowSelectionModel: any) => {
-                                                                                    setRowSelectionModel2(newRowSelectionModel);
-                                                                                    setSelectedHaulage(newRowSelectionModel.length !== 0 ? haulages.find((elm: any) => elm.id === newRowSelectionModel[0]) : null);
-                                                                                }}
-                                                                                rowSelectionModel={rowSelectionModel2}
-                                                                                // onRowClick={handleRowHaulagesClick}
-                                                                            />
-                                                                        </Box> :
-                                                                        <Box>
-                                                                            <Grid container>
-                                                                                <Grid item xs={8}>
-                                                                                    <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>
-                                                                                        {t('listHaulagesPricingOffers')+t('fromDotted')+loadingCity.city}
-                                                                                    </Typography>
-                                                                                </Grid>
-                                                                                <Grid item xs={4}>
-                                                                                    <Button 
-                                                                                        variant="contained" 
-                                                                                        color="inherit" 
-                                                                                        sx={{ 
-                                                                                            textTransform: "none", backgroundColor: "#fff", 
-                                                                                            color: "#333", float: "right", marginTop: "8px", marginLeft: "10px" 
-                                                                                        }} 
-                                                                                        onClick={getHaulagePriceOffers}
-                                                                                    >
-                                                                                        {t('reload')} <RestartAltIcon fontSize='small' />
-                                                                                    </Button>
-                                                                                    <Button 
-                                                                                        variant="contained" 
-                                                                                        color="inherit" 
-                                                                                        sx={{ 
-                                                                                            textTransform: "none", backgroundColor: "#fff", 
-                                                                                            color: "#333", float: "right", marginTop: "8px" 
-                                                                                        }}
-                                                                                        onClick={() => setModal5(true)}
-                                                                                    >
-                                                                                        {t('requestHaulagePrice')}
-                                                                                    </Button>
-                                                                                </Grid>
-                                                                            </Grid>
-                                                                            <Alert severity="error">{t('noResults')}</Alert>
-                                                                        </Box> 
-                                                                    : <Skeleton />
-                                                                }
-                                                            </Grid>
-                                                        </Grid> : null
-                                                    }
-                                                    {
-                                                        activeStep === 1 ? 
-                                                        <Grid container spacing={2} mt={1} px={2}>
-                                                            <Grid item xs={12} md={6} mt={1}>
-                                                                <InputLabel htmlFor="port-departure" sx={inputLabelStyles}><Anchor fontSize="small" sx={inputIconStyles} /> {t('departurePort')}</InputLabel>
-                                                                {
-                                                                    ports !== null ?
-                                                                    <Autocomplete
-                                                                        disablePortal
-                                                                        id="port-departure"
-                                                                        options={ports1}
-                                                                        renderOption={(props, option, i) => {
-                                                                            return (
-                                                                                <li {...props} key={option.portId}>
-                                                                                    {option.portName+", "+option.country}
-                                                                                </li>
-                                                                            );
-                                                                        }}
-                                                                        getOptionLabel={(option: any) => { 
-                                                                            if (option !== null && option !== undefined) {
-                                                                                return option.portName+', '+option.country;
-                                                                            }
-                                                                            return ""; 
-                                                                        }}
-                                                                        value={portDeparture}
-                                                                        // disabled={true}
-                                                                        sx={{ mt: 1 }}
-                                                                        renderInput={(params: any) => <TextField {...params} />}
-                                                                        onChange={(e: any, value: any) => { setPortDeparture(value); }}
-                                                                        fullWidth
-                                                                    /> : <Skeleton />
-                                                                }
-                                                            </Grid>
-                                                            <Grid item xs={12} md={6} mt={1}>
-                                                                <InputLabel htmlFor="destination-port" sx={inputLabelStyles}><Anchor fontSize="small" sx={inputIconStyles} /> {t('arrivalPort')}</InputLabel>
-                                                                {
-                                                                    ports !== null ?
-                                                                    <Autocomplete
-                                                                        disablePortal
-                                                                        id="destination-port"
-                                                                        options={ports2}
-                                                                        renderOption={(props, option, i) => {
-                                                                            return (
-                                                                                <li {...props} key={option.portId}>
-                                                                                    {option.portName+", "+option.country}
-                                                                                </li>
-                                                                            );
-                                                                        }}
-                                                                        getOptionLabel={(option: any) => { 
-                                                                            if (option !== null && option !== undefined) {
-                                                                                return option.portName+', '+option.country;
-                                                                            }
-                                                                            return ""; 
-                                                                        }}
-                                                                        value={portDestination}
-                                                                        sx={{ mt: 1 }}
-                                                                        renderInput={(params: any) => <TextField {...params} />}
-                                                                        onChange={(e: any, value: any) => { setPortDestination(value); }}
-                                                                        fullWidth
-                                                                    /> : <Skeleton />
-                                                                }
-                                                            </Grid>
-                                                            <Grid item xs={12}>
-                                                                <Alert severity="info" sx={{ mb: 2 }}>{t('selectOfferMessage')}</Alert>
-                                                                {
-                                                                    !loadResults ? 
-                                                                    seafreights !== null && seafreights.length !== 0 ?
-                                                                    <Box sx={{ overflow: "auto" }}>
-                                                                        <Grid container>
-                                                                            <Grid item xs={8}>
-                                                                                <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>
-                                                                                    {t('listSeaFreightsPricingOffers')+t('fromDotted')+portDeparture.portName+"-"+portDestination.portName}
-                                                                                </Typography>
-                                                                            </Grid>
-                                                                            <Grid item xs={4}>
-                                                                                <Button 
-                                                                                    variant="contained" 
-                                                                                    color="inherit" 
-                                                                                    sx={{ 
-                                                                                        textTransform: "none", backgroundColor: "#fff", 
-                                                                                        color: "#333", float: "right", marginTop: "8px", marginLeft: "10px"
-                                                                                    }} 
-                                                                                    onClick={getSeaFreightPriceOffers}
-                                                                                >
-                                                                                    {t('reload')} <RestartAltIcon fontSize='small' />
-                                                                                </Button>
-                                                                                <Button 
-                                                                                    variant="contained" 
-                                                                                    color="inherit" 
-                                                                                    sx={{ 
-                                                                                        textTransform: "none", backgroundColor: "#fff", 
-                                                                                        color: "#333", float: "right", marginTop: "8px"
-                                                                                    }}
-                                                                                    onClick={() => setModal6(true)}
-                                                                                >
-                                                                                    {t('requestSeafreightPrice')}
-                                                                                </Button>
-                                                                            </Grid>
-                                                                        </Grid>
-                                                                        <DataGrid
-                                                                            rows={seafreights}
-                                                                            columns={columnsSeafreights}
-                                                                            // hideFooter
-                                                                            initialState={{
-                                                                                pagination: {
-                                                                                    paginationModel: {
-                                                                                        pageSize: 7,
-                                                                                    },
-                                                                                },
-                                                                            }}
-                                                                            pageSizeOptions={[5, 10]}
-                                                                            getRowId={(row: any) => row?.seaFreightId}
-                                                                            getRowHeight={() => "auto" }
-                                                                            style={sizingStyles}
-                                                                            sx={gridStyles}
-                                                                            disableDensitySelector
-                                                                            disableColumnSelector
-                                                                            slots={{ toolbar: GridToolbar }}
-                                                                            slotProps={{
-                                                                                toolbar: {
-                                                                                    showQuickFilter: true,
-                                                                                },
-                                                                            }}
-                                                                            onRowSelectionModelChange={(newRowSelectionModel: any) => {
-                                                                                if (newRowSelectionModel.length <= containersSelection.length) {
-                                                                                    var myFreights = newRowSelectionModel.length !== 0 ? seafreights.filter((elm: any) => newRowSelectionModel.includes(elm.seaFreightId)) : [];
-                                                                                    if (checkDifferentDefaultContainer(myFreights)) {
-                                                                                        setRowSelectionModel(newRowSelectionModel);
-                                                                                        setSelectedSeafreight(newRowSelectionModel.length !== 0 ? seafreights.find((elm: any) => elm.seaFreightId === newRowSelectionModel[0]) : null);
-                                                                                        setMySeafreights(myFreights);
-                                                                                        // setSelectedSeafreight(newRowSelectionModel.length !== 0 ? seafreights.filter((elm: any) => newRowSelectionModel.includes(elm.seaFreightId)) : null);
-                                                                                    }
-                                                                                    else {
-                                                                                        enqueueSnackbar("You can only select offers with different container types!", { variant: "warning", anchorOrigin: { horizontal: "right", vertical: "top"} });
-                                                                                    }
-                                                                                }
-                                                                                else {
-                                                                                    enqueueSnackbar("You can only select "+containersSelection.length+" offers!", { variant: "warning", anchorOrigin: { horizontal: "right", vertical: "top"} });
-                                                                                }
-                                                                            }}
-                                                                            rowSelectionModel={rowSelectionModel}
-                                                                            checkboxSelection
-                                                                            // onRowClick={handleRowSeafreightsClick}
-                                                                        />
-                                                                    </Box> : 
-                                                                    <Box>
-                                                                        <Grid container>
-                                                                            <Grid item xs={8}>
-                                                                                <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>
-                                                                                    {
-                                                                                        portDeparture !== null && portDestination !== null && portDeparture !== undefined && portDestination !== undefined ? 
-                                                                                        t('listSeaFreightsPricingOffers')+t('fromDotted')+portDeparture.portName+"-"+portDestination.portName
-                                                                                        : t('listSeaFreightsPricingOffers')+t('fromDotted')
-                                                                                    }
-                                                                                </Typography>
-                                                                            </Grid>
-                                                                            <Grid item xs={4}>
-                                                                                <Button 
-                                                                                    variant="contained" 
-                                                                                    color="inherit" 
-                                                                                    sx={{ 
-                                                                                        textTransform: "none", backgroundColor: "#fff", 
-                                                                                        color: "#333", float: "right", marginTop: "8px", marginLeft: "10px"
-                                                                                    }} 
-                                                                                    onClick={getSeaFreightPriceOffers}
-                                                                                >
-                                                                                    {t('reload')} <RestartAltIcon fontSize='small' />
-                                                                                </Button>
-                                                                                <Button 
-                                                                                    variant="contained" 
-                                                                                    color="inherit" 
-                                                                                    sx={{ 
-                                                                                        textTransform: "none", backgroundColor: "#fff", 
-                                                                                        color: "#333", float: "right", marginTop: "8px"
-                                                                                    }}
-                                                                                    onClick={() => setModal6(true)}
-                                                                                >
-                                                                                    {t('requestSeafreightPrice')}
-                                                                                </Button>
-                                                                            </Grid>
-                                                                        </Grid>
-                                                                        <Alert severity="error">{t('noResults')}</Alert>
-                                                                    </Box>
-                                                                    : <Skeleton />
-                                                                }
-                                                            </Grid>
+                                        <option value="">{t('noAgentAssigned')}</option>
+                                        {
+                                            assignees.map((row: any, i: number) => (
+                                                <option key={"assigneeId-"+i} value={String(row.id)}>{row.name}</option>
+                                            ))
+                                        }
+                                    </NativeSelect>
+                                    <Button variant="contained" color="inherit" sx={whiteButtonStyles} style={{ marginRight: "10px" }} onClick={assignManager} >{t('updateManager')}</Button>
+                                    <Button variant="contained" color="inherit" sx={whiteButtonStyles} onClick={removeManager} >{t('removeManager')}</Button>
+                                </> : <Skeleton sx={{ mt: 3 }} />   
+                            }
+                        </Grid>
+                        
+                        <Grid item xs={12}>
+                            <Accordion sx={{ backgroundColor: "#fbfbfb" }}>
+                                <AccordionSummary
+                                    expandIcon={<ExpandMoreIcon />}
+                                    aria-controls="panel1a-content"
+                                    id="panel1a-header"
+                                >
+                                    <Typography variant="h6" sx={{ mx: 0 }}><b>{t('generatePriceOffer')}</b></Typography>
+                                </AccordionSummary>
+                                <AccordionDetails>
+                                    <Box sx={{ px: 0 }}>
+                                        <Stepper activeStep={activeStep} sx={{ px: 1 }}>
+                                            {steps.map((label, index) => {
+                                                const stepProps: { completed?: boolean } = {};
+                                                const labelProps: {
+                                                    optional?: React.ReactNode;
+                                                } = {};
+                                                if (isStepOptional(index)) {
+                                                    labelProps.optional = (<Typography variant="caption">{t('optional')}</Typography>);
+                                                }
+                                                if (isStepSkipped(index)) {
+                                                    stepProps.completed = false;
+                                                }
+                                                return (
+                                                    <Step key={label} {...stepProps}>
+                                                        <StepLabel {...labelProps}>{label}</StepLabel>
+                                                    </Step>
+                                                );
+                                            })}
+                                        </Stepper>
+                                        {activeStep === steps.length ? (
+                                            <React.Fragment>
+                                                <Typography sx={{ mt: 2, mb: 1 }}>
+                                                    All steps completed - you&apos;re finished
+                                                </Typography>
+                                                <Box sx={{ display: 'flex', flexDirection: 'row', pt: 2 }}>
+                                                    <Box sx={{ flex: '1 1 auto' }} />
+                                                    <Button onClick={handleReset}>Reset</Button>
+                                                </Box>
+                                            </React.Fragment>
+                                        ) : (
+                                            <React.Fragment>
+                                                {
+                                                    activeStep === 0 ?
+                                                    <Grid container spacing={2} mt={1} px={2}>
+                                                        <Grid item xs={12} md={6} mt={1}>
+                                                            <InputLabel htmlFor="loading-city" sx={inputLabelStyles}>{t('departure')} / {t('loadingCity')}</InputLabel>
+                                                            <AutocompleteSearch id="loading-city" value={loadingCity} onChange={setLoadingCity} fullWidth callBack={() => { setDeparture(loadingCity); }} />
                                                         </Grid>
-                                                        : null
-                                                    }
-                                                    {
-                                                        activeStep === 2 ? 
-                                                        <Grid container spacing={2} mt={1} px={2}>
-                                                            <Grid item xs={12}>
-                                                                <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>{t('listMiscPricingOffers')+t('fromDotted')+portDeparture.portName+"-"+portDestination.portName}</Typography>
-                                                                {/* <Typography variant="h6" sx={{ my: 2, fontSize: 17, fontWeight: "bold" }}>
-                                                                    Haulage miscs (auto selected)
-                                                                </Typography>
+                                                        <Grid item xs={12} md={6} mt={1}>
+                                                            <InputLabel htmlFor="haulage-type" sx={inputLabelStyles}>{t('haulageType')}</InputLabel>
+                                                            <NativeSelect
+                                                                id="haulage-type"
+                                                                value={haulageType}
+                                                                onChange={handleChangeHaulageType}
+                                                                input={<BootstrapInput />}
+                                                                fullWidth
+                                                            >
+                                                                <option key={"kdq-"} value="">{t('anyType')}</option>
                                                                 {
-                                                                    !loadMiscsHaulage ? 
-                                                                    miscsHaulage !== null && miscsHaulage.length !== 0 ?
-                                                                        <Box sx={{ overflow: "auto", mt: 1 }}>
-                                                                            <DataGrid
-                                                                                rows={miscsHaulage}
-                                                                                columns={columnsMiscs}
-                                                                                // hideFooter
-                                                                                initialState={{
-                                                                                    pagination: {
-                                                                                        paginationModel: {
-                                                                                            pageSize: 7,
-                                                                                        },
-                                                                                    },
-                                                                                }}
-                                                                                pageSizeOptions={[5, 10]}
-                                                                                getRowId={(row: any) => row?.miscellaneousId}
-                                                                                getRowHeight={() => "auto" }
-                                                                                sx={gridStyles}
-                                                                                disableRowSelectionOnClick
-                                                                                // onRowSelectionModelChange={(newRowSelectionModel: any) => {
-                                                                                //     setRowSelectionModel3(newRowSelectionModel);
-                                                                                //     // setSelectedMisc(newRowSelectionModel.length !== 0 ? miscs.find((elm: any) => elm.id === newRowSelectionModel[0]) : null);
-                                                                                // }}
-                                                                                // rowSelectionModel={rowSelectionModel3}
-                                                                                // onRowClick={handleRowMiscsClick}
-                                                                            />
-                                                                        </Box> : <Alert severity="error">{t('noResults')}</Alert>
-                                                                    : <Skeleton />
+                                                                    haulageTypeOptions.map((item: any, i: number) => (
+                                                                        <option key={"kdq"+i} value={item.value}>{item.label}</option>
+                                                                    ))
                                                                 }
-
-                                                                <Grid container sx={{ alignItems: "center" }}>
-                                                                    <Grid item xs={12} md={8}>
-                                                                        <Typography variant="h6" sx={{ my: 2, fontSize: 17, fontWeight: "bold" }}>
-                                                                            Seafreight miscs (auto selected)
-                                                                        </Typography>
-                                                                    </Grid>
-                                                                    <Grid item xs={12} md={4}>
-                                                                        <Button 
-                                                                            variant="contained" 
-                                                                            color="inherit" 
-                                                                            sx={{ 
-                                                                                textTransform: "none", backgroundColor: "#fff", 
-                                                                                color: "#333", float: "right", marginTop: "0px", marginLeft: "10px" 
-                                                                            }} 
-                                                                            onClick={getMiscellaneousPriceOffers}
-                                                                        >
-                                                                            {t('reload')} <RestartAltIcon fontSize='small' />
-                                                                        </Button>
-                                                                    </Grid>
-                                                                </Grid>
-                                                                {
-                                                                    !loadResults ? 
-                                                                    miscs !== null && miscs.length !== 0 ?
-                                                                        <Box sx={{ overflow: "auto" }}>
-                                                                            <DataGrid
-                                                                                rows={miscs}
-                                                                                columns={columnsMiscs}
-                                                                                // hideFooter
-                                                                                initialState={{
-                                                                                    pagination: {
-                                                                                        paginationModel: {
-                                                                                            pageSize: 7,
-                                                                                        },
-                                                                                    },
-                                                                                }}
-                                                                                pageSizeOptions={[5, 10]}
-                                                                                getRowId={(row: any) => row?.miscellaneousId}
-                                                                                getRowHeight={() => "auto" }
-                                                                                sx={gridStyles}
-                                                                                disableRowSelectionOnClick
-                                                                                // onRowSelectionModelChange={(newRowSelectionModel: any) => {
-                                                                                //     setRowSelectionModel3(newRowSelectionModel);
-                                                                                //     // setSelectedMisc(newRowSelectionModel.length !== 0 ? miscs.find((elm: any) => elm.id === newRowSelectionModel[0]) : null);
-                                                                                // }}
-                                                                                // rowSelectionModel={rowSelectionModel3}
-                                                                                // onRowClick={handleRowMiscsClick}
-                                                                            />
-                                                                        </Box> : <Alert severity="error">{t('noResults')}</Alert>
-                                                                    : <Skeleton />
-                                                                } */}
-                                                                <Grid container spacing={2}>
-                                                                    <Grid item xs={8}>
-                                                                        <Typography variant="h6" sx={{ mt: 2, fontSize: 17, fontWeight: "bold" }}>
-                                                                            General miscs (select any)
-                                                                        </Typography>    
-                                                                    </Grid>
-                                                                    <Grid item xs={4}>
-                                                                        <Button 
-                                                                            variant="contained" 
-                                                                            color="inherit" 
-                                                                            sx={{ 
-                                                                                textTransform: "none", backgroundColor: "#fff", 
-                                                                                color: "#333", float: "right", marginTop: "8px" 
-                                                                            }}
-                                                                            onClick={() => setModal9(true)}
-                                                                        >
-                                                                            Create a misc
-                                                                        </Button>
-                                                                    </Grid>
-                                                                    <Grid item xs={12}>
-                                                                        {
-                                                                            !loadGeneralMiscs && !loadResults && !loadMiscsHaulage ? 
-                                                                            tableMiscs !== null && tableMiscs.length !== 0 ?
-                                                                                <Box sx={{ overflow: "auto" }}>
-                                                                                    <DataGrid
-                                                                                        rows={tableMiscs}
-                                                                                        columns={columnsMiscs}
-                                                                                        // hideFooter
-                                                                                        initialState={{
-                                                                                            pagination: {
-                                                                                                paginationModel: {
-                                                                                                    pageSize: 7,
-                                                                                                },
-                                                                                            },
-                                                                                        }}
-                                                                                        pageSizeOptions={[5, 10]}
-                                                                                        getRowId={(row: any) => row?.miscellaneousId}
-                                                                                        getRowHeight={() => "auto" }
-                                                                                        style={sizingStyles}
-                                                                                        sx={gridStyles}
-                                                                                        disableDensitySelector
-                                                                                        disableColumnSelector
-                                                                                        slots={{ toolbar: GridToolbar }}
-                                                                                        slotProps={{
-                                                                                            toolbar: {
-                                                                                                showQuickFilter: true,
-                                                                                            },
-                                                                                        }}
-                                                                                        onRowSelectionModelChange={(newRowSelectionModel: any) => {
-                                                                                            setRowSelectionModel3(newRowSelectionModel);
-                                                                                            setMyMiscs(newRowSelectionModel.length !== 0 ? 
-                                                                                                tableMiscs
-                                                                                                .filter((elm: any) => newRowSelectionModel.includes(elm.miscellaneousId))
-                                                                                                .map((elm: any) => { return {...elm, defaultContainer: elm.containers[0].container.packageName}}) : 
-                                                                                            []);
-                                                                                            // setSelectedMisc(newRowSelectionModel.length !== 0 ? generalMiscs.find((elm: any) => elm.id === newRowSelectionModel[0]) : null);
-                                                                                        }}
-                                                                                        rowSelectionModel={rowSelectionModel3}
-                                                                                        checkboxSelection
-                                                                                        // onRowClick={handleRowMiscsClick}
-                                                                                    />
-                                                                                </Box> : <Alert severity="error">{t('noResults')}</Alert>
-                                                                            : <Skeleton />
-                                                                        }
-                                                                    </Grid>
-                                                                </Grid>
-                                                            </Grid>
+                                                            </NativeSelect>
                                                         </Grid>
-                                                        : null
-                                                    }
-                                                    {
-                                                        activeStep === 3 ?
-                                                        <Grid container spacing={2} mt={1} px={2}>
+                                                        <Grid item xs={12}>
                                                             {
-                                                                selectedHaulage !== null ? 
-                                                                <Grid item xs={12}>
-                                                                    <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>{t('selectedHaulage')}</Typography>
+                                                                !loadResults ? 
+                                                                haulages !== null && haulages.length !== 0 ?
                                                                     <Box sx={{ overflow: "auto" }}>
+                                                                        <Grid container>
+                                                                            <Grid item xs={8}>
+                                                                                <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>
+                                                                                    {t('listHaulagesPricingOffers')+t('fromDotted')+loadingCity.city} (select one)
+                                                                                </Typography>
+                                                                            </Grid>
+                                                                            <Grid item xs={4}>
+                                                                                <Button 
+                                                                                    variant="contained" 
+                                                                                    color="inherit" 
+                                                                                    sx={{ 
+                                                                                        textTransform: "none", backgroundColor: "#fff", 
+                                                                                        color: "#333", float: "right", marginTop: "8px", marginLeft: "10px" 
+                                                                                    }} 
+                                                                                    onClick={getHaulagePriceOffers}
+                                                                                >
+                                                                                    {t('reload')} <RestartAltIcon fontSize='small' />
+                                                                                </Button>
+                                                                                <Button 
+                                                                                    variant="contained" 
+                                                                                    color="inherit" 
+                                                                                    sx={{ 
+                                                                                        textTransform: "none", backgroundColor: "#fff", 
+                                                                                        color: "#333", float: "right", marginTop: "8px" 
+                                                                                    }}
+                                                                                    onClick={() => setModal5(true)}
+                                                                                >
+                                                                                    {t('requestHaulagePrice')}
+                                                                                </Button>
+                                                                            </Grid>
+                                                                        </Grid>
+                                                                        
                                                                         <DataGrid
-                                                                            rows={[selectedHaulage]}
+                                                                            rows={haulages}
                                                                             columns={columnsHaulages}
                                                                             // hideFooter
                                                                             initialState={{
@@ -2057,17 +1644,155 @@ function Request() {
                                                                             pageSizeOptions={[5, 10]}
                                                                             getRowId={(row: any) => row?.id}
                                                                             getRowHeight={() => "auto" }
-                                                                            sx={sizeStyles}
-                                                                            disableRowSelectionOnClick
+                                                                            sx={gridStyles}
+                                                                            onRowSelectionModelChange={(newRowSelectionModel: any) => {
+                                                                                setRowSelectionModel2(newRowSelectionModel);
+                                                                                setSelectedHaulage(newRowSelectionModel.length !== 0 ? haulages.find((elm: any) => elm.id === newRowSelectionModel[0]) : null);
+                                                                            }}
+                                                                            rowSelectionModel={rowSelectionModel2}
+                                                                            // onRowClick={handleRowHaulagesClick}
                                                                         />
-                                                                    </Box>
-                                                                </Grid> : null
+                                                                    </Box> :
+                                                                    <Box>
+                                                                        <Grid container>
+                                                                            <Grid item xs={8}>
+                                                                                <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>
+                                                                                    {t('listHaulagesPricingOffers')+t('fromDotted')+loadingCity.city}
+                                                                                </Typography>
+                                                                            </Grid>
+                                                                            <Grid item xs={4}>
+                                                                                <Button 
+                                                                                    variant="contained" 
+                                                                                    color="inherit" 
+                                                                                    sx={{ 
+                                                                                        textTransform: "none", backgroundColor: "#fff", 
+                                                                                        color: "#333", float: "right", marginTop: "8px", marginLeft: "10px" 
+                                                                                    }} 
+                                                                                    onClick={getHaulagePriceOffers}
+                                                                                >
+                                                                                    {t('reload')} <RestartAltIcon fontSize='small' />
+                                                                                </Button>
+                                                                                <Button 
+                                                                                    variant="contained" 
+                                                                                    color="inherit" 
+                                                                                    sx={{ 
+                                                                                        textTransform: "none", backgroundColor: "#fff", 
+                                                                                        color: "#333", float: "right", marginTop: "8px" 
+                                                                                    }}
+                                                                                    onClick={() => setModal5(true)}
+                                                                                >
+                                                                                    {t('requestHaulagePrice')}
+                                                                                </Button>
+                                                                            </Grid>
+                                                                        </Grid>
+                                                                        <Alert severity="error">{t('noResults')}</Alert>
+                                                                    </Box> 
+                                                                : <Skeleton />
                                                             }
-                                                            <Grid item xs={12}>
-                                                                <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>{t('selectedSeafreight')}</Typography>
+                                                        </Grid>
+                                                    </Grid> : null
+                                                }
+                                                {
+                                                    activeStep === 1 ? 
+                                                    <Grid container spacing={2} mt={1} px={2}>
+                                                        <Grid item xs={12} md={6} mt={1}>
+                                                            <InputLabel htmlFor="port-departure" sx={inputLabelStyles}><Anchor fontSize="small" sx={inputIconStyles} /> {t('departurePort')}</InputLabel>
+                                                            {
+                                                                ports !== null ?
+                                                                <Autocomplete
+                                                                    disablePortal
+                                                                    id="port-departure"
+                                                                    options={ports1}
+                                                                    renderOption={(props, option, i) => {
+                                                                        return (
+                                                                            <li {...props} key={option.portId}>
+                                                                                {option.portName+", "+option.country}
+                                                                            </li>
+                                                                        );
+                                                                    }}
+                                                                    getOptionLabel={(option: any) => { 
+                                                                        if (option !== null && option !== undefined) {
+                                                                            return option.portName+', '+option.country;
+                                                                        }
+                                                                        return ""; 
+                                                                    }}
+                                                                    value={portDeparture}
+                                                                    // disabled={true}
+                                                                    sx={{ mt: 1 }}
+                                                                    renderInput={(params: any) => <TextField {...params} />}
+                                                                    onChange={(e: any, value: any) => { setPortDeparture(value); }}
+                                                                    fullWidth
+                                                                /> : <Skeleton />
+                                                            }
+                                                        </Grid>
+                                                        <Grid item xs={12} md={6} mt={1}>
+                                                            <InputLabel htmlFor="destination-port" sx={inputLabelStyles}><Anchor fontSize="small" sx={inputIconStyles} /> {t('arrivalPort')}</InputLabel>
+                                                            {
+                                                                ports !== null ?
+                                                                <Autocomplete
+                                                                    disablePortal
+                                                                    id="destination-port"
+                                                                    options={ports2}
+                                                                    renderOption={(props, option, i) => {
+                                                                        return (
+                                                                            <li {...props} key={option.portId}>
+                                                                                {option.portName+", "+option.country}
+                                                                            </li>
+                                                                        );
+                                                                    }}
+                                                                    getOptionLabel={(option: any) => { 
+                                                                        if (option !== null && option !== undefined) {
+                                                                            return option.portName+', '+option.country;
+                                                                        }
+                                                                        return ""; 
+                                                                    }}
+                                                                    value={portDestination}
+                                                                    sx={{ mt: 1 }}
+                                                                    renderInput={(params: any) => <TextField {...params} />}
+                                                                    onChange={(e: any, value: any) => { setPortDestination(value); }}
+                                                                    fullWidth
+                                                                /> : <Skeleton />
+                                                            }
+                                                        </Grid>
+                                                        <Grid item xs={12}>
+                                                            <Alert severity="info" sx={{ mb: 2 }}>{t('selectOfferMessage')}</Alert>
+                                                            {
+                                                                !loadResults ? 
+                                                                seafreights !== null && seafreights.length !== 0 ?
                                                                 <Box sx={{ overflow: "auto" }}>
+                                                                    <Grid container>
+                                                                        <Grid item xs={8}>
+                                                                            <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>
+                                                                                {t('listSeaFreightsPricingOffers')+t('fromDotted')+portDeparture.portName+"-"+portDestination.portName}
+                                                                            </Typography>
+                                                                        </Grid>
+                                                                        <Grid item xs={4}>
+                                                                            <Button 
+                                                                                variant="contained" 
+                                                                                color="inherit" 
+                                                                                sx={{ 
+                                                                                    textTransform: "none", backgroundColor: "#fff", 
+                                                                                    color: "#333", float: "right", marginTop: "8px", marginLeft: "10px"
+                                                                                }} 
+                                                                                onClick={getSeaFreightPriceOffers}
+                                                                            >
+                                                                                {t('reload')} <RestartAltIcon fontSize='small' />
+                                                                            </Button>
+                                                                            <Button 
+                                                                                variant="contained" 
+                                                                                color="inherit" 
+                                                                                sx={{ 
+                                                                                    textTransform: "none", backgroundColor: "#fff", 
+                                                                                    color: "#333", float: "right", marginTop: "8px"
+                                                                                }}
+                                                                                onClick={() => setModal6(true)}
+                                                                            >
+                                                                                {t('requestSeafreightPrice')}
+                                                                            </Button>
+                                                                        </Grid>
+                                                                    </Grid>
                                                                     <DataGrid
-                                                                        rows={seafreights.filter((elm: any) => rowSelectionModel.includes(elm.seaFreightId))}
+                                                                        rows={seafreights}
                                                                         columns={columnsSeafreights}
                                                                         // hideFooter
                                                                         initialState={{
@@ -2080,237 +1805,381 @@ function Request() {
                                                                         pageSizeOptions={[5, 10]}
                                                                         getRowId={(row: any) => row?.seaFreightId}
                                                                         getRowHeight={() => "auto" }
+                                                                        style={sizingStyles}
+                                                                        sx={gridStyles}
+                                                                        disableDensitySelector
+                                                                        disableColumnSelector
+                                                                        slots={{ toolbar: GridToolbar }}
+                                                                        slotProps={{
+                                                                            toolbar: {
+                                                                                showQuickFilter: true,
+                                                                            },
+                                                                        }}
+                                                                        onRowSelectionModelChange={(newRowSelectionModel: any) => {
+                                                                            if (newRowSelectionModel.length <= containersSelection.length) {
+                                                                                var myFreights = newRowSelectionModel.length !== 0 ? seafreights.filter((elm: any) => newRowSelectionModel.includes(elm.seaFreightId)) : [];
+                                                                                if (checkDifferentDefaultContainer(myFreights)) {
+                                                                                    setRowSelectionModel(newRowSelectionModel);
+                                                                                    setSelectedSeafreight(newRowSelectionModel.length !== 0 ? seafreights.find((elm: any) => elm.seaFreightId === newRowSelectionModel[0]) : null);
+                                                                                    setMySeafreights(myFreights);
+                                                                                    // setSelectedSeafreight(newRowSelectionModel.length !== 0 ? seafreights.filter((elm: any) => newRowSelectionModel.includes(elm.seaFreightId)) : null);
+                                                                                }
+                                                                                else {
+                                                                                    enqueueSnackbar("You can only select offers with different container types!", { variant: "warning", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                                                                                }
+                                                                            }
+                                                                            else {
+                                                                                enqueueSnackbar("You can only select "+containersSelection.length+" offers!", { variant: "warning", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                                                                            }
+                                                                        }}
+                                                                        rowSelectionModel={rowSelectionModel}
+                                                                        checkboxSelection
+                                                                        // onRowClick={handleRowSeafreightsClick}
+                                                                    />
+                                                                </Box> : 
+                                                                <Box>
+                                                                    <Grid container>
+                                                                        <Grid item xs={8}>
+                                                                            <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>
+                                                                                {
+                                                                                    portDeparture !== null && portDestination !== null && portDeparture !== undefined && portDestination !== undefined ? 
+                                                                                    t('listSeaFreightsPricingOffers')+t('fromDotted')+portDeparture.portName+"-"+portDestination.portName
+                                                                                    : t('listSeaFreightsPricingOffers')+t('fromDotted')
+                                                                                }
+                                                                            </Typography>
+                                                                        </Grid>
+                                                                        <Grid item xs={4}>
+                                                                            <Button 
+                                                                                variant="contained" 
+                                                                                color="inherit" 
+                                                                                sx={{ 
+                                                                                    textTransform: "none", backgroundColor: "#fff", 
+                                                                                    color: "#333", float: "right", marginTop: "8px", marginLeft: "10px"
+                                                                                }} 
+                                                                                onClick={getSeaFreightPriceOffers}
+                                                                            >
+                                                                                {t('reload')} <RestartAltIcon fontSize='small' />
+                                                                            </Button>
+                                                                            <Button 
+                                                                                variant="contained" 
+                                                                                color="inherit" 
+                                                                                sx={{ 
+                                                                                    textTransform: "none", backgroundColor: "#fff", 
+                                                                                    color: "#333", float: "right", marginTop: "8px"
+                                                                                }}
+                                                                                onClick={() => setModal6(true)}
+                                                                            >
+                                                                                {t('requestSeafreightPrice')}
+                                                                            </Button>
+                                                                        </Grid>
+                                                                    </Grid>
+                                                                    <Alert severity="error">{t('noResults')}</Alert>
+                                                                </Box>
+                                                                : <Skeleton />
+                                                            }
+                                                        </Grid>
+                                                    </Grid>
+                                                    : null
+                                                }
+                                                {
+                                                    activeStep === 2 ? 
+                                                    <Grid container spacing={2} mt={1} px={2}>
+                                                        <Grid item xs={12}>
+                                                            <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>{t('listMiscPricingOffers')+t('fromDotted')+portDeparture.portName+"-"+portDestination.portName}</Typography>
+                                                            <Grid container spacing={2}>
+                                                                <Grid item xs={8}>
+                                                                    <Typography variant="h6" sx={{ mt: 2, fontSize: 17, fontWeight: "bold" }}>
+                                                                        General miscs (select any)
+                                                                    </Typography>    
+                                                                </Grid>
+                                                                <Grid item xs={4}>
+                                                                    <Button 
+                                                                        variant="contained" 
+                                                                        color="inherit" 
+                                                                        sx={{ 
+                                                                            textTransform: "none", backgroundColor: "#fff", 
+                                                                            color: "#333", float: "right", marginTop: "8px" 
+                                                                        }}
+                                                                        onClick={() => setModal9(true)}
+                                                                    >
+                                                                        Create a misc
+                                                                    </Button>
+                                                                </Grid>
+                                                                <Grid item xs={12}>
+                                                                    {
+                                                                        !loadGeneralMiscs && !loadResults && !loadMiscsHaulage ? 
+                                                                        tableMiscs !== null && tableMiscs.length !== 0 ?
+                                                                            <Box sx={{ overflow: "auto" }}>
+                                                                                <DataGrid
+                                                                                    rows={tableMiscs}
+                                                                                    columns={columnsMiscs}
+                                                                                    // hideFooter
+                                                                                    initialState={{
+                                                                                        pagination: {
+                                                                                            paginationModel: {
+                                                                                                pageSize: 7,
+                                                                                            },
+                                                                                        },
+                                                                                    }}
+                                                                                    pageSizeOptions={[5, 10]}
+                                                                                    getRowId={(row: any) => row?.miscellaneousId}
+                                                                                    getRowHeight={() => "auto" }
+                                                                                    style={sizingStyles}
+                                                                                    sx={gridStyles}
+                                                                                    disableDensitySelector
+                                                                                    disableColumnSelector
+                                                                                    slots={{ toolbar: GridToolbar }}
+                                                                                    slotProps={{
+                                                                                        toolbar: {
+                                                                                            showQuickFilter: true,
+                                                                                        },
+                                                                                    }}
+                                                                                    onRowSelectionModelChange={(newRowSelectionModel: any) => {
+                                                                                        setRowSelectionModel3(newRowSelectionModel);
+                                                                                        setMyMiscs(newRowSelectionModel.length !== 0 ? 
+                                                                                            tableMiscs
+                                                                                            .filter((elm: any) => newRowSelectionModel.includes(elm.miscellaneousId))
+                                                                                            .map((elm: any) => { return {...elm, defaultContainer: elm.containers[0].container.packageName}}) : 
+                                                                                        []);
+                                                                                        // setSelectedMisc(newRowSelectionModel.length !== 0 ? generalMiscs.find((elm: any) => elm.id === newRowSelectionModel[0]) : null);
+                                                                                    }}
+                                                                                    rowSelectionModel={rowSelectionModel3}
+                                                                                    checkboxSelection
+                                                                                    // onRowClick={handleRowMiscsClick}
+                                                                                />
+                                                                            </Box> : <Alert severity="error">{t('noResults')}</Alert>
+                                                                        : <Skeleton />
+                                                                    }
+                                                                </Grid>
+                                                            </Grid>
+                                                        </Grid>
+                                                    </Grid>
+                                                    : null
+                                                }
+                                                {
+                                                    activeStep === 3 ?
+                                                    <Grid container spacing={2} mt={1} px={2}>
+                                                        {
+                                                            selectedHaulage !== null ? 
+                                                            <Grid item xs={12}>
+                                                                <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>{t('selectedHaulage')}</Typography>
+                                                                <Box sx={{ overflow: "auto" }}>
+                                                                    <DataGrid
+                                                                        rows={[selectedHaulage]}
+                                                                        columns={columnsHaulages}
+                                                                        // hideFooter
+                                                                        initialState={{
+                                                                            pagination: {
+                                                                                paginationModel: {
+                                                                                    pageSize: 7,
+                                                                                },
+                                                                            },
+                                                                        }}
+                                                                        pageSizeOptions={[5, 10]}
+                                                                        getRowId={(row: any) => row?.id}
+                                                                        getRowHeight={() => "auto" }
                                                                         sx={sizeStyles}
                                                                         disableRowSelectionOnClick
                                                                     />
                                                                 </Box>
-                                                            </Grid>
-                                                            {/* {
-                                                                miscsHaulage !== null && miscsHaulage.length !== 0 ? 
-                                                                <Grid item xs={12}>
-                                                                    <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>Haulage miscs</Typography>
-                                                                    <Box sx={{ overflow: "auto" }}>
-                                                                        <DataGrid
-                                                                            rows={miscsHaulage}
-                                                                            columns={columnsMiscs}
-                                                                            // hideFooter
-                                                                            initialState={{
-                                                                                pagination: {
-                                                                                    paginationModel: {
-                                                                                        pageSize: 7,
-                                                                                    },
-                                                                                },
-                                                                            }}
-                                                                            pageSizeOptions={[5, 10]}
-                                                                            getRowId={(row: any) => row?.miscellaneousId}
-                                                                            getRowHeight={() => "auto" }
-                                                                            sx={sizeStyles}
-                                                                            disableRowSelectionOnClick
-                                                                        />
-                                                                    </Box>
-                                                                </Grid> : null
-                                                            }
-                                                            {
-                                                                miscs !== null && miscs.length !== 0 ? 
-                                                                <Grid item xs={12}>
-                                                                    <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>Seafreight miscs</Typography>
-                                                                    <Box sx={{ overflow: "auto" }}>
-                                                                        <DataGrid
-                                                                            rows={miscs}
-                                                                            columns={columnsMiscs}
-                                                                            // hideFooter
-                                                                            initialState={{
-                                                                                pagination: {
-                                                                                    paginationModel: {
-                                                                                        pageSize: 7,
-                                                                                    },
-                                                                                },
-                                                                            }}
-                                                                            pageSizeOptions={[5, 10]}
-                                                                            getRowId={(row: any) => row?.miscellaneousId}
-                                                                            getRowHeight={() => "auto" }
-                                                                            sx={sizeStyles}
-                                                                            disableRowSelectionOnClick
-                                                                        />
-                                                                    </Box>
-                                                                </Grid> : null
-                                                            } */}
-                                                            {
-                                                                myMiscs !== null && myMiscs.length !== 0 ? 
-                                                                <Grid item xs={12}>
-                                                                    <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>Selected miscellaneous</Typography>
-                                                                    <Box sx={{ overflow: "auto" }}>
-                                                                        <DataGrid
-                                                                            rows={myMiscs}
-                                                                            columns={columnsMiscs}
-                                                                            // hideFooter
-                                                                            initialState={{
-                                                                                pagination: {
-                                                                                    paginationModel: {
-                                                                                        pageSize: 7,
-                                                                                    },
-                                                                                },
-                                                                            }}
-                                                                            pageSizeOptions={[5, 10]}
-                                                                            getRowId={(row: any) => row?.miscellaneousId}
-                                                                            getRowHeight={() => "auto" }
-                                                                            sx={sizeStyles}
-                                                                            disableRowSelectionOnClick
-                                                                        />
-                                                                    </Box>
-                                                                </Grid> : null
-                                                            }
-                                                            <Grid item xs={8}>
-                                                                <InputLabel htmlFor="selectedTemplate" sx={inputLabelStyles}>{t('selectedTemplate')}</InputLabel>
-                                                                {
-                                                                    loadTemplates !== true ?
-                                                                    <NativeSelect
-                                                                        id="selectedTemplate"
-                                                                        value={selectedTemplate}
-                                                                        onChange={(e: any) => { setSelectedTemplate(e.target.value); }}
-                                                                        input={<BootstrapInput />}
-                                                                        fullWidth
-                                                                    >
-                                                                        {templates.map((elm: any, i: number) => (
-                                                                            <option key={"templateElm-"+i} value={elm.id}>{elm.name}</option>
-                                                                        ))}
-                                                                    </NativeSelect>
-                                                                    : <Skeleton />
-                                                                }
-                                                            </Grid>
-                                                            <Grid item xs={4}>
-                                                                <InputLabel htmlFor="mailLanguage" sx={inputLabelStyles}>{t('mailLanguage')}</InputLabel>
-                                                                <ToggleButtonGroup
-                                                                    color="primary"
-                                                                    value={mailLanguage}
-                                                                    exclusive
-                                                                    // size="small"
-                                                                    onChange={(event: React.MouseEvent<HTMLElement>, newValue: string,) => { 
-                                                                        setMailLanguage(newValue); 
+                                                            </Grid> : null
+                                                        }
+                                                        <Grid item xs={12}>
+                                                            <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>{t('selectedSeafreight')}</Typography>
+                                                            <Box sx={{ overflow: "auto" }}>
+                                                                <DataGrid
+                                                                    rows={seafreights.filter((elm: any) => rowSelectionModel.includes(elm.seaFreightId))}
+                                                                    columns={columnsSeafreights}
+                                                                    // hideFooter
+                                                                    initialState={{
+                                                                        pagination: {
+                                                                            paginationModel: {
+                                                                                pageSize: 7,
+                                                                            },
+                                                                        },
                                                                     }}
-                                                                    aria-label="Platform"
-                                                                    fullWidth
-                                                                    sx={{ mt: 1, maxHeight: "44px" }}
-                                                                >
-                                                                    <ToggleButton value="fr"><img src="/assets/img/flags/flag-fr.png" style={{ width: "12px", marginRight: "6px" }} alt="flag english" /> Français</ToggleButton>
-                                                                    <ToggleButton disabled value="en"><img src="/assets/img/flags/flag-en.png" style={{ width: "12px", marginRight: "6px" }} alt="flag english" /> English</ToggleButton>
-                                                                </ToggleButtonGroup>
-                                                            </Grid>
-                                                            <Grid item xs={12}>
-                                                                <Box sx={{ border: "1px solid #e5e5e5", backgroundColor: "#fff", p: 2 }}>
-                                                                    {
-                                                                        containersSelection !== null && rowSelectionModel.length !== 0 ?
-                                                                        seafreights.filter((elm: any) => rowSelectionModel.includes(elm.seaFreightId))
-                                                                        .map((element: any, index: number) => {
-                                                                            var containerElm = containersSelection.find((val: any) => val.container === element.containers[0].container.packageName);
-                                                                            var allMiscs = myMiscs;
-                                                                            console.log(allMiscs);
-                                                                            var miscsSelected = [];
-                                                                            if (containerElm !== undefined && containerElm !== null) {
-                                                                                miscsSelected = allMiscs.filter((elm: any) => elm.defaultContainer === containerElm.container);
-                                                                            }
-                                                                            
-                                                                            return (
-                                                                                <React.Fragment key={"containerRow-"+index}>
-                                                                                    <ContainerElement
-                                                                                        key={"containerElm-"+index} 
-                                                                                        elm={containerElm}
-                                                                                        index={index}
-                                                                                        adding={addings[index]}
-                                                                                        margin={margins[index]}
-                                                                                        handleAddingChange={handleAddingChange}
-                                                                                        handleMarginChange={handleMarginChange}
-                                                                                        purchasePrice={Number(((calculateContainerPrice(containerElm.container, containerElm.quantity, index)-addings[index])/(1+margins[index]/100)).toFixed(2))+" "+t(element.currency)}
-                                                                                        profit={Number((calculateContainerPrice(containerElm.container, containerElm.quantity, index) - ((calculateContainerPrice(containerElm.container, containerElm.quantity, index)-addings[index])/(1+margins[index]/100))).toFixed(2))+" "+t(element.currency)}
-                                                                                        salePrice={calculateContainerPrice(containerElm.container, containerElm.quantity, index)+" "+t(element.currency)}
-                                                                                        haulagePrice={selectedHaulage !== null && selectedHaulage.containerNames.includes(containerElm.container) ? containerElm.quantity+"x"+selectedHaulage.unitTariff+" "+t(element.currency) : "N/A"}
-                                                                                        seafreightPrice={formatServices(element.containers[0], t(element.currency), containerElm.container, containerElm.quantity) || "N/A"}
-                                                                                        miscellaneousPrice={miscsSelected.length !== 0 ? miscsSelected.map((value: any, id: number) => {
-                                                                                            return <span key={"sMiscs-"+id}>
-                                                                                                <span>- {getServicesTotal2(value.containers, t(element.currency), containerElm.quantity)}</span>
-                                                                                                {id !== miscsSelected.length - 1 && <br />}
-                                                                                            </span>
-                                                                                        }) : "N/A"}
-                                                                                    />
-                                                                                </React.Fragment>
-                                                                            );
-                                                                        }) : null
-                                                                    }
-                                                                </Box>
-                                                            </Grid>
-                                                            <Grid item xs={12}>
-                                                                <InputLabel htmlFor="details" sx={inputLabelStyles}>{t('detailsOffer')}</InputLabel>
-                                                                {
-                                                                    selectedSeafreight !== null ? 
-                                                                    <Box sx={{ mt: 2 }}>
-                                                                        {
-                                                                            loadTemplate !== true ?
-                                                                            <RichTextEditor
-                                                                                ref={rteRef}
-                                                                                extensions={[StarterKit]}
-                                                                                content={getDefaultContent(mailLanguage !== "en" ? templateBase.content : templateBase.contentEn)}
-                                                                                renderControls={() => (
-                                                                                <MenuControlsContainer>
-                                                                                    <MenuSelectHeading />
-                                                                                    <MenuDivider />
-                                                                                    <MenuButtonBold />
-                                                                                    <MenuButtonItalic />
-                                                                                    <MenuButtonStrikethrough />
-                                                                                    <MenuButtonOrderedList />
-                                                                                    <MenuButtonBulletedList />
-                                                                                    <MenuSelectTextAlign />
-                                                                                    <MenuButtonEditLink />
-                                                                                    <MenuButtonHorizontalRule />
-                                                                                    <MenuButtonUndo />
-                                                                                    <MenuButtonRedo />
-                                                                                </MenuControlsContainer>
-                                                                                )}
-                                                                            />
-                                                                            : <Skeleton />
-                                                                        }
-                                                                    </Box>   
-                                                                    : null
-                                                                }
-                                                            </Grid>
+                                                                    pageSizeOptions={[5, 10]}
+                                                                    getRowId={(row: any) => row?.seaFreightId}
+                                                                    getRowHeight={() => "auto" }
+                                                                    sx={sizeStyles}
+                                                                    disableRowSelectionOnClick
+                                                                />
+                                                            </Box>
                                                         </Grid>
-                                                        : null
-                                                    }
+                                                        {
+                                                            myMiscs !== null && myMiscs.length !== 0 ? 
+                                                            <Grid item xs={12}>
+                                                                <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>Selected miscellaneous</Typography>
+                                                                <Box sx={{ overflow: "auto" }}>
+                                                                    <DataGrid
+                                                                        rows={myMiscs}
+                                                                        columns={columnsMiscs}
+                                                                        // hideFooter
+                                                                        initialState={{
+                                                                            pagination: {
+                                                                                paginationModel: {
+                                                                                    pageSize: 7,
+                                                                                },
+                                                                            },
+                                                                        }}
+                                                                        pageSizeOptions={[5, 10]}
+                                                                        getRowId={(row: any) => row?.miscellaneousId}
+                                                                        getRowHeight={() => "auto" }
+                                                                        sx={sizeStyles}
+                                                                        disableRowSelectionOnClick
+                                                                    />
+                                                                </Box>
+                                                            </Grid> : null
+                                                        }
+                                                        <Grid item xs={8}>
+                                                            <InputLabel htmlFor="selectedTemplate" sx={inputLabelStyles}>{t('selectedTemplate')}</InputLabel>
+                                                            {
+                                                                loadTemplates !== true ?
+                                                                <NativeSelect
+                                                                    id="selectedTemplate"
+                                                                    value={selectedTemplate}
+                                                                    onChange={(e: any) => { setSelectedTemplate(e.target.value); }}
+                                                                    input={<BootstrapInput />}
+                                                                    fullWidth
+                                                                >
+                                                                    {templates.map((elm: any, i: number) => (
+                                                                        <option key={"templateElm-"+i} value={elm.id}>{elm.name}</option>
+                                                                    ))}
+                                                                </NativeSelect>
+                                                                : <Skeleton />
+                                                            }
+                                                        </Grid>
+                                                        <Grid item xs={4}>
+                                                            <InputLabel htmlFor="mailLanguage" sx={inputLabelStyles}>{t('mailLanguage')}</InputLabel>
+                                                            <ToggleButtonGroup
+                                                                color="primary"
+                                                                value={mailLanguage}
+                                                                exclusive
+                                                                // size="small"
+                                                                onChange={(event: React.MouseEvent<HTMLElement>, newValue: string,) => { 
+                                                                    setMailLanguage(newValue); 
+                                                                }}
+                                                                aria-label="Platform"
+                                                                fullWidth
+                                                                sx={{ mt: 1, maxHeight: "44px" }}
+                                                            >
+                                                                <ToggleButton value="fr"><img src="/assets/img/flags/flag-fr.png" style={{ width: "12px", marginRight: "6px" }} alt="flag english" /> Français</ToggleButton>
+                                                                <ToggleButton disabled value="en"><img src="/assets/img/flags/flag-en.png" style={{ width: "12px", marginRight: "6px" }} alt="flag english" /> English</ToggleButton>
+                                                            </ToggleButtonGroup>
+                                                        </Grid>
+                                                        <Grid item xs={12}>
+                                                            <Box sx={{ border: "1px solid #e5e5e5", backgroundColor: "#fff", p: 2 }}>
+                                                                {
+                                                                    containersSelection !== null && rowSelectionModel.length !== 0 ?
+                                                                    seafreights.filter((elm: any) => rowSelectionModel.includes(elm.seaFreightId))
+                                                                    .map((element: any, index: number) => {
+                                                                        var containerElm = containersSelection.find((val: any) => val.container === element.containers[0].container.packageName);
+                                                                        var allMiscs = myMiscs;
+                                                                        console.log(allMiscs);
+                                                                        var miscsSelected = [];
+                                                                        if (containerElm !== undefined && containerElm !== null) {
+                                                                            miscsSelected = allMiscs.filter((elm: any) => elm.defaultContainer === containerElm.container);
+                                                                        }
+                                                                        
+                                                                        return (
+                                                                            <React.Fragment key={"containerRow-"+index}>
+                                                                                <ContainerElement
+                                                                                    key={"containerElm-"+index} 
+                                                                                    elm={containerElm}
+                                                                                    index={index}
+                                                                                    adding={addings[index]}
+                                                                                    margin={margins[index]}
+                                                                                    handleAddingChange={handleAddingChange}
+                                                                                    handleMarginChange={handleMarginChange}
+                                                                                    purchasePrice={Number(((calculateContainerPrice(containerElm.container, containerElm.quantity, index)-addings[index])/(1+margins[index]/100)).toFixed(2))+" "+t(element.currency)}
+                                                                                    profit={Number((calculateContainerPrice(containerElm.container, containerElm.quantity, index) - ((calculateContainerPrice(containerElm.container, containerElm.quantity, index)-addings[index])/(1+margins[index]/100))).toFixed(2))+" "+t(element.currency)}
+                                                                                    salePrice={calculateContainerPrice(containerElm.container, containerElm.quantity, index)+" "+t(element.currency)}
+                                                                                    haulagePrice={selectedHaulage !== null && selectedHaulage.containerNames.includes(containerElm.container) ? containerElm.quantity+"x"+selectedHaulage.unitTariff+" "+t(element.currency) : "N/A"}
+                                                                                    seafreightPrice={formatServices(element.containers[0], t(element.currency), containerElm.container, containerElm.quantity) || "N/A"}
+                                                                                    miscellaneousPrice={miscsSelected.length !== 0 ? miscsSelected.map((value: any, id: number) => {
+                                                                                        return <span key={"sMiscs-"+id}>
+                                                                                            <span>- {getServicesTotal2(value.containers, t(element.currency), containerElm.quantity)}</span>
+                                                                                            {id !== miscsSelected.length - 1 && <br />}
+                                                                                        </span>
+                                                                                    }) : "N/A"}
+                                                                                />
+                                                                            </React.Fragment>
+                                                                        );
+                                                                    }) : null
+                                                                }
+                                                            </Box>
+                                                        </Grid>
+                                                        <Grid item xs={12}>
+                                                            <InputLabel htmlFor="details" sx={inputLabelStyles}>{t('detailsOffer')}</InputLabel>
+                                                            {
+                                                                selectedSeafreight !== null ? 
+                                                                <Box sx={{ mt: 2 }}>
+                                                                    {
+                                                                        loadTemplate !== true ?
+                                                                        <RichTextEditor
+                                                                            ref={rteRef}
+                                                                            extensions={[StarterKit]}
+                                                                            content={getDefaultContent(mailLanguage !== "en" ? templateBase.content : templateBase.contentEn)}
+                                                                            renderControls={() => (
+                                                                            <MenuControlsContainer>
+                                                                                <MenuSelectHeading />
+                                                                                <MenuDivider />
+                                                                                <MenuButtonBold />
+                                                                                <MenuButtonItalic />
+                                                                                <MenuButtonStrikethrough />
+                                                                                <MenuButtonOrderedList />
+                                                                                <MenuButtonBulletedList />
+                                                                                <MenuSelectTextAlign />
+                                                                                <MenuButtonEditLink />
+                                                                                <MenuButtonHorizontalRule />
+                                                                                <MenuButtonUndo />
+                                                                                <MenuButtonRedo />
+                                                                            </MenuControlsContainer>
+                                                                            )}
+                                                                        />
+                                                                        : <Skeleton />
+                                                                    }
+                                                                </Box>   
+                                                                : null
+                                                            }
+                                                        </Grid>
+                                                    </Grid>
+                                                    : null
+                                                }
 
-                                                    <Box sx={{ display: 'flex', flexDirection: 'row', pt: 2, px: 2 }}>
-                                                        <Button
-                                                            variant="contained" 
-                                                            color="inherit" 
-                                                            sx={whiteButtonStyles}
-                                                            disabled={activeStep === 0}
-                                                            onClick={handleBack}
-                                                        >
-                                                            {t('back')}
-                                                        </Button>
-                                                        <Box sx={{ flex: '1 1 auto' }} />
-                                                        {isStepOptional(activeStep) && (
-                                                        <Button variant="contained" color="inherit" sx={whiteButtonStyles} onClick={handleSkip} style={{ marginRight: "10px" }}>
-                                                            {t('skip')}
-                                                        </Button>
-                                                        )}
-                                                        <Button variant="contained" color="inherit" sx={whiteButtonStyles} onClick={handleNext}>
-                                                            {activeStep === steps.length - 1 ? t('sendOfferValidation') : t('nextStep')}
-                                                        </Button>
-                                                    </Box>
-                                                </React.Fragment>
-                                            )}
-                                        </Box>
-                                    </AccordionDetails>
-                                </Accordion>
-                            </Grid>
-                            <Grid item xs={12}>
-                                <Button variant="contained" color="primary" sx={{ mt: 2, mr: 2, textTransform: "none" }} onClick={editRequest} >{t('editRequest')}</Button>
-                                <Button variant="contained" color="inherit" sx={whiteButtonStyles} onClick={() => { setModal2(true); }} >{t('changeStatus')}</Button>
-                                <Button variant="contained" color="inherit" sx={whiteButtonStyles} style={{ float: "right" }} onClick={() => { setModal3(true); }} >{t('addCommentNote')}</Button>
-                                <Button variant="contained" color="inherit" sx={whiteButtonStyles} style={{ float: "right", marginRight: "10px" }} onClick={() => { setModal4(true); /*getNotes(id);*/ }} >{t('listNotes')}</Button>
-                            </Grid>
+                                                <Box sx={{ display: 'flex', flexDirection: 'row', pt: 2, px: 2 }}>
+                                                    <Button
+                                                        variant="contained" 
+                                                        color="inherit" 
+                                                        sx={whiteButtonStyles}
+                                                        disabled={activeStep === 0}
+                                                        onClick={handleBack}
+                                                    >
+                                                        {t('back')}
+                                                    </Button>
+                                                    <Box sx={{ flex: '1 1 auto' }} />
+                                                    {isStepOptional(activeStep) && (
+                                                    <Button variant="contained" color="inherit" sx={whiteButtonStyles} onClick={handleSkip} style={{ marginRight: "10px" }}>
+                                                        {t('skip')}
+                                                    </Button>
+                                                    )}
+                                                    <Button variant="contained" color="inherit" sx={whiteButtonStyles} onClick={handleNext}>
+                                                        {activeStep === steps.length - 1 ? t('sendOfferValidation') : t('nextStep')}
+                                                    </Button>
+                                                </Box>
+                                            </React.Fragment>
+                                        )}
+                                    </Box>
+                                </AccordionDetails>
+                            </Accordion>
+                        </Grid>
+
+                        <Grid item xs={12}>
+                            <Button variant="contained" color="inherit" sx={whiteButtonStyles} onClick={() => { navigate("/admin/requests"); }} >Save and close</Button>
+                        </Grid>
                     </Grid> 
-                        : <Skeleton sx={{ mx: 5, mt: 3 }} />
-                    }
+                    : <Skeleton sx={{ mx: 5, mt: 3 }} />
+                }
                 </Box>
             </Box>
             
