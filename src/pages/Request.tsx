@@ -842,7 +842,13 @@ function Request() {
             
             setLoadResults(true);
             var containersFormatted = (containersSelection.map((elm: any) => elm.id)).join("&ContainerTypesId=");
-            var urlSent = createGetRequestUrl2(protectedResources.apiLisPricing.endPoint+"/Pricing/SeaFreightsOffersRequest?", portDeparture.portId, portDestination.portId, containersFormatted);
+            
+            var auxPortDeparture = portDeparture;
+            if (selectedHaulage !== null) {
+                auxPortDeparture = ports1.find((elm: any) => elm.portName === selectedHaulage.loadingPort);
+            }
+
+            var urlSent = createGetRequestUrl2(protectedResources.apiLisPricing.endPoint+"/Pricing/SeaFreightsOffersRequest?", auxPortDeparture.portId, portDestination.portId, containersFormatted);
             const response = await (context as BackendService<any>).getWithToken(urlSent, token);
             setLoadResults(false);
             
