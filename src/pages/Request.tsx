@@ -863,9 +863,16 @@ function Request() {
             const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisPricing.endPoint+"/Miscellaneous/Miscellaneous?departurePortId="+portDeparture.portId+"&destinationPortId="+portDestination.portId+"&withShipment=true", tempToken);
             setLoadResults(false);
             
+            var myContainers = containersSelection.map((elm: any, index: any) => {
+                if (calculateSeafreightPrice(elm.container, elm.quantity, index) !== 0) {
+                    return elm.container;
+                }
+                return null;
+            });
+            
             var suppliersRecentlySelected = mySeafreights.map((elm: any) => { return {carrierName: elm.carrierName, defaultContainer: elm.defaultContainer} });
             setMiscs(response.length !== 0 ? 
-                response[0].suppliers.filter((elm: any) => new Date(elm.validUntil) > new Date()).filter((elm: any) => suppliersRecentlySelected.some((val: any) => val.carrierName === elm.supplierName && val.defaultContainer === elm.containers[0].container.packageName)).map((elm: any) => { return {...elm, defaultContainer: elm.containers[0].container.packageName}})
+                response[0].suppliers.filter((elm: any) => myContainers.includes(elm.containers[0].container.packageName)).filter((elm: any) => new Date(elm.validUntil) > new Date()).filter((elm: any) => suppliersRecentlySelected.some((val: any) => val.carrierName === elm.supplierName && val.defaultContainer === elm.containers[0].container.packageName)).map((elm: any) => { return {...elm, defaultContainer: elm.containers[0].container.packageName}})
             : []);
         }
     }
@@ -906,11 +913,18 @@ function Request() {
                 }
             }
             
+            var myContainers = containersSelection.map((elm: any, index: any) => {
+                if (calculateSeafreightPrice(elm.container, elm.quantity, index) !== 0) {
+                    return elm.container;
+                }
+                return null;
+            });
+            
             const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisPricing.endPoint+"/Miscellaneous/Miscellaneous?supplierId="+selectedHaulage.haulierId+"&departurePortId="+Number(hashCode(city))+"&destinationPortId="+selectedHaulage.loadingPortId+"&withShipment=true", tempToken);
             setLoadMiscsHaulage(false);
             
             // console.log(response);
-            setMiscsHaulage(response.length !== 0 ? response[0].suppliers.filter((elm: any) => new Date(elm.validUntil) > new Date()) : []);
+            setMiscsHaulage(response.length !== 0 ? response[0].suppliers.filter((elm: any) => myContainers.includes(elm.containers[0].container.packageName)).filter((elm: any) => new Date(elm.validUntil) > new Date()) : []);
         }
     }
     
