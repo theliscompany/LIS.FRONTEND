@@ -531,7 +531,7 @@ function Request() {
         // console.log("Quantity : ",quantity);
         if (miscsSelected !== null && miscsSelected !== undefined) {
             for (var i = 0; i < miscsSelected.length; i++) {
-                console.log(miscsSelected[i].containers);
+                // console.log(miscsSelected[i].containers);
                 miscPrices =  miscPrices + getTotalNumber(miscsSelected[i].containers)*quantity;
             }
         }
@@ -878,7 +878,7 @@ function Request() {
     }
     
     const getGeneralMiscellaneousPriceOffers = async () => {
-        setLoadGeneralMiscs(true)
+        setLoadGeneralMiscs(true);
         if (context && account) {
             var response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisPricing.endPoint+"/Miscellaneous/Miscellaneous?withShipment=false", tempToken);
             setLoadGeneralMiscs(false);
