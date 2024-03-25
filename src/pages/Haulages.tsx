@@ -25,6 +25,8 @@ import { Anchor, Mail } from '@mui/icons-material';
 import NewContact from '../components/editRequestPage/NewContact';
 import { extractCityAndPostalCode, flattenData2, hashCode, parseLocation, parseLocation2, reverseTransformArray, transformArray } from '../utils/functions';
 import ServicesTable from '../components/seafreightPage/ServicesTable';
+import NewService from '../components/shared/NewService';
+import NewPort from '../components/shared/NewPort';
 
 function createGetRequestUrl(variable1: number, variable2: number, variable3: string) {
     let url = protectedResources.apiLisPricing.endPoint+"/Haulage/Haulages?";
@@ -55,6 +57,8 @@ function Haulages() {
     const [modal2, setModal2] = useState<boolean>(false);
     const [modal5, setModal5] = useState<boolean>(false);
     const [modal7, setModal7] = useState<boolean>(false);
+    const [modal8, setModal8] = useState<boolean>(false);
+    const [modal9, setModal9] = useState<boolean>(false);
     const [ports, setPorts] = useState<any>(null);
     const [clients, setClients] = useState<any>(null);
     const [containers, setContainers] = useState<any>(null);
@@ -209,7 +213,7 @@ function Haulages() {
     
     const getPorts = async () => {
         if (context && account) {
-            const response = await (context as BackendService<any>).getSingle(protectedResources.apiLisTransport.endPoint+"/Port/Ports");
+            const response = await (context as BackendService<any>).getSingle(protectedResources.apiLisTransport.endPoint+"/Port/Ports?pageSize=500");
             if (response !== null && response !== undefined) {
                 setPorts(response);
             }  
@@ -242,10 +246,10 @@ function Haulages() {
     
     const getServices = async (token: string) => {
         if (context && account) {
-            const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Service/Services", token);
+            const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Service?pageSize=500", token);
             if (response !== null && response !== undefined) {
                 setAllServices(response);
-                setServices(response.filter((obj: any) => obj.servicesTypeId.includes(2))); // Filter the services for haulages (HAULAGE = 1)
+                setServices(response.filter((obj: any) => obj.servicesTypeId.includes(2))); // Filter the services for haulages (HAULAGE = 2)
             }  
         }
     }
@@ -842,8 +846,26 @@ function Haulages() {
                                 <BootstrapInput id="multiStop" type="number" value={multiStop} onChange={(e: any) => setMultiStop(e.target.value)} fullWidth />
                             </Grid>
 
-                            <Grid item xs={12}>
+                            <Grid item xs={12} md={8}>
                                 <Typography sx={{ fontSize: 18, mb: 1 }}><b>{t('listServices')} - {t('miscellaneous')}</b></Typography>
+                            </Grid>
+                            <Grid item xs={12} md={4}>
+                                <Button 
+                                    variant="contained" color="inherit" 
+                                    sx={{ float: "right", backgroundColor: "#fff", textTransform: "none" }} 
+                                    onClick={() => { setModal8(true); }}
+                                >
+                                    Create new service
+                                </Button>
+                                <Button 
+                                    variant="contained" color="inherit" 
+                                    sx={{ float: "right", backgroundColor: "#fff", textTransform: "none", mr: 1 }} 
+                                    onClick={() => { setModal9(true); }}
+                                >
+                                    Create new port
+                                </Button>
+                            </Grid>
+                            <Grid item xs={12}>
                                 {
                                     allServices !== null && allServices !== undefined && allServices.length !== 0 ?
                                     !loadMiscs ? 
@@ -910,6 +932,34 @@ function Haulages() {
                     categories={["SUPPLIERS"]}
                     closeModal={() => setModal7(false)}
                     callBack={getClients}
+                />
+            </BootstrapDialog>
+
+            {/* Create new service */}
+            <BootstrapDialog
+                onClose={() => setModal8(false)}
+                aria-labelledby="custom-dialog-title8"
+                open={modal8}
+                maxWidth="md"
+                fullWidth
+            >
+                <NewService 
+                    closeModal={() => setModal8(false)}
+                    callBack={getServices}
+                />
+            </BootstrapDialog>
+
+            {/* Create new port */}
+            <BootstrapDialog
+                onClose={() => setModal9(false)}
+                aria-labelledby="custom-dialog-title9"
+                open={modal9}
+                maxWidth="md"
+                fullWidth
+            >
+                <NewPort 
+                    closeModal={() => setModal9(false)}
+                    callBack={getPorts}
                 />
             </BootstrapDialog>
         </div>

@@ -9,8 +9,8 @@ export const fr = {
   collapse: "Décaler",
   whatsappNumber: "Numéro whatsapp",
   emailAddress: "Adresse mail",
-  departure: "De (ville, pays)",
-  arrival: "A (ville, pays)",
+  departure: "De (ville, code du pays)",
+  arrival: "A (ville, code du pays)",
   packingType: "Type de packing",
   containerType: "Type de conteneur",
   quantity: "Quantité",
@@ -399,5 +399,7 @@ export const fr = {
   totalPurchase: "Coût total",
   copyRowSeafreight: "Copier prix de frêt maritime",
   messageOkGeneralMiscs: "Vos services miscs généraux ont été enregistrés!",
-  included: "inclus"
+  included: "inclus",
+  seafreight: "Frêt maritime",
+  haulage: "Transport routier"
 };

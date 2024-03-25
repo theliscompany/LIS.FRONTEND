@@ -21,6 +21,7 @@ import { BackendService } from '../../utils/services/fetch';
 import CompanySearch from '../shared/CompanySearch';
 import NewContact from './NewContact';
 import { actionButtonStyles, inputLabelStyles, gridStyles, BootstrapDialog, BootstrapDialogTitle, buttonCloseStyles, datetimeStyles, BootstrapInput, whiteButtonStyles } from '../../utils/misc/styles';
+import NewService from '../shared/NewService';
 
 function createGetRequestUrl(variable1: number, variable2: number, variable3: number) {
     let url = protectedResources.apiLisPricing.endPoint+"/Miscellaneous/Miscellaneous?";
@@ -46,6 +47,7 @@ function NewMiscellaneous(props: any) {
     const [modal, setModal] = useState<boolean>(false);
     const [modal2, setModal2] = useState<boolean>(false);
     const [modal7, setModal7] = useState<boolean>(false);
+    const [modal8, setModal8] = useState<boolean>(false);
     const [ports, setPorts] = useState<any>(null);
     const [containers, setContainers] = useState<any>(null);
     const [services, setServices] = useState<any>(null);
@@ -220,7 +222,7 @@ function NewMiscellaneous(props: any) {
     
     const getPorts = async () => {
         if (context && account) {
-            const response = await (context as BackendService<any>).getSingle(protectedResources.apiLisTransport.endPoint+"/Port/Ports");
+            const response = await (context as BackendService<any>).getSingle(protectedResources.apiLisTransport.endPoint+"/Port/Ports?pageSize=500");
             if (response !== null && response !== undefined) {
                 setPorts(response);
             }  
@@ -253,7 +255,7 @@ function NewMiscellaneous(props: any) {
 
     const getServices = async (token: string) => {
         if (context && account) {
-            const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Service/Services", token);
+            const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Service?pageSize=500", token);
             if (response !== null && response !== undefined) {
                 setServices(response.filter((obj: any) => obj.servicesTypeId.includes(5) || obj.servicesTypeId.includes(2))); // Filter the services for miscellaneous (MISCELLANEOUS = 5 & HAULAGE = 2)
             }  
@@ -619,8 +621,17 @@ function NewMiscellaneous(props: any) {
                                 </Grid>
                             </Grid>
                         </Grid>
-                        <Grid item xs={12} md={12}>
-                            <Typography sx={{ fontSize: 18 }}><b>{t('listServices')}</b></Typography>
+                        <Grid item xs={12} md={8}>
+                            <Typography sx={{ fontSize: 18, mb: 1 }}><b>{t('listServices')}</b></Typography>
+                        </Grid>
+                        <Grid item xs={12} md={4}>
+                            <Button 
+                                variant="contained" color="inherit" 
+                                sx={{ float: "right", backgroundColor: "#fff", textTransform: "none" }} 
+                                onClick={() => { setModal8(true); }}
+                            >
+                                Create new service
+                            </Button>
                         </Grid>
                         <Grid item xs={12} md={8}>
                             <InputLabel htmlFor="service-name" sx={inputLabelStyles}>{t('serviceName')}</InputLabel>
@@ -758,6 +769,20 @@ function NewMiscellaneous(props: any) {
                 <NewContact 
                     categories={["OTHERS","SUPPLIERS"]}
                     closeModal={() => setModal7(false)}
+                />
+            </BootstrapDialog>
+
+            {/* Create new service */}
+            <BootstrapDialog
+                onClose={() => setModal8(false)}
+                aria-labelledby="custom-dialog-title8"
+                open={modal8}
+                maxWidth="md"
+                fullWidth
+            >
+                <NewService 
+                    closeModal={() => setModal8(false)}
+                    callBack={getServices}
                 />
             </BootstrapDialog>
         </div>

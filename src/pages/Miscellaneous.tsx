@@ -23,6 +23,8 @@ import { useMsal, useAccount } from '@azure/msal-react';
 import { CategoryEnum } from '../utils/constants';
 import NewContact from '../components/editRequestPage/NewContact';
 import { Anchor } from '@mui/icons-material';
+import NewService from '../components/shared/NewService';
+import NewPort from '../components/shared/NewPort';
 
 function createGetRequestUrl(variable1: number, variable2: number, variable3: number) {
     let url = protectedResources.apiLisPricing.endPoint+"/Miscellaneous/Miscellaneous?";
@@ -48,6 +50,8 @@ function Miscellaneous() {
     const [modal, setModal] = useState<boolean>(false);
     const [modal2, setModal2] = useState<boolean>(false);
     const [modal7, setModal7] = useState<boolean>(false);
+    const [modal8, setModal8] = useState<boolean>(false);
+    const [modal9, setModal9] = useState<boolean>(false);
     const [ports, setPorts] = useState<any>(null);
     const [containers, setContainers] = useState<any>(null);
     const [services, setServices] = useState<any>(null);
@@ -222,7 +226,7 @@ function Miscellaneous() {
     
     const getPorts = async () => {
         if (context && account) {
-            const response = await (context as BackendService<any>).getSingle(protectedResources.apiLisTransport.endPoint+"/Port/Ports");
+            const response = await (context as BackendService<any>).getSingle(protectedResources.apiLisTransport.endPoint+"/Port/Ports?pageSize=500");
             if (response !== null && response !== undefined) {
                 setPorts(response);
             }  
@@ -255,7 +259,7 @@ function Miscellaneous() {
 
     const getServices = async (token: string) => {
         if (context && account) {
-            const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Service/Services", token);
+            const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Service?pageSize=500", token);
             if (response !== null && response !== undefined) {
                 setServices(response.filter((obj: any) => obj.servicesTypeId.includes(5))); // Filter the services for miscellaneous (MISCELLANEOUS = 5)
             }  
@@ -837,9 +841,25 @@ function Miscellaneous() {
                                     </Grid>
                                 </Grid>
                             </Grid>
-                            <Grid item xs={12} md={12}>
-                                <Typography sx={{ fontSize: 18 }}><b>{t('listServices')}</b></Typography>
+                            <Grid item xs={12} md={8}>
+                                <Typography sx={{ fontSize: 18, mb: 1 }}><b>{t('listServices')}</b></Typography>
                             </Grid>
+                            <Grid item xs={12} md={4}>
+                                <Button 
+                                    variant="contained" color="inherit" 
+                                    sx={{ float: "right", backgroundColor: "#fff", textTransform: "none" }} 
+                                    onClick={() => { setModal8(true); }}
+                                >
+                                    Create new service
+                                </Button>
+                                <Button 
+                                    variant="contained" color="inherit" 
+                                    sx={{ float: "right", backgroundColor: "#fff", textTransform: "none", mr: 1 }} 
+                                    onClick={() => { setModal9(true); }}
+                                >
+                                    Create new port
+                                </Button>
+                            </Grid> 
                             <Grid item xs={12} md={8}>
                                 <InputLabel htmlFor="service-name" sx={inputLabelStyles}>{t('serviceName')}</InputLabel>
                                 {
@@ -967,6 +987,34 @@ function Miscellaneous() {
                 <NewContact 
                     categories={["OTHERS","SUPPLIERS"]}
                     closeModal={() => setModal7(false)}
+                />
+            </BootstrapDialog>
+
+            {/* Create new service */}
+            <BootstrapDialog
+                onClose={() => setModal8(false)}
+                aria-labelledby="custom-dialog-title8"
+                open={modal8}
+                maxWidth="md"
+                fullWidth
+            >
+                <NewService 
+                    closeModal={() => setModal8(false)}
+                    callBack={getServices}
+                />
+            </BootstrapDialog>
+
+            {/* Create new port */}
+            <BootstrapDialog
+                onClose={() => setModal9(false)}
+                aria-labelledby="custom-dialog-title9"
+                open={modal9}
+                maxWidth="md"
+                fullWidth
+            >
+                <NewPort 
+                    closeModal={() => setModal9(false)}
+                    callBack={getPorts}
                 />
             </BootstrapDialog>
         </div>

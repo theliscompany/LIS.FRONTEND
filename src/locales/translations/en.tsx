@@ -9,8 +9,8 @@ export const en = {
   collapse: "Collapse",
   whatsappNumber: "Whatsapp number",
   emailAddress: "Email address",
-  departure: "From (city, country)",
-  arrival: "To (city, country)",
+  departure: "From (city, country code)",
+  arrival: "To (city, country code)",
   packingType: "Packing type",
   containerType: "Container type",
   quantity: "Quantity",
@@ -399,5 +399,7 @@ export const en = {
   totalPurchase: "Total purchase",
   copyRowSeafreight: "Copy seafreight price",
   messageOkGeneralMiscs: "Your general misc services have been recorded!",
-  included: "included"
+  included: "included",
+  seafreight: "Seafreight",
+  haulage: "Haulage"
 };

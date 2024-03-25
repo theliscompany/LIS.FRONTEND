@@ -14,6 +14,19 @@ interface LocationAutocompleteProps {
     callBack?: (value: any) => void;
 }
 
+// List of African country ISO 3166-1 alpha-2 codes
+const africanCountryCodes = [
+    'DZ', 'AO', 'BJ', 'BW', 'BF', 'BI', 'CV', 'CM', 'CF', 'TD', 'KM', 'CG', 'CD', 'DJ', 'EG', 
+    'GQ', 'ER', 'SZ', 'ET', 'GA', 'GM', 'GH', 'GN', 'GW', 'CI', 'KE', 'LS', 'LR', 'LY', 'MG', 
+    'MW', 'ML', 'MR', 'MU', 'YT', 'MA', 'MZ', 'NA', 'NE', 'NG', 'RE', 'RW', 'SH', 'ST', 'SN', 
+    'SC', 'SL', 'SO', 'ZA', 'SS', 'SD', 'TZ', 'TG', 'TN', 'UG', 'EH', 'ZM', 'ZW'
+];
+  
+// Function to check if a country code is from Africa
+function isCountryCodeFromAfrica(countryCode: string) {
+    return africanCountryCodes.includes(countryCode.toUpperCase());
+}
+
 const AutocompleteSearch: React.FC<LocationAutocompleteProps> = ({ id, value, onChange, fullWidth, disabled, callBack }) => {
     const [loading, setLoading] = useState(false);
     const [open, setOpen] = useState(false);
@@ -38,7 +51,8 @@ const AutocompleteSearch: React.FC<LocationAutocompleteProps> = ({ id, value, on
         try {
             setLoading(true);
             setOptions([]);
-            const regex = /^(.+) \/ ([a-zA-Z]{2,3})$/;
+            // const regex = /^(.+) \/ ([a-zA-Z]{2,3})$/;
+            const regex = /^(.*?),\s*(.*)$/;
             const match = value.match(regex);
 
             var townText = value;
@@ -47,36 +61,32 @@ const AutocompleteSearch: React.FC<LocationAutocompleteProps> = ({ id, value, on
             if (match) {
                 townText = match[1].trim();
                 countryCode = match[2];
-                
-                const response = await axios.get(
-                    `https://secure.geonames.org/postalCodeSearchJSON?formatted=true&placename_startsWith=${townText}&countryBias=${countryCode}&maxRows=500&username=blackstarmc97`
-                );
-                if (!(response.data.postalCodes.length === 0)) {
-                    var auxResponse = response.data.postalCodes.map((elm: any, i: number) => { return { id: 'psCode-'+i, city: elm.placeName, country: regionNames.of(elm.countryCode), postalCode: elm.postalCode, latitude: elm.lat, longitude: elm.lng }});
-                    console.log("Choice 1 : ", auxResponse);
-                    setOptions(auxResponse);
+                    
+                if (!isCountryCodeFromAfrica(countryCode)) {
+                    const response = await axios.get(
+                        `https://secure.geonames.org/postalCodeSearchJSON?formatted=true&placename_startsWith=${townText}&country=${countryCode}&maxRows=500&username=blackstarmc97`
+                    );
+                    if (!(response.data.postalCodes.length === 0)) {
+                        var auxResponse = response.data.postalCodes.map((elm: any, i: number) => { return { id: 'psCode-'+i, city: elm.placeName, country: regionNames.of(elm.countryCode), postalCode: elm.postalCode, latitude: elm.lat, longitude: elm.lng }});
+                        console.log("Choice 1 : ", auxResponse);
+                        setOptions(auxResponse);
+                    }
+                    else {
+                        const response2 = await axios.get(
+                            `https://secure.geonames.org/search?name_startsWith=${townText+", "+countryCode}&formatted=true&maxRows=500&type=json&username=blackstarmc97`
+                        );
+                        
+                        var auxResponse = response2.data.geonames.map((elm: any) => { return { id: elm.geonameId, region: elm.adminName1||"", city: elm.name, country: elm.countryName, postalCode: null, latitude: elm.lat, longitude: elm.lng } });
+                        let result = auxResponse.filter((e: any, i: number) => {
+                            return auxResponse.findIndex((x: any) => {
+                            return x.city == e.city && x.country == e.country && x.region == e.region;}) == i;
+                        });
+                        
+                        console.log("Choice 2 : ", result);
+                        setOptions(result);
+                    }
                 }
                 else {
-                    const response2 = await axios.get(
-                        `https://secure.geonames.org/search?name_startsWith=${townText+", "+countryCode}&formatted=true&maxRows=500&type=json&username=blackstarmc97`
-                    );
-                    
-                    var auxResponse = response2.data.geonames.map((elm: any) => { return { id: elm.geonameId, region: elm.adminName1||"", city: elm.name, country: elm.countryName, postalCode: null, latitude: elm.lat, longitude: elm.lng } });
-                    let result = auxResponse.filter((e: any, i: number) => {
-                        return auxResponse.findIndex((x: any) => {
-                        return x.city == e.city && x.country == e.country && x.region == e.region;}) == i;
-                    });
-                    
-                    console.log("Choice 2 : ", result);
-                    setOptions(result);
-                }
-            }
-            else {
-                const response = await axios.get(
-                    `https://secure.geonames.org/postalCodeSearchJSON?formatted=true&placename_startsWith=${value}&maxRows=500&username=blackstarmc97`
-                );
-                
-                if (response.data.postalCodes.length === 0) {
                     const response2 = await axios.get(
                         `https://secure.geonames.org/search?name_startsWith=${value}&formatted=true&type=json&maxRows=500&username=blackstarmc97`
                     );
@@ -89,12 +99,30 @@ const AutocompleteSearch: React.FC<LocationAutocompleteProps> = ({ id, value, on
                     console.log("Choice 3 : ", result);
                     setOpen(true);
                     setOptions(result);
-                }
-                else {
-                    console.log(response.data.postalCodes);
-                    var auxResponse = response.data.postalCodes.map((elm: any, i: number) => { return { id: 'psCode-'+i, city: elm.placeName, country: regionNames.of(elm.countryCode), postalCode: elm.postalCode, latitude: elm.lat, longitude: elm.lng, region: elm.adminName1||"" } });
-                    console.log("Choice 4 : ", auxResponse);
-                    setOptions(auxResponse)
+                    // const response = await axios.get(
+                    //     `https://secure.geonames.org/postalCodeSearchJSON?formatted=true&placename_startsWith=${value}&maxRows=500&username=blackstarmc97`
+                    // );
+                    
+                    // if (response.data.postalCodes.length === 0) {
+                    //     const response2 = await axios.get(
+                    //         `https://secure.geonames.org/search?name_startsWith=${value}&formatted=true&type=json&maxRows=500&username=blackstarmc97`
+                    //     );
+                        
+                    //     var auxResponse = response2.data.geonames.map((elm: any) => { return { id: elm.geonameId, region: elm.adminName1||"", city: elm.name, country: elm.countryName, postalCode: null, latitude: elm.lat, longitude: elm.lng } });
+                    //     let result = auxResponse.filter((e: any, i: number) => {
+                    //         return auxResponse.findIndex((x: any) => {
+                    //         return x.city == e.city && x.country == e.country && x.region == e.region;}) == i;
+                    //     });
+                    //     console.log("Choice 3 : ", result);
+                    //     setOpen(true);
+                    //     setOptions(result);
+                    // }
+                    // else {
+                    //     console.log(response.data.postalCodes);
+                    //     var auxResponse = response.data.postalCodes.map((elm: any, i: number) => { return { id: 'psCode-'+i, city: elm.placeName, country: regionNames.of(elm.countryCode), postalCode: elm.postalCode, latitude: elm.lat, longitude: elm.lng, region: elm.adminName1||"" } });
+                    //     console.log("Choice 4 : ", auxResponse);
+                    //     setOptions(auxResponse)
+                    // }
                 }
             }            
         } catch (error) {
@@ -117,11 +145,11 @@ const AutocompleteSearch: React.FC<LocationAutocompleteProps> = ({ id, value, on
                 vertical: 'top',
                 horizontal: 'right',
             }}
+            // sx={{ maxWidth: "250px" }}
         >
             <Typography sx={{ p: 2, fontSize: 12 }}>
-                - Type the name of the city you want. Eg : "Dakar"<br />
-                - If no result, add the country code. Eg : "Dakar / sen"<br />
-                - If you cant find a town, try this. Eg : "Dakar, sen"<br />
+                Please respect the following format <br />
+                - Type the name of the city and the country code with a comma. <br /> Eg : "Dakar, SN"
             </Typography>
         </Popover>
         {

@@ -106,7 +106,7 @@ function Landing() {
     
     // const getPorts = async () => {
     //     try {
-    //         const response = await fetch(protectedResources.apiLisTransport.endPoint+"/Port/Ports");
+    //         const response = await fetch(protectedResources.apiLisTransport.endPoint+"/Port/Ports?pageSize=500");
     //         if (!response.ok) {
     //           throw new Error('Network response was not ok');
     //         }
@@ -119,7 +119,7 @@ function Landing() {
     
     const getProducts = async () => {
         try {
-            const response = await fetch(protectedResources.apiLisTransport.endPoint+"/Product/Products");
+            const response = await fetch(protectedResources.apiLisTransport.endPoint+"/Product?pageSize=500");
             if (!response.ok) {
               throw new Error('Network response was not ok');
             }

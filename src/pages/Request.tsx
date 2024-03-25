@@ -531,7 +531,7 @@ function Request() {
         // console.log("Quantity : ",quantity);
         if (miscsSelected !== null && miscsSelected !== undefined) {
             for (var i = 0; i < miscsSelected.length; i++) {
-                console.log(miscsSelected[i].containers);
+                // console.log(miscsSelected[i].containers);
                 miscPrices =  miscPrices + getTotalNumber(miscsSelected[i].containers)*quantity;
             }
         }
@@ -878,7 +878,7 @@ function Request() {
     }
     
     const getGeneralMiscellaneousPriceOffers = async () => {
-        setLoadGeneralMiscs(true)
+        setLoadGeneralMiscs(true);
         if (context && account) {
             var response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisPricing.endPoint+"/Miscellaneous/Miscellaneous?withShipment=false", tempToken);
             setLoadGeneralMiscs(false);
@@ -1000,12 +1000,12 @@ function Request() {
                 }
             );
             
-            const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Port/Ports", token);
+            const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Port/Ports?pageSize=500", token);
             if (response !== null && response !== undefined) {
                 console.log(response);
                 var addedCoordinatesPorts = addedCoordinatesToPorts(response);
                 setPorts(addedCoordinatesPorts);
-
+                
                 // Here i can get the products
                 // getProducts(addedCoordinatesPorts);
             }  
@@ -1031,7 +1031,7 @@ function Request() {
                 }
             );
             
-            const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Product/Products", token);
+            const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Product?pageSize=500", token);
             if (response !== null && response !== undefined) {
                 setProducts(response);
 
