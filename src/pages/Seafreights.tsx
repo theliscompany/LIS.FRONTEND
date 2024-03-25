@@ -25,6 +25,8 @@ import { Anchor, FileCopy, Mail } from '@mui/icons-material';
 import NewContact from '../components/editRequestPage/NewContact';
 import ServicesTable from '../components/seafreightPage/ServicesTable';
 import { transformArray, reverseTransformArray, flattenData, flattenData2 } from '../utils/functions';
+import NewService from '../components/shared/NewService';
+import NewPort from '../components/shared/NewPort';
 
 function createGetRequestUrl(variable1: number, variable2: number, variable3: number) {
     let url = protectedResources.apiLisPricing.endPoint+"/SeaFreight/GetSeaFreights?";
@@ -52,6 +54,8 @@ function Seafreights() {
     const [modal2, setModal2] = useState<boolean>(false);
     const [modal6, setModal6] = useState<boolean>(false);
     const [modal7, setModal7] = useState<boolean>(false);
+    const [modal8, setModal8] = useState<boolean>(false);
+    const [modal9, setModal9] = useState<boolean>(false);
     const [ports, setPorts] = useState<any>(null);
     const [products, setProducts] = useState<any>(null);
     const [clients, setClients] = useState<any>(null);
@@ -188,7 +192,7 @@ function Seafreights() {
                 }
             );
             
-            const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Product/Products", token);
+            const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Product?pageSize=500", token);
             if (response !== null && response !== undefined) {
                 setProducts(response);
             }  
@@ -229,7 +233,7 @@ function Seafreights() {
     
     const getPorts = async () => {
         if (context && account) {
-            const response = await (context as BackendService<any>).getSingle(protectedResources.apiLisTransport.endPoint+"/Port/Ports");
+            const response = await (context as BackendService<any>).getSingle(protectedResources.apiLisTransport.endPoint+"/Port/Ports?pageSize=500");
             if (response !== null && response !== undefined) {
                 setPorts(response);
             }  
@@ -262,7 +266,7 @@ function Seafreights() {
 
     const getServices = async (token: string) => {
         if (context && account) {
-            const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Service/Services", token);
+            const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Service?pageSize=500", token);
             if (response !== null && response !== undefined) {
                 setAllServices(response);
                 setServices(response.filter((obj: any) => obj.servicesTypeId.includes(1))); // Filter the services for seafreights (SEAFREIGHT = 1)
@@ -913,8 +917,26 @@ function Seafreights() {
                                     /> : <Skeleton />
                                 }
                             </Grid>
-                            <Grid item xs={12}>
+                            <Grid item xs={12} md={8}>
                                 <Typography sx={{ fontSize: 18, mb: 1 }}><b>{t('listServices')} - {t('seafreights')}</b></Typography>
+                            </Grid>
+                            <Grid item xs={12} md={4}>
+                                <Button 
+                                    variant="contained" color="inherit" 
+                                    sx={{ float: "right", backgroundColor: "#fff", textTransform: "none" }} 
+                                    onClick={() => { setModal8(true); }}
+                                >
+                                    Create new service
+                                </Button>
+                                <Button 
+                                    variant="contained" color="inherit" 
+                                    sx={{ float: "right", backgroundColor: "#fff", textTransform: "none", mr: 1 }} 
+                                    onClick={() => { setModal9(true); }}
+                                >
+                                    Create new port
+                                </Button>
+                            </Grid> 
+                            <Grid item xs={12}>
                                 {
                                     allServices !== null && allServices !== undefined && allServices.length !== 0 ?
                                     <ServicesTable 
@@ -1018,6 +1040,34 @@ function Seafreights() {
                     categories={["SHIPPING_LINES"]}
                     closeModal={() => setModal7(false)}
                     callBack={getClients}
+                />
+            </BootstrapDialog>
+
+            {/* Create new service */}
+            <BootstrapDialog
+                onClose={() => setModal8(false)}
+                aria-labelledby="custom-dialog-title8"
+                open={modal8}
+                maxWidth="md"
+                fullWidth
+            >
+                <NewService 
+                    closeModal={() => setModal8(false)}
+                    callBack={getServices}
+                />
+            </BootstrapDialog>
+
+            {/* Create new port */}
+            <BootstrapDialog
+                onClose={() => setModal9(false)}
+                aria-labelledby="custom-dialog-title9"
+                open={modal9}
+                maxWidth="md"
+                fullWidth
+            >
+                <NewPort 
+                    closeModal={() => setModal9(false)}
+                    callBack={getPorts}
                 />
             </BootstrapDialog>
         </div>

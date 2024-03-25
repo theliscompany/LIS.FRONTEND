@@ -1000,12 +1000,12 @@ function Request() {
                 }
             );
             
-            const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Port/Ports", token);
+            const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Port/Ports?pageSize=500", token);
             if (response !== null && response !== undefined) {
                 console.log(response);
                 var addedCoordinatesPorts = addedCoordinatesToPorts(response);
                 setPorts(addedCoordinatesPorts);
-
+                
                 // Here i can get the products
                 // getProducts(addedCoordinatesPorts);
             }  
@@ -1031,7 +1031,7 @@ function Request() {
                 }
             );
             
-            const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Product/Products", token);
+            const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Product?pageSize=500", token);
             if (response !== null && response !== undefined) {
                 setProducts(response);
 

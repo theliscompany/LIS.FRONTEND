@@ -98,7 +98,7 @@ function NewRequest(props: any) {
                 }
             );
             
-            const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Product/Products", token);
+            const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Product?pageSize=500", token);
             console.log(response);
             if (response !== null && response !== undefined) {
                 setProducts(response);

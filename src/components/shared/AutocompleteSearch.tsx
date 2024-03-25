@@ -148,9 +148,6 @@ const AutocompleteSearch: React.FC<LocationAutocompleteProps> = ({ id, value, on
             // sx={{ maxWidth: "250px" }}
         >
             <Typography sx={{ p: 2, fontSize: 12 }}>
-                {/* - Type the name of the city you want. Eg : "Dakar"<br />
-                - If no result, add the country code. Eg : "Dakar / sen"<br />
-                - If you cant find a town, try this. Eg : "Dakar, sen"<br /> */}
                 Please respect the following format <br />
                 - Type the name of the city and the country code with a comma. <br /> Eg : "Dakar, SN"
             </Typography>

@@ -399,5 +399,7 @@ export const fr = {
   totalPurchase: "Coût total",
   copyRowSeafreight: "Copier prix de frêt maritime",
   messageOkGeneralMiscs: "Vos services miscs généraux ont été enregistrés!",
-  included: "inclus"
+  included: "inclus",
+  seafreight: "Frêt maritime",
+  haulage: "Transport routier"
 };
