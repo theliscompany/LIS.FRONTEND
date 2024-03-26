@@ -56,7 +56,7 @@ function NewService(props: any) {
                 var dataSent = {
                     "serviceName": testName,
                     "serviceDescription": testDescription,
-                    "servicesTypesId": selectedServiceTypes
+                    "servicesTypeId": selectedServiceTypes
                 };
                 
                 try {
