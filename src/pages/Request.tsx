@@ -1000,7 +1000,7 @@ function Request() {
                 }
             );
             
-            const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Port/Ports?pageSize=500", token);
+            const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Port/Ports?pageSize=2000", token);
             if (response !== null && response !== undefined) {
                 console.log(response);
                 var addedCoordinatesPorts = addedCoordinatesToPorts(response);
