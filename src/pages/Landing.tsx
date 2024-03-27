@@ -106,7 +106,7 @@ function Landing() {
     
     // const getPorts = async () => {
     //     try {
-    //         const response = await fetch(protectedResources.apiLisTransport.endPoint+"/Port/Ports?pageSize=500");
+    //         const response = await fetch(protectedResources.apiLisTransport.endPoint+"/Port/Ports?pageSize=2000");
     //         if (!response.ok) {
     //           throw new Error('Network response was not ok');
     //         }
