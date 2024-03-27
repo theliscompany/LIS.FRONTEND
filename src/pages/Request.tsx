@@ -1005,7 +1005,7 @@ function Request() {
                 console.log(response);
                 var addedCoordinatesPorts = addedCoordinatesToPorts(response);
                 setPorts(addedCoordinatesPorts);
-                
+
                 // Here i can get the products
                 // getProducts(addedCoordinatesPorts);
             }  
@@ -1354,198 +1354,212 @@ function Request() {
                             <Button variant="contained" color="inherit" sx={whiteButtonStyles} style={{ float: "right", marginRight: "10px" }} onClick={() => { setModal4(true); /*getNotes(id);*/ }} >{t('listNotes')}</Button>
                         </Grid>
                         
-                        <Grid item xs={12} md={6} mt={1}>
-                            <InputLabel htmlFor="client-number" sx={inputLabelStyles}>{t('clientNumber')}</InputLabel>
-                            <ClientSearch 
-                                id="client-number" 
-                                value={clientNumber} 
-                                onChange={setClientNumber}
-                                disabled 
-                                callBack={(value: any) => {
-                                    setClientNumber(value);
-                                    if (clientNumber !== null) {
-                                        setPhone(clientNumber.phone !== null ? clientNumber.phone : "");
-                                        // alert("check");
-                                    }
-                                }} 
-                                fullWidth 
-                            />
-                        </Grid>
-                        <Grid item xs={12} md={6} mt={1}>
-                            <InputLabel htmlFor="tags" sx={inputLabelStyles}>{t('specifics')}</InputLabel>
-                            {
-                                products !== null ?
-                                <Autocomplete
-                                    multiple    
-                                    disablePortal
-                                    id="tags"
-                                    placeholder="Machinery, Household goods, etc"
-                                    options={products}
-                                    getOptionLabel={(option: any) => { 
-                                        if (option !== null && option !== undefined) {
-                                            return option.productName !== undefined ? option.productName : option;
-                                        }
-                                        return ""; 
-                                    }}
-                                    value={tags}
-                                    sx={{ mt: 1 }}
-                                    renderInput={(params: any) => <TextField {...params} sx={{ textTransform: "lowercase" }} />}
-                                    onChange={(e: any, value: any) => { setTags(value); }}
-                                    fullWidth
-                                /> : <Skeleton />
-                            }
-                        </Grid>
-                        <Grid item xs={12} md={6}>
-                            <InputLabel htmlFor="whatsapp-phone-number" sx={inputLabelStyles}>{t('whatsappNumber')}</InputLabel>
-                            <MuiTelInput 
-                                id="whatsapp-phone-number" 
-                                value={phone} onChange={setPhone} 
-                                defaultCountry="CM" preferredCountries={["CM", "BE", "KE"]} 
-                                fullWidth sx={{ mt: 1 }} disabled 
-                            />
-                        </Grid>
-                        <Grid item xs={12} md={6}>
-                            <InputLabel htmlFor="request-email" sx={inputLabelStyles}>{t('emailAddress')}</InputLabel>
-                            <BootstrapInput id="request-email" type="email" value={email} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)} fullWidth disabled />
-                        </Grid>
-                        <Grid item xs={12} md={6} mt={1}>
-                            <InputLabel htmlFor="departure" sx={inputLabelStyles}>{t('departure')}</InputLabel>
-                            <AutocompleteSearch id="departure" value={departure} onChange={setDeparture} callBack={getClosestDeparture} fullWidth />
-                        </Grid>
-                        <Grid item xs={12} md={6} mt={1}>
-                            <InputLabel htmlFor="arrival" sx={inputLabelStyles}>{t('arrival')}</InputLabel>
-                            <AutocompleteSearch id="arrival" value={arrival} onChange={setArrival} callBack={getClosestArrival} fullWidth />
-                        </Grid>
-                        
-                        <Grid item xs={9} container direction="column" alignItems="flex-start">
-                            <InputLabel htmlFor="listContainers" sx={inputLabelStyles} style={{ marginBottom: "8px", position: "relative", top: "12px" }}>{t('listContainers')}</InputLabel>
-                        </Grid>
-                        <Grid item xs={3}>
-                            <Button variant="contained" color="inherit" sx={whiteButtonStyles} style={{ float: "right" }} onClick={() => setModal10(true)} >{t('addContainer')}</Button>
-                        </Grid>
-
                         <Grid item xs={12}>
-                            {
-                                packingType === "FCL" ?
-                                <>
-                                {
-                                    containersSelection !== undefined && containersSelection !== null && containersSelection.length !== 0 && containers !== null ? 
-                                    <Grid container spacing={2}>
-                                    {
-                                        containersSelection.map((item: any, index: number) => (
-                                            <Grid key={"listitem1-"+index} item xs={12} md={4}>
-                                                <ListItem
-                                                    sx={{ border: "1px solid #e5e5e5" }}
-                                                    secondaryAction={
-                                                        <IconButton edge="end" onClick={() => {
-                                                            setContainersSelection((prevItems: any) => prevItems.filter((item: any, i: number) => i !== index));
-                                                        }}>
-                                                            <DeleteIcon />
-                                                        </IconButton>
+                            <Accordion defaultExpanded sx={{ backgroundColor: "#fbfbfb" }}>
+                                <AccordionSummary
+                                    expandIcon={<ExpandMoreIcon />}
+                                    aria-controls="panel1b-content"
+                                    id="panel1b-header"
+                                >
+                                    <Typography variant="h6" sx={{ mx: 0 }}><b>Customer request</b></Typography>
+                                </AccordionSummary>
+                                <AccordionDetails>
+                                    <Grid container spacing={2} px={2}>
+                                        <Grid item xs={12} md={6}>
+                                            <InputLabel htmlFor="client-number" sx={inputLabelStyles} style={{ marginTop: "8px" }}>{t('clientNumber')}</InputLabel>
+                                            <ClientSearch 
+                                                id="client-number" 
+                                                value={clientNumber} 
+                                                onChange={setClientNumber}
+                                                disabled 
+                                                callBack={(value: any) => {
+                                                    setClientNumber(value);
+                                                    if (clientNumber !== null) {
+                                                        setPhone(clientNumber.phone !== null ? clientNumber.phone : "");
+                                                        // alert("check");
                                                     }
-                                                >
-                                                    <ListItemText primary={
-                                                        t('container')+" : "+item.container+" | "+t('quantity')+" : "+item.quantity
-                                                    } />
-                                                </ListItem>
-                                            </Grid>
-                                        ))
-                                    }
-                                    </Grid> : null  
-                                }
-                                </> : null
-                            }
-                            {
-                                packingType === "Breakbulk/LCL" ?
-                                <>
-                                {
-                                    packagesSelection !== undefined && packagesSelection !== null && packagesSelection.length !== 0 ? 
-                                    <Grid container spacing={2}>
-                                        {
-                                            packagesSelection.map((item: any, index: number) => (
-                                                <Grid key={"packageitem1-"+index} item xs={12} md={6}>
-                                                    <ListItem
-                                                        sx={{ border: "1px solid #e5e5e5" }}
-                                                        secondaryAction={
-                                                            <IconButton edge="end" onClick={() => {
-                                                                setPackagesSelection((prevItems: any) => prevItems.filter((item: any, i: number) => i !== index));
-                                                            }}>
-                                                                <DeleteIcon />
-                                                            </IconButton>
+                                                }} 
+                                                fullWidth 
+                                            />
+                                        </Grid>
+                                        <Grid item xs={12} md={6} mt={1}>
+                                            <InputLabel htmlFor="departure" sx={inputLabelStyles}>{t('departure')}</InputLabel>
+                                            <AutocompleteSearch id="departure" value={departure} onChange={setDeparture} callBack={getClosestDeparture} fullWidth />
+                                        </Grid>
+                                        <Grid item xs={12} md={6}>
+                                            <InputLabel htmlFor="whatsapp-phone-number" sx={inputLabelStyles} style={{ marginTop: "8px" }}>{t('whatsappNumber')}</InputLabel>
+                                            <MuiTelInput 
+                                                id="whatsapp-phone-number" 
+                                                value={phone} onChange={setPhone} 
+                                                defaultCountry="CM" preferredCountries={["CM", "BE", "KE"]} 
+                                                fullWidth sx={{ mt: 1 }} disabled 
+                                            />
+                                        </Grid>
+                                        <Grid item xs={12} md={6} mt={1}>
+                                            <InputLabel htmlFor="arrival" sx={inputLabelStyles}>{t('arrival')}</InputLabel>
+                                            <AutocompleteSearch id="arrival" value={arrival} onChange={setArrival} callBack={getClosestArrival} fullWidth />
+                                        </Grid>
+                                        <Grid item xs={12} md={6}>
+                                            <InputLabel htmlFor="request-email" sx={inputLabelStyles}>{t('emailAddress')}</InputLabel>
+                                            <BootstrapInput id="request-email" type="email" value={email} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)} fullWidth disabled />
+                                        </Grid>
+                                        <Grid item xs={12} md={6}>
+                                            <InputLabel htmlFor="tags" sx={inputLabelStyles}>{t('specifics')}</InputLabel>
+                                            {
+                                                products !== null ?
+                                                <Autocomplete
+                                                    multiple    
+                                                    disablePortal
+                                                    id="tags"
+                                                    placeholder="Machinery, Household goods, etc"
+                                                    options={products}
+                                                    getOptionLabel={(option: any) => { 
+                                                        if (option !== null && option !== undefined) {
+                                                            return option.productName !== undefined ? option.productName : option;
                                                         }
-                                                    >
-                                                        <ListItemText primary={
-                                                            t('name')+" : "+item.name+" | "+t('quantity')+" : "+item.quantity+" | "+t('dimensions')+" : "+item.dimensions+" | Cubage ("+item.volume+" \u33A5) | "+t('weight')+" : "+item.weight+" Kg"
-                                                        } />
-                                                    </ListItem>
-                                                </Grid>
-                                            ))
-                                        }
-                                    </Grid> : null  
-                                }
-                                </> : null
-                            }
-                            {
-                                packingType === "Unit RoRo" ?
-                                <>
-                                {
-                                    unitsSelection !== undefined && unitsSelection !== null && unitsSelection.length !== 0 ? 
-                                    <Grid container spacing={2}>
-                                        {
-                                            unitsSelection.map((item: any, index: number) => (
-                                                <Grid key={"unititem1-"+index} item xs={12} md={6}>
-                                                    <ListItem
-                                                        sx={{ border: "1px solid #e5e5e5" }}
-                                                        secondaryAction={
-                                                            <IconButton edge="end" onClick={() => {
-                                                                setUnitsSelection((prevItems: any) => prevItems.filter((item: any, i: number) => i !== index));
-                                                            }}>
-                                                                <DeleteIcon />
-                                                            </IconButton>
+                                                        return ""; 
+                                                    }}
+                                                    value={tags}
+                                                    sx={{ mt: 1 }}
+                                                    renderInput={(params: any) => <TextField {...params} sx={{ textTransform: "lowercase" }} />}
+                                                    onChange={(e: any, value: any) => { setTags(value); }}
+                                                    fullWidth
+                                                /> : <Skeleton />
+                                            }
+                                        </Grid>
+                                        
+                                        <Grid item xs={9} container direction="column" alignItems="flex-start">
+                                            <InputLabel htmlFor="listContainers" sx={inputLabelStyles} style={{ marginBottom: "8px", position: "relative", top: "12px" }}>{t('listContainers')}</InputLabel>
+                                        </Grid>
+                                        <Grid item xs={3}>
+                                            <Button variant="contained" color="inherit" sx={whiteButtonStyles} style={{ float: "right" }} onClick={() => setModal10(true)} >{t('addContainer')}</Button>
+                                        </Grid>
+
+                                        <Grid item xs={12}>
+                                            {
+                                                packingType === "FCL" ?
+                                                <>
+                                                {
+                                                    containersSelection !== undefined && containersSelection !== null && containersSelection.length !== 0 && containers !== null ? 
+                                                    <Grid container spacing={2}>
+                                                    {
+                                                        containersSelection.map((item: any, index: number) => (
+                                                            <Grid key={"listitem1-"+index} item xs={12} md={4}>
+                                                                <ListItem
+                                                                    sx={{ border: "1px solid #e5e5e5" }}
+                                                                    secondaryAction={
+                                                                        <IconButton edge="end" onClick={() => {
+                                                                            setContainersSelection((prevItems: any) => prevItems.filter((item: any, i: number) => i !== index));
+                                                                        }}>
+                                                                            <DeleteIcon />
+                                                                        </IconButton>
+                                                                    }
+                                                                >
+                                                                    <ListItemText primary={
+                                                                        t('container')+" : "+item.container+" | "+t('quantity')+" : "+item.quantity
+                                                                    } />
+                                                                </ListItem>
+                                                            </Grid>
+                                                        ))
+                                                    }
+                                                    </Grid> : null  
+                                                }
+                                                </> : null
+                                            }
+                                            {
+                                                packingType === "Breakbulk/LCL" ?
+                                                <>
+                                                {
+                                                    packagesSelection !== undefined && packagesSelection !== null && packagesSelection.length !== 0 ? 
+                                                    <Grid container spacing={2}>
+                                                        {
+                                                            packagesSelection.map((item: any, index: number) => (
+                                                                <Grid key={"packageitem1-"+index} item xs={12} md={6}>
+                                                                    <ListItem
+                                                                        sx={{ border: "1px solid #e5e5e5" }}
+                                                                        secondaryAction={
+                                                                            <IconButton edge="end" onClick={() => {
+                                                                                setPackagesSelection((prevItems: any) => prevItems.filter((item: any, i: number) => i !== index));
+                                                                            }}>
+                                                                                <DeleteIcon />
+                                                                            </IconButton>
+                                                                        }
+                                                                    >
+                                                                        <ListItemText primary={
+                                                                            t('name')+" : "+item.name+" | "+t('quantity')+" : "+item.quantity+" | "+t('dimensions')+" : "+item.dimensions+" | Cubage ("+item.volume+" \u33A5) | "+t('weight')+" : "+item.weight+" Kg"
+                                                                        } />
+                                                                    </ListItem>
+                                                                </Grid>
+                                                            ))
                                                         }
+                                                    </Grid> : null  
+                                                }
+                                                </> : null
+                                            }
+                                            {
+                                                packingType === "Unit RoRo" ?
+                                                <>
+                                                {
+                                                    unitsSelection !== undefined && unitsSelection !== null && unitsSelection.length !== 0 ? 
+                                                    <Grid container spacing={2}>
+                                                        {
+                                                            unitsSelection.map((item: any, index: number) => (
+                                                                <Grid key={"unititem1-"+index} item xs={12} md={6}>
+                                                                    <ListItem
+                                                                        sx={{ border: "1px solid #e5e5e5" }}
+                                                                        secondaryAction={
+                                                                            <IconButton edge="end" onClick={() => {
+                                                                                setUnitsSelection((prevItems: any) => prevItems.filter((item: any, i: number) => i !== index));
+                                                                            }}>
+                                                                                <DeleteIcon />
+                                                                            </IconButton>
+                                                                        }
+                                                                    >
+                                                                        <ListItemText primary={
+                                                                            t('name')+" : "+item.name+" | "+t('quantity')+" : "+item.quantity+" | "+t('dimensions')+" : "+item.dimensions+" | Cubage ("+item.volume+" \u33A5) | "+t('weight')+" : "+item.weight+" Kg"
+                                                                        } />
+                                                                    </ListItem>
+                                                                </Grid>
+                                                            ))
+                                                        }
+                                                    </Grid> : null  
+                                                }
+                                                </> : null
+                                            }
+                                        </Grid>                                
+                                        <Grid item xs={12} md={6} mt={.5} sx={{ display: { xs: 'none', md: 'block' } }}>
+                                            <InputLabel htmlFor="request-message" sx={inputLabelStyles}>{t('details')}</InputLabel>
+                                            <BootstrapInput id="request-message" type="text" multiline rows={3.5} value={message} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setMessage(e.target.value)} fullWidth />
+                                        </Grid>
+                                        <Grid item xs={12} md={6} mt={1}>
+                                            <InputLabel htmlFor="assigned-manager" sx={inputLabelStyles}>{t('assignedManager')}</InputLabel>
+                                            {
+                                                !loadAssignees ? 
+                                                <>
+                                                    <NativeSelect
+                                                        id="assigned-manager"
+                                                        value={assignedManager}
+                                                        onChange={handleChangeAssignedManager}
+                                                        input={<BootstrapInput />}
+                                                        fullWidth
                                                     >
-                                                        <ListItemText primary={
-                                                            t('name')+" : "+item.name+" | "+t('quantity')+" : "+item.quantity+" | "+t('dimensions')+" : "+item.dimensions+" | Cubage ("+item.volume+" \u33A5) | "+t('weight')+" : "+item.weight+" Kg"
-                                                        } />
-                                                    </ListItem>
-                                                </Grid>
-                                            ))
-                                        }
-                                    </Grid> : null  
-                                }
-                                </> : null
-                            }
+                                                        <option value="">{t('noAgentAssigned')}</option>
+                                                        {
+                                                            assignees.map((row: any, i: number) => (
+                                                                <option key={"assigneeId-"+i} value={String(row.id)}>{row.name}</option>
+                                                            ))
+                                                        }
+                                                    </NativeSelect>
+                                                    <Button variant="contained" color="inherit" sx={whiteButtonStyles} style={{ marginRight: "10px" }} onClick={assignManager} >{t('updateManager')}</Button>
+                                                    <Button variant="contained" color="inherit" sx={whiteButtonStyles} onClick={removeManager} >{t('removeManager')}</Button>
+                                                </> : <Skeleton sx={{ mt: 3 }} />   
+                                            }
+                                        </Grid>
+                                    </Grid>                                
+                                </AccordionDetails>
+                            </Accordion>
                         </Grid>
                         
-
-                        <Grid item xs={12} md={6} mt={.5} sx={{ display: { xs: 'none', md: 'block' } }}>
-                            <InputLabel htmlFor="request-message" sx={inputLabelStyles}>{t('details')}</InputLabel>
-                            <BootstrapInput id="request-message" type="text" multiline rows={3.5} value={message} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setMessage(e.target.value)} fullWidth />
-                        </Grid>
-                        <Grid item xs={12} md={6} mt={1}>
-                            <InputLabel htmlFor="assigned-manager" sx={inputLabelStyles}>{t('assignedManager')}</InputLabel>
-                            {
-                                !loadAssignees ? 
-                                <>
-                                    <NativeSelect
-                                        id="assigned-manager"
-                                        value={assignedManager}
-                                        onChange={handleChangeAssignedManager}
-                                        input={<BootstrapInput />}
-                                        fullWidth
-                                    >
-                                        <option value="">{t('noAgentAssigned')}</option>
-                                        {
-                                            assignees.map((row: any, i: number) => (
-                                                <option key={"assigneeId-"+i} value={String(row.id)}>{row.name}</option>
-                                            ))
-                                        }
-                                    </NativeSelect>
-                                    <Button variant="contained" color="inherit" sx={whiteButtonStyles} style={{ marginRight: "10px" }} onClick={assignManager} >{t('updateManager')}</Button>
-                                    <Button variant="contained" color="inherit" sx={whiteButtonStyles} onClick={removeManager} >{t('removeManager')}</Button>
-                                </> : <Skeleton sx={{ mt: 3 }} />   
-                            }
-                        </Grid>
                         
                         <Grid item xs={12}>
                             <Accordion sx={{ backgroundColor: "#fbfbfb" }}>
