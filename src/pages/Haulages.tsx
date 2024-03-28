@@ -18,7 +18,7 @@ import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import dayjs, { Dayjs } from 'dayjs';
 import { AuthenticationResult } from '@azure/msal-browser';
 import { useMsal, useAccount } from '@azure/msal-react';
-import { CategoryEnum } from '../utils/constants';
+import { CategoryEnum, containerPackages } from '../utils/constants';
 import AutocompleteSearch from '../components/shared/AutocompleteSearch';
 import RequestPriceHaulage from '../components/editRequestPage/RequestPriceHaulage';
 import { Anchor, Mail } from '@mui/icons-material';
@@ -158,7 +158,7 @@ function Haulages() {
     ];
     
     useEffect(() => {
-        getClients();
+        // getClients();
         getPorts();
         getHaulages();
         getProtectedData();
@@ -255,12 +255,13 @@ function Haulages() {
     }
     
     const getContainers = async (token: string) => {
-        if (context && account) {
-            const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Package/Containers", token);
-            if (response !== null && response !== undefined) {
-                setContainers(response);
-            }  
-        }
+        // if (context && account) {
+        //     const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Package/Containers", token);
+        //     if (response !== null && response !== undefined) {
+        //         setContainers(response);
+        //     }  
+        // }
+        setContainers(containerPackages);
     }
     
     const getHaulages = async () => {
@@ -907,7 +908,7 @@ function Haulages() {
                 maxWidth="lg"
                 fullWidth
             >
-                {
+                {/* {
                     clients !== null ?
                     <RequestPriceHaulage
                         token={tempToken} 
@@ -917,7 +918,15 @@ function Haulages() {
                         loadingPort={null}
                         closeModal={() => setModal5(false)}
                     /> : <Skeleton />
-                }
+                } */}
+                <RequestPriceHaulage
+                    token={tempToken} 
+                    // companies={clients}
+                    ports={ports}
+                    loadingCity={null}
+                    loadingPort={null}
+                    closeModal={() => setModal5(false)}
+                />
             </BootstrapDialog>
 
             {/* Add a new contact */}

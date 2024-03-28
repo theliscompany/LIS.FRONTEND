@@ -22,6 +22,7 @@ import CompanySearch from '../shared/CompanySearch';
 import NewContact from './NewContact';
 import { actionButtonStyles, inputLabelStyles, gridStyles, BootstrapDialog, BootstrapDialogTitle, buttonCloseStyles, datetimeStyles, BootstrapInput, whiteButtonStyles } from '../../utils/misc/styles';
 import NewService from '../shared/NewService';
+import { containerPackages } from '../../utils/constants';
 
 function createGetRequestUrl(variable1: number, variable2: number, variable3: number) {
     let url = protectedResources.apiLisPricing.endPoint+"/Miscellaneous/Miscellaneous?";
@@ -263,12 +264,13 @@ function NewMiscellaneous(props: any) {
     }
     
     const getContainers = async (token: string) => {
-        if (context && account) {
-            const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Package/Containers", token);
-            if (response !== null && response !== undefined) {
-                setContainers(response);
-            }  
-        }
+        // if (context && account) {
+        //     const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Package/Containers", token);
+        //     if (response !== null && response !== undefined) {
+        //         setContainers(response);
+        //     }  
+        // }
+        setContainers(containerPackages);
     }
     
     const getMiscellaneouses = async () => {

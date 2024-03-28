@@ -19,7 +19,7 @@ import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import dayjs, { Dayjs } from 'dayjs';
 import { AuthenticationResult } from '@azure/msal-browser';
 import { useMsal, useAccount } from '@azure/msal-react';
-import { CategoryEnum } from '../utils/constants';
+import { CategoryEnum, containerPackages } from '../utils/constants';
 import RequestPriceRequest from '../components/editRequestPage/RequestPriceRequest';
 import { Anchor, FileCopy, Mail } from '@mui/icons-material';
 import NewContact from '../components/editRequestPage/NewContact';
@@ -275,12 +275,13 @@ function Seafreights() {
     }
     
     const getContainers = async (token: string) => {
-        if (context && account) {
-            const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Package/Containers", token);
-            if (response !== null && response !== undefined) {
-                setContainers(response);
-            }  
-        }
+        // if (context && account) {
+        //     const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Package/Containers", token);
+        //     if (response !== null && response !== undefined) {
+        //         setContainers(response);
+        //     }  
+        // }
+        setContainers(containerPackages);
     }
     
     const getSeafreights = async () => {
@@ -1011,13 +1012,28 @@ function Seafreights() {
                 maxWidth="lg"
                 fullWidth
             >
-                {
+                {/* {
                     clients !== null && products !== null ?
                     <RequestPriceRequest 
                         token={tempToken} 
                         products={products} 
                         commodities={[]}
                         companies={clients}
+                        ports={ports}
+                        portLoading={null}
+                        portDischarge={null} 
+                        containers={containers} 
+                        containersSelection={[]}
+                        closeModal={() => setModal6(false)} 
+                    /> : <Skeleton />
+                } */}
+                {
+                    products !== null ?
+                    <RequestPriceRequest 
+                        token={tempToken} 
+                        products={products} 
+                        commodities={[]}
+                        // companies={clients}
                         ports={ports}
                         portLoading={null}
                         portDischarge={null} 

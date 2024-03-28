@@ -14,6 +14,7 @@ import AutocompleteSearch from '../components/shared/AutocompleteSearch';
 import { useTranslation } from 'react-i18next';
 import ClientSearch from '../components/shared/ClientSearch';
 import NewContact from '../components/editRequestPage/NewContact';
+import { containerPackages } from '../utils/constants';
 
 //let statusTypes = ["EnAttente", "Valider", "Rejeter"];
 // let cargoTypes = ["Container", "Conventional", "RollOnRollOff"];
@@ -107,29 +108,30 @@ function NewRequest(props: any) {
     }
     
     const getContainers = async () => {
-        if (context && account) {
-            const token = await instance.acquireTokenSilent({
-                scopes: transportRequest.scopes,
-                account: account
-            })
-            .then((response: AuthenticationResult) => {
-                return response.accessToken;
-            })
-            .catch(() => {
-                return instance.acquireTokenPopup({
-                    ...transportRequest,
-                    account: account
-                    }).then((response) => {
-                        return response.accessToken;
-                    });
-                }
-            );
+        // if (context && account) {
+        //     const token = await instance.acquireTokenSilent({
+        //         scopes: transportRequest.scopes,
+        //         account: account
+        //     })
+        //     .then((response: AuthenticationResult) => {
+        //         return response.accessToken;
+        //     })
+        //     .catch(() => {
+        //         return instance.acquireTokenPopup({
+        //             ...transportRequest,
+        //             account: account
+        //             }).then((response) => {
+        //                 return response.accessToken;
+        //             });
+        //         }
+        //     );
             
-            const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Package/Containers", token);
-            if (response !== null && response !== undefined) {
-                setContainers(response);
-            }  
-        }
+        //     const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Package/Containers", token);
+        //     if (response !== null && response !== undefined) {
+        //         setContainers(response);
+        //     }  
+        // }
+        setContainers(containerPackages);
     }
 
     const resetForm = () => {
