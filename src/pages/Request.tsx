@@ -59,6 +59,7 @@ import ContainerElement from '../components/editRequestPage/ContainerElement';
 import ContainerPrice from '../components/editRequestPage/ContainerPrice';
 import NewMiscellaneous from '../components/editRequestPage/NewMiscellaneous';
 import { Anchor } from '@mui/icons-material';
+import { containerPackages } from '../utils/constants';
 
 let packingOptions = ["Unit", "Bundle", "Bag", "Pallet", "Carton", "Lot", "Crate"];
 
@@ -600,7 +601,7 @@ function Request() {
     useEffect(() => {
         getTemplate(defaultTemplate);
         getTemplates();
-        getClients();
+        // getClients();
         getContainers();
         getAssignees();
         getPorts();
@@ -947,7 +948,7 @@ function Request() {
                 }
             );
             
-            const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisCrm.endPoint+"/Contact/GetContacts", token);
+            const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisCrm.endPoint+"/Contact/GetContacts?pageSize=1000", token);
             if (response !== null && response !== undefined) {
                 // Removing duplicates from client array
                 setClients(response.filter((obj: any, index: number, self: any) => index === self.findIndex((o: any) => o.contactName === obj.contactName)));
@@ -956,29 +957,30 @@ function Request() {
     }
     
     const getContainers = async () => {
-        if (context && account) {
-            const token = await instance.acquireTokenSilent({
-                scopes: transportRequest.scopes,
-                account: account
-            })
-            .then((response: AuthenticationResult) => {
-                return response.accessToken;
-            })
-            .catch(() => {
-                return instance.acquireTokenPopup({
-                    ...transportRequest,
-                    account: account
-                    }).then((response) => {
-                        return response.accessToken;
-                    });
-                }
-            );
+        // if (context && account) {
+        //     const token = await instance.acquireTokenSilent({
+        //         scopes: transportRequest.scopes,
+        //         account: account
+        //     })
+        //     .then((response: AuthenticationResult) => {
+        //         return response.accessToken;
+        //     })
+        //     .catch(() => {
+        //         return instance.acquireTokenPopup({
+        //             ...transportRequest,
+        //             account: account
+        //             }).then((response) => {
+        //                 return response.accessToken;
+        //             });
+        //         }
+        //     );
             
-            const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Package/Containers", token);
-            if (response !== null && response !== undefined) {
-                setContainers(response);
-            }  
-        }
+        //     const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Package/Containers", token);
+        //     if (response !== null && response !== undefined) {
+        //         setContainers(response);
+        //     }  
+        // }
+        setContainers(containerPackages);
     }
     
     const getPorts = async () => {
@@ -2271,7 +2273,7 @@ function Request() {
             >
                 <RequestPriceHaulage
                     token={tempToken} 
-                    companies={clients}
+                    // companies={clients}
                     ports={ports}
                     loadingCity={loadingCity}
                     loadingPort={portDeparture}
@@ -2291,7 +2293,7 @@ function Request() {
                     token={tempToken} 
                     products={products} 
                     commodities={tags}
-                    companies={clients}
+                    // companies={clients}
                     ports={ports}
                     portLoading={portDeparture}
                     portDischarge={portDestination} 

@@ -5,13 +5,14 @@ import { useAuthorizedBackendApi } from '../../api/api';
 import { useTranslation } from 'react-i18next';
 import { enqueueSnackbar } from 'notistack';
 import { BackendService } from '../../utils/services/fetch';
-import { protectedResources } from '../../config/authConfig';
+import { crmRequest, protectedResources } from '../../config/authConfig';
 import { useAccount, useMsal } from '@azure/msal-react';
 import StarterKit from '@tiptap/starter-kit';
 import { RichTextEditor, MenuControlsContainer, MenuSelectHeading, MenuDivider, MenuButtonBold, MenuButtonItalic, MenuButtonStrikethrough, MenuButtonOrderedList, MenuButtonBulletedList, MenuSelectTextAlign, MenuButtonEditLink, MenuButtonHorizontalRule, MenuButtonUndo, MenuButtonRedo, type RichTextEditorRef, } from 'mui-tiptap';
 import './../../App.css';
 import AutocompleteSearch from '../shared/AutocompleteSearch';
 import { Anchor } from '@mui/icons-material';
+import { AuthenticationResult } from '@azure/msal-browser';
 
 function createGetRequestUrl(variable1: number, variable2: number) {
     let url = protectedResources.apiLisPricing.endPoint+"/Haulage/Haulages?";
@@ -38,7 +39,7 @@ function RequestPriceHaulage(props: any) {
     // const [loadingCity, setLoadingCity] = useState<string>("");
     const [deliveryPort, setDeliveryPort] = useState<any>(props.loadingPort);
     
-    const [hauliersData, setHauliersData] = useState<any>(props.companies);
+    const [hauliersData, setHauliersData] = useState<any>(null);
     const [content, setContent] = useState<string>("");
     const [templateBase, setTemplateBase] = useState<string>("");
     
@@ -52,7 +53,7 @@ function RequestPriceHaulage(props: any) {
 
     const rteRef = useRef<RichTextEditorRef>(null);
     
-    const { accounts } = useMsal();
+    const { instance, accounts } = useMsal();
     const account = useAccount(accounts[0] || {});
 
     const context = useAuthorizedBackendApi();
@@ -122,6 +123,40 @@ function RequestPriceHaulage(props: any) {
         }
     }
 
+    const getClients = async () => {
+        if (context && account) {
+            const token = await instance.acquireTokenSilent({
+                scopes: crmRequest.scopes,
+                account: account
+            })
+            .then((response: AuthenticationResult) => {
+                return response.accessToken;
+            })
+            .catch(() => {
+                return instance.acquireTokenPopup({
+                    ...crmRequest,
+                    account: account
+                    }).then((response) => {
+                        return response.accessToken;
+                    });
+                }
+            );
+            
+            try {
+                const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisCrm.endPoint+"/Contact/GetContactsByCategory?category=2&pageSize=1000", token);
+                if (response !== null && response !== undefined) {
+                    // console.log(response);
+                    // Removing duplicates from client array
+                    setHauliersData(response.filter((obj: any, index: number, self: any) => index === self.findIndex((o: any) => o.contactName === obj.contactName)));
+                    // console.log(response.filter((obj: any, index: number, self: any) => index === self.findIndex((o: any) => o.contactName === obj.contactName)));
+                }
+            }
+            catch (err: any) {
+                console.log(err);
+            }  
+        }
+    }
+    
     function getAllHauliers(data: any) {
         if (!Array.isArray(data)) {
             // Handle invalid data
@@ -153,13 +188,12 @@ function RequestPriceHaulage(props: any) {
             const response = await (context as BackendService<any>).getWithToken(requestFormatted, props.token);
             if (response !== null && response !== undefined) {
                 var aux = getAllHauliers(response);
-                console.log(response.length !== 0 ? aux : "None");
+                // console.log(response.length !== 0 ? aux : "None");
                 
-                if (aux.length !== 0) {
-                    setRecipients(props.companies.filter((obj: any) => aux.includes(obj.contactName) && obj.email !== "" && obj.email !== null));
-                }
-                // setHauliersData(props.companies.filter((obj: any) => aux.includes(obj.contactName) && obj.email !== "" && obj.email !== null));
-                // setHauliersData(props.companies);
+                // if (aux.length !== 0) {
+                //     setRecipients(hauliersData.filter((obj: any) => aux.includes(obj.contactName) && obj.email !== "" && obj.email !== null));
+                // }
+                setRecipients(hauliersData.filter((obj: any) => aux.includes(obj.contactName) && obj.email !== "" && obj.email !== null));
                 setLoad(false);
             }
             else {
@@ -256,179 +290,191 @@ function RequestPriceHaulage(props: any) {
     }, [loadingCityObj, deliveryPort, emptyPickupDepot, templateBase, selectedTemplate]);
 
     useEffect(() => {
-        searchHaulages();
+        getClients();
         getTemplates();
-    }, [deliveryPort]);
+    }, []);
+
+    useEffect(() => {
+        if (hauliersData !== null) {
+            searchHaulages();
+        }
+    }, [deliveryPort, hauliersData]);
 
     return (
         <>
-            <BootstrapDialogTitle id="custom-dialog-title6" onClose={props.closeModal}>
-                <b>{t('priceRequestHaulage')}</b>
-            </BootstrapDialogTitle>
-            <DialogContent dividers>
-                <Grid container spacing={2} px={2}>
-                    <Grid item xs={12} md={6}>
-                        <Grid container spacing={1}>
-                            <Grid item xs={12} mt={0.5}>
-                                {
-                                    hauliersData !== null ? 
-                                    <>
-                                        <InputLabel htmlFor="recipients" sx={inputLabelStyles}>{t('recipients')}</InputLabel>
-                                        <Autocomplete
-                                            multiple    
-                                            disablePortal
-                                            id="recipients"
-                                            placeholder="Carriers recipients"
-                                            options={hauliersData}
-                                            getOptionLabel={(option: any) => { 
-                                                if (option !== undefined && option !== null && option !== "") {
-                                                    if (option.contactName !== undefined && option.contactName !== null) {
-                                                        return `${option.contactName}`;
+            {
+                hauliersData !== null ?
+                <>
+                    <BootstrapDialogTitle id="custom-dialog-title6" onClose={props.closeModal}>
+                        <b>{t('priceRequestHaulage')}</b>
+                    </BootstrapDialogTitle>
+                    <DialogContent dividers>
+                        <Grid container spacing={2} px={2}>
+                            <Grid item xs={12} md={6}>
+                                <Grid container spacing={1}>
+                                    <Grid item xs={12} mt={0.5}>
+                                        {
+                                            hauliersData !== null && recipients !== null && load !== true ? 
+                                            <>
+                                                <InputLabel htmlFor="recipients" sx={inputLabelStyles}>{t('recipients')}</InputLabel>
+                                                <Autocomplete
+                                                    multiple    
+                                                    disablePortal
+                                                    id="recipients"
+                                                    placeholder="Carriers recipients"
+                                                    options={hauliersData}
+                                                    getOptionLabel={(option: any) => { 
+                                                        if (option !== undefined && option !== null && option !== "") {
+                                                            if (option.contactName !== undefined && option.contactName !== null) {
+                                                                return `${option.contactName}`;
+                                                            }
+                                                            return "";
+                                                        }
+                                                        return ""; 
+                                                    }}
+                                                    value={recipients}
+                                                    sx={{ mt: 1 }}
+                                                    renderInput={(params: any) => <TextField {...params} sx={{ textTransform: "lowercase" }} />}
+                                                    onChange={(e: any, value: any) => { setRecipients(value); }}
+                                                    fullWidth
+                                                />
+                                                {/* <Alert severity="info">S.O. Bongo</Alert> */}
+                                            </> : <Skeleton />
+                                        }
+                                    </Grid>
+                                    <Grid item xs={12} mt={0.5}>
+                                        <InputLabel htmlFor="subject" sx={inputLabelStyles}>{t('subject')}</InputLabel>
+                                        <BootstrapInput id="subject" value={subject} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSubject(e.target.value)} fullWidth />
+                                    </Grid>
+                                    <Grid item xs={12} md={12} mt={0.5}>
+                                        <InputLabel htmlFor="emptyPickupDepot" sx={inputLabelStyles}>{t('emptyPickupDepot')}</InputLabel>
+                                        <BootstrapInput id="emptyPickupDepot" type="text" value={emptyPickupDepot} onChange={(e: any) => setEmptyPickupDepot(e.target.value)} fullWidth />
+                                    </Grid>
+                                    <Grid item xs={12} md={12} mt={0.5}>
+                                        <InputLabel htmlFor="loading-city" sx={inputLabelStyles}>{t('loadingCity')}</InputLabel>
+                                        <AutocompleteSearch id="loading-city" value={loadingCityObj} onChange={setLoadingCityObj} fullWidth  />
+                                    </Grid>
+                                    <Grid item xs={12} md={12} mt={0.5}>
+                                        <InputLabel htmlFor="deliveryPort" sx={inputLabelStyles}><Anchor fontSize="small" sx={inputIconStyles} /> {t('destinationPort')}</InputLabel>
+                                        {
+                                            props.ports !== null ?
+                                            <Autocomplete
+                                                disablePortal
+                                                id="deliveryPort"
+                                                options={props.ports}
+                                                renderOption={(props, option, i) => {
+                                                    return (
+                                                        <li {...props} key={option.portId}>
+                                                            {option.portName+", "+option.country}
+                                                        </li>
+                                                    );
+                                                }}
+                                                getOptionLabel={(option: any) => { 
+                                                    if (option !== null && option !== undefined) {
+                                                        return option.portName+', '+option.country;
                                                     }
-                                                    return "";
+                                                    return ""; 
+                                                }}
+                                                value={deliveryPort}
+                                                // disabled={true}
+                                                sx={{ mt: 1 }}
+                                                renderInput={(params: any) => <TextField {...params} />}
+                                                onChange={(e: any, value: any) => { 
+                                                    setDeliveryPort(value);
+                                                }}
+                                                fullWidth
+                                            /> : <Skeleton />
+                                        }
+                                    </Grid>
+                                </Grid>
+                            </Grid>
+
+                            <Grid item xs={12} md={6} mt={0.5}>
+                                <Grid container>
+                                    <Grid item xs={12}>
+                                        <InputLabel htmlFor="selectedTemplate" sx={inputLabelStyles}>{t('selectedTemplate')}</InputLabel>
+                                        {
+                                            loadTemplates !== true ?
+                                            <NativeSelect
+                                                id="selectedTemplate"
+                                                value={selectedTemplate}
+                                                onChange={(e: any) => { setSelectedTemplate(e.target.value); }}
+                                                input={<BootstrapInput />}
+                                                fullWidth
+                                            >
+                                                {templates.map((elm: any, i: number) => (
+                                                    <option key={"templateElm-"+i} value={elm.id}>{elm.name}</option>
+                                                ))}
+                                            </NativeSelect>
+                                            : <Skeleton />
+                                        }
+                                    </Grid>
+
+                                    {/* <Grid item xs={12}>
+                                        <InputLabel htmlFor="mailLanguage" sx={inputLabelStyles}>{t('mailLanguage')}</InputLabel>
+                                        <ToggleButtonGroup
+                                            color="primary"
+                                            value={mailLanguage}
+                                            exclusive
+                                            // size="small"
+                                            onChange={(event: React.MouseEvent<HTMLElement>, newValue: string,) => { 
+                                                setMailLanguage(newValue); 
+                                                if (newValue === "fr") {
+                                                    rteRef.current?.editor?.commands.setContent(templateBase);
                                                 }
-                                                return ""; 
+                                                else {
+                                                    rteRef.current?.editor?.commands.setContent(templateBaseEn);
+                                                }
                                             }}
-                                            value={recipients}
-                                            sx={{ mt: 1 }}
-                                            renderInput={(params: any) => <TextField {...params} sx={{ textTransform: "lowercase" }} />}
-                                            onChange={(e: any, value: any) => { setRecipients(value); }}
+                                            aria-label="Platform"
                                             fullWidth
-                                        />
-                                        {/* <Alert severity="info">S.O. Bongo</Alert> */}
-                                    </> : <Skeleton />
-                                }
-                            </Grid>
-                            <Grid item xs={12} mt={0.5}>
-                                <InputLabel htmlFor="subject" sx={inputLabelStyles}>{t('subject')}</InputLabel>
-                                <BootstrapInput id="subject" value={subject} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSubject(e.target.value)} fullWidth />
-                            </Grid>
-                            <Grid item xs={12} md={12} mt={0.5}>
-                                <InputLabel htmlFor="emptyPickupDepot" sx={inputLabelStyles}>{t('emptyPickupDepot')}</InputLabel>
-                                <BootstrapInput id="emptyPickupDepot" type="text" value={emptyPickupDepot} onChange={(e: any) => setEmptyPickupDepot(e.target.value)} fullWidth />
-                            </Grid>
-                            <Grid item xs={12} md={12} mt={0.5}>
-                                <InputLabel htmlFor="loading-city" sx={inputLabelStyles}>{t('loadingCity')}</InputLabel>
-                                <AutocompleteSearch id="loading-city" value={loadingCityObj} onChange={setLoadingCityObj} fullWidth  />
-                            </Grid>
-                            <Grid item xs={12} md={12} mt={0.5}>
-                                <InputLabel htmlFor="deliveryPort" sx={inputLabelStyles}><Anchor fontSize="small" sx={inputIconStyles} /> {t('destinationPort')}</InputLabel>
-                                {
-                                    props.ports !== null ?
-                                    <Autocomplete
-                                        disablePortal
-                                        id="deliveryPort"
-                                        options={props.ports}
-                                        renderOption={(props, option, i) => {
-                                            return (
-                                                <li {...props} key={option.portId}>
-                                                    {option.portName+", "+option.country}
-                                                </li>
-                                            );
-                                        }}
-                                        getOptionLabel={(option: any) => { 
-                                            if (option !== null && option !== undefined) {
-                                                return option.portName+', '+option.country;
+                                            sx={{ mt: 1, maxHeight: "44px" }}
+                                        >
+                                            <ToggleButton value="fr"><img src="/assets/img/flags/flag-fr.png" style={{ width: "12px", marginRight: "6px" }} alt="flag english" /> Français</ToggleButton>
+                                            <ToggleButton value="en"><img src="/assets/img/flags/flag-en.png" style={{ width: "12px", marginRight: "6px" }} alt="flag english" /> English</ToggleButton>
+                                        </ToggleButtonGroup>
+                                    </Grid> */}
+                                    <Grid item xs={12} mt={1.5}>
+                                        <InputLabel htmlFor="details" sx={inputLabelStyles}>{t('detailsOffer')}</InputLabel>
+                                        <Box sx={{ mt: 1 }}>
+                                            {
+                                                loadTemplate !== true ?
+                                                <RichTextEditor
+                                                    ref={rteRef}
+                                                    extensions={[StarterKit]}
+                                                    content={getDefaultContent(templateBase)}
+                                                    renderControls={() => (
+                                                    <MenuControlsContainer>
+                                                        <MenuSelectHeading />
+                                                        <MenuDivider />
+                                                        <MenuButtonBold />
+                                                        <MenuButtonItalic />
+                                                        <MenuButtonStrikethrough />
+                                                        <MenuButtonOrderedList />
+                                                        <MenuButtonBulletedList />
+                                                        <MenuSelectTextAlign />
+                                                        <MenuButtonEditLink />
+                                                        <MenuButtonHorizontalRule />
+                                                        <MenuButtonUndo />
+                                                        <MenuButtonRedo />
+                                                    </MenuControlsContainer>
+                                                    )}
+                                                />
+                                                : <Skeleton />
                                             }
-                                            return ""; 
-                                        }}
-                                        value={deliveryPort}
-                                        // disabled={true}
-                                        sx={{ mt: 1 }}
-                                        renderInput={(params: any) => <TextField {...params} />}
-                                        onChange={(e: any, value: any) => { 
-                                            setDeliveryPort(value);
-                                        }}
-                                        fullWidth
-                                    /> : <Skeleton />
-                                }
+                                        </Box>
+                                    </Grid>
+                                </Grid>
                             </Grid>
                         </Grid>
-                    </Grid>
-
-                    <Grid item xs={12} md={6} mt={0.5}>
-                        <Grid container>
-                            <Grid item xs={12}>
-                                <InputLabel htmlFor="selectedTemplate" sx={inputLabelStyles}>{t('selectedTemplate')}</InputLabel>
-                                {
-                                    loadTemplates !== true ?
-                                    <NativeSelect
-                                        id="selectedTemplate"
-                                        value={selectedTemplate}
-                                        onChange={(e: any) => { setSelectedTemplate(e.target.value); }}
-                                        input={<BootstrapInput />}
-                                        fullWidth
-                                    >
-                                        {templates.map((elm: any, i: number) => (
-                                            <option key={"templateElm-"+i} value={elm.id}>{elm.name}</option>
-                                        ))}
-                                    </NativeSelect>
-                                    : <Skeleton />
-                                }
-                            </Grid>
-
-                            {/* <Grid item xs={12}>
-                                <InputLabel htmlFor="mailLanguage" sx={inputLabelStyles}>{t('mailLanguage')}</InputLabel>
-                                <ToggleButtonGroup
-                                    color="primary"
-                                    value={mailLanguage}
-                                    exclusive
-                                    // size="small"
-                                    onChange={(event: React.MouseEvent<HTMLElement>, newValue: string,) => { 
-                                        setMailLanguage(newValue); 
-                                        if (newValue === "fr") {
-                                            rteRef.current?.editor?.commands.setContent(templateBase);
-                                        }
-                                        else {
-                                            rteRef.current?.editor?.commands.setContent(templateBaseEn);
-                                        }
-                                    }}
-                                    aria-label="Platform"
-                                    fullWidth
-                                    sx={{ mt: 1, maxHeight: "44px" }}
-                                >
-                                    <ToggleButton value="fr"><img src="/assets/img/flags/flag-fr.png" style={{ width: "12px", marginRight: "6px" }} alt="flag english" /> Français</ToggleButton>
-                                    <ToggleButton value="en"><img src="/assets/img/flags/flag-en.png" style={{ width: "12px", marginRight: "6px" }} alt="flag english" /> English</ToggleButton>
-                                </ToggleButtonGroup>
-                            </Grid> */}
-                            <Grid item xs={12} mt={1.5}>
-                                <InputLabel htmlFor="details" sx={inputLabelStyles}>{t('detailsOffer')}</InputLabel>
-                                <Box sx={{ mt: 1 }}>
-                                    {
-                                        loadTemplate !== true ?
-                                        <RichTextEditor
-                                            ref={rteRef}
-                                            extensions={[StarterKit]}
-                                            content={getDefaultContent(templateBase)}
-                                            renderControls={() => (
-                                            <MenuControlsContainer>
-                                                <MenuSelectHeading />
-                                                <MenuDivider />
-                                                <MenuButtonBold />
-                                                <MenuButtonItalic />
-                                                <MenuButtonStrikethrough />
-                                                <MenuButtonOrderedList />
-                                                <MenuButtonBulletedList />
-                                                <MenuSelectTextAlign />
-                                                <MenuButtonEditLink />
-                                                <MenuButtonHorizontalRule />
-                                                <MenuButtonUndo />
-                                                <MenuButtonRedo />
-                                            </MenuControlsContainer>
-                                            )}
-                                        />
-                                        : <Skeleton />
-                                    }
-                                </Box>
-                            </Grid>
-                        </Grid>
-                    </Grid>
-                </Grid>
-            </DialogContent>
-            <DialogActions>
-                <Button variant="contained" color="primary" className="mr-3" onClick={sendPriceRequestHaulage} sx={{ textTransform: "none" }}>{t('send')}</Button>
-                <Button variant="contained" onClick={props.closeModal} sx={buttonCloseStyles}>{t('close')}</Button>
-            </DialogActions>
+                    </DialogContent>
+                    <DialogActions>
+                        <Button variant="contained" color="primary" className="mr-3" onClick={sendPriceRequestHaulage} sx={{ textTransform: "none" }}>{t('send')}</Button>
+                        <Button variant="contained" onClick={props.closeModal} sx={buttonCloseStyles}>{t('close')}</Button>
+                    </DialogActions>
+                </>
+                : <Skeleton />
+            }
         </>
     );
 }

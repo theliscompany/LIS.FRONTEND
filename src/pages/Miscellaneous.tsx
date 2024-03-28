@@ -20,7 +20,7 @@ import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import dayjs, { Dayjs } from 'dayjs';
 import { AuthenticationResult } from '@azure/msal-browser';
 import { useMsal, useAccount } from '@azure/msal-react';
-import { CategoryEnum } from '../utils/constants';
+import { CategoryEnum, containerPackages } from '../utils/constants';
 import NewContact from '../components/editRequestPage/NewContact';
 import { Anchor } from '@mui/icons-material';
 import NewService from '../components/shared/NewService';
@@ -267,12 +267,13 @@ function Miscellaneous() {
     }
     
     const getContainers = async (token: string) => {
-        if (context && account) {
-            const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Package/Containers", token);
-            if (response !== null && response !== undefined) {
-                setContainers(response);
-            }  
-        }
+        // if (context && account) {
+        //     const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Package/Containers", token);
+        //     if (response !== null && response !== undefined) {
+        //         setContainers(response);
+        //     }  
+        // }
+        setContainers(containerPackages);
     }
     
     const getMiscellaneouses = async () => {
