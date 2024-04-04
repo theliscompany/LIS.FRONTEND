@@ -272,7 +272,8 @@ export class BackendService<T> {
             return response.text().then((_responseText) => {
             return _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
             });
-        } else if (status !== 200 && status !== 204) {
+        } 
+        else if (status !== 200 && status !== 204) {
             return response.text().then((_responseText) => {
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
             });

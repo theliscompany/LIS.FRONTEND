@@ -11,6 +11,7 @@ import { AuthenticationResult } from "@azure/msal-browser";
 
 interface LocationAutocompleteProps {
     id: string;
+    name: string;
     value: string;
     onChange: (value: any) => void;
     fullWidth?: boolean;
@@ -32,7 +33,7 @@ function checkFormatCode(code: string) {
     }
 }
 
-const ClientSearch: React.FC<LocationAutocompleteProps> = ({ id, value, onChange, fullWidth, disabled, callBack }) => {
+const ClientSearch: React.FC<LocationAutocompleteProps> = ({ id, name, value, onChange, fullWidth, disabled, callBack }) => {
     const [loading, setLoading] = useState(false);
     const [options, setOptions] = useState<any[]>([]);
 
