@@ -1,0 +1,1490 @@
+import { useEffect, useRef, useState } from 'react';
+import { BootstrapDialog, BootstrapDialogTitle, BootstrapInput, gridStyles, inputIconStyles, inputLabelStyles, sizeStyles, sizingStyles, whiteButtonStyles } from '../../utils/misc/styles';
+import { Accordion, AccordionDetails, AccordionSummary, Alert, Autocomplete, Box, Button, Chip, Grid, InputLabel, NativeSelect, Skeleton, Step, StepLabel, Stepper, TextField, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material';
+import { enqueueSnackbar } from 'notistack';
+import { BackendService } from '../../utils/services/fetch';
+import { protectedResources, pricingRequest } from '../../config/authConfig';
+import { AuthenticationResult } from '@azure/msal-browser';
+import { Anchor, ExpandMore, RestartAlt } from '@mui/icons-material';
+import { DataGrid, GridColDef, GridColumnHeaderParams, GridRenderCellParams, GridRowSelectionModel, GridToolbar, GridValueFormatterParams, GridValueGetterParams } from '@mui/x-data-grid';
+import StarterKit from '@tiptap/starter-kit';
+import { t } from 'i18next';
+import React from 'react';
+import { calculateTotal, checkCarrierConsistency, checkDifferentDefaultContainer, generateRandomNumber, getServices, getServicesTotal, getServicesTotal2, getTotalNumber, hashCode, removeDuplicatesWithLatestUpdated } from '../../utils/functions';
+import AutocompleteSearch from '../shared/AutocompleteSearch';
+import ContainerElement from './ContainerElement';
+import ContainerPrice from './ContainerPrice';
+import { RichTextEditor, MenuControlsContainer, MenuSelectHeading, MenuDivider, MenuButtonBold, MenuButtonItalic, MenuButtonStrikethrough, MenuButtonOrderedList, MenuButtonBulletedList, MenuSelectTextAlign, MenuButtonEditLink, MenuButtonHorizontalRule, MenuButtonUndo, MenuButtonRedo } from 'mui-tiptap';
+import { RichTextEditorRef } from 'mui-tiptap';
+import NewMiscellaneous from './NewMiscellaneous';
+import RequestPriceHaulage from './RequestPriceHaulage';
+import RequestPriceRequest from './RequestPriceRequest';
+import useProcessStatePersistence from '../../utils/processes/useProcessStatePersistence';
+
+function createGetRequestUrl(url: string, variable2: string, variable3: string, variable4: string) {
+    if (variable2) {
+        url += 'HaulageType=' + encodeURIComponent(variable2) + '&';
+    }
+    if (variable3) {
+        url += 'LoadingCity=' + encodeURIComponent(variable3) + '&';
+    }
+    if (variable4) {
+        url += 'ContainerTypesId=' + variable4 + '&';
+    }
+    
+    if (url.slice(-1) === '&') {
+        url = url.slice(0, -1);
+    }
+    return url;
+}
+
+function createGetRequestUrl2(url: string, variable1: string, variable2: string, variable4: string) {
+    if (variable1) {
+        url += 'DeparturePortId=' + encodeURIComponent(variable1) + '&';
+    }
+    if (variable2) {
+        url += 'DestinationPortId=' + encodeURIComponent(variable2) + '&';
+    }
+    
+    if (url.slice(-1) === '&') {
+        url = url.slice(0, -1);
+    }
+    return url;
+}
+
+const defaultTemplate = "65b74024891f9de80722fc6d";
+
+function GeneratePriceOffer(props: any) {
+    const { 
+        context, account, instance, 
+        id, email, tags, clientNumber, 
+        departure, setDeparture, containersSelection, 
+        loadingCity, setLoadingCity,
+        portDeparture, setPortDeparture, 
+        portDestination, setPortDestination,
+        ports, products, ports1, ports2, containers 
+    } = props;
+    
+    const [loadResults, setLoadResults] = useState<boolean>(false);
+    const [loadGeneralMiscs, setLoadGeneralMiscs] = useState<boolean>(false);
+    const [loadMiscsHaulage, setLoadMiscsHaulage] = useState<boolean>(false);
+    const [loadNewOffer, setLoadNewOffer] = useState<boolean>(false);
+    
+    const [miscs, setMiscs] = useState<any>([]);
+    const [haulages, setHaulages] = useState<any>(null);
+    const [seafreights, setSeafreights] = useState<any>(null);
+    const [generalMiscs, setGeneralMiscs] = useState<any>(null);
+    const [tableMiscs, setTableMiscs] = useState<any>(null);
+    
+    const [selectedHaulage, setSelectedHaulage] = useState<any>(null);
+    const [selectedSeafreight, setSelectedSeafreight] = useState<any>(null);
+    const [selectedMisc, setSelectedMisc] = useState<any>(null);
+
+    const [mySeafreights, setMySeafreights] = useState<any>([]);
+    const [myMiscs, setMyMiscs] = useState<any>([]);
+    const [miscsHaulage, setMiscsHaulage] = useState<any>([]);
+    
+    const [tempToken, setTempToken] = useState<string>("");
+    
+    const [rowSelectionModel, setRowSelectionModel] = React.useState<GridRowSelectionModel>([]);
+    const [rowSelectionModel2, setRowSelectionModel2] = React.useState<GridRowSelectionModel>([]);
+    const [rowSelectionModel3, setRowSelectionModel3] = React.useState<GridRowSelectionModel>([]);
+
+    const [templates, setTemplates] = useState<any>([]);
+    const [loadTemplates, setLoadTemplates] = useState<boolean>(false);
+    const [selectedTemplate, setSelectedTemplate] = useState<string>(defaultTemplate);
+    const [templateBase, setTemplateBase] = useState<any>(null);
+    const [loadTemplate, setLoadTemplate] = useState<boolean>(false);
+    const [mailLanguage, setMailLanguage] = useState<string>("fr");
+
+    const [margins, setMargins] = useState([]);
+    const [addings, setAddings] = useState([]);
+    
+    const [modal5, setModal5] = useState<boolean>(false);
+    const [modal6, setModal6] = useState<boolean>(false);
+    const [modal9, setModal9] = useState<boolean>(false);
+    
+    const rteRef = useRef<RichTextEditorRef>(null);
+    
+    const [formState, setFormState] = useProcessStatePersistence(
+        account?.name,
+        'generatePriceOfferTest',
+        { 
+            haulageType: "",
+        },
+        null, // Optionnel, par défaut à null (pas d'expiration)
+        true // Optionnel, par défaut à true (sauvegarde automatique activée)
+    );
+    
+    const handleChangeFormState = (value: any, name: string) => {
+        setFormState({ ...formState, [name]: value });
+    };
+    
+    const steps = [t('selectHaulage'), t('selectSeafreight'), t('selectMisc'), t('sendOffer')];
+    const haulageTypeOptions = [
+        { value: "On trailer, direct loading", label: t('haulageType1') },
+        { value: "On trailer, Loading with Interval", label: t('haulageType2') },
+        { value: "Side loader, direct loading", label: t('haulageType3') },
+        { value: "Side loader, Loading with Interval, from trailer to floor", label: t('haulageType4') },
+        { value: "Side loader, Loading with Interval, from floor to trailer", label: t('haulageType5') }
+    ];
+
+    const columnsSeafreights: GridColDef[] = [
+        { field: 'carrierName', headerName: t('carrier'), flex: 1.25 },
+        { field: 'carrierAgentName', headerName: t('carrierAgent'), flex: 1.25 },
+        { field: 'frequency', headerName: t('frequency'), valueFormatter: (params: GridValueFormatterParams) => `${t('every')} ${params.value || ''} `+t('days'), flex: 0.75 },
+        { field: 'transitTime', headerName: t('transitTime'), valueFormatter: (params: GridValueFormatterParams) => `${params.value || ''} `+t('days'), flex: 0.5 },
+        { field: 'defaultContainer', headerName: t('prices'), renderCell: (params: GridRenderCellParams) => {
+            return (
+                <Box sx={{ my: 1, mr: 1 }}>
+                    <Box>
+                        {
+                            params.row.containers[0] ? 
+                            <ContainerPrice 
+                                price={formatObject(params.row.containers[0])+" "+t(params.row.currency)}
+                                seafreightPrice={formatServices(params.row.containers[0], t(params.row.currency), params.row.containers[0].container.packageName, 0) || "N/A"} 
+                            /> : "N/A"
+                        }
+                    </Box>
+                </Box>
+            );
+        }, renderHeader: (params: GridColumnHeaderParams) => t('prices'), flex: 1 },
+        { field: 'validUntil', headerName: t('validUntil'), renderCell: (params: GridRenderCellParams) => {
+            return (
+                <Box sx={{ my: 1, mr: 1 }}>
+                    <Chip label={(new Date(params.row.validUntil)).toLocaleDateString().slice(0,10)} color={(new Date()).getTime() - (new Date(params.row.validUntil)).getTime() > 0 ? "warning" : "success"}></Chip>
+                </Box>
+            );
+        }, flex: 0.75 },
+        { field: 'comment', headerName: "Comment", renderCell: (params: GridRenderCellParams) => {
+            return (
+                <Box sx={{ my: 2 }}>
+                    {params.row.comment}
+                </Box>
+            );
+        }, flex: 1.25 },
+    ];
+
+    const columnsHaulages: GridColDef[] = [
+        { field: 'haulierName', headerName: t('haulier'), flex: 1.3 },
+        { field: 'loadingPort', headerName: t('loadingPort'), renderCell: (params: GridRenderCellParams) => {
+            return (
+                <Box sx={{ my: 2 }}>{params.row.loadingPort}</Box>
+            );
+        }, flex: 1 },
+        { field: 'containerNames', headerName: t('containers'), renderCell: (params: GridRenderCellParams) => {
+            return (
+                <Box sx={{ my: 2 }}>{params.row.containerNames.join(", ")}</Box>
+            );
+        }, minWidth: 100, flex: 0.75 },
+        { field: 'unitTariff', valueGetter: (params: GridValueGetterParams) => `${params.row.unitTariff || ''} ${t(params.row.currency)}`, renderHeader: (params: GridColumnHeaderParams) => (<>Haulage <br />per unit</>), flex: 0.75 },
+        { field: 'freeTime', headerName: t('freeTime'), valueFormatter: (params: GridValueFormatterParams) => `${params.value || ''} ${t('hours')}`, flex: 0.5 },
+        { field: 'overtimeTariff', headerName: t('overtimeTariff'), valueGetter: (params: GridValueGetterParams) => `${params.row.overtimeTariff || ''} ${t(params.row.currency)} / ${t('hour')}`, renderHeader: (params: GridColumnHeaderParams) => (<>Overtime <br />tariff</>), flex: 0.75 },
+        { field: 'multiStop', headerName: t('multiStop'), valueGetter: (params: GridValueGetterParams) => `${params.row.multiStop || ''} ${t(params.row.currency)}`, flex: 0.5 },
+        { field: 'validUntil', headerName: t('validUntil'), renderCell: (params: GridRenderCellParams) => {
+            return (
+                <Box sx={{ my: 1, mr: 1 }}>
+                    <Chip label={(new Date(params.row.validUntil)).toLocaleDateString().slice(0,10)} color={(new Date()).getTime() - (new Date(params.row.validUntil)).getTime() > 0 ? "warning" : "success"}></Chip>
+                </Box>
+            );
+        }, flex: 0.75 },
+        { field: 'comment', headerName: "Comment", renderCell: (params: GridRenderCellParams) => {
+            return (
+                <Box sx={{ my: 2 }}>
+                    {params.row.comment}
+                </Box>
+            );
+        }, flex: 1.25 },
+    ];
+
+    const columnsMiscs: GridColDef[] = [
+        { field: 'supplierName', headerName: t('supplier'), flex: 2.7 },
+        { field: 'costTotal', headerName: t('costPrices'), renderCell: (params: GridRenderCellParams) => {
+            return (
+                <Box sx={{ my: 1, mr: 1 }}>
+                    <Box>
+                        {
+                            params.row.containers !== null ?
+                            params.row.containers[0] ? 
+                            <>{calculateTotal(params.row.containers)+" "+t(params.row.currency)}</> : "N/A" : null
+                        }
+                    </Box>
+                </Box>
+            );
+        }, flex: 1.75 },
+        { field: 'textServices', headerName: 'Services', renderCell: (params: GridRenderCellParams) => {
+            return (
+                <Box sx={{ my: 1, mr: 1 }}>
+                    {
+                        params.row.containers !== null ? params.row.containers[0] ? <>{getServicesTotal(params.row.containers, t(params.row.currency), 0)}</> : "N/A" : null
+                    }
+                </Box>
+            );
+        }, flex: 4 },
+        // { field: 'textServices', headerName: t('costPrices'), flex: 2 },
+        { field: 'validUntil', headerName: t('validUntil'), renderCell: (params: GridRenderCellParams) => {
+            return (
+                <Box sx={{ my: 1, mr: 1 }}>
+                    <Chip label={(new Date(params.row.validUntil)).toLocaleDateString().slice(0,10)} color={(new Date()).getTime() - (new Date(params.row.validUntil)).getTime() > 0 ? "warning" : "success"}></Chip>
+                </Box>
+            );
+        }, flex: 1.25 },
+        { field: 'comment', headerName: "Comment", renderCell: (params: GridRenderCellParams) => {
+            return (
+                <Box sx={{ my: 2 }}>
+                    {params.row.comment}
+                </Box>
+            );
+        }, flex: 2.5 },
+    ];
+        
+    function formatObject(obj: any) {
+        const packageName = obj.container.packageName;
+        const totalPrice = obj.services.reduce((sum: number, service: any) => sum + service.price, 0);
+        return `${packageName} : ${totalPrice}`;
+    }
+
+    function formatServices(obj: any, currency: string, targetPackageName: string, qty: number) {
+        if (obj.container.packageName === targetPackageName) {
+            const servicesList = obj.services.map((service: any, index: number) => (
+                <React.Fragment key={"someservice"+index}>
+                    <span>- {service.serviceName} : {qty !== 0 ? qty+"x" : null}{service.price} {currency}</span>
+                    {index !== obj.services.length - 1 && <br />} {/* Add <br /> except for the last item */}
+                </React.Fragment>
+            ));
+            return servicesList;
+        } else {
+            return null; // Return null if the package name doesn't match
+        }
+    }
+    
+    const handleMarginChange = (index: number, value: any) => {
+        const updatedMargins: any = [...margins];
+        updatedMargins[index] = value;
+        setMargins(updatedMargins);
+    };
+    
+    const handleAddingChange = (index: number, value: any) => {
+        const updatedAddings: any = [...addings];
+        updatedAddings[index] = value;
+        setAddings(updatedAddings);
+    };
+    
+    useEffect(() => {
+        if (loadingCity !== null) {
+            getHaulagePriceOffers();
+        }
+    }, [loadingCity]);
+
+    useEffect(() => {
+        getTemplate(defaultTemplate);
+        getTemplates();
+    }, []);
+    
+    useEffect(() => {
+        getTemplate(selectedTemplate);
+    }, [selectedTemplate]);
+
+    useEffect(() => {
+        // Initialize margins with default value 22 and addings with default value 0
+        const initialMargins = containersSelection.map(() => 22); // Default margin 22
+        const initialAddings = containersSelection.map(() => 0); // Default adding 0
+        
+        setMargins(initialMargins);
+        setAddings(initialAddings);
+    }, [containersSelection]); // Assuming containersSelection is a prop or state
+    
+    useEffect(() => {
+        if (generalMiscs !== null && miscs !== null && miscsHaulage !== null) {
+            setTableMiscs([...miscsHaulage, ...miscs, ...generalMiscs]);
+            setRowSelectionModel3([...miscsHaulage, ...miscs].map((elm: any) => elm.miscellaneousId));
+        }
+    }, [generalMiscs, miscs, miscsHaulage]); // Assuming containersSelection is a prop or state
+    
+    // Stepper functions
+    const [activeStep, setActiveStep] = React.useState(0);
+    const [skipped, setSkipped] = React.useState(new Set<number>());
+
+    const isStepOptional = (step: number) => {
+        return step === 0;
+        // return false;
+    };
+
+    const isStepSkipped = (step: number) => {
+        return skipped.has(step);
+    };
+
+    const handleNext = () => {
+        let newSkipped = skipped;
+        if (isStepSkipped(activeStep)) {
+            newSkipped = new Set(newSkipped.values());
+            newSkipped.delete(activeStep);
+        }
+        if (activeStep === 0) {
+            if (selectedHaulage !== null) {
+                setPortDeparture(ports1.find((elm: any) => elm.portName === selectedHaulage.loadingPort));
+                
+                if (selectedSeafreight === null) {
+                    setLoadResults(true);
+                    getSeaFreightPriceOffers();
+                }
+                
+                setActiveStep((prevActiveStep) => prevActiveStep + 1);
+                setSkipped(newSkipped);
+            }
+            else {
+                enqueueSnackbar(t('youNeedSelectHaulage'), { variant: "warning", anchorOrigin: { horizontal: "right", vertical: "top"} });
+            }
+        }
+        if (activeStep === 1) {
+            // Check if seafreights have the same carrier
+            var seafreightSelected = seafreights.filter((elm: any) => rowSelectionModel.includes(elm.seaFreightId));
+            if (checkCarrierConsistency(seafreightSelected) || (!checkCarrierConsistency(seafreightSelected) && window.confirm("All the selected offers must be related to the same carrier, do you want to continue?"))) {
+                if (selectedSeafreight !== null) {
+                    if (selectedMisc === null) {
+                        setLoadResults(true);
+                        getMiscellaneousPriceOffers();
+                    }
+                    if (selectedHaulage !== null) {
+                        setLoadMiscsHaulage(true);
+                        getHaulageMiscellaneousPriceOffers();
+                    }
+                    setLoadGeneralMiscs(true);
+                    getGeneralMiscellaneousPriceOffers();
+                    
+                    setActiveStep((prevActiveStep) => prevActiveStep + 1);
+                    setSkipped(newSkipped);
+                }
+                else {
+                    enqueueSnackbar(t('youNeedSelectSeafreight'), { variant: "warning", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                }
+            }
+        }
+        if (activeStep === 2) {
+            setActiveStep((prevActiveStep) => prevActiveStep + 1);
+            setSkipped(newSkipped);
+        }
+        if (activeStep === 3) {
+            createNewOffer();
+        }
+    };
+
+    const handleBack = () => {
+        setActiveStep((prevActiveStep) => prevActiveStep - 1);
+    };
+
+    const handleSkip = () => {
+        if (!isStepOptional(activeStep)) {
+            throw new Error("You can't skip a step that isn't optional.");
+        }
+        if (activeStep === 0) {
+            setLoadResults(true);
+            getSeaFreightPriceOffers();
+        }
+
+        setActiveStep((prevActiveStep) => prevActiveStep + 1);
+        setSkipped((prevSkipped) => {
+            const newSkipped = new Set(prevSkipped.values());
+            newSkipped.add(activeStep);
+            return newSkipped;
+        });
+    };
+
+    const handleReset = () => {
+        setActiveStep(0);
+    };
+
+    function displayContainers(value: any) {
+        var aux = value.map((elm: any, index: number) => {
+            if (calculateSeafreightPrice(elm.container, elm.quantity, index) !== 0) {
+                return '<li>'+elm.quantity+"x"+elm.container+'</li>';
+            }
+            else {
+                return null;
+            }
+        }).join('');
+        return '<ul>'+aux+'</ul>';
+    }
+
+
+    function calculateContainerPrice(type: string, quantity: number, index: number) {
+        // Calculate seafreight prices
+        var seafreightPrices = 0;
+        var seafreightSelected = seafreights.filter((elm: any) => rowSelectionModel.includes(elm.seaFreightId)).find((elm: any) => elm.containers[0].container.packageName === type);
+        if (seafreightSelected !== null && seafreightSelected !== undefined) {
+            seafreightPrices = seafreightSelected.containers[0].services.reduce((sum: number, service: any) => sum + service.price, 0)*quantity;
+        }
+        
+        // Calculate haulage prices
+        var haulagePrices = 0;
+        if (selectedHaulage !== null && selectedHaulage.containerNames.includes(type)) {
+            haulagePrices = haulagePrices + selectedHaulage.unitTariff*quantity;
+        } 
+        
+        // Calculate miscellaneous prices
+        var miscPrices = 0;
+        var allMiscs = myMiscs;
+        var miscsSelected = allMiscs.filter((elm: any) => elm.defaultContainer === type);
+        if (miscsSelected !== null && miscsSelected !== undefined) {
+            for (var i = 0; i < miscsSelected.length; i++) {
+                miscPrices =  miscPrices + getTotalNumber(miscsSelected[i].containers)*quantity;
+            }
+        }
+        
+        var finalValue = ((seafreightPrices+haulagePrices+miscPrices)*(margins[index]/100)+seafreightPrices+haulagePrices+miscPrices).toFixed(2);
+        return Number(finalValue)+Number(addings[index]);
+    }
+
+    function calculateSeafreightPrice(type: string, quantity: number, index: number) {
+        // Calculate seafreight prices
+        var seafreightPrices = 0;
+        if (seafreights !== null) {
+            var seafreightSelected = seafreights.filter((elm: any) => rowSelectionModel.includes(elm.seaFreightId)).find((elm: any) => elm.containers[0].container.packageName === type);
+            if (seafreightSelected !== null && seafreightSelected !== undefined) {
+                seafreightPrices = seafreightSelected.containers[0].services.reduce((sum: number, service: any) => sum + service.price, 0)*quantity;
+            }
+        }
+        // Calculate haulage prices
+        var haulagePrices = 0;
+        // Calculate miscellaneous prices
+        var miscPrices = 0;
+        // I removed miscPrices temporarily
+        var finalValue = ((seafreightPrices+haulagePrices+miscPrices)*(margins[index]/100)+seafreightPrices+haulagePrices+miscPrices).toFixed(2);
+        return Number(finalValue)+Number(addings[index]);
+    }
+
+    const getHaulagePriceOffers = async () => {
+        if (context && account) {
+            const token = await instance.acquireTokenSilent({
+                scopes: pricingRequest.scopes,
+                account: account
+            })
+            .then((response: AuthenticationResult) => {
+                return response.accessToken;
+            })
+            .catch((err: any) => {
+                console.log(err);
+                return instance.acquireTokenPopup({
+                    ...pricingRequest,
+                    account: account
+                }).then((response: any) => {
+                    return response.accessToken;
+                });
+            });
+            setTempToken(token);
+            
+            setLoadResults(true);
+            var postalCode = loadingCity !== null ? loadingCity.postalCode !== undefined ? loadingCity.postalCode : "" : ""; 
+            var city = loadingCity !== null ? loadingCity.city.toUpperCase()+', '+loadingCity.country.toUpperCase() : "";
+            if (postalCode !== "") {
+                if (postalCode === null) {
+                    city = loadingCity.city.toUpperCase()+', '+loadingCity.country.toUpperCase();
+                }
+                else {
+                    city = loadingCity.city.toUpperCase()+', '+loadingCity.country.toUpperCase()+', '+postalCode;
+                }
+            }
+
+            // I removed the loadingDate
+            var containersFormatted = (containersSelection.map((elm: any) => elm.id)).join("&ContainerTypesId="); 
+            var urlSent = createGetRequestUrl(protectedResources.apiLisPricing.endPoint+"/Pricing/HaulagesOfferRequest?", formState.haulageType, city, containersFormatted);
+            const response = await (context as BackendService<any>).getWithToken(urlSent, token);
+            setLoadResults(false);
+            setHaulages(removeDuplicatesWithLatestUpdated(response));
+        }
+    }
+
+    const getSeaFreightPriceOffers = async () => {
+        if (context && account) {
+            const token = await instance.acquireTokenSilent({
+                scopes: pricingRequest.scopes,
+                account: account
+            })
+            .then((response: AuthenticationResult) => {
+                return response.accessToken;
+            })
+            .catch((err: any) => {
+                console.log(err);
+                return instance.acquireTokenPopup({
+                    ...pricingRequest,
+                    account: account
+                }).then((response: any) => {
+                    return response.accessToken;
+                });
+            });
+            setTempToken(token);
+            
+            setLoadResults(true);
+            var containersFormatted = (containersSelection.map((elm: any) => elm.id)).join("&ContainerTypesId=");
+            
+            var auxPortDeparture = portDeparture;
+            if (selectedHaulage !== null) {
+                auxPortDeparture = ports1.find((elm: any) => elm.portName === selectedHaulage.loadingPort);
+            }
+
+            var urlSent = createGetRequestUrl2(protectedResources.apiLisPricing.endPoint+"/Pricing/SeaFreightsOffersRequest?", auxPortDeparture.portId, portDestination.portId, containersFormatted);
+            const response = await (context as BackendService<any>).getWithToken(urlSent, token);
+            setLoadResults(false);
+            
+            var myContainers = containersSelection.map((elm: any) => elm.container);
+            setSeafreights(response.filter((elm: any) => myContainers.includes(elm.containers[0].container.packageName)).map((elm: any) => { return {...elm, defaultContainer: elm.containers[0].container.packageName}}));
+        }
+    }
+
+    const getMiscellaneousPriceOffers = async () => {
+        setLoadResults(true);
+        if (context && account) {
+            const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisPricing.endPoint+"/Miscellaneous/Miscellaneous?departurePortId="+portDeparture.portId+"&destinationPortId="+portDestination.portId+"&withShipment=true", tempToken);
+            setLoadResults(false);
+            
+            var myContainers = containersSelection.map((elm: any, index: any) => {
+                if (calculateSeafreightPrice(elm.container, elm.quantity, index) !== 0) {
+                    return elm.container;
+                }
+                return null;
+            });
+            
+            var suppliersRecentlySelected = mySeafreights.map((elm: any) => { return {carrierName: elm.carrierName, defaultContainer: elm.defaultContainer} });
+            setMiscs(response.length !== 0 ? 
+                response[0].suppliers.filter((elm: any) => myContainers.includes(elm.containers[0].container.packageName)).filter((elm: any) => new Date(elm.validUntil) > new Date()).filter((elm: any) => suppliersRecentlySelected.some((val: any) => val.carrierName === elm.supplierName && val.defaultContainer === elm.containers[0].container.packageName)).map((elm: any) => { return {...elm, defaultContainer: elm.containers[0].container.packageName}})
+            : []);
+        }
+    }
+
+    const getGeneralMiscellaneousPriceOffers = async () => {
+        setLoadGeneralMiscs(true);
+        if (context && account) {
+            var response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisPricing.endPoint+"/Miscellaneous/Miscellaneous?withShipment=false", tempToken);
+            setLoadGeneralMiscs(false);
+            
+            // console.log(response);
+            var suppliersRecentlySelected = mySeafreights.map((elm: any) => { return {carrierName: elm.carrierName, defaultContainer: elm.defaultContainer} });
+            
+            setGeneralMiscs(response.length !== 0 ? 
+                response
+                .filter((elm: any) => new Date(elm.validUntil) > new Date())
+                .filter((elm: any) => suppliersRecentlySelected.some((val: any) => val.defaultContainer === elm.containers[0].container.packageName || elm.containers[0].container.packageName === null))
+                .map((elm: any) => { return {
+                    ...elm, 
+                    textServices: elm.containers !== null ? elm.containers[0] ? getServicesTotal(elm.containers, t(elm.currency), 0) : "N/A" : null,
+                    costTotal: elm.containers !== null ? elm.containers[0] ? getTotalNumber(elm.containers) : "N/A" : null
+                }})
+            : []);
+        }
+    }
+
+    const getHaulageMiscellaneousPriceOffers = async () => {
+        setLoadMiscsHaulage(true)
+        if (context && account) {
+            var postalCode = loadingCity !== null ? loadingCity.postalCode !== undefined ? loadingCity.postalCode : "" : ""; 
+            var city = "";
+            if (postalCode !== "") {
+                if (postalCode === null) {
+                    city = loadingCity.city;
+                }
+                else {
+                    city = loadingCity.city+' '+postalCode;
+                }
+            }
+            
+            var myContainers = containersSelection.map((elm: any, index: any) => {
+                if (calculateSeafreightPrice(elm.container, elm.quantity, index) !== 0) {
+                    return elm.container;
+                }
+                return null;
+            });
+            
+            const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisPricing.endPoint+"/Miscellaneous/Miscellaneous?supplierId="+selectedHaulage.haulierId+"&departurePortId="+Number(hashCode(city))+"&destinationPortId="+selectedHaulage.loadingPortId+"&withShipment=true", tempToken);
+            setLoadMiscsHaulage(false);
+            
+            setMiscsHaulage(response.length !== 0 ? response[0].suppliers.filter((elm: any) => myContainers.includes(elm.containers[0].container.packageName)).filter((elm: any) => new Date(elm.validUntil) > new Date()) : []);
+        }
+    }
+
+    const createNewOffer = async () => {
+        if (selectedSeafreight !== null) {
+            if (context && account) {
+                setLoadNewOffer(true);
+                var haulage = null;
+                var miscellaneous = null;
+                if (selectedHaulage !== null) {
+                    haulage = {
+                        "id": selectedHaulage.id,
+                        "haulierId": 0,
+                        "haulierName": selectedHaulage.haulierName,
+                        "currency": selectedHaulage.currency,
+                        "loadingCityName": selectedHaulage.loadingPort,
+                        "freeTime": selectedHaulage.freeTime,
+                        "multiStop": selectedHaulage.multiStop,
+                        "overtimeTariff": selectedHaulage.overtimeTariff,
+                        "unitTariff": selectedHaulage.unitTariff,
+                        "haulageType": formState.haulageType,
+                        // "loadingPort": loadingCity.name,
+                        "loadingPort": loadingCity.city,
+                        "validUntil": selectedHaulage.validUntil,
+                        // "loadingPortId": loadingCity.id,
+                        "containerNames": [null]
+                    }
+                }
+                if (selectedMisc !== undefined && selectedMisc !== null) {
+                    miscellaneous = [
+                        {
+                            "id": selectedMisc.id,
+                            "departurePortId": null,
+                            "destinationPortId": null,
+                            "departurePortName": null,
+                            "destinationPortName": null,
+                            "supplierId": 0,
+                            "supplierName": selectedMisc.supplierName,
+                            "currency": selectedMisc.currency,
+                            "price20": selectedMisc.price20,
+                            "price40": selectedMisc.price40,
+                            "price20dry": selectedMisc.price20dry,
+                            "price20rf": selectedMisc.price20rf,
+                            "price40dry": selectedMisc.price40dry,
+                            "price40hc": selectedMisc.price40hc,
+                            "price40hcrf": selectedMisc.price40hcRf,
+                            "validUntil": selectedMisc.validUntil,
+                        }                      
+                    ]
+                }
+                var dataSent = {
+                    "requestQuoteId": Number(id),
+                    "comment": rteRef.current?.editor?.getHTML(),
+                    // "quoteOfferNumber": transformId(uuidv4()),
+                    "quoteOfferVm": 0,
+                    "quoteOfferId": 10,
+                    "quoteOfferNumber": generateRandomNumber(),
+                    "createdBy": account?.username,
+                    "emailUser": email,
+                    "haulage": haulage,
+                    "miscellaneousList": miscellaneous,
+                    "seaFreight": {
+                        "id": selectedSeafreight.seaFreightId,
+                        "departurePortId": portDeparture.portId,
+                        "destinationPortId": portDestination.portId,
+                        "departurePortName": selectedSeafreight.departurePortName,
+                        "destinationPortName": portDestination.portName,
+                        "carrierId": 0,
+                        "carrierName": selectedSeafreight.carrierName,
+                        "carrierAgentId": 0,
+                        "carrierAgentName": selectedSeafreight.carrierAgentName,
+                        "currency": selectedSeafreight.currency,
+                        "transitTime": selectedSeafreight.transitTime,
+                        "frequency": selectedSeafreight.frequency,
+                        "price20dry": selectedSeafreight.price20dry,
+                        "price20rf": selectedSeafreight.price20rf,
+                        "price40dry": selectedSeafreight.price40dry,
+                        "price40hc": selectedSeafreight.price40hc,
+                        "price40hcrf": selectedSeafreight.price40hcrf,
+                        "validUntil": selectedSeafreight.validUntil,
+                    },
+                    "containers": containersSelection.map((elm: any) => { return { "containerId": elm.id, quantity: elm.quantity } }),
+                    "departureDate": (new Date("01/01/2022")).toISOString(),
+                    "departurePortId": portDeparture.portId,
+                    "destinationPortId": portDestination.portId,
+                    "margin": 0,
+                    "reduction": 0,
+                    "extraFee": 0,
+                    "totalPrice": 0
+                };
+                const response = await (context as BackendService<any>).postReturnJson(protectedResources.apiLisOffer.endPoint+"/QuoteOffer", dataSent);
+                
+                if (response !== null) {
+                    enqueueSnackbar(t('offerSuccessSent'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                    setLoadNewOffer(false);
+                }
+                else {
+                    enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                    setLoadNewOffer(false);
+                }
+            }
+        }
+        else {
+            enqueueSnackbar(t('contentEmpty'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+        }
+    }
+
+    const getTemplates = async () => {
+        if (context && account) {
+            const response = await (context as BackendService<any>).getSingle(protectedResources.apiLisTemplate.endPoint+"/Template");
+            if (response !== null && response.data !== undefined) {
+                setTemplates(response.data);
+                setLoadTemplates(false);
+            }
+            else {
+                setLoadTemplates(false);
+            }
+        }
+    }
+    
+    // Work on the template
+    const getTemplate = async (id: string) => {
+        setLoadTemplate(true)
+        if (context && account) {
+            const response = await (context as BackendService<any>).getSingle(protectedResources.apiLisTemplate.endPoint+"/Template/"+id);
+            if (response !== null && response !== undefined) {
+                setTemplateBase(response.data);
+                setLoadTemplate(false);
+            }
+            else {
+                setLoadTemplate(false);
+            }
+        }
+    }
+    
+    // Fonction pour remplacer les variables dans le template
+    function generateEmailContent(template: string, variables: any) {
+        var textToRemove = selectedHaulage !== null ? "" : "Chargement de {{freeTime}} heures inclus pour chaque conteneur, ensuite de {{overtimeTariff}} EUR par heure indivisible.";
+        var textToRemove2 = selectedHaulage !== null ? "" : "Loading of {{freeTime}} hours included for each container, then {{overtimeTariff}} EUR per indivisible hour.";
+        return template.replace(textToRemove,"").replace(textToRemove2,"").replace(/\{\{(.*?)\}\}/g, (_, variableName: any) => {
+            const trimmedName = variableName.trim();
+            // Si la variable est non nulle/vide, l'encapsuler dans <strong>
+            if (variables[trimmedName]) {
+                return `<strong>${variables[trimmedName]}</strong>`;
+            } else {
+                return `{{${trimmedName}}}`; // Laisser le placeholder si la variable est nulle/vide
+            }
+        });
+    }
+
+    function getDefaultContent(template: any) {
+        var postalCode = departure !== null ? departure.postalCode !== undefined ? departure.postalCode : "" : ""; 
+        var loadingCity = departure !== null ? departure.city.toUpperCase()+', '+departure.country.toUpperCase() : "";
+        if (postalCode !== "") {
+            loadingCity = departure.city.toUpperCase()+', '+postalCode+', '+departure.country.toUpperCase();
+        }
+        
+        var destinationPort = portDestination !== null ? portDestination.portName+', '+portDestination.country.toUpperCase() : "";
+        var commodities:any = tags.map((elm: any) => elm.productName).join(',');
+        
+        // var auxServices = [...miscs,...myMiscs];
+        var auxServices = myMiscs;
+        var listServices = auxServices !== null && auxServices.length !== 0 ? 
+            auxServices.map((elm: any, index: number) => elm.defaultContainer !== null ? "<p>- "+getServices(elm.containers, elm.currency)+" inclus</p>" : "<p>- "+getServicesTotal(elm.containers, elm.currency, 50)+" supplémentaires</p>").join("")
+        : "<br>";
+        
+        var pricesContainers = containersSelection !== null && selectedSeafreight !== null ? 
+        containersSelection.map((elm: any, index: number) => 
+        {
+            var auxFrequency = 0;
+            var auxTransitTime = "";
+            var aux1 = seafreights.filter((val: any) => rowSelectionModel.includes(val.seaFreightId)).find((val: any) => val.defaultContainer === elm.container);
+            if (calculateSeafreightPrice(elm.container, elm.quantity, index) !== 0) {
+                if (aux1 !== undefined) {
+                    auxFrequency = aux1.frequency;
+                    auxTransitTime = aux1.transitTime;
+                }
+                return "<p><strong>"+calculateContainerPrice(elm.container, elm.quantity, index)+" "
+                +selectedSeafreight.currency+" / "+elm.container
+                +" / Tous les "+auxFrequency
+                +" jours / Délai de mer : "+auxTransitTime
+                +" jours</strong></p>"
+            }
+            else {
+                return null;
+            }
+        }).join("") : "";
+        var clientName = clientNumber !== null ? clientNumber.contactName : null;
+        var freeTime = selectedHaulage !== null ? selectedHaulage.freeTime : "";
+        var overtimeTariff = selectedHaulage !== null ? selectedHaulage.overtimeTariff : "";
+        var frequency = selectedSeafreight !== null ? selectedSeafreight.frequency : "";
+        var transitTime = selectedSeafreight !== null ? selectedSeafreight.transitTime : "";
+        var containersQuantities = displayContainers(containersSelection);
+
+        const variables = { loadingCity, destinationPort, commodities, clientName, freeTime, overtimeTariff, frequency, transitTime, containersQuantities, listServices, pricesContainers };
+        return generateEmailContent(template, variables);
+    }
+
+    useEffect(() => {
+        var postalCode = departure !== null ? departure.postalCode !== undefined ? departure.postalCode : "" : ""; 
+        var loadingCity = departure !== null ? departure.city.toUpperCase()+', '+departure.country.toUpperCase() : "";
+        if (postalCode !== "") {
+            loadingCity = departure.city.toUpperCase()+', '+postalCode+', '+departure.country.toUpperCase();
+        }
+        
+        var destinationPort = portDestination !== null ? portDestination.portName+', '+portDestination.country.toUpperCase() : "";
+        var commodities:any = tags.map((elm: any) => elm.productName).join(',');
+        
+        // var auxServices = [...miscs,...myMiscs];
+        var auxServices = myMiscs;
+        // console.log(auxServices);
+        var listServices = auxServices !== null && auxServices.length !== 0 ? 
+            auxServices.map((elm: any) => elm.defaultContainer !== null ? "<p>- "+getServices(elm.containers, elm.currency)+" inclus</p>" : "<p>- "+getServicesTotal(elm.containers, elm.currency, 50)+" supplémentaires</p>").join("")
+        : "<br>";
+        
+        var pricesContainers = containersSelection !== null && selectedSeafreight !== null ? 
+        containersSelection.map((elm: any, index: number) => 
+        {
+            var auxFrequency = 0;
+            var auxTransitTime = "";
+            var aux1 = seafreights.filter((val: any) => rowSelectionModel.includes(val.seaFreightId)).find((val: any) => val.defaultContainer === elm.container);
+            if (calculateSeafreightPrice(elm.container, elm.quantity, index) !== 0) {
+                if (aux1 !== undefined) {
+                    auxFrequency = aux1.frequency;
+                    auxTransitTime = aux1.transitTime;
+                }
+                return "<p><strong>"+calculateContainerPrice(elm.container, elm.quantity, index)+" "
+                +selectedSeafreight.currency+" / "+elm.container
+                +" / Tous les "+auxFrequency
+                +" jours / Délai de mer : "+auxTransitTime
+                +" jours</strong></p>"
+            }
+            else {
+                return null;
+            }
+        }).join("") : "";
+        var clientName = clientNumber !== null ? clientNumber.contactName : null;
+        var freeTime = selectedHaulage !== null ? selectedHaulage.freeTime : "";
+        var overtimeTariff = selectedHaulage !== null ? selectedHaulage.overtimeTariff : "";
+        var frequency = selectedSeafreight !== null ? selectedSeafreight.frequency : "";
+        var transitTime = selectedSeafreight !== null ? selectedSeafreight.transitTime : "";
+        var containersQuantities = displayContainers(containersSelection);
+
+        const variables = { loadingCity, destinationPort, commodities, clientName, freeTime, overtimeTariff, frequency, transitTime, containersQuantities, listServices, pricesContainers };
+        rteRef.current?.editor?.commands.setContent(generateEmailContent(mailLanguage !== "en" ? templateBase.content : templateBase.contentEn, variables));
+    }, [tags, departure, clientNumber, portDestination, selectedSeafreight, selectedHaulage, selectedMisc, containersSelection, margins, addings]);
+
+
+
+    
+    return (
+        <Grid item xs={12}>
+            <Accordion sx={{ backgroundColor: "#fbfbfb" }}>
+                <AccordionSummary
+                    expandIcon={<ExpandMore />}
+                    aria-controls="panel1a-content"
+                    id="panel1a-header"
+                >
+                    <Typography variant="h6" sx={{ mx: 0 }}><b>{t('generatePriceOffer')}</b></Typography>
+                </AccordionSummary>
+                <AccordionDetails>
+                    <Box sx={{ px: 0 }}>
+                        <Stepper activeStep={activeStep} sx={{ px: 1 }}>
+                            {steps.map((label, index) => {
+                                const stepProps: { completed?: boolean } = {};
+                                const labelProps: {
+                                    optional?: React.ReactNode;
+                                } = {};
+                                if (isStepOptional(index)) {
+                                    labelProps.optional = (<Typography variant="caption">{t('optional')}</Typography>);
+                                }
+                                if (isStepSkipped(index)) {
+                                    stepProps.completed = false;
+                                }
+                                return (
+                                    <Step key={label} {...stepProps}>
+                                        <StepLabel {...labelProps}>{label}</StepLabel>
+                                    </Step>
+                                );
+                            })}
+                        </Stepper>
+                        {activeStep === steps.length ? (
+                            <React.Fragment>
+                                <Typography sx={{ mt: 2, mb: 1 }}>
+                                    All steps completed - you&apos;re finished
+                                </Typography>
+                                <Box sx={{ display: 'flex', flexDirection: 'row', pt: 2 }}>
+                                    <Box sx={{ flex: '1 1 auto' }} />
+                                    <Button onClick={handleReset}>Reset</Button>
+                                </Box>
+                            </React.Fragment>
+                        ) : (
+                            <React.Fragment>
+                                {
+                                    activeStep === 0 ?
+                                    <Grid container spacing={2} mt={1} px={2}>
+                                        <Grid item xs={12} md={6} mt={1}>
+                                            <InputLabel htmlFor="loading-city" sx={inputLabelStyles}>{t('departure')} / {t('loadingCity')}</InputLabel>
+                                            <AutocompleteSearch id="loading-city" value={loadingCity} onChange={setLoadingCity} fullWidth callBack={() => { setDeparture(loadingCity); }} />
+                                        </Grid>
+                                        <Grid item xs={12} md={6} mt={1}>
+                                            <InputLabel htmlFor="haulage-type" sx={inputLabelStyles}>{t('haulageType')}</InputLabel>
+                                            <NativeSelect
+                                                id="haulage-type"
+                                                value={formState.haulageType}
+                                                onChange={(e: any) => { handleChangeFormState(e.target.value, "haulageType"); }}
+                                                input={<BootstrapInput />}
+                                                fullWidth
+                                            >
+                                                <option key={"kdq-"} value="">{t('anyType')}</option>
+                                                {
+                                                    haulageTypeOptions.map((item: any, i: number) => (
+                                                        <option key={"kdq"+i} value={item.value}>{item.label}</option>
+                                                    ))
+                                                }
+                                            </NativeSelect>
+                                        </Grid>
+                                        <Grid item xs={12}>
+                                            <Box sx={{ overflow: "auto" }}>
+                                                <Grid container>
+                                                    <Grid item xs={8}>
+                                                        <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>
+                                                            {t('listHaulagesPricingOffers')+t('fromDotted')+loadingCity.city} (select one)
+                                                        </Typography>
+                                                    </Grid>
+                                                    <Grid item xs={4}>
+                                                        <Button 
+                                                            variant="contained" 
+                                                            color="inherit" 
+                                                            sx={{ 
+                                                                textTransform: "none", backgroundColor: "#fff", 
+                                                                color: "#333", float: "right", marginTop: "8px", marginLeft: "10px" 
+                                                            }} 
+                                                            onClick={getHaulagePriceOffers}
+                                                        >
+                                                            {t('reload')} <RestartAlt fontSize='small' />
+                                                        </Button>
+                                                        <Button 
+                                                            variant="contained" 
+                                                            color="inherit" 
+                                                            sx={{ 
+                                                                textTransform: "none", backgroundColor: "#fff", 
+                                                                color: "#333", float: "right", marginTop: "8px" 
+                                                            }}
+                                                            onClick={() => setModal5(true)}
+                                                        >
+                                                            {t('requestHaulagePrice')}
+                                                        </Button>
+                                                    </Grid>
+                                                </Grid>
+                                                
+                                                {
+                                                    !loadResults ? 
+                                                    haulages !== null && haulages.length !== 0 ?
+                                                    <DataGrid
+                                                        rows={haulages}
+                                                        columns={columnsHaulages}
+                                                        // hideFooter
+                                                        initialState={{
+                                                            pagination: {
+                                                                paginationModel: {
+                                                                    pageSize: 7,
+                                                                },
+                                                            },
+                                                        }}
+                                                        pageSizeOptions={[5, 10]}
+                                                        getRowId={(row: any) => row?.id}
+                                                        getRowHeight={() => "auto" }
+                                                        sx={gridStyles}
+                                                        onRowSelectionModelChange={(newRowSelectionModel: any) => {
+                                                            setRowSelectionModel2(newRowSelectionModel);
+                                                            setSelectedHaulage(newRowSelectionModel.length !== 0 ? haulages.find((elm: any) => elm.id === newRowSelectionModel[0]) : null);
+                                                        }}
+                                                        rowSelectionModel={rowSelectionModel2}
+                                                        // onRowClick={handleRowHaulagesClick}
+                                                    /> :
+                                                    <Box>
+                                                        <Alert severity="error">{t('noResults')}</Alert>
+                                                    </Box> 
+                                                    : <Skeleton />
+                                                }
+                                            </Box>
+                                        </Grid>
+                                    </Grid> : null
+                                }
+                                {
+                                    activeStep === 1 ? 
+                                    <Grid container spacing={2} mt={1} px={2}>
+                                        <Grid item xs={12} md={6} mt={1}>
+                                            <InputLabel htmlFor="port-departure" sx={inputLabelStyles}><Anchor fontSize="small" sx={inputIconStyles} /> {t('departurePort')}</InputLabel>
+                                            {
+                                                ports !== null ?
+                                                <Autocomplete
+                                                    disablePortal
+                                                    id="port-departure"
+                                                    options={ports1}
+                                                    renderOption={(props, option, i) => {
+                                                        return (
+                                                            <li {...props} key={option.portId}>
+                                                                {option.portName+", "+option.country}
+                                                            </li>
+                                                        );
+                                                    }}
+                                                    getOptionLabel={(option: any) => { 
+                                                        if (option !== null && option !== undefined) {
+                                                            return option.portName+', '+option.country;
+                                                        }
+                                                        return ""; 
+                                                    }}
+                                                    value={portDeparture}
+                                                    // disabled={true}
+                                                    sx={{ mt: 1 }}
+                                                    renderInput={(params: any) => <TextField {...params} />}
+                                                    onChange={(e: any, value: any) => { setPortDeparture(value); }}
+                                                    fullWidth
+                                                /> : <Skeleton />
+                                            }
+                                        </Grid>
+                                        <Grid item xs={12} md={6} mt={1}>
+                                            <InputLabel htmlFor="destination-port" sx={inputLabelStyles}><Anchor fontSize="small" sx={inputIconStyles} /> {t('arrivalPort')}</InputLabel>
+                                            {
+                                                ports !== null ?
+                                                <Autocomplete
+                                                    disablePortal
+                                                    id="destination-port"
+                                                    options={ports2}
+                                                    renderOption={(props, option, i) => {
+                                                        return (
+                                                            <li {...props} key={option.portId}>
+                                                                {option.portName+", "+option.country}
+                                                            </li>
+                                                        );
+                                                    }}
+                                                    getOptionLabel={(option: any) => { 
+                                                        if (option !== null && option !== undefined) {
+                                                            return option.portName+', '+option.country;
+                                                        }
+                                                        return ""; 
+                                                    }}
+                                                    value={portDestination}
+                                                    sx={{ mt: 1 }}
+                                                    renderInput={(params: any) => <TextField {...params} />}
+                                                    onChange={(e: any, value: any) => { setPortDestination(value); }}
+                                                    fullWidth
+                                                /> : <Skeleton />
+                                            }
+                                        </Grid>
+                                        <Grid container>
+                                            <Grid item xs={8}>
+                                                <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>
+                                                    {t('listSeaFreightsPricingOffers')+t('fromDotted')+portDeparture.portName+"-"+portDestination.portName}
+                                                </Typography>
+                                            </Grid>
+                                            <Grid item xs={4}>
+                                                <Button 
+                                                    variant="contained" 
+                                                    color="inherit" 
+                                                    sx={{ 
+                                                        textTransform: "none", backgroundColor: "#fff", 
+                                                        color: "#333", float: "right", marginTop: "8px", marginLeft: "10px"
+                                                    }} 
+                                                    onClick={getSeaFreightPriceOffers}
+                                                >
+                                                    {t('reload')} <RestartAlt fontSize='small' />
+                                                </Button>
+                                                <Button 
+                                                    variant="contained" 
+                                                    color="inherit" 
+                                                    sx={{ 
+                                                        textTransform: "none", backgroundColor: "#fff", 
+                                                        color: "#333", float: "right", marginTop: "8px"
+                                                    }}
+                                                    onClick={() => setModal6(true)}
+                                                >
+                                                    {t('requestSeafreightPrice')}
+                                                </Button>
+                                            </Grid>
+                                        </Grid>
+                                        
+                                        <Grid item xs={12}>
+                                            <Alert severity="info" sx={{ mb: 2 }}>{t('selectOfferMessage')}</Alert>
+                                            {
+                                                !loadResults ? 
+                                                seafreights !== null && seafreights.length !== 0 ?
+                                                <Box sx={{ overflow: "auto" }}>
+                                                    <DataGrid
+                                                        rows={seafreights}
+                                                        columns={columnsSeafreights}
+                                                        // hideFooter
+                                                        initialState={{
+                                                            pagination: {
+                                                                paginationModel: {
+                                                                    pageSize: 7,
+                                                                },
+                                                            },
+                                                        }}
+                                                        pageSizeOptions={[5, 10]}
+                                                        getRowId={(row: any) => row?.seaFreightId}
+                                                        getRowHeight={() => "auto" }
+                                                        style={sizingStyles}
+                                                        sx={gridStyles}
+                                                        disableDensitySelector
+                                                        disableColumnSelector
+                                                        slots={{ toolbar: GridToolbar }}
+                                                        slotProps={{
+                                                            toolbar: {
+                                                                showQuickFilter: true,
+                                                            },
+                                                        }}
+                                                        onRowSelectionModelChange={(newRowSelectionModel: any) => {
+                                                            if (newRowSelectionModel.length <= containersSelection.length) {
+                                                                var myFreights = newRowSelectionModel.length !== 0 ? seafreights.filter((elm: any) => newRowSelectionModel.includes(elm.seaFreightId)) : [];
+                                                                if (checkDifferentDefaultContainer(myFreights)) {
+                                                                    setRowSelectionModel(newRowSelectionModel);
+                                                                    setSelectedSeafreight(newRowSelectionModel.length !== 0 ? seafreights.find((elm: any) => elm.seaFreightId === newRowSelectionModel[0]) : null);
+                                                                    setMySeafreights(myFreights);
+                                                                    // setSelectedSeafreight(newRowSelectionModel.length !== 0 ? seafreights.filter((elm: any) => newRowSelectionModel.includes(elm.seaFreightId)) : null);
+                                                                }
+                                                                else {
+                                                                    enqueueSnackbar("You can only select offers with different container types!", { variant: "warning", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                                                                }
+                                                            }
+                                                            else {
+                                                                enqueueSnackbar("You can only select "+containersSelection.length+" offers!", { variant: "warning", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                                                            }
+                                                        }}
+                                                        rowSelectionModel={rowSelectionModel}
+                                                        checkboxSelection
+                                                        // onRowClick={handleRowSeafreightsClick}
+                                                    />
+                                                </Box> : 
+                                                <Box>
+                                                    <Alert severity="error">{t('noResults')}</Alert>
+                                                </Box>
+                                                : <Skeleton />
+                                            }
+                                        </Grid>
+                                    </Grid>
+                                    : null
+                                }
+                                {
+                                    activeStep === 2 ? 
+                                    <Grid container spacing={2} mt={1} px={2}>
+                                        <Grid item xs={12}>
+                                            <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>{t('listMiscPricingOffers')+t('fromDotted')+portDeparture.portName+"-"+portDestination.portName}</Typography>
+                                            <Grid container spacing={2}>
+                                                <Grid item xs={8}>
+                                                    <Typography variant="h6" sx={{ mt: 2, fontSize: 17, fontWeight: "bold" }}>
+                                                        General miscs (select any)
+                                                    </Typography>    
+                                                </Grid>
+                                                <Grid item xs={4}>
+                                                    <Button 
+                                                        variant="contained" 
+                                                        color="inherit" 
+                                                        sx={{ 
+                                                            textTransform: "none", backgroundColor: "#fff", 
+                                                            color: "#333", float: "right", marginTop: "8px" 
+                                                        }}
+                                                        onClick={() => setModal9(true)}
+                                                    >
+                                                        Create a misc
+                                                    </Button>
+                                                </Grid>
+                                                <Grid item xs={12}>
+                                                    {
+                                                        !loadGeneralMiscs && !loadResults && !loadMiscsHaulage ? 
+                                                        tableMiscs !== null && tableMiscs.length !== 0 ?
+                                                            <Box sx={{ overflow: "auto" }}>
+                                                                <DataGrid
+                                                                    rows={tableMiscs}
+                                                                    columns={columnsMiscs}
+                                                                    // hideFooter
+                                                                    initialState={{
+                                                                        pagination: {
+                                                                            paginationModel: {
+                                                                                pageSize: 7,
+                                                                            },
+                                                                        },
+                                                                    }}
+                                                                    pageSizeOptions={[5, 10]}
+                                                                    getRowId={(row: any) => row?.miscellaneousId}
+                                                                    getRowHeight={() => "auto" }
+                                                                    style={sizingStyles}
+                                                                    sx={gridStyles}
+                                                                    disableDensitySelector
+                                                                    disableColumnSelector
+                                                                    slots={{ toolbar: GridToolbar }}
+                                                                    slotProps={{
+                                                                        toolbar: {
+                                                                            showQuickFilter: true,
+                                                                        },
+                                                                    }}
+                                                                    onRowSelectionModelChange={(newRowSelectionModel: any) => {
+                                                                        setRowSelectionModel3(newRowSelectionModel);
+                                                                        setMyMiscs(newRowSelectionModel.length !== 0 ? 
+                                                                            tableMiscs
+                                                                            .filter((elm: any) => newRowSelectionModel.includes(elm.miscellaneousId))
+                                                                            .map((elm: any) => { return {...elm, defaultContainer: elm.containers[0].container.packageName}}) : 
+                                                                        []);
+                                                                        setSelectedMisc(newRowSelectionModel.length !== 0 ? generalMiscs.find((elm: any) => elm.id === newRowSelectionModel[0]) : null);
+                                                                    }}
+                                                                    rowSelectionModel={rowSelectionModel3}
+                                                                    checkboxSelection
+                                                                    // onRowClick={handleRowMiscsClick}
+                                                                />
+                                                            </Box> : <Alert severity="error">{t('noResults')}</Alert>
+                                                        : <Skeleton />
+                                                    }
+                                                </Grid>
+                                            </Grid>
+                                        </Grid>
+                                    </Grid>
+                                    : null
+                                }
+                                {
+                                    activeStep === 3 ?
+                                    <Grid container spacing={2} mt={1} px={2}>
+                                        {
+                                            selectedHaulage !== null ? 
+                                            <Grid item xs={12}>
+                                                <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>{t('selectedHaulage')}</Typography>
+                                                <Box sx={{ overflow: "auto" }}>
+                                                    <DataGrid
+                                                        rows={[selectedHaulage]}
+                                                        columns={columnsHaulages}
+                                                        // hideFooter
+                                                        initialState={{
+                                                            pagination: {
+                                                                paginationModel: {
+                                                                    pageSize: 7,
+                                                                },
+                                                            },
+                                                        }}
+                                                        pageSizeOptions={[5, 10]}
+                                                        getRowId={(row: any) => row?.id}
+                                                        getRowHeight={() => "auto" }
+                                                        sx={sizeStyles}
+                                                        disableRowSelectionOnClick
+                                                    />
+                                                </Box>
+                                            </Grid> : null
+                                        }
+                                        <Grid item xs={12}>
+                                            <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>{t('selectedSeafreight')}</Typography>
+                                            <Box sx={{ overflow: "auto" }}>
+                                                <DataGrid
+                                                    rows={seafreights.filter((elm: any) => rowSelectionModel.includes(elm.seaFreightId))}
+                                                    columns={columnsSeafreights}
+                                                    // hideFooter
+                                                    initialState={{
+                                                        pagination: {
+                                                            paginationModel: {
+                                                                pageSize: 7,
+                                                            },
+                                                        },
+                                                    }}
+                                                    pageSizeOptions={[5, 10]}
+                                                    getRowId={(row: any) => row?.seaFreightId}
+                                                    getRowHeight={() => "auto" }
+                                                    sx={sizeStyles}
+                                                    disableRowSelectionOnClick
+                                                />
+                                            </Box>
+                                        </Grid>
+                                        {
+                                            myMiscs !== null && myMiscs.length !== 0 ? 
+                                            <Grid item xs={12}>
+                                                <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>Selected miscellaneous</Typography>
+                                                <Box sx={{ overflow: "auto" }}>
+                                                    <DataGrid
+                                                        rows={myMiscs}
+                                                        columns={columnsMiscs}
+                                                        // hideFooter
+                                                        initialState={{
+                                                            pagination: {
+                                                                paginationModel: {
+                                                                    pageSize: 7,
+                                                                },
+                                                            },
+                                                        }}
+                                                        pageSizeOptions={[5, 10]}
+                                                        getRowId={(row: any) => row?.miscellaneousId}
+                                                        getRowHeight={() => "auto" }
+                                                        sx={sizeStyles}
+                                                        disableRowSelectionOnClick
+                                                    />
+                                                </Box>
+                                            </Grid> : null
+                                        }
+                                        <Grid item xs={8}>
+                                            <InputLabel htmlFor="selectedTemplate" sx={inputLabelStyles}>{t('selectedTemplate')}</InputLabel>
+                                            {
+                                                loadTemplates !== true ?
+                                                <NativeSelect
+                                                    id="selectedTemplate"
+                                                    value={selectedTemplate}
+                                                    onChange={(e: any) => { setSelectedTemplate(e.target.value); }}
+                                                    input={<BootstrapInput />}
+                                                    fullWidth
+                                                >
+                                                    {templates.map((elm: any, i: number) => (
+                                                        <option key={"templateElm-"+i} value={elm.id}>{elm.name}</option>
+                                                    ))}
+                                                </NativeSelect>
+                                                : <Skeleton />
+                                            }
+                                        </Grid>
+                                        <Grid item xs={4}>
+                                            <InputLabel htmlFor="mailLanguage" sx={inputLabelStyles}>{t('mailLanguage')}</InputLabel>
+                                            <ToggleButtonGroup
+                                                color="primary"
+                                                value={mailLanguage}
+                                                exclusive
+                                                // size="small"
+                                                onChange={(event: React.MouseEvent<HTMLElement>, newValue: string,) => { 
+                                                    setMailLanguage(newValue); 
+                                                }}
+                                                aria-label="Platform"
+                                                fullWidth
+                                                sx={{ mt: 1, maxHeight: "44px" }}
+                                            >
+                                                <ToggleButton value="fr"><img src="/assets/img/flags/flag-fr.png" style={{ width: "12px", marginRight: "6px" }} alt="flag english" /> Français</ToggleButton>
+                                                <ToggleButton disabled value="en"><img src="/assets/img/flags/flag-en.png" style={{ width: "12px", marginRight: "6px" }} alt="flag english" /> English</ToggleButton>
+                                            </ToggleButtonGroup>
+                                        </Grid>
+                                        <Grid item xs={12}>
+                                            <Box sx={{ border: "1px solid #e5e5e5", backgroundColor: "#fff", p: 2 }}>
+                                                {
+                                                    containersSelection !== null && rowSelectionModel.length !== 0 ?
+                                                    seafreights.filter((elm: any) => rowSelectionModel.includes(elm.seaFreightId))
+                                                    .map((element: any, index: number) => {
+                                                        var containerElm = containersSelection.find((val: any) => val.container === element.containers[0].container.packageName);
+                                                        var allMiscs = myMiscs;
+                                                        console.log(allMiscs);
+                                                        var miscsSelected = [];
+                                                        if (containerElm !== undefined && containerElm !== null) {
+                                                            miscsSelected = allMiscs.filter((elm: any) => elm.defaultContainer === containerElm.container);
+                                                        }
+                                                        
+                                                        return (
+                                                            <React.Fragment key={"containerRow-"+index}>
+                                                                <ContainerElement
+                                                                    key={"containerElm-"+index} 
+                                                                    elm={containerElm}
+                                                                    index={index}
+                                                                    adding={addings[index]}
+                                                                    margin={margins[index]}
+                                                                    handleAddingChange={handleAddingChange}
+                                                                    handleMarginChange={handleMarginChange}
+                                                                    purchasePrice={Number(((calculateContainerPrice(containerElm.container, containerElm.quantity, index)-addings[index])/(1+margins[index]/100)).toFixed(2))+" "+t(element.currency)}
+                                                                    profit={Number((calculateContainerPrice(containerElm.container, containerElm.quantity, index) - ((calculateContainerPrice(containerElm.container, containerElm.quantity, index)-addings[index])/(1+margins[index]/100))).toFixed(2))+" "+t(element.currency)}
+                                                                    salePrice={calculateContainerPrice(containerElm.container, containerElm.quantity, index)+" "+t(element.currency)}
+                                                                    haulagePrice={selectedHaulage !== null && selectedHaulage.containerNames.includes(containerElm.container) ? containerElm.quantity+"x"+selectedHaulage.unitTariff+" "+t(element.currency) : "N/A"}
+                                                                    seafreightPrice={formatServices(element.containers[0], t(element.currency), containerElm.container, containerElm.quantity) || "N/A"}
+                                                                    miscellaneousPrice={miscsSelected.length !== 0 ? miscsSelected.map((value: any, id: number) => {
+                                                                        return <span key={"sMiscs-"+id}>
+                                                                            <span>- {getServicesTotal2(value.containers, t(element.currency), containerElm.quantity)}</span>
+                                                                            {id !== miscsSelected.length - 1 && <br />}
+                                                                        </span>
+                                                                    }) : "N/A"}
+                                                                />
+                                                            </React.Fragment>
+                                                        );
+                                                    }) : null
+                                                }
+                                            </Box>
+                                        </Grid>
+                                        <Grid item xs={12}>
+                                            <InputLabel htmlFor="details" sx={inputLabelStyles}>{t('detailsOffer')}</InputLabel>
+                                            {
+                                                selectedSeafreight !== null ? 
+                                                <Box sx={{ mt: 2 }}>
+                                                    {
+                                                        loadTemplate !== true ?
+                                                        <RichTextEditor
+                                                            ref={rteRef}
+                                                            extensions={[StarterKit]}
+                                                            content={getDefaultContent(mailLanguage !== "en" ? templateBase.content : templateBase.contentEn)}
+                                                            renderControls={() => (
+                                                            <MenuControlsContainer>
+                                                                <MenuSelectHeading />
+                                                                <MenuDivider />
+                                                                <MenuButtonBold />
+                                                                <MenuButtonItalic />
+                                                                <MenuButtonStrikethrough />
+                                                                <MenuButtonOrderedList />
+                                                                <MenuButtonBulletedList />
+                                                                <MenuSelectTextAlign />
+                                                                <MenuButtonEditLink />
+                                                                <MenuButtonHorizontalRule />
+                                                                <MenuButtonUndo />
+                                                                <MenuButtonRedo />
+                                                            </MenuControlsContainer>
+                                                            )}
+                                                        />
+                                                        : <Skeleton />
+                                                    }
+                                                </Box>   
+                                                : null
+                                            }
+                                        </Grid>
+                                    </Grid>
+                                    : null
+                                }
+
+                                <Box sx={{ display: 'flex', flexDirection: 'row', pt: 2, px: 2 }}>
+                                    <Button
+                                        variant="contained" 
+                                        color="inherit" 
+                                        sx={whiteButtonStyles}
+                                        disabled={activeStep === 0}
+                                        onClick={handleBack}
+                                    >
+                                        {t('back')}
+                                    </Button>
+                                    <Box sx={{ flex: '1 1 auto' }} />
+                                    {isStepOptional(activeStep) && (
+                                    <Button variant="contained" color="inherit" sx={whiteButtonStyles} onClick={handleSkip} style={{ marginRight: "10px" }}>
+                                        {t('skip')}
+                                    </Button>
+                                    )}
+                                    <Button variant="contained" color="inherit" sx={whiteButtonStyles} onClick={handleNext} disabled={activeStep === steps.length - 1 ? loadNewOffer : false}>
+                                        {activeStep === steps.length - 1 ? t('sendOfferValidation') : t('nextStep')}
+                                    </Button>
+                                </Box>
+                            </React.Fragment>
+                        )}
+                    </Box>
+                </AccordionDetails>
+            </Accordion>
+
+            {/* Price request haulage (modal5) */}
+            <BootstrapDialog
+                onClose={() => setModal5(false)}
+                aria-labelledby="custom-dialog-title5"
+                open={modal5}
+                maxWidth="lg"
+                fullWidth
+            >
+                <RequestPriceHaulage
+                    token={tempToken} 
+                    // companies={clients}
+                    ports={ports}
+                    loadingCity={loadingCity}
+                    loadingPort={portDeparture}
+                    closeModal={() => setModal5(false)}
+                />
+            </BootstrapDialog>
+
+            {/* Price request seafreight FCL (modal6) */}
+            <BootstrapDialog
+                onClose={() => setModal6(false)}
+                aria-labelledby="custom-dialog-title6"
+                open={modal6}
+                maxWidth="lg"
+                fullWidth
+            >
+                <RequestPriceRequest 
+                    token={tempToken} 
+                    products={products} 
+                    commodities={tags}
+                    // companies={clients}
+                    ports={ports}
+                    portLoading={portDeparture}
+                    portDischarge={portDestination} 
+                    containers={containers} 
+                    containersSelection={containersSelection}
+                    closeModal={() => setModal6(false)} 
+                />
+            </BootstrapDialog>
+
+            {/* Create new misc (modal9) */}
+            <BootstrapDialog
+                onClose={() => setModal9(false)}
+                aria-labelledby="custom-dialog-title9"
+                open={modal9}
+                maxWidth="lg"
+                fullWidth
+            >
+                <BootstrapDialogTitle id="custom-dialog-title" onClose={() => setModal9(false)}>
+                    <b>{t('createRowMisc')}</b>
+                </BootstrapDialogTitle>
+                <NewMiscellaneous closeModal={() => setModal9(false)} updateMiscs={getGeneralMiscellaneousPriceOffers} />
+            </BootstrapDialog>
+        </Grid>
+    );
+}
+
+export default GeneratePriceOffer;

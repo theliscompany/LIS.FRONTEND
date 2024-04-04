@@ -15,6 +15,7 @@ import { useTranslation } from 'react-i18next';
 import ClientSearch from '../components/shared/ClientSearch';
 import NewContact from '../components/editRequestPage/NewContact';
 import { containerPackages } from '../utils/constants';
+import useProcessStatePersistence from '../utils/processes/useProcessStatePersistence';
 
 //let statusTypes = ["EnAttente", "Valider", "Rejeter"];
 // let cargoTypes = ["Container", "Conventional", "RollOnRollOff"];
@@ -64,21 +65,31 @@ function NewRequest(props: any) {
     const [products, setProducts] = useState<any>(null);
     
     const [modal7, setModal7] = useState<boolean>(false);
-    
+
     const { instance, accounts } = useMsal();
     const account = useAccount(accounts[0] || {});
     
     const context = useAuthorizedBackendApi();
 
-    const { t } = useTranslation();
+    const [formState, setFormState] = useProcessStatePersistence(
+        account?.name,
+        'newRequestTest',
+        { 
+            message: "", tags: [], phone: "", 
+            email: "", departure: null, arrival: null, 
+            packingType: "FCL", clientNumber: null,
+            containerType: "20' Dry", quantity: 1, 
+            containersSelection: [], assignedManager: "null"
+        },
+        null, // Optionnel, par défaut à null (pas d'expiration)
+        true // Optionnel, par défaut à true (sauvegarde automatique activée)
+    );
     
-    const handleChangePackingType = (event: { target: { value: string } }) => {
-        setPackingType(event.target.value);
+    const handleChangeFormState = (value: any, name: string) => {
+        setFormState({ ...formState, [name]: value });
     };
-
-    const handleChangeAssignedManager = (event: { target: { value: string } }) => {
-        setAssignedManager(event.target.value);
-    };
+    
+    const { t } = useTranslation();
     
     const getProducts = async () => {
         if (context && account) {
@@ -135,18 +146,26 @@ function NewRequest(props: any) {
     }
 
     const resetForm = () => {
-        setEmail("");
-        setPhone("");
-        setMessage("");
-        setPackingType("FCL");
-        setClientNumber(null);
-        setDeparture(null);
-        setArrival(null);
-        setTags([]);
-        setAssignedManager("null");
-        setContainerType("20' Dry");
-        setQuantity(1);
-        setContainersSelection([]);
+        setFormState({ 
+            ...formState, 
+            message: "", tags: [], phone: "", 
+            email: "", departure: null, arrival: null, 
+            packingType: "FCL", clientNumber: null,
+            containerType: "20' Dry", quantity: 1, 
+            containersSelection: []
+        });
+        // setEmail("");
+        // setPhone("");
+        // setMessage("");
+        // setPackingType("FCL");
+        // setClientNumber(null);
+        // setDeparture(null);
+        // setArrival(null);
+        // setTags([]);
+        // setAssignedManager("null");
+        // setContainerType("20' Dry");
+        // setQuantity(1);
+        // setContainersSelection([]);
     }
     
     useEffect(() => {
@@ -158,7 +177,7 @@ function NewRequest(props: any) {
     const assignManager = async (idQuote: string) => {
         if (currentUser !== null && currentUser !== undefined && currentUser !== "") {
             if (context && account) {
-                const response = await (context as BackendService<any>).put(protectedResources.apiLisQuotes.endPoint+"/Assignee/"+idQuote+"/"+assignedManager, []);
+                const response = await (context as BackendService<any>).put(protectedResources.apiLisQuotes.endPoint+"/Assignee/"+idQuote+"/"+formState.assignedManager, []);
                 if (response !== null) {
                     setLoad(false);
                     // enqueueSnackbar(t('requestCreatedAssigned'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
@@ -183,13 +202,12 @@ function NewRequest(props: any) {
             if (response !== null && response.code !== undefined) {
                 if (response.code === 200) {
                     var aux = response.data.find((elm: any) => elm.email === account?.username);
-                    //console.log(account);
                     setAssignees(response.data);
                     setCurrentUser(aux);
                     if (aux !== null && aux !== undefined && aux !== "") {
-                        setAssignedManager(aux.id);
+                        // setAssignedManager(aux.id);
+                        // handleChangeFormState(aux.id, "assignedManager");
                     }
-                    //console.log(response.data.find((elm: any) => elm.email === account?.username));
                     setLoadUser(false);
                 }
                 else {
@@ -212,20 +230,20 @@ function NewRequest(props: any) {
     // }
 
     function sendQuotationForm() {
-        if (phone !== "" && email !== "" && arrival !== null && departure !== null && containersSelection.length !== 0 && clientNumber !== null) {
+        if (formState.phone !== "" && formState.email !== "" && formState.arrival !== null && formState.departure !== null && formState.containersSelection.length !== 0 && formState.clientNumber !== null) {
             // Old test : email === "" || (email !== "" && validMail(email))
-            if (validMail(email)) {
+            if (validMail(formState.email)) {
                 setLoad(true);
                 var auxUnits = [];
-                if (packingType === "Breakbulk/LCL") {
+                if (formState.packingType === "Breakbulk/LCL") {
                     auxUnits = packagesSelection;
                 }
-                else if (packingType === "Unit RoRo") {
+                else if (formState.packingType === "Unit RoRo") {
                     auxUnits = unitsSelection;
                 }
 
-                var postcode1 = departure.postalCode !== null && departure.postalCode !== undefined ? departure.postalCode : "";
-                var postcode2 = arrival.postalCode !== null && arrival.postalCode !== undefined ? arrival.postalCode : "";
+                var postcode1 = formState.departure.postalCode !== null && formState.departure.postalCode !== undefined ? formState.departure.postalCode : "";
+                var postcode2 = formState.arrival.postalCode !== null && formState.arrival.postalCode !== undefined ? formState.arrival.postalCode : "";
                 
                 var myHeaders = new Headers();
                 myHeaders.append('Accept', '');
@@ -233,14 +251,14 @@ function NewRequest(props: any) {
                 fetch(protectedResources.apiLisQuotes.endPoint+"/Request", {
                     method: "POST",
                     body: JSON.stringify({ 
-                        email: email,
-                        whatsapp: phone,
-                        departure: departure !== null && departure !== undefined ? [departure.city.toUpperCase(),departure.country,departure.latitude,departure.longitude,postcode1].filter((val: any) => { return val !== "" }).join(', ') : "",
-                        arrival: arrival !== null && arrival !== undefined ? [arrival.city.toUpperCase(),arrival.country,arrival.latitude,arrival.longitude,postcode2].filter((val: any) => { return val !== "" }).join(', ') : "",
+                        email: formState.email,
+                        whatsapp: formState.phone,
+                        departure: formState.departure !== null && formState.departure !== undefined ? [formState.departure.city.toUpperCase(),formState.departure.country,formState.departure.latitude,formState.departure.longitude,postcode1].filter((val: any) => { return val !== "" }).join(', ') : "",
+                        arrival: formState.arrival !== null && formState.arrival !== undefined ? [formState.arrival.city.toUpperCase(),formState.arrival.country,formState.arrival.latitude,formState.arrival.longitude,postcode2].filter((val: any) => { return val !== "" }).join(', ') : "",
                         cargoType: 0,
-                        clientNumber: clientNumber !== null ? String(clientNumber.contactNumber)+", "+clientNumber.contactName : null,
-                        packingType: packingType,
-                        containers: containersSelection.map((elm: any, i: number) => { return { 
+                        clientNumber: formState.clientNumber !== null ? String(formState.clientNumber.contactNumber)+", "+formState.clientNumber.contactName : null,
+                        packingType: formState.packingType,
+                        containers: formState.containersSelection.map((elm: any, i: number) => { return { 
                             id: containers.find((item: any) => item.packageName === elm.container).packageId, 
                             containers: elm.container, 
                             quantity: elm.quantity, 
@@ -253,8 +271,8 @@ function NewRequest(props: any) {
                             quantity: elm.quantity, 
                         } }),
                         quantity: Number(quantity),
-                        detail: message,
-                        tags: tags.length !== 0 ? tags.map((elm: any) => elm.productName).join(',') : null,
+                        detail: formState.message,
+                        tags: formState.tags.length !== 0 ? formState.tags.map((elm: any) => elm.productName).join(',') : null,
                     }),
                     headers: myHeaders
                 })
@@ -263,7 +281,7 @@ function NewRequest(props: any) {
                     if (data.code === 201) {
                         resetForm();
                         enqueueSnackbar(t('requestCreatedAssigned'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
-                        if (assignedManager !== null && assignedManager !== "null" && assignedManager !== undefined && assignedManager !== "") {
+                        if (formState.assignedManager !== null && formState.assignedManager !== "null" && formState.assignedManager !== undefined && formState.assignedManager !== "") {
                             assignManager(data.data.id);
                         }
                         else {
@@ -306,23 +324,16 @@ function NewRequest(props: any) {
                             <InputLabel htmlFor="client-number" sx={inputLabelStyles}>{t('clientNumber')}</InputLabel>
                             <ClientSearch 
                                 id="client-number" 
-                                value={clientNumber} 
-                                onChange={setClientNumber} 
-                                callBack={(e: any) => {
-                                    if (e.phone !== null) {
-                                        setPhone(e.phone);
-                                    }
-                                    else {
-                                        setPhone("");
-                                    }
-
-                                    if (e.email !== null) {
-                                        setEmail(e.email);
-                                    }
-                                    else {
-                                        setEmail("");
-                                    }
+                                name="clientNumber"
+                                value={formState.clientNumber} 
+                                onChange={(e: any) => {
+                                    // setClientNumber(e);
+                                    setFormState({ ...formState, clientNumber: e, phone: e.phone !== null ? e.phone : "", email: e.email !== null ? e.email : "" });
                                 }} 
+                                // callBack={(e: any) => {
+                                //     handleChangeFormState(e.phone !== null ? e.phone : "", "phone");
+                                //     handleChangeFormState(e.email !== null ? e.email : "", "email");
+                                // }} 
                                 fullWidth 
                             />
                         </Grid>
@@ -333,8 +344,8 @@ function NewRequest(props: any) {
                                 <>
                                     <NativeSelect
                                         id="assigned-manager"
-                                        value={assignedManager}
-                                        onChange={handleChangeAssignedManager}
+                                        value={formState.assignedManager}
+                                        onChange={(e: any) => { handleChangeFormState(e.target.value, "assignedManager"); }} 
                                         input={<BootstrapInput />}
                                         fullWidth
                                     >
@@ -351,27 +362,55 @@ function NewRequest(props: any) {
                         
                         <Grid item xs={12} md={6}>
                             <InputLabel htmlFor="whatsapp-phone-number" sx={inputLabelStyles}>{t('whatsappNumber')}</InputLabel>
-                            <MuiTelInput id="whatsapp-phone-number" value={phone} onChange={setPhone} defaultCountry="CM" preferredCountries={["CM", "BE", "KE"]} fullWidth sx={{ mt: 1 }} />
+                            <MuiTelInput 
+                                id="whatsapp-phone-number" 
+                                value={formState.phone} 
+                                onChange={(e: any) => { handleChangeFormState(e.target.value, "phone"); }} 
+                                defaultCountry="CM" 
+                                preferredCountries={["CM", "BE", "KE"]} 
+                                fullWidth 
+                                disabled
+                                sx={{ mt: 1 }} 
+                            />
                         </Grid>
                         <Grid item xs={12} md={6}>
                             <InputLabel htmlFor="request-email" sx={inputLabelStyles}>{t('emailAddress')}</InputLabel>
-                            <BootstrapInput id="request-email" type="email" value={email} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)} fullWidth />
+                            <BootstrapInput 
+                                id="request-email" 
+                                type="email" 
+                                value={formState.email} 
+                                onChange={(e: any) => { handleChangeFormState(e.target.value, "email"); }} 
+                                fullWidth
+                                disabled 
+                            />
                         </Grid>
                         <Grid item xs={12} md={6} mt={1}>
                             <InputLabel htmlFor="departure" sx={inputLabelStyles}>{t('departure')}</InputLabel>
-                            <AutocompleteSearch id="departure" value={departure} onChange={setDeparture} fullWidth /*callBack={(val: any) => { setDeparture(val); }}*/ />
+                            <AutocompleteSearch 
+                                id="departure" 
+                                value={formState.departure} 
+                                onChange={(e: any) => { handleChangeFormState(e, "departure"); }} 
+                                fullWidth 
+                                /*callBack={(val: any) => { setDeparture(val); }}*/ 
+                            />
                         </Grid>
                         <Grid item xs={12} md={6} mt={1}>
                             <InputLabel htmlFor="arrival" sx={inputLabelStyles}>{t('arrival')}</InputLabel>
-                            <AutocompleteSearch id="arrival" value={arrival} onChange={setArrival} fullWidth /*callBack={(val: any) => { setArrival(val); }}*/ />
+                            <AutocompleteSearch 
+                                id="arrival" 
+                                value={formState.arrival} 
+                                onChange={(e: any) => { handleChangeFormState(e, "arrival"); }} 
+                                fullWidth 
+                                /*callBack={(val: any) => { setArrival(val); }}*/ 
+                            />
                         </Grid>
                         <Grid item xs={12} md={2} mt={1}>
                             <InputLabel htmlFor="packing-type" sx={inputLabelStyles}>{t('packingType')}</InputLabel>
                             <NativeSelect
                                 id="packing-type"
                                 placeholder=''
-                                value={packingType}
-                                onChange={handleChangePackingType}
+                                value={formState.packingType}
+                                onChange={(e: any) => { handleChangeFormState(e.target.value, "packingType"); }}
                                 input={<BootstrapInput />}
                                 fullWidth
                             >
@@ -382,7 +421,7 @@ function NewRequest(props: any) {
                         </Grid>
 
                         {
-                            packingType === "FCL" ?
+                            formState.packingType === "FCL" ?
                             <>
                             <Grid item xs={12} md={3} mt={1}>
                                 <InputLabel htmlFor="container-type" sx={inputLabelStyles}>{t('containerType')}</InputLabel>
@@ -391,7 +430,8 @@ function NewRequest(props: any) {
                                     <NativeSelect
                                         id="container-type"
                                         value={containerType}
-                                        onChange={(e: any) => { setContainerType(e.target.value) }}
+                                        // onChange={(e: any) => { handleChangeFormState(e.target.value, "containerType") }}
+                                        onChange={(e: any) => { setContainerType(e.target.value); }}
                                         input={<BootstrapInput />}
                                         fullWidth
                                     >
@@ -405,7 +445,14 @@ function NewRequest(props: any) {
                             </Grid>
                             <Grid item xs={12} md={3} mt={1}>
                                 <InputLabel htmlFor="quantity" sx={inputLabelStyles}>{t('quantity')}</InputLabel>
-                                <BootstrapInput id="quantity" type="number" inputProps={{ min: 1, max: 100 }} value={quantity} onChange={(e: any) => {setQuantity(e.target.value)}} fullWidth />
+                                <BootstrapInput 
+                                    id="quantity" type="number" 
+                                    inputProps={{ min: 1, max: 100 }} 
+                                    value={quantity} 
+                                    onChange={(e: any) => { setQuantity(e.target.value); }}
+                                    // onChange={(e: any) => { handleChangeFormState(e.target.value, "quantity"); }} 
+                                    fullWidth 
+                                />
                             </Grid>
                             <Grid item xs={12} md={4} mt={1}>
                                 <Button 
@@ -413,7 +460,9 @@ function NewRequest(props: any) {
                                     style={{ marginTop: "30px", height: "42px", float: "right" }} 
                                     onClick={() => {
                                         if (containerType !== "" && quantity > 0) {
-                                            setContainersSelection((prevItems: any) => [...prevItems, { container: containerType, quantity: quantity, id: containers.find((item: any) => item.packageName === containerType).packageId }]);
+                                            // setContainersSelection((prevItems: any) => [...prevItems, { container: containerType, quantity: quantity, id: containers.find((item: any) => item.packageName === containerType).packageId }]);
+                                            handleChangeFormState([...formState.containersSelection, { container: containerType, quantity: quantity, id: containers.find((item: any) => item.packageName === containerType).packageId }], "containersSelection");
+                                            // handleChangeFormState("", "containerType"); handleChangeFormState(1, "quantity");
                                             setContainerType(""); setQuantity(1);
                                         } 
                                         else {
@@ -426,16 +475,17 @@ function NewRequest(props: any) {
                             </Grid>
                             <Grid item xs={12} mb={2}>
                                 {
-                                    containersSelection !== undefined && containersSelection !== null && containersSelection.length !== 0 && containers !== null ? 
+                                    formState.containersSelection !== undefined && formState.containersSelection !== null && formState.containersSelection.length !== 0 && containers !== null ? 
                                         <Grid container spacing={2}>
                                             {
-                                                containersSelection.map((item: any, index: number) => (
+                                                formState.containersSelection.map((item: any, index: number) => (
                                                     <Grid key={"listitem1-"+index} item xs={12} md={4}>
                                                         <ListItem
                                                             sx={{ border: "1px solid #e5e5e5" }}
                                                             secondaryAction={
                                                                 <IconButton edge="end" onClick={() => {
-                                                                    setContainersSelection((prevItems: any) => prevItems.filter((item: any, i: number) => i !== index));
+                                                                    // setContainersSelection((prevItems: any) => prevItems.filter((item: any, i: number) => i !== index));
+                                                                    handleChangeFormState(formState.containersSelection.filter((item: any, i: number) => i !== index), "containersSelection");
                                                                 }}>
                                                                     <DeleteIcon />
                                                                 </IconButton>
@@ -455,7 +505,7 @@ function NewRequest(props: any) {
                             </> : null
                         }
                         {
-                            packingType === "Breakbulk/LCL" ?
+                            formState.packingType === "Breakbulk/LCL" ?
                             <>
                             <Grid item xs={12} md={3} mt={1}>
                                 <InputLabel htmlFor="package-name" sx={inputLabelStyles}>{t('packageName')}</InputLabel>
@@ -542,7 +592,7 @@ function NewRequest(props: any) {
                             </> : null
                         }
                         {
-                            packingType === "Unit RoRo" ?
+                            formState.packingType === "Unit RoRo" ?
                             <>
                             <Grid item xs={12} md={3} mt={1}>
                                 <InputLabel htmlFor="unit-name" sx={inputLabelStyles}>{t('unitName')}</InputLabel>
@@ -641,7 +691,7 @@ function NewRequest(props: any) {
                                 <Autocomplete
                                     multiple    
                                     disablePortal
-                                    id="cargo-products"
+                                    id="tags"
                                     placeholder="Machinery, Household goods, etc"
                                     options={products}
                                     getOptionLabel={(option: any) => { 
@@ -650,17 +700,28 @@ function NewRequest(props: any) {
                                         }
                                         return ""; 
                                     }}
-                                    value={tags}
-                                    sx={{ mt: 1 }}
+                                    // value={tags}
+                                    // onChange={(e: any, value: any) => { setTags(value);  }}
                                     renderInput={(params: any) => <TextField {...params} sx={{ textTransform: "lowercase" }} />}
-                                    onChange={(e: any, value: any) => { setTags(value); }}
+                                    value={formState.tags}
+                                    onChange={(e: any, value: any) => { handleChangeFormState(value, "tags"); }}
+                                    sx={{ mt: 1 }}
                                     fullWidth
                                 /> : <Skeleton />
                             }
                         </Grid>
                         <Grid item xs={12} md={6} mt={.5} sx={{ display: { xs: 'none', md: 'block' } }}>
-                            <InputLabel htmlFor="request-message" sx={inputLabelStyles}>{t('details')}</InputLabel>
-                            <BootstrapInput id="request-message" type="text" multiline rows={3.5} value={message} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setMessage(e.target.value)} fullWidth />
+                            <InputLabel htmlFor="message" sx={inputLabelStyles}>{t('details')}</InputLabel>
+                            <BootstrapInput 
+                                id="message" 
+                                type="text" name="message" 
+                                multiline rows={3.5} 
+                                // value={message} 
+                                // onChange={(e: React.ChangeEvent<HTMLInputElement>) => setMessage(e.target.value)} 
+                                value={formState.message}
+                                onChange={(e: any) => { handleChangeFormState(e.target.value, "message"); }}
+                                fullWidth 
+                            />
                         </Grid>
 
                         <Grid item xs={12} md={2}>
