@@ -63,21 +63,21 @@ const ClientSearch: React.FC<LocationAutocompleteProps> = ({ id, name, value, on
             
             if (checkFormatCode(search)) {
                 // First i search by contact number
-                const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisCrm.endPoint+"/Contact/GetContactsByContactNumber?contactNumber="+search+"&category=1", token);
+                const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisCrm.endPoint+"/Contact/GetContacts?contactNumber="+search+"&category=1", token);
                 // const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisCrm.endPoint+"/Contact/GetContacts", token);
                 if (response !== null && response !== undefined && response.length !== 0) {
                     console.log(response);
                     // Removing duplicates from result before rendering
-                    setOptions(response.filter((obj: any, index: number, self: any) => index === self.findIndex((o: any) => o.contactName === obj.contactName)));
+                    setOptions(response.data.filter((obj: any, index: number, self: any) => index === self.findIndex((o: any) => o.contactName === obj.contactName)));
                 }
             } 
             else {
                 // If i dont find i search by contact name
-                const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisCrm.endPoint+"/Contact/GetContactsByCategory?contactName="+search+"&category=1", token);
+                const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisCrm.endPoint+"/Contact/GetContacts?contactName="+search+"&category=1", token);
                 if (response !== null && response !== undefined) {
                     console.log(response);
                     // Removing duplicates from result before rendering
-                    setOptions(response.filter((obj: any, index: number, self: any) => index === self.findIndex((o: any) => o.contactName === obj.contactName)));
+                    setOptions(response.data.filter((obj: any, index: number, self: any) => index === self.findIndex((o: any) => o.contactName === obj.contactName)));
                 }   
             }
             setLoading(false);

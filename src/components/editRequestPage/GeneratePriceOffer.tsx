@@ -108,9 +108,10 @@ function GeneratePriceOffer(props: any) {
     
     const [formState, setFormState] = useProcessStatePersistence(
         account?.name,
-        'generatePriceOfferTest',
+        'generatePriceOfferTest'+id,
         { 
-            haulageType: "",
+            haulageType: "", selectedHaulage: null, rowSelectionModel2: [],
+            selectedSeafreight: null, rowSelectionModel: []
         },
         null, // Optionnel, par défaut à null (pas d'expiration)
         true // Optionnel, par défaut à true (sauvegarde automatique activée)
@@ -286,6 +287,10 @@ function GeneratePriceOffer(props: any) {
     }, [selectedTemplate]);
 
     useEffect(() => {
+        getSeaFreightPriceOffers();
+    }, [portDestination]);
+
+    useEffect(() => {
         // Initialize margins with default value 22 and addings with default value 0
         const initialMargins = containersSelection.map(() => 22); // Default margin 22
         const initialAddings = containersSelection.map(() => 0); // Default adding 0
@@ -321,13 +326,15 @@ function GeneratePriceOffer(props: any) {
             newSkipped.delete(activeStep);
         }
         if (activeStep === 0) {
-            if (selectedHaulage !== null) {
-                setPortDeparture(ports1.find((elm: any) => elm.portName === selectedHaulage.loadingPort));
+            if (formState.selectedHaulage !== null && formState.selectedHaulage !== undefined) {
+                setPortDeparture(ports1.find((elm: any) => elm.portName === formState.selectedHaulage.loadingPort));
                 
-                if (selectedSeafreight === null) {
-                    setLoadResults(true);
-                    getSeaFreightPriceOffers();
-                }
+                // if (formState.selectedSeafreight === null || formState.selectedSeafreight === undefined) {
+                //     setLoadResults(true);
+                //     getSeaFreightPriceOffers();
+                // }
+                setLoadResults(true);
+                getSeaFreightPriceOffers();
                 
                 setActiveStep((prevActiveStep) => prevActiveStep + 1);
                 setSkipped(newSkipped);
@@ -338,14 +345,14 @@ function GeneratePriceOffer(props: any) {
         }
         if (activeStep === 1) {
             // Check if seafreights have the same carrier
-            var seafreightSelected = seafreights.filter((elm: any) => rowSelectionModel.includes(elm.seaFreightId));
+            var seafreightSelected = seafreights.filter((elm: any) => formState.rowSelectionModel.includes(elm.seaFreightId));
             if (checkCarrierConsistency(seafreightSelected) || (!checkCarrierConsistency(seafreightSelected) && window.confirm("All the selected offers must be related to the same carrier, do you want to continue?"))) {
-                if (selectedSeafreight !== null) {
+                if (formState.selectedSeafreight !== null && formState.selectedSeafreight !== undefined) {
                     if (selectedMisc === null) {
                         setLoadResults(true);
                         getMiscellaneousPriceOffers();
                     }
-                    if (selectedHaulage !== null) {
+                    if (formState.selectedHaulage !== null && formState.selectedHaulage !== undefined) {
                         setLoadMiscsHaulage(true);
                         getHaulageMiscellaneousPriceOffers();
                     }
@@ -410,15 +417,15 @@ function GeneratePriceOffer(props: any) {
     function calculateContainerPrice(type: string, quantity: number, index: number) {
         // Calculate seafreight prices
         var seafreightPrices = 0;
-        var seafreightSelected = seafreights.filter((elm: any) => rowSelectionModel.includes(elm.seaFreightId)).find((elm: any) => elm.containers[0].container.packageName === type);
+        var seafreightSelected = seafreights.filter((elm: any) => formState.rowSelectionModel.includes(elm.seaFreightId)).find((elm: any) => elm.containers[0].container.packageName === type);
         if (seafreightSelected !== null && seafreightSelected !== undefined) {
             seafreightPrices = seafreightSelected.containers[0].services.reduce((sum: number, service: any) => sum + service.price, 0)*quantity;
         }
         
         // Calculate haulage prices
         var haulagePrices = 0;
-        if (selectedHaulage !== null && selectedHaulage.containerNames.includes(type)) {
-            haulagePrices = haulagePrices + selectedHaulage.unitTariff*quantity;
+        if (formState.selectedHaulage !== null && formState.selectedHaulage !== undefined && formState.selectedHaulage.containerNames.includes(type)) {
+            haulagePrices = haulagePrices + formState.selectedHaulage.unitTariff*quantity;
         } 
         
         // Calculate miscellaneous prices
@@ -439,7 +446,7 @@ function GeneratePriceOffer(props: any) {
         // Calculate seafreight prices
         var seafreightPrices = 0;
         if (seafreights !== null) {
-            var seafreightSelected = seafreights.filter((elm: any) => rowSelectionModel.includes(elm.seaFreightId)).find((elm: any) => elm.containers[0].container.packageName === type);
+            var seafreightSelected = seafreights.filter((elm: any) => formState.rowSelectionModel.includes(elm.seaFreightId)).find((elm: any) => elm.containers[0].container.packageName === type);
             if (seafreightSelected !== null && seafreightSelected !== undefined) {
                 seafreightPrices = seafreightSelected.containers[0].services.reduce((sum: number, service: any) => sum + service.price, 0)*quantity;
             }
@@ -518,8 +525,8 @@ function GeneratePriceOffer(props: any) {
             var containersFormatted = (containersSelection.map((elm: any) => elm.id)).join("&ContainerTypesId=");
             
             var auxPortDeparture = portDeparture;
-            if (selectedHaulage !== null) {
-                auxPortDeparture = ports1.find((elm: any) => elm.portName === selectedHaulage.loadingPort);
+            if (formState.selectedHaulage !== null && formState.selectedHaulage !== undefined) {
+                auxPortDeparture = ports1.find((elm: any) => elm.portName === formState.selectedHaulage.loadingPort);
             }
 
             var urlSent = createGetRequestUrl2(protectedResources.apiLisPricing.endPoint+"/Pricing/SeaFreightsOffersRequest?", auxPortDeparture.portId, portDestination.portId, containersFormatted);
@@ -594,7 +601,7 @@ function GeneratePriceOffer(props: any) {
                 return null;
             });
             
-            const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisPricing.endPoint+"/Miscellaneous/Miscellaneous?supplierId="+selectedHaulage.haulierId+"&departurePortId="+Number(hashCode(city))+"&destinationPortId="+selectedHaulage.loadingPortId+"&withShipment=true", tempToken);
+            const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisPricing.endPoint+"/Miscellaneous/Miscellaneous?supplierId="+formState.selectedHaulage.haulierId+"&departurePortId="+Number(hashCode(city))+"&destinationPortId="+formState.selectedHaulage.loadingPortId+"&withShipment=true", tempToken);
             setLoadMiscsHaulage(false);
             
             setMiscsHaulage(response.length !== 0 ? response[0].suppliers.filter((elm: any) => myContainers.includes(elm.containers[0].container.packageName)).filter((elm: any) => new Date(elm.validUntil) > new Date()) : []);
@@ -602,26 +609,26 @@ function GeneratePriceOffer(props: any) {
     }
 
     const createNewOffer = async () => {
-        if (selectedSeafreight !== null) {
+        if (formState.selectedSeafreight !== null && formState.selectedSeafreight !== undefined) {
             if (context && account) {
                 setLoadNewOffer(true);
                 var haulage = null;
                 var miscellaneous = null;
-                if (selectedHaulage !== null) {
+                if (formState.selectedHaulage !== null && formState.selectedHaulage !== undefined) {
                     haulage = {
-                        "id": selectedHaulage.id,
+                        "id": formState.selectedHaulage.id,
                         "haulierId": 0,
-                        "haulierName": selectedHaulage.haulierName,
-                        "currency": selectedHaulage.currency,
-                        "loadingCityName": selectedHaulage.loadingPort,
-                        "freeTime": selectedHaulage.freeTime,
-                        "multiStop": selectedHaulage.multiStop,
-                        "overtimeTariff": selectedHaulage.overtimeTariff,
-                        "unitTariff": selectedHaulage.unitTariff,
+                        "haulierName": formState.selectedHaulage.haulierName,
+                        "currency": formState.selectedHaulage.currency,
+                        "loadingCityName": formState.selectedHaulage.loadingPort,
+                        "freeTime": formState.selectedHaulage.freeTime,
+                        "multiStop": formState.selectedHaulage.multiStop,
+                        "overtimeTariff": formState.selectedHaulage.overtimeTariff,
+                        "unitTariff": formState.selectedHaulage.unitTariff,
                         "haulageType": formState.haulageType,
                         // "loadingPort": loadingCity.name,
                         "loadingPort": loadingCity.city,
-                        "validUntil": selectedHaulage.validUntil,
+                        "validUntil": formState.selectedHaulage.validUntil,
                         // "loadingPortId": loadingCity.id,
                         "containerNames": [null]
                     }
@@ -660,24 +667,24 @@ function GeneratePriceOffer(props: any) {
                     "haulage": haulage,
                     "miscellaneousList": miscellaneous,
                     "seaFreight": {
-                        "id": selectedSeafreight.seaFreightId,
+                        "id": formState.selectedSeafreight.seaFreightId,
                         "departurePortId": portDeparture.portId,
                         "destinationPortId": portDestination.portId,
-                        "departurePortName": selectedSeafreight.departurePortName,
+                        "departurePortName": formState.selectedSeafreight.departurePortName,
                         "destinationPortName": portDestination.portName,
                         "carrierId": 0,
-                        "carrierName": selectedSeafreight.carrierName,
+                        "carrierName": formState.selectedSeafreight.carrierName,
                         "carrierAgentId": 0,
-                        "carrierAgentName": selectedSeafreight.carrierAgentName,
-                        "currency": selectedSeafreight.currency,
-                        "transitTime": selectedSeafreight.transitTime,
-                        "frequency": selectedSeafreight.frequency,
-                        "price20dry": selectedSeafreight.price20dry,
-                        "price20rf": selectedSeafreight.price20rf,
-                        "price40dry": selectedSeafreight.price40dry,
-                        "price40hc": selectedSeafreight.price40hc,
-                        "price40hcrf": selectedSeafreight.price40hcrf,
-                        "validUntil": selectedSeafreight.validUntil,
+                        "carrierAgentName": formState.selectedSeafreight.carrierAgentName,
+                        "currency": formState.selectedSeafreight.currency,
+                        "transitTime": formState.selectedSeafreight.transitTime,
+                        "frequency": formState.selectedSeafreight.frequency,
+                        "price20dry": formState.selectedSeafreight.price20dry,
+                        "price20rf": formState.selectedSeafreight.price20rf,
+                        "price40dry": formState.selectedSeafreight.price40dry,
+                        "price40hc": formState.selectedSeafreight.price40hc,
+                        "price40hcrf": formState.selectedSeafreight.price40hcrf,
+                        "validUntil": formState.selectedSeafreight.validUntil,
                     },
                     "containers": containersSelection.map((elm: any) => { return { "containerId": elm.id, quantity: elm.quantity } }),
                     "departureDate": (new Date("01/01/2022")).toISOString(),
@@ -735,8 +742,8 @@ function GeneratePriceOffer(props: any) {
     
     // Fonction pour remplacer les variables dans le template
     function generateEmailContent(template: string, variables: any) {
-        var textToRemove = selectedHaulage !== null ? "" : "Chargement de {{freeTime}} heures inclus pour chaque conteneur, ensuite de {{overtimeTariff}} EUR par heure indivisible.";
-        var textToRemove2 = selectedHaulage !== null ? "" : "Loading of {{freeTime}} hours included for each container, then {{overtimeTariff}} EUR per indivisible hour.";
+        var textToRemove = formState.selectedHaulage !== null && formState.selectedHaulage !== undefined ? "" : "Chargement de {{freeTime}} heures inclus pour chaque conteneur, ensuite de {{overtimeTariff}} EUR par heure indivisible.";
+        var textToRemove2 = formState.selectedHaulage !== null && formState.selectedHaulage !== undefined ? "" : "Loading of {{freeTime}} hours included for each container, then {{overtimeTariff}} EUR per indivisible hour.";
         return template.replace(textToRemove,"").replace(textToRemove2,"").replace(/\{\{(.*?)\}\}/g, (_, variableName: any) => {
             const trimmedName = variableName.trim();
             // Si la variable est non nulle/vide, l'encapsuler dans <strong>
@@ -764,19 +771,19 @@ function GeneratePriceOffer(props: any) {
             auxServices.map((elm: any, index: number) => elm.defaultContainer !== null ? "<p>- "+getServices(elm.containers, elm.currency)+" inclus</p>" : "<p>- "+getServicesTotal(elm.containers, elm.currency, 50)+" supplémentaires</p>").join("")
         : "<br>";
         
-        var pricesContainers = containersSelection !== null && selectedSeafreight !== null ? 
+        var pricesContainers = containersSelection !== null && formState.selectedSeafreight !== null && formState.selectedSeafreight !== undefined ? 
         containersSelection.map((elm: any, index: number) => 
         {
             var auxFrequency = 0;
             var auxTransitTime = "";
-            var aux1 = seafreights.filter((val: any) => rowSelectionModel.includes(val.seaFreightId)).find((val: any) => val.defaultContainer === elm.container);
+            var aux1 = seafreights.filter((val: any) => formState.rowSelectionModel.includes(val.seaFreightId)).find((val: any) => val.defaultContainer === elm.container);
             if (calculateSeafreightPrice(elm.container, elm.quantity, index) !== 0) {
                 if (aux1 !== undefined) {
                     auxFrequency = aux1.frequency;
                     auxTransitTime = aux1.transitTime;
                 }
                 return "<p><strong>"+calculateContainerPrice(elm.container, elm.quantity, index)+" "
-                +selectedSeafreight.currency+" / "+elm.container
+                +formState.selectedSeafreight.currency+" / "+elm.container
                 +" / Tous les "+auxFrequency
                 +" jours / Délai de mer : "+auxTransitTime
                 +" jours</strong></p>"
@@ -786,10 +793,10 @@ function GeneratePriceOffer(props: any) {
             }
         }).join("") : "";
         var clientName = clientNumber !== null ? clientNumber.contactName : null;
-        var freeTime = selectedHaulage !== null ? selectedHaulage.freeTime : "";
-        var overtimeTariff = selectedHaulage !== null ? selectedHaulage.overtimeTariff : "";
-        var frequency = selectedSeafreight !== null ? selectedSeafreight.frequency : "";
-        var transitTime = selectedSeafreight !== null ? selectedSeafreight.transitTime : "";
+        var freeTime = formState.selectedHaulage !== null && formState.selectedHaulage !== undefined ? formState.selectedHaulage.freeTime : "";
+        var overtimeTariff = formState.selectedHaulage !== null && formState.selectedHaulage !== undefined ? formState.selectedHaulage.overtimeTariff : "";
+        var frequency = formState.selectedSeafreight !== null && formState.selectedSeafreight !== undefined ? formState.selectedSeafreight.frequency : "";
+        var transitTime = formState.selectedSeafreight !== null && formState.selectedSeafreight !== undefined ? formState.selectedSeafreight.transitTime : "";
         var containersQuantities = displayContainers(containersSelection);
 
         const variables = { loadingCity, destinationPort, commodities, clientName, freeTime, overtimeTariff, frequency, transitTime, containersQuantities, listServices, pricesContainers };
@@ -813,19 +820,19 @@ function GeneratePriceOffer(props: any) {
             auxServices.map((elm: any) => elm.defaultContainer !== null ? "<p>- "+getServices(elm.containers, elm.currency)+" inclus</p>" : "<p>- "+getServicesTotal(elm.containers, elm.currency, 50)+" supplémentaires</p>").join("")
         : "<br>";
         
-        var pricesContainers = containersSelection !== null && selectedSeafreight !== null ? 
+        var pricesContainers = containersSelection !== null && formState.selectedSeafreight !== null && formState.selectedSeafreight !== undefined && seafreights !== null ? 
         containersSelection.map((elm: any, index: number) => 
         {
             var auxFrequency = 0;
             var auxTransitTime = "";
-            var aux1 = seafreights.filter((val: any) => rowSelectionModel.includes(val.seaFreightId)).find((val: any) => val.defaultContainer === elm.container);
+            var aux1 = seafreights.filter((val: any) => formState.rowSelectionModel.includes(val.seaFreightId)).find((val: any) => val.defaultContainer === elm.container);
             if (calculateSeafreightPrice(elm.container, elm.quantity, index) !== 0) {
                 if (aux1 !== undefined) {
                     auxFrequency = aux1.frequency;
                     auxTransitTime = aux1.transitTime;
                 }
                 return "<p><strong>"+calculateContainerPrice(elm.container, elm.quantity, index)+" "
-                +selectedSeafreight.currency+" / "+elm.container
+                +formState.selectedSeafreight.currency+" / "+elm.container
                 +" / Tous les "+auxFrequency
                 +" jours / Délai de mer : "+auxTransitTime
                 +" jours</strong></p>"
@@ -835,15 +842,15 @@ function GeneratePriceOffer(props: any) {
             }
         }).join("") : "";
         var clientName = clientNumber !== null ? clientNumber.contactName : null;
-        var freeTime = selectedHaulage !== null ? selectedHaulage.freeTime : "";
-        var overtimeTariff = selectedHaulage !== null ? selectedHaulage.overtimeTariff : "";
-        var frequency = selectedSeafreight !== null ? selectedSeafreight.frequency : "";
-        var transitTime = selectedSeafreight !== null ? selectedSeafreight.transitTime : "";
+        var freeTime = formState.selectedHaulage !== null && formState.selectedHaulage !== undefined ? formState.selectedHaulage.freeTime : "";
+        var overtimeTariff = formState.selectedHaulage !== null && formState.selectedHaulage !== undefined ? formState.selectedHaulage.overtimeTariff : "";
+        var frequency = formState.selectedSeafreight !== null && formState.selectedSeafreight !== undefined ? formState.selectedSeafreight.frequency : "";
+        var transitTime = formState.selectedSeafreight !== null && formState.selectedSeafreight !== undefined ? formState.selectedSeafreight.transitTime : "";
         var containersQuantities = displayContainers(containersSelection);
 
         const variables = { loadingCity, destinationPort, commodities, clientName, freeTime, overtimeTariff, frequency, transitTime, containersQuantities, listServices, pricesContainers };
         rteRef.current?.editor?.commands.setContent(generateEmailContent(mailLanguage !== "en" ? templateBase.content : templateBase.contentEn, variables));
-    }, [tags, departure, clientNumber, portDestination, selectedSeafreight, selectedHaulage, selectedMisc, containersSelection, margins, addings]);
+    }, [tags, departure, clientNumber, portDestination, formState.selectedSeafreight, formState.selectedHaulage, selectedMisc, containersSelection, margins, addings]);
 
 
 
@@ -968,10 +975,12 @@ function GeneratePriceOffer(props: any) {
                                                         getRowHeight={() => "auto" }
                                                         sx={gridStyles}
                                                         onRowSelectionModelChange={(newRowSelectionModel: any) => {
-                                                            setRowSelectionModel2(newRowSelectionModel);
-                                                            setSelectedHaulage(newRowSelectionModel.length !== 0 ? haulages.find((elm: any) => elm.id === newRowSelectionModel[0]) : null);
+                                                            // setRowSelectionModel2(newRowSelectionModel);
+                                                            // setSelectedHaulage(newRowSelectionModel.length !== 0 ? haulages.find((elm: any) => elm.id === newRowSelectionModel[0]) : null);
+                                                            setFormState({...formState, selectedHaulage: newRowSelectionModel.length !== 0 ? haulages.find((elm: any) => elm.id === newRowSelectionModel[0]) : null, rowSelectionModel2: newRowSelectionModel});
+                                                            // handleChangeFormState(newRowSelectionModel.length !== 0 ? haulages.find((elm: any) => elm.id === newRowSelectionModel[0]) : null, "selectedHaulage");
                                                         }}
-                                                        rowSelectionModel={rowSelectionModel2}
+                                                        rowSelectionModel={formState.rowSelectionModel2}
                                                         // onRowClick={handleRowHaulagesClick}
                                                     /> :
                                                     <Box>
@@ -1048,7 +1057,11 @@ function GeneratePriceOffer(props: any) {
                                         <Grid container>
                                             <Grid item xs={8}>
                                                 <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>
-                                                    {t('listSeaFreightsPricingOffers')+t('fromDotted')+portDeparture.portName+"-"+portDestination.portName}
+                                                    {
+                                                        portDeparture !== null ?
+                                                        t('listSeaFreightsPricingOffers')+t('fromDotted')+portDeparture.portName+"-"+portDestination.portName : 
+                                                        t('listSeaFreightsPricingOffers')
+                                                    }
                                                 </Typography>
                                             </Grid>
                                             <Grid item xs={4}>
@@ -1111,8 +1124,9 @@ function GeneratePriceOffer(props: any) {
                                                             if (newRowSelectionModel.length <= containersSelection.length) {
                                                                 var myFreights = newRowSelectionModel.length !== 0 ? seafreights.filter((elm: any) => newRowSelectionModel.includes(elm.seaFreightId)) : [];
                                                                 if (checkDifferentDefaultContainer(myFreights)) {
-                                                                    setRowSelectionModel(newRowSelectionModel);
-                                                                    setSelectedSeafreight(newRowSelectionModel.length !== 0 ? seafreights.find((elm: any) => elm.seaFreightId === newRowSelectionModel[0]) : null);
+                                                                    // setRowSelectionModel(newRowSelectionModel);
+                                                                    // setSelectedSeafreight(newRowSelectionModel.length !== 0 ? seafreights.find((elm: any) => elm.seaFreightId === newRowSelectionModel[0]) : null);
+                                                                    setFormState({...formState, rowSelectionModel: newRowSelectionModel, selectedSeafreight: newRowSelectionModel.length !== 0 ? seafreights.find((elm: any) => elm.seaFreightId === newRowSelectionModel[0]) : null});
                                                                     setMySeafreights(myFreights);
                                                                     // setSelectedSeafreight(newRowSelectionModel.length !== 0 ? seafreights.filter((elm: any) => newRowSelectionModel.includes(elm.seaFreightId)) : null);
                                                                 }
@@ -1124,7 +1138,7 @@ function GeneratePriceOffer(props: any) {
                                                                 enqueueSnackbar("You can only select "+containersSelection.length+" offers!", { variant: "warning", anchorOrigin: { horizontal: "right", vertical: "top"} });
                                                             }
                                                         }}
-                                                        rowSelectionModel={rowSelectionModel}
+                                                        rowSelectionModel={formState.rowSelectionModel}
                                                         checkboxSelection
                                                         // onRowClick={handleRowSeafreightsClick}
                                                     />
@@ -1217,12 +1231,12 @@ function GeneratePriceOffer(props: any) {
                                     activeStep === 3 ?
                                     <Grid container spacing={2} mt={1} px={2}>
                                         {
-                                            selectedHaulage !== null ? 
+                                            formState.selectedHaulage !== null && formState.selectedHaulage !== undefined ? 
                                             <Grid item xs={12}>
                                                 <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>{t('selectedHaulage')}</Typography>
                                                 <Box sx={{ overflow: "auto" }}>
                                                     <DataGrid
-                                                        rows={[selectedHaulage]}
+                                                        rows={[formState.selectedHaulage]}
                                                         columns={columnsHaulages}
                                                         // hideFooter
                                                         initialState={{
@@ -1245,7 +1259,7 @@ function GeneratePriceOffer(props: any) {
                                             <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>{t('selectedSeafreight')}</Typography>
                                             <Box sx={{ overflow: "auto" }}>
                                                 <DataGrid
-                                                    rows={seafreights.filter((elm: any) => rowSelectionModel.includes(elm.seaFreightId))}
+                                                    rows={seafreights.filter((elm: any) => formState.rowSelectionModel.includes(elm.seaFreightId))}
                                                     columns={columnsSeafreights}
                                                     // hideFooter
                                                     initialState={{
@@ -1327,8 +1341,8 @@ function GeneratePriceOffer(props: any) {
                                         <Grid item xs={12}>
                                             <Box sx={{ border: "1px solid #e5e5e5", backgroundColor: "#fff", p: 2 }}>
                                                 {
-                                                    containersSelection !== null && rowSelectionModel.length !== 0 ?
-                                                    seafreights.filter((elm: any) => rowSelectionModel.includes(elm.seaFreightId))
+                                                    containersSelection !== null && formState.rowSelectionModel.length !== 0 ?
+                                                    seafreights.filter((elm: any) => formState.rowSelectionModel.includes(elm.seaFreightId))
                                                     .map((element: any, index: number) => {
                                                         var containerElm = containersSelection.find((val: any) => val.container === element.containers[0].container.packageName);
                                                         var allMiscs = myMiscs;
@@ -1351,7 +1365,7 @@ function GeneratePriceOffer(props: any) {
                                                                     purchasePrice={Number(((calculateContainerPrice(containerElm.container, containerElm.quantity, index)-addings[index])/(1+margins[index]/100)).toFixed(2))+" "+t(element.currency)}
                                                                     profit={Number((calculateContainerPrice(containerElm.container, containerElm.quantity, index) - ((calculateContainerPrice(containerElm.container, containerElm.quantity, index)-addings[index])/(1+margins[index]/100))).toFixed(2))+" "+t(element.currency)}
                                                                     salePrice={calculateContainerPrice(containerElm.container, containerElm.quantity, index)+" "+t(element.currency)}
-                                                                    haulagePrice={selectedHaulage !== null && selectedHaulage.containerNames.includes(containerElm.container) ? containerElm.quantity+"x"+selectedHaulage.unitTariff+" "+t(element.currency) : "N/A"}
+                                                                    haulagePrice={formState.selectedHaulage !== null && formState.selectedHaulage !== undefined && formState.selectedHaulage.containerNames.includes(containerElm.container) ? containerElm.quantity+"x"+formState.selectedHaulage.unitTariff+" "+t(element.currency) : "N/A"}
                                                                     seafreightPrice={formatServices(element.containers[0], t(element.currency), containerElm.container, containerElm.quantity) || "N/A"}
                                                                     miscellaneousPrice={miscsSelected.length !== 0 ? miscsSelected.map((value: any, id: number) => {
                                                                         return <span key={"sMiscs-"+id}>
@@ -1369,7 +1383,7 @@ function GeneratePriceOffer(props: any) {
                                         <Grid item xs={12}>
                                             <InputLabel htmlFor="details" sx={inputLabelStyles}>{t('detailsOffer')}</InputLabel>
                                             {
-                                                selectedSeafreight !== null ? 
+                                                formState.selectedSeafreight !== null && formState.selectedSeafreight !== undefined ? 
                                                 <Box sx={{ mt: 2 }}>
                                                     {
                                                         loadTemplate !== true ?
