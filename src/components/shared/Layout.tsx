@@ -129,6 +129,7 @@ function Layout(props: {children?: React.ReactNode}) {
     const [anchorElNav, setAnchorElNav] = useState(null);
     const [openRequests, setOpenRequests] = useState<boolean>(false);
     const [openPrices, setOpenPrices] = useState<boolean>(false);
+    const [openMasterdata, setOpenMasterdata] = useState<boolean>(false);
 
     const { t, i18n } = useTranslation();
     
@@ -597,6 +598,33 @@ function Layout(props: {children?: React.ReactNode}) {
                                 </DarkTooltip>
                                 </ListItem>
                             </NavLink>
+                            
+                            <ListItem className="cs-listitem" key={"Masterdata part"} disablePadding disableGutters>
+                                <ListItemButton className="cs-listitembutton" onClick={() => { setOpenMasterdata(!openMasterdata); }}>
+                                    <ListItemIcon className="cs-listitemicon">
+                                        <RequestQuoteOutlinedIcon fontSize="small" />
+                                    </ListItemIcon>
+                                    <ListItemText primary={t('masterdata')} primaryTypographyProps={{ fontSize: 14 }} />
+                                    {openMasterdata ? <ExpandLess /> : <ExpandMore />}
+                                </ListItemButton>
+                            </ListItem>
+                            <Collapse in={openMasterdata} timeout="auto" unmountOnExit>
+                                <List component="div" disablePadding>
+                                    <NavLink to="/admin/services" className={({ isActive }) => isActive ? "cs-navlink-active" : "cs-navlink"}>
+                                        <ListItem className="cs-listitem" key={"Services"} disablePadding disableGutters sx={{ pl: 2 }}>
+                                        <DarkTooltip title={t('services')} placement="right" arrow>
+                                            <ListItemButton className="cs-listitembutton">
+                                                <ListItemIcon className="cs-listitemicon">
+                                                    <LocalShippingIcon fontSize="small" />
+                                                </ListItemIcon>
+                                                <ListItemText primary={t('services')} primaryTypographyProps={{ fontSize: 14 }} />
+                                            </ListItemButton>
+                                        </DarkTooltip>
+                                        </ListItem>
+                                    </NavLink>
+                                </List>
+                            </Collapse>
+
                             
                         </List>
                         

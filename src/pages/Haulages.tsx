@@ -197,12 +197,12 @@ function Haulages() {
             );
             
             try {
-                const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisCrm.endPoint+"/Contact/GetContactsByCategory?category=2&pageSize=1000", token);
+                const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisCrm.endPoint+"/Contact/GetContacts?category=2&pageSize=1000", token);
                 if (response !== null && response !== undefined) {
                     // console.log(response);
                     // Removing duplicates from client array
-                    setClients(response.filter((obj: any, index: number, self: any) => index === self.findIndex((o: any) => o.contactName === obj.contactName)));
-                    console.log(response.filter((obj: any, index: number, self: any) => index === self.findIndex((o: any) => o.contactName === obj.contactName)));
+                    setClients(response.data.filter((obj: any, index: number, self: any) => index === self.findIndex((o: any) => o.contactName === obj.contactName)));
+                    // console.log(response.filter((obj: any, index: number, self: any) => index === self.findIndex((o: any) => o.contactName === obj.contactName)));
                 }
             }
             catch (err: any) {

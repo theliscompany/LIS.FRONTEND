@@ -13,7 +13,7 @@ import { BootstrapDialog, BootstrapDialogTitle, actionButtonStyles, buttonCloseS
 import { NavLink } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { DataGrid, GridColDef, GridRenderCellParams, GridValueFormatterParams } from '@mui/x-data-grid';
-import { RestartAltOutlined } from '@mui/icons-material';
+import { RestartAltOutlined, Visibility } from '@mui/icons-material';
 
 function colors(value: string) {
     switch (value) {
@@ -81,6 +81,9 @@ function PriceOffers() {
                     </IconButton>
                     <IconButton onClick={() => { setCurrentId(params.row.id); setModal(true); }}>
                         <DeleteIcon fontSize="small" />
+                    </IconButton>
+                    <IconButton component={NavLink} to={"/admin/request/"+params.row.requestQuoteId} title="View the request" sx={{ mr: 1 }}>
+                        <Visibility fontSize="small" />
                     </IconButton>
                 </Box>
             );

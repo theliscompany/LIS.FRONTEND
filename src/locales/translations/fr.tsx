@@ -401,5 +401,12 @@ export const fr = {
   messageOkGeneralMiscs: "Vos services miscs généraux ont été enregistrés!",
   included: "inclus",
   seafreight: "Frêt maritime",
-  haulage: "Transport routier"
+  haulage: "Transport routier",
+  masterdata: "Masterdata",
+  services: "Services",
+  servicesTypesId: "Types de services",
+  newService: "Créer un nouveau service",
+  deleteRowService: "Supprimer un service",
+  editRowService: "Modifier un service",
+  createRowService: "Créer un service",
 };

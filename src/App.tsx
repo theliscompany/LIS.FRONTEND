@@ -27,6 +27,7 @@ import Miscellaneous from './pages/Miscellaneous';
 import AcceptOffer from './pages/AcceptOffer';
 import RefuseOffer from './pages/RefuseOffer';
 import Templates from './pages/Templates';
+import MasterDataServices from './pages/MasterDataServices';
 
 const App = () => {
   return (
@@ -51,6 +52,7 @@ const App = () => {
 							<Route path="haulages" element={<Haulages />} />
 							<Route path="miscellaneous" element={<Miscellaneous />} />
 							<Route path="templates" element={<Templates />} />
+							<Route path="services" element={<MasterDataServices />} />
 						</Route> 
 						<Route path="/" element={<Layout children={<Requests />} />} />
 						<Route path="login" element={<Layout children={<Requests />} />} />

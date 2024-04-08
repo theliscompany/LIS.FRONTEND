@@ -12,7 +12,7 @@ import { AuthenticationResult } from '@azure/msal-browser';
 function NewService(props: any) {
     const [testName, setTestName] = useState<string>("");
     const [testDescription, setTestDescription] = useState<string>("");
-    const [selectedServiceTypes, setSelectedServiceTypes] = useState([]);
+    const [selectedServiceTypes, setSelectedServiceTypes] = useState<any>([]);
     
     const { instance, accounts } = useMsal();
     const account = useAccount(accounts[0] || {});
@@ -102,7 +102,7 @@ function NewService(props: any) {
                         <BootstrapInput id="test-description" type="text" multiline rows={3} value={testDescription} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTestDescription(e.target.value)} fullWidth />
                     </Grid>
                     <Grid item xs={12}>
-                        <InputLabel htmlFor="test-services-types" sx={inputLabelStyles}>Description</InputLabel>
+                        <InputLabel htmlFor="test-services-types" sx={inputLabelStyles}>{t('servicesTypesId')}</InputLabel>
                         <Select
                             labelId="test-services-types"
                             id="test-selected-services"
