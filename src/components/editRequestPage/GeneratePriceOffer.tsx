@@ -70,25 +70,25 @@ function GeneratePriceOffer(props: any) {
     const [loadMiscsHaulage, setLoadMiscsHaulage] = useState<boolean>(false);
     const [loadNewOffer, setLoadNewOffer] = useState<boolean>(false);
     
-    const [miscs, setMiscs] = useState<any>([]);
     const [haulages, setHaulages] = useState<any>(null);
     const [seafreights, setSeafreights] = useState<any>(null);
+    const [miscs, setMiscs] = useState<any>([]); // Seafreight Miscs
+    const [miscsHaulage, setMiscsHaulage] = useState<any>([]);
     const [generalMiscs, setGeneralMiscs] = useState<any>(null);
     const [tableMiscs, setTableMiscs] = useState<any>(null);
     
-    const [selectedHaulage, setSelectedHaulage] = useState<any>(null);
-    const [selectedSeafreight, setSelectedSeafreight] = useState<any>(null);
-    const [selectedMisc, setSelectedMisc] = useState<any>(null);
+    // const [selectedHaulage, setSelectedHaulage] = useState<any>(null);
+    // const [selectedSeafreight, setSelectedSeafreight] = useState<any>(null);
+    // const [selectedMisc, setSelectedMisc] = useState<any>(null);
 
-    const [mySeafreights, setMySeafreights] = useState<any>([]);
-    const [myMiscs, setMyMiscs] = useState<any>([]);
-    const [miscsHaulage, setMiscsHaulage] = useState<any>([]);
+    // const [mySeafreights, setMySeafreights] = useState<any>([]);
+    // const [myMiscs, setMyMiscs] = useState<any>([]);
     
     const [tempToken, setTempToken] = useState<string>("");
     
-    const [rowSelectionModel, setRowSelectionModel] = React.useState<GridRowSelectionModel>([]);
-    const [rowSelectionModel2, setRowSelectionModel2] = React.useState<GridRowSelectionModel>([]);
-    const [rowSelectionModel3, setRowSelectionModel3] = React.useState<GridRowSelectionModel>([]);
+    // const [rowSelectionModel, setRowSelectionModel] = React.useState<GridRowSelectionModel>([]);
+    // const [rowSelectionModel2, setRowSelectionModel2] = React.useState<GridRowSelectionModel>([]);
+    // const [rowSelectionModel3, setRowSelectionModel3] = React.useState<GridRowSelectionModel>([]);
 
     const [templates, setTemplates] = useState<any>([]);
     const [loadTemplates, setLoadTemplates] = useState<boolean>(false);
@@ -111,7 +111,9 @@ function GeneratePriceOffer(props: any) {
         'generatePriceOfferTest'+id,
         { 
             haulageType: "", selectedHaulage: null, rowSelectionModel2: [],
-            selectedSeafreight: null, rowSelectionModel: []
+            selectedSeafreight: null, rowSelectionModel: [], 
+            selectedMisc: null, myMiscs: [], rowSelectionModel3: [],
+            activeStep: 0 
         },
         null, // Optionnel, par défaut à null (pas d'expiration)
         true // Optionnel, par défaut à true (sauvegarde automatique activée)
@@ -300,12 +302,36 @@ function GeneratePriceOffer(props: any) {
     }, [containersSelection]); // Assuming containersSelection is a prop or state
     
     useEffect(() => {
+        // console.log("Table", tableMiscs);
+        // console.log("Haulage", miscs);
+        // console.log("Seafreight", miscsHaulage);
         if (generalMiscs !== null && miscs !== null && miscsHaulage !== null) {
             setTableMiscs([...miscsHaulage, ...miscs, ...generalMiscs]);
-            setRowSelectionModel3([...miscsHaulage, ...miscs].map((elm: any) => elm.miscellaneousId));
+            // setRowSelectionModel3([...miscsHaulage, ...miscs].map((elm: any) => elm.miscellaneousId));
+            var auxTab = [...miscsHaulage, ...miscs];
+            setFormState({...formState, rowSelectionModel3: auxTab.map((elm: any) => elm.miscellaneousId)});
         }
-    }, [generalMiscs, miscs, miscsHaulage]); // Assuming containersSelection is a prop or state
+    }, [generalMiscs, miscs, miscsHaulage]);
     
+
+    useEffect(() => {
+        if (formState.activeStep === 2 && generalMiscs === null && seafreights !== null) {
+            getMiscellaneousPriceOffers();
+            getHaulageMiscellaneousPriceOffers();
+            getGeneralMiscellaneousPriceOffers();
+        }
+    }, [formState.activeStep, seafreights]);
+
+    // useEffect(() => {
+    //     // console.log("Table", tableMiscs);
+    //     // console.log("Haulage", miscs);
+    //     // console.log("Seafreight", miscsHaulage);
+    //     if (!loadGeneralMiscs && !loadResults && !loadMiscsHaulage) {
+    //         setTableMiscs([...miscsHaulage, ...miscs, ...generalMiscs]);
+    //         setRowSelectionModel3([...miscsHaulage, ...miscs].map((elm: any) => elm.miscellaneousId));
+    //     }
+    // }, [loadGeneralMiscs, loadResults, loadMiscsHaulage]);
+
     // Stepper functions
     const [activeStep, setActiveStep] = React.useState(0);
     const [skipped, setSkipped] = React.useState(new Set<number>());
@@ -321,11 +347,11 @@ function GeneratePriceOffer(props: any) {
 
     const handleNext = () => {
         let newSkipped = skipped;
-        if (isStepSkipped(activeStep)) {
+        if (isStepSkipped(formState.activeStep)) {
             newSkipped = new Set(newSkipped.values());
-            newSkipped.delete(activeStep);
+            newSkipped.delete(formState.activeStep);
         }
-        if (activeStep === 0) {
+        if (formState.activeStep === 0) {
             if (formState.selectedHaulage !== null && formState.selectedHaulage !== undefined) {
                 setPortDeparture(ports1.find((elm: any) => elm.portName === formState.selectedHaulage.loadingPort));
                 
@@ -336,19 +362,21 @@ function GeneratePriceOffer(props: any) {
                 setLoadResults(true);
                 getSeaFreightPriceOffers();
                 
-                setActiveStep((prevActiveStep) => prevActiveStep + 1);
+                setFormState({...formState, activeStep: formState.activeStep !== undefined ? formState.activeStep + 1 : 0 });
+                // setActiveStep((prevActiveStep) => prevActiveStep + 1);
                 setSkipped(newSkipped);
             }
             else {
                 enqueueSnackbar(t('youNeedSelectHaulage'), { variant: "warning", anchorOrigin: { horizontal: "right", vertical: "top"} });
             }
         }
-        if (activeStep === 1) {
+        if (formState.activeStep === 1) {
             // Check if seafreights have the same carrier
             var seafreightSelected = seafreights.filter((elm: any) => formState.rowSelectionModel.includes(elm.seaFreightId));
             if (checkCarrierConsistency(seafreightSelected) || (!checkCarrierConsistency(seafreightSelected) && window.confirm("All the selected offers must be related to the same carrier, do you want to continue?"))) {
+                console.log("fState", formState);
                 if (formState.selectedSeafreight !== null && formState.selectedSeafreight !== undefined) {
-                    if (selectedMisc === null) {
+                    if (formState.selectedMisc === null && formState.selectedMisc === undefined) {
                         setLoadResults(true);
                         getMiscellaneousPriceOffers();
                     }
@@ -356,10 +384,16 @@ function GeneratePriceOffer(props: any) {
                         setLoadMiscsHaulage(true);
                         getHaulageMiscellaneousPriceOffers();
                     }
+                    
+                    // setLoadResults(true);
+                    // getMiscellaneousPriceOffers();
+                    // setLoadMiscsHaulage(true);
+                    // getHaulageMiscellaneousPriceOffers();
                     setLoadGeneralMiscs(true);
                     getGeneralMiscellaneousPriceOffers();
                     
-                    setActiveStep((prevActiveStep) => prevActiveStep + 1);
+                    setFormState({...formState, activeStep: formState.activeStep !== undefined ? formState.activeStep + 1 : 0 });
+                    // setActiveStep((prevActiveStep) => prevActiveStep + 1);
                     setSkipped(newSkipped);
                 }
                 else {
@@ -367,38 +401,43 @@ function GeneratePriceOffer(props: any) {
                 }
             }
         }
-        if (activeStep === 2) {
-            setActiveStep((prevActiveStep) => prevActiveStep + 1);
+        if (formState.activeStep === 2) {
+            console.log("fState", formState);
+            setFormState({...formState, activeStep: formState.activeStep !== undefined ? formState.activeStep + 1 : 0 });
+            // setActiveStep((prevActiveStep) => prevActiveStep + 1);
             setSkipped(newSkipped);
         }
-        if (activeStep === 3) {
+        if (formState.activeStep === 3) {
             createNewOffer();
         }
     };
 
     const handleBack = () => {
-        setActiveStep((prevActiveStep) => prevActiveStep - 1);
+        setFormState({...formState, activeStep: formState.activeStep !== undefined ? formState.activeStep - 1 : 0 });
+        // setActiveStep((prevActiveStep) => prevActiveStep - 1);
     };
 
     const handleSkip = () => {
-        if (!isStepOptional(activeStep)) {
+        if (!isStepOptional(formState.activeStep)) {
             throw new Error("You can't skip a step that isn't optional.");
         }
-        if (activeStep === 0) {
+        if (formState.activeStep === 0) {
             setLoadResults(true);
             getSeaFreightPriceOffers();
         }
 
-        setActiveStep((prevActiveStep) => prevActiveStep + 1);
+        setFormState({...formState, activeStep: formState.activeStep !== undefined ? formState.activeStep + 1 : 0 });
+        // setActiveStep((prevActiveStep) => prevActiveStep + 1);
         setSkipped((prevSkipped) => {
             const newSkipped = new Set(prevSkipped.values());
-            newSkipped.add(activeStep);
+            newSkipped.add(formState.activeStep);
             return newSkipped;
         });
     };
 
     const handleReset = () => {
-        setActiveStep(0);
+        setFormState({...formState, activeStep: 0 });
+        // setActiveStep(0);
     };
 
     function displayContainers(value: any) {
@@ -430,7 +469,7 @@ function GeneratePriceOffer(props: any) {
         
         // Calculate miscellaneous prices
         var miscPrices = 0;
-        var allMiscs = myMiscs;
+        var allMiscs = formState.myMiscs;
         var miscsSelected = allMiscs.filter((elm: any) => elm.defaultContainer === type);
         if (miscsSelected !== null && miscsSelected !== undefined) {
             for (var i = 0; i < miscsSelected.length; i++) {
@@ -542,7 +581,6 @@ function GeneratePriceOffer(props: any) {
         setLoadResults(true);
         if (context && account) {
             const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisPricing.endPoint+"/Miscellaneous/Miscellaneous?departurePortId="+portDeparture.portId+"&destinationPortId="+portDestination.portId+"&withShipment=true", tempToken);
-            setLoadResults(false);
             
             var myContainers = containersSelection.map((elm: any, index: any) => {
                 if (calculateSeafreightPrice(elm.container, elm.quantity, index) !== 0) {
@@ -551,10 +589,22 @@ function GeneratePriceOffer(props: any) {
                 return null;
             });
             
-            var suppliersRecentlySelected = mySeafreights.map((elm: any) => { return {carrierName: elm.carrierName, defaultContainer: elm.defaultContainer} });
-            setMiscs(response.length !== 0 ? 
+            var myFreights = formState.rowSelectionModel.length !== 0 && seafreights !== null ? seafreights.filter((elm: any) => formState.rowSelectionModel.includes(elm.seaFreightId)) : [];
+            var suppliersRecentlySelected = myFreights.map((elm: any) => { return {carrierName: elm.carrierName, defaultContainer: elm.defaultContainer} });
+            
+            var arrayFinal = response.length !== 0 ? 
                 response[0].suppliers.filter((elm: any) => myContainers.includes(elm.containers[0].container.packageName)).filter((elm: any) => new Date(elm.validUntil) > new Date()).filter((elm: any) => suppliersRecentlySelected.some((val: any) => val.carrierName === elm.supplierName && val.defaultContainer === elm.containers[0].container.packageName)).map((elm: any) => { return {...elm, defaultContainer: elm.containers[0].container.packageName}})
-            : []);
+            : [];
+            setMiscs(arrayFinal);
+            
+            // if (miscs !== null && generalMiscs !== null) {
+            //     console.log("xxx");
+            //     setTableMiscs([...arrayFinal, ...miscs, ...generalMiscs]);
+            //     setFormState({...formState, rowSelectionModel3: [...arrayFinal, ...miscs].map((elm: any) => elm.miscellaneousId)});
+            //     // setRowSelectionModel3([...arrayFinal, ...miscs].map((elm: any) => elm.miscellaneousId));
+            // }
+
+            setLoadResults(false);
         }
     }
 
@@ -562,12 +612,13 @@ function GeneratePriceOffer(props: any) {
         setLoadGeneralMiscs(true);
         if (context && account) {
             var response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisPricing.endPoint+"/Miscellaneous/Miscellaneous?withShipment=false", tempToken);
-            setLoadGeneralMiscs(false);
             
-            // console.log(response);
-            var suppliersRecentlySelected = mySeafreights.map((elm: any) => { return {carrierName: elm.carrierName, defaultContainer: elm.defaultContainer} });
-            
-            setGeneralMiscs(response.length !== 0 ? 
+            console.log(response);
+            var myFreights = formState.rowSelectionModel.length !== 0 && seafreights !== null ? seafreights.filter((elm: any) => formState.rowSelectionModel.includes(elm.seaFreightId)) : [];
+            var suppliersRecentlySelected = myFreights.map((elm: any) => { return {carrierName: elm.carrierName, defaultContainer: elm.defaultContainer} });
+            console.log(suppliersRecentlySelected);
+
+            var arrayFinal = response.length !== 0 ? 
                 response
                 .filter((elm: any) => new Date(elm.validUntil) > new Date())
                 .filter((elm: any) => suppliersRecentlySelected.some((val: any) => val.defaultContainer === elm.containers[0].container.packageName || elm.containers[0].container.packageName === null))
@@ -576,7 +627,17 @@ function GeneratePriceOffer(props: any) {
                     textServices: elm.containers !== null ? elm.containers[0] ? getServicesTotal(elm.containers, t(elm.currency), 0) : "N/A" : null,
                     costTotal: elm.containers !== null ? elm.containers[0] ? getTotalNumber(elm.containers) : "N/A" : null
                 }})
-            : []);
+            : [];
+            setGeneralMiscs(arrayFinal);
+            
+            // if (miscsHaulage !== null && miscs !== null) {
+            //     console.log("xxx");
+            //     setTableMiscs([...miscsHaulage, ...miscs, ...arrayFinal]);
+            //     setFormState({...formState, rowSelectionModel3: [...miscsHaulage, ...miscs].map((elm: any) => elm.miscellaneousId)});
+            //     // setRowSelectionModel3([...miscsHaulage, ...miscs].map((elm: any) => elm.miscellaneousId));
+            // }
+
+            setLoadGeneralMiscs(false);
         }
     }
 
@@ -602,9 +663,18 @@ function GeneratePriceOffer(props: any) {
             });
             
             const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisPricing.endPoint+"/Miscellaneous/Miscellaneous?supplierId="+formState.selectedHaulage.haulierId+"&departurePortId="+Number(hashCode(city))+"&destinationPortId="+formState.selectedHaulage.loadingPortId+"&withShipment=true", tempToken);
-            setLoadMiscsHaulage(false);
             
-            setMiscsHaulage(response.length !== 0 ? response[0].suppliers.filter((elm: any) => myContainers.includes(elm.containers[0].container.packageName)).filter((elm: any) => new Date(elm.validUntil) > new Date()) : []);
+            var arrayFinal = response.length !== 0 ? response[0].suppliers.filter((elm: any) => myContainers.includes(elm.containers[0].container.packageName)).filter((elm: any) => new Date(elm.validUntil) > new Date()) : [];
+            setMiscsHaulage(arrayFinal);
+            
+            // if (miscs !== null && generalMiscs !== null) {
+            //     console.log("xxx");
+            //     setTableMiscs([...arrayFinal, ...miscs, generalMiscs]);
+            //     setFormState({...formState, rowSelectionModel3: [...arrayFinal, ...miscs].map((elm: any) => elm.miscellaneousId)});
+            //     // setRowSelectionModel3([...arrayFinal, ...miscs].map((elm: any) => elm.miscellaneousId));
+            // }
+            
+            setLoadMiscsHaulage(false);
         }
     }
 
@@ -633,27 +703,47 @@ function GeneratePriceOffer(props: any) {
                         "containerNames": [null]
                     }
                 }
-                if (selectedMisc !== undefined && selectedMisc !== null) {
-                    miscellaneous = [
-                        {
-                            "id": selectedMisc.id,
+                if (formState.selectedMisc !== undefined && formState.selectedMisc !== null) {
+                    // miscellaneous = [
+                    //     {
+                    //         "id": formState.selectedMisc.id,
+                    //         "departurePortId": null,
+                    //         "destinationPortId": null,
+                    //         "departurePortName": null,
+                    //         "destinationPortName": null,
+                    //         "supplierId": 0,
+                    //         "supplierName": formState.selectedMisc.supplierName,
+                    //         "currency": formState.selectedMisc.currency,
+                    //         "price20": formState.selectedMisc.price20,
+                    //         "price40": formState.selectedMisc.price40,
+                    //         "price20dry": formState.selectedMisc.price20dry,
+                    //         "price20rf": formState.selectedMisc.price20rf,
+                    //         "price40dry": formState.selectedMisc.price40dry,
+                    //         "price40hc": formState.selectedMisc.price40hc,
+                    //         "price40hcrf": formState.selectedMisc.price40hcRf,
+                    //         "validUntil": formState.selectedMisc.validUntil,
+                    //     }                      
+                    // ];
+                    miscellaneous = formState.myMiscs.map((elm: any) => {
+                        return {
+                            "id": elm.miscellaneousId,
                             "departurePortId": null,
                             "destinationPortId": null,
                             "departurePortName": null,
                             "destinationPortName": null,
                             "supplierId": 0,
-                            "supplierName": selectedMisc.supplierName,
-                            "currency": selectedMisc.currency,
-                            "price20": selectedMisc.price20,
-                            "price40": selectedMisc.price40,
-                            "price20dry": selectedMisc.price20dry,
-                            "price20rf": selectedMisc.price20rf,
-                            "price40dry": selectedMisc.price40dry,
-                            "price40hc": selectedMisc.price40hc,
-                            "price40hcrf": selectedMisc.price40hcRf,
-                            "validUntil": selectedMisc.validUntil,
-                        }                      
-                    ]
+                            "supplierName": elm.supplierName,
+                            "currency": elm.currency,
+                            "price20": elm.total20,
+                            "price40": elm.total40,
+                            "price20dry": elm.total20Dry,
+                            "price20rf": elm.total20RF,
+                            "price40dry": elm.total40Dry,
+                            "price40hc": elm.total40HC,
+                            "price40hcrf": elm.total40HCRF,
+                            "validUntil": elm.validUntil,
+                        }
+                    })
                 }
                 var dataSent = {
                     "requestQuoteId": Number(id),
@@ -765,8 +855,8 @@ function GeneratePriceOffer(props: any) {
         var destinationPort = portDestination !== null ? portDestination.portName+', '+portDestination.country.toUpperCase() : "";
         var commodities:any = tags.map((elm: any) => elm.productName).join(',');
         
-        // var auxServices = [...miscs,...myMiscs];
-        var auxServices = myMiscs;
+        // var auxServices = [...miscs,...formState.myMiscs];
+        var auxServices = formState.myMiscs;
         var listServices = auxServices !== null && auxServices.length !== 0 ? 
             auxServices.map((elm: any, index: number) => elm.defaultContainer !== null ? "<p>- "+getServices(elm.containers, elm.currency)+" inclus</p>" : "<p>- "+getServicesTotal(elm.containers, elm.currency, 50)+" supplémentaires</p>").join("")
         : "<br>";
@@ -776,7 +866,7 @@ function GeneratePriceOffer(props: any) {
         {
             var auxFrequency = 0;
             var auxTransitTime = "";
-            var aux1 = seafreights.filter((val: any) => formState.rowSelectionModel.includes(val.seaFreightId)).find((val: any) => val.defaultContainer === elm.container);
+            var aux1 = seafreights !== undefined && seafreights !== null ? seafreights.filter((val: any) => formState.rowSelectionModel.includes(val.seaFreightId)).find((val: any) => val.defaultContainer === elm.container) : [];
             if (calculateSeafreightPrice(elm.container, elm.quantity, index) !== 0) {
                 if (aux1 !== undefined) {
                     auxFrequency = aux1.frequency;
@@ -813,10 +903,10 @@ function GeneratePriceOffer(props: any) {
         var destinationPort = portDestination !== null ? portDestination.portName+', '+portDestination.country.toUpperCase() : "";
         var commodities:any = tags.map((elm: any) => elm.productName).join(',');
         
-        // var auxServices = [...miscs,...myMiscs];
-        var auxServices = myMiscs;
+        // var auxServices = [...miscs,...formState.myMiscs];
+        var auxServices = formState.myMiscs;
         // console.log(auxServices);
-        var listServices = auxServices !== null && auxServices.length !== 0 ? 
+        var listServices = auxServices !== undefined && auxServices !== null && auxServices.length !== 0 ? 
             auxServices.map((elm: any) => elm.defaultContainer !== null ? "<p>- "+getServices(elm.containers, elm.currency)+" inclus</p>" : "<p>- "+getServicesTotal(elm.containers, elm.currency, 50)+" supplémentaires</p>").join("")
         : "<br>";
         
@@ -850,7 +940,7 @@ function GeneratePriceOffer(props: any) {
 
         const variables = { loadingCity, destinationPort, commodities, clientName, freeTime, overtimeTariff, frequency, transitTime, containersQuantities, listServices, pricesContainers };
         rteRef.current?.editor?.commands.setContent(generateEmailContent(mailLanguage !== "en" ? templateBase.content : templateBase.contentEn, variables));
-    }, [tags, departure, clientNumber, portDestination, formState.selectedSeafreight, formState.selectedHaulage, selectedMisc, containersSelection, margins, addings]);
+    }, [tags, departure, clientNumber, portDestination, formState.selectedSeafreight, formState.selectedHaulage, formState.selectedMisc, containersSelection, margins, addings]);
 
 
 
@@ -867,14 +957,14 @@ function GeneratePriceOffer(props: any) {
                 </AccordionSummary>
                 <AccordionDetails>
                     <Box sx={{ px: 0 }}>
-                        <Stepper activeStep={activeStep} sx={{ px: 1 }}>
+                        <Stepper activeStep={formState.activeStep} sx={{ px: 1 }}>
                             {steps.map((label, index) => {
                                 const stepProps: { completed?: boolean } = {};
                                 const labelProps: {
                                     optional?: React.ReactNode;
                                 } = {};
                                 if (isStepOptional(index)) {
-                                    labelProps.optional = (<Typography variant="caption">{t('optional')}</Typography>);
+                                    labelProps.optional = (<Typography variant="caption">{t('optional')}-{formState.activeStep}</Typography>);
                                 }
                                 if (isStepSkipped(index)) {
                                     stepProps.completed = false;
@@ -886,7 +976,7 @@ function GeneratePriceOffer(props: any) {
                                 );
                             })}
                         </Stepper>
-                        {activeStep === steps.length ? (
+                        {formState.activeStep === steps.length ? (
                             <React.Fragment>
                                 <Typography sx={{ mt: 2, mb: 1 }}>
                                     All steps completed - you&apos;re finished
@@ -899,7 +989,7 @@ function GeneratePriceOffer(props: any) {
                         ) : (
                             <React.Fragment>
                                 {
-                                    activeStep === 0 ?
+                                    formState.activeStep === 0 ?
                                     <Grid container spacing={2} mt={1} px={2}>
                                         <Grid item xs={12} md={6} mt={1}>
                                             <InputLabel htmlFor="loading-city" sx={inputLabelStyles}>{t('departure')} / {t('loadingCity')}</InputLabel>
@@ -966,7 +1056,7 @@ function GeneratePriceOffer(props: any) {
                                                         initialState={{
                                                             pagination: {
                                                                 paginationModel: {
-                                                                    pageSize: 7,
+                                                                    pageSize: 10,
                                                                 },
                                                             },
                                                         }}
@@ -977,7 +1067,11 @@ function GeneratePriceOffer(props: any) {
                                                         onRowSelectionModelChange={(newRowSelectionModel: any) => {
                                                             // setRowSelectionModel2(newRowSelectionModel);
                                                             // setSelectedHaulage(newRowSelectionModel.length !== 0 ? haulages.find((elm: any) => elm.id === newRowSelectionModel[0]) : null);
-                                                            setFormState({...formState, selectedHaulage: newRowSelectionModel.length !== 0 ? haulages.find((elm: any) => elm.id === newRowSelectionModel[0]) : null, rowSelectionModel2: newRowSelectionModel});
+                                                            setFormState({
+                                                                ...formState, 
+                                                                selectedHaulage: newRowSelectionModel.length !== 0 ? haulages.find((elm: any) => elm.id === newRowSelectionModel[0]) : null, 
+                                                                rowSelectionModel2: newRowSelectionModel
+                                                            });
                                                             // handleChangeFormState(newRowSelectionModel.length !== 0 ? haulages.find((elm: any) => elm.id === newRowSelectionModel[0]) : null, "selectedHaulage");
                                                         }}
                                                         rowSelectionModel={formState.rowSelectionModel2}
@@ -993,7 +1087,7 @@ function GeneratePriceOffer(props: any) {
                                     </Grid> : null
                                 }
                                 {
-                                    activeStep === 1 ? 
+                                    formState.activeStep === 1 ? 
                                     <Grid container spacing={2} mt={1} px={2}>
                                         <Grid item xs={12} md={6} mt={1}>
                                             <InputLabel htmlFor="port-departure" sx={inputLabelStyles}><Anchor fontSize="small" sx={inputIconStyles} /> {t('departurePort')}</InputLabel>
@@ -1103,7 +1197,7 @@ function GeneratePriceOffer(props: any) {
                                                         initialState={{
                                                             pagination: {
                                                                 paginationModel: {
-                                                                    pageSize: 7,
+                                                                    pageSize: 10,
                                                                 },
                                                             },
                                                         }}
@@ -1126,8 +1220,12 @@ function GeneratePriceOffer(props: any) {
                                                                 if (checkDifferentDefaultContainer(myFreights)) {
                                                                     // setRowSelectionModel(newRowSelectionModel);
                                                                     // setSelectedSeafreight(newRowSelectionModel.length !== 0 ? seafreights.find((elm: any) => elm.seaFreightId === newRowSelectionModel[0]) : null);
-                                                                    setFormState({...formState, rowSelectionModel: newRowSelectionModel, selectedSeafreight: newRowSelectionModel.length !== 0 ? seafreights.find((elm: any) => elm.seaFreightId === newRowSelectionModel[0]) : null});
-                                                                    setMySeafreights(myFreights);
+                                                                    setFormState({
+                                                                        ...formState, 
+                                                                        rowSelectionModel: newRowSelectionModel, 
+                                                                        selectedSeafreight: newRowSelectionModel.length !== 0 ? seafreights.find((elm: any) => elm.seaFreightId === newRowSelectionModel[0]) : null
+                                                                    });
+                                                                    // setMySeafreights(myFreights);
                                                                     // setSelectedSeafreight(newRowSelectionModel.length !== 0 ? seafreights.filter((elm: any) => newRowSelectionModel.includes(elm.seaFreightId)) : null);
                                                                 }
                                                                 else {
@@ -1153,7 +1251,7 @@ function GeneratePriceOffer(props: any) {
                                     : null
                                 }
                                 {
-                                    activeStep === 2 ? 
+                                    formState.activeStep === 2 ? 
                                     <Grid container spacing={2} mt={1} px={2}>
                                         <Grid item xs={12}>
                                             <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>{t('listMiscPricingOffers')+t('fromDotted')+portDeparture.portName+"-"+portDestination.portName}</Typography>
@@ -1164,6 +1262,21 @@ function GeneratePriceOffer(props: any) {
                                                     </Typography>    
                                                 </Grid>
                                                 <Grid item xs={4}>
+                                                    <Button 
+                                                        variant="contained" 
+                                                        color="inherit" 
+                                                        sx={{ 
+                                                            textTransform: "none", backgroundColor: "#fff", 
+                                                            color: "#333", float: "right", marginTop: "8px", marginLeft: "10px" 
+                                                        }} 
+                                                        onClick={() => {
+                                                            getMiscellaneousPriceOffers();
+                                                            getHaulageMiscellaneousPriceOffers();
+                                                            getGeneralMiscellaneousPriceOffers();
+                                                        }}
+                                                    >
+                                                        {t('reload')} <RestartAlt fontSize='small' />
+                                                    </Button>
                                                     <Button 
                                                         variant="contained" 
                                                         color="inherit" 
@@ -1180,45 +1293,54 @@ function GeneratePriceOffer(props: any) {
                                                     {
                                                         !loadGeneralMiscs && !loadResults && !loadMiscsHaulage ? 
                                                         tableMiscs !== null && tableMiscs.length !== 0 ?
-                                                            <Box sx={{ overflow: "auto" }}>
-                                                                <DataGrid
-                                                                    rows={tableMiscs}
-                                                                    columns={columnsMiscs}
-                                                                    // hideFooter
-                                                                    initialState={{
-                                                                        pagination: {
-                                                                            paginationModel: {
-                                                                                pageSize: 7,
-                                                                            },
+                                                        <Box sx={{ overflow: "auto" }}>
+                                                            <DataGrid
+                                                                rows={tableMiscs}
+                                                                columns={columnsMiscs}
+                                                                // hideFooter
+                                                                initialState={{
+                                                                    pagination: {
+                                                                        paginationModel: {
+                                                                            pageSize: 10,
                                                                         },
-                                                                    }}
-                                                                    pageSizeOptions={[5, 10]}
-                                                                    getRowId={(row: any) => row?.miscellaneousId}
-                                                                    getRowHeight={() => "auto" }
-                                                                    style={sizingStyles}
-                                                                    sx={gridStyles}
-                                                                    disableDensitySelector
-                                                                    disableColumnSelector
-                                                                    slots={{ toolbar: GridToolbar }}
-                                                                    slotProps={{
-                                                                        toolbar: {
-                                                                            showQuickFilter: true,
-                                                                        },
-                                                                    }}
-                                                                    onRowSelectionModelChange={(newRowSelectionModel: any) => {
-                                                                        setRowSelectionModel3(newRowSelectionModel);
-                                                                        setMyMiscs(newRowSelectionModel.length !== 0 ? 
-                                                                            tableMiscs
-                                                                            .filter((elm: any) => newRowSelectionModel.includes(elm.miscellaneousId))
-                                                                            .map((elm: any) => { return {...elm, defaultContainer: elm.containers[0].container.packageName}}) : 
-                                                                        []);
-                                                                        setSelectedMisc(newRowSelectionModel.length !== 0 ? generalMiscs.find((elm: any) => elm.id === newRowSelectionModel[0]) : null);
-                                                                    }}
-                                                                    rowSelectionModel={rowSelectionModel3}
-                                                                    checkboxSelection
-                                                                    // onRowClick={handleRowMiscsClick}
-                                                                />
-                                                            </Box> : <Alert severity="error">{t('noResults')}</Alert>
+                                                                    },
+                                                                }}
+                                                                pageSizeOptions={[5, 10]}
+                                                                getRowId={(row: any) => row?.miscellaneousId}
+                                                                getRowHeight={() => "auto" }
+                                                                style={sizingStyles}
+                                                                sx={gridStyles}
+                                                                disableDensitySelector
+                                                                disableColumnSelector
+                                                                slots={{ toolbar: GridToolbar }}
+                                                                slotProps={{
+                                                                    toolbar: {
+                                                                        showQuickFilter: true,
+                                                                    },
+                                                                }}
+                                                                onRowSelectionModelChange={(newRowSelectionModel: any) => {
+                                                                    // setRowSelectionModel3(newRowSelectionModel);
+                                                                    // setMyMiscs(newRowSelectionModel.length !== 0 ? 
+                                                                    //     tableMiscs
+                                                                    //     .filter((elm: any) => newRowSelectionModel.includes(elm.miscellaneousId))
+                                                                    //     .map((elm: any) => { return {...elm, defaultContainer: elm.containers[0].container.packageName}}) : 
+                                                                    // []);
+                                                                    setFormState({
+                                                                        ...formState, 
+                                                                        selectedMisc: newRowSelectionModel.length !== 0 ? generalMiscs.find((elm: any) => elm.id === newRowSelectionModel[0]) : null,
+                                                                        myMiscs: newRowSelectionModel.length !== 0 ? 
+                                                                        tableMiscs
+                                                                        .filter((elm: any) => newRowSelectionModel.includes(elm.miscellaneousId))
+                                                                        .map((elm: any) => { return {...elm, defaultContainer: elm.containers[0].container.packageName}}) : [],
+                                                                        rowSelectionModel3: newRowSelectionModel
+                                                                    });
+                                                                    // setSelectedMisc(newRowSelectionModel.length !== 0 ? generalMiscs.find((elm: any) => elm.id === newRowSelectionModel[0]) : null);
+                                                                }}
+                                                                rowSelectionModel={formState.rowSelectionModel3}
+                                                                checkboxSelection
+                                                                // onRowClick={handleRowMiscsClick}
+                                                            />
+                                                        </Box> : <Alert severity="error">{t('noResults')}</Alert>
                                                         : <Skeleton />
                                                     }
                                                 </Grid>
@@ -1228,7 +1350,7 @@ function GeneratePriceOffer(props: any) {
                                     : null
                                 }
                                 {
-                                    activeStep === 3 ?
+                                    formState.activeStep === 3 ?
                                     <Grid container spacing={2} mt={1} px={2}>
                                         {
                                             formState.selectedHaulage !== null && formState.selectedHaulage !== undefined ? 
@@ -1242,7 +1364,7 @@ function GeneratePriceOffer(props: any) {
                                                         initialState={{
                                                             pagination: {
                                                                 paginationModel: {
-                                                                    pageSize: 7,
+                                                                    pageSize: 10,
                                                                 },
                                                             },
                                                         }}
@@ -1259,13 +1381,16 @@ function GeneratePriceOffer(props: any) {
                                             <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>{t('selectedSeafreight')}</Typography>
                                             <Box sx={{ overflow: "auto" }}>
                                                 <DataGrid
-                                                    rows={seafreights.filter((elm: any) => formState.rowSelectionModel.includes(elm.seaFreightId))}
+                                                    rows={
+                                                        seafreights !== undefined && seafreights !== null ? 
+                                                        seafreights.filter((elm: any) => formState.rowSelectionModel !== undefined && formState.rowSelectionModel !== null ? formState.rowSelectionModel.includes(elm.seaFreightId) : []) : []
+                                                    }
                                                     columns={columnsSeafreights}
                                                     // hideFooter
                                                     initialState={{
                                                         pagination: {
                                                             paginationModel: {
-                                                                pageSize: 7,
+                                                                pageSize: 10,
                                                             },
                                                         },
                                                     }}
@@ -1278,18 +1403,18 @@ function GeneratePriceOffer(props: any) {
                                             </Box>
                                         </Grid>
                                         {
-                                            myMiscs !== null && myMiscs.length !== 0 ? 
+                                            formState.myMiscs !== null && formState.myMiscs.length !== 0 ? 
                                             <Grid item xs={12}>
                                                 <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>Selected miscellaneous</Typography>
                                                 <Box sx={{ overflow: "auto" }}>
                                                     <DataGrid
-                                                        rows={myMiscs}
+                                                        rows={formState.myMiscs}
                                                         columns={columnsMiscs}
                                                         // hideFooter
                                                         initialState={{
                                                             pagination: {
                                                                 paginationModel: {
-                                                                    pageSize: 7,
+                                                                    pageSize: 10,
                                                                 },
                                                             },
                                                         }}
@@ -1341,11 +1466,11 @@ function GeneratePriceOffer(props: any) {
                                         <Grid item xs={12}>
                                             <Box sx={{ border: "1px solid #e5e5e5", backgroundColor: "#fff", p: 2 }}>
                                                 {
-                                                    containersSelection !== null && formState.rowSelectionModel.length !== 0 ?
+                                                    containersSelection !== null && formState.rowSelectionModel.length !== 0 && seafreights !== undefined && seafreights !== null ?
                                                     seafreights.filter((elm: any) => formState.rowSelectionModel.includes(elm.seaFreightId))
                                                     .map((element: any, index: number) => {
                                                         var containerElm = containersSelection.find((val: any) => val.container === element.containers[0].container.packageName);
-                                                        var allMiscs = myMiscs;
+                                                        var allMiscs = formState.myMiscs;
                                                         console.log(allMiscs);
                                                         var miscsSelected = [];
                                                         if (containerElm !== undefined && containerElm !== null) {
@@ -1423,19 +1548,19 @@ function GeneratePriceOffer(props: any) {
                                         variant="contained" 
                                         color="inherit" 
                                         sx={whiteButtonStyles}
-                                        disabled={activeStep === 0}
+                                        disabled={formState.activeStep === 0}
                                         onClick={handleBack}
                                     >
                                         {t('back')}
                                     </Button>
                                     <Box sx={{ flex: '1 1 auto' }} />
-                                    {isStepOptional(activeStep) && (
+                                    {isStepOptional(formState.activeStep) && (
                                     <Button variant="contained" color="inherit" sx={whiteButtonStyles} onClick={handleSkip} style={{ marginRight: "10px" }}>
                                         {t('skip')}
                                     </Button>
                                     )}
-                                    <Button variant="contained" color="inherit" sx={whiteButtonStyles} onClick={handleNext} disabled={activeStep === steps.length - 1 ? loadNewOffer : false}>
-                                        {activeStep === steps.length - 1 ? t('sendOfferValidation') : t('nextStep')}
+                                    <Button variant="contained" color="inherit" sx={whiteButtonStyles} onClick={handleNext} disabled={formState.activeStep === steps.length - 1 ? loadNewOffer : false}>
+                                        {formState.activeStep === steps.length - 1 ? t('sendOfferValidation') : t('nextStep')}
                                     </Button>
                                 </Box>
                             </React.Fragment>

@@ -31,6 +31,8 @@ import {
 	type RichTextEditorRef,
 } from "mui-tiptap";
 import { MuiFileInput } from 'mui-file-input';
+import GeneratePriceOffer from '../components/editRequestPage/GeneratePriceOffer';
+import { containerPackages } from '../utils/constants';
 
 function statusLabel(value: string) {
 	if (value === "Accepted")
@@ -52,7 +54,16 @@ function ManagePriceOffer(props: any) {
 	const [containers, setContainers] = useState<any>(null);
 	const [containersId, setContainersId] = useState<any>([]);
 
-	let { id } = useParams();
+	const [portDestination, setPortDestination] = useState<any>(null);
+    const [portDeparture, setPortDeparture] = useState<any>(null);
+    const [loadingCity, setLoadingCity] = useState<any>(null);
+    const [products, setProducts] = useState<any>(null);
+    const [ports, setPorts] = useState<any>(null);
+    const [ports1, setPorts1] = useState<any>(null);
+    const [ports2, setPorts2] = useState<any>(null);
+    // const [containers, setContainers] = useState<any>(null);
+    
+    let { id } = useParams();
 	const { instance, accounts } = useMsal();
 	const account = useAccount(accounts[0] || {});
 	const context = useAuthorizedBackendApi();
@@ -89,34 +100,36 @@ function ManagePriceOffer(props: any) {
 	}
 
 	const getContainers = async () => {
-		if (context && account) {
-			setLoad(true);
-			const token = await instance.acquireTokenSilent({
-				scopes: transportRequest.scopes,
-				account: account
-			})
-			.then((response: AuthenticationResult) => {
-				return response.accessToken;
-			})
-			.catch(() => {
-				return instance.acquireTokenPopup({
-					...transportRequest,
-					account: account
-				})
-				.then((response) => {
-					return response.accessToken;
-				});
-			});
+		// if (context && account) {
+		// 	setLoad(true);
+		// 	const token = await instance.acquireTokenSilent({
+		// 		scopes: transportRequest.scopes,
+		// 		account: account
+		// 	})
+		// 	.then((response: AuthenticationResult) => {
+		// 		return response.accessToken;
+		// 	})
+		// 	.catch(() => {
+		// 		return instance.acquireTokenPopup({
+		// 			...transportRequest,
+		// 			account: account
+		// 		})
+		// 		.then((response) => {
+		// 			return response.accessToken;
+		// 		});
+		// 	});
 
-			const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint + "/Package/Containers", token);
-			console.log("Containers", response);
-			if (response !== null && response !== undefined) {
-				setContainers(response);
+		// 	const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint + "/Package/Containers", token);
+		// 	console.log("Containers", response);
+		// 	if (response !== null && response !== undefined) {
+		// 		setContainers(response);
 
-				// Now I can call the quote offer
-				loadOffer();
-			}
-		}
+		// 		// Now I can call the quote offer
+		// 		loadOffer();
+		// 	}
+		// }
+		setContainers(containerPackages);
+		loadOffer();
 	}
 
 	const updateOffer = async () => {
@@ -265,6 +278,30 @@ function ManagePriceOffer(props: any) {
 				{
 					!load ?
 					<Grid container spacing={2} mt={1} px={5}>
+						{/* Generate Price Offer COMPONENT */}
+                        {/* <GeneratePriceOffer
+                            context={context}
+                            account={account}
+                            instance={instance}
+                            id={offer.requestQuoteId}
+                            email={offer.emailUser}
+                            tags={tags}
+                            clientNumber={clientNumber}
+                            departure={departure}
+                            setDeparture={setDeparture}
+                            loadingCity={loadingCity}
+                            setLoadingCity={setLoadingCity}
+                            portDestination={portDestination}
+                            setPortDestination={setPortDestination}
+                            portDeparture={portDeparture}
+                            setPortDeparture={setPortDeparture}
+                            containersSelection={containersSelection}
+                            ports={ports}
+                            products={products}
+                            ports1={ports1}
+                            ports2={ports2}
+                            containers={containers}
+                        /> */}
 						<Grid item xs={12}>
 							<Typography variant="h5" sx={{ my: 1, fontSize: 19, fontWeight: "bold" }}>{t('selectedContainers')}</Typography>
 							{
@@ -285,7 +322,7 @@ function ManagePriceOffer(props: any) {
 								</Grid>
 							}
 						</Grid>
-						{/* <Grid item xs={12}>
+						<Grid item xs={12}>
 							<Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>{t('selectedSeafreight')}</Typography>
 							<DataGrid
 								rows={[offer.seaFreight]}
@@ -315,7 +352,7 @@ function ManagePriceOffer(props: any) {
 								sx={gridStyles}
 								isRowSelectable={(params: any) => false}
 							/>
-						</Grid> */}
+						</Grid>
 						{/* {
 							offer.haulage !== null && offer.haulage !== undefined ?
 							<Grid item xs={12}>
@@ -409,14 +446,14 @@ function ManagePriceOffer(props: any) {
 							<InputLabel htmlFor="adding" sx={inputLabelStyles}>{t('extraFee')}</InputLabel>
 							<BootstrapInput id="adding" type="number" value={adding} onChange={(e: any) => setAdding(e.target.value)} fullWidth />
 						</Grid> */}
-						<Grid item xs={8}>
+						{/* <Grid item xs={8}>
 							<InputLabel htmlFor="fileSent" sx={inputLabelStyles}>{t('fileSent')}</InputLabel>
 							<MuiFileInput
 								id="fileSent" size="small" variant="outlined" multiple fullWidth inputProps={{ accept: '.pdf' }}
 								value={fileValue} sx={{ mt: 1 }} onChange={(newValue: any) => { console.log(newValue); setFileValue(newValue); }}
 							/>
-						</Grid>
-						<Grid item xs={12}>
+						</Grid> */}
+						{/* <Grid item xs={12}>
 							<InputLabel htmlFor="details" sx={inputLabelStyles}>{t('detailsOffer')}</InputLabel>
 							<Box sx={{ mt: 2 }}>
 								<RichTextEditor
@@ -429,7 +466,6 @@ function ManagePriceOffer(props: any) {
 									<MenuDivider />
 									<MenuButtonBold />
 									<MenuButtonItalic />
-									{/* <MenuButtonUnderline /> */}
 									<MenuButtonStrikethrough />
 									<MenuButtonOrderedList />
 									<MenuButtonBulletedList />
@@ -438,12 +474,11 @@ function ManagePriceOffer(props: any) {
 									<MenuButtonHorizontalRule />
 									<MenuButtonUndo />
 									<MenuButtonRedo />
-									{/* Add more controls of your choosing here */}
 									</MenuControlsContainer>
 								)}
 								/>
 							</Box>
-						</Grid>
+						</Grid> */}
 						{/* <Grid item xs={12}>
 						<Typography variant="h6">
 							{ 

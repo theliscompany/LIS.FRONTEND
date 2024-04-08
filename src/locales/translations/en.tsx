@@ -401,5 +401,12 @@ export const en = {
   messageOkGeneralMiscs: "Your general misc services have been recorded!",
   included: "included",
   seafreight: "Seafreight",
-  haulage: "Haulage"
+  haulage: "Haulage",
+  masterdata: "Masterdata",
+  services: "Services",
+  servicesTypesId: "Types of services",
+  newService: "Create a new service",
+  deleteRowService: "Delete a service",
+  editRowService: "Edit a service",
+  createRowService: "Create a service",
 };
