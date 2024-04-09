@@ -13,9 +13,8 @@ import CountrySelect from '../shared/CountrySelect';
 
 function NewContact(props: any) {
     const [testName, setTestName] = useState<string>("");
-    const [addressCountry, setAddressCountry] = useState<string>("");
-    const [countryCode, setCountryCode] = useState<string>("CM");
     const [country, setCountry] = useState<any>(null);
+    const [addressCountry, setAddressCountry] = useState<string>("");
     const [testPhone, setTestPhone] = useState<string>("");
     const [testEmail, setTestEmail] = useState<string>("");
     
@@ -115,10 +114,6 @@ function NewContact(props: any) {
                         <InputLabel htmlFor="addressCountry" sx={inputLabelStyles}>{t('addressCountry')}</InputLabel>
                         <BootstrapInput id="addressCountry" type="text" value={addressCountry} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setAddressCountry(e.target.value)} fullWidth />
                     </Grid>
-                    {/* <Grid item xs={12}>
-                        <InputLabel htmlFor="countryCode" sx={inputLabelStyles}>{t('countryCode')}</InputLabel>
-                        <BootstrapInput id="countryCode" type="text" value={countryCode} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setCountryCode(e.target.value)} fullWidth />
-                    </Grid> */}
                     <Grid item xs={12}>
                         <InputLabel htmlFor="countryCode" sx={inputLabelStyles}>{t('countryCode')}</InputLabel>
                         <CountrySelect id="countryCode" value={country} onChange={setCountry} fullWidth />

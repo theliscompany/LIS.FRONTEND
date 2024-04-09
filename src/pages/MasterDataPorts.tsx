@@ -12,16 +12,17 @@ import { DataGrid, GridColDef, GridRenderCellParams, GridToolbar } from '@mui/x-
 import { t } from 'i18next';
 import { sizingStyles, gridStyles, BootstrapDialog, BootstrapDialogTitle, buttonCloseStyles, BootstrapInput, actionButtonStyles, inputLabelStyles } from '../utils/misc/styles';
 import { Edit, Delete } from '@mui/icons-material';
+import CountrySelect from '../components/shared/CountrySelect';
+import { countries } from '../utils/constants';
 
-const MasterDataServices: any = (props: any) => {
-    const [services, setServices] = useState<any>(null);
+const MasterDataPorts: any = (props: any) => {
+    const [products, setPorts] = useState<any>(null);
     const [loadResults, setLoadResults] = useState<boolean>(true);
     const [loadEdit, setLoadEdit] = useState<boolean>(false);
     const [modal, setModal] = useState<boolean>(false);
     const [modal2, setModal2] = useState<boolean>(false);
     const [testName, setTestName] = useState<string>("");
-    const [testDescription, setTestDescription] = useState<string>("");
-    const [selectedServiceTypes, setSelectedServiceTypes] = useState<number[]>([]);
+    const [country, setCountry] = useState<any>(null);
     const [currentId, setCurrentId] = useState<string>("");
     const [currentEditId, setCurrentEditId] = useState<string>("");
     const [tempToken, setTempToken] = useState<string>("");
@@ -30,7 +31,7 @@ const MasterDataServices: any = (props: any) => {
     const account = useAccount(accounts[0] || {});
     const context = useAuthorizedBackendApi();
     
-    const getServices = async () => {
+    const getPorts = async () => {
         if (context && account) {
             setLoadResults(true);
 
@@ -51,12 +52,12 @@ const MasterDataServices: any = (props: any) => {
                 }
             );
             
-            const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Service?pageSize=500", token);
+            const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Port/Ports?pageSize=2000", token);
             if (response !== null && response !== undefined) {
-                setServices(response);
+                setPorts(response);
                 setLoadResults(false);
                 setTempToken(token);
-                // setServices(response.filter((obj: any) => obj.servicesTypeId.includes(5) || obj.servicesTypeId.includes(2))); // Filter the services for miscellaneous (MISCELLANEOUS = 5 & HAULAGE = 2)
+                // setPorts(response.filter((obj: any) => obj.productsTypeId.includes(5) || obj.productsTypeId.includes(2))); // Filter the products for miscellaneous (MISCELLANEOUS = 5 & HAULAGE = 2)
             }
             else {
                 setLoadResults(false);
@@ -64,14 +65,14 @@ const MasterDataServices: any = (props: any) => {
         }
     }
     
-    const deleteServicePrice = async (id: string) => {
+    const deletePort = async (id: string) => {
         if (context && account) {
             try {
-                const response = await (context as BackendService<any>).deleteWithToken(protectedResources.apiLisTransport.endPoint+"/Service/"+id, tempToken);
+                const response = await (context as BackendService<any>).deleteWithToken(protectedResources.apiLisTransport.endPoint+"/Port/DeletePort/"+id, tempToken);
                 console.log(response);
                 enqueueSnackbar(t('rowDeletedSuccess'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
                 setModal2(false);
-                getServices();
+                getPorts();
             }
             catch (e: any) {
                 console.log(e);
@@ -81,36 +82,20 @@ const MasterDataServices: any = (props: any) => {
     }
     
     useEffect(() => {
-        getServices();
+        getPorts();
     }, []);
 
-    const servicesOptions = [
-        {value: 1, name: "SEAFREIGHT"},
-        {value: 2, name: "HAULAGE"},
-        {value: 5, name: "MISCELLANEOUS"},
-    ];
-
-    const columnsServices: GridColDef[] = [
-        { field: 'serviceId', headerName: t('id'), flex: 1 },
-        { field: 'serviceName', headerName: t('serviceName'), flex: 3 },
-        { field: 'servicesTypeId', headerName: t('servicesTypeId'), renderCell: (params: GridRenderCellParams) => {
-            return (
-                <Box sx={{ my: 2 }}>
-                    {
-                        params.row.servicesTypeId.map((id: any) => servicesOptions.find((service) => service.value === id)?.name)
-                        .filter(Boolean)
-                        .join(", ")
-                    }
-                </Box>
-            );
-        }, flex: 2 },
+    const columnsPorts: GridColDef[] = [
+        { field: 'portId', headerName: t('id'), flex: 1 },
+        { field: 'portName', headerName: t('portName'), flex: 3 },
+        { field: 'country', headerName: t('country'), flex: 3 },
         { field: 'xxx', headerName: t('Actions'), renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box sx={{ my: 1, mr: 1 }}>
-                    <IconButton size="small" title={t('editRowService')} sx={{ mr: 0.5 }} onClick={() => { setCurrentEditId(params.row.serviceId); resetForm(); getService(params.row.serviceId); setModal(true); }}>
+                    <IconButton size="small" title={t('editRowPort')} sx={{ mr: 0.5 }} onClick={() => { setCurrentEditId(params.row.portId); resetForm(); getPort(params.row.portId); setModal(true); }}>
                         <Edit fontSize="small" />
                     </IconButton>
-                    <IconButton size="small" title={t('deleteRowService')} onClick={() => { setCurrentId(params.row.serviceId); setModal2(true); }}>
+                    <IconButton size="small" title={t('deleteRowPort')} onClick={() => { setCurrentId(params.row.portId); setModal2(true); }}>
                         <Delete fontSize="small" />
                     </IconButton>
                 </Box>
@@ -118,8 +103,8 @@ const MasterDataServices: any = (props: any) => {
         }, minWidth: 120, flex: 1 },
     ];
     
-    const createNewService = async () => {
-        if (testName !== "" && selectedServiceTypes.length !== 0) {
+    const createNewPort = async () => {
+        if (testName !== "" && country !== null) {
             if (account && context) {
                 const token = await instance.acquireTokenSilent({
                     scopes: transportRequest.scopes,
@@ -143,23 +128,21 @@ const MasterDataServices: any = (props: any) => {
                     var response = null;
                     if (currentEditId !== "") {
                         dataSent = {
-                            "serviceId": currentEditId,
-                            "serviceName": testName,
-                            "serviceDescription": testDescription,
-                            "servicesTypeId": selectedServiceTypes
+                            "portId": currentEditId,
+                            "portName": testName.toUpperCase(),
+                            "country": country.label.toUpperCase(),
                         };
-                        response = await (context as BackendService<any>).putWithToken(protectedResources.apiLisTransport.endPoint+"/Service/"+currentEditId, dataSent, token);
+                        response = await (context as BackendService<any>).putWithToken(protectedResources.apiLisTransport.endPoint+"/Port/UpdatePort/"+currentEditId, dataSent, token);
                     }
                     else {
                         dataSent = {
-                            "serviceName": testName,
-                            "serviceDescription": testDescription,
-                            "servicesTypeId": selectedServiceTypes
+                            "portName": testName.toUpperCase(),
+                            "country": country.label.toUpperCase(),
                         };
-                        response = await (context as BackendService<any>).postWithToken(protectedResources.apiLisTransport.endPoint+"/Service", dataSent, token);
+                        response = await (context as BackendService<any>).postWithToken(protectedResources.apiLisTransport.endPoint+"/Port/CreatePort", dataSent, token);
                     }
-                    enqueueSnackbar(currentEditId === "" ? "The service has been added with success!" : "The service has been edited with success!", { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
-                    getServices();
+                    enqueueSnackbar(currentEditId === "" ? "The port has been added with success!" : "The port has been edited with success!", { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                    getPorts();
                     setModal(false);    
                 }
                 catch (err: any) {
@@ -173,14 +156,14 @@ const MasterDataServices: any = (props: any) => {
         }
     }
     
-    const getService = async (id: string) => {
+    const getPort = async (id: string) => {
         setLoadEdit(true)
         if (context && account) {
-            const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Service/"+id, tempToken);
+            const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Port/GetPort/"+id, tempToken);
             if (response !== null && response !== undefined) {
                 console.log(response);
-                setTestName(response.serviceName);
-                setSelectedServiceTypes(response.servicesTypeId);
+                setTestName(response.portName);
+                setCountry(countries.find((elm: any) => elm.label.toUpperCase() === response.country));
                 setLoadEdit(false);
             }
             else {
@@ -192,8 +175,7 @@ const MasterDataServices: any = (props: any) => {
     
     const resetForm = () => {
         setTestName("");
-        setTestDescription("");
-        setSelectedServiceTypes([]);
+        setCountry(null);
     }
     
     return (
@@ -202,7 +184,7 @@ const MasterDataServices: any = (props: any) => {
             <Box py={2.5}>
                 <Grid container spacing={2} mt={0} px={5}>
                     <Grid item xs={12} md={8}>
-                        <Typography sx={{ fontSize: 18, mb: 1 }}><b>{t('listServices')}</b></Typography>
+                        <Typography sx={{ fontSize: 18, mb: 1 }}><b>{t('listPorts')}</b></Typography>
                     </Grid>
                     <Grid item xs={12} md={4}>
                         <Button 
@@ -210,17 +192,17 @@ const MasterDataServices: any = (props: any) => {
                             sx={{ float: "right", backgroundColor: "#fff", textTransform: "none" }} 
                             onClick={() => { setCurrentEditId(""); resetForm(); setModal(true); }} 
                         >
-                            {t('newService')}
+                            {t('newPort')}
                         </Button>
                     </Grid>
                     <Grid item xs={12}>
                         {
                             !loadResults ? 
-                            services !== null && services.length !== 0 ?
+                            products !== null && products.length !== 0 ?
                             <Box sx={{ overflow: "auto" }}>
                                 <DataGrid
-                                    rows={services}
-                                    columns={columnsServices}
+                                    rows={products}
+                                    columns={columnsPorts}
                                     // hideFooter
                                     initialState={{
                                         pagination: {
@@ -230,7 +212,7 @@ const MasterDataServices: any = (props: any) => {
                                         },
                                     }}
                                     pageSizeOptions={[5, 10, 25, 50]}
-                                    getRowId={(row: any) => row?.serviceId}
+                                    getRowId={(row: any) => row?.portId}
                                     getRowHeight={() => "auto" }
                                     style={sizingStyles}
                                     sx={gridStyles}
@@ -263,44 +245,25 @@ const MasterDataServices: any = (props: any) => {
                 fullWidth
             >
                 <BootstrapDialogTitle id="custom-dialog-title7" onClose={() => setModal(false)}>
-                    <b>{currentEditId === "" ? t('createRowService') : t('editRowService')}</b>
+                    <b>{currentEditId === "" ? t('createRowPort') : t('editRowPort')}</b>
                 </BootstrapDialogTitle>
                 <DialogContent dividers>
                     {
                         loadEdit === false ?
                         <Grid container spacing={2}>
                             <Grid item xs={12}>
-                                <InputLabel htmlFor="test-name" sx={inputLabelStyles}>{t('serviceName')}</InputLabel>
+                                <InputLabel htmlFor="test-name" sx={inputLabelStyles}>{t('portName')}</InputLabel>
                                 <BootstrapInput id="test-name" type="text" value={testName} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTestName(e.target.value)} fullWidth />
                             </Grid>
                             <Grid item xs={12}>
-                                <InputLabel htmlFor="test-description" sx={inputLabelStyles}>Description</InputLabel>
-                                <BootstrapInput id="test-description" type="text" multiline rows={3} value={testDescription} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTestDescription(e.target.value)} fullWidth />
-                            </Grid>
-                            <Grid item xs={12}>
-                                <InputLabel htmlFor="test-services-types" sx={inputLabelStyles}>{t('servicesTypesId')}</InputLabel>
-                                <Select
-                                    labelId="test-services-types"
-                                    id="test-selected-services"
-                                    multiple
-                                    value={selectedServiceTypes}
-                                    onChange={(e: any) => setSelectedServiceTypes(e.target.value as number[])}
-                                    fullWidth
-                                    input={<BootstrapInput />}
-                                    renderValue={(selected: any) => selected.map((value: any) => servicesOptions.find((type: any) => type.value === value)?.name).join(', ')}
-                                >
-                                    {servicesOptions.map((serviceType: any) => (
-                                        <MenuItem key={serviceType.value} value={serviceType.value}>
-                                            {serviceType?.name}
-                                        </MenuItem>
-                                    ))}
-                                </Select>
+                                <InputLabel htmlFor="test-country" sx={inputLabelStyles}>{t('country')}</InputLabel>
+                                <CountrySelect id="test-country" value={country} onChange={setCountry} fullWidth />
                             </Grid>
                         </Grid> : <Skeleton />
                     }
                 </DialogContent>
                 <DialogActions>
-                    <Button variant="contained" onClick={() => { createNewService(); }} sx={actionButtonStyles}>{t('validate')}</Button>
+                    <Button variant="contained" onClick={() => { createNewPort(); }} sx={actionButtonStyles}>{t('validate')}</Button>
                     <Button variant="contained" onClick={() => setModal(false)} sx={buttonCloseStyles}>{t('close')}</Button>
                 </DialogActions>
             </BootstrapDialog>
@@ -313,11 +276,11 @@ const MasterDataServices: any = (props: any) => {
                 fullWidth
             >
                 <BootstrapDialogTitle id="custom-dialog-title" onClose={() => setModal2(false)}>
-                    <b>{t('deleteRowService')}</b>
+                    <b>{t('deleteRowPort')}</b>
                 </BootstrapDialogTitle>
                 <DialogContent dividers>{t('areYouSureDeleteRow')}</DialogContent>
                 <DialogActions>
-                    <Button variant="contained" color={"primary"} onClick={() => { deleteServicePrice(currentId); }} sx={{ mr: 1.5, textTransform: "none" }}>{t('accept')}</Button>
+                    <Button variant="contained" color={"primary"} onClick={() => { deletePort(currentId); }} sx={{ mr: 1.5, textTransform: "none" }}>{t('accept')}</Button>
                     <Button variant="contained" onClick={() => setModal2(false)} sx={buttonCloseStyles}>{t('close')}</Button>
                 </DialogActions>
             </BootstrapDialog>
@@ -325,4 +288,4 @@ const MasterDataServices: any = (props: any) => {
     );
 }
 
-export default MasterDataServices;
+export default MasterDataPorts;

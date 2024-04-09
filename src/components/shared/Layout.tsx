@@ -45,7 +45,7 @@ import Search from '@mui/icons-material/Search';
 
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { ExpandLess, ExpandMore } from '@mui/icons-material';
+import { Anchor, AnchorOutlined, ContactsOutlined, ExpandLess, ExpandMore, FolderOutlined, Inventory, InventoryOutlined, RoomService, RoomServiceOutlined } from '@mui/icons-material';
 
 function stringToColor(string: string) {
     let hash = 0;
@@ -602,7 +602,7 @@ function Layout(props: {children?: React.ReactNode}) {
                             <ListItem className="cs-listitem" key={"Masterdata part"} disablePadding disableGutters>
                                 <ListItemButton className="cs-listitembutton" onClick={() => { setOpenMasterdata(!openMasterdata); }}>
                                     <ListItemIcon className="cs-listitemicon">
-                                        <RequestQuoteOutlinedIcon fontSize="small" />
+                                        <FolderOutlined fontSize="small" />
                                     </ListItemIcon>
                                     <ListItemText primary={t('masterdata')} primaryTypographyProps={{ fontSize: 14 }} />
                                     {openMasterdata ? <ExpandLess /> : <ExpandMore />}
@@ -615,9 +615,45 @@ function Layout(props: {children?: React.ReactNode}) {
                                         <DarkTooltip title={t('services')} placement="right" arrow>
                                             <ListItemButton className="cs-listitembutton">
                                                 <ListItemIcon className="cs-listitemicon">
-                                                    <LocalShippingIcon fontSize="small" />
+                                                    <RoomServiceOutlined fontSize="small" />
                                                 </ListItemIcon>
                                                 <ListItemText primary={t('services')} primaryTypographyProps={{ fontSize: 14 }} />
+                                            </ListItemButton>
+                                        </DarkTooltip>
+                                        </ListItem>
+                                    </NavLink>
+                                    <NavLink to="/admin/products" className={({ isActive }) => isActive ? "cs-navlink-active" : "cs-navlink"}>
+                                        <ListItem className="cs-listitem" key={"Products"} disablePadding disableGutters sx={{ pl: 2 }}>
+                                        <DarkTooltip title={t('products')} placement="right" arrow>
+                                            <ListItemButton className="cs-listitembutton">
+                                                <ListItemIcon className="cs-listitemicon">
+                                                    <InventoryOutlined fontSize="small" />
+                                                </ListItemIcon>
+                                                <ListItemText primary={t('products')} primaryTypographyProps={{ fontSize: 14 }} />
+                                            </ListItemButton>
+                                        </DarkTooltip>
+                                        </ListItem>
+                                    </NavLink>
+                                    <NavLink to="/admin/ports" className={({ isActive }) => isActive ? "cs-navlink-active" : "cs-navlink"}>
+                                        <ListItem className="cs-listitem" key={"Ports"} disablePadding disableGutters sx={{ pl: 2 }}>
+                                        <DarkTooltip title={t('ports')} placement="right" arrow>
+                                            <ListItemButton className="cs-listitembutton">
+                                                <ListItemIcon className="cs-listitemicon">
+                                                    <AnchorOutlined fontSize="small" />
+                                                </ListItemIcon>
+                                                <ListItemText primary={t('ports')} primaryTypographyProps={{ fontSize: 14 }} />
+                                            </ListItemButton>
+                                        </DarkTooltip>
+                                        </ListItem>
+                                    </NavLink>
+                                    <NavLink to="/admin/contacts" className={({ isActive }) => isActive ? "cs-navlink-active" : "cs-navlink"}>
+                                        <ListItem className="cs-listitem" key={"Contacts"} disablePadding disableGutters sx={{ pl: 2 }}>
+                                        <DarkTooltip title={t('contacts')} placement="right" arrow>
+                                            <ListItemButton className="cs-listitembutton">
+                                                <ListItemIcon className="cs-listitemicon">
+                                                    <ContactsOutlined fontSize="small" />
+                                                </ListItemIcon>
+                                                <ListItemText primary={t('contacts')} primaryTypographyProps={{ fontSize: 14 }} />
                                             </ListItemButton>
                                         </DarkTooltip>
                                         </ListItem>
