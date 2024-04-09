@@ -16,7 +16,7 @@ import { Edit, Delete } from '@mui/icons-material';
 const MasterDataProducts: any = (props: any) => {
     const [products, setProducts] = useState<any>(null);
     const [loadResults, setLoadResults] = useState<boolean>(true);
-    const [loadEdit, setLoadEdit] = useState<boolean>(true);
+    const [loadEdit, setLoadEdit] = useState<boolean>(false);
     const [modal, setModal] = useState<boolean>(false);
     const [modal2, setModal2] = useState<boolean>(false);
     const [testName, setTestName] = useState<string>("");
@@ -84,26 +84,9 @@ const MasterDataProducts: any = (props: any) => {
         getProducts();
     }, []);
 
-    const productsOptions = [
-        {value: 1, name: "SEAFREIGHT"},
-        {value: 2, name: "HAULAGE"},
-        {value: 5, name: "MISCELLANEOUS"},
-    ];
-
     const columnsProducts: GridColDef[] = [
         { field: 'productId', headerName: t('id'), flex: 1 },
         { field: 'productName', headerName: t('productName'), flex: 3 },
-        { field: 'productsTypeId', headerName: t('productsTypeId'), renderCell: (params: GridRenderCellParams) => {
-            return (
-                <Box sx={{ my: 2 }}>
-                    {
-                        params.row.productsTypeId.map((id: any) => productsOptions.find((product) => product.value === id)?.name)
-                        .filter(Boolean)
-                        .join(", ")
-                    }
-                </Box>
-            );
-        }, flex: 2 },
         { field: 'xxx', headerName: t('Actions'), renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box sx={{ my: 1, mr: 1 }}>
@@ -119,7 +102,7 @@ const MasterDataProducts: any = (props: any) => {
     ];
     
     const createNewProduct = async () => {
-        if (testName !== "" && selectedProductTypes.length !== 0) {
+        if (testName !== "") {
             if (account && context) {
                 const token = await instance.acquireTokenSilent({
                     scopes: transportRequest.scopes,
@@ -180,7 +163,6 @@ const MasterDataProducts: any = (props: any) => {
             if (response !== null && response !== undefined) {
                 console.log(response);
                 setTestName(response.productName);
-                setSelectedProductTypes(response.productsTypeId);
                 setLoadEdit(false);
             }
             else {
@@ -192,8 +174,6 @@ const MasterDataProducts: any = (props: any) => {
     
     const resetForm = () => {
         setTestName("");
-        setTestDescription("");
-        setSelectedProductTypes([]);
     }
     
     return (
@@ -270,33 +250,8 @@ const MasterDataProducts: any = (props: any) => {
                         loadEdit === false ?
                         <Grid container spacing={2}>
                             <Grid item xs={12}>
-                                <InputLabel htmlFor="test-name" sx={inputLabelStyles}>
-                                    Product name
-                                </InputLabel>
+                                <InputLabel htmlFor="test-name" sx={inputLabelStyles}>Product name</InputLabel>
                                 <BootstrapInput id="test-name" type="text" value={testName} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTestName(e.target.value)} fullWidth />
-                            </Grid>
-                            <Grid item xs={12}>
-                                <InputLabel htmlFor="test-description" sx={inputLabelStyles}>Description</InputLabel>
-                                <BootstrapInput id="test-description" type="text" multiline rows={3} value={testDescription} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTestDescription(e.target.value)} fullWidth />
-                            </Grid>
-                            <Grid item xs={12}>
-                                <InputLabel htmlFor="test-products-types" sx={inputLabelStyles}>{t('productsTypesId')}</InputLabel>
-                                <Select
-                                    labelId="test-products-types"
-                                    id="test-selected-products"
-                                    multiple
-                                    value={selectedProductTypes}
-                                    onChange={(e: any) => setSelectedProductTypes(e.target.value as number[])}
-                                    fullWidth
-                                    input={<BootstrapInput />}
-                                    renderValue={(selected: any) => selected.map((value: any) => productsOptions.find((type: any) => type.value === value)?.name).join(', ')}
-                                >
-                                    {productsOptions.map((productType: any) => (
-                                        <MenuItem key={productType.value} value={productType.value}>
-                                            {productType?.name}
-                                        </MenuItem>
-                                    ))}
-                                </Select>
                             </Grid>
                         </Grid> : <Skeleton />
                     }

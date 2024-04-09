@@ -28,6 +28,9 @@ import AcceptOffer from './pages/AcceptOffer';
 import RefuseOffer from './pages/RefuseOffer';
 import Templates from './pages/Templates';
 import MasterDataServices from './pages/MasterDataServices';
+import MasterDataProducts from './pages/MasterDataProducts';
+import MasterDataPorts from './pages/MasterDataPorts';
+import MasterDataContacts from './pages/MasterDataContacts';
 
 const App = () => {
   return (
@@ -53,6 +56,9 @@ const App = () => {
 							<Route path="miscellaneous" element={<Miscellaneous />} />
 							<Route path="templates" element={<Templates />} />
 							<Route path="services" element={<MasterDataServices />} />
+							<Route path="products" element={<MasterDataProducts />} />
+							<Route path="ports" element={<MasterDataPorts />} />
+							<Route path="contacts" element={<MasterDataContacts />} />
 						</Route> 
 						<Route path="/" element={<Layout children={<Requests />} />} />
 						<Route path="login" element={<Layout children={<Requests />} />} />

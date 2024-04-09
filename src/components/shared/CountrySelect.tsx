@@ -11,6 +11,9 @@ interface CountryAutocompleteProps {
 }
 
 const CountrySelect: React.FC<CountryAutocompleteProps> = ({id, value, onChange, fullWidth}) => {
+    // if (value.label === undefined) {
+    //   value = countries.find((elm: any) => elm.label === value);
+    // }
     return (
         <Autocomplete
             id={id}
@@ -18,6 +21,7 @@ const CountrySelect: React.FC<CountryAutocompleteProps> = ({id, value, onChange,
             autoHighlight
             getOptionLabel={(option: any) => option.label}
             fullWidth={true}
+            // value={value !== null && value.label !== undefined ? value : countries.find((elm: any) => elm.label.toUpperCase() === value)}
             value={value}
             onChange={(event: any, newValue: any) => {
                 onChange(newValue);
