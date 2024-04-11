@@ -6,7 +6,7 @@ import AutocompleteSearch from '../components/shared/AutocompleteSearch';
 import { inputLabelStyles, BootstrapInput, BootstrapDialog, whiteButtonStyles, BootstrapDialogTitle, buttonCloseStyles } from '../utils/misc/styles';
 import { enqueueSnackbar, SnackbarProvider } from 'notistack';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { protectedResources, transportRequest } from '../config/authConfig';
+import { loginRequest, protectedResources, transportRequest } from '../config/authConfig';
 import { useAuthorizedBackendApi } from '../api/api';
 import { BackendService } from '../utils/services/fetch';
 import { MuiChipsInputChip } from 'mui-chips-input';
@@ -143,22 +143,44 @@ function Request() {
 
     const getAssignees = async () => {
         if (context && account) {
-            setLoadAssignees(true);
-            const response = await (context as BackendService<any>).getSingle(protectedResources.apiLisQuotes.endPoint+"/Assignee");
-            if (response !== null && response.code !== undefined) {
-                if (response.code === 200) {
-                    setAssignees(response.data);
-                    setLoadAssignees(false);
+            const token = await instance.acquireTokenSilent({
+                scopes: loginRequest.scopes,
+                account: account
+            })
+            .then((response: AuthenticationResult) => {
+                return response.accessToken;
+            })
+            .catch(() => {
+                return instance.acquireTokenPopup({
+                    ...loginRequest,
+                    account: account
+                    }).then((response) => {
+                        return response.accessToken;
+                    });
+                }
+            );
+            
+            try {
+                setLoadAssignees(true);
+                const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisQuotes.endPoint+"/Assignee", token);
+                if (response !== null && response.code !== undefined) {
+                    if (response.code === 200) {
+                        setAssignees(response.data);
+                        setLoadAssignees(false);
 
-                    // Now i can load the ports (who loads the request later)
-                    // getPorts();
+                        // Now i can load the ports (who loads the request later)
+                        // getPorts();
+                    }
+                    else {
+                        setLoadAssignees(false);
+                    }
                 }
                 else {
                     setLoadAssignees(false);
-                }
+                }   
             }
-            else {
-                setLoadAssignees(false);
+            catch (err: any) {
+                console.log(err);
             }
         }
     }
@@ -666,8 +688,8 @@ function Request() {
                             setLoadingCity={setLoadingCity}
                             portDestination={portDestination}
                             setPortDestination={setPortDestination}
-                            portDeparture={portDeparture}
-                            setPortDeparture={setPortDeparture}
+                            // portDeparture={portDeparture}
+                            // setPortDeparture={setPortDeparture}
                             containersSelection={containersSelection}
                             ports={ports}
                             products={products}

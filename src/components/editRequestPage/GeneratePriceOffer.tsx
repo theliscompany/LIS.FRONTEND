@@ -60,7 +60,7 @@ function GeneratePriceOffer(props: any) {
         id, email, tags, clientNumber, 
         departure, setDeparture, containersSelection, 
         loadingCity, setLoadingCity,
-        portDeparture, setPortDeparture, 
+        // formState.portDeparture, setPortDeparture, 
         portDestination, setPortDestination,
         ports, products, ports1, ports2, containers 
     } = props;
@@ -110,10 +110,12 @@ function GeneratePriceOffer(props: any) {
         account?.name,
         'generatePriceOfferTest'+id,
         { 
-            haulageType: "", selectedHaulage: null, rowSelectionModel2: [],
+            haulageType: "", 
+            selectedHaulage: null, rowSelectionModel2: [],
             selectedSeafreight: null, rowSelectionModel: [], 
             selectedMisc: null, myMiscs: [], rowSelectionModel3: [],
-            activeStep: 0 
+            activeStep: 0, 
+            portDeparture: null, portDestination: portDestination 
         },
         null, // Optionnel, par défaut à null (pas d'expiration)
         true // Optionnel, par défaut à true (sauvegarde automatique activée)
@@ -290,7 +292,7 @@ function GeneratePriceOffer(props: any) {
 
     useEffect(() => {
         getSeaFreightPriceOffers();
-    }, [portDestination]);
+    }, [formState.portDestination]);
 
     useEffect(() => {
         // Initialize margins with default value 22 and addings with default value 0
@@ -302,14 +304,14 @@ function GeneratePriceOffer(props: any) {
     }, [containersSelection]); // Assuming containersSelection is a prop or state
     
     useEffect(() => {
-        // console.log("Table", tableMiscs);
-        // console.log("Haulage", miscs);
-        // console.log("Seafreight", miscsHaulage);
+        console.log("Table", tableMiscs);
+        console.log("Haulage", miscs);
+        console.log("Seafreight", miscsHaulage);
         if (generalMiscs !== null && miscs !== null && miscsHaulage !== null) {
             setTableMiscs([...miscsHaulage, ...miscs, ...generalMiscs]);
             // setRowSelectionModel3([...miscsHaulage, ...miscs].map((elm: any) => elm.miscellaneousId));
-            var auxTab = [...miscsHaulage, ...miscs];
-            setFormState({...formState, rowSelectionModel3: auxTab.map((elm: any) => elm.miscellaneousId)});
+            // var auxTab = [...miscsHaulage, ...miscs];
+            // setFormState({...formState, rowSelectionModel3: auxTab.map((elm: any) => elm.miscellaneousId)});
         }
     }, [generalMiscs, miscs, miscsHaulage]);
     
@@ -319,6 +321,9 @@ function GeneratePriceOffer(props: any) {
             getMiscellaneousPriceOffers();
             getHaulageMiscellaneousPriceOffers();
             getGeneralMiscellaneousPriceOffers();
+        }
+        if (formState.activeStep === 3 && seafreights === null) {
+            getSeaFreightPriceOffers();
         }
     }, [formState.activeStep, seafreights]);
 
@@ -353,7 +358,8 @@ function GeneratePriceOffer(props: any) {
         }
         if (formState.activeStep === 0) {
             if (formState.selectedHaulage !== null && formState.selectedHaulage !== undefined) {
-                setPortDeparture(ports1.find((elm: any) => elm.portName === formState.selectedHaulage.loadingPort));
+                // setFormState({...formState, portDeparture: ports1.find((elm: any) => elm.portName === formState.selectedHaulage.loadingPort)});
+                // setPortDeparture(ports1.find((elm: any) => elm.portName === formState.selectedHaulage.loadingPort));
                 
                 // if (formState.selectedSeafreight === null || formState.selectedSeafreight === undefined) {
                 //     setLoadResults(true);
@@ -362,7 +368,10 @@ function GeneratePriceOffer(props: any) {
                 setLoadResults(true);
                 getSeaFreightPriceOffers();
                 
-                setFormState({...formState, activeStep: formState.activeStep !== undefined ? formState.activeStep + 1 : 0 });
+                setFormState({
+                    ...formState, 
+                    portDeparture: ports1.find((elm: any) => elm.portName === formState.selectedHaulage.loadingPort), 
+                    activeStep: formState.activeStep !== undefined ? formState.activeStep + 1 : 0 });
                 // setActiveStep((prevActiveStep) => prevActiveStep + 1);
                 setSkipped(newSkipped);
             }
@@ -563,24 +572,25 @@ function GeneratePriceOffer(props: any) {
             setLoadResults(true);
             var containersFormatted = (containersSelection.map((elm: any) => elm.id)).join("&ContainerTypesId=");
             
-            var auxPortDeparture = portDeparture;
+            var auxPortDeparture = formState.portDeparture;
             if (formState.selectedHaulage !== null && formState.selectedHaulage !== undefined) {
                 auxPortDeparture = ports1.find((elm: any) => elm.portName === formState.selectedHaulage.loadingPort);
             }
 
-            var urlSent = createGetRequestUrl2(protectedResources.apiLisPricing.endPoint+"/Pricing/SeaFreightsOffersRequest?", auxPortDeparture.portId, portDestination.portId, containersFormatted);
-            const response = await (context as BackendService<any>).getWithToken(urlSent, token);
+            if (auxPortDeparture !== undefined && auxPortDeparture !== null && formState.portDestination !== undefined && formState.portDestination !== null) {
+                var urlSent = createGetRequestUrl2(protectedResources.apiLisPricing.endPoint+"/Pricing/SeaFreightsOffersRequest?", auxPortDeparture.portId, formState.portDestination.portId, containersFormatted);
+                const response = await (context as BackendService<any>).getWithToken(urlSent, token);
+                var myContainers = containersSelection.map((elm: any) => elm.container);
+                setSeafreights(response.filter((elm: any) => myContainers.includes(elm.containers[0].container.packageName)).map((elm: any) => { return {...elm, defaultContainer: elm.containers[0].container.packageName}}));
+            }
             setLoadResults(false);
-            
-            var myContainers = containersSelection.map((elm: any) => elm.container);
-            setSeafreights(response.filter((elm: any) => myContainers.includes(elm.containers[0].container.packageName)).map((elm: any) => { return {...elm, defaultContainer: elm.containers[0].container.packageName}}));
         }
     }
 
     const getMiscellaneousPriceOffers = async () => {
         setLoadResults(true);
         if (context && account) {
-            const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisPricing.endPoint+"/Miscellaneous/Miscellaneous?departurePortId="+portDeparture.portId+"&destinationPortId="+portDestination.portId+"&withShipment=true", tempToken);
+            const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisPricing.endPoint+"/Miscellaneous/Miscellaneous?departurePortId="+formState.portDeparture.portId+"&destinationPortId="+formState.portDestination.portId+"&withShipment=true", tempToken);
             
             var myContainers = containersSelection.map((elm: any, index: any) => {
                 if (calculateSeafreightPrice(elm.container, elm.quantity, index) !== 0) {
@@ -758,10 +768,10 @@ function GeneratePriceOffer(props: any) {
                     "miscellaneousList": miscellaneous,
                     "seaFreight": {
                         "id": formState.selectedSeafreight.seaFreightId,
-                        "departurePortId": portDeparture.portId,
-                        "destinationPortId": portDestination.portId,
+                        "departurePortId": formState.portDeparture.portId,
+                        "destinationPortId": formState.portDestination.portId,
                         "departurePortName": formState.selectedSeafreight.departurePortName,
-                        "destinationPortName": portDestination.portName,
+                        "destinationPortName": formState.portDestination.portName,
                         "carrierId": 0,
                         "carrierName": formState.selectedSeafreight.carrierName,
                         "carrierAgentId": 0,
@@ -778,8 +788,8 @@ function GeneratePriceOffer(props: any) {
                     },
                     "containers": containersSelection.map((elm: any) => { return { "containerId": elm.id, quantity: elm.quantity } }),
                     "departureDate": (new Date("01/01/2022")).toISOString(),
-                    "departurePortId": portDeparture.portId,
-                    "destinationPortId": portDestination.portId,
+                    "departurePortId": formState.portDeparture.portId,
+                    "destinationPortId": formState.portDestination.portId,
                     "margin": 0,
                     "reduction": 0,
                     "extraFee": 0,
@@ -852,7 +862,7 @@ function GeneratePriceOffer(props: any) {
             loadingCity = departure.city.toUpperCase()+', '+postalCode+', '+departure.country.toUpperCase();
         }
         
-        var destinationPort = portDestination !== null ? portDestination.portName+', '+portDestination.country.toUpperCase() : "";
+        var destinationPort = formState.portDestination !== undefined && formState.portDestination !== null ? formState.portDestination.portName+', '+formState.portDestination.country.toUpperCase() : "";
         var commodities:any = tags.map((elm: any) => elm.productName).join(',');
         
         // var auxServices = [...miscs,...formState.myMiscs];
@@ -900,7 +910,7 @@ function GeneratePriceOffer(props: any) {
             loadingCity = departure.city.toUpperCase()+', '+postalCode+', '+departure.country.toUpperCase();
         }
         
-        var destinationPort = portDestination !== null ? portDestination.portName+', '+portDestination.country.toUpperCase() : "";
+        var destinationPort = formState.portDestination !== undefined && formState.portDestination !== null ? formState.portDestination.portName+', '+formState.portDestination.country.toUpperCase() : "";
         var commodities:any = tags.map((elm: any) => elm.productName).join(',');
         
         // var auxServices = [...miscs,...formState.myMiscs];
@@ -940,7 +950,7 @@ function GeneratePriceOffer(props: any) {
 
         const variables = { loadingCity, destinationPort, commodities, clientName, freeTime, overtimeTariff, frequency, transitTime, containersQuantities, listServices, pricesContainers };
         rteRef.current?.editor?.commands.setContent(generateEmailContent(mailLanguage !== "en" ? templateBase.content : templateBase.contentEn, variables));
-    }, [tags, departure, clientNumber, portDestination, formState.selectedSeafreight, formState.selectedHaulage, formState.selectedMisc, containersSelection, margins, addings]);
+    }, [tags, departure, clientNumber, formState.portDestination, formState.selectedSeafreight, formState.selectedHaulage, formState.selectedMisc, containersSelection, margins, addings, seafreights]);
 
 
 
@@ -1110,11 +1120,14 @@ function GeneratePriceOffer(props: any) {
                                                         }
                                                         return ""; 
                                                     }}
-                                                    value={portDeparture}
-                                                    // disabled={true}
+                                                    value={formState.portDeparture}
+                                                    disabled={true}
                                                     sx={{ mt: 1 }}
                                                     renderInput={(params: any) => <TextField {...params} />}
-                                                    onChange={(e: any, value: any) => { setPortDeparture(value); }}
+                                                    onChange={(e: any, value: any) => { 
+                                                        setFormState({...formState, portDeparture: value});
+                                                        // setPortDeparture(value); 
+                                                    }}
                                                     fullWidth
                                                 /> : <Skeleton />
                                             }
@@ -1140,10 +1153,13 @@ function GeneratePriceOffer(props: any) {
                                                         }
                                                         return ""; 
                                                     }}
-                                                    value={portDestination}
+                                                    value={formState.portDestination}
                                                     sx={{ mt: 1 }}
                                                     renderInput={(params: any) => <TextField {...params} />}
-                                                    onChange={(e: any, value: any) => { setPortDestination(value); }}
+                                                    onChange={(e: any, value: any) => {  
+                                                        setFormState({...formState, portDestination: value});
+                                                        // setPortDestination(value); 
+                                                    }}
                                                     fullWidth
                                                 /> : <Skeleton />
                                             }
@@ -1152,8 +1168,8 @@ function GeneratePriceOffer(props: any) {
                                             <Grid item xs={8}>
                                                 <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>
                                                     {
-                                                        portDeparture !== null ?
-                                                        t('listSeaFreightsPricingOffers')+t('fromDotted')+portDeparture.portName+"-"+portDestination.portName : 
+                                                        formState.portDeparture !== undefined && formState.portDeparture !== null && formState.portDestination !== undefined && formState.portDestination !== null ?
+                                                        t('listSeaFreightsPricingOffers')+t('fromDotted')+formState.portDeparture.portName+"-"+formState.portDestination.portName : 
                                                         t('listSeaFreightsPricingOffers')
                                                     }
                                                 </Typography>
@@ -1254,7 +1270,7 @@ function GeneratePriceOffer(props: any) {
                                     formState.activeStep === 2 ? 
                                     <Grid container spacing={2} mt={1} px={2}>
                                         <Grid item xs={12}>
-                                            <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>{t('listMiscPricingOffers')+t('fromDotted')+portDeparture.portName+"-"+portDestination.portName}</Typography>
+                                            <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>{t('listMiscPricingOffers')+t('fromDotted')+formState.portDeparture.portName+"-"+formState.portDestination.portName}</Typography>
                                             <Grid container spacing={2}>
                                                 <Grid item xs={8}>
                                                     <Typography variant="h6" sx={{ mt: 2, fontSize: 17, fontWeight: "bold" }}>
@@ -1582,7 +1598,7 @@ function GeneratePriceOffer(props: any) {
                     // companies={clients}
                     ports={ports}
                     loadingCity={loadingCity}
-                    loadingPort={portDeparture}
+                    loadingPort={formState.portDeparture}
                     closeModal={() => setModal5(false)}
                 />
             </BootstrapDialog>
@@ -1601,8 +1617,8 @@ function GeneratePriceOffer(props: any) {
                     commodities={tags}
                     // companies={clients}
                     ports={ports}
-                    portLoading={portDeparture}
-                    portDischarge={portDestination} 
+                    portLoading={formState.portDeparture}
+                    portDischarge={formState.portDestination} 
                     containers={containers} 
                     containersSelection={containersSelection}
                     closeModal={() => setModal6(false)} 

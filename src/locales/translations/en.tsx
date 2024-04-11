@@ -431,5 +431,8 @@ export const en = {
   contactName: "Contact name",
   contacts: "Contacts",
   categories: "Categories",
-  contactNumber: "Number"
+  contactNumber: "Number",
+  phone: "Phone number",
+  country: "Country",
+  serviceTypesId: "Services types"
 };
