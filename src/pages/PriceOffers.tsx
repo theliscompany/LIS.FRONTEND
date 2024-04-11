@@ -9,11 +9,11 @@ import { protectedResources } from '../config/authConfig';
 import { BackendService } from '../utils/services/fetch';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { BootstrapDialog, BootstrapDialogTitle, actionButtonStyles, buttonCloseStyles, gridStyles } from '../utils/misc/styles';
+import { BootstrapDialog, BootstrapDialogTitle, actionButtonStyles, buttonCloseStyles, gridStyles, sizingStyles } from '../utils/misc/styles';
 import { NavLink } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { DataGrid, GridColDef, GridRenderCellParams, GridValueFormatterParams } from '@mui/x-data-grid';
-import { RestartAltOutlined, Visibility } from '@mui/icons-material';
+import { Edit, RestartAltOutlined, Visibility } from '@mui/icons-material';
 
 function colors(value: string) {
     switch (value) {
@@ -59,35 +59,35 @@ function PriceOffers() {
                     <Link to={"/admin/request/"+params.row.requestQuoteId}>{params.row.emailUser}</Link>
                 </Box>
             );
-        }, minWidth: 200, flex: 1.2 },
-        { field: 'created', headerName: t('created'), valueFormatter: (params: GridValueFormatterParams) => `${(new Date(params.value)).toLocaleString().slice(0,10)}`, minWidth: 100, flex: 0.6 },
-        { field: 'xxx', headerName: t('departure'), renderCell: (params: GridRenderCellParams) => {
+        }, minWidth: 200, flex: 1 },
+        { field: 'created', headerName: t('created'), valueFormatter: (params: GridValueFormatterParams) => `${(new Date(params.value)).toLocaleString().slice(0,10)}`, minWidth: 100, flex: 0.5 },
+        { field: 'xxx', headerName: t('departurePort'), renderCell: (params: GridRenderCellParams) => {
             return (<Box>{params.row.seaFreight.departurePortName}</Box>);
-        }, minWidth: 100, flex: 1 },
-        { field: 'yyy', headerName: t('arrival'), renderCell: (params: GridRenderCellParams) => {
+        }, minWidth: 100, flex: 0.75 },
+        { field: 'yyy', headerName: t('arrivalPort'), renderCell: (params: GridRenderCellParams) => {
             return (<Box>{params.row.seaFreight.destinationPortName}</Box>);
-        }, minWidth: 100, flex: 1 },
+        }, minWidth: 100, flex: 0.75 },
         { field: 'zzz', headerName: t('status'), renderCell: (params: GridRenderCellParams) => {
             return (<Box><Chip label={statusLabel(params.row.status)} color={colors(params.row.status)} /></Box>);
-        }, minWidth: 100, flex: 0.6 },
+        }, minWidth: 100, flex: 0.5 },
         { field: 'qqq', headerName: t('clientApproval'), renderCell: (params: GridRenderCellParams) => {
             return (<Box>{params.row.status !== "Accepted" && params.row.clientApproval === "Pending" ? <Chip label={t('noEmail')} /> : <Chip label={params.row.clientApproval} color={colors(params.row.clientApproval)} />}</Box>);
-        }, minWidth: 100, flex: 0.6 },
+        }, minWidth: 100, flex: 0.5 },
         { field: 'www', headerName: t('Actions'), renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box sx={{ my: 1, mr: 1 }}>
-                    <IconButton component={NavLink} to={"/admin/quote-offers/"+params.row.id} sx={{ mr: 1 }}>
-                        <EditIcon fontSize="small" />
+                    <IconButton component={NavLink} to={"/admin/quote-offers/"+params.row.id} sx={{ mr: 1 }} title="Handle the offer">
+                        <Visibility fontSize="small" />
+                    </IconButton>
+                    <IconButton component={NavLink} to={"/admin/request/"+params.row.requestQuoteId} title="View the request" sx={{ mr: 1 }}>
+                        <Edit fontSize="small" />
                     </IconButton>
                     <IconButton onClick={() => { setCurrentId(params.row.id); setModal(true); }}>
                         <DeleteIcon fontSize="small" />
                     </IconButton>
-                    <IconButton component={NavLink} to={"/admin/request/"+params.row.requestQuoteId} title="View the request" sx={{ mr: 1 }}>
-                        <Visibility fontSize="small" />
-                    </IconButton>
                 </Box>
             );
-        }, minWidth: 150, flex: 0.7 }
+        }, minWidth: 150, flex: 0.75 }
     ];
     
     useEffect(() => {
@@ -148,18 +148,16 @@ function PriceOffers() {
                             <Grid item xs={12}>
                                 {
                                     offers !== null && offers.length !== 0 ?
-                                    <Box sx={{ overflow: "auto" }}>
-                                        <Box sx={{ width: "100%" }}>
-                                            <DataGrid
-                                                rows={offers}
-                                                columns={columnsOffers}
-                                                // hideFooter
-                                                getRowId={(row: any) => row?.id}
-                                                getRowHeight={() => "auto" }
-                                                sx={gridStyles}
-                                                disableRowSelectionOnClick
-                                            />
-                                        </Box>
+                                    <Box sx={{ overflow: "hidden" }}>
+                                        <DataGrid
+                                            rows={offers}
+                                            columns={columnsOffers}
+                                            // hideFooter
+                                            getRowId={(row: any) => row?.id}
+                                            getRowHeight={() => "auto" }
+                                            sx={sizingStyles}
+                                            disableRowSelectionOnClick
+                                        />
                                     </Box> : <Alert severity="warning">{t('noResults')}</Alert>
                                 }
                             </Grid>
