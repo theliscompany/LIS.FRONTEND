@@ -974,7 +974,7 @@ function GeneratePriceOffer(props: any) {
                                     optional?: React.ReactNode;
                                 } = {};
                                 if (isStepOptional(index)) {
-                                    labelProps.optional = (<Typography variant="caption">{t('optional')}-{formState.activeStep}</Typography>);
+                                    labelProps.optional = (<Typography variant="caption">{t('optional')}</Typography>);
                                 }
                                 if (isStepSkipped(index)) {
                                     stepProps.completed = false;

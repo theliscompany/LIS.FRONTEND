@@ -73,7 +73,7 @@ function NewContact(props: any) {
                 console.log(categoriesText);
     
                 try {
-                    const response = await (context as BackendService<any>).postWithToken(protectedResources.apiLisCrm.endPoint+"/Contact/CreateCustomerContact"+categoriesText, dataSent, token);
+                    const response = await (context as BackendService<any>).postWithToken(protectedResources.apiLisCrm.endPoint+"/Contact/CreateContact"+categoriesText, dataSent, token);
                     if (response !== null) {
                         enqueueSnackbar("The contact has been added with success!", { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
                         

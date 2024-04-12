@@ -4,7 +4,7 @@ import { MuiTelInput } from 'mui-tel-input';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { inputLabelStyles, BootstrapInput, whiteButtonStyles, BootstrapDialog } from '../utils/misc/styles';
 import { enqueueSnackbar, SnackbarProvider } from 'notistack';
-import { protectedResources, transportRequest } from '../config/authConfig';
+import { loginRequest, protectedResources, transportRequest } from '../config/authConfig';
 import { useAuthorizedBackendApi } from '../api/api';
 import { BackendService } from '../utils/services/fetch';
 import { useAccount, useMsal } from '@azure/msal-react';
@@ -197,8 +197,25 @@ function NewRequest(props: any) {
 
     const getAssignees = async () => {
         if (context && account) {
+            const token = await instance.acquireTokenSilent({
+                scopes: loginRequest.scopes,
+                account: account
+            })
+            .then((response: AuthenticationResult) => {
+                return response.accessToken;
+            })
+            .catch(() => {
+                return instance.acquireTokenPopup({
+                    ...loginRequest,
+                    account: account
+                    }).then((response) => {
+                        return response.accessToken;
+                    });
+                }
+            );
+
             setLoadUser(true);
-            const response = await (context as BackendService<any>).getSingle(protectedResources.apiLisQuotes.endPoint+"/Assignee");
+            const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisQuotes.endPoint+"/Assignee", token);
             if (response !== null && response.code !== undefined) {
                 if (response.code === 200) {
                     var aux = response.data.find((elm: any) => elm.email === account?.username);
