@@ -187,9 +187,26 @@ function Request() {
     
     const loadRequest = async (allPorts: any, allProducts: any) => {
         if (context && account) {
+            const token = await instance.acquireTokenSilent({
+                scopes: loginRequest.scopes,
+                account: account
+            })
+            .then((response: AuthenticationResult) => {
+                return response.accessToken;
+            })
+            .catch(() => {
+                return instance.acquireTokenPopup({
+                    ...loginRequest,
+                    account: account
+                    }).then((response) => {
+                        return response.accessToken;
+                    });
+                }
+            );
+
             setLoad(true);
             try {
-                const response = await (context as BackendService<any>).getSingle(protectedResources.apiLisQuotes.endPoint+"/Request/"+id);
+                const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisQuotes.endPoint+"/Request/"+id, token);
                 if (response !== null && response.code !== undefined) {
                     if (response.code === 200) {
                         setEmail(response.data.email !== "emailexample@gmail.com" ? response.data.email : "");
