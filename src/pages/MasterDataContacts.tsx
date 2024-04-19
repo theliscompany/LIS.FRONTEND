@@ -4,7 +4,7 @@ import Box from '@mui/material/Box';
 import { SnackbarProvider, enqueueSnackbar } from 'notistack';
 import { useMsal, useAccount } from '@azure/msal-react';
 import { useAuthorizedBackendApi } from '../api/api';
-import { protectedResources, transportRequest } from '../config/authConfig';
+import { crmRequest, protectedResources, transportRequest } from '../config/authConfig';
 import { BackendService } from '../utils/services/fetch';
 import { AuthenticationResult } from '@azure/msal-browser';
 import { Alert, Button, DialogActions, DialogContent, Grid, IconButton, InputLabel, MenuItem, Select, Skeleton, Typography } from '@mui/material';
@@ -58,7 +58,7 @@ const MasterDataContacts: any = (props: any) => {
             setLoadResults(true);
 
             const token = await instance.acquireTokenSilent({
-                scopes: transportRequest.scopes,
+                scopes: crmRequest.scopes,
                 account: account
             })
             .then((response: AuthenticationResult) => {
@@ -66,19 +66,19 @@ const MasterDataContacts: any = (props: any) => {
             })
             .catch(() => {
                 return instance.acquireTokenPopup({
-                    ...transportRequest,
+                    ...crmRequest,
                     account: account
                     }).then((response) => {
                         return response.accessToken;
                     });
                 }
             );
+            setTempToken(token);
             
             const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisCrm.endPoint+"/Contact/GetContacts?pageSize=4000", token);
             if (response !== null && response !== undefined) {
                 setContacts(response.data);
                 setLoadResults(false);
-                setTempToken(token);
                 // setContacts(response.filter((obj: any) => obj.productsTypeId.includes(5) || obj.productsTypeId.includes(2))); // Filter the products for miscellaneous (MISCELLANEOUS = 5 & HAULAGE = 2)
             }
             else {
@@ -187,7 +187,7 @@ const MasterDataContacts: any = (props: any) => {
                         };
                         response = await (context as BackendService<any>).postWithToken(protectedResources.apiLisCrm.endPoint+"/Contact/CreateContact", dataSent, token);
                     }
-                    enqueueSnackbar(currentEditId === "" ? "The port has been added with success!" : "The port has been edited with success!", { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                    enqueueSnackbar(currentEditId === "" ? "The contact has been added with success!" : "The contact has been edited with success!", { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
                     getContacts();
                     setModal(false);    
                 }

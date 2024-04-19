@@ -9,7 +9,7 @@ import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 import { Alert, Button, Grid, InputLabel, NativeSelect, Skeleton } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import { BootstrapInput, datetimeStyles, inputLabelStyles } from '../utils/misc/styles';
-import { protectedResources } from '../config/authConfig';
+import { loginRequest, protectedResources } from '../config/authConfig';
 import { enqueueSnackbar, SnackbarProvider } from 'notistack';
 import { useAuthorizedBackendApi } from '../api/api';
 import { BackendService } from '../utils/services/fetch';
@@ -18,6 +18,7 @@ import { useAccount, useMsal } from '@azure/msal-react';
 import { useTranslation } from 'react-i18next';
 import RequestViewItem from '../components/requestsPage/RequestViewItem';
 import AutocompleteSearch from '../components/shared/AutocompleteSearch';
+import { AuthenticationResult } from '@azure/msal-browser';
 
 function createGetRequestUrl(variable1: string, variable2: string, variable3: string, variable4: string, variable5: Dayjs|null, variable6: Dayjs|null, variable7: Dayjs|null, variable8: Dayjs|null, assigneeId: number) {
     let url = protectedResources.apiLisQuotes.endPoint+'/Request?';
@@ -87,12 +88,28 @@ function MyRequests() {
 
     const getAssignees = async () => {
         if (context && account) {
+            const token = await instance.acquireTokenSilent({
+                scopes: loginRequest.scopes,
+                account: account
+            })
+            .then((response: AuthenticationResult) => {
+                return response.accessToken;
+            })
+            .catch(() => {
+                return instance.acquireTokenPopup({
+                    ...loginRequest,
+                    account: account
+                    }).then((response) => {
+                        return response.accessToken;
+                    });
+                }
+            );
+
             setLoad(true);
-            const response = await (context as BackendService<any>).getSingle(protectedResources.apiLisQuotes.endPoint+"/Assignee");
+            const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisQuotes.endPoint+"/Assignee", token);
             if (response !== null && response.code !== undefined) {
                 if (response.code === 200) {
                     setCurrentUser(response.data.find((elm: any) => elm.email === account?.username));
-
                     // Then I can load requests
                     loadRequests(response.data);
                 }

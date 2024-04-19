@@ -389,9 +389,11 @@ export const en = {
   reloadIndication: "Please, click the reload button if you want to actualize the data after some modifications",
   addressCountry: "Address country",
   countryCode: "Country code",
-  createNewContact: "Create new contact",
-  createNewCarrier: "Create new carrier",
-  createNewHaulier: "Create new haulier",
+  createNewPort: "New port",
+  createNewContact: "New contact",
+  createNewCarrier: "New carrier",
+  createNewHaulier: "New haulier",
+  createNewHaulage: "New haulage",
   priceType: "Type of price",
   lumpSum: "Margin lump sum",
   margin: "Margin",
@@ -434,5 +436,6 @@ export const en = {
   contactNumber: "Number",
   phone: "Phone number",
   country: "Country",
-  serviceTypesId: "Services types"
+  serviceTypesId: "Services types",
+  newHaulage: "New haulage",
 };

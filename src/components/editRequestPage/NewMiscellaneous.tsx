@@ -23,6 +23,7 @@ import NewContact from './NewContact';
 import { actionButtonStyles, inputLabelStyles, gridStyles, BootstrapDialog, BootstrapDialogTitle, buttonCloseStyles, datetimeStyles, BootstrapInput, whiteButtonStyles } from '../../utils/misc/styles';
 import NewService from '../shared/NewService';
 import { containerPackages } from '../../utils/constants';
+import { compareServices } from '../../utils/functions';
 
 function createGetRequestUrl(variable1: number, variable2: number, variable3: number) {
     let url = protectedResources.apiLisPricing.endPoint+"/Miscellaneous/Miscellaneous?";
@@ -258,7 +259,7 @@ function NewMiscellaneous(props: any) {
         if (context && account) {
             const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Service?pageSize=500", token);
             if (response !== null && response !== undefined) {
-                setServices(response.filter((obj: any) => obj.servicesTypeId.includes(5) || obj.servicesTypeId.includes(2))); // Filter the services for miscellaneous (MISCELLANEOUS = 5 & HAULAGE = 2)
+                setServices(response.sort((a: any, b: any) => compareServices(a, b)).filter((obj: any) => obj.servicesTypeId.includes(5) || obj.servicesTypeId.includes(2))); // Filter the services for miscellaneous (MISCELLANEOUS = 5 & HAULAGE = 2)
             }  
         }
     }

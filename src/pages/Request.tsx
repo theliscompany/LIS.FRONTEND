@@ -28,13 +28,16 @@ import { containerPackages } from '../utils/constants';
 // @ts-ignore
 import { JSON as seaPorts } from 'sea-ports';
 import GeneratePriceOffer from '../components/editRequestPage/GeneratePriceOffer';
+import NewPort from '../components/shared/NewPort';
+import NewHaulage from '../components/editRequestPage/NewHaulage';
 // @ts-ignore
 
 let packingOptions = ["Unit", "Bundle", "Bag", "Pallet", "Carton", "Lot", "Crate"];
 
 function Request() {
-    const [load, setLoad] = useState<boolean>(true);
+    const [load, setLoad] = useState<boolean>(false);
     const [loadAssignees, setLoadAssignees] = useState<boolean>(true);
+    const [requestData, setRequestData] = useState<any>(null);
     const [email, setEmail] = useState<string>("");
     const [status, setStatus] = useState<string | null>(null);
     const [trackingNumber, setTrackingNumber] = useState<string>("");
@@ -51,7 +54,9 @@ function Request() {
     const [modal4, setModal4] = useState<boolean>(false);
     const [modal7, setModal7] = useState<boolean>(false);
     const [modal8, setModal8] = useState<boolean>(false);
+    const [modal9, setModal9] = useState<boolean>(false);
     const [modal10, setModal10] = useState<boolean>(false);
+    const [modalHaulage, setModalHaulage] = useState<boolean>(false);
     
     const [assignedManager, setAssignedManager] = useState<string>("");
     const [assignees, setAssignees] = useState<any>(null);
@@ -84,7 +89,8 @@ function Request() {
     const [ports1, setPorts1] = useState<any>(null);
     const [ports2, setPorts2] = useState<any>(null);
     const [containers, setContainers] = useState<any>(null);
-    
+    const [tempToken, setTempToken] = useState<string>("");
+
     let { id } = useParams();
     const navigate = useNavigate();
 
@@ -132,12 +138,20 @@ function Request() {
         getAssignees();
         getPorts();
         getProducts();
+        loadRequest(null, null);
     }, [context]);
     
     useEffect(() => {
-        if (ports !== null && products !== null) {
-            console.log("Ports X : ", ports);
-            loadRequest(ports, products);
+        if (ports !== null && products !== null && requestData !== null) {
+            // console.log("Ports X : ", ports);
+            // loadRequest(ports, products);
+            setTags(requestData.tags !== null ? products.filter((elm: any) => requestData.tags.includes(elm.productName)) : []);
+            const closestDeparturePort = findClosestSeaPort(parseLocation(requestData.departure), ports);
+            const closestArrivalPort = findClosestSeaPort(parseLocation(requestData.arrival), ports);
+            setPortDeparture(closestDeparturePort);
+            setPortDestination(closestArrivalPort);
+            setPorts1(sortByCloseness(parseLocation(requestData.departure), ports).slice(0, 50));
+            setPorts2(sortByCloseness(parseLocation(requestData.arrival), ports).slice(0, 50));
         }
     }, [ports, products]);
 
@@ -159,6 +173,7 @@ function Request() {
                     });
                 }
             );
+            setTempToken(token);
             
             try {
                 setLoadAssignees(true);
@@ -167,9 +182,6 @@ function Request() {
                     if (response.code === 200) {
                         setAssignees(response.data);
                         setLoadAssignees(false);
-
-                        // Now i can load the ports (who loads the request later)
-                        // getPorts();
                     }
                     else {
                         setLoadAssignees(false);
@@ -180,6 +192,7 @@ function Request() {
                 }   
             }
             catch (err: any) {
+                setLoadAssignees(false);
                 console.log(err);
             }
         }
@@ -204,20 +217,18 @@ function Request() {
                 }
             );
 
-            setLoad(true);
+            // setLoad(true);
             try {
                 const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisQuotes.endPoint+"/Request/"+id, token);
                 if (response !== null && response.code !== undefined) {
                     if (response.code === 200) {
-                        setEmail(response.data.email !== "emailexample@gmail.com" ? response.data.email : "");
+                        setRequestData(response.data);
+                        setEmail(response.data.email);
                         setPhone(response.data.whatsapp);
                         setDeparture(parseLocation(response.data.departure));
                         setArrival(parseLocation(response.data.arrival));
                         setLoadingCity(parseLocation(response.data.departure));
-                        // setDepartureTown(convertStringToObject(response.data.departure));
-                        // setArrivalTown(convertStringToObject(response.data.arrival));
                         setStatus(response.data.status);
-                        // setCargoType(String(cargoTypes.indexOf(response.data.cargoType)));
                         setPackingType(response.data.packingType !== null ? response.data.packingType : "FCL");
                         setClientNumber(response.data.clientNumber !== null && response.data.clientNumber !== "" ? parseContact(response.data.clientNumber) : "");
                         setContainersSelection(response.data.containers.map((elm: any) => { return {
@@ -233,17 +244,16 @@ function Request() {
                         }}) || []);
                         setQuantity(response.data.quantity);
                         setMessage(response.data.detail);
-                        // setTags(response.data.tags !== null ? response.data.tags.split(",") : []);
-                        setTags(response.data.tags !== null ? allProducts.filter((elm: any) => response.data.tags.includes(elm.productName)) : []);
+                        // setTags(response.data.tags !== null ? allProducts.filter((elm: any) => response.data.tags.includes(elm.productName)) : []);
                         setAssignedManager(response.data.assigneeId !== null && response.data.assigneeId !== "" ? response.data.assigneeId : "");
                         setTrackingNumber(response.data.trackingNumber);
                         
-                        const closestDeparturePort = findClosestSeaPort(parseLocation(response.data.departure), allPorts);
-                        const closestArrivalPort = findClosestSeaPort(parseLocation(response.data.arrival), allPorts);
-                        setPortDeparture(closestDeparturePort);
-                        setPortDestination(closestArrivalPort);
-                        setPorts1(sortByCloseness(parseLocation(response.data.departure), allPorts).slice(0, 50));
-                        setPorts2(sortByCloseness(parseLocation(response.data.arrival), allPorts).slice(0, 50));
+                        // const closestDeparturePort = findClosestSeaPort(parseLocation(response.data.departure), allPorts);
+                        // const closestArrivalPort = findClosestSeaPort(parseLocation(response.data.arrival), allPorts);
+                        // setPortDeparture(closestDeparturePort);
+                        // setPortDestination(closestArrivalPort);
+                        // setPorts1(sortByCloseness(parseLocation(response.data.departure), allPorts).slice(0, 50));
+                        // setPorts2(sortByCloseness(parseLocation(response.data.arrival), allPorts).slice(0, 50));
                         
                         setLoad(false);
                     }
@@ -265,7 +275,7 @@ function Request() {
     const assignManager = async () => {
         if (assignedManager !== null && assignedManager !== undefined && assignedManager !== "") {
             if (context && account) {
-                const response = await (context as BackendService<any>).put(protectedResources.apiLisQuotes.endPoint+"/Assignee/"+id+"/"+assignedManager, []);
+                const response = await (context as BackendService<any>).putWithToken(protectedResources.apiLisQuotes.endPoint+"/Assignee/"+id+"/"+assignedManager, [], tempToken);
                 if (response !== null) {
                     enqueueSnackbar(t('managerAssignedRequest'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
                 }
@@ -281,7 +291,7 @@ function Request() {
 
     const removeManager = async () => {
         if (context && account) {
-            const response = await (context as BackendService<any>).put(protectedResources.apiLisQuotes.endPoint+"/Assignee/unassign/"+id, []);
+            const response = await (context as BackendService<any>).putWithToken(protectedResources.apiLisQuotes.endPoint+"/Assignee/unassign/"+id, [], tempToken);
             if (response !== null) {
                 enqueueSnackbar(t('managerRemovedRequest'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
                 setAssignedManager("");
@@ -454,16 +464,36 @@ function Request() {
                 <Typography variant="h5" sx={{mt: {xs: 4, md: 1.5, lg: 1.5 }}} mx={5}><b>{t('manageRequestQuote')} {id}</b></Typography>
                 <Box>
                 {
-                    !load ?
-                    clientNumber !== null ? 
+                    true ? // !load
+                    true ? // clientNumber !== null
                     <Grid container spacing={2} mt={1} px={5}>
-                        <Grid item xs={9}>
+                        <Grid item xs={6}>
                             <Typography variant="body2" color="dodgerblue" sx={{ fontWeight: "bold" }}>
                                 <span style={{ color: 'red' }}>{t('quoteNumber')} : </span> N° {trackingNumber}
                             </Typography>
                         </Grid>
-                        <Grid item xs={3}>
-                            <Button variant="contained" color="inherit" sx={{ float: "right", backgroundColor: "#fff", textTransform: "none" }} onClick={() => { setModal7(true); }} >{t('createNewContact')}</Button>
+                        <Grid item xs={6}>
+                            {/* <Button 
+                                variant="contained" color="inherit" 
+                                sx={{ float: "right", backgroundColor: "#fff", textTransform: "none", ml: 2 }} 
+                                onClick={() => { setModalHaulage(true); }}
+                            >
+                                {t('newHaulage')}
+                            </Button> */}
+                            <Button 
+                                variant="contained" color="inherit" 
+                                sx={{ float: "right", backgroundColor: "#fff", textTransform: "none", ml: 2 }} 
+                                onClick={() => { setModal9(true); }}
+                            >
+                                {t('createNewPort')}
+                            </Button>
+                            <Button 
+                                variant="contained" color="inherit" 
+                                sx={{ float: "right", backgroundColor: "#fff", textTransform: "none" }} 
+                                onClick={() => { setModal7(true); }}
+                            >
+                                {t('createNewContact')}
+                            </Button>
                         </Grid>
 
                         <Grid item xs={12}>
@@ -564,7 +594,6 @@ function Request() {
                                         <Grid item xs={3}>
                                             <Button variant="contained" color="inherit" sx={whiteButtonStyles} style={{ float: "right" }} onClick={() => setModal10(true)} >{t('addContainer')}</Button>
                                         </Grid>
-
                                         <Grid item xs={12}>
                                             {
                                                 packingType === "FCL" ?
@@ -657,6 +686,7 @@ function Request() {
                                                 </> : null
                                             }
                                         </Grid>                                
+                                        
                                         <Grid item xs={12} md={6} mt={.5} sx={{ display: { xs: 'none', md: 'block' } }}>
                                             <InputLabel htmlFor="request-message" sx={inputLabelStyles}>{t('details')}</InputLabel>
                                             <BootstrapInput id="request-message" type="text" multiline rows={3.5} value={message} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setMessage(e.target.value)} fullWidth />
@@ -691,34 +721,38 @@ function Request() {
                         </Grid>
                         
                         {/* Generate Price Offer COMPONENT */}
-                        <GeneratePriceOffer
-                            context={context}
-                            account={account}
-                            instance={instance}
-                            id={id}
-                            email={email}
-                            tags={tags}
-                            clientNumber={clientNumber}
-                            departure={departure}
-                            setDeparture={setDeparture}
-                            loadingCity={loadingCity}
-                            setLoadingCity={setLoadingCity}
-                            portDestination={portDestination}
-                            setPortDestination={setPortDestination}
-                            // portDeparture={portDeparture}
-                            // setPortDeparture={setPortDeparture}
-                            containersSelection={containersSelection}
-                            ports={ports}
-                            products={products}
-                            ports1={ports1}
-                            ports2={ports2}
-                            containers={containers}
-                        />
+                        {
+                            ports1 !== null && ports2 !== null ? 
+                            <GeneratePriceOffer
+                                context={context}
+                                account={account}
+                                instance={instance}
+                                id={id}
+                                email={email}
+                                tags={tags}
+                                clientNumber={clientNumber}
+                                departure={departure}
+                                setDeparture={setDeparture}
+                                loadingCity={loadingCity}
+                                setLoadingCity={setLoadingCity}
+                                portDestination={portDestination}
+                                setPortDestination={setPortDestination}
+                                // portDeparture={portDeparture}
+                                // setPortDeparture={setPortDeparture}
+                                containersSelection={containersSelection}
+                                ports={ports}
+                                products={products}
+                                ports1={ports1}
+                                ports2={ports2}
+                                containers={containers}
+                            />
+                            : <Skeleton />
+                        }
 
                         <Grid item xs={12}>
                             <Button variant="contained" color="inherit" sx={whiteButtonStyles} onClick={() => { navigate("/admin/requests"); }} >Save and close</Button>
                         </Grid>
-                    </Grid> : <Alert severity="warning" sx={{ mx: 5, mt: 3 }}>{t('noResults')}</Alert>
+                    </Grid> : null
                     : <Skeleton sx={{ mx: 5, mt: 3 }} />
                 }
                 </Box>
@@ -813,6 +847,35 @@ function Request() {
                     </Button>
                     <Button variant="contained" onClick={() => setModal8(false)} sx={buttonCloseStyles}>{t('close')}</Button>
                 </DialogActions>
+            </BootstrapDialog>
+
+            {/* Add a new haulage */}
+            {/* <BootstrapDialog
+                onClose={() => setModalHaulage(false)}
+                aria-labelledby="custom-dialog-titleHaulage"
+                open={modalHaulage}
+                maxWidth="lg"
+                fullWidth
+            >
+                <NewHaulage 
+                    ports={ports}
+                    containers={containers}
+                    closeModal={() => setModalHaulage(false)}
+                />
+            </BootstrapDialog> */}
+
+            {/* Create new port */}
+            <BootstrapDialog
+                onClose={() => setModal9(false)}
+                aria-labelledby="custom-dialog-title9"
+                open={modal9}
+                maxWidth="md"
+                fullWidth
+            >
+                <NewPort 
+                    closeModal={() => setModal9(false)}
+                    callBack={getPorts}
+                />
             </BootstrapDialog>
 
             {/* New container type */}

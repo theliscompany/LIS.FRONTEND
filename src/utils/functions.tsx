@@ -90,6 +90,20 @@ export function similar(str1: string, str2: string) {
     return cleanStr1 === cleanStr2;
 }
    
+export function compareServices (a: any, b: any) {
+    let nameA = a.serviceName.toLowerCase(); // ignore upper and lowercase
+    let nameB = b.serviceName.toLowerCase(); // ignore upper and lowercase
+    if (nameA < nameB) {
+        return -1;
+    }
+    if (nameA > nameB) {
+        return 1;
+    }
+  
+    // names must be equal
+    return 0;
+}
+
 export function complexEquality(str1: string, str2: string) {
     return str1.includes(str2) || str2.includes(str1);
 }
