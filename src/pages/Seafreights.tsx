@@ -24,7 +24,7 @@ import RequestPriceRequest from '../components/editRequestPage/RequestPriceReque
 import { Anchor, FileCopy, Mail } from '@mui/icons-material';
 import NewContact from '../components/editRequestPage/NewContact';
 import ServicesTable from '../components/seafreightPage/ServicesTable';
-import { transformArray, reverseTransformArray, flattenData, flattenData2 } from '../utils/functions';
+import { transformArray, reverseTransformArray, flattenData, flattenData2, compareServices } from '../utils/functions';
 import NewService from '../components/shared/NewService';
 import NewPort from '../components/shared/NewPort';
 
@@ -268,8 +268,9 @@ function Seafreights() {
         if (context && account) {
             const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Service?pageSize=500", token);
             if (response !== null && response !== undefined) {
+                console.log(response.sort((a: any, b: any) => b.serviceName - a.serviceName));
                 setAllServices(response);
-                setServices(response.filter((obj: any) => obj.servicesTypeId.includes(1))); // Filter the services for seafreights (SEAFREIGHT = 1)
+                setServices(response.sort((a: any, b: any) => compareServices(a, b)).filter((obj: any) => obj.servicesTypeId.includes(1))); // Filter the services for seafreights (SEAFREIGHT = 1)
             }  
         }
     }

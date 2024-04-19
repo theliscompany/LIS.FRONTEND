@@ -4,7 +4,7 @@ import { DarkTooltip, gridStyles } from '../utils/misc/styles';
 import { enqueueSnackbar, SnackbarProvider } from 'notistack';
 import AssignmentIndIcon from '@mui/icons-material/AssignmentInd';
 import AssignmentReturnIcon from '@mui/icons-material/AssignmentReturn';
-import { graphRequest, protectedResources } from '../config/authConfig';
+import { graphRequest, loginRequest, protectedResources } from '../config/authConfig';
 import { useAuthorizedBackendApi } from '../api/api';
 import { BackendService } from '../utils/services/fetch';
 import { useAccount, useMsal } from '@azure/msal-react';
@@ -17,6 +17,7 @@ function UsersAssignment(props: any) {
     const [showAlert, setShowAlert] = useState<boolean>(false);
     const [users, setUsers] = useState<any>(null);
     const [assignees, setAssignees] = useState<any>(null);
+    const [tempToken, setTempToken] = useState<string>("");
 
     const { instance, accounts } = useMsal();
     const account = useAccount(accounts[0] || {});
@@ -64,20 +65,47 @@ function UsersAssignment(props: any) {
     
     const getAssignees = async () => {
         if (context && account) {
-            setLoad(true);
-            const response = await (context as BackendService<any>).getSingle(protectedResources.apiLisQuotes.endPoint+"/Assignee");
-            if (response !== null && response.code !== undefined) {
-                if (response.code === 200) {
-                    //console.log(response);
-                    setAssignees(response.data);
-                    setLoad(false);
+            const token = await instance.acquireTokenSilent({
+                scopes: loginRequest.scopes,
+                account: account
+            })
+            .then((response: AuthenticationResult) => {
+                return response.accessToken;
+            })
+            .catch(() => {
+                return instance.acquireTokenPopup({
+                    ...loginRequest,
+                    account: account
+                    }).then((response) => {
+                        return response.accessToken;
+                    });
+                }
+            );
+            setTempToken(token);
+            
+            try {
+                setLoad(true);
+                const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisQuotes.endPoint+"/Assignee", token);
+                if (response !== null && response.code !== undefined) {
+                    if (response.code === 200) {
+                        //console.log(response);
+                        setAssignees(response.data);
+                        setLoad(false);
 
-                    // Then I can load users
-                    loadUsers();
+                        // Then I can load users
+                        loadUsers();
+                    }
+                    else {
+                        setLoad(false);
+                    }
                 }
                 else {
                     setLoad(false);
                 }
+            }
+            catch (err: any) {
+                setLoad(false);
+                console.log(err);
             }  
         }
     }
@@ -135,14 +163,14 @@ function UsersAssignment(props: any) {
         if (assignee) {
             if (context && account) {
                 setLoad(true);
-                const response = await (context as any).delete(protectedResources.apiLisQuotes.endPoint+"/Assignee/"+assignee.id);
+                const response = await (context as BackendService<any>).deleteWithToken(protectedResources.apiLisQuotes.endPoint+"/Assignee/"+assignee.id, tempToken);
                 if (response !== null && response.code !== undefined) {
                     if (response.code === 200) {
                         //console.log(response);
                         enqueueSnackbar(t('operationSuccess'), { variant: "info", anchorOrigin: { horizontal: "right", vertical: "top"} });
 
                         // Here i refresh the assignees (to do a lot cleaner)
-                        const response2 = await (context as BackendService<any>).getSingle(protectedResources.apiLisQuotes.endPoint+"/Assignee");
+                        const response2 = await (context as BackendService<any>).getWithToken(protectedResources.apiLisQuotes.endPoint+"/Assignee", tempToken);
                         if (response2 !== null && response2.code !== undefined) {
                             if (response2.code === 200) {
                                 setAssignees(response2.data);
@@ -166,13 +194,13 @@ function UsersAssignment(props: any) {
     const assignAsManager = async (name: string, email: string, idUser: string) => {
         if (context && account) {
             let content = { "name": name, "email": email, "idUser": idUser };
-            const response = await (context as BackendService<any>).post(protectedResources.apiLisQuotes.endPoint+"/Assignee", content);
+            const response = await (context as BackendService<any>).postWithToken(protectedResources.apiLisQuotes.endPoint+"/Assignee", content, tempToken);
             if (response !== null && response.status === 201) {
                 //console.log(response);
                 enqueueSnackbar(t('assigneeCreatedSuccess'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
 
                 // Here i refresh the assignees (to do a lot cleaner)
-                const response2 = await (context as BackendService<any>).getSingle(protectedResources.apiLisQuotes.endPoint+"/Assignee");
+                const response2 = await (context as BackendService<any>).getWithToken(protectedResources.apiLisQuotes.endPoint+"/Assignee", tempToken);
                 if (response2 !== null && response2.code !== undefined) {
                     if (response2.code === 200) {
                         setAssignees(response2.data);

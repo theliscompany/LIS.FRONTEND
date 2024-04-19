@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { Alert, Autocomplete, Box, Button, Grid, InputLabel, NativeSelect, Skeleton, TextField, Typography, ListItem, ListItemText, IconButton } from '@mui/material';
+import { Alert, Autocomplete, Box, Button, Grid, InputLabel, NativeSelect, Skeleton, TextField, Typography, ListItem, ListItemText, IconButton, DialogActions, DialogContent } from '@mui/material';
 import { MuiTelInput } from 'mui-tel-input';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { inputLabelStyles, BootstrapInput, whiteButtonStyles, BootstrapDialog } from '../utils/misc/styles';
+import { inputLabelStyles, BootstrapInput, whiteButtonStyles, BootstrapDialog, BootstrapDialogTitle, buttonCloseStyles } from '../utils/misc/styles';
 import { enqueueSnackbar, SnackbarProvider } from 'notistack';
 import { loginRequest, protectedResources, transportRequest } from '../config/authConfig';
 import { useAuthorizedBackendApi } from '../api/api';
@@ -65,6 +65,9 @@ function NewRequest(props: any) {
     const [products, setProducts] = useState<any>(null);
     
     const [modal7, setModal7] = useState<boolean>(false);
+    const [modal10, setModal10] = useState<boolean>(false);
+
+    const [tempToken, setTempToken] = useState<string>("");
 
     const { instance, accounts } = useMsal();
     const account = useAccount(accounts[0] || {});
@@ -154,18 +157,6 @@ function NewRequest(props: any) {
             containerType: "20' Dry", quantity: 1, 
             containersSelection: []
         });
-        // setEmail("");
-        // setPhone("");
-        // setMessage("");
-        // setPackingType("FCL");
-        // setClientNumber(null);
-        // setDeparture(null);
-        // setArrival(null);
-        // setTags([]);
-        // setAssignedManager("null");
-        // setContainerType("20' Dry");
-        // setQuantity(1);
-        // setContainersSelection([]);
     }
     
     useEffect(() => {
@@ -173,27 +164,6 @@ function NewRequest(props: any) {
         getProducts(); 
         getAssignees();
     }, [instance, account, context]);
-
-    const assignManager = async (idQuote: string) => {
-        if (currentUser !== null && currentUser !== undefined && currentUser !== "") {
-            if (context && account) {
-                const response = await (context as BackendService<any>).put(protectedResources.apiLisQuotes.endPoint+"/Assignee/"+idQuote+"/"+formState.assignedManager, []);
-                if (response !== null) {
-                    setLoad(false);
-                    // enqueueSnackbar(t('requestCreatedAssigned'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
-                    //enqueueSnackbar("The manager has been assigned to this request.", { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
-                }
-                else {
-                    setLoad(false);
-                    // enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
-                }
-            }
-        }
-        else {
-            setLoad(false);
-            // enqueueSnackbar(t('errorHappenedRequest'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
-        }
-    }
 
     const getAssignees = async () => {
         if (context && account) {
@@ -213,24 +183,55 @@ function NewRequest(props: any) {
                     });
                 }
             );
+            setTempToken(token);
 
-            setLoadUser(true);
-            const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisQuotes.endPoint+"/Assignee", token);
-            if (response !== null && response.code !== undefined) {
-                if (response.code === 200) {
-                    var aux = response.data.find((elm: any) => elm.email === account?.username);
-                    setAssignees(response.data);
-                    setCurrentUser(aux);
-                    if (aux !== null && aux !== undefined && aux !== "") {
-                        // setAssignedManager(aux.id);
-                        // handleChangeFormState(aux.id, "assignedManager");
+            try {
+                setLoadUser(true);
+                const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisQuotes.endPoint+"/Assignee", token);
+                if (response !== null && response.code !== undefined) {
+                    if (response.code === 200) {
+                        var aux = response.data.find((elm: any) => elm.email === account?.username);
+                        setAssignees(response.data);
+                        setCurrentUser(aux);
+                        if (aux !== null && aux !== undefined && aux !== "") {
+                            // setAssignedManager(aux.id);
+                            // handleChangeFormState(aux.id, "assignedManager");
+                        }
+                        setLoadUser(false);
                     }
-                    setLoadUser(false);
+                    else {
+                        setLoadUser(false);
+                    }
                 }
                 else {
                     setLoadUser(false);
                 }
             }
+            catch (err: any) {
+                setLoadUser(false);
+                console.log(err);
+            }
+        }
+    }
+
+    const assignManager = async (idQuote: string) => {
+        if (currentUser !== null && currentUser !== undefined && currentUser !== "") {
+            if (context && account) {
+                const response = await (context as BackendService<any>).putWithToken(protectedResources.apiLisQuotes.endPoint+"/Assignee/"+idQuote+"/"+formState.assignedManager, [], tempToken);
+                if (response !== null) {
+                    setLoad(false);
+                    // enqueueSnackbar(t('requestCreatedAssigned'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                    //enqueueSnackbar("The manager has been assigned to this request.", { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                }
+                else {
+                    setLoad(false);
+                    // enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                }
+            }
+        }
+        else {
+            setLoad(false);
+            // enqueueSnackbar(t('errorHappenedRequest'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
         }
     }
 
@@ -421,7 +422,7 @@ function NewRequest(props: any) {
                                 /*callBack={(val: any) => { setArrival(val); }}*/ 
                             />
                         </Grid>
-                        <Grid item xs={12} md={2} mt={1}>
+                        {/* <Grid item xs={12} md={2} mt={1}>
                             <InputLabel htmlFor="packing-type" sx={inputLabelStyles}>{t('packingType')}</InputLabel>
                             <NativeSelect
                                 id="packing-type"
@@ -435,272 +436,109 @@ function NewRequest(props: any) {
                                 <option value="Breakbulk/LCL">{t('breakbulk')}</option>
                                 <option value="Unit RoRo">{t('roro')}</option>
                             </NativeSelect>
-                        </Grid>
+                        </Grid> */}
 
-                        {
-                            formState.packingType === "FCL" ?
-                            <>
-                            <Grid item xs={12} md={3} mt={1}>
-                                <InputLabel htmlFor="container-type" sx={inputLabelStyles}>{t('containerType')}</InputLabel>
-                                {
-                                    containers !== null ?
-                                    <NativeSelect
-                                        id="container-type"
-                                        value={containerType}
-                                        // onChange={(e: any) => { handleChangeFormState(e.target.value, "containerType") }}
-                                        onChange={(e: any) => { setContainerType(e.target.value); }}
-                                        input={<BootstrapInput />}
-                                        fullWidth
-                                    >
-                                        <option key={"elm1-x"} value="">{t('notDefined')}</option>
-                                        {containers.map((elm: any, i: number) => (
-                                            <option key={"elm1-"+i} value={elm.packageName}>{elm.packageName}</option>
-                                        ))}
-                                    </NativeSelect>
-                                    : <Skeleton />
-                                }
-                            </Grid>
-                            <Grid item xs={12} md={3} mt={1}>
-                                <InputLabel htmlFor="quantity" sx={inputLabelStyles}>{t('quantity')}</InputLabel>
-                                <BootstrapInput 
-                                    id="quantity" type="number" 
-                                    inputProps={{ min: 1, max: 100 }} 
-                                    value={quantity} 
-                                    onChange={(e: any) => { setQuantity(e.target.value); }}
-                                    // onChange={(e: any) => { handleChangeFormState(e.target.value, "quantity"); }} 
-                                    fullWidth 
-                                />
-                            </Grid>
-                            <Grid item xs={12} md={4} mt={1}>
-                                <Button 
-                                    variant="contained" color="inherit" fullWidth sx={whiteButtonStyles} 
-                                    style={{ marginTop: "30px", height: "42px", float: "right" }} 
-                                    onClick={() => {
-                                        if (containerType !== "" && quantity > 0) {
-                                            // setContainersSelection((prevItems: any) => [...prevItems, { container: containerType, quantity: quantity, id: containers.find((item: any) => item.packageName === containerType).packageId }]);
-                                            handleChangeFormState([...formState.containersSelection, { container: containerType, quantity: quantity, id: containers.find((item: any) => item.packageName === containerType).packageId }], "containersSelection");
-                                            // handleChangeFormState("", "containerType"); handleChangeFormState(1, "quantity");
-                                            setContainerType(""); setQuantity(1);
-                                        } 
-                                        else {
-                                            enqueueSnackbar("You need to select a container type and a good value for quantity.", { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
-                                        }
-                                    }} 
-                                >
-                                    {t('addContainer')}
-                                </Button>
-                            </Grid>
-                            <Grid item xs={12} mb={2}>
+                        <Grid item xs={9} container direction="column" alignItems="flex-start">
+                            <InputLabel htmlFor="listContainers" sx={inputLabelStyles} style={{ marginBottom: "8px", position: "relative", top: "12px" }}>{t('listContainers')}</InputLabel>
+                        </Grid>
+                        <Grid item xs={3}>
+                            <Button variant="contained" color="inherit" sx={whiteButtonStyles} style={{ float: "right" }} onClick={() => setModal10(true)} >{t('addContainer')}</Button>
+                        </Grid>
+                        <Grid item xs={12}>
+                            {
+                                formState.packingType === "FCL" ?
+                                <>
                                 {
                                     formState.containersSelection !== undefined && formState.containersSelection !== null && formState.containersSelection.length !== 0 && containers !== null ? 
-                                        <Grid container spacing={2}>
-                                            {
-                                                formState.containersSelection.map((item: any, index: number) => (
-                                                    <Grid key={"listitem1-"+index} item xs={12} md={4}>
-                                                        <ListItem
-                                                            sx={{ border: "1px solid #e5e5e5" }}
-                                                            secondaryAction={
-                                                                <IconButton edge="end" onClick={() => {
-                                                                    // setContainersSelection((prevItems: any) => prevItems.filter((item: any, i: number) => i !== index));
-                                                                    handleChangeFormState(formState.containersSelection.filter((item: any, i: number) => i !== index), "containersSelection");
-                                                                }}>
-                                                                    <DeleteIcon />
-                                                                </IconButton>
-                                                            }
-                                                        >
-                                                            <ListItemText primary={
-                                                                t('container')+" : "+item.container+" | "+t('quantity')+" : "+item.quantity
-                                                            } />
-                                                        </ListItem>
-                                                    </Grid>
-                                                ))
-                                            }
-                                        </Grid>
-                                    : null  
+                                    <Grid container spacing={2}>
+                                    {
+                                        formState.containersSelection.map((item: any, index: number) => (
+                                            <Grid key={"listitem1-"+index} item xs={12} md={4}>
+                                                <ListItem
+                                                    sx={{ border: "1px solid #e5e5e5" }}
+                                                    secondaryAction={
+                                                        <IconButton edge="end" onClick={() => {
+                                                            // setContainersSelection((prevItems: any) => prevItems.filter((item: any, i: number) => i !== index));
+                                                            handleChangeFormState(formState.containersSelection.filter((item: any, i: number) => i !== index), "containersSelection");
+                                                        }}>
+                                                            <DeleteIcon />
+                                                        </IconButton>
+                                                    }
+                                                >
+                                                    <ListItemText primary={
+                                                        t('container')+" : "+item.container+" | "+t('quantity')+" : "+item.quantity
+                                                    } />
+                                                </ListItem>
+                                            </Grid>
+                                        ))
+                                    }
+                                    </Grid> : null  
                                 }
-                            </Grid>
-                            </> : null
-                        }
-                        {
-                            formState.packingType === "Breakbulk/LCL" ?
-                            <>
-                            <Grid item xs={12} md={3} mt={1}>
-                                <InputLabel htmlFor="package-name" sx={inputLabelStyles}>{t('packageName')}</InputLabel>
-                                <NativeSelect
-                                    id="package-name"
-                                    value={packageName}
-                                    onChange={(e: any) => { setPackageName(e.target.value) }}
-                                    input={<BootstrapInput />}
-                                    fullWidth
-                                >
-                                    <option key={"option1-x"} value="">{t('notDefined')}</option>
-                                    {packingOptions.map((elm: any, i: number) => (
-                                        <option key={"elm11-"+i} value={elm}>{elm}</option>
-                                    ))}
-                                </NativeSelect>
-                            </Grid>
-                            <Grid item xs={12} md={1} mt={1}>
-                                <InputLabel htmlFor="package-quantity" sx={inputLabelStyles}>{t('quantity')}</InputLabel>
-                                <BootstrapInput id="package-quantity" type="number" inputProps={{ min: 1, max: 100 }} value={packageQuantity} onChange={(e: any) => {setPackageQuantity(e.target.value)}} fullWidth />
-                            </Grid>
-                            <Grid item xs={12} md={1} mt={1}>
-                                <InputLabel htmlFor="package-length" sx={inputLabelStyles}>{t('length')}(cm)</InputLabel>
-                                <BootstrapInput id="package-length" type="number" value={packageLength} onChange={(e: any) => {setPackageLength(e.target.value)}} fullWidth />
-                            </Grid>
-                            <Grid item xs={12} md={1} mt={1}>
-                                <InputLabel htmlFor="package-width" sx={inputLabelStyles}>{t('width')}(cm)</InputLabel>
-                                <BootstrapInput id="package-width" type="number" value={packageWidth} onChange={(e: any) => {setPackageWidth(e.target.value)}} fullWidth />
-                            </Grid>
-                            <Grid item xs={12} md={1} mt={1}>
-                                <InputLabel htmlFor="package-height" sx={inputLabelStyles}>{t('height')}(cm)</InputLabel>
-                                <BootstrapInput id="package-height" type="number" value={packageHeight} onChange={(e: any) => {setPackageHeight(e.target.value)}} fullWidth />
-                            </Grid>
-                            <Grid item xs={12} md={2} mt={1}>
-                                <InputLabel htmlFor="package-weight" sx={inputLabelStyles}>{t('weight')} (Kg)</InputLabel>
-                                <BootstrapInput id="package-weight" type="number" inputProps={{ min: 0, max: 100 }} value={packageWeight} onChange={(e: any) => {setPackageWeight(e.target.value)}} fullWidth />
-                            </Grid>
-                            <Grid item xs={12} md={1} mt={1}>
-                                <Button
-                                    variant="contained" color="inherit" fullWidth sx={whiteButtonStyles} 
-                                    style={{ marginTop: "30px", height: "42px", float: "right" }} 
-                                    onClick={() => {
-                                        if (packageName !== "" && packageQuantity > 0 && packageWeight > 0) {
-                                            setPackagesSelection((prevItems: any) => [...prevItems, { 
-                                                name: packageName, quantity: packageQuantity, dimensions: packageLength+"x"+packageWidth+"x"+packageHeight, weight: packageWeight, volume: packageLength*packageWidth*packageHeight
-                                            }]);
-                                            setPackageName(""); setPackageQuantity(1); setPackageLength(0); setPackageWidth(0); setPackageHeight(0); setPackageWeight(0);
-                                        } 
-                                        else {
-                                            enqueueSnackbar(t('fieldNeedTobeFilled'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
-                                        }
-                                    }} 
-                                >
-                                    {t('add')}
-                                </Button>
-                            </Grid>
-                            <Grid item xs={12}>
+                                </> : null
+                            }
+                            {
+                                formState.packingType === "Breakbulk/LCL" ?
+                                <>
                                 {
                                     packagesSelection !== undefined && packagesSelection !== null && packagesSelection.length !== 0 ? 
-                                        <Grid container spacing={2}>
-                                            {
-                                                packagesSelection.map((item: any, index: number) => (
-                                                    <Grid key={"packageitem1-"+index} item xs={12} md={6}>
-                                                        <ListItem
-                                                            sx={{ border: "1px solid #e5e5e5" }}
-                                                            secondaryAction={
-                                                                <IconButton edge="end" onClick={() => {
-                                                                    setPackagesSelection((prevItems: any) => prevItems.filter((item: any, i: number) => i !== index));
-                                                                }}>
-                                                                    <DeleteIcon />
-                                                                </IconButton>
-                                                            }
-                                                        >
-                                                            <ListItemText primary={
-                                                                t('name')+" : "+item.name+" | "+t('quantity')+" : "+item.quantity+" | "+t('dimensions')+" : "+item.dimensions+" | Cubage ("+item.volume+" \u33A5) | "+t('weight')+" : "+item.weight+" Kg"
-                                                            } />
-                                                        </ListItem>
-                                                    </Grid>
-                                                ))
-                                            }
-                                        </Grid>
-                                    : null  
-                                }
-                            </Grid>
-                            </> : null
-                        }
-                        {
-                            formState.packingType === "Unit RoRo" ?
-                            <>
-                            <Grid item xs={12} md={3} mt={1}>
-                                <InputLabel htmlFor="unit-name" sx={inputLabelStyles}>{t('unitName')}</InputLabel>
-                                {/* <BootstrapInput id="unit-name" type="text" value={unitName} onChange={(e: any) => {setUnitName(e.target.value)}} fullWidth /> */}
-                                <NativeSelect
-                                    id="unit-name"
-                                    value={unitName}
-                                    onChange={(e: any) => { setUnitName(e.target.value) }}
-                                    input={<BootstrapInput />}
-                                    fullWidth
-                                >
-                                    <option key={"option2-x"} value="">{t('notDefined')}</option>
-                                    {packingOptions.map((elm: any, i: number) => (
-                                        <option key={"elm22-"+i} value={elm}>{elm}</option>
-                                    ))}
-                                </NativeSelect>
-                            </Grid>
-                            <Grid item xs={12} md={1} mt={1}>
-                                <InputLabel htmlFor="unit-quantity" sx={inputLabelStyles}>{t('quantity')}</InputLabel>
-                                <BootstrapInput id="unit-quantity" type="number" inputProps={{ min: 1, max: 100 }} value={unitQuantity} onChange={(e: any) => {setUnitQuantity(e.target.value)}} fullWidth />
-                            </Grid>
-                            {/* <Grid item xs={12} md={2} mt={1}>
-                                <InputLabel htmlFor="unit-dimensions" sx={inputLabelStyles}>{t('dimensions')}</InputLabel>
-                                <BootstrapInput id="unit-dimensions" type="text" value={unitDimensions} onChange={(e: any) => {setUnitDimensions(e.target.value)}} fullWidth />
-                            </Grid> */}
-                            <Grid item xs={12} md={1} mt={1}>
-                                <InputLabel htmlFor="unit-length" sx={inputLabelStyles}>{t('length')}(cm)</InputLabel>
-                                <BootstrapInput id="unit-length" type="number" value={unitLength} onChange={(e: any) => {setUnitLength(e.target.value)}} fullWidth />
-                            </Grid>
-                            <Grid item xs={12} md={1} mt={1}>
-                                <InputLabel htmlFor="unit-width" sx={inputLabelStyles}>{t('width')}(cm)</InputLabel>
-                                <BootstrapInput id="unit-width" type="number" value={unitWidth} onChange={(e: any) => {setUnitWidth(e.target.value)}} fullWidth />
-                            </Grid>
-                            <Grid item xs={12} md={1} mt={1}>
-                                <InputLabel htmlFor="unit-height" sx={inputLabelStyles}>{t('height')}(cm)</InputLabel>
-                                <BootstrapInput id="unit-height" type="number" value={unitHeight} onChange={(e: any) => {setUnitHeight(e.target.value)}} fullWidth />
-                            </Grid>
-                            <Grid item xs={12} md={2} mt={1}>
-                                <InputLabel htmlFor="unit-weight" sx={inputLabelStyles}>{t('weight')} (Kg)</InputLabel>
-                                <BootstrapInput id="unit-weight" type="number" inputProps={{ min: 0, max: 100 }} value={unitWeight} onChange={(e: any) => {setUnitWeight(e.target.value)}} fullWidth />
-                            </Grid>
-                            <Grid item xs={12} md={1} mt={1}>
-                                <Button
-                                    variant="contained" color="inherit" fullWidth sx={whiteButtonStyles} 
-                                    style={{ marginTop: "30px", height: "42px", float: "right" }} 
-                                    onClick={() => {
-                                        if (unitName !== "" && unitQuantity > 0 && unitWeight > 0) {
-                                            setUnitsSelection((prevItems: any) => [...prevItems, { 
-                                                name: unitName, quantity: unitQuantity, dimensions: unitLength+"x"+unitWidth+"x"+unitHeight, weight: unitWeight, volume: unitLength*unitWidth*unitHeight
-                                            }]);
-                                            setUnitName(""); setUnitQuantity(1); setUnitLength(0); setUnitWidth(0); setUnitHeight(0); setUnitWeight(0);
-                                        } 
-                                        else {
-                                            enqueueSnackbar(t('fieldNeedTobeFilled'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                                    <Grid container spacing={2}>
+                                        {
+                                            packagesSelection.map((item: any, index: number) => (
+                                                <Grid key={"packageitem1-"+index} item xs={12} md={6}>
+                                                    <ListItem
+                                                        sx={{ border: "1px solid #e5e5e5" }}
+                                                        secondaryAction={
+                                                            <IconButton edge="end" onClick={() => {
+                                                                setPackagesSelection((prevItems: any) => prevItems.filter((item: any, i: number) => i !== index));
+                                                            }}>
+                                                                <DeleteIcon />
+                                                            </IconButton>
+                                                        }
+                                                    >
+                                                        <ListItemText primary={
+                                                            t('name')+" : "+item.name+" | "+t('quantity')+" : "+item.quantity+" | "+t('dimensions')+" : "+item.dimensions+" | Cubage ("+item.volume+" \u33A5) | "+t('weight')+" : "+item.weight+" Kg"
+                                                        } />
+                                                    </ListItem>
+                                                </Grid>
+                                            ))
                                         }
-                                    }} 
-                                >
-                                    {t('add')}
-                                </Button>
-                            </Grid>
-                            <Grid item xs={12}>
+                                    </Grid> : null  
+                                }
+                                </> : null
+                            }
+                            {
+                                formState.packingType === "Unit RoRo" ?
+                                <>
                                 {
                                     unitsSelection !== undefined && unitsSelection !== null && unitsSelection.length !== 0 ? 
-                                        <Grid container spacing={2}>
-                                            {
-                                                unitsSelection.map((item: any, index: number) => (
-                                                    <Grid key={"unititem1-"+index} item xs={12} md={6}>
-                                                        <ListItem
-                                                            sx={{ border: "1px solid #e5e5e5" }}
-                                                            secondaryAction={
-                                                                <IconButton edge="end" onClick={() => {
-                                                                    setUnitsSelection((prevItems: any) => prevItems.filter((item: any, i: number) => i !== index));
-                                                                }}>
-                                                                    <DeleteIcon />
-                                                                </IconButton>
-                                                            }
-                                                        >
-                                                            <ListItemText primary={
-                                                                t('name')+" : "+item.name+" | "+t('quantity')+" : "+item.quantity+" | "+t('dimensions')+" : "+item.dimensions+" | Cubage ("+item.volume+" \u33A5) | "+t('weight')+" : "+item.weight+" Kg"
-                                                            } />
-                                                        </ListItem>
-                                                    </Grid>
-                                                ))
-                                            }
-                                        </Grid>
-                                    : null  
+                                    <Grid container spacing={2}>
+                                        {
+                                            unitsSelection.map((item: any, index: number) => (
+                                                <Grid key={"unititem1-"+index} item xs={12} md={6}>
+                                                    <ListItem
+                                                        sx={{ border: "1px solid #e5e5e5" }}
+                                                        secondaryAction={
+                                                            <IconButton edge="end" onClick={() => {
+                                                                setUnitsSelection((prevItems: any) => prevItems.filter((item: any, i: number) => i !== index));
+                                                            }}>
+                                                                <DeleteIcon />
+                                                            </IconButton>
+                                                        }
+                                                    >
+                                                        <ListItemText primary={
+                                                            t('name')+" : "+item.name+" | "+t('quantity')+" : "+item.quantity+" | "+t('dimensions')+" : "+item.dimensions+" | Cubage ("+item.volume+" \u33A5) | "+t('weight')+" : "+item.weight+" Kg"
+                                                        } />
+                                                    </ListItem>
+                                                </Grid>
+                                            ))
+                                        }
+                                    </Grid> : null  
                                 }
-                            </Grid>
-                            </> : null
-                        }
-
+                                </> : null
+                            }
+                        </Grid>                                
+                        
+                        
                         <Grid item xs={12} md={6} mt={1} mb={1}>
                             <InputLabel htmlFor="tags" sx={inputLabelStyles}>{t('specifics')}</InputLabel>
                             {
@@ -760,6 +598,205 @@ function NewRequest(props: any) {
                     categories={[""]}
                     closeModal={() => setModal7(false)}
                 />
+            </BootstrapDialog>
+
+            {/* New container type */}
+            <BootstrapDialog
+                onClose={() => setModal10(false)}
+                aria-labelledby="custom-dialog-title10"
+                open={modal10}
+                maxWidth="lg"
+                fullWidth
+            >
+                <BootstrapDialogTitle id="custom-dialog-title" onClose={() => setModal10(false)}>
+                    <b>Add a container</b>
+                </BootstrapDialogTitle>
+                <DialogContent dividers>
+                    <Grid container spacing={2}>
+                        <Grid item xs={12} md={2} mt={1}>
+                            <InputLabel htmlFor="packing-type" sx={inputLabelStyles}>{t('packingType')}</InputLabel>
+                            <NativeSelect
+                                id="packing-type"
+                                value={packingType}
+                                onChange={(e: any) => { setPackingType(e.target.value); }}
+                                input={<BootstrapInput />}
+                                fullWidth
+                            >
+                                <option value="FCL">{t('fcl')}</option>
+                                <option value="Breakbulk/LCL">{t('breakbulk')}</option>
+                                <option value="Unit RoRo">{t('roro')}</option>
+                            </NativeSelect>
+                        </Grid>
+
+                        {
+                            packingType === "FCL" ?
+                            <>
+                            <Grid item xs={12} md={3} mt={1}>
+                                <InputLabel htmlFor="container-type" sx={inputLabelStyles}>{t('containerType')}</InputLabel>
+                                {
+                                    containers !== null ?
+                                    <NativeSelect
+                                        id="container-type"
+                                        value={containerType}
+                                        onChange={(e: any) => { setContainerType(e.target.value) }}
+                                        input={<BootstrapInput />}
+                                        fullWidth
+                                    >
+                                        <option key={"elm1-x"} value="">{t('notDefined')}</option>
+                                        {containers.map((elm: any, i: number) => (
+                                            <option key={"elm1-"+i} value={elm.packageName}>{elm.packageName}</option>
+                                        ))}
+                                    </NativeSelect>
+                                    : <Skeleton />
+                                }
+                            </Grid>
+                            <Grid item xs={12} md={3} mt={1}>
+                                <InputLabel htmlFor="quantity" sx={inputLabelStyles}>{t('quantity')}</InputLabel>
+                                <BootstrapInput id="quantity" type="number" inputProps={{ min: 1, max: 100 }} value={quantity} onChange={(e: any) => {setQuantity(e.target.value)}} fullWidth />
+                            </Grid>
+                            <Grid item xs={12} md={4} mt={1}>
+                                <Button 
+                                    variant="contained" color="inherit" fullWidth sx={whiteButtonStyles} 
+                                    style={{ marginTop: "30px", height: "42px", float: "right" }} 
+                                    onClick={() => {
+                                        if (containerType !== "" && quantity > 0) {
+                                            handleChangeFormState([...formState.containersSelection, { container: containerType, quantity: quantity, id: containers.find((item: any) => item.packageName === containerType).packageId }], "containersSelection");
+                                            setContainerType(""); setQuantity(1);
+                                            setModal10(false);
+                                        } 
+                                        else {
+                                            enqueueSnackbar("You need to select a container type and a good value for quantity.", { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                                        }
+                                    }} 
+                                >
+                                    {t('addContainer')}
+                                </Button>
+                            </Grid>
+                            </> : null
+                        }
+                        {
+                            packingType === "Breakbulk/LCL" ?
+                            <>
+                            <Grid item xs={12} md={3} mt={1}>
+                                <InputLabel htmlFor="package-name" sx={inputLabelStyles}>{t('packageName')}</InputLabel>
+                                <NativeSelect
+                                    id="package-name"
+                                    value={packageName}
+                                    onChange={(e: any) => { setPackageName(e.target.value) }}
+                                    input={<BootstrapInput />}
+                                    fullWidth
+                                >
+                                    <option key={"option1-x"} value="">{t('notDefined')}</option>
+                                    {packingOptions.map((elm: any, i: number) => (
+                                        <option key={"elm11-"+i} value={elm}>{elm}</option>
+                                    ))}
+                                </NativeSelect>
+                            </Grid>
+                            <Grid item xs={12} md={1} mt={1}>
+                                <InputLabel htmlFor="package-quantity" sx={inputLabelStyles}>{t('quantity')}</InputLabel>
+                                <BootstrapInput id="package-quantity" type="number" inputProps={{ min: 1, max: 100 }} value={packageQuantity} onChange={(e: any) => {setPackageQuantity(e.target.value)}} fullWidth />
+                            </Grid>
+                            <Grid item xs={12} md={1} mt={1}>
+                                <InputLabel htmlFor="package-length" sx={inputLabelStyles}>{t('length')}(cm)</InputLabel>
+                                <BootstrapInput id="package-length" type="number" value={packageLength} onChange={(e: any) => {setPackageLength(e.target.value)}} fullWidth />
+                            </Grid>
+                            <Grid item xs={12} md={1} mt={1}>
+                                <InputLabel htmlFor="package-width" sx={inputLabelStyles}>{t('width')}(cm)</InputLabel>
+                                <BootstrapInput id="package-width" type="number" value={packageWidth} onChange={(e: any) => {setPackageWidth(e.target.value)}} fullWidth />
+                            </Grid>
+                            <Grid item xs={12} md={1} mt={1}>
+                                <InputLabel htmlFor="package-height" sx={inputLabelStyles}>{t('height')}(cm)</InputLabel>
+                                <BootstrapInput id="package-height" type="number" value={packageHeight} onChange={(e: any) => {setPackageHeight(e.target.value)}} fullWidth />
+                            </Grid>
+                            <Grid item xs={12} md={2} mt={1}>
+                                <InputLabel htmlFor="package-weight" sx={inputLabelStyles}>{t('weight')} (Kg)</InputLabel>
+                                <BootstrapInput id="package-weight" type="number" inputProps={{ min: 0, max: 100 }} value={packageWeight} onChange={(e: any) => {setPackageWeight(e.target.value)}} fullWidth />
+                            </Grid>
+                            <Grid item xs={12} md={1} mt={1}>
+                                <Button
+                                    variant="contained" color="inherit" fullWidth sx={whiteButtonStyles} 
+                                    style={{ marginTop: "30px", height: "42px", float: "right" }} 
+                                    onClick={() => {
+                                        if (packageName !== "" && packageQuantity > 0 && packageWeight > 0) {
+                                            setPackagesSelection((prevItems: any) => [...prevItems, { 
+                                                name: packageName, quantity: packageQuantity, dimensions: packageLength+"x"+packageWidth+"x"+packageHeight, weight: packageWeight, volume: packageLength*packageWidth*packageHeight
+                                            }]);
+                                            setPackageName(""); setPackageQuantity(1); setPackageLength(0); setPackageWidth(0); setPackageHeight(0); setPackageWeight(0);
+                                        } 
+                                        else {
+                                            enqueueSnackbar(t('fieldNeedTobeFilled'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                                        }
+                                    }} 
+                                >
+                                    {t('add')}
+                                </Button>
+                            </Grid>
+                            </> : null
+                        }
+                        {
+                            packingType === "Unit RoRo" ?
+                            <>
+                            <Grid item xs={12} md={3} mt={1}>
+                                <InputLabel htmlFor="unit-name" sx={inputLabelStyles}>{t('unitName')}</InputLabel>
+                                <NativeSelect
+                                    id="unit-name"
+                                    value={unitName}
+                                    onChange={(e: any) => { setUnitName(e.target.value) }}
+                                    input={<BootstrapInput />}
+                                    fullWidth
+                                >
+                                    <option key={"option2-x"} value="">{t('notDefined')}</option>
+                                    {packingOptions.map((elm: any, i: number) => (
+                                        <option key={"elm22-"+i} value={elm}>{elm}</option>
+                                    ))}
+                                </NativeSelect>
+                            </Grid>
+                            <Grid item xs={12} md={1} mt={1}>
+                                <InputLabel htmlFor="unit-quantity" sx={inputLabelStyles}>{t('quantity')}</InputLabel>
+                                <BootstrapInput id="unit-quantity" type="number" inputProps={{ min: 1, max: 100 }} value={unitQuantity} onChange={(e: any) => {setUnitQuantity(e.target.value)}} fullWidth />
+                            </Grid>
+                            <Grid item xs={12} md={1} mt={1}>
+                                <InputLabel htmlFor="unit-length" sx={inputLabelStyles}>{t('length')}(cm)</InputLabel>
+                                <BootstrapInput id="unit-length" type="number" value={unitLength} onChange={(e: any) => {setUnitLength(e.target.value)}} fullWidth />
+                            </Grid>
+                            <Grid item xs={12} md={1} mt={1}>
+                                <InputLabel htmlFor="unit-width" sx={inputLabelStyles}>{t('width')}(cm)</InputLabel>
+                                <BootstrapInput id="unit-width" type="number" value={unitWidth} onChange={(e: any) => {setUnitWidth(e.target.value)}} fullWidth />
+                            </Grid>
+                            <Grid item xs={12} md={1} mt={1}>
+                                <InputLabel htmlFor="unit-height" sx={inputLabelStyles}>{t('height')}(cm)</InputLabel>
+                                <BootstrapInput id="unit-height" type="number" value={unitHeight} onChange={(e: any) => {setUnitHeight(e.target.value)}} fullWidth />
+                            </Grid>
+                            <Grid item xs={12} md={2} mt={1}>
+                                <InputLabel htmlFor="unit-weight" sx={inputLabelStyles}>{t('weight')} (Kg)</InputLabel>
+                                <BootstrapInput id="unit-weight" type="number" inputProps={{ min: 0, max: 100 }} value={unitWeight} onChange={(e: any) => {setUnitWeight(e.target.value)}} fullWidth />
+                            </Grid>
+                            <Grid item xs={12} md={1} mt={1}>
+                                <Button
+                                    variant="contained" color="inherit" fullWidth sx={whiteButtonStyles} 
+                                    style={{ marginTop: "30px", height: "42px", float: "right" }} 
+                                    onClick={() => {
+                                        if (unitName !== "" && unitQuantity > 0 && unitWeight > 0) {
+                                            setUnitsSelection((prevItems: any) => [...prevItems, { 
+                                                name: unitName, quantity: unitQuantity, dimensions: unitLength+"x"+unitWidth+"x"+unitHeight, weight: unitWeight, volume: unitLength*unitWidth*unitHeight
+                                            }]);
+                                            setUnitName(""); setUnitQuantity(1); setUnitLength(0); setUnitWidth(0); setUnitHeight(0); setUnitWeight(0);
+                                        } 
+                                        else {
+                                            enqueueSnackbar(t('fieldNeedTobeFilled'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                                        }
+                                    }} 
+                                >
+                                    {t('add')}
+                                </Button>
+                            </Grid>
+                            </> : null
+                        }
+                    </Grid>
+                </DialogContent>
+                <DialogActions>
+                    <Button variant="contained" onClick={() => setModal10(false)} sx={buttonCloseStyles}>{t('close')}</Button>
+                </DialogActions>
             </BootstrapDialog>
         </div>
     );

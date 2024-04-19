@@ -25,6 +25,7 @@ import NewContact from '../components/editRequestPage/NewContact';
 import { Anchor } from '@mui/icons-material';
 import NewService from '../components/shared/NewService';
 import NewPort from '../components/shared/NewPort';
+import { compareServices } from '../utils/functions';
 
 function createGetRequestUrl(variable1: number, variable2: number, variable3: number) {
     let url = protectedResources.apiLisPricing.endPoint+"/Miscellaneous/Miscellaneous?";
@@ -261,7 +262,7 @@ function Miscellaneous() {
         if (context && account) {
             const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Service?pageSize=500", token);
             if (response !== null && response !== undefined) {
-                setServices(response.filter((obj: any) => obj.servicesTypeId.includes(5))); // Filter the services for miscellaneous (MISCELLANEOUS = 5)
+                setServices(response.sort((a: any, b: any) => compareServices(a, b)).filter((obj: any) => obj.servicesTypeId.includes(5))); // Filter the services for miscellaneous (MISCELLANEOUS = 5)
             }  
         }
     }

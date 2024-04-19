@@ -110,11 +110,11 @@ function NewContact(props: any) {
                         </InputLabel>
                         <BootstrapInput id="test-name" type="text" value={testName} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTestName(e.target.value)} fullWidth />
                     </Grid>
-                    <Grid item xs={12}>
+                    <Grid item xs={6}>
                         <InputLabel htmlFor="addressCountry" sx={inputLabelStyles}>{t('addressCountry')}</InputLabel>
                         <BootstrapInput id="addressCountry" type="text" value={addressCountry} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setAddressCountry(e.target.value)} fullWidth />
                     </Grid>
-                    <Grid item xs={12}>
+                    <Grid item xs={6}>
                         <InputLabel htmlFor="countryCode" sx={inputLabelStyles}>{t('countryCode')}</InputLabel>
                         <CountrySelect id="countryCode" value={country} onChange={setCountry} fullWidth />
                     </Grid>

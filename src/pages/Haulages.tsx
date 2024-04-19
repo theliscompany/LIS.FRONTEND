@@ -23,7 +23,7 @@ import AutocompleteSearch from '../components/shared/AutocompleteSearch';
 import RequestPriceHaulage from '../components/editRequestPage/RequestPriceHaulage';
 import { Anchor, Mail } from '@mui/icons-material';
 import NewContact from '../components/editRequestPage/NewContact';
-import { extractCityAndPostalCode, flattenData2, hashCode, parseLocation, parseLocation2, reverseTransformArray, transformArray } from '../utils/functions';
+import { compareServices, extractCityAndPostalCode, flattenData2, hashCode, parseLocation, parseLocation2, reverseTransformArray, transformArray } from '../utils/functions';
 import ServicesTable from '../components/seafreightPage/ServicesTable';
 import NewService from '../components/shared/NewService';
 import NewPort from '../components/shared/NewPort';
@@ -199,10 +199,8 @@ function Haulages() {
             try {
                 const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisCrm.endPoint+"/Contact/GetContacts?category=2&pageSize=1000", token);
                 if (response !== null && response !== undefined) {
-                    // console.log(response);
                     // Removing duplicates from client array
                     setClients(response.data.filter((obj: any, index: number, self: any) => index === self.findIndex((o: any) => o.contactName === obj.contactName)));
-                    // console.log(response.filter((obj: any, index: number, self: any) => index === self.findIndex((o: any) => o.contactName === obj.contactName)));
                 }
             }
             catch (err: any) {
@@ -249,7 +247,7 @@ function Haulages() {
             const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Service?pageSize=500", token);
             if (response !== null && response !== undefined) {
                 setAllServices(response);
-                setServices(response.filter((obj: any) => obj.servicesTypeId.includes(2))); // Filter the services for haulages (HAULAGE = 2)
+                setServices(response.sort((a: any, b: any) => compareServices(a, b)).filter((obj: any) => obj.servicesTypeId.includes(2))); // Filter the services for haulages (HAULAGE = 2)
             }  
         }
     }
@@ -338,7 +336,7 @@ function Haulages() {
                 setLoadEdit(false);
 
                 // Now i get the miscs
-                getMiscellaneouses(auxHaulier, auxCity, auxPort, auxValidUntil, response.containers[0], false);
+                // getMiscellaneouses(auxHaulier, auxCity, auxPort, auxValidUntil, response.containers[0], false);
             }
             else {
                 setLoadEdit(false);
@@ -717,7 +715,27 @@ function Haulages() {
                                 <Typography sx={{ fontSize: 18, mb: 1 }}><b>Haulage price information</b></Typography>
                             </Grid>
                             <Grid item xs={12} md={4}>
-                                <Button variant="contained" color="inherit" sx={{ float: "right", backgroundColor: "#fff", textTransform: "none" }} onClick={() => { setModal7(true); }} >{t('createNewHaulier')}</Button>
+                                {/* <Button 
+                                    variant="contained" color="inherit" 
+                                    sx={{ float: "right", backgroundColor: "#fff", textTransform: "none" }} 
+                                    onClick={() => { setModal8(true); }}
+                                >
+                                    {t('newService')}
+                                </Button> */}
+                                <Button 
+                                    variant="contained" color="inherit" 
+                                    sx={{ float: "right", backgroundColor: "#fff", textTransform: "none", ml: 1 }} 
+                                    onClick={() => { setModal9(true); }}
+                                >
+                                    {t('newPort')}
+                                </Button>
+                                <Button 
+                                    variant="contained" color="inherit" 
+                                    sx={{ float: "right", backgroundColor: "#fff", textTransform: "none" }} 
+                                    onClick={() => { setModal7(true); }}
+                                >
+                                    {t('createNewHaulier')}
+                                </Button>
                             </Grid>
                             <Grid item xs={12} md={8}>
                                 <Grid container spacing={2}>
@@ -847,26 +865,10 @@ function Haulages() {
                                 <BootstrapInput id="multiStop" type="number" value={multiStop} onChange={(e: any) => setMultiStop(e.target.value)} fullWidth />
                             </Grid>
 
-                            <Grid item xs={12} md={8}>
+                            {/* <Grid item xs={12} md={8}>
                                 <Typography sx={{ fontSize: 18, mb: 1 }}><b>{t('listServices')} - {t('miscellaneous')}</b></Typography>
-                            </Grid>
-                            <Grid item xs={12} md={4}>
-                                <Button 
-                                    variant="contained" color="inherit" 
-                                    sx={{ float: "right", backgroundColor: "#fff", textTransform: "none" }} 
-                                    onClick={() => { setModal8(true); }}
-                                >
-                                    Create new service
-                                </Button>
-                                <Button 
-                                    variant="contained" color="inherit" 
-                                    sx={{ float: "right", backgroundColor: "#fff", textTransform: "none", mr: 1 }} 
-                                    onClick={() => { setModal9(true); }}
-                                >
-                                    Create new port
-                                </Button>
-                            </Grid>
-                            <Grid item xs={12}>
+                            </Grid> */}
+                            {/* <Grid item xs={12}>
                                 {
                                     allServices !== null && allServices !== undefined && allServices.length !== 0 ?
                                     !loadMiscs ? 
@@ -881,7 +883,7 @@ function Haulages() {
                                     /> : <Skeleton />
                                     : null
                                 }
-                            </Grid>
+                            </Grid> */}
                         </Grid> : <Skeleton />
                     }
                 </DialogContent>
@@ -890,7 +892,7 @@ function Haulages() {
                         variant="contained" color={"primary"} 
                         onClick={() => { 
                             createUpdateHaulage(); 
-                            createMiscellaneous();
+                            // createMiscellaneous();
                         }} 
                         sx={{ mr: 1.5, textTransform: "none" }}
                     >
@@ -908,17 +910,6 @@ function Haulages() {
                 maxWidth="lg"
                 fullWidth
             >
-                {/* {
-                    clients !== null ?
-                    <RequestPriceHaulage
-                        token={tempToken} 
-                        companies={clients}
-                        ports={ports}
-                        loadingCity={null}
-                        loadingPort={null}
-                        closeModal={() => setModal5(false)}
-                    /> : <Skeleton />
-                } */}
                 <RequestPriceHaulage
                     token={tempToken} 
                     // companies={clients}

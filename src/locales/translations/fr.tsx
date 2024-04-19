@@ -389,9 +389,11 @@ export const fr = {
   reloadIndication: "Veuillez cliquer sur le bouton Recharger si vous voulez actualiser les données après vos modifications",
   addressCountry: "Adresse du pays",
   countryCode: "Code du pays",
-  createNewContact: "Créer un nouveau contact",
-  createNewCarrier: "Créer un nouveau transporteur maritime",
-  createNewHaulier: "Créer un nouveau transporteur routier",
+  createNewPort: "Nouveau port",
+  createNewContact: "Nouveau contact",
+  createNewCarrier: "Nouveau transporteur maritime",
+  createNewHaulier: "Nouveau transporteur routier",
+  createNewHaulage: "Nouveau prix de transport routier",
   priceType: "Type de prix",
   lumpSum: "Marge forfaitaire",
   margin: "Marge",
@@ -434,5 +436,6 @@ export const fr = {
   contactNumber: "Numéro",
   phone: "Numéro de téléphone",
   country: "Pays",
-  serviceTypesId: "Types de service"
+  serviceTypesId: "Types de service",
+  newHaulage: "Nouveau prix de transport",
 };

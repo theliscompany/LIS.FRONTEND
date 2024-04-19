@@ -664,7 +664,7 @@ function Layout(props: {children?: React.ReactNode}) {
                             
                         </List>
                         
-                        <List dense sx={{ position: "absolute", bottom: "0px", left: "10px", right: "10px" }}>
+                        {/* <List dense sx={{ position: "absolute", bottom: "0px", left: "10px", right: "10px" }}>
                             <ListItem className="cs-listitem" key={"Collapse"} disablePadding disableGutters>
                                 <DarkTooltip title={t('collapse')} placement="right" arrow>
                                     <ListItemButton className="cs-listitembutton" onClick={open ? handleDrawerClose : handleDrawerOpen}>
@@ -675,7 +675,7 @@ function Layout(props: {children?: React.ReactNode}) {
                                     </ListItemButton>
                                 </DarkTooltip>
                             </ListItem>
-                        </List>
+                        </List> */}
                     </Box>
                 </Drawer>
                 

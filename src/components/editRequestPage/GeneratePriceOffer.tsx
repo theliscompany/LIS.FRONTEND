@@ -20,6 +20,7 @@ import NewMiscellaneous from './NewMiscellaneous';
 import RequestPriceHaulage from './RequestPriceHaulage';
 import RequestPriceRequest from './RequestPriceRequest';
 import useProcessStatePersistence from '../../utils/processes/useProcessStatePersistence';
+import NewHaulage from './NewHaulage';
 
 function createGetRequestUrl(url: string, variable2: string, variable3: string, variable4: string) {
     if (variable2) {
@@ -77,19 +78,8 @@ function GeneratePriceOffer(props: any) {
     const [generalMiscs, setGeneralMiscs] = useState<any>(null);
     const [tableMiscs, setTableMiscs] = useState<any>(null);
     
-    // const [selectedHaulage, setSelectedHaulage] = useState<any>(null);
-    // const [selectedSeafreight, setSelectedSeafreight] = useState<any>(null);
-    // const [selectedMisc, setSelectedMisc] = useState<any>(null);
-
-    // const [mySeafreights, setMySeafreights] = useState<any>([]);
-    // const [myMiscs, setMyMiscs] = useState<any>([]);
-    
     const [tempToken, setTempToken] = useState<string>("");
     
-    // const [rowSelectionModel, setRowSelectionModel] = React.useState<GridRowSelectionModel>([]);
-    // const [rowSelectionModel2, setRowSelectionModel2] = React.useState<GridRowSelectionModel>([]);
-    // const [rowSelectionModel3, setRowSelectionModel3] = React.useState<GridRowSelectionModel>([]);
-
     const [templates, setTemplates] = useState<any>([]);
     const [loadTemplates, setLoadTemplates] = useState<boolean>(false);
     const [selectedTemplate, setSelectedTemplate] = useState<string>(defaultTemplate);
@@ -100,9 +90,10 @@ function GeneratePriceOffer(props: any) {
     const [margins, setMargins] = useState([]);
     const [addings, setAddings] = useState([]);
     
-    const [modal5, setModal5] = useState<boolean>(false);
-    const [modal6, setModal6] = useState<boolean>(false);
-    const [modal9, setModal9] = useState<boolean>(false);
+    const [modalRequestHaulage, setModalRequestHaulage] = useState<boolean>(false);
+    const [modalRequestSeafreight, setModalRequestSeafreight] = useState<boolean>(false);
+    const [modalNewMisc, setModalNewMisc] = useState<boolean>(false);
+    const [modalHaulage, setModalHaulage] = useState<boolean>(false);
     
     const rteRef = useRef<RichTextEditorRef>(null);
     
@@ -370,7 +361,7 @@ function GeneratePriceOffer(props: any) {
                 
                 setFormState({
                     ...formState, 
-                    portDeparture: ports1.find((elm: any) => elm.portName === formState.selectedHaulage.loadingPort), 
+                    portDeparture: ports1.find((elm: any) => elm.portId === formState.selectedHaulage.loadingPortId), 
                     activeStep: formState.activeStep !== undefined ? formState.activeStep + 1 : 0 });
                 // setActiveStep((prevActiveStep) => prevActiveStep + 1);
                 setSkipped(newSkipped);
@@ -574,7 +565,7 @@ function GeneratePriceOffer(props: any) {
             
             var auxPortDeparture = formState.portDeparture;
             if (formState.selectedHaulage !== null && formState.selectedHaulage !== undefined) {
-                auxPortDeparture = ports1.find((elm: any) => elm.portName === formState.selectedHaulage.loadingPort);
+                auxPortDeparture = ports1.find((elm: any) => elm.portId === formState.selectedHaulage.loadingPortId);
             }
 
             if (auxPortDeparture !== undefined && auxPortDeparture !== null && formState.portDestination !== undefined && formState.portDestination !== null) {
@@ -1025,22 +1016,29 @@ function GeneratePriceOffer(props: any) {
                                         <Grid item xs={12}>
                                             <Box sx={{ overflow: "auto" }}>
                                                 <Grid container>
-                                                    <Grid item xs={8}>
+                                                    <Grid item xs={7}>
                                                         <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>
                                                             {t('listHaulagesPricingOffers')+t('fromDotted')+loadingCity.city} (select one)
                                                         </Typography>
                                                     </Grid>
-                                                    <Grid item xs={4}>
+                                                    <Grid item xs={5}>
                                                         <Button 
                                                             variant="contained" 
                                                             color="inherit" 
                                                             sx={{ 
                                                                 textTransform: "none", backgroundColor: "#fff", 
-                                                                color: "#333", float: "right", marginTop: "8px", marginLeft: "10px" 
+                                                                color: "#333", float: "right", marginTop: "8px", ml: 1 
                                                             }} 
                                                             onClick={getHaulagePriceOffers}
                                                         >
                                                             {t('reload')} <RestartAlt fontSize='small' />
+                                                        </Button>
+                                                        <Button 
+                                                            variant="contained" color="inherit" 
+                                                            sx={{ float: "right", backgroundColor: "#fff", marginTop: "8px", textTransform: "none", ml: 1 }} 
+                                                            onClick={() => { setModalHaulage(true); }}
+                                                        >
+                                                            {t('newHaulage')}
                                                         </Button>
                                                         <Button 
                                                             variant="contained" 
@@ -1049,7 +1047,7 @@ function GeneratePriceOffer(props: any) {
                                                                 textTransform: "none", backgroundColor: "#fff", 
                                                                 color: "#333", float: "right", marginTop: "8px" 
                                                             }}
-                                                            onClick={() => setModal5(true)}
+                                                            onClick={() => setModalRequestHaulage(true)}
                                                         >
                                                             {t('requestHaulagePrice')}
                                                         </Button>
@@ -1193,7 +1191,7 @@ function GeneratePriceOffer(props: any) {
                                                         textTransform: "none", backgroundColor: "#fff", 
                                                         color: "#333", float: "right", marginTop: "8px"
                                                     }}
-                                                    onClick={() => setModal6(true)}
+                                                    onClick={() => setModalRequestSeafreight(true)}
                                                 >
                                                     {t('requestSeafreightPrice')}
                                                 </Button>
@@ -1300,7 +1298,7 @@ function GeneratePriceOffer(props: any) {
                                                             textTransform: "none", backgroundColor: "#fff", 
                                                             color: "#333", float: "right", marginTop: "8px" 
                                                         }}
-                                                        onClick={() => setModal9(true)}
+                                                        onClick={() => setModalNewMisc(true)}
                                                     >
                                                         Create a misc
                                                     </Button>
@@ -1585,11 +1583,11 @@ function GeneratePriceOffer(props: any) {
                 </AccordionDetails>
             </Accordion>
 
-            {/* Price request haulage (modal5) */}
+            {/* Price request haulage (modalRequestHaulage) */}
             <BootstrapDialog
-                onClose={() => setModal5(false)}
+                onClose={() => setModalRequestHaulage(false)}
                 aria-labelledby="custom-dialog-title5"
-                open={modal5}
+                open={modalRequestHaulage}
                 maxWidth="lg"
                 fullWidth
             >
@@ -1599,15 +1597,15 @@ function GeneratePriceOffer(props: any) {
                     ports={ports}
                     loadingCity={loadingCity}
                     loadingPort={formState.portDeparture}
-                    closeModal={() => setModal5(false)}
+                    closeModal={() => setModalRequestHaulage(false)}
                 />
             </BootstrapDialog>
 
-            {/* Price request seafreight FCL (modal6) */}
+            {/* Price request seafreight FCL (modalRequestSeafreight) */}
             <BootstrapDialog
-                onClose={() => setModal6(false)}
+                onClose={() => setModalRequestSeafreight(false)}
                 aria-labelledby="custom-dialog-title6"
-                open={modal6}
+                open={modalRequestSeafreight}
                 maxWidth="lg"
                 fullWidth
             >
@@ -1621,22 +1619,38 @@ function GeneratePriceOffer(props: any) {
                     portDischarge={formState.portDestination} 
                     containers={containers} 
                     containersSelection={containersSelection}
-                    closeModal={() => setModal6(false)} 
+                    closeModal={() => setModalRequestSeafreight(false)} 
                 />
             </BootstrapDialog>
 
-            {/* Create new misc (modal9) */}
+            {/* Create new misc (modalNewMisc) */}
             <BootstrapDialog
-                onClose={() => setModal9(false)}
+                onClose={() => setModalNewMisc(false)}
                 aria-labelledby="custom-dialog-title9"
-                open={modal9}
+                open={modalNewMisc}
                 maxWidth="lg"
                 fullWidth
             >
-                <BootstrapDialogTitle id="custom-dialog-title" onClose={() => setModal9(false)}>
+                <BootstrapDialogTitle id="custom-dialog-title" onClose={() => setModalNewMisc(false)}>
                     <b>{t('createRowMisc')}</b>
                 </BootstrapDialogTitle>
-                <NewMiscellaneous closeModal={() => setModal9(false)} updateMiscs={getGeneralMiscellaneousPriceOffers} />
+                <NewMiscellaneous closeModal={() => setModalNewMisc(false)} updateMiscs={getGeneralMiscellaneousPriceOffers} />
+            </BootstrapDialog>
+
+            {/* Create new haulage */}
+            <BootstrapDialog
+                onClose={() => setModalHaulage(false)}
+                aria-labelledby="custom-dialog-titleHaulage"
+                open={modalHaulage}
+                maxWidth="lg"
+                fullWidth
+            >
+                <NewHaulage 
+                    ports={ports}
+                    containers={containers}
+                    closeModal={() => setModalHaulage(false)}
+                    callBack={() => { getHaulagePriceOffers(); }}
+                />
             </BootstrapDialog>
         </Grid>
     );
