@@ -268,12 +268,6 @@ function Miscellaneous() {
     }
     
     const getContainers = async (token: string) => {
-        // if (context && account) {
-        //     const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Package/Containers", token);
-        //     if (response !== null && response !== undefined) {
-        //         setContainers(response);
-        //     }  
-        // }
         setContainers(containerPackages);
     }
     

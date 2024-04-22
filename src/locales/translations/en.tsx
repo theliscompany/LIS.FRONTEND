@@ -359,7 +359,7 @@ export const en = {
   commodities: "Commodities",
   etd: "Estimate time of departure",
   recipients: "Recipients",
-  deliveryPort: "Port of delivery",
+  deliveryPort: "Port of loading",
   errorSelectRecipient: "You need to select at least one recipient before sending the mail",
   mailSentTo: "Mail sent to : ",
   templates: "Templates",
@@ -438,4 +438,7 @@ export const en = {
   country: "Country",
   serviceTypesId: "Services types",
   newHaulage: "New haulage",
+  newSeafreight: "New seafreight",
+  rateRequest: "RATE REQUEST",
+  rateRequestHaulage: "RATE REQUEST HAULAGE"
 };

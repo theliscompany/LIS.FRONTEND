@@ -359,7 +359,7 @@ export const fr = {
   commodities: "Commodités",
   etd: "Date prévue de départ",
   recipients: "Destinataires",
-  deliveryPort: "Port de délivrance",
+  deliveryPort: "Port de chargement",
   errorSelectRecipient: "Vous devez sélectionner au moins un destinataire avant d'envoyer votre mail",
   mailSentTo: "Mail envoyé à : ",
   templates: "Modèles",
@@ -438,4 +438,7 @@ export const fr = {
   country: "Pays",
   serviceTypesId: "Types de service",
   newHaulage: "Nouveau prix de transport",
+  newSeafreight: "Nouveau prix de frêt maritime",
+  rateRequest: "DEMANDE DE PRIX",
+  rateRequestHaulage: "DEMANDE DE PRIX DE TRANSPORT"
 };

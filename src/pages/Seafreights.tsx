@@ -77,30 +77,13 @@ function Seafreights() {
     const [validUntil, setValidUntil] = useState<Dayjs | null>(null);
     const [currency, setCurrency] = useState<string>("EUR");
     const [comment, setComment] = useState<string>("");
-    const [serviceName, setServiceName] = useState<any>(null);
-    const [otherMiscs, setOtherMiscs] = useState<any>(null);
     const [containerTypes, setContainerTypes] = useState<any>(null);
     // const [containerTypes, setContainerTypes] = useState<any>({packageId: 8, packageName: "20' Dry"});
-    const [priceType, setPriceType] = useState<string>("Seafreight price");
-    
-    const [price, setPrice] = useState<number>(0);
     const [servicesData, setServicesData] = useState<any>([]);
-    const [servicesData2, setServicesData2] = useState<any>([]);
-    const [servicesSelection, setServicesSelection] = useState<any>([]);
-    const [servicesSelection2, setServicesSelection2] = useState<any>([]);
-    const [miscellaneousId, setMiscellaneousId] = useState<string>("");
-
+    // const [servicesData2, setServicesData2] = useState<any>([]);
+    // const [miscellaneousId, setMiscellaneousId] = useState<string>("");
     const [tempToken, setTempToken] = useState<string>("");
     
-    // State to hold the currently selected container type
-    const [selectedContainer, setSelectedContainer] = useState('');
-
-    // Extract unique container package names
-    // const containerTypes = Array.from(new Set(dataArray.flatMap((item: any) => item.containers.map((container: any) => container.packageName))));
-
-    // Filter services based on the selected container type
-    // const filteredData = selectedContainer === '' ? dataArray : dataArray.filter(item => item.containers.some(container => container.packageName === selectedContainer));
-
     const { t } = useTranslation();
     
     const { instance, accounts } = useMsal();
@@ -276,12 +259,6 @@ function Seafreights() {
     }
     
     const getContainers = async (token: string) => {
-        // if (context && account) {
-        //     const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Package/Containers", token);
-        //     if (response !== null && response !== undefined) {
-        //         setContainers(response);
-        //     }  
-        // }
         setContainers(containerPackages);
     }
     
@@ -327,19 +304,6 @@ function Seafreights() {
         }));
     };
 
-    const deflattenData2 = (flattenedData: any) => {
-        return flattenedData.map((item: any) => ({
-            miscellaneousServiceId: item.id,
-            service: {
-                serviceId: item.serviceId, // Original structure did not include this in the flattened data
-                serviceName: item.serviceName,
-                price: item.price,
-                containers: item.containers // Assuming this was not included in the flattened version
-            },
-            containers: [containerTypes]
-        }));
-    };
-
     const resetForm = () => {
         setCarrier(null);
         setCarrierAgent(null);
@@ -350,11 +314,9 @@ function Seafreights() {
         setTransitTime(0);
         setFrequency(0);
         setComment("");
-        // setServicesSelection([]);
-        // setServicesSelection2([]);
         setServicesData([]);
-        setServicesData2([]);
-        setMiscellaneousId("");
+        // setServicesData2([]);
+        // setMiscellaneousId("");
     }
     
     const getSeafreight = async (id: string, isCopy: boolean) => {
@@ -520,11 +482,10 @@ function Seafreights() {
                         setLoadMiscs(false);
                         
                         // Dont update the miscellaneousId is it's a new price
-                        if (!isCopy) {
-                            setMiscellaneousId(selectedElement.miscellaneousId);
-                        }
-                        
-                        setServicesData2(flattenData2(reverseTransformArray(selectedElement.containers).filter((elm: any) => elm.containers[0].packageName === container.packageName)));
+                        // if (!isCopy) {
+                        //     setMiscellaneousId(selectedElement.miscellaneousId);
+                        // }
+                        // setServicesData2(flattenData2(reverseTransformArray(selectedElement.containers).filter((elm: any) => elm.containers[0].packageName === container.packageName)));
                     }
                     else {
                         setLoadMiscs(false);
@@ -540,62 +501,6 @@ function Seafreights() {
         }
     }
     
-    const createMiscellaneous = async () => {
-        if (miscellaneousId !== "" || servicesData2.length !== 0) {
-            if (validUntil !== null && portLoading !== null && portDischarge !== null && carrier !== null) {
-                if (context && account) {
-                    var dataSent = null;
-                    if (miscellaneousId !== "" && miscellaneousId !== undefined) {
-                        dataSent = {
-                            "miscellaneousId": miscellaneousId,
-                            "id": miscellaneousId,
-                            "departurePortId": portLoading.portId,
-                            "destinationPortId": portDischarge.portId,
-                            "departurePortName": portLoading.portName,
-                            "destinationPortName": portDischarge.portName,
-                            "supplierId": carrier.contactId,
-                            "supplierName": carrier.contactName,
-                            "currency": currency,
-                            "validUntil": validUntil?.toISOString(),
-                            "comment": "with seafreight",
-                            "containers": transformArray(deflattenData2(servicesData2)),
-                            "services": deflattenData2(servicesData2),
-                            "updated": (new Date()).toISOString()
-                        };
-                    }
-                    else {
-                        dataSent = {
-                            // "miscellaneousId": currentEditId,
-                            "departurePortId": portLoading.portId,
-                            "destinationPortId": portDischarge.portId,
-                            "departurePortName": portLoading.portName,
-                            "destinationPortName": portDischarge.portName,
-                            "supplierId": carrier.contactId,
-                            "supplierName": carrier.contactName,
-                            "currency": currency,
-                            "validUntil": validUntil?.toISOString(),
-                            "comment": "with seafreight",
-                            "containers": transformArray(deflattenData2(servicesData2)),
-                            "services": deflattenData2(servicesData2),
-                            "updated": (new Date()).toISOString()
-                        };
-                    }
-                    console.log(dataSent);
-                    const response = await (context as BackendService<any>).postWithToken(protectedResources.apiLisPricing.endPoint+"/Miscellaneous/Miscellaneous", dataSent, tempToken);
-                    if (response !== null && response !== undefined) {
-                        setModal2(false);
-                    }
-                    else {
-                        enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
-                    }
-                }
-            }
-            else {
-                enqueueSnackbar(t('fieldsEmptySeafreight'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
-            }
-        }
-    }
-
     function findPricingOffer(offers: any, carrierId: string, departurePort: string, destinationPort: string, containerType: string) {
         // Map containerType to the key used in the offer objects
         const containerTypeKeyMap: any = {
@@ -952,23 +857,6 @@ function Seafreights() {
                                     /> : null
                                 }
                             </Grid>
-                            <Grid item xs={12}>
-                                <Typography sx={{ fontSize: 18, mb: 1 }}><b>{t('listServices')} - {t('miscellaneous')}</b></Typography>
-                                {
-                                    allServices !== null && allServices !== undefined && allServices.length !== 0 ?
-                                    !loadMiscs ? 
-                                    <ServicesTable 
-                                        services={servicesData2} 
-                                        setServices={setServicesData2}
-                                        allServices={allServices}
-                                        type="Miscellaneous"
-                                        container={containerTypes}
-                                        currency={currency}
-                                        servicesOptions={allServices.filter((obj: any) => obj.servicesTypeId.includes(5)).map((elm: any) => elm.serviceName)}
-                                    /> : <Skeleton />
-                                    : null
-                                }
-                            </Grid>
                         </Grid> : <Skeleton />
                     }
                 </DialogContent>
@@ -979,12 +867,12 @@ function Seafreights() {
                             if (containerTypes !== null && containerTypes !== undefined) {
                                 // Now i check if there is already a price for this seafreight
                                 if (currentEditId !== "") {
-                                    createUpdateSeafreight(); createMiscellaneous(); 
+                                    createUpdateSeafreight();
                                 }
                                 else {
                                     if (carrier !== null && carrierAgent !== null && portLoading !== null && portDischarge !== null) {
                                         if (findPricingOffer(seafreights, carrierAgent.contactName, portLoading.portName, portDischarge.portName, containerTypes.packageName) === null) {
-                                            createUpdateSeafreight(); createMiscellaneous(); 
+                                            createUpdateSeafreight(); 
                                         }
                                         else {
                                             enqueueSnackbar("A similar pricing already exists, change the container type!", { variant: "warning", anchorOrigin: { horizontal: "right", vertical: "top"} });
@@ -1013,28 +901,12 @@ function Seafreights() {
                 maxWidth="lg"
                 fullWidth
             >
-                {/* {
-                    clients !== null && products !== null ?
-                    <RequestPriceRequest 
-                        token={tempToken} 
-                        products={products} 
-                        commodities={[]}
-                        companies={clients}
-                        ports={ports}
-                        portLoading={null}
-                        portDischarge={null} 
-                        containers={containers} 
-                        containersSelection={[]}
-                        closeModal={() => setModal6(false)} 
-                    /> : <Skeleton />
-                } */}
                 {
                     products !== null ?
                     <RequestPriceRequest 
                         token={tempToken} 
                         products={products} 
                         commodities={[]}
-                        // companies={clients}
                         ports={ports}
                         portLoading={null}
                         portDischarge={null} 
@@ -1045,7 +917,7 @@ function Seafreights() {
                 }
             </BootstrapDialog>
 
-            {/* Add a new contact */}
+            {/* Add a new contact - carrier */}
             <BootstrapDialog
                 onClose={() => setModal7(false)}
                 aria-labelledby="custom-dialog-title7"

@@ -29,7 +29,6 @@ import { containerPackages } from '../utils/constants';
 import { JSON as seaPorts } from 'sea-ports';
 import GeneratePriceOffer from '../components/editRequestPage/GeneratePriceOffer';
 import NewPort from '../components/shared/NewPort';
-import NewHaulage from '../components/editRequestPage/NewHaulage';
 // @ts-ignore
 
 let packingOptions = ["Unit", "Bundle", "Bag", "Pallet", "Carton", "Lot", "Crate"];
@@ -56,7 +55,6 @@ function Request() {
     const [modal8, setModal8] = useState<boolean>(false);
     const [modal9, setModal9] = useState<boolean>(false);
     const [modal10, setModal10] = useState<boolean>(false);
-    const [modalHaulage, setModalHaulage] = useState<boolean>(false);
     
     const [assignedManager, setAssignedManager] = useState<string>("");
     const [assignees, setAssignees] = useState<any>(null);
@@ -143,15 +141,13 @@ function Request() {
     
     useEffect(() => {
         if (ports !== null && products !== null && requestData !== null) {
-            // console.log("Ports X : ", ports);
-            // loadRequest(ports, products);
             setTags(requestData.tags !== null ? products.filter((elm: any) => requestData.tags.includes(elm.productName)) : []);
             const closestDeparturePort = findClosestSeaPort(parseLocation(requestData.departure), ports);
             const closestArrivalPort = findClosestSeaPort(parseLocation(requestData.arrival), ports);
             setPortDeparture(closestDeparturePort);
             setPortDestination(closestArrivalPort);
-            setPorts1(sortByCloseness(parseLocation(requestData.departure), ports).slice(0, 50));
-            setPorts2(sortByCloseness(parseLocation(requestData.arrival), ports).slice(0, 50));
+            setPorts1(sortByCloseness(parseLocation(requestData.departure), ports).slice(0, 500));
+            setPorts2(sortByCloseness(parseLocation(requestData.arrival), ports).slice(0, 500));
         }
     }, [ports, products]);
 
@@ -746,7 +742,7 @@ function Request() {
                                 ports2={ports2}
                                 containers={containers}
                             />
-                            : <Skeleton />
+                            : <Grid item xs={12}><Skeleton /></Grid>
                         }
 
                         <Grid item xs={12}>
@@ -848,21 +844,6 @@ function Request() {
                     <Button variant="contained" onClick={() => setModal8(false)} sx={buttonCloseStyles}>{t('close')}</Button>
                 </DialogActions>
             </BootstrapDialog>
-
-            {/* Add a new haulage */}
-            {/* <BootstrapDialog
-                onClose={() => setModalHaulage(false)}
-                aria-labelledby="custom-dialog-titleHaulage"
-                open={modalHaulage}
-                maxWidth="lg"
-                fullWidth
-            >
-                <NewHaulage 
-                    ports={ports}
-                    containers={containers}
-                    closeModal={() => setModalHaulage(false)}
-                />
-            </BootstrapDialog> */}
 
             {/* Create new port */}
             <BootstrapDialog

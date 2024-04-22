@@ -21,6 +21,7 @@ import RequestPriceHaulage from './RequestPriceHaulage';
 import RequestPriceRequest from './RequestPriceRequest';
 import useProcessStatePersistence from '../../utils/processes/useProcessStatePersistence';
 import NewHaulage from './NewHaulage';
+import NewSeafreight from './NewSeafreight';
 
 function createGetRequestUrl(url: string, variable2: string, variable3: string, variable4: string) {
     if (variable2) {
@@ -94,6 +95,7 @@ function GeneratePriceOffer(props: any) {
     const [modalRequestSeafreight, setModalRequestSeafreight] = useState<boolean>(false);
     const [modalNewMisc, setModalNewMisc] = useState<boolean>(false);
     const [modalHaulage, setModalHaulage] = useState<boolean>(false);
+    const [modalSeafreight, setModalSeafreight] = useState<boolean>(false);
     
     const rteRef = useRef<RichTextEditorRef>(null);
     
@@ -295,14 +297,8 @@ function GeneratePriceOffer(props: any) {
     }, [containersSelection]); // Assuming containersSelection is a prop or state
     
     useEffect(() => {
-        console.log("Table", tableMiscs);
-        console.log("Haulage", miscs);
-        console.log("Seafreight", miscsHaulage);
         if (generalMiscs !== null && miscs !== null && miscsHaulage !== null) {
             setTableMiscs([...miscsHaulage, ...miscs, ...generalMiscs]);
-            // setRowSelectionModel3([...miscsHaulage, ...miscs].map((elm: any) => elm.miscellaneousId));
-            // var auxTab = [...miscsHaulage, ...miscs];
-            // setFormState({...formState, rowSelectionModel3: auxTab.map((elm: any) => elm.miscellaneousId)});
         }
     }, [generalMiscs, miscs, miscsHaulage]);
     
@@ -317,16 +313,6 @@ function GeneratePriceOffer(props: any) {
             getSeaFreightPriceOffers();
         }
     }, [formState.activeStep, seafreights]);
-
-    // useEffect(() => {
-    //     // console.log("Table", tableMiscs);
-    //     // console.log("Haulage", miscs);
-    //     // console.log("Seafreight", miscsHaulage);
-    //     if (!loadGeneralMiscs && !loadResults && !loadMiscsHaulage) {
-    //         setTableMiscs([...miscsHaulage, ...miscs, ...generalMiscs]);
-    //         setRowSelectionModel3([...miscsHaulage, ...miscs].map((elm: any) => elm.miscellaneousId));
-    //     }
-    // }, [loadGeneralMiscs, loadResults, loadMiscsHaulage]);
 
     // Stepper functions
     const [activeStep, setActiveStep] = React.useState(0);
@@ -349,21 +335,16 @@ function GeneratePriceOffer(props: any) {
         }
         if (formState.activeStep === 0) {
             if (formState.selectedHaulage !== null && formState.selectedHaulage !== undefined) {
-                // setFormState({...formState, portDeparture: ports1.find((elm: any) => elm.portName === formState.selectedHaulage.loadingPort)});
-                // setPortDeparture(ports1.find((elm: any) => elm.portName === formState.selectedHaulage.loadingPort));
-                
-                // if (formState.selectedSeafreight === null || formState.selectedSeafreight === undefined) {
-                //     setLoadResults(true);
-                //     getSeaFreightPriceOffers();
-                // }
                 setLoadResults(true);
                 getSeaFreightPriceOffers();
                 
+                console.log(formState);
+                console.log(ports1.find((elm: any) => elm.portId === formState.selectedHaulage.loadingPortId));
                 setFormState({
                     ...formState, 
                     portDeparture: ports1.find((elm: any) => elm.portId === formState.selectedHaulage.loadingPortId), 
-                    activeStep: formState.activeStep !== undefined ? formState.activeStep + 1 : 0 });
-                // setActiveStep((prevActiveStep) => prevActiveStep + 1);
+                    activeStep: formState.activeStep !== undefined ? formState.activeStep + 1 : 0 
+                });
                 setSkipped(newSkipped);
             }
             else {
@@ -385,15 +366,10 @@ function GeneratePriceOffer(props: any) {
                         getHaulageMiscellaneousPriceOffers();
                     }
                     
-                    // setLoadResults(true);
-                    // getMiscellaneousPriceOffers();
-                    // setLoadMiscsHaulage(true);
-                    // getHaulageMiscellaneousPriceOffers();
                     setLoadGeneralMiscs(true);
                     getGeneralMiscellaneousPriceOffers();
                     
                     setFormState({...formState, activeStep: formState.activeStep !== undefined ? formState.activeStep + 1 : 0 });
-                    // setActiveStep((prevActiveStep) => prevActiveStep + 1);
                     setSkipped(newSkipped);
                 }
                 else {
@@ -404,7 +380,6 @@ function GeneratePriceOffer(props: any) {
         if (formState.activeStep === 2) {
             console.log("fState", formState);
             setFormState({...formState, activeStep: formState.activeStep !== undefined ? formState.activeStep + 1 : 0 });
-            // setActiveStep((prevActiveStep) => prevActiveStep + 1);
             setSkipped(newSkipped);
         }
         if (formState.activeStep === 3) {
@@ -574,6 +549,9 @@ function GeneratePriceOffer(props: any) {
                 var myContainers = containersSelection.map((elm: any) => elm.container);
                 setSeafreights(response.filter((elm: any) => myContainers.includes(elm.containers[0].container.packageName)).map((elm: any) => { return {...elm, defaultContainer: elm.containers[0].container.packageName}}));
             }
+            else {
+                console.log("Port departure : ", auxPortDeparture);
+            }
             setLoadResults(false);
         }
     }
@@ -597,14 +575,6 @@ function GeneratePriceOffer(props: any) {
                 response[0].suppliers.filter((elm: any) => myContainers.includes(elm.containers[0].container.packageName)).filter((elm: any) => new Date(elm.validUntil) > new Date()).filter((elm: any) => suppliersRecentlySelected.some((val: any) => val.carrierName === elm.supplierName && val.defaultContainer === elm.containers[0].container.packageName)).map((elm: any) => { return {...elm, defaultContainer: elm.containers[0].container.packageName}})
             : [];
             setMiscs(arrayFinal);
-            
-            // if (miscs !== null && generalMiscs !== null) {
-            //     console.log("xxx");
-            //     setTableMiscs([...arrayFinal, ...miscs, ...generalMiscs]);
-            //     setFormState({...formState, rowSelectionModel3: [...arrayFinal, ...miscs].map((elm: any) => elm.miscellaneousId)});
-            //     // setRowSelectionModel3([...arrayFinal, ...miscs].map((elm: any) => elm.miscellaneousId));
-            // }
-
             setLoadResults(false);
         }
     }
@@ -630,14 +600,6 @@ function GeneratePriceOffer(props: any) {
                 }})
             : [];
             setGeneralMiscs(arrayFinal);
-            
-            // if (miscsHaulage !== null && miscs !== null) {
-            //     console.log("xxx");
-            //     setTableMiscs([...miscsHaulage, ...miscs, ...arrayFinal]);
-            //     setFormState({...formState, rowSelectionModel3: [...miscsHaulage, ...miscs].map((elm: any) => elm.miscellaneousId)});
-            //     // setRowSelectionModel3([...miscsHaulage, ...miscs].map((elm: any) => elm.miscellaneousId));
-            // }
-
             setLoadGeneralMiscs(false);
         }
     }
@@ -667,14 +629,6 @@ function GeneratePriceOffer(props: any) {
             
             var arrayFinal = response.length !== 0 ? response[0].suppliers.filter((elm: any) => myContainers.includes(elm.containers[0].container.packageName)).filter((elm: any) => new Date(elm.validUntil) > new Date()) : [];
             setMiscsHaulage(arrayFinal);
-            
-            // if (miscs !== null && generalMiscs !== null) {
-            //     console.log("xxx");
-            //     setTableMiscs([...arrayFinal, ...miscs, generalMiscs]);
-            //     setFormState({...formState, rowSelectionModel3: [...arrayFinal, ...miscs].map((elm: any) => elm.miscellaneousId)});
-            //     // setRowSelectionModel3([...arrayFinal, ...miscs].map((elm: any) => elm.miscellaneousId));
-            // }
-            
             setLoadMiscsHaulage(false);
         }
     }
@@ -705,26 +659,6 @@ function GeneratePriceOffer(props: any) {
                     }
                 }
                 if (formState.selectedMisc !== undefined && formState.selectedMisc !== null) {
-                    // miscellaneous = [
-                    //     {
-                    //         "id": formState.selectedMisc.id,
-                    //         "departurePortId": null,
-                    //         "destinationPortId": null,
-                    //         "departurePortName": null,
-                    //         "destinationPortName": null,
-                    //         "supplierId": 0,
-                    //         "supplierName": formState.selectedMisc.supplierName,
-                    //         "currency": formState.selectedMisc.currency,
-                    //         "price20": formState.selectedMisc.price20,
-                    //         "price40": formState.selectedMisc.price40,
-                    //         "price20dry": formState.selectedMisc.price20dry,
-                    //         "price20rf": formState.selectedMisc.price20rf,
-                    //         "price40dry": formState.selectedMisc.price40dry,
-                    //         "price40hc": formState.selectedMisc.price40hc,
-                    //         "price40hcrf": formState.selectedMisc.price40hcRf,
-                    //         "validUntil": formState.selectedMisc.validUntil,
-                    //     }                      
-                    // ];
                     miscellaneous = formState.myMiscs.map((elm: any) => {
                         return {
                             "id": elm.miscellaneousId,
@@ -1073,17 +1007,13 @@ function GeneratePriceOffer(props: any) {
                                                         getRowHeight={() => "auto" }
                                                         sx={gridStyles}
                                                         onRowSelectionModelChange={(newRowSelectionModel: any) => {
-                                                            // setRowSelectionModel2(newRowSelectionModel);
-                                                            // setSelectedHaulage(newRowSelectionModel.length !== 0 ? haulages.find((elm: any) => elm.id === newRowSelectionModel[0]) : null);
                                                             setFormState({
                                                                 ...formState, 
                                                                 selectedHaulage: newRowSelectionModel.length !== 0 ? haulages.find((elm: any) => elm.id === newRowSelectionModel[0]) : null, 
                                                                 rowSelectionModel2: newRowSelectionModel
                                                             });
-                                                            // handleChangeFormState(newRowSelectionModel.length !== 0 ? haulages.find((elm: any) => elm.id === newRowSelectionModel[0]) : null, "selectedHaulage");
                                                         }}
                                                         rowSelectionModel={formState.rowSelectionModel2}
-                                                        // onRowClick={handleRowHaulagesClick}
                                                     /> :
                                                     <Box>
                                                         <Alert severity="error">{t('noResults')}</Alert>
@@ -1162,39 +1092,48 @@ function GeneratePriceOffer(props: any) {
                                                 /> : <Skeleton />
                                             }
                                         </Grid>
-                                        <Grid container>
-                                            <Grid item xs={8}>
-                                                <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>
-                                                    {
-                                                        formState.portDeparture !== undefined && formState.portDeparture !== null && formState.portDestination !== undefined && formState.portDestination !== null ?
-                                                        t('listSeaFreightsPricingOffers')+t('fromDotted')+formState.portDeparture.portName+"-"+formState.portDestination.portName : 
-                                                        t('listSeaFreightsPricingOffers')
-                                                    }
-                                                </Typography>
-                                            </Grid>
-                                            <Grid item xs={4}>
-                                                <Button 
-                                                    variant="contained" 
-                                                    color="inherit" 
-                                                    sx={{ 
-                                                        textTransform: "none", backgroundColor: "#fff", 
-                                                        color: "#333", float: "right", marginTop: "8px", marginLeft: "10px"
-                                                    }} 
-                                                    onClick={getSeaFreightPriceOffers}
-                                                >
-                                                    {t('reload')} <RestartAlt fontSize='small' />
-                                                </Button>
-                                                <Button 
-                                                    variant="contained" 
-                                                    color="inherit" 
-                                                    sx={{ 
-                                                        textTransform: "none", backgroundColor: "#fff", 
-                                                        color: "#333", float: "right", marginTop: "8px"
-                                                    }}
-                                                    onClick={() => setModalRequestSeafreight(true)}
-                                                >
-                                                    {t('requestSeafreightPrice')}
-                                                </Button>
+                                        <Grid item xs={12}>
+                                            <Grid container>
+                                                <Grid item xs={7}>
+                                                    <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>
+                                                        {
+                                                            formState.portDeparture !== undefined && formState.portDeparture !== null && formState.portDestination !== undefined && formState.portDestination !== null ?
+                                                            t('listSeaFreightsPricingOffers')+t('fromDotted')+formState.portDeparture.portName+"-"+formState.portDestination.portName : 
+                                                            t('listSeaFreightsPricingOffers')
+                                                        }
+                                                    </Typography>
+                                                </Grid>
+                                                <Grid item xs={5}>
+                                                    <Button 
+                                                        variant="contained" 
+                                                        color="inherit" 
+                                                        sx={{ 
+                                                            textTransform: "none", backgroundColor: "#fff", 
+                                                            color: "#333", float: "right", marginTop: "8px", marginLeft: "10px"
+                                                        }} 
+                                                        onClick={getSeaFreightPriceOffers}
+                                                    >
+                                                        {t('reload')} <RestartAlt fontSize='small' />
+                                                    </Button>
+                                                    <Button 
+                                                        variant="contained" color="inherit" 
+                                                        sx={{ float: "right", backgroundColor: "#fff", marginTop: "8px", textTransform: "none", ml: 1 }} 
+                                                        onClick={() => { setModalSeafreight(true); }}
+                                                    >
+                                                        {t('newSeafreight')}
+                                                    </Button>
+                                                    <Button 
+                                                        variant="contained" 
+                                                        color="inherit" 
+                                                        sx={{ 
+                                                            textTransform: "none", backgroundColor: "#fff", 
+                                                            color: "#333", float: "right", marginTop: "8px"
+                                                        }}
+                                                        onClick={() => setModalRequestSeafreight(true)}
+                                                    >
+                                                        {t('requestSeafreightPrice')}
+                                                    </Button>
+                                                </Grid>
                                             </Grid>
                                         </Grid>
                                         
@@ -1232,15 +1171,11 @@ function GeneratePriceOffer(props: any) {
                                                             if (newRowSelectionModel.length <= containersSelection.length) {
                                                                 var myFreights = newRowSelectionModel.length !== 0 ? seafreights.filter((elm: any) => newRowSelectionModel.includes(elm.seaFreightId)) : [];
                                                                 if (checkDifferentDefaultContainer(myFreights)) {
-                                                                    // setRowSelectionModel(newRowSelectionModel);
-                                                                    // setSelectedSeafreight(newRowSelectionModel.length !== 0 ? seafreights.find((elm: any) => elm.seaFreightId === newRowSelectionModel[0]) : null);
                                                                     setFormState({
                                                                         ...formState, 
                                                                         rowSelectionModel: newRowSelectionModel, 
                                                                         selectedSeafreight: newRowSelectionModel.length !== 0 ? seafreights.find((elm: any) => elm.seaFreightId === newRowSelectionModel[0]) : null
                                                                     });
-                                                                    // setMySeafreights(myFreights);
-                                                                    // setSelectedSeafreight(newRowSelectionModel.length !== 0 ? seafreights.filter((elm: any) => newRowSelectionModel.includes(elm.seaFreightId)) : null);
                                                                 }
                                                                 else {
                                                                     enqueueSnackbar("You can only select offers with different container types!", { variant: "warning", anchorOrigin: { horizontal: "right", vertical: "top"} });
@@ -1252,7 +1187,6 @@ function GeneratePriceOffer(props: any) {
                                                         }}
                                                         rowSelectionModel={formState.rowSelectionModel}
                                                         checkboxSelection
-                                                        // onRowClick={handleRowSeafreightsClick}
                                                     />
                                                 </Box> : 
                                                 <Box>
@@ -1333,12 +1267,6 @@ function GeneratePriceOffer(props: any) {
                                                                     },
                                                                 }}
                                                                 onRowSelectionModelChange={(newRowSelectionModel: any) => {
-                                                                    // setRowSelectionModel3(newRowSelectionModel);
-                                                                    // setMyMiscs(newRowSelectionModel.length !== 0 ? 
-                                                                    //     tableMiscs
-                                                                    //     .filter((elm: any) => newRowSelectionModel.includes(elm.miscellaneousId))
-                                                                    //     .map((elm: any) => { return {...elm, defaultContainer: elm.containers[0].container.packageName}}) : 
-                                                                    // []);
                                                                     setFormState({
                                                                         ...formState, 
                                                                         selectedMisc: newRowSelectionModel.length !== 0 ? generalMiscs.find((elm: any) => elm.id === newRowSelectionModel[0]) : null,
@@ -1348,11 +1276,9 @@ function GeneratePriceOffer(props: any) {
                                                                         .map((elm: any) => { return {...elm, defaultContainer: elm.containers[0].container.packageName}}) : [],
                                                                         rowSelectionModel3: newRowSelectionModel
                                                                     });
-                                                                    // setSelectedMisc(newRowSelectionModel.length !== 0 ? generalMiscs.find((elm: any) => elm.id === newRowSelectionModel[0]) : null);
                                                                 }}
                                                                 rowSelectionModel={formState.rowSelectionModel3}
                                                                 checkboxSelection
-                                                                // onRowClick={handleRowMiscsClick}
                                                             />
                                                         </Box> : <Alert severity="error">{t('noResults')}</Alert>
                                                         : <Skeleton />
@@ -1593,7 +1519,6 @@ function GeneratePriceOffer(props: any) {
             >
                 <RequestPriceHaulage
                     token={tempToken} 
-                    // companies={clients}
                     ports={ports}
                     loadingCity={loadingCity}
                     loadingPort={formState.portDeparture}
@@ -1613,7 +1538,6 @@ function GeneratePriceOffer(props: any) {
                     token={tempToken} 
                     products={products} 
                     commodities={tags}
-                    // companies={clients}
                     ports={ports}
                     portLoading={formState.portDeparture}
                     portDischarge={formState.portDestination} 
@@ -1646,10 +1570,31 @@ function GeneratePriceOffer(props: any) {
                 fullWidth
             >
                 <NewHaulage 
+                    token={tempToken}
                     ports={ports}
+                    loadingCity={loadingCity}
                     containers={containers}
                     closeModal={() => setModalHaulage(false)}
                     callBack={() => { getHaulagePriceOffers(); }}
+                />
+            </BootstrapDialog>
+
+            {/* Create new seafreight */}
+            <BootstrapDialog
+                onClose={() => setModalSeafreight(false)}
+                aria-labelledby="custom-dialog-titleSeafreight"
+                open={modalSeafreight}
+                maxWidth="lg"
+                fullWidth
+            >
+                <NewSeafreight 
+                    token={tempToken}
+                    ports={ports}
+                    portLoading={formState.portDeparture}
+                    portDischarge={formState.portDestination}
+                    containers={containers}
+                    closeModal={() => setModalSeafreight(false)}
+                    callBack={() => { getSeaFreightPriceOffers(); }}
                 />
             </BootstrapDialog>
         </Grid>
