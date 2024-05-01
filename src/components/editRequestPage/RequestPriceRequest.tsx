@@ -448,73 +448,79 @@ function RequestPriceRequest(props: any) {
                                             />
                                         </LocalizationProvider>
                                     </Grid>
-                                    <Grid item xs={12} md={4} mt={0.5}>
-                                        <InputLabel htmlFor="container-type" sx={inputLabelStyles}>{t('containerType')}</InputLabel>
-                                        {
-                                            props.containers !== null ?
-                                            <NativeSelect
-                                                id="container-type"
-                                                value={containerType}
-                                                onChange={(e: any) => { setContainerType(e.target.value) }}
-                                                input={<BootstrapInput />}
-                                                fullWidth
-                                            >
-                                                <option key={"elm1-x"} value="">{t('notDefined')}</option>
-                                                {props.containers.map((elm: any, i: number) => (
-                                                    <option key={"elm1-"+i} value={elm.packageName}>{elm.packageName}</option>
-                                                ))}
-                                            </NativeSelect>
-                                            : <Skeleton />
-                                        }
-                                    </Grid>
-                                    <Grid item xs={12} md={4} mt={0.5}>
-                                        <InputLabel htmlFor="quantity" sx={inputLabelStyles}>{t('quantity')}</InputLabel>
-                                        <BootstrapInput id="quantity" type="number" inputProps={{ min: 1, max: 100 }} value={quantity} onChange={(e: any) => {setQuantity(e.target.value)}} fullWidth />
-                                    </Grid>
-                                    <Grid item xs={12} md={4} mt={0.5}>
-                                        <Button 
-                                            variant="contained" color="inherit" fullWidth sx={whiteButtonStyles} 
-                                            style={{ marginTop: "30px", height: "42px", float: "right" }} 
-                                            onClick={() => {
-                                                if (containerType !== "" && quantity > 0) {
-                                                    setContainersSelection((prevItems: any) => [...prevItems, { container: containerType, quantity: quantity, id: props.containers.find((item: any) => item.packageName === containerType).packageId }]);
-                                                    setContainerType(""); setQuantity(1);
-                                                } 
-                                                else {
-                                                    enqueueSnackbar("You need to select a container type and a good value for quantity.", { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                                    <Grid item xs={12} mt={0.5}>
+                                        <Grid container spacing={0} sx={{ p: 2, border: "1px solid #e5e5e5" }}>
+                                            <Grid item xs={12} sx={{ mb: 1 }}>{t('containersQuantities')} - select one or many</Grid>
+                                            <Grid item xs={12} md={4} mt={0.5}>
+                                                {/* <InputLabel htmlFor="container-type" sx={inputLabelStyles}>{t('containerType')}</InputLabel> */}
+                                                {
+                                                    props.containers !== null ?
+                                                    <NativeSelect
+                                                        id="container-type"
+                                                        value={containerType}
+                                                        onChange={(e: any) => { setContainerType(e.target.value) }}
+                                                        input={<BootstrapInput />}
+                                                        fullWidth
+                                                    >
+                                                        <option key={"elm1-x"} value="">{t('notDefined')}</option>
+                                                        {props.containers.map((elm: any, i: number) => (
+                                                            <option key={"elm1-"+i} value={elm.packageName}>{elm.packageName}</option>
+                                                        ))}
+                                                    </NativeSelect>
+                                                    : <Skeleton />
                                                 }
-                                            }} 
-                                        >
-                                            {t('addContainer')}
-                                        </Button>
-                                    </Grid>
-                                    <Grid item xs={12}>
-                                        {
-                                            containersSelection !== undefined && containersSelection !== null && containersSelection.length !== 0 && props.containers !== null ? 
-                                                <Grid container spacing={2}>
-                                                    {
-                                                        containersSelection.map((item: any, index: number) => (
-                                                            <Grid key={"listitem1-"+index} item xs={12} md={6}>
-                                                                <ListItem
-                                                                    sx={{ border: "1px solid #e5e5e5" }}
-                                                                    secondaryAction={
-                                                                        <IconButton edge="end" onClick={() => {
-                                                                            setContainersSelection((prevItems: any) => prevItems.filter((item: any, i: number) => i !== index));
-                                                                        }}>
-                                                                            <DeleteIcon />
-                                                                        </IconButton>
-                                                                    }
-                                                                >
-                                                                    <ListItemText primary={
-                                                                        item.container+" x "+item.quantity
-                                                                    } />
-                                                                </ListItem>
-                                                            </Grid>
-                                                        ))
-                                                    }
-                                                </Grid>
-                                            : null  
-                                        }
+                                            </Grid>
+                                            <Grid item xs={12} md={4} mt={0.5}>
+                                                {/* <InputLabel htmlFor="quantity" sx={inputLabelStyles}>{t('quantity')}</InputLabel> */}
+                                                <BootstrapInput id="quantity" type="number" inputProps={{ min: 1, max: 100 }} value={quantity} onChange={(e: any) => {setQuantity(e.target.value)}} fullWidth />
+                                            </Grid>
+                                            <Grid item xs={12} md={4} mt={0.5}>
+                                                <Button 
+                                                    variant="contained" color="inherit" fullWidth sx={whiteButtonStyles} 
+                                                    style={{ marginTop: "0px", height: "42px", float: "right" }} 
+                                                    onClick={() => {
+                                                        if (containerType !== "" && quantity > 0) {
+                                                            setContainersSelection((prevItems: any) => [...prevItems, { container: containerType, quantity: quantity, id: props.containers.find((item: any) => item.packageName === containerType).packageId }]);
+                                                            setContainerType(""); setQuantity(1);
+                                                        } 
+                                                        else {
+                                                            enqueueSnackbar("You need to select a container type and a good value for quantity.", { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                                                        }
+                                                    }} 
+                                                >
+                                                    {t('addContainer')}
+                                                </Button>
+                                            </Grid>
+                                            <Grid item xs={12}>
+                                                {
+                                                    containersSelection !== undefined && containersSelection !== null && props.containers !== null ? 
+                                                        containersSelection.length !== 0 ? 
+                                                        <Grid container spacing={2}>
+                                                            {
+                                                                containersSelection.map((item: any, index: number) => (
+                                                                    <Grid key={"listitem1-"+index} item xs={12} md={6}>
+                                                                        <ListItem
+                                                                            sx={{ border: "1px solid #e5e5e5" }}
+                                                                            secondaryAction={
+                                                                                <IconButton edge="end" onClick={() => {
+                                                                                    setContainersSelection((prevItems: any) => prevItems.filter((item: any, i: number) => i !== index));
+                                                                                }}>
+                                                                                    <DeleteIcon />
+                                                                                </IconButton>
+                                                                            }
+                                                                        >
+                                                                            <ListItemText primary={
+                                                                                item.container+" x "+item.quantity
+                                                                            } />
+                                                                        </ListItem>
+                                                                    </Grid>
+                                                                ))
+                                                            }
+                                                        </Grid> : <Alert severity="info">No containers selected, please select one</Alert>
+                                                    : null  
+                                                }
+                                            </Grid>
+                                        </Grid>
                                     </Grid>
                                 </Grid>
                             </Grid>

@@ -416,7 +416,7 @@ function Templates() {
                                             freeSolo
                                             disablePortal
                                             id="tags"
-                                            options={[]}
+                                            options={["pricing", "offer", "request", "default", "seafreight", "haulage"]}
                                             getOptionLabel={(option: any) => { 
                                                 if (option !== null && option !== undefined) {
                                                     return option;

@@ -24,7 +24,7 @@ import RequestPriceRequest from '../components/editRequestPage/RequestPriceReque
 import { Anchor, FileCopy, Mail } from '@mui/icons-material';
 import NewContact from '../components/editRequestPage/NewContact';
 import ServicesTable from '../components/seafreightPage/ServicesTable';
-import { transformArray, reverseTransformArray, flattenData, flattenData2, compareServices } from '../utils/functions';
+import { transformArray, reverseTransformArray, flattenData, flattenData2, compareServices, sortSuppliersByCarrierAgentName } from '../utils/functions';
 import NewService from '../components/shared/NewService';
 import NewPort from '../components/shared/NewPort';
 
@@ -281,8 +281,7 @@ function Seafreights() {
             
             const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisPricing.endPoint+"/SeaFreight/GetSeaFreights", token);
             if (response !== null && response !== undefined) {
-                setSeafreights(response);
-                // setHaulages([]);
+                setSeafreights(sortSuppliersByCarrierAgentName(response));
                 setLoad(false);
             }
             else {

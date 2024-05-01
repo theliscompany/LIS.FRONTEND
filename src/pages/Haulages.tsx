@@ -23,7 +23,7 @@ import AutocompleteSearch from '../components/shared/AutocompleteSearch';
 import RequestPriceHaulage from '../components/editRequestPage/RequestPriceHaulage';
 import { Anchor, Mail } from '@mui/icons-material';
 import NewContact from '../components/editRequestPage/NewContact';
-import { compareServices, extractCityAndPostalCode, flattenData2, hashCode, parseLocation, parseLocation2, reverseTransformArray, transformArray } from '../utils/functions';
+import { compareServices, extractCityAndPostalCode, flattenData2, hashCode, parseLocation, parseLocation2, reverseTransformArray, sortHauliersByName, transformArray } from '../utils/functions';
 import ServicesTable from '../components/seafreightPage/ServicesTable';
 import NewService from '../components/shared/NewService';
 import NewPort from '../components/shared/NewPort';
@@ -275,8 +275,7 @@ function Haulages() {
 
             const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisPricing.endPoint+"/Haulage/Haulages", token);
             if (response !== null && response !== undefined) {
-                setHaulages(response);
-                // setHaulages([]);
+                setHaulages(sortHauliersByName(response));
                 setLoad(false);
             }
             else {

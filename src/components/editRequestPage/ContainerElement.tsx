@@ -13,7 +13,7 @@ function ContainerElement(props: any) {
     
     return (
         <Grid container spacing={2} sx={{ my: 1 }}>
-            <Grid item xs={6}>
+            <Grid item xs={4}>
                 <InputLabel htmlFor={"margin-"+props.index} sx={inputLabelStyles}>{t('margin')} %</InputLabel>
                 <BootstrapInput 
                     id={"margin-"+props.index} 
@@ -28,7 +28,7 @@ function ContainerElement(props: any) {
                     }} 
                 />
             </Grid>
-            <Grid item xs={6}>
+            <Grid item xs={4}>
                 <InputLabel htmlFor={"adding-"+props.index} sx={inputLabelStyles}>{t('lumpSum')}</InputLabel>
                 <BootstrapInput 
                     id={"adding-"+props.index} 
@@ -45,10 +45,10 @@ function ContainerElement(props: any) {
             </Grid>
             <Grid item xs={12}>
                 <Typography sx={{ fontSize: 14 }}>
-                    <span>Container {props.elm.quantity+"x"+props.elm.container}</span>
-                    <span> | Purchase price : {props.purchasePrice} <IconButton size="small" title="Show details" sx={{ position: "relative", bottom: "1px" }} onClick={(event: any) => { setAnchorEl(event.currentTarget); }}><Info fontSize="small" /></IconButton></span>
-                    <span> | Profit : {props.profit}</span>
-                    <span> | Sale price : {props.salePrice}</span>
+                    <span>{props.elm.quantity+"x"+props.elm.container}</span>
+                    <span> | {t('purchasePrice')} : {props.purchasePrice} <IconButton size="small" title="Show details" sx={{ position: "relative", bottom: "1px" }} onClick={(event: any) => { setAnchorEl(event.currentTarget); }}><Info fontSize="small" /></IconButton></span>
+                    <span> | {t('profit')} : {props.profit}</span>
+                    <span> | {t('salePrice')} : {props.salePrice}</span>
                 </Typography>
             </Grid>
             <Popover
@@ -64,9 +64,9 @@ function ContainerElement(props: any) {
                 }}
             >
                 <Typography sx={{ p: 2, fontSize: 13 }}>
-                    Haulage : {props.haulagePrice} <br />
-                    Seafreight : {props.seafreightPrice !== "N/A" ? <><br /> {props.seafreightPrice}</> : props.seafreightPrice}<br />
-                    Miscellaneous : {props.miscellaneousPrice !== "N/A" ? <><br /> {props.miscellaneousPrice}</> : props.miscellaneousPrice}
+                    {t('haulage')} : {props.haulagePrice} <br />
+                    {t('seafreight')} : {props.seafreightPrice !== "N/A" ? <><br /> {props.seafreightPrice}</> : props.seafreightPrice}<br />
+                    {t('miscellaneous')} : {props.miscellaneousPrice !== "N/A" ? <><br /> {props.miscellaneousPrice}</> : props.miscellaneousPrice}
                 </Typography>
             </Popover>
         </Grid>

@@ -440,5 +440,20 @@ export const en = {
   newHaulage: "New haulage",
   newSeafreight: "New seafreight",
   rateRequest: "RATE REQUEST",
-  rateRequestHaulage: "RATE REQUEST HAULAGE"
+  rateRequestHaulage: "RATE REQUEST HAULAGE",
+  purchasePrice: "Purchase Price",
+  profit: "Profit",
+  salePrice: "Sale price",
+  listFiles: "List of files",
+  newFile: "Create a new file",
+  deleteRowFile: "Delete a file",
+  editRowFile: "Edit a file",
+  createRowFile: "Create a file",
+  additionals: "additional",
+  customerRequest: "Customer request", 
+  loadingOf: "Loading of ",
+  includedForEachContainer: " hours included for each container, then ", 
+  byHourIndivisible: " EUR per indivisible hour.",
+  or: "OR", 
+  offer: "Offer"
 };
