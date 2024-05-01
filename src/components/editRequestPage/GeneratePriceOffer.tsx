@@ -270,12 +270,13 @@ function GeneratePriceOffer(props: any) {
     // }, [formState]);
     
     useEffect(() => {
-        getTemplate(formState.selectedTemplate);
         getTemplates();
     }, []);
     
     useEffect(() => {
-        getTemplate(formState.selectedTemplate);
+        if (formState.selectedTemplate !== undefined && formState.selectedTemplate !== null) {
+            getTemplate(formState.selectedTemplate);
+        }
     }, [formState.selectedTemplate]);
 
     // useEffect(() => {
@@ -345,7 +346,7 @@ function GeneratePriceOffer(props: any) {
         }
         if (formState.activeStep === 1) {
             // Check if seafreights have the same carrier
-            var seafreightSelected = formState.selectedSeafreights;
+            var seafreightSelected = formState.selectedSeafreights !== undefined && formState.selectedSeafreights !== null ? formState.selectedSeafreights : [];
             if (checkCarrierConsistency(seafreightSelected) || (!checkCarrierConsistency(seafreightSelected) && window.confirm("All the selected offers must be related to the same carrier, do you want to continue?"))) {
                 if (formState.selectedSeafreight !== null && formState.selectedSeafreight !== undefined) {
                     if (formState.selectedMisc === null && formState.selectedMisc === undefined) {
@@ -446,7 +447,9 @@ function GeneratePriceOffer(props: any) {
     function calculateContainerPrice(type: string, quantity: number, index: number) {
         // Calculate seafreight prices
         var seafreightPrices = 0;
-        var seafreightSelected = seafreights !== null ? formState.selectedSeafreights.find((elm: any) => elm.containers[0].container.packageName === type) : null;
+        var seafreightSelected = seafreights !== null && formState.selectedSeafreights !== undefined && formState.selectedSeafreights !== null ? 
+            formState.selectedSeafreights.find((elm: any) => elm.containers[0].container.packageName === type) 
+        : null;
         if (seafreightSelected !== null && seafreightSelected !== undefined) {
             seafreightPrices = seafreightSelected.containers[0].services.reduce((sum: number, service: any) => sum + service.price, 0)*quantity;
         }
@@ -474,7 +477,7 @@ function GeneratePriceOffer(props: any) {
     function calculateSeafreightPrice(type: string, quantity: number, index: number) {
         // Calculate seafreight prices
         var seafreightPrices = 0;
-        if (seafreights !== null) {
+        if (seafreights !== null && formState.selectedSeafreights !== undefined && formState.selectedSeafreights !== null) {
             var seafreightSelected = formState.selectedSeafreights.find((elm: any) => elm.containers[0].container.packageName === type);
             if (seafreightSelected !== null && seafreightSelected !== undefined) {
                 seafreightPrices = seafreightSelected.containers[0].services.reduce((sum: number, service: any) => sum + service.price, 0)*quantity;
@@ -485,8 +488,10 @@ function GeneratePriceOffer(props: any) {
         // Calculate miscellaneous prices
         var miscPrices = 0;
         // I removed miscPrices temporarily
-        var finalValue = ((seafreightPrices+haulagePrices+miscPrices)*(formState.margins[index]/100)+seafreightPrices+haulagePrices+miscPrices).toFixed(2);
-        return Number(finalValue)+Number(formState.addings[index]);
+        var finalValue = formState.margins !== undefined && formState.margins !== null ? 
+            ((seafreightPrices+haulagePrices+miscPrices)*(formState.margins[index]/100)+seafreightPrices+haulagePrices+miscPrices).toFixed(2) 
+        : 0;
+        return formState.addings !== undefined && formState.addings !== null ? Number(finalValue)+Number(formState.addings[index]) : Number(finalValue);
     }
 
     const getHaulagePriceOffers = async () => {
@@ -584,7 +589,9 @@ function GeneratePriceOffer(props: any) {
                 return null;
             });
             
-            var myFreights = formState.rowSelectionModel.length !== 0 && seafreights !== null ? formState.selectedSeafreights : [];
+            var myFreights = formState.rowSelectionModel.length !== 0 && seafreights !== null && formState.selectedSeafreights !== undefined && formState.selectedSeafreights !== null ? 
+                formState.selectedSeafreights 
+            : [];
             var suppliersRecentlySelected = myFreights.map((elm: any) => { return {carrierName: elm.carrierName, defaultContainer: elm.defaultContainer} });
             
             var arrayFinal = response.length !== 0 ? 
@@ -600,7 +607,9 @@ function GeneratePriceOffer(props: any) {
         if (context && account) {
             var response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisPricing.endPoint+"/Miscellaneous/Miscellaneous?withShipment=false", tempToken);
             
-            var myFreights = formState.rowSelectionModel.length !== 0 && seafreights !== null ? formState.selectedSeafreights : [];
+            var myFreights = formState.rowSelectionModel.length !== 0 && seafreights !== null && formState.selectedSeafreights !== undefined && formState.selectedSeafreights !== null ? 
+                formState.selectedSeafreights 
+            : [];
             var suppliersRecentlySelected = myFreights.map((elm: any) => { return {carrierName: elm.carrierName, defaultContainer: elm.defaultContainer} });
             
             var arrayFinal = response.length !== 0 ? 
@@ -812,7 +821,7 @@ function GeneratePriceOffer(props: any) {
         var listServices = "";
         
         var auxPricesContainers = [];
-        if (templateBase !== null) {
+        if (templateBase !== null && formState.options !== undefined && formState.options !== null) {
             for (var i = 0; i < formState.options.length; i++) {
                 var option: any = formState.options[i];
                 var auxPricesTotal = containersSelection !== null && option.selectedSeafreight !== null && option.selectedSeafreight !== undefined && seafreights !== null ? 
@@ -900,7 +909,7 @@ function GeneratePriceOffer(props: any) {
         var listServices = "";
         
         var auxPricesContainers = [];
-        if (templateBase !== null) {
+        if (templateBase !== null && formState.options !== undefined && formState.options !== null) {
             for (var i = 0; i < formState.options.length; i++) {
                 var option: any = formState.options[i];
                 var auxPricesTotal = containersSelection !== null && option.selectedSeafreight !== null && option.selectedSeafreight !== undefined && seafreights !== null ? 
@@ -1388,82 +1397,85 @@ function GeneratePriceOffer(props: any) {
                                 {
                                     formState.activeStep === 3 ?
                                     <Grid container spacing={2} mt={1} px={2}>
-                                        <Grid item xs={12}>
-                                            <Button
-                                                variant="contained" 
-                                                color="inherit" 
-                                                sx={whiteButtonStyles}
-                                                style={{ marginRight: 8 }}
-                                                onClick={(e: any) => {
-                                                    var thisOption = {
-                                                        haulageType: formState.haulageType, selectedTemplate: formState.selectedTemplate, 
-                                                        selectedHaulage: formState.selectedHaulage, rowSelectionModel2: formState.rowSelectionModel2, 
-                                                        selectedSeafreight: formState.selectedSeafreight, rowSelectionModel: formState.rowSelectionModel,  
-                                                        selectedMisc: formState.selectedMisc, myMiscs: formState.myMiscs, rowSelectionModel3: formState.rowSelectionModel3, 
-                                                        activeStep: formState.activeStep, margins: formState.margins, addings: formState.addings,
-                                                        marginsMiscs: formState.marginsMiscs, addingsMiscs: formState.addingsMiscs,  
-                                                        portDeparture: formState.portDeparture, portDestination: formState.portDestination, 
-                                                        selectedSeafreights: formState.selectedSeafreights
-                                                    };
+                                        {
+                                            formState.options !== undefined && formState.options !== null ? 
+                                            <Grid item xs={12}>
+                                                <Button
+                                                    variant="contained" 
+                                                    color="inherit" 
+                                                    sx={whiteButtonStyles}
+                                                    style={{ marginRight: 8 }}
+                                                    onClick={(e: any) => {
+                                                        var thisOption = {
+                                                            haulageType: formState.haulageType, selectedTemplate: formState.selectedTemplate, 
+                                                            selectedHaulage: formState.selectedHaulage, rowSelectionModel2: formState.rowSelectionModel2, 
+                                                            selectedSeafreight: formState.selectedSeafreight, rowSelectionModel: formState.rowSelectionModel,  
+                                                            selectedMisc: formState.selectedMisc, myMiscs: formState.myMiscs, rowSelectionModel3: formState.rowSelectionModel3, 
+                                                            activeStep: formState.activeStep, margins: formState.margins, addings: formState.addings,
+                                                            marginsMiscs: formState.marginsMiscs, addingsMiscs: formState.addingsMiscs,  
+                                                            portDeparture: formState.portDeparture, portDestination: formState.portDestination, 
+                                                            selectedSeafreights: formState.selectedSeafreights
+                                                        };
 
-                                                    if (formState.currentOption === null || formState.options.length === 0 || formState.currentOption >= formState.options.length) {
-                                                        setFormState({...formState, options: [...formState.options, thisOption] });
+                                                        if (formState.currentOption === null || formState.options.length === 0 || formState.currentOption >= formState.options.length) {
+                                                            setFormState({...formState, options: [...formState.options, thisOption] });
+                                                        }
+                                                        else {
+                                                            setFormState((prevState: any) => {
+                                                                const options = [...prevState.options];
+                                                                options[prevState.currentOption] = {
+                                                                    ...options[prevState.currentOption], 
+                                                                    haulageType: formState.haulageType, selectedTemplate: formState.selectedTemplate, 
+                                                                    selectedHaulage: formState.selectedHaulage, rowSelectionModel2: formState.rowSelectionModel2, 
+                                                                    selectedSeafreight: formState.selectedSeafreight, rowSelectionModel: formState.rowSelectionModel,  
+                                                                    selectedMisc: formState.selectedMisc, myMiscs: formState.myMiscs, rowSelectionModel3: formState.rowSelectionModel3, 
+                                                                    activeStep: formState.activeStep, margins: formState.margins, addings: formState.addings,
+                                                                    marginsMiscs: formState.marginsMiscs, addingsMiscs: formState.addingsMiscs,  
+                                                                    portDeparture: formState.portDeparture, portDestination: formState.portDestination, 
+                                                                    selectedSeafreights: formState.selectedSeafreights
+                                                                };
+                                                                return {...prevState, options};
+                                                            });
+                                                        }
+                                                    }}
+                                                >
+                                                    {
+                                                        formState.currentOption === null || formState.options.length === 0 || formState.currentOption >= formState.options.length ? 
+                                                        "Save option" : "Edit option"
                                                     }
-                                                    else {
-                                                        setFormState((prevState: any) => {
-                                                            const options = [...prevState.options];
-                                                            options[prevState.currentOption] = {
-                                                                ...options[prevState.currentOption], 
-                                                                haulageType: formState.haulageType, selectedTemplate: formState.selectedTemplate, 
-                                                                selectedHaulage: formState.selectedHaulage, rowSelectionModel2: formState.rowSelectionModel2, 
-                                                                selectedSeafreight: formState.selectedSeafreight, rowSelectionModel: formState.rowSelectionModel,  
-                                                                selectedMisc: formState.selectedMisc, myMiscs: formState.myMiscs, rowSelectionModel3: formState.rowSelectionModel3, 
-                                                                activeStep: formState.activeStep, margins: formState.margins, addings: formState.addings,
-                                                                marginsMiscs: formState.marginsMiscs, addingsMiscs: formState.addingsMiscs,  
-                                                                portDeparture: formState.portDeparture, portDestination: formState.portDestination, 
-                                                                selectedSeafreights: formState.selectedSeafreights
-                                                            };
-                                                            return {...prevState, options};
+                                                </Button>
+                                                <Button
+                                                    variant="contained" 
+                                                    color="inherit" 
+                                                    sx={whiteButtonStyles}
+                                                    style={{ marginRight: 8 }}
+                                                    onClick={(e: any) => {
+                                                        setFormState({
+                                                            ...formState, 
+                                                            currentOption: formState.options !== undefined ? formState.options.length : 0,
+                                                            haulageType: "", selectedTemplate: defaultTemplate, 
+                                                            selectedHaulage: null, rowSelectionModel2: [],
+                                                            selectedSeafreight: null, rowSelectionModel: [], 
+                                                            selectedMisc: null, myMiscs: [], rowSelectionModel3: [],
+                                                            activeStep: 0, margins: containersSelection.map(() => 22), addings: containersSelection.map(() => 0),
+                                                            marginsMiscs: Array(15).fill(50), addingsMiscs: [],  
+                                                            portDeparture: null, portDestination: portDestination
                                                         });
-                                                    }
-                                                }}
-                                            >
-                                                {
-                                                    formState.currentOption === null || formState.options.length === 0 || formState.currentOption >= formState.options.length ? 
-                                                    "Save option" : "Edit option"
-                                                }
-                                            </Button>
-                                            <Button
-                                                variant="contained" 
-                                                color="inherit" 
-                                                sx={whiteButtonStyles}
-                                                style={{ marginRight: 8 }}
-                                                onClick={(e: any) => {
-                                                    setFormState({
-                                                        ...formState, 
-                                                        currentOption: formState.options !== undefined ? formState.options.length : 0,
-                                                        haulageType: "", selectedTemplate: defaultTemplate, 
-                                                        selectedHaulage: null, rowSelectionModel2: [],
-                                                        selectedSeafreight: null, rowSelectionModel: [], 
-                                                        selectedMisc: null, myMiscs: [], rowSelectionModel3: [],
-                                                        activeStep: 0, margins: containersSelection.map(() => 22), addings: containersSelection.map(() => 0),
-                                                        marginsMiscs: Array(15).fill(50), addingsMiscs: [],  
-                                                        portDeparture: null, portDestination: portDestination
-                                                    });
-                                                }}
-                                            >
-                                                New option
-                                            </Button>
-                                            <Button
-                                                variant="contained" 
-                                                color="inherit" 
-                                                sx={whiteButtonStyles}
-                                                style={{ marginRight: 8 }}
-                                                onClick={(e: any) => { setModalCompare(true); }}
-                                            >
-                                                Compare options
-                                            </Button>
-                                        </Grid>
+                                                    }}
+                                                >
+                                                    New option
+                                                </Button>
+                                                <Button
+                                                    variant="contained" 
+                                                    color="inherit" 
+                                                    sx={whiteButtonStyles}
+                                                    style={{ marginRight: 8 }}
+                                                    onClick={(e: any) => { setModalCompare(true); }}
+                                                >
+                                                    Compare options
+                                                </Button>
+                                            </Grid> : null
+                                        }
                                         <Grid item xs={12}>
                                             {
                                                 formState.options !== undefined && formState.options.length !== 0 ? 
@@ -1607,7 +1619,7 @@ function GeneratePriceOffer(props: any) {
                                                 <Grid item xs={8}>
                                                     <InputLabel htmlFor="selectedTemplate" sx={inputLabelStyles}>{t('selectedTemplate')}</InputLabel>
                                                     {
-                                                        loadTemplates !== true ?
+                                                        loadTemplates !== true && formState.selectedTemplate !== undefined && formState.selectedTemplate !== null ?
                                                         <NativeSelect
                                                             id="selectedTemplate"
                                                             value={formState.selectedTemplate}
@@ -1646,7 +1658,7 @@ function GeneratePriceOffer(props: any) {
                                                             <Typography variant="h5" sx={{ mt: 1, fontSize: 15, fontWeight: "bold" }}>Transport price margins</Typography>
                                                         </Grid>
                                                         {
-                                                            containersSelection !== null && formState.rowSelectionModel.length !== 0 && seafreights !== undefined && seafreights !== null ?
+                                                            containersSelection !== null && formState.rowSelectionModel.length !== 0 && seafreights !== undefined && seafreights !== null && formState.selectedSeafreights !== undefined && formState.selectedSeafreights !== null ?
                                                             formState.selectedSeafreights
                                                             .map((element: any, index: number) => {
                                                                 var containerElm = containersSelection.find((val: any) => val.container === element.containers[0].container.packageName);

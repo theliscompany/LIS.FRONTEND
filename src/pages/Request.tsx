@@ -124,8 +124,8 @@ function Request() {
             const closestArrivalPort = findClosestSeaPort(parseLocation(requestData.arrival), ports);
             setPortDeparture(closestDeparturePort);
             setPortDestination(closestArrivalPort);
-            setPorts1(sortByCloseness(parseLocation(requestData.departure), ports).slice(0, 500));
-            setPorts2(sortByCloseness(parseLocation(requestData.arrival), ports).slice(0, 500));
+            setPorts1(sortByCloseness(parseLocation(requestData.departure), ports));
+            setPorts2(sortByCloseness(parseLocation(requestData.arrival), ports));
         }
     }, [ports, products]);
 
@@ -270,6 +270,8 @@ function Request() {
                 // console.log(response);
                 var addedCoordinatesPorts = addedCoordinatesToPorts(response);
                 setPorts(addedCoordinatesPorts);
+                console.log(response);
+                console.log(addedCoordinatesPorts);
             }  
         }
     }
@@ -290,7 +292,7 @@ function Request() {
             const closest = findClosestSeaPort(value, ports);
             setPortDeparture(closest);
             setLoadingCity(value);
-            setPorts1(sortByCloseness(value, ports).slice(0, 50));
+            setPorts1(sortByCloseness(value, ports));
         }
     }
 
@@ -298,7 +300,7 @@ function Request() {
         if (value !== null && value !== undefined) {
             const closest = findClosestSeaPort(value, ports);
             setPortDestination(closest);
-            setPorts2(sortByCloseness(value, ports).slice(0, 50));
+            setPorts2(sortByCloseness(value, ports));
         }
     }
 

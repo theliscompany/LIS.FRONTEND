@@ -5,9 +5,8 @@ import { useAuthorizedBackendApi } from '../../api/api';
 import { useTranslation } from 'react-i18next';
 import { enqueueSnackbar } from 'notistack';
 import { BackendService } from '../../utils/services/fetch';
-import { pricingRequest, protectedResources } from '../../config/authConfig';
+import { protectedResources } from '../../config/authConfig';
 import { useAccount, useMsal } from '@azure/msal-react';
-import { AuthenticationResult } from '@azure/msal-browser';
 import { Anchor } from '@mui/icons-material';
 import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
@@ -18,6 +17,7 @@ import { Dayjs } from 'dayjs';
 import NewContact from './NewContact';
 
 function NewHaulage(props: any) {
+    const [load, setLoad] = useState<boolean>(false);
     const [haulier, setHaulier] = useState<any>(null);
     const [loadingCity, setLoadingCity] = useState<any>(props.loadingCity);
     const [loadingPort, setLoadingPort] = useState<any>(null);
@@ -55,6 +55,7 @@ function NewHaulage(props: any) {
     ];
     
     const createHaulage = async () => {
+        setLoad(true);
         if (haulier !== null && loadingCity !== null && loadingPort !== null && freeTime > 0 && unitTariff > 0 && overtimeTariff > 0 && multiStop > 0 && validUntil !== null && containerTypes.length > 0) {
             if (context && account) {
                 var dataSent = null;
@@ -95,14 +96,17 @@ function NewHaulage(props: any) {
                     props.closeModal();
                     // Callback function here
                     props.callBack();
+                    setLoad(false);
                 }
                 else {
                     enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                    setLoad(false);
                 }
             }
         }
         else {
             enqueueSnackbar(t('fieldsEmptyHaulage'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+            setLoad(false);
         }
     }
 
@@ -255,7 +259,7 @@ function NewHaulage(props: any) {
                 </Grid>
             </DialogContent>
             <DialogActions>
-                <Button variant="contained" onClick={() => { createHaulage(); }} sx={actionButtonStyles}>{t('validate')}</Button>
+                <Button variant="contained" disabled={load === true} onClick={() => { createHaulage(); }} sx={actionButtonStyles}>{t('validate')}</Button>
                 <Button variant="contained" onClick={props.closeModal} sx={buttonCloseStyles}>{t('close')}</Button>
             </DialogActions>
 

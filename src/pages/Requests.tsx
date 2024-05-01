@@ -9,7 +9,7 @@ import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 import { Alert, Button, Grid, InputLabel, NativeSelect, Skeleton } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import { BootstrapInput, datetimeStyles, inputLabelStyles } from '../utils/misc/styles';
-import { protectedResources } from '../config/authConfig';
+import { loginRequest, protectedResources } from '../config/authConfig';
 import { enqueueSnackbar, SnackbarProvider } from 'notistack';
 import { useAuthorizedBackendApi } from '../api/api';
 import { BackendService } from '../utils/services/fetch';
@@ -19,6 +19,7 @@ import { useTranslation } from 'react-i18next';
 import RequestViewItem from '../components/requestsPage/RequestViewItem';
 import AutocompleteSearch from '../components/shared/AutocompleteSearch';
 import { useAccount, useMsal } from '@azure/msal-react';
+import { getAccessToken } from '../utils/functions';
 
 function createGetRequestUrl(variable1: string, variable2: string, variable3: string, variable4: string, variable5: Dayjs|null, variable6: Dayjs|null, variable7: Dayjs|null, variable8: Dayjs|null) {
     let url = protectedResources.apiLisQuotes.endPoint+'/Request?';
@@ -58,6 +59,7 @@ function Requests() {
     const [load, setLoad] = React.useState<boolean>(true);
     const [status, setStatus] = React.useState<string>("");
     const [packingType, setPackingType] = React.useState<string>("");
+    const [tempToken, setTempToken] = React.useState<string>("");
     // const [departureTown, setDepartureTown] = React.useState<any>(null);
     // const [arrivalTown, setArrivalTown] = React.useState<any>(null);
     // const [departure, setDeparture] = React.useState<string>("");
@@ -91,7 +93,10 @@ function Requests() {
     const loadRequests = async () => {
         if (context && account) {
             setLoad(true);
-            const response: RequestResponseDto = await (context as BackendService<any>).getSingle(search !== undefined ? protectedResources.apiLisQuotes.endPoint+"/Request?Search="+search : protectedResources.apiLisQuotes.endPoint+"/Request");
+            const token = await getAccessToken(instance, loginRequest, account);
+            setTempToken(token);
+            
+            const response: RequestResponseDto = await (context as BackendService<any>).getWithToken(search !== undefined ? protectedResources.apiLisQuotes.endPoint+"/Request?Search="+search : protectedResources.apiLisQuotes.endPoint+"/Request", token);
             if (response !== null && response.code !== undefined && response.data !== undefined) {
                 if (response.code === 200) {
                     setLoad(false);
@@ -116,7 +121,7 @@ function Requests() {
             console.log(auxDeparture, auxArrival);
 
             var requestFormatted = createGetRequestUrl(auxDeparture, auxArrival, packingType, status, createdDateStart, createdDateEnd, updatedDateStart, updatedDateEnd);
-            const response: RequestResponseDto = await (context as BackendService<any>).getSingle(requestFormatted);
+            const response: RequestResponseDto = await (context as BackendService<any>).getWithToken(requestFormatted, tempToken);
             if (response !== null && response.code !== undefined && response.data !== undefined) {
                 if (response.code === 200) {
                     setLoad(false);
