@@ -45,7 +45,7 @@ function PriceOffers() {
     const [modal, setModal] = useState<boolean>(false);
     const [currentId, setCurrentId] = useState<string>("");
 
-    const { accounts } = useMsal();
+    const { instance, accounts } = useMsal();
     const account = useAccount(accounts[0] || {});
         
     const context = useAuthorizedBackendApi();

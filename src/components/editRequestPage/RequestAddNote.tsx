@@ -11,7 +11,7 @@ import { useAccount, useMsal } from '@azure/msal-react';
 function RequestAddNote(props: any) {
     const [generalNote, setGeneralNote] = useState<string>("");
     
-    const { accounts } = useMsal();
+    const { instance, accounts } = useMsal();
     const account = useAccount(accounts[0] || {});
 
     const context = useAuthorizedBackendApi();

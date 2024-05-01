@@ -12,7 +12,7 @@ function RequestAskInformation(props: any) {
     const [mailSubject, setMailSubject] = useState<string>("");
     const [mailContent, setMailContent] = useState<string>("");
     
-    const { accounts } = useMsal();
+    const { instance, accounts } = useMsal();
     const account = useAccount(accounts[0] || {});
 
     const context = useAuthorizedBackendApi();
