@@ -162,27 +162,14 @@ function Haulages() {
         getPorts();
         getHaulages();
         getProtectedData();
-    }, []);
+    }, [account, instance, account]);
     
-    const deflattenData2 = (flattenedData: any) => {
-        return flattenedData.map((item: any) => ({
-            miscellaneousServiceId: item.id,
-            service: {
-                serviceId: item.serviceId, // Original structure did not include this in the flattened data
-                serviceName: item.serviceName,
-                price: item.price,
-                containers: item.containers // Assuming this was not included in the flattened version
-            },
-            containers: containerTypes
-        }));
-    };
-
     const getClients = async () => {
-        if (account && instance) {
-            const token = await getAccessToken(instance, crmRequest, account);
+        if (account && instance && context) {
+            // const token = await getAccessToken(instance, crmRequest, account);
             
             try {
-                const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisCrm.endPoint+"/Contact/GetContacts?category=2&pageSize=1000", token);
+                const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisCrm.endPoint+"/Contact/GetContacts?category=2&pageSize=1000", context.tokenCrm);
                 if (response !== null && response !== undefined) {
                     // Removing duplicates from client array
                     setClients(response.data.filter((obj: any, index: number, self: any) => index === self.findIndex((o: any) => o.contactName === obj.contactName)));
@@ -195,8 +182,8 @@ function Haulages() {
     }
     
     const getPorts = async () => {
-        if (account && instance) {
-            const response = await (context as BackendService<any>).getSingle(protectedResources.apiLisTransport.endPoint+"/Port/Ports?pageSize=2000");
+        if (account && instance && context) {
+            const response = await (context?.service as BackendService<any>).getSingle(protectedResources.apiLisTransport.endPoint+"/Port/Ports?pageSize=2000");
             if (response !== null && response !== undefined) {
                 setPorts(response);
             }  
@@ -204,17 +191,17 @@ function Haulages() {
     }
     
     const getProtectedData = async () => {
-        if (account && instance) {
-            const token = await getAccessToken(instance, transportRequest, account);
+        if (account && instance && context) {
+            // const token = await getAccessToken(instance, transportRequest, account);
             
-            getServices(token);
-            getContainers(token);
+            getServices("");
+            getContainers("");
         }
     }
     
     const getServices = async (token: string) => {
-        if (account && instance) {
-            const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Service?pageSize=500", token);
+        if (account && instance && context) {
+            const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Service?pageSize=500", context.tokenTransport);
             if (response !== null && response !== undefined) {
                 setAllServices(response);
                 setServices(response.sort((a: any, b: any) => compareServices(a, b)).filter((obj: any) => obj.servicesTypeId.includes(2))); // Filter the services for haulages (HAULAGE = 2)
@@ -227,11 +214,11 @@ function Haulages() {
     }
     
     const getHaulages = async () => {
-        if (account && instance) {
-            const token = await getAccessToken(instance, pricingRequest, account);
-            setTempToken(token);
+        if (account && instance && context) {
+            // const token = await getAccessToken(instance, pricingRequest, account);
+            // setTempToken(token);
 
-            const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisPricing.endPoint+"/Haulage/Haulages", token);
+            const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisPricing.endPoint+"/Haulage/Haulages", context.tokenPricing);
             if (response !== null && response !== undefined) {
                 setHaulages(sortHauliersByName(response));
                 setLoad(false);
@@ -263,8 +250,8 @@ function Haulages() {
     
     const getHaulage = async (id: string) => {
         setLoadEdit(true)
-        if (account && instance) {
-            const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisPricing.endPoint+"/Haulage/Haulage?offerId="+id, tempToken);
+        if (account && instance && context) {
+            const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisPricing.endPoint+"/Haulage/Haulage?offerId="+id, context.tokenPricing);
             if (response !== null && response !== undefined) {
                 var auxHaulier = {contactId: response.haulierId, contactName: response.haulierName};
                 var auxValidUntil = dayjs(response.validUntil);
@@ -297,10 +284,10 @@ function Haulages() {
     }
     
     const searchHaulages = async () => {
-        if (account && instance) {
+        if (account && instance && context) {
             setLoad(true);
             var requestFormatted = createGetRequestUrl(searchedLoadingPort?.portId, searchedHaulier?.contactId, searchedLoadingCity?.city.toUpperCase());
-            const response = await (context as BackendService<any>).getWithToken(requestFormatted, tempToken);
+            const response = await (context?.service as BackendService<any>).getWithToken(requestFormatted, context.tokenPricing);
             if (response !== null && response !== undefined) {
                 setHaulages(response);
                 setLoad(false);
@@ -314,7 +301,7 @@ function Haulages() {
 
     const createUpdateHaulage = async () => {
         if (haulier !== null && loadingCity !== null && loadingPort !== null && freeTime > 0 && unitTariff > 0 && overtimeTariff > 0 && multiStop > 0 && validUntil !== null && containerTypes.length > 0) {
-            if (account && instance) {
+            if (account && instance && context) {
                 var dataSent = null;
                 
                 var postalCode = loadingCity !== null ? loadingCity.postalCode !== undefined ? loadingCity.postalCode : "" : ""; 
@@ -370,7 +357,7 @@ function Haulages() {
                         "containers": containerTypes,
                     };    
                 }
-                const response = await (context as BackendService<any>).postWithToken(protectedResources.apiLisPricing.endPoint+"/Haulage/Haulage", dataSent, tempToken);
+                const response = await (context?.service as BackendService<any>).postWithToken(protectedResources.apiLisPricing.endPoint+"/Haulage/Haulage", dataSent, context.tokenPricing);
                 if (response !== null && response !== undefined) {
                     setModal2(false);
                     enqueueSnackbar(t('successCreated'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
@@ -387,9 +374,9 @@ function Haulages() {
     }
 
     const deleteHaulagePrice = async (id: string) => {
-        if (account && instance) {
+        if (account && instance && context) {
             // alert("Function not available yet!");
-            const response = await (context as BackendService<any>).deleteWithToken(protectedResources.apiLisPricing.endPoint+"/Haulage/DeleteHaulage?offerId="+id, tempToken);
+            const response = await (context?.service as BackendService<any>).deleteWithToken(protectedResources.apiLisPricing.endPoint+"/Haulage/DeleteHaulage?offerId="+id, context.tokenPricing);
             if (response !== null && response !== undefined) {
                 enqueueSnackbar(t('rowDeletedSuccess'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
                 setModal(false);
@@ -733,14 +720,16 @@ function Haulages() {
                 maxWidth="lg"
                 fullWidth
             >
-                <RequestPriceHaulage
-                    token={tempToken} 
-                    // companies={clients}
-                    ports={ports}
-                    loadingCity={null}
-                    loadingPort={null}
-                    closeModal={() => setModal5(false)}
-                />
+                {
+                    context ? 
+                    <RequestPriceHaulage
+                        token={context.tokenPricing} 
+                        ports={ports}
+                        loadingCity={null}
+                        loadingPort={null}
+                        closeModal={() => setModal5(false)}
+                    /> : null
+                }
             </BootstrapDialog>
 
             {/* Add a new contact */}

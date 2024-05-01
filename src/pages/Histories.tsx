@@ -53,7 +53,7 @@ function Histories(props: any) {
     
     useEffect(() => {
         getHistories();
-    }, [context]);
+    }, [account, instance, account]);
     
     const columnsEvents: GridColDef[] = [
         { field: 'id', headerName: t('id'), minWidth: 100, flex: 0.5 },
@@ -89,11 +89,11 @@ function Histories(props: any) {
     ];
     
     const getHistories = async () => {
-        if (account && instance) {
+        if (account && instance && context) {
             setLoad(true);
-            const token: any = await getAccessToken(instance, loginRequest, account);
+            // const token: any = await getAccessToken(instance, loginRequest, account);
             
-            const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisQuotes.endPoint+"/RequestQuoteHistory", token);
+            const response = await (context?.service as any).getWithToken(protectedResources.apiLisQuotes.endPoint+"/RequestQuoteHistory", context.tokenLogin);
             if (response !== null && response.code !== undefined) {
                 if (response.code === 200) {
                     console.log(response.data);
@@ -108,12 +108,12 @@ function Histories(props: any) {
     }
 
     const searchHistories = async () => {
-        if (account && instance) {
+        if (account && instance && context) {
             setLoad(true);
-            const token: any = await getAccessToken(instance, loginRequest, account);
+            // const token: any = await getAccessToken(instance, loginRequest, account);
 
             var requestFormatted = createGetRequestUrl(assignedDateStart, assignedDateEnd, assigneeId, requestQuoteId);
-            const response: RequestResponseDto = await (context as BackendService<any>).getWithToken(requestFormatted, token);
+            const response: RequestResponseDto = await (context?.service as BackendService<any>).getWithToken(requestFormatted, context.tokenLogin);
             if (response !== null && response.code !== undefined && response.data !== undefined) {
                 if (response.code === 200) {
                     setLoad(false);

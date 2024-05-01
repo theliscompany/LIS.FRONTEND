@@ -36,8 +36,8 @@ function NewService(props: any) {
 
     const createNewService = async () => {
         if (testName !== "" && selectedServiceTypes.length !== 0) {
-            if (account && instance) {
-                const token = await getAccessToken(instance, transportRequest, account);
+            if (account && instance && context) {
+                // const token = await getAccessToken(instance, transportRequest, account);
                 var dataSent = {
                     "serviceName": testName,
                     "serviceDescription": testDescription,
@@ -45,7 +45,7 @@ function NewService(props: any) {
                 };
                 
                 try {
-                    const response = await (context as BackendService<any>).postWithToken(protectedResources.apiLisTransport.endPoint+"/Service", dataSent, token);
+                    const response = await (context?.service as BackendService<any>).postWithToken(protectedResources.apiLisTransport.endPoint+"/Service", dataSent, context.tokenTransport);
                     if (response !== null) {
                         enqueueSnackbar("The service has been added with success!", { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
                         

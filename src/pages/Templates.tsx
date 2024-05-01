@@ -145,10 +145,10 @@ function Templates() {
     
     useEffect(() => {
         getTemplates();
-    }, []);
+    }, [account, instance, account]);
     
     const getTemplates = async () => {
-        if (account && instance) {
+        if (account && instance && context) {
             // const token = await instance.acquireTokenSilent({
             //     scopes: pricingRequest.scopes,
             //     account: account
@@ -164,7 +164,7 @@ function Templates() {
             // });
             // setTempToken(token);
             
-            const response = await (context as BackendService<any>).getSingle(protectedResources.apiLisTemplate.endPoint+"/Template");
+            const response = await (context?.service as BackendService<any>).getSingle(protectedResources.apiLisTemplate.endPoint+"/Template");
             if (response !== null && response.data !== undefined) {
                 setTemplates(response.data);
                 setLoad(false);
@@ -185,8 +185,8 @@ function Templates() {
     
     const getTemplate = async (id: string) => {
         setLoadEdit(true)
-        if (account && instance) {
-            const response = await (context as BackendService<any>).getSingle(protectedResources.apiLisTemplate.endPoint+"/Template/"+id);
+        if (account && instance && context) {
+            const response = await (context?.service as BackendService<any>).getSingle(protectedResources.apiLisTemplate.endPoint+"/Template/"+id);
             if (response !== null && response !== undefined) {
                 setName(response.data.name);
                 setCurrentVersion(response.data.currentVersion);
@@ -203,10 +203,10 @@ function Templates() {
     }
     
     const searchTemplates = async () => {
-        if (account && instance) {
+        if (account && instance && context) {
             setLoad(true);
             var requestFormatted = createGetRequestUrl(searchedName);
-            const response = await (context as BackendService<any>).getSingle(requestFormatted);
+            const response = await (context?.service as BackendService<any>).getSingle(requestFormatted);
             if (response !== null && response !== undefined) {
                 setTemplates(response.data);
                 setLoad(false);
@@ -220,7 +220,7 @@ function Templates() {
 
     const createUpdateTemplate = async () => {
         if (name !== "" && rteRef.current?.editor?.getHTML() !== "") {
-            if (account && instance) {
+            if (account && instance && context) {
                 var dataSent = null;
                 if (currentEditId !== "") {
                     dataSent = {
@@ -235,7 +235,7 @@ function Templates() {
                     };
                     
                     try {
-                        const response = await (context as BackendService<any>).put(protectedResources.apiLisTemplate.endPoint+"/Template/"+currentEditId, dataSent);
+                        const response = await (context?.service as BackendService<any>).put(protectedResources.apiLisTemplate.endPoint+"/Template/"+currentEditId, dataSent);
                         if (response !== null && response !== undefined) {
                             setModal2(false);
                             enqueueSnackbar(t('successEdited'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
@@ -260,7 +260,7 @@ function Templates() {
                         "tags": tags
                     };
                     
-                    const response = await (context as BackendService<any>).post(protectedResources.apiLisTemplate.endPoint+"/Template", dataSent);
+                    const response = await (context?.service as BackendService<any>).post(protectedResources.apiLisTemplate.endPoint+"/Template", dataSent);
                     if (response !== null && response !== undefined) {
                         setModal2(false);
                         enqueueSnackbar(t('successCreated'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
@@ -278,9 +278,9 @@ function Templates() {
     }
 
     const deleteTemplate = async (id: string) => {
-        if (account && instance) {
+        if (account && instance && context) {
             // alert("Function not available yet!");
-            const response = await (context as BackendService<any>).delete(protectedResources.apiLisTemplate.endPoint+"/Template/"+id);
+            const response = await (context?.service as BackendService<any>).delete(protectedResources.apiLisTemplate.endPoint+"/Template/"+id);
             if (response !== null && response !== undefined) {
                 enqueueSnackbar(t('rowDeletedSuccess'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
                 setModal(false);

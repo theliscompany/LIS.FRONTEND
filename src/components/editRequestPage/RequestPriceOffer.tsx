@@ -161,11 +161,11 @@ function RequestPriceOffer(props: any) {
     }
 
     const searchSeafreights = async () => {
-        if (account && instance) {
+        if (account && instance && context) {
             setLoad(true);
             // setCarriersData([]);
             var requestFormatted = createGetRequestUrl(portLoading?.portId, portDischarge?.portId);
-            const response = await (context as BackendService<any>).getWithToken(requestFormatted, props.token);
+            const response = await (context?.service as BackendService<any>).getWithToken(requestFormatted, props.token);
             if (response !== null && response !== undefined) {
                 var aux = getAllCarriers(response);
                 console.log(response.length !== 0 ? aux : "None");
@@ -184,8 +184,8 @@ function RequestPriceOffer(props: any) {
     }
 
     const getTemplates = async () => {
-        if (account && instance) {
-            const response = await (context as BackendService<any>).getSingle(protectedResources.apiLisTemplate.endPoint+"/Template");
+        if (account && instance && context) {
+            const response = await (context?.service as BackendService<any>).getSingle(protectedResources.apiLisTemplate.endPoint+"/Template");
             if (response !== null && response.data !== undefined) {
                 setTemplates(response.data);
                 console.log(response);
@@ -200,8 +200,8 @@ function RequestPriceOffer(props: any) {
     
     const getTemplate = async (id: string) => {
         setLoadTemplate(true)
-        if (account && instance) {
-            const response = await (context as BackendService<any>).getSingle(protectedResources.apiLisTemplate.endPoint+"/Template/"+id);
+        if (account && instance && context) {
+            const response = await (context?.service as BackendService<any>).getSingle(protectedResources.apiLisTemplate.endPoint+"/Template/"+id);
             if (response !== null && response !== undefined) {
                 setTemplateBase(response.data.content);
                 setLoadTemplate(false);
@@ -239,7 +239,7 @@ function RequestPriceOffer(props: any) {
 
     useEffect(() => {
         getTemplate(selectedTemplate);
-    }, [selectedTemplate]);
+    }, [selectedTemplate, account, instance, account]);
 
     useEffect(() => {
         var departurePort = portLoading !== null ? portLoading.portName : "";
@@ -255,7 +255,7 @@ function RequestPriceOffer(props: any) {
     useEffect(() => {
         searchSeafreights();
         getTemplates();
-    }, [portLoading]);
+    }, [portLoading, account, instance, account]);
 
     return (
         <>

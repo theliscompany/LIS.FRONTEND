@@ -149,17 +149,12 @@ function Seafreights() {
         getPorts();
         getSeafreights();
         getProtectedData(); // Services and Containers
-        // getMiscellaneouses();
-    }, []);
+    }, [account, instance, account]);
 
-    // useEffect(() => {
-    //     getMiscellaneousesById(miscellaneousId);
-    // }, [miscellaneousId]);
-    
     const getProducts = async () => {
-        if (account && instance) {
-            const token = await getAccessToken(instance, transportRequest, account);
-            const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Product?pageSize=500", token);
+        if (account && instance && context) {
+            // const token = await getAccessToken(instance, transportRequest, account);
+            const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Product?pageSize=500", context.tokenTransport);
             if (response !== null && response !== undefined) {
                 setProducts(response);
             }  
@@ -167,11 +162,11 @@ function Seafreights() {
     }
     
     const getClients = async () => {
-        if (account && instance) {
-            const token = await getAccessToken(instance, crmRequest, account);
+        if (account && instance && context) {
+            // const token = await getAccessToken(instance, crmRequest, account);
             
             try {
-                const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisCrm.endPoint+"/Contact/GetContacts?category=5&pageSize=1000", token);
+                const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisCrm.endPoint+"/Contact/GetContacts?category=5&pageSize=1000", context.tokenCrm);
                 if (response !== null && response !== undefined) {
                     // Removing duplicates from client array
                     setClients(response.data.filter((obj: any, index: number, self: any) => index === self.findIndex((o: any) => o.contactName === obj.contactName)));
@@ -184,8 +179,8 @@ function Seafreights() {
     }
     
     const getPorts = async () => {
-        if (account && instance) {
-            const response = await (context as BackendService<any>).getSingle(protectedResources.apiLisTransport.endPoint+"/Port/Ports?pageSize=2000");
+        if (account && instance && context) {
+            const response = await (context?.service as BackendService<any>).getSingle(protectedResources.apiLisTransport.endPoint+"/Port/Ports?pageSize=2000");
             if (response !== null && response !== undefined) {
                 setPorts(response);
             }  
@@ -193,16 +188,16 @@ function Seafreights() {
     }
     
     const getProtectedData = async () => {
-        if (account && instance) {
-            const token = await getAccessToken(instance, transportRequest, account);
-            getServices(token);
-            getContainers(token);
+        if (account && instance && context) {
+            // const token = await getAccessToken(instance, transportRequest, account);
+            getServices("");
+            getContainers("");
         }
     }
 
     const getServices = async (token: string) => {
-        if (account && instance) {
-            const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Service?pageSize=500", token);
+        if (account && instance && context) {
+            const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Service?pageSize=500", context.tokenTransport);
             if (response !== null && response !== undefined) {
                 console.log(response.sort((a: any, b: any) => b.serviceName - a.serviceName));
                 setAllServices(response);
@@ -216,11 +211,11 @@ function Seafreights() {
     }
     
     const getSeafreights = async () => {
-        if (account && instance) {
-            const token = await getAccessToken(instance, pricingRequest, account);
-            setTempToken(token);
+        if (account && instance && context) {
+            // const token = await getAccessToken(instance, pricingRequest, account);
+            // setTempToken(token);
             
-            const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisPricing.endPoint+"/SeaFreight/GetSeaFreights", token);
+            const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisPricing.endPoint+"/SeaFreight/GetSeaFreights", context.tokenPricing);
             if (response !== null && response !== undefined) {
                 setSeafreights(sortSuppliersByCarrierAgentName(response));
                 setLoad(false);
@@ -261,8 +256,8 @@ function Seafreights() {
     
     const getSeafreight = async (id: string, isCopy: boolean) => {
         setLoadEdit(true)
-        if (account && instance) {
-            const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisPricing.endPoint+"/SeaFreight/SeaFreight?seaFreightId="+id, tempToken);
+        if (account && instance && context) {
+            const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisPricing.endPoint+"/SeaFreight/SeaFreight?seaFreightId="+id, context.tokenPricing);
             if (response !== null && response !== undefined) {
                 var auxCarrier = {contactId: response.carrierId, contactName: response.carrierName};
                 var auxLoading = ports.find((elm: any) => elm.portId === response.departurePortId);
@@ -299,10 +294,10 @@ function Seafreights() {
     }
     
     const searchSeafreights = async () => {
-        if (account && instance) {
+        if (account && instance && context) {
             setLoad(true);
             var requestFormatted = createGetRequestUrl(portDeparture?.portId, portDestination?.portId, searchedCarrier?.contactId);
-            const response = await (context as BackendService<any>).getWithToken(requestFormatted, tempToken);
+            const response = await (context?.service as BackendService<any>).getWithToken(requestFormatted, context.tokenPricing);
             if (response !== null && response !== undefined) {
                 setSeafreights(response);
                 setLoad(false);
@@ -315,7 +310,7 @@ function Seafreights() {
 
     const createUpdateSeafreight = async () => {
         if (servicesData.length !== 0 && portLoading !== null && portDischarge !== null && carrier !== null && carrierAgent !== null && frequency !== 0 && transitTime !== 0 && validUntil !== null) {
-            if (account && instance) {
+            if (account && instance && context) {
                 var dataSent = null;
                 if (currentEditId !== "") {
                     dataSent = {
@@ -360,7 +355,7 @@ function Seafreights() {
                     };    
                 }
                 console.log(dataSent);
-                const response = await (context as BackendService<any>).postWithToken(protectedResources.apiLisPricing.endPoint+"/SeaFreight/SeaFreight", dataSent, tempToken);
+                const response = await (context?.service as BackendService<any>).postWithToken(protectedResources.apiLisPricing.endPoint+"/SeaFreight/SeaFreight", dataSent, context.tokenPricing);
                 if (response !== null && response !== undefined) {
                     setModal2(false);
                     enqueueSnackbar(t('successCreated'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
@@ -377,8 +372,8 @@ function Seafreights() {
     }
 
     const deleteSeafreightPrice = async (id: string) => {
-        if (account && instance) {
-            const response = await (context as BackendService<any>).deleteWithToken(protectedResources.apiLisPricing.endPoint+"/SeaFreight/DeleteSeaFreightPrice?id="+id, tempToken);
+        if (account && instance && context) {
+            const response = await (context?.service as BackendService<any>).deleteWithToken(protectedResources.apiLisPricing.endPoint+"/SeaFreight/DeleteSeaFreightPrice?id="+id, context.tokenPricing);
             if (response !== null && response !== undefined) {
                 enqueueSnackbar(t('rowDeletedSuccess'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
                 setModal(false);
@@ -391,17 +386,17 @@ function Seafreights() {
     }
 
     const getMiscellaneouses = async (carrier1: any, portLoading1: any, portDischarge1: any, validUntil1: any, container: any, isCopy: boolean) => {
-        if (account && instance) {
+        if (account && instance && context) {
             setLoadMiscs(true);
             
             var token = null;
-            if (tempToken === "") {
-                token = await getAccessToken(instance, pricingRequest, account);
-                setTempToken(token);    
-            }
+            // if (tempToken === "") {
+            //     token = await getAccessToken(instance, pricingRequest, account);
+            //     setTempToken(token);    
+            // }
 
             if (carrier1 !== null && portLoading1 !== null && portDischarge1 !== null) {
-                const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisPricing.endPoint+"/Miscellaneous/Miscellaneous?SupplierId="+carrier1.contactId+"&DeparturePortId="+portLoading1.portId+"&DestinationPortId="+portDischarge1.portId+"&withShipment=true", token !== null ? token : tempToken);
+                const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisPricing.endPoint+"/Miscellaneous/Miscellaneous?SupplierId="+carrier1.contactId+"&DeparturePortId="+portLoading1.portId+"&DestinationPortId="+portDischarge1.portId+"&withShipment=true", context.tokenPricing);
                 if (response !== null && response !== undefined && response.length !== 0) {
                     // Here i check if the result is good
                     // console.log(container);
@@ -812,9 +807,9 @@ function Seafreights() {
             {/* Price request seafreight FCL */}
             <BootstrapDialog open={modal6} onClose={() => setModal6(false)} maxWidth="lg" fullWidth>
                 {
-                    products !== null ?
+                    products !== null && context ?
                     <RequestPriceRequest 
-                        token={tempToken} 
+                        token={context.tokenPricing} 
                         products={products} 
                         commodities={[]}
                         ports={ports}

@@ -20,9 +20,9 @@ function RequestAddNote(props: any) {
     const addRequestNote = async () => {
         // console.log(account);
         if (generalNote !== "") {
-            if (account && instance) {
+            if (account && instance && context) {
                 var dataSent = { "content": generalNote, "requestQuoteId": props.id, "noteType": "General", "idUser": account?.username };
-                const response = await (context as BackendService<any>).post(protectedResources.apiLisQuotes.endPoint+"/RequestQuoteNotes", dataSent);
+                const response = await (context?.service as BackendService<any>).post(protectedResources.apiLisQuotes.endPoint+"/RequestQuoteNotes", dataSent);
                 if (response !== null) {
                     props.closeModal();
                     enqueueSnackbar(t('commentSuccessAdded'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });

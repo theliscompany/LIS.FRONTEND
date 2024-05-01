@@ -53,7 +53,7 @@ function NewSeafreight(props: any) {
 
     useEffect(() => {
         getServices(props.token);
-    }, []);
+    }, [account, instance, account]);
 
     const deflattenData = (flattenedData: any) => {
         return flattenedData.map((item: any) => ({
@@ -69,8 +69,8 @@ function NewSeafreight(props: any) {
     };
 
     const getServices = async (token: string) => {
-        if (account && instance) {
-            const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Service?pageSize=500", token);
+        if (account && instance && context) {
+            const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Service?pageSize=500", context.tokenTransport);
             if (response !== null && response !== undefined) {
                 console.log(response.sort((a: any, b: any) => b.serviceName - a.serviceName));
                 setAllServices(response);
@@ -81,7 +81,7 @@ function NewSeafreight(props: any) {
     
     const createSeafreight = async () => {
         if (servicesData.length !== 0 && portLoading !== null && portDischarge !== null && carrier !== null && carrierAgent !== null && frequency !== 0 && transitTime !== 0 && validUntil !== null) {
-            if (account && instance) {
+            if (account && instance && context) {
                 var dataSent = null;
                 dataSent = {
                     // "seaFreightId": "string",
@@ -104,7 +104,7 @@ function NewSeafreight(props: any) {
                 };
 
                 console.log(dataSent);
-                const response = await (context as BackendService<any>).postWithToken(protectedResources.apiLisPricing.endPoint+"/SeaFreight/SeaFreight", dataSent, props.token);
+                const response = await (context?.service as BackendService<any>).postWithToken(protectedResources.apiLisPricing.endPoint+"/SeaFreight/SeaFreight", dataSent, props.token);
                 if (response !== null && response !== undefined) {
                     props.closeModal();
                     enqueueSnackbar(t('successCreated'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });

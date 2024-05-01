@@ -40,8 +40,8 @@ function NewContact(props: any) {
     const createNewContact = async () => {
         console.log(country);
         if (country !== null && testName !== "" && testPhone !== "" && testEmail !== "" && addressCountry !== "") {
-            if (account && instance) {
-                const token = await getAccessToken(instance, crmRequest, account);
+            if (account && instance && context) {
+                // const token = await getAccessToken(instance, crmRequest, account);
     
                 var dataSent = {
                     "contactName": testName,
@@ -59,7 +59,7 @@ function NewContact(props: any) {
                 console.log(categoriesText);
     
                 try {
-                    const response = await (context as BackendService<any>).postWithToken(protectedResources.apiLisCrm.endPoint+"/Contact/CreateContact"+categoriesText, dataSent, token);
+                    const response = await (context?.service as BackendService<any>).postWithToken(protectedResources.apiLisCrm.endPoint+"/Contact/CreateContact"+categoriesText, dataSent, context.tokenCrm);
                     if (response !== null) {
                         enqueueSnackbar("The contact has been added with success!", { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
                         

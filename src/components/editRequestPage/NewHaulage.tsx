@@ -57,7 +57,7 @@ function NewHaulage(props: any) {
     const createHaulage = async () => {
         setLoad(true);
         if (haulier !== null && loadingCity !== null && loadingPort !== null && freeTime > 0 && unitTariff > 0 && overtimeTariff > 0 && multiStop > 0 && validUntil !== null && containerTypes.length > 0) {
-            if (account && instance) {
+            if (account && instance && context) {
                 var dataSent = null;
                 var postalCode = loadingCity !== null ? loadingCity.postalCode !== undefined ? loadingCity.postalCode : "" : ""; 
                 var city = loadingCity !== null ? loadingCity.city.toUpperCase()+', '+loadingCity.country.toUpperCase() : "";
@@ -90,7 +90,7 @@ function NewHaulage(props: any) {
                     "containers": containerTypes,
                 };
 
-                const response = await (context as BackendService<any>).postWithToken(protectedResources.apiLisPricing.endPoint+"/Haulage/Haulage", dataSent, props.token);
+                const response = await (context?.service as BackendService<any>).postWithToken(protectedResources.apiLisPricing.endPoint+"/Haulage/Haulage", dataSent, props.token);
                 if (response !== null && response !== undefined) {
                     enqueueSnackbar(t('successCreated'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
                     props.closeModal();

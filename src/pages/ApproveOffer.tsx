@@ -37,8 +37,8 @@ function ApproveOffer(props: any) {
     }, [context]);
 
     const loadOffer = async () => {
-        if (account && instance) {
-            const response = await (context as BackendService<any>).getSingle(protectedResources.apiLisOffer.endPoint+"/QuoteOffer/"+id);
+        if (account && instance && context) {
+            const response = await (context?.service as BackendService<any>).getSingle(protectedResources.apiLisOffer.endPoint+"/QuoteOffer/"+id);
             if (response !== null && response.code !== undefined) {
                 if (response.code === 200) {
                 console.log(response.data);
@@ -58,11 +58,11 @@ function ApproveOffer(props: any) {
     }
 
     const getContainers = async () => {
-        if (account && instance) {
+        if (account && instance && context) {
             setLoad(true);
-            const token = await getAccessToken(instance, transportRequest, account);
+            // const token = await getAccessToken(instance, transportRequest, account);
             
-            const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Package/Containers", token);
+            const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Package/Containers", context.tokenTransport);
             console.log("Containers", response);
             if (response !== null && response !== undefined) {
                 setContainers(response);
@@ -81,7 +81,7 @@ function ApproveOffer(props: any) {
                 comment: details
             };
 
-            const data = await (context as BackendService<any>).put(protectedResources.apiLisOffer.endPoint+"/QuoteOffer/"+id+"/approval?newStatus=Accepted&comment="+details, body);
+            const data = await (context?.service as BackendService<any>).put(protectedResources.apiLisOffer.endPoint+"/QuoteOffer/"+id+"/approval?newStatus=Accepted&comment="+details, body);
             if (data?.status === 200) {
                 enqueueSnackbar(t('priceOfferApproved'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
                 loadOffer();
@@ -99,7 +99,7 @@ function ApproveOffer(props: any) {
                 newStatus: "Rejected",
             };
 
-            const data = await (context as BackendService<any>).put(protectedResources.apiLisOffer.endPoint+"/QuoteOffer/"+id+"/approval?newStatus=Rejected", body);
+            const data = await (context?.service as BackendService<any>).put(protectedResources.apiLisOffer.endPoint+"/QuoteOffer/"+id+"/approval?newStatus=Rejected", body);
             if (data?.status === 200) {
                 enqueueSnackbar(t('priceOfferRejected'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
                 loadOffer();

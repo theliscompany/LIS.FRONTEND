@@ -14,7 +14,7 @@ function RequestForm(props: any) {
     const assignManager = async () => {
         if (props.assignedManager !== null && props.assignedManager !== undefined && props.assignedManager !== "") {
             if (props.context && props.account) {
-                const response = await (props.context as BackendService<any>).putWithToken(protectedResources.apiLisQuotes.endPoint+"/Assignee/"+props.id+"/"+props.assignedManager, [], props.tempToken);
+                const response = await (props.context?.service as BackendService<any>).putWithToken(protectedResources.apiLisQuotes.endPoint+"/Assignee/"+props.id+"/"+props.assignedManager, [], props.tempToken);
                 if (response !== null) {
                     enqueueSnackbar(t('managerAssignedRequest'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
                 }
@@ -30,7 +30,7 @@ function RequestForm(props: any) {
 
     const removeManager = async () => {
         if (props.context && props.account) {
-            const response = await (props.context as BackendService<any>).putWithToken(protectedResources.apiLisQuotes.endPoint+"/Assignee/unassign/"+props.id, [], props.tempToken);
+            const response = await (props.context?.service as BackendService<any>).putWithToken(protectedResources.apiLisQuotes.endPoint+"/Assignee/unassign/"+props.id, [], props.tempToken);
             if (response !== null) {
                 enqueueSnackbar(t('managerRemovedRequest'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
                 props.setAssignedManager("");

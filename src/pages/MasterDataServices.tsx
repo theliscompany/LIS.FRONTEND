@@ -32,14 +32,14 @@ const MasterDataServices: any = (props: any) => {
     const context = useAuthorizedBackendApi();
     
     const getServices = async () => {
-        if (account && instance) {
+        if (account && instance && context) {
             setLoadResults(true);
-            const token = await getAccessToken(instance, transportRequest, account);
-            const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Service?pageSize=500", token);
+            // const token = await getAccessToken(instance, transportRequest, account);
+            const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Service?pageSize=500", context.tokenTransport);
             if (response !== null && response !== undefined) {
                 setServices(response);
                 setLoadResults(false);
-                setTempToken(token);
+                // setTempToken(context.toke);
                 // setServices(response.filter((obj: any) => obj.servicesTypeId.includes(5) || obj.servicesTypeId.includes(2))); // Filter the services for miscellaneous (MISCELLANEOUS = 5 & HAULAGE = 2)
             }
             else {
@@ -49,9 +49,9 @@ const MasterDataServices: any = (props: any) => {
     }
     
     const deleteServicePrice = async (id: string) => {
-        if (account && instance) {
+        if (account && instance && context) {
             try {
-                const response = await (context as BackendService<any>).deleteWithToken(protectedResources.apiLisTransport.endPoint+"/Service/"+id, tempToken);
+                const response = await (context?.service as BackendService<any>).deleteWithToken(protectedResources.apiLisTransport.endPoint+"/Service/"+id, context.tokenTransport);
                 console.log(response);
                 enqueueSnackbar(t('rowDeletedSuccess'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
                 setModal2(false);
@@ -66,7 +66,7 @@ const MasterDataServices: any = (props: any) => {
     
     useEffect(() => {
         getServices();
-    }, []);
+    }, [account, instance, account]);
 
     const servicesOptions = [
         {value: 1, name: "SEAFREIGHT"},
@@ -104,8 +104,8 @@ const MasterDataServices: any = (props: any) => {
     
     const createNewService = async () => {
         if (testName !== "" && selectedServiceTypes.length !== 0) {
-            if (account && instance) {
-                const token = await getAccessToken(instance, transportRequest, account);
+            if (account && instance && context) {
+                // const token = await getAccessToken(instance, transportRequest, account);
 
                 try {
                     var dataSent = null;
@@ -117,7 +117,7 @@ const MasterDataServices: any = (props: any) => {
                             "serviceDescription": testDescription,
                             "servicesTypeId": selectedServiceTypes
                         };
-                        response = await (context as BackendService<any>).putWithToken(protectedResources.apiLisTransport.endPoint+"/Service/"+currentEditId, dataSent, token);
+                        response = await (context?.service as BackendService<any>).putWithToken(protectedResources.apiLisTransport.endPoint+"/Service/"+currentEditId, dataSent, context.tokenTransport);
                     }
                     else {
                         dataSent = {
@@ -125,7 +125,7 @@ const MasterDataServices: any = (props: any) => {
                             "serviceDescription": testDescription,
                             "servicesTypeId": selectedServiceTypes
                         };
-                        response = await (context as BackendService<any>).postWithToken(protectedResources.apiLisTransport.endPoint+"/Service", dataSent, token);
+                        response = await (context?.service as BackendService<any>).postWithToken(protectedResources.apiLisTransport.endPoint+"/Service", dataSent, context.tokenTransport);
                     }
                     enqueueSnackbar(currentEditId === "" ? "The service has been added with success!" : "The service has been edited with success!", { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
                     getServices();
@@ -144,8 +144,8 @@ const MasterDataServices: any = (props: any) => {
     
     const getService = async (id: string) => {
         setLoadEdit(true)
-        if (account && instance) {
-            const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Service/"+id, tempToken);
+        if (account && instance && context) {
+            const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Service/"+id, context.tokenTransport);
             if (response !== null && response !== undefined) {
                 console.log(response);
                 setTestName(response.serviceName);

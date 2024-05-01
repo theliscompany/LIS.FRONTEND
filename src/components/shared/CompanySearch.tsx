@@ -29,16 +29,16 @@ const CompanySearch: React.FC<CompanyAutocompleteProps> = ({ id, value, onChange
     const account = useAccount(accounts[0] || {});
 
     const debouncedSearch = debounce(async (search: string) => {
-        if (account && instance) {
+        if (account && instance && context) {
             setLoading(true);
-            const token = await getAccessToken(instance, crmRequest, account);
+            // const token = await getAccessToken(instance, crmRequest, account);
             
             var requestString = protectedResources.apiLisCrm.endPoint+"/Contact/GetContacts?contactName="+search+"&category="+category;
             if (category === 0) {
                 requestString = protectedResources.apiLisCrm.endPoint+"/Contact/GetContacts?contactName="+search;
             }
             
-            const response = await (context as BackendService<any>).getWithToken(requestString, token);
+            const response = await (context?.service as BackendService<any>).getWithToken(requestString, context.tokenCrm);
             if (response !== null && response !== undefined && response.length !== 0) {
                 console.log(response);
                 setOptions(response.data);

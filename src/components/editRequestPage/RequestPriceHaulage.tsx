@@ -129,11 +129,11 @@ function RequestPriceHaulage(props: any) {
     }
 
     const getClients = async () => {
-        if (account && instance) {
-            const token = await getAccessToken(instance, crmRequest, account);
+        if (account && instance && context) {
+            // const token = await getAccessToken(instance, crmRequest, account);
             
             try {
-                const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisCrm.endPoint+"/Contact/GetContacts?category=2&pageSize=1000", token);
+                const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisCrm.endPoint+"/Contact/GetContacts?category=2&pageSize=1000", context.tokenCrm);
                 if (response !== null && response !== undefined) {
                     // Removing duplicates from client array
                     setHauliersData(response.data.filter((obj: any, index: number, self: any) => index === self.findIndex((o: any) => o.contactName === obj.contactName)));
@@ -169,10 +169,10 @@ function RequestPriceHaulage(props: any) {
     }
 
     const searchHaulages = async () => {
-        if (account && instance) {
+        if (account && instance && context) {
             setLoad(true);
             var requestFormatted = createGetRequestUrl(loadingCityObj?.portId, deliveryPort?.portId);
-            const response = await (context as BackendService<any>).getWithToken(requestFormatted, props.token);
+            const response = await (context?.service as BackendService<any>).getWithToken(requestFormatted, props.token);
             if (response !== null && response !== undefined) {
                 var aux = getAllHauliers(response);
                 setRecipients(hauliersData.filter((obj: any) => aux.includes(obj.contactName) && obj.email !== "" && obj.email !== null));
@@ -185,8 +185,8 @@ function RequestPriceHaulage(props: any) {
     }
 
     const getTemplates = async () => {
-        if (account && instance) {
-            const response = await (context as BackendService<any>).getSingle(protectedResources.apiLisTemplate.endPoint+"/Template?Tags=haulage");
+        if (account && instance && context) {
+            const response = await (context?.service as BackendService<any>).getSingle(protectedResources.apiLisTemplate.endPoint+"/Template?Tags=haulage");
             if (response !== null && response.data !== undefined) {
                 setTemplates(response.data);
                 console.log(response);
@@ -201,8 +201,8 @@ function RequestPriceHaulage(props: any) {
     
     const getTemplate = async (id: string) => {
         setLoadTemplate(true)
-        if (account && instance) {
-            const response = await (context as BackendService<any>).getSingle(protectedResources.apiLisTemplate.endPoint+"/Template/"+id);
+        if (account && instance && context) {
+            const response = await (context?.service as BackendService<any>).getSingle(protectedResources.apiLisTemplate.endPoint+"/Template/"+id);
             if (response !== null && response !== undefined) {
                 setTemplateBase(response.data.content);
                 setLoadTemplate(false);
@@ -256,7 +256,7 @@ function RequestPriceHaulage(props: any) {
 
     useEffect(() => {
         getTemplate(selectedTemplate);
-    }, [selectedTemplate]);
+    }, [selectedTemplate, account, instance, account]);
 
     useEffect(() => {
         var postalCode = loadingCityObj !== null ? loadingCityObj.postalCode !== undefined ? loadingCityObj.postalCode : "" : ""; 
@@ -274,13 +274,13 @@ function RequestPriceHaulage(props: any) {
     useEffect(() => {
         getClients();
         getTemplates();
-    }, []);
+    }, [account, instance, account]);
 
     useEffect(() => {
         if (hauliersData !== null) {
             searchHaulages();
         }
-    }, [deliveryPort, hauliersData]);
+    }, [deliveryPort, hauliersData, account, instance, account]);
 
     return (
         <>

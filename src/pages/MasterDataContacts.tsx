@@ -55,13 +55,13 @@ const MasterDataContacts: any = (props: any) => {
     }
       
     const getContacts = async () => {
-        if (account && instance) {
+        if (account && instance && context) {
             setLoadResults(true);
 
-            const token = await getAccessToken(instance, crmRequest, account);
-            setTempToken(token);
+            // const token = await getAccessToken(instance, crmRequest, account);
+            // setTempToken(token);
             
-            const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisCrm.endPoint+"/Contact/GetContacts?pageSize=4000", token);
+            const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisCrm.endPoint+"/Contact/GetContacts?pageSize=4000", context.tokenCrm);
             if (response !== null && response !== undefined) {
                 setContacts(response.data);
                 setLoadResults(false);
@@ -74,9 +74,9 @@ const MasterDataContacts: any = (props: any) => {
     }
     
     const deleteContact = async (id: string) => {
-        if (account && instance) {
+        if (account && instance && context) {
             try {
-                const response = await (context as BackendService<any>).deleteWithToken(protectedResources.apiLisCrm.endPoint+"/Contact/DeleteContact/"+id, tempToken);
+                const response = await (context?.service as BackendService<any>).deleteWithToken(protectedResources.apiLisCrm.endPoint+"/Contact/DeleteContact/"+id, context.tokenCrm);
                 console.log(response);
                 enqueueSnackbar(t('rowDeletedSuccess'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
                 setModal2(false);
@@ -91,7 +91,7 @@ const MasterDataContacts: any = (props: any) => {
     
     useEffect(() => {
         getContacts();
-    }, []);
+    }, [instance, account]);
 
     const columnsContacts: GridColDef[] = [
         { field: 'contactId', headerName: t('id'), flex: 0.5 },
@@ -127,8 +127,8 @@ const MasterDataContacts: any = (props: any) => {
     
     const createNewContact = async () => {
         if (country !== null && testName !== "" && testPhone !== "" && testEmail !== "" && addressCountry !== "") {
-            if (account && instance) {
-                const token = await getAccessToken(instance, transportRequest, account);
+            if (account && instance && context) {
+                // const token = await getAccessToken(instance, transportRequest, account);
                 
                 try {
                     var dataSent = null;
@@ -144,7 +144,7 @@ const MasterDataContacts: any = (props: any) => {
                             "email": testEmail,
                             "categories": getCategoryNames(selectedCategories)
                         };
-                        response = await (context as BackendService<any>).putWithToken(protectedResources.apiLisCrm.endPoint+"/Contact/UpdateContact/"+currentEditId, dataSent, token);
+                        response = await (context?.service as BackendService<any>).putWithToken(protectedResources.apiLisCrm.endPoint+"/Contact/UpdateContact/"+currentEditId, dataSent, context.tokenCrm);
                     }
                     else {
                         dataSent = {
@@ -156,7 +156,7 @@ const MasterDataContacts: any = (props: any) => {
                             "email": testEmail,
                             "categories": getCategoryNames(selectedCategories)
                         };
-                        response = await (context as BackendService<any>).postWithToken(protectedResources.apiLisCrm.endPoint+"/Contact/CreateContact", dataSent, token);
+                        response = await (context?.service as BackendService<any>).postWithToken(protectedResources.apiLisCrm.endPoint+"/Contact/CreateContact", dataSent, context.tokenCrm);
                     }
                     enqueueSnackbar(currentEditId === "" ? "The contact has been added with success!" : "The contact has been edited with success!", { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
                     getContacts();
@@ -175,8 +175,8 @@ const MasterDataContacts: any = (props: any) => {
     
     const getContact = async (id: string) => {
         setLoadEdit(true)
-        if (account && instance) {
-            const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisCrm.endPoint+"/Contact/GetContactById/"+id, tempToken);
+        if (account && instance && context) {
+            const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisCrm.endPoint+"/Contact/GetContactById/"+id, context.tokenCrm);
             if (response !== null && response !== undefined) {
                 console.log(response);
                 setTestName(response.data.contactName);

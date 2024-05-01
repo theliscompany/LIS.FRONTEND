@@ -40,7 +40,7 @@ function RequestChangeStatus(props: any) {
                 customMessage: statusMessage
             };
 
-            const data = await (context as BackendService<any>).put(protectedResources.apiLisQuotes.endPoint+"/Request/"+props.id+"/changeStatus", body);
+            const data = await (context?.service as BackendService<any>).put(protectedResources.apiLisQuotes.endPoint+"/Request/"+props.id+"/changeStatus", body);
             if (data?.status === 200) {
                 props.closeModal();
                 enqueueSnackbar(t('requestStatusUpdated'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });

@@ -180,8 +180,8 @@ function Layout(props: {children?: React.ReactNode}) {
     };
 
     // const loadRequests = async () => {
-    //     if (account && instance) {
-    //         const response = await (context as BackendService<any>).getSingle(protectedResources.apiLisQuotes.endPoint+"/Request");
+    //     if (account && instance && context) {
+    //         const response = await (context?.service as BackendService<any>).getSingle(protectedResources.apiLisQuotes.endPoint+"/Request");
     //         if (response !== null && response.code !== undefined) {
     //             if (response.code === 200) {
     //                 setNotifications(response.data.filter((elm: any) => { return elm.status === "EnAttente" }).reverse());

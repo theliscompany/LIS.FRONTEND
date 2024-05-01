@@ -5,13 +5,15 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import { useTranslation } from 'react-i18next';
 import { useAuthorizedBackendApi } from '../../api/api';
 import { enqueueSnackbar } from 'notistack';
-import { protectedResources } from '../../config/authConfig';
+import { loginRequest, protectedResources } from '../../config/authConfig';
 import { BackendService } from '../../utils/services/fetch';
 import { useAccount, useMsal } from '@azure/msal-react';
+import { getAccessToken } from '../../utils/functions';
 
 function RequestListNotes(props: any) {
     const [loadNotes, setLoadNotes] = useState<boolean>(true);
     const [notes, setNotes] = useState<any>(null);
+    const [tempToken, setTempToken] = useState<string>("");
     
     const context = useAuthorizedBackendApi();
     const { t } = useTranslation();
@@ -21,12 +23,15 @@ function RequestListNotes(props: any) {
     useEffect(() => {
         // Here i initialize the sea ports
         getNotes(props.id);
-    }, [context]);
+    }, [account, instance, account]);
     
     const getNotes = async (idRequest: string|undefined) => {
-        if (account && instance) {
+        if (account && instance && context) {
             setLoadNotes(true);
-            const response = await (context as BackendService<any>).getSingle(protectedResources.apiLisQuotes.endPoint+"/RequestQuoteNotes?requestQuoteId="+idRequest);
+            // const token = await getAccessToken(instance, loginRequest, account);
+            // setTempToken(token);
+            
+            const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisQuotes.endPoint+"/RequestQuoteNotes?requestQuoteId="+idRequest, context.tokenLogin);
             if (response !== null && response.code !== undefined) {
                 if (response.code === 200) {
                     // console.log(response.data);
@@ -41,8 +46,8 @@ function RequestListNotes(props: any) {
     }
     
     const deleteNote = async (idNote: string) => {
-        if (account && instance) {
-            const response = await (context as any).delete(protectedResources.apiLisQuotes.endPoint+"/RequestQuoteNotes/"+idNote);
+        if (account && instance && context) {
+            const response = await (context?.service as any).deleteWithToken(protectedResources.apiLisQuotes.endPoint+"/RequestQuoteNotes/"+idNote, context.tokenLogin);
             if (response !== null && response.code !== undefined) {
                 if (response.code === 200) {
                     enqueueSnackbar("The note has been deleted with success.", { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });

@@ -33,11 +33,11 @@ const MasterDataPorts: any = (props: any) => {
     const context = useAuthorizedBackendApi();
     
     const getPorts = async () => {
-        if (account && instance) {
+        if (account && instance && context) {
             setLoadResults(true);
-            const token = await getAccessToken(instance, transportRequest, account);
-            setTempToken(token);
-            const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Port/Ports?pageSize=2000", token);
+            // const token = await getAccessToken(instance, transportRequest, account);
+            // setTempToken(token);
+            const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Port/Ports?pageSize=2000", context.tokenTransport);
             if (response !== null && response !== undefined) {
                 setPorts(response);
                 setLoadResults(false);
@@ -49,9 +49,9 @@ const MasterDataPorts: any = (props: any) => {
     }
     
     const deletePort = async (id: string) => {
-        if (account && instance) {
+        if (account && instance && context) {
             try {
-                const response = await (context as BackendService<any>).deleteWithToken(protectedResources.apiLisTransport.endPoint+"/Port/DeletePort/"+id, tempToken);
+                const response = await (context?.service as BackendService<any>).deleteWithToken(protectedResources.apiLisTransport.endPoint+"/Port/DeletePort/"+id, context.tokenTransport);
                 console.log(response);
                 enqueueSnackbar(t('rowDeletedSuccess'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
                 setModal2(false);
@@ -66,7 +66,7 @@ const MasterDataPorts: any = (props: any) => {
     
     useEffect(() => {
         getPorts();
-    }, []);
+    }, [account, instance, account]);
 
     const columnsPorts: GridColDef[] = [
         { field: 'portId', headerName: t('id'), flex: 1 },
@@ -88,8 +88,8 @@ const MasterDataPorts: any = (props: any) => {
     
     const createNewPort = async () => {
         if (testName !== "" && country !== null) {
-            if (account && instance) {
-                const token = await getAccessToken(instance, transportRequest, account);
+            if (account && instance && context) {
+                // const token = await getAccessToken(instance, transportRequest, account);
                 
                 try {
                     var dataSent = null;
@@ -100,14 +100,14 @@ const MasterDataPorts: any = (props: any) => {
                             "portName": testName.toUpperCase(),
                             "country": country.label.toUpperCase(),
                         };
-                        response = await (context as BackendService<any>).putWithToken(protectedResources.apiLisTransport.endPoint+"/Port/UpdatePort/"+currentEditId, dataSent, token);
+                        response = await (context?.service as BackendService<any>).putWithToken(protectedResources.apiLisTransport.endPoint+"/Port/UpdatePort/"+currentEditId, dataSent, context.tokenTransport);
                     }
                     else {
                         dataSent = {
                             "portName": testName.toUpperCase(),
                             "country": country.label.toUpperCase(),
                         };
-                        response = await (context as BackendService<any>).postWithToken(protectedResources.apiLisTransport.endPoint+"/Port/CreatePort", dataSent, token);
+                        response = await (context?.service as BackendService<any>).postWithToken(protectedResources.apiLisTransport.endPoint+"/Port/CreatePort", dataSent, context.tokenTransport);
                     }
                     enqueueSnackbar(currentEditId === "" ? "The port has been added with success!" : "The port has been edited with success!", { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
                     getPorts();
@@ -126,8 +126,8 @@ const MasterDataPorts: any = (props: any) => {
     
     const getPort = async (id: string) => {
         setLoadEdit(true)
-        if (account && instance) {
-            const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Port/GetPort/"+id, tempToken);
+        if (account && instance && context) {
+            const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Port/GetPort/"+id, context.tokenTransport);
             if (response !== null && response !== undefined) {
                 console.log(response);
                 setTestName(response.portName);

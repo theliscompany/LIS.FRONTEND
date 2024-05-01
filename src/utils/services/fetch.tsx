@@ -1,13 +1,3 @@
-import { AccountInfo, AuthenticationResult, IPublicClientApplication } from '@azure/msal-browser';
-import { loginRequest } from '../../config/authConfig';
-    
-export const GetToken = (instance: IPublicClientApplication, account: AccountInfo): Promise<AuthenticationResult> => {    
-    return instance.acquireTokenSilent({
-        scopes: loginRequest.scopes,
-        account: account
-    })
-}
-
 export class BackendService<T> {
     private accessToken?: string;
     protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;

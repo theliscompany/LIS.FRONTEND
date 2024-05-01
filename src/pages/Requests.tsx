@@ -88,15 +88,15 @@ function Requests() {
 
     useEffect(() => {
         loadRequests();
-    }, [context]);
+    }, [account, instance, account]);
 
     const loadRequests = async () => {
-        if (account && instance) {
+        if (account && instance && account) {
             setLoad(true);
-            const token = await getAccessToken(instance, loginRequest, account);
-            setTempToken(token);
+            // const token = await getAccessToken(instance, loginRequest, account);
+            // setTempToken(token);
 
-            const response: RequestResponseDto = await (context as BackendService<any>).getWithToken(search !== undefined ? protectedResources.apiLisQuotes.endPoint+"/Request?Search="+search : protectedResources.apiLisQuotes.endPoint+"/Request", token);
+            const response: RequestResponseDto = await (context?.service as BackendService<any>).getWithToken(search !== undefined ? protectedResources.apiLisQuotes.endPoint+"/Request?Search="+search : protectedResources.apiLisQuotes.endPoint+"/Request", context.tokenLogin);
             if (response !== null && response.code !== undefined && response.data !== undefined) {
                 if (response.code === 200) {
                     setLoad(false);
@@ -111,7 +111,7 @@ function Requests() {
     }
 
     const searchRequests = async () => {
-        if (account && instance) {
+        if (account && instance && context) {
             setLoad(true);
             
             var postcode1 = "";
@@ -121,7 +121,7 @@ function Requests() {
             console.log(auxDeparture, auxArrival);
 
             var requestFormatted = createGetRequestUrl(auxDeparture, auxArrival, packingType, status, createdDateStart, createdDateEnd, updatedDateStart, updatedDateEnd);
-            const response: RequestResponseDto = await (context as BackendService<any>).getWithToken(requestFormatted, tempToken);
+            const response: RequestResponseDto = await (context?.service as BackendService<any>).getWithToken(requestFormatted, context.tokenLogin);
             if (response !== null && response.code !== undefined && response.data !== undefined) {
                 if (response.code === 200) {
                     setLoad(false);

@@ -85,13 +85,13 @@ function MyRequests() {
     
     useEffect(() => {
         getAssignees();
-    }, [instance, account, context]);
+    }, [instance, account]);
 
     const getAssignees = async () => {
-        if (account && instance) {
-            const token = await getAccessToken(instance, loginRequest, account);
-            setLoad(true);
-            const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisQuotes.endPoint+"/Assignee", token);
+        if (account && instance && context) {
+            // const token = await getAccessToken(instance, loginRequest, account);
+            // setLoad(true);
+            const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisQuotes.endPoint+"/Assignee", context.tokenLogin);
             if (response !== null && response.code !== undefined) {
                 if (response.code === 200) {
                     setCurrentUser(response.data.find((elm: any) => elm.email === account?.username));
@@ -106,11 +106,11 @@ function MyRequests() {
     }
 
     const loadRequests = async (assigneesList: any) => {
-        if (account && instance) {
+        if (account && instance && context) {
             //setLoad(true);
             var auxAssignee = assigneesList.find((elm: any) => elm.email === account?.username);
             if (auxAssignee !== undefined) {
-                const response: RequestResponseDto = await (context as BackendService<any>).getSingle(protectedResources.apiLisQuotes.endPoint+"/Request?AssigneeId="+auxAssignee.id);
+                const response: RequestResponseDto = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisQuotes.endPoint+"/Request?AssigneeId="+auxAssignee.id, context.tokenLogin);
                 if (response !== null && response.code !== undefined && response.data !== undefined) {
                     if (response.code === 200) {
                         setLoad(false);
@@ -130,7 +130,7 @@ function MyRequests() {
     }
 
     const searchRequests = async () => {
-        if (account && instance) {
+        if (account && instance && context) {
             setLoad(true);
             var idAssignee = currentUser.id;
             
@@ -141,7 +141,7 @@ function MyRequests() {
             console.log(auxDeparture, auxArrival);
 
             var requestFormatted = createGetRequestUrl(auxDeparture, auxArrival, packingType, status, createdDateStart, createdDateEnd, updatedDateStart, updatedDateEnd, idAssignee);
-            const response: RequestResponseDto = await (context as BackendService<any>).getSingle(requestFormatted);
+            const response: RequestResponseDto = await (context?.service as BackendService<any>).getSingle(requestFormatted);
             if (response !== null && response.code !== undefined && response.data !== undefined) {
                 if (response.code === 200) {
                     setLoad(false);
