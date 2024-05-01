@@ -1,38 +1,29 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Alert, Autocomplete, Box, Button, DialogActions, DialogContent, Grid, IconButton, InputLabel, ListItem, ListItemText, NativeSelect, Skeleton, TextField, Typography } from '@mui/material';
-import { MuiTelInput } from 'mui-tel-input';
-import AutocompleteSearch from '../components/shared/AutocompleteSearch';
+import { Alert, Box, Button, DialogActions, DialogContent, Grid, InputLabel, NativeSelect, Skeleton, Typography } from '@mui/material';
 import { inputLabelStyles, BootstrapInput, BootstrapDialog, whiteButtonStyles, BootstrapDialogTitle, buttonCloseStyles } from '../utils/misc/styles';
 import { enqueueSnackbar, SnackbarProvider } from 'notistack';
-import DeleteIcon from '@mui/icons-material/Delete';
 import { loginRequest, protectedResources, transportRequest } from '../config/authConfig';
 import { useAuthorizedBackendApi } from '../api/api';
 import { BackendService } from '../utils/services/fetch';
 import { MuiChipsInputChip } from 'mui-chips-input';
 import { useAccount, useMsal } from '@azure/msal-react';
-import { AuthenticationResult } from '@azure/msal-browser';
 import { useTranslation } from 'react-i18next';
-import Accordion from '@mui/material/Accordion';
-import AccordionSummary from '@mui/material/AccordionSummary';
-import AccordionDetails from '@mui/material/AccordionDetails';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import ClientSearch from '../components/shared/ClientSearch';
 import RequestListNotes from '../components/editRequestPage/RequestListNotes';
 import RequestAddNote from '../components/editRequestPage/RequestAddNote';
 import RequestAskInformation from '../components/editRequestPage/RequestAskInformation';
 import RequestChangeStatus from '../components/editRequestPage/RequestChangeStatus';
-import { arePhoneticallyClose, complexEquality, findClosestSeaPort, parseContact, parseLocation, similar, sortByCloseness } from '../utils/functions';
+import { arePhoneticallyClose, complexEquality, findClosestSeaPort, getAccessToken, parseContact, parseLocation, similar, sortByCloseness } from '../utils/functions';
 import NewContact from '../components/editRequestPage/NewContact';
 import { containerPackages } from '../utils/constants';
 // @ts-ignore
 import { JSON as seaPorts } from 'sea-ports';
 import GeneratePriceOffer from '../components/editRequestPage/GeneratePriceOffer';
 import NewPort from '../components/shared/NewPort';
-import NewHaulage from '../components/editRequestPage/NewHaulage';
+import RequestForm from '../components/editRequestPage/RequestForm';
 // @ts-ignore
 
-let packingOptions = ["Unit", "Bundle", "Bag", "Pallet", "Carton", "Lot", "Crate"];
+// let packingOptions = ["Unit", "Bundle", "Bag", "Pallet", "Carton", "Lot", "Crate"];
 
 function Request() {
     const [load, setLoad] = useState<boolean>(false);
@@ -56,7 +47,6 @@ function Request() {
     const [modal8, setModal8] = useState<boolean>(false);
     const [modal9, setModal9] = useState<boolean>(false);
     const [modal10, setModal10] = useState<boolean>(false);
-    const [modalHaulage, setModalHaulage] = useState<boolean>(false);
     
     const [assignedManager, setAssignedManager] = useState<string>("");
     const [assignees, setAssignees] = useState<any>(null);
@@ -65,20 +55,8 @@ function Request() {
     const [quantity, setQuantity] = useState<number>(1);
     const [containersSelection, setContainersSelection] = useState<any>([]);
     
-    const [unitName, setUnitName] = useState<string>("");
-    const [unitHeight, setUnitHeight] = useState<number>(0);
-    const [unitLength, setUnitLength] = useState<number>(0);
-    const [unitWidth, setUnitWidth] = useState<number>(0);
-    const [unitWeight, setUnitWeight] = useState<number>(0);
-    const [unitQuantity, setUnitQuantity] = useState<number>(1);
     const [unitsSelection, setUnitsSelection] = useState<any>([]);
 
-    const [packageName, setPackageName] = useState<string>("");
-    const [packageHeight, setPackageHeight] = useState<number>(0);
-    const [packageLength, setPackageLength] = useState<number>(0);
-    const [packageWidth, setPackageWidth] = useState<number>(0);
-    const [packageWeight, setPackageWeight] = useState<number>(0);
-    const [packageQuantity, setPackageQuantity] = useState<number>(1);
     const [packagesSelection, setPackagesSelection] = useState<any>([]);
     
     const [portDestination, setPortDestination] = useState<any>(null);
@@ -118,11 +96,9 @@ function Request() {
     
     function addedCoordinatesToPorts(selectedPorts: any) {
         var allMySeaPorts = initializeSeaPorts();
-        // console.log("Seaports : ", allMySeaPorts);
         const updatedLisPorts = selectedPorts.map((lisPort: any) => {
             const matchingSeaPort = allMySeaPorts.find((seaPort: any) => 
-                (complexEquality(seaPort.name.toUpperCase(), lisPort.portName.toUpperCase())
-                || similar(seaPort.name, lisPort.portName) 
+                (complexEquality(seaPort.name.toUpperCase(), lisPort.portName.toUpperCase()) || similar(seaPort.name, lisPort.portName) 
                 || (arePhoneticallyClose(seaPort.name.toUpperCase(), lisPort.portName.toUpperCase()) && complexEquality(seaPort.country.toUpperCase(), lisPort.country.toUpperCase()))));
             if (matchingSeaPort) {
                 return { ...lisPort, name: matchingSeaPort.name, coordinates: matchingSeaPort.coordinates };
@@ -138,41 +114,24 @@ function Request() {
         getAssignees();
         getPorts();
         getProducts();
-        loadRequest(null, null);
-    }, [context]);
+        loadRequest();
+    }, []);
     
     useEffect(() => {
         if (ports !== null && products !== null && requestData !== null) {
-            // console.log("Ports X : ", ports);
-            // loadRequest(ports, products);
             setTags(requestData.tags !== null ? products.filter((elm: any) => requestData.tags.includes(elm.productName)) : []);
             const closestDeparturePort = findClosestSeaPort(parseLocation(requestData.departure), ports);
             const closestArrivalPort = findClosestSeaPort(parseLocation(requestData.arrival), ports);
             setPortDeparture(closestDeparturePort);
             setPortDestination(closestArrivalPort);
-            setPorts1(sortByCloseness(parseLocation(requestData.departure), ports).slice(0, 50));
-            setPorts2(sortByCloseness(parseLocation(requestData.arrival), ports).slice(0, 50));
+            setPorts1(sortByCloseness(parseLocation(requestData.departure), ports).slice(0, 500));
+            setPorts2(sortByCloseness(parseLocation(requestData.arrival), ports).slice(0, 500));
         }
     }, [ports, products]);
 
     const getAssignees = async () => {
         if (context && account) {
-            const token = await instance.acquireTokenSilent({
-                scopes: loginRequest.scopes,
-                account: account
-            })
-            .then((response: AuthenticationResult) => {
-                return response.accessToken;
-            })
-            .catch(() => {
-                return instance.acquireTokenPopup({
-                    ...loginRequest,
-                    account: account
-                    }).then((response) => {
-                        return response.accessToken;
-                    });
-                }
-            );
+            const token = await getAccessToken(instance, loginRequest, account);
             setTempToken(token);
             
             try {
@@ -198,26 +157,10 @@ function Request() {
         }
     }
     
-    const loadRequest = async (allPorts: any, allProducts: any) => {
+    const loadRequest = async () => {
         if (context && account) {
-            const token = await instance.acquireTokenSilent({
-                scopes: loginRequest.scopes,
-                account: account
-            })
-            .then((response: AuthenticationResult) => {
-                return response.accessToken;
-            })
-            .catch(() => {
-                return instance.acquireTokenPopup({
-                    ...loginRequest,
-                    account: account
-                    }).then((response) => {
-                        return response.accessToken;
-                    });
-                }
-            );
+            const token = await getAccessToken(instance, loginRequest, account);
 
-            // setLoad(true);
             try {
                 const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisQuotes.endPoint+"/Request/"+id, token);
                 if (response !== null && response.code !== undefined) {
@@ -244,17 +187,8 @@ function Request() {
                         }}) || []);
                         setQuantity(response.data.quantity);
                         setMessage(response.data.detail);
-                        // setTags(response.data.tags !== null ? allProducts.filter((elm: any) => response.data.tags.includes(elm.productName)) : []);
                         setAssignedManager(response.data.assigneeId !== null && response.data.assigneeId !== "" ? response.data.assigneeId : "");
-                        setTrackingNumber(response.data.trackingNumber);
-                        
-                        // const closestDeparturePort = findClosestSeaPort(parseLocation(response.data.departure), allPorts);
-                        // const closestArrivalPort = findClosestSeaPort(parseLocation(response.data.arrival), allPorts);
-                        // setPortDeparture(closestDeparturePort);
-                        // setPortDestination(closestArrivalPort);
-                        // setPorts1(sortByCloseness(parseLocation(response.data.departure), allPorts).slice(0, 50));
-                        // setPorts2(sortByCloseness(parseLocation(response.data.arrival), allPorts).slice(0, 50));
-                        
+                        setTrackingNumber(response.data.trackingNumber);                        
                         setLoad(false);
                     }
                     else {
@@ -268,36 +202,6 @@ function Request() {
             catch (e: any) {
                 console.log(e);
                 setLoad(false);
-            }
-        }
-    }
-    
-    const assignManager = async () => {
-        if (assignedManager !== null && assignedManager !== undefined && assignedManager !== "") {
-            if (context && account) {
-                const response = await (context as BackendService<any>).putWithToken(protectedResources.apiLisQuotes.endPoint+"/Assignee/"+id+"/"+assignedManager, [], tempToken);
-                if (response !== null) {
-                    enqueueSnackbar(t('managerAssignedRequest'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
-                }
-                else {
-                    enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
-                }
-            }
-        }
-        else {
-            enqueueSnackbar(t('selectManagerFirst'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
-        }
-    }
-
-    const removeManager = async () => {
-        if (context && account) {
-            const response = await (context as BackendService<any>).putWithToken(protectedResources.apiLisQuotes.endPoint+"/Assignee/unassign/"+id, [], tempToken);
-            if (response !== null) {
-                enqueueSnackbar(t('managerRemovedRequest'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
-                setAssignedManager("");
-            }
-            else {
-                enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
             }
         }
     }
@@ -354,88 +258,29 @@ function Request() {
     }
 
     const getContainers = async () => {
-        // if (context && account) {
-        //     const token = await instance.acquireTokenSilent({
-        //         scopes: transportRequest.scopes,
-        //         account: account
-        //     })
-        //     .then((response: AuthenticationResult) => {
-        //         return response.accessToken;
-        //     })
-        //     .catch(() => {
-        //         return instance.acquireTokenPopup({
-        //             ...transportRequest,
-        //             account: account
-        //             }).then((response) => {
-        //                 return response.accessToken;
-        //             });
-        //         }
-        //     );
-            
-        //     const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Package/Containers", token);
-        //     if (response !== null && response !== undefined) {
-        //         setContainers(response);
-        //     }  
-        // }
         setContainers(containerPackages);
     }
     
     const getPorts = async () => {
         if (context && account) {
-            const token = await instance.acquireTokenSilent({
-                scopes: transportRequest.scopes,
-                account: account
-            })
-            .then((response: AuthenticationResult) => {
-                return response.accessToken;
-            })
-            .catch(() => {
-                return instance.acquireTokenPopup({
-                    ...transportRequest,
-                    account: account
-                    }).then((response) => {
-                        return response.accessToken;
-                    });
-                }
-            );
+            const token = await getAccessToken(instance, transportRequest, account);
             
             const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Port/Ports?pageSize=2000", token);
             if (response !== null && response !== undefined) {
-                console.log(response);
+                // console.log(response);
                 var addedCoordinatesPorts = addedCoordinatesToPorts(response);
                 setPorts(addedCoordinatesPorts);
-
-                // Here i can get the products
-                // getProducts(addedCoordinatesPorts);
             }  
         }
     }
     
     const getProducts = async () => {
         if (context && account) {
-            const token = await instance.acquireTokenSilent({
-                scopes: transportRequest.scopes,
-                account: account
-            })
-            .then((response: AuthenticationResult) => {
-                return response.accessToken;
-            })
-            .catch(() => {
-                return instance.acquireTokenPopup({
-                    ...transportRequest,
-                    account: account
-                    }).then((response) => {
-                        return response.accessToken;
-                    });
-                }
-            );
+            const token = await getAccessToken(instance, transportRequest, account);
             
             const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Product?pageSize=500", token);
             if (response !== null && response !== undefined) {
                 setProducts(response);
-
-                // Here i can load the request information
-                // loadRequest(allPorts, response);
             }  
         }
     }
@@ -473,13 +318,6 @@ function Request() {
                             </Typography>
                         </Grid>
                         <Grid item xs={6}>
-                            {/* <Button 
-                                variant="contained" color="inherit" 
-                                sx={{ float: "right", backgroundColor: "#fff", textTransform: "none", ml: 2 }} 
-                                onClick={() => { setModalHaulage(true); }}
-                            >
-                                {t('newHaulage')}
-                            </Button> */}
                             <Button 
                                 variant="contained" color="inherit" 
                                 sx={{ float: "right", backgroundColor: "#fff", textTransform: "none", ml: 2 }} 
@@ -495,7 +333,6 @@ function Request() {
                                 {t('createNewContact')}
                             </Button>
                         </Grid>
-
                         <Grid item xs={12}>
                             <Alert 
                                 severity="info" 
@@ -505,248 +342,47 @@ function Request() {
                                 <Typography variant="subtitle1" display="inline">{t('doYouThinkInformation')}</Typography>
                             </Alert>
                         </Grid>
-                        
                         <Grid item xs={12}>
                             <Button variant="contained" color="primary" sx={{ mt: 2, mr: 2, textTransform: "none" }} onClick={editRequest} >{t('editRequest')}</Button>
                             <Button variant="contained" color="inherit" sx={whiteButtonStyles} onClick={() => { setModal2(true); }} >{t('changeStatus')}</Button>
                             <Button variant="contained" color="inherit" sx={whiteButtonStyles} style={{ float: "right" }} onClick={() => { setModal3(true); }} >{t('addCommentNote')}</Button>
-                            <Button variant="contained" color="inherit" sx={whiteButtonStyles} style={{ float: "right", marginRight: "10px" }} onClick={() => { setModal4(true); /*getNotes(id);*/ }} >{t('listNotes')}</Button>
+                            <Button variant="contained" color="inherit" sx={whiteButtonStyles} style={{ float: "right", marginRight: "10px" }} onClick={() => { setModal4(true); }} >{t('listNotes')}</Button>
                         </Grid>
                         
-                        <Grid item xs={12}>
-                            <Accordion defaultExpanded sx={{ backgroundColor: "#fbfbfb" }}>
-                                <AccordionSummary
-                                    expandIcon={<ExpandMoreIcon />}
-                                    aria-controls="panel1b-content"
-                                    id="panel1b-header"
-                                >
-                                    <Typography variant="h6" sx={{ mx: 0 }}><b>Customer request</b></Typography>
-                                </AccordionSummary>
-                                <AccordionDetails>
-                                    <Grid container spacing={2} px={2}>
-                                        <Grid item xs={12} md={6}>
-                                            <InputLabel htmlFor="client-number" sx={inputLabelStyles} style={{ marginTop: "8px" }}>{t('clientNumber')}</InputLabel>
-                                            <ClientSearch 
-                                                id="client-number"
-                                                name="clientNumber" 
-                                                value={clientNumber} 
-                                                onChange={setClientNumber}
-                                                disabled 
-                                                callBack={(value: any) => {
-                                                    setClientNumber(value);
-                                                    if (clientNumber !== null) {
-                                                        setPhone(clientNumber.phone !== null ? clientNumber.phone : "");
-                                                        // alert("check");
-                                                    }
-                                                }} 
-                                                fullWidth 
-                                            />
-                                        </Grid>
-                                        <Grid item xs={12} md={6} mt={1}>
-                                            <InputLabel htmlFor="departure" sx={inputLabelStyles}>{t('departure')}</InputLabel>
-                                            <AutocompleteSearch id="departure" value={departure} onChange={setDeparture} callBack={getClosestDeparture} fullWidth />
-                                        </Grid>
-                                        <Grid item xs={12} md={6}>
-                                            <InputLabel htmlFor="whatsapp-phone-number" sx={inputLabelStyles} style={{ marginTop: "8px" }}>{t('whatsappNumber')}</InputLabel>
-                                            <MuiTelInput 
-                                                id="whatsapp-phone-number" 
-                                                value={phone} onChange={setPhone} 
-                                                defaultCountry="CM" preferredCountries={["CM", "BE", "KE"]} 
-                                                fullWidth sx={{ mt: 1 }} disabled 
-                                            />
-                                        </Grid>
-                                        <Grid item xs={12} md={6} mt={1}>
-                                            <InputLabel htmlFor="arrival" sx={inputLabelStyles}>{t('arrival')}</InputLabel>
-                                            <AutocompleteSearch id="arrival" value={arrival} onChange={setArrival} callBack={getClosestArrival} fullWidth />
-                                        </Grid>
-                                        <Grid item xs={12} md={6}>
-                                            <InputLabel htmlFor="request-email" sx={inputLabelStyles}>{t('emailAddress')}</InputLabel>
-                                            <BootstrapInput id="request-email" type="email" value={email} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)} fullWidth disabled />
-                                        </Grid>
-                                        <Grid item xs={12} md={6}>
-                                            <InputLabel htmlFor="tags" sx={inputLabelStyles}>{t('specifics')}</InputLabel>
-                                            {
-                                                products !== null ?
-                                                <Autocomplete
-                                                    multiple    
-                                                    disablePortal
-                                                    id="tags"
-                                                    placeholder="Machinery, Household goods, etc"
-                                                    options={products}
-                                                    getOptionLabel={(option: any) => { 
-                                                        if (option !== null && option !== undefined) {
-                                                            return option.productName !== undefined ? option.productName : option;
-                                                        }
-                                                        return ""; 
-                                                    }}
-                                                    value={tags}
-                                                    sx={{ mt: 1 }}
-                                                    renderInput={(params: any) => <TextField {...params} sx={{ textTransform: "lowercase" }} />}
-                                                    onChange={(e: any, value: any) => { setTags(value); }}
-                                                    fullWidth
-                                                /> : <Skeleton />
-                                            }
-                                        </Grid>
-                                        
-                                        <Grid item xs={9} container direction="column" alignItems="flex-start">
-                                            <InputLabel htmlFor="listContainers" sx={inputLabelStyles} style={{ marginBottom: "8px", position: "relative", top: "12px" }}>{t('listContainers')}</InputLabel>
-                                        </Grid>
-                                        <Grid item xs={3}>
-                                            <Button variant="contained" color="inherit" sx={whiteButtonStyles} style={{ float: "right" }} onClick={() => setModal10(true)} >{t('addContainer')}</Button>
-                                        </Grid>
-                                        <Grid item xs={12}>
-                                            {
-                                                packingType === "FCL" ?
-                                                <>
-                                                {
-                                                    containersSelection !== undefined && containersSelection !== null && containersSelection.length !== 0 && containers !== null ? 
-                                                    <Grid container spacing={2}>
-                                                    {
-                                                        containersSelection.map((item: any, index: number) => (
-                                                            <Grid key={"listitem1-"+index} item xs={12} md={4}>
-                                                                <ListItem
-                                                                    sx={{ border: "1px solid #e5e5e5" }}
-                                                                    secondaryAction={
-                                                                        <IconButton edge="end" onClick={() => {
-                                                                            setContainersSelection((prevItems: any) => prevItems.filter((item: any, i: number) => i !== index));
-                                                                        }}>
-                                                                            <DeleteIcon />
-                                                                        </IconButton>
-                                                                    }
-                                                                >
-                                                                    <ListItemText primary={
-                                                                        t('container')+" : "+item.container+" | "+t('quantity')+" : "+item.quantity
-                                                                    } />
-                                                                </ListItem>
-                                                            </Grid>
-                                                        ))
-                                                    }
-                                                    </Grid> : null  
-                                                }
-                                                </> : null
-                                            }
-                                            {
-                                                packingType === "Breakbulk/LCL" ?
-                                                <>
-                                                {
-                                                    packagesSelection !== undefined && packagesSelection !== null && packagesSelection.length !== 0 ? 
-                                                    <Grid container spacing={2}>
-                                                        {
-                                                            packagesSelection.map((item: any, index: number) => (
-                                                                <Grid key={"packageitem1-"+index} item xs={12} md={6}>
-                                                                    <ListItem
-                                                                        sx={{ border: "1px solid #e5e5e5" }}
-                                                                        secondaryAction={
-                                                                            <IconButton edge="end" onClick={() => {
-                                                                                setPackagesSelection((prevItems: any) => prevItems.filter((item: any, i: number) => i !== index));
-                                                                            }}>
-                                                                                <DeleteIcon />
-                                                                            </IconButton>
-                                                                        }
-                                                                    >
-                                                                        <ListItemText primary={
-                                                                            t('name')+" : "+item.name+" | "+t('quantity')+" : "+item.quantity+" | "+t('dimensions')+" : "+item.dimensions+" | Cubage ("+item.volume+" \u33A5) | "+t('weight')+" : "+item.weight+" Kg"
-                                                                        } />
-                                                                    </ListItem>
-                                                                </Grid>
-                                                            ))
-                                                        }
-                                                    </Grid> : null  
-                                                }
-                                                </> : null
-                                            }
-                                            {
-                                                packingType === "Unit RoRo" ?
-                                                <>
-                                                {
-                                                    unitsSelection !== undefined && unitsSelection !== null && unitsSelection.length !== 0 ? 
-                                                    <Grid container spacing={2}>
-                                                        {
-                                                            unitsSelection.map((item: any, index: number) => (
-                                                                <Grid key={"unititem1-"+index} item xs={12} md={6}>
-                                                                    <ListItem
-                                                                        sx={{ border: "1px solid #e5e5e5" }}
-                                                                        secondaryAction={
-                                                                            <IconButton edge="end" onClick={() => {
-                                                                                setUnitsSelection((prevItems: any) => prevItems.filter((item: any, i: number) => i !== index));
-                                                                            }}>
-                                                                                <DeleteIcon />
-                                                                            </IconButton>
-                                                                        }
-                                                                    >
-                                                                        <ListItemText primary={
-                                                                            t('name')+" : "+item.name+" | "+t('quantity')+" : "+item.quantity+" | "+t('dimensions')+" : "+item.dimensions+" | Cubage ("+item.volume+" \u33A5) | "+t('weight')+" : "+item.weight+" Kg"
-                                                                        } />
-                                                                    </ListItem>
-                                                                </Grid>
-                                                            ))
-                                                        }
-                                                    </Grid> : null  
-                                                }
-                                                </> : null
-                                            }
-                                        </Grid>                                
-                                        
-                                        <Grid item xs={12} md={6} mt={.5} sx={{ display: { xs: 'none', md: 'block' } }}>
-                                            <InputLabel htmlFor="request-message" sx={inputLabelStyles}>{t('details')}</InputLabel>
-                                            <BootstrapInput id="request-message" type="text" multiline rows={3.5} value={message} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setMessage(e.target.value)} fullWidth />
-                                        </Grid>
-                                        <Grid item xs={12} md={6} mt={1}>
-                                            <InputLabel htmlFor="assigned-manager" sx={inputLabelStyles}>{t('assignedManager')}</InputLabel>
-                                            {
-                                                !loadAssignees ? 
-                                                <>
-                                                    <NativeSelect
-                                                        id="assigned-manager"
-                                                        value={assignedManager}
-                                                        onChange={(e: any) => { setAssignedManager(e.target.value); }}
-                                                        input={<BootstrapInput />}
-                                                        fullWidth
-                                                    >
-                                                        <option value="">{t('noAgentAssigned')}</option>
-                                                        {
-                                                            assignees.map((row: any, i: number) => (
-                                                                <option key={"assigneeId-"+i} value={String(row.id)}>{row.name}</option>
-                                                            ))
-                                                        }
-                                                    </NativeSelect>
-                                                    <Button variant="contained" color="inherit" sx={whiteButtonStyles} style={{ marginRight: "10px" }} onClick={assignManager} >{t('updateManager')}</Button>
-                                                    <Button variant="contained" color="inherit" sx={whiteButtonStyles} onClick={removeManager} >{t('removeManager')}</Button>
-                                                </> : <Skeleton sx={{ mt: 3 }} />   
-                                            }
-                                        </Grid>
-                                    </Grid>                                
-                                </AccordionDetails>
-                            </Accordion>
-                        </Grid>
+                        {/* Request Form COMPONENT */}
+                        <RequestForm 
+                            context={context} account={account} instance={instance}
+                            id={id} tempToken={tempToken}
+                            assignedManager={assignedManager} setAssignedManager={setAssignedManager}
+                            assignees={assignees} loadAssignees={loadAssignees}
+                            message={message} setMessage={setMessage}
+                            phone={phone} setPhone={setPhone}
+                            packingType={packingType} containers={containers}
+                            clientNumber={clientNumber} setClientNumber={setClientNumber}
+                            departure={departure} setDeparture={setDeparture}
+                            arrival={arrival} setArrival={setArrival} 
+                            email={email} setEmail={setEmail}
+                            tags={tags} setTags={setTags}
+                            containersSelection={containersSelection} setContainersSelection={setContainersSelection}
+                            getClosestDeparture={getClosestDeparture} getClosestArrival={getClosestArrival}
+                            products={products} openModalContainer={() => setModal10(true)}
+                        />
                         
                         {/* Generate Price Offer COMPONENT */}
                         {
-                            ports1 !== null && ports2 !== null ? 
+                            ports1 !== null && ports2 !== null && ports !== null && products !== null && requestData !== null ? 
                             <GeneratePriceOffer
-                                context={context}
-                                account={account}
-                                instance={instance}
-                                id={id}
-                                email={email}
-                                tags={tags}
-                                clientNumber={clientNumber}
-                                departure={departure}
-                                setDeparture={setDeparture}
-                                loadingCity={loadingCity}
-                                setLoadingCity={setLoadingCity}
-                                portDestination={portDestination}
-                                setPortDestination={setPortDestination}
-                                // portDeparture={portDeparture}
-                                // setPortDeparture={setPortDeparture}
+                                context={context} account={account} instance={instance} id={id}
+                                email={email} tags={tags} clientNumber={clientNumber}
+                                departure={departure} setDeparture={setDeparture}
+                                loadingCity={loadingCity} setLoadingCity={setLoadingCity}
+                                portDestination={portDestination} setPortDestination={setPortDestination}
                                 containersSelection={containersSelection}
-                                ports={ports}
-                                products={products}
-                                ports1={ports1}
-                                ports2={ports2}
+                                ports={ports} products={products}
+                                ports1={ports1} ports2={ports2}
                                 containers={containers}
                             />
-                            : <Skeleton />
+                            : <Grid item xs={12}><Skeleton /></Grid>
                         }
 
                         <Grid item xs={12}>
@@ -759,133 +395,37 @@ function Request() {
             </Box>
             
             {/* Ask for information */}
-            <BootstrapDialog
-                onClose={() => setModal(false)}
-                aria-labelledby="custom-dialog-title"
-                open={modal}
-                maxWidth="md"
-                fullWidth
-            >
+            <BootstrapDialog open={modal} onClose={() => setModal(false)} maxWidth="md" fullWidth>
                 <RequestAskInformation id={id} userId={null} email={email} closeModal={() => setModal(false)} />
             </BootstrapDialog>
             
             {/* Change request status */}
-            <BootstrapDialog
-                onClose={() => setModal2(false)}
-                aria-labelledby="custom-dialog-title2"
-                open={modal2}
-                maxWidth="md"
-                fullWidth
-            >
+            <BootstrapDialog open={modal2} onClose={() => setModal2(false)} maxWidth="md" fullWidth>
                 <RequestChangeStatus id={id} closeModal={() => setModal2(false)} />
             </BootstrapDialog>
             
             {/* Add a comment/note */}
-            <BootstrapDialog
-                onClose={() => setModal3(false)}
-                aria-labelledby="custom-dialog-title3"
-                open={modal3}
-                maxWidth="md"
-                fullWidth
-            >
+            <BootstrapDialog open={modal3} onClose={() => setModal3(false)} maxWidth="md" fullWidth>
                 <RequestAddNote id={id} userId={null} closeModal={() => setModal3(false)} />
             </BootstrapDialog>
 
             {/* List of notes */}
-            <BootstrapDialog
-                onClose={() => setModal4(false)}
-                aria-labelledby="custom-dialog-title4"
-                open={modal4}
-                maxWidth="lg"
-                fullWidth
-            >
+            <BootstrapDialog open={modal4} onClose={() => setModal4(false)} maxWidth="lg" fullWidth>
                 <RequestListNotes id={id} closeModal={() => setModal4(false)} />
             </BootstrapDialog>
 
             {/* Add a new contact */}
-            <BootstrapDialog
-                onClose={() => setModal7(false)}
-                aria-labelledby="custom-dialog-title7"
-                open={modal7}
-                maxWidth="md"
-                fullWidth
-            >
-                <NewContact 
-                    categories={[""]}
-                    closeModal={() => setModal7(false)}
-                />
+            <BootstrapDialog open={modal7} onClose={() => setModal7(false)} maxWidth="md" fullWidth>
+                <NewContact categories={[""]} closeModal={() => setModal7(false)} />
             </BootstrapDialog>
-
-            {/* General miscs selection */}
-            <BootstrapDialog
-                onClose={() => setModal8(false)}
-                aria-labelledby="custom-dialog-title8"
-                open={modal8}
-                maxWidth="lg"
-                fullWidth
-            >
-                <BootstrapDialogTitle id="custom-dialog-title" onClose={() => setModal8(false)}>
-                    <b>Add general miscs</b>
-                </BootstrapDialogTitle>
-                <DialogContent dividers>
-                    <Typography variant="subtitle1" gutterBottom px={2}>
-                        You can select some general miscellaneous services.
-                    </Typography>
-                    
-                </DialogContent>
-                <DialogActions>
-                    <Button 
-                        variant="contained" 
-                        color="primary" className="mr-3" 
-                        onClick={() => {
-                            enqueueSnackbar(t('messageOkGeneralMiscs'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} }); 
-                            setModal8(false); 
-                        }} 
-                        sx={{ textTransform: "none" }}
-                    >
-                        {t('validate')}
-                    </Button>
-                    <Button variant="contained" onClick={() => setModal8(false)} sx={buttonCloseStyles}>{t('close')}</Button>
-                </DialogActions>
-            </BootstrapDialog>
-
-            {/* Add a new haulage */}
-            {/* <BootstrapDialog
-                onClose={() => setModalHaulage(false)}
-                aria-labelledby="custom-dialog-titleHaulage"
-                open={modalHaulage}
-                maxWidth="lg"
-                fullWidth
-            >
-                <NewHaulage 
-                    ports={ports}
-                    containers={containers}
-                    closeModal={() => setModalHaulage(false)}
-                />
-            </BootstrapDialog> */}
 
             {/* Create new port */}
-            <BootstrapDialog
-                onClose={() => setModal9(false)}
-                aria-labelledby="custom-dialog-title9"
-                open={modal9}
-                maxWidth="md"
-                fullWidth
-            >
-                <NewPort 
-                    closeModal={() => setModal9(false)}
-                    callBack={getPorts}
-                />
+            <BootstrapDialog open={modal9} onClose={() => setModal9(false)} maxWidth="md" fullWidth>
+                <NewPort closeModal={() => setModal9(false)} callBack={getPorts} />
             </BootstrapDialog>
 
             {/* New container type */}
-            <BootstrapDialog
-                onClose={() => setModal10(false)}
-                aria-labelledby="custom-dialog-title10"
-                open={modal10}
-                maxWidth="lg"
-                fullWidth
-            >
+            <BootstrapDialog open={modal10} onClose={() => setModal10(false)} maxWidth="lg" fullWidth>
                 <BootstrapDialogTitle id="custom-dialog-title" onClose={() => setModal10(false)}>
                     <b>Add a container</b>
                 </BootstrapDialogTitle>
@@ -901,8 +441,8 @@ function Request() {
                                 fullWidth
                             >
                                 <option value="FCL">{t('fcl')}</option>
-                                <option value="Breakbulk/LCL">{t('breakbulk')}</option>
-                                <option value="Unit RoRo">{t('roro')}</option>
+                                {/* <option value="Breakbulk/LCL">{t('breakbulk')}</option>
+                                <option value="Unit RoRo">{t('roro')}</option> */}
                             </NativeSelect>
                         </Grid>
 
@@ -948,124 +488,6 @@ function Request() {
                                     }} 
                                 >
                                     {t('addContainer')}
-                                </Button>
-                            </Grid>
-                            </> : null
-                        }
-                        {
-                            packingType === "Breakbulk/LCL" ?
-                            <>
-                            <Grid item xs={12} md={3} mt={1}>
-                                <InputLabel htmlFor="package-name" sx={inputLabelStyles}>{t('packageName')}</InputLabel>
-                                <NativeSelect
-                                    id="package-name"
-                                    value={packageName}
-                                    onChange={(e: any) => { setPackageName(e.target.value) }}
-                                    input={<BootstrapInput />}
-                                    fullWidth
-                                >
-                                    <option key={"option1-x"} value="">{t('notDefined')}</option>
-                                    {packingOptions.map((elm: any, i: number) => (
-                                        <option key={"elm11-"+i} value={elm}>{elm}</option>
-                                    ))}
-                                </NativeSelect>
-                            </Grid>
-                            <Grid item xs={12} md={1} mt={1}>
-                                <InputLabel htmlFor="package-quantity" sx={inputLabelStyles}>{t('quantity')}</InputLabel>
-                                <BootstrapInput id="package-quantity" type="number" inputProps={{ min: 1, max: 100 }} value={packageQuantity} onChange={(e: any) => {setPackageQuantity(e.target.value)}} fullWidth />
-                            </Grid>
-                            <Grid item xs={12} md={1} mt={1}>
-                                <InputLabel htmlFor="package-length" sx={inputLabelStyles}>{t('length')}(cm)</InputLabel>
-                                <BootstrapInput id="package-length" type="number" value={packageLength} onChange={(e: any) => {setPackageLength(e.target.value)}} fullWidth />
-                            </Grid>
-                            <Grid item xs={12} md={1} mt={1}>
-                                <InputLabel htmlFor="package-width" sx={inputLabelStyles}>{t('width')}(cm)</InputLabel>
-                                <BootstrapInput id="package-width" type="number" value={packageWidth} onChange={(e: any) => {setPackageWidth(e.target.value)}} fullWidth />
-                            </Grid>
-                            <Grid item xs={12} md={1} mt={1}>
-                                <InputLabel htmlFor="package-height" sx={inputLabelStyles}>{t('height')}(cm)</InputLabel>
-                                <BootstrapInput id="package-height" type="number" value={packageHeight} onChange={(e: any) => {setPackageHeight(e.target.value)}} fullWidth />
-                            </Grid>
-                            <Grid item xs={12} md={2} mt={1}>
-                                <InputLabel htmlFor="package-weight" sx={inputLabelStyles}>{t('weight')} (Kg)</InputLabel>
-                                <BootstrapInput id="package-weight" type="number" inputProps={{ min: 0, max: 100 }} value={packageWeight} onChange={(e: any) => {setPackageWeight(e.target.value)}} fullWidth />
-                            </Grid>
-                            <Grid item xs={12} md={1} mt={1}>
-                                <Button
-                                    variant="contained" color="inherit" fullWidth sx={whiteButtonStyles} 
-                                    style={{ marginTop: "30px", height: "42px", float: "right" }} 
-                                    onClick={() => {
-                                        if (packageName !== "" && packageQuantity > 0 && packageWeight > 0) {
-                                            setPackagesSelection((prevItems: any) => [...prevItems, { 
-                                                name: packageName, quantity: packageQuantity, dimensions: packageLength+"x"+packageWidth+"x"+packageHeight, weight: packageWeight, volume: packageLength*packageWidth*packageHeight
-                                            }]);
-                                            setPackageName(""); setPackageQuantity(1); setPackageLength(0); setPackageWidth(0); setPackageHeight(0); setPackageWeight(0);
-                                        } 
-                                        else {
-                                            enqueueSnackbar(t('fieldNeedTobeFilled'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
-                                        }
-                                    }} 
-                                >
-                                    {t('add')}
-                                </Button>
-                            </Grid>
-                            </> : null
-                        }
-                        {
-                            packingType === "Unit RoRo" ?
-                            <>
-                            <Grid item xs={12} md={3} mt={1}>
-                                <InputLabel htmlFor="unit-name" sx={inputLabelStyles}>{t('unitName')}</InputLabel>
-                                <NativeSelect
-                                    id="unit-name"
-                                    value={unitName}
-                                    onChange={(e: any) => { setUnitName(e.target.value) }}
-                                    input={<BootstrapInput />}
-                                    fullWidth
-                                >
-                                    <option key={"option2-x"} value="">{t('notDefined')}</option>
-                                    {packingOptions.map((elm: any, i: number) => (
-                                        <option key={"elm22-"+i} value={elm}>{elm}</option>
-                                    ))}
-                                </NativeSelect>
-                            </Grid>
-                            <Grid item xs={12} md={1} mt={1}>
-                                <InputLabel htmlFor="unit-quantity" sx={inputLabelStyles}>{t('quantity')}</InputLabel>
-                                <BootstrapInput id="unit-quantity" type="number" inputProps={{ min: 1, max: 100 }} value={unitQuantity} onChange={(e: any) => {setUnitQuantity(e.target.value)}} fullWidth />
-                            </Grid>
-                            <Grid item xs={12} md={1} mt={1}>
-                                <InputLabel htmlFor="unit-length" sx={inputLabelStyles}>{t('length')}(cm)</InputLabel>
-                                <BootstrapInput id="unit-length" type="number" value={unitLength} onChange={(e: any) => {setUnitLength(e.target.value)}} fullWidth />
-                            </Grid>
-                            <Grid item xs={12} md={1} mt={1}>
-                                <InputLabel htmlFor="unit-width" sx={inputLabelStyles}>{t('width')}(cm)</InputLabel>
-                                <BootstrapInput id="unit-width" type="number" value={unitWidth} onChange={(e: any) => {setUnitWidth(e.target.value)}} fullWidth />
-                            </Grid>
-                            <Grid item xs={12} md={1} mt={1}>
-                                <InputLabel htmlFor="unit-height" sx={inputLabelStyles}>{t('height')}(cm)</InputLabel>
-                                <BootstrapInput id="unit-height" type="number" value={unitHeight} onChange={(e: any) => {setUnitHeight(e.target.value)}} fullWidth />
-                            </Grid>
-                            <Grid item xs={12} md={2} mt={1}>
-                                <InputLabel htmlFor="unit-weight" sx={inputLabelStyles}>{t('weight')} (Kg)</InputLabel>
-                                <BootstrapInput id="unit-weight" type="number" inputProps={{ min: 0, max: 100 }} value={unitWeight} onChange={(e: any) => {setUnitWeight(e.target.value)}} fullWidth />
-                            </Grid>
-                            <Grid item xs={12} md={1} mt={1}>
-                                <Button
-                                    variant="contained" color="inherit" fullWidth sx={whiteButtonStyles} 
-                                    style={{ marginTop: "30px", height: "42px", float: "right" }} 
-                                    onClick={() => {
-                                        if (unitName !== "" && unitQuantity > 0 && unitWeight > 0) {
-                                            setUnitsSelection((prevItems: any) => [...prevItems, { 
-                                                name: unitName, quantity: unitQuantity, dimensions: unitLength+"x"+unitWidth+"x"+unitHeight, weight: unitWeight, volume: unitLength*unitWidth*unitHeight
-                                            }]);
-                                            setUnitName(""); setUnitQuantity(1); setUnitLength(0); setUnitWidth(0); setUnitHeight(0); setUnitWeight(0);
-                                        } 
-                                        else {
-                                            enqueueSnackbar(t('fieldNeedTobeFilled'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
-                                        }
-                                    }} 
-                                >
-                                    {t('add')}
                                 </Button>
                             </Grid>
                             </> : null

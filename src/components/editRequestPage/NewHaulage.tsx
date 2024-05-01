@@ -5,11 +5,9 @@ import { useAuthorizedBackendApi } from '../../api/api';
 import { useTranslation } from 'react-i18next';
 import { enqueueSnackbar } from 'notistack';
 import { BackendService } from '../../utils/services/fetch';
-import { crmRequest, pricingRequest, protectedResources } from '../../config/authConfig';
+import { pricingRequest, protectedResources } from '../../config/authConfig';
 import { useAccount, useMsal } from '@azure/msal-react';
 import { AuthenticationResult } from '@azure/msal-browser';
-import { MuiTelInput } from 'mui-tel-input';
-import CountrySelect from '../shared/CountrySelect';
 import { Anchor } from '@mui/icons-material';
 import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
@@ -19,30 +17,9 @@ import CompanySearch from '../shared/CompanySearch';
 import { Dayjs } from 'dayjs';
 import NewContact from './NewContact';
 
-function createGetRequestUrl(variable1: number, variable2: number, variable3: string) {
-    let url = protectedResources.apiLisPricing.endPoint+"/Haulage/Haulages?";
-    if (variable1) {
-      url += 'LoadingPortId=' + encodeURIComponent(variable1) + '&';
-    }
-    if (variable2) {
-      url += 'HaulierId=' + encodeURIComponent(variable2) + '&';
-    }
-    if (variable3) {
-        url += 'LoadingCity=' + encodeURIComponent(variable3) + '&';
-    }
-    // if (variable3) {
-    //   url += 'CarrierAgentId=' + encodeURIComponent(variable3) + '&';
-    // }
-    
-    if (url.slice(-1) === '&') {
-      url = url.slice(0, -1);
-    }
-    return url;
-}
-
 function NewHaulage(props: any) {
     const [haulier, setHaulier] = useState<any>(null);
-    const [loadingCity, setLoadingCity] = useState<any>(null);
+    const [loadingCity, setLoadingCity] = useState<any>(props.loadingCity);
     const [loadingPort, setLoadingPort] = useState<any>(null);
     const [freeTime, setFreeTime] = useState<number>(0);
     const [multiStop, setMultiStop] = useState<number>(0);
@@ -56,8 +33,6 @@ function NewHaulage(props: any) {
     const [comment, setComment] = useState<string>("");
     const [modalNewHaulier, setModalNewHaulier] = useState<boolean>(false);
 
-    const [tempToken, setTempToken] = useState<string>("");
-    
     const { instance, accounts } = useMsal();
     const account = useAccount(accounts[0] || {});
 
@@ -82,23 +57,6 @@ function NewHaulage(props: any) {
     const createHaulage = async () => {
         if (haulier !== null && loadingCity !== null && loadingPort !== null && freeTime > 0 && unitTariff > 0 && overtimeTariff > 0 && multiStop > 0 && validUntil !== null && containerTypes.length > 0) {
             if (context && account) {
-                const token = await instance.acquireTokenSilent({
-                    scopes: pricingRequest.scopes,
-                    account: account
-                })
-                .then((response: AuthenticationResult) => {
-                    return response.accessToken;
-                })
-                .catch(() => {
-                    return instance.acquireTokenPopup({
-                        ...pricingRequest,
-                        account: account
-                        }).then((response) => {
-                            return response.accessToken;
-                        });
-                    }
-                );
-                
                 var dataSent = null;
                 var postalCode = loadingCity !== null ? loadingCity.postalCode !== undefined ? loadingCity.postalCode : "" : ""; 
                 var city = loadingCity !== null ? loadingCity.city.toUpperCase()+', '+loadingCity.country.toUpperCase() : "";
@@ -131,10 +89,9 @@ function NewHaulage(props: any) {
                     "containers": containerTypes,
                 };
 
-                const response = await (context as BackendService<any>).postWithToken(protectedResources.apiLisPricing.endPoint+"/Haulage/Haulage", dataSent, token);
+                const response = await (context as BackendService<any>).postWithToken(protectedResources.apiLisPricing.endPoint+"/Haulage/Haulage", dataSent, props.token);
                 if (response !== null && response !== undefined) {
                     enqueueSnackbar(t('successCreated'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
-                    // setModal2(false);
                     props.closeModal();
                     // Callback function here
                     props.callBack();

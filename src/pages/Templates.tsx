@@ -55,6 +55,7 @@ const variableOptions = [
     { label: t('containersQuantities'), value: "containersQuantities" },
     { label: t('pricesContainers'), value: "pricesContainers" },
     { label: t('clientName'), value: "clientName" },
+    { label: t('haulageType'), value: "haulageType" },
 ];
 
 function createGetRequestUrl(variable1: string) {
@@ -166,8 +167,6 @@ function Templates() {
             const response = await (context as BackendService<any>).getSingle(protectedResources.apiLisTemplate.endPoint+"/Template");
             if (response !== null && response.data !== undefined) {
                 setTemplates(response.data);
-                console.log(response);
-                // setHaulages([]);
                 setLoad(false);
             }
             else {
@@ -417,8 +416,7 @@ function Templates() {
                                             freeSolo
                                             disablePortal
                                             id="tags"
-                                            // placeholder="Machinery, Household goods, etc"
-                                            options={[]}
+                                            options={["pricing", "offer", "request", "default", "seafreight", "haulage"]}
                                             getOptionLabel={(option: any) => { 
                                                 if (option !== null && option !== undefined) {
                                                     return option;
@@ -441,7 +439,6 @@ function Templates() {
                                                     label={elm.label} 
                                                     variant='outlined' 
                                                     onClick={() => { 
-                                                        // alert('Value : '+elm.value);
                                                         rteRef.current?.editor?.commands.insertContent('{{'+elm.value+'}}');
                                                     }} 
                                                     sx={{ my: 1, mr: 0.5 }} 
@@ -454,13 +451,12 @@ function Templates() {
                             
                             <Grid item xs={6}>
                                 <Grid container spacing={2}>
-                                    <Grid item xs={12}>
+                                    {/* <Grid item xs={12}>
                                         <InputLabel htmlFor="mailLanguage" sx={inputLabelStyles}>{t('mailLanguage')}</InputLabel>
                                         <ToggleButtonGroup
                                             color="primary"
                                             value={mailLanguage}
                                             exclusive
-                                            // size="small"
                                             onChange={(event: React.MouseEvent<HTMLElement>, newValue: string,) => { 
                                                 setMailLanguage(newValue); 
                                             }}
@@ -471,37 +467,38 @@ function Templates() {
                                             <ToggleButton value="fr"><img src="/assets/img/flags/flag-fr.png" style={{ width: "12px", marginRight: "6px" }} alt="flag english" /> Français</ToggleButton>
                                             <ToggleButton value="en"><img src="/assets/img/flags/flag-en.png" style={{ width: "12px", marginRight: "6px" }} alt="flag english" /> English</ToggleButton>
                                         </ToggleButtonGroup>
-                                    </Grid>
+                                    </Grid> */}
                                     <Grid item xs={12}>
                                         {
                                             mailLanguage !== "en" ? 
                                             <Box sx={{ mt: 1 }}>
-                                                <InputLabel htmlFor="content" sx={inputLabelStyles}>{t('content')} - FR</InputLabel>
-                                                <RichTextEditor
-                                                    ref={rteRef}
-                                                    extensions={[StarterKit]}
-                                                    content={content}
-                                                    renderControls={() => (
-                                                    <MenuControlsContainer>
-                                                        <MenuSelectHeading />
-                                                        <MenuDivider />
-                                                        <MenuButtonBold />
-                                                        <MenuButtonItalic />
-                                                        <MenuButtonStrikethrough />
-                                                        <MenuButtonOrderedList />
-                                                        <MenuButtonBulletedList />
-                                                        <MenuSelectTextAlign />
-                                                        <MenuButtonEditLink />
-                                                        <MenuButtonHorizontalRule />
-                                                        <MenuButtonUndo />
-                                                        <MenuButtonRedo />
-                                                    </MenuControlsContainer>
-                                                    )}
-                                                />
+                                                <InputLabel htmlFor="content" sx={inputLabelStyles} style={{ position: "relative", bottom: 6 }}>{t('content')} - FR</InputLabel>
+                                                <Box sx={{ mt: 0 }}>
+                                                    <RichTextEditor
+                                                        ref={rteRef}
+                                                        extensions={[StarterKit]}
+                                                        content={content}
+                                                        renderControls={() => (
+                                                        <MenuControlsContainer>
+                                                            <MenuSelectHeading />
+                                                            <MenuDivider />
+                                                            <MenuButtonBold />
+                                                            <MenuButtonItalic />
+                                                            <MenuButtonStrikethrough />
+                                                            <MenuButtonOrderedList />
+                                                            <MenuButtonBulletedList />
+                                                            <MenuSelectTextAlign />
+                                                            <MenuButtonEditLink />
+                                                            <MenuButtonHorizontalRule />
+                                                            <MenuButtonUndo />
+                                                            <MenuButtonRedo />
+                                                        </MenuControlsContainer>
+                                                        )}
+                                                    />
+                                                </Box>
                                             </Box> : 
                                             <Box sx={{ mt: 1 }}>
                                                 <InputLabel htmlFor="contentEn" sx={inputLabelStyles}>{t('content')} - EN</InputLabel>
-                                                {/* <RichTextEditorGeneral content={contentEn} onUpdate={setContentEn} /> */}
                                             </Box>
                                         }
                                     </Grid>

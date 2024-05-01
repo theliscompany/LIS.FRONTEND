@@ -1,16 +1,16 @@
 import { useEffect, useRef, useState } from 'react';
 import { BootstrapDialog, BootstrapDialogTitle, BootstrapInput, gridStyles, inputIconStyles, inputLabelStyles, sizeStyles, sizingStyles, whiteButtonStyles } from '../../utils/misc/styles';
-import { Accordion, AccordionDetails, AccordionSummary, Alert, Autocomplete, Box, Button, Chip, Grid, InputLabel, NativeSelect, Skeleton, Step, StepLabel, Stepper, TextField, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material';
+import { Accordion, AccordionDetails, AccordionSummary, Alert, Autocomplete, Box, Button, Chip, Grid, IconButton, InputLabel, ListItem, ListItemButton, ListItemText, NativeSelect, Skeleton, Step, StepLabel, Stepper, TextField, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material';
 import { enqueueSnackbar } from 'notistack';
 import { BackendService } from '../../utils/services/fetch';
 import { protectedResources, pricingRequest } from '../../config/authConfig';
 import { AuthenticationResult } from '@azure/msal-browser';
-import { Anchor, ExpandMore, RestartAlt } from '@mui/icons-material';
+import { Anchor, Delete, ExpandMore, RestartAlt, Visibility } from '@mui/icons-material';
 import { DataGrid, GridColDef, GridColumnHeaderParams, GridRenderCellParams, GridRowSelectionModel, GridToolbar, GridValueFormatterParams, GridValueGetterParams } from '@mui/x-data-grid';
 import StarterKit from '@tiptap/starter-kit';
 import { t } from 'i18next';
 import React from 'react';
-import { calculateTotal, checkCarrierConsistency, checkDifferentDefaultContainer, generateRandomNumber, getServices, getServicesTotal, getServicesTotal2, getTotalNumber, hashCode, removeDuplicatesWithLatestUpdated } from '../../utils/functions';
+import { calculateTotal, checkCarrierConsistency, checkDifferentDefaultContainer, formatObject, formatServices, generateRandomNumber, getServices, getServicesTotal, getServicesTotal2, getTotalNumber, hashCode, myServices, removeDuplicatesWithLatestUpdated } from '../../utils/functions';
 import AutocompleteSearch from '../shared/AutocompleteSearch';
 import ContainerElement from './ContainerElement';
 import ContainerPrice from './ContainerPrice';
@@ -21,6 +21,8 @@ import RequestPriceHaulage from './RequestPriceHaulage';
 import RequestPriceRequest from './RequestPriceRequest';
 import useProcessStatePersistence from '../../utils/processes/useProcessStatePersistence';
 import NewHaulage from './NewHaulage';
+import NewSeafreight from './NewSeafreight';
+import CompareOptions from './CompareOptions';
 
 function createGetRequestUrl(url: string, variable2: string, variable3: string, variable4: string) {
     if (variable2) {
@@ -61,9 +63,7 @@ function GeneratePriceOffer(props: any) {
         id, email, tags, clientNumber, 
         departure, setDeparture, containersSelection, 
         loadingCity, setLoadingCity,
-        // formState.portDeparture, setPortDeparture, 
-        portDestination, setPortDestination,
-        ports, products, ports1, ports2, containers 
+        portDestination, ports, products, ports1, ports2, containers 
     } = props;
     
     const [loadResults, setLoadResults] = useState<boolean>(false);
@@ -73,6 +73,7 @@ function GeneratePriceOffer(props: any) {
     
     const [haulages, setHaulages] = useState<any>(null);
     const [seafreights, setSeafreights] = useState<any>(null);
+    const [allSeafreights, setAllSeafreights] = useState<any>(null);
     const [miscs, setMiscs] = useState<any>([]); // Seafreight Miscs
     const [miscsHaulage, setMiscsHaulage] = useState<any>([]);
     const [generalMiscs, setGeneralMiscs] = useState<any>(null);
@@ -82,18 +83,16 @@ function GeneratePriceOffer(props: any) {
     
     const [templates, setTemplates] = useState<any>([]);
     const [loadTemplates, setLoadTemplates] = useState<boolean>(false);
-    const [selectedTemplate, setSelectedTemplate] = useState<string>(defaultTemplate);
     const [templateBase, setTemplateBase] = useState<any>(null);
     const [loadTemplate, setLoadTemplate] = useState<boolean>(false);
     const [mailLanguage, setMailLanguage] = useState<string>("fr");
 
-    const [margins, setMargins] = useState([]);
-    const [addings, setAddings] = useState([]);
-    
     const [modalRequestHaulage, setModalRequestHaulage] = useState<boolean>(false);
     const [modalRequestSeafreight, setModalRequestSeafreight] = useState<boolean>(false);
     const [modalNewMisc, setModalNewMisc] = useState<boolean>(false);
     const [modalHaulage, setModalHaulage] = useState<boolean>(false);
+    const [modalSeafreight, setModalSeafreight] = useState<boolean>(false);
+    const [modalCompare, setModalCompare] = useState<boolean>(false);
     
     const rteRef = useRef<RichTextEditorRef>(null);
     
@@ -101,12 +100,14 @@ function GeneratePriceOffer(props: any) {
         account?.name,
         'generatePriceOfferTest'+id,
         { 
-            haulageType: "", 
+            haulageType: "", selectedTemplate: defaultTemplate, 
             selectedHaulage: null, rowSelectionModel2: [],
             selectedSeafreight: null, rowSelectionModel: [], 
             selectedMisc: null, myMiscs: [], rowSelectionModel3: [],
-            activeStep: 0, 
-            portDeparture: null, portDestination: portDestination 
+            activeStep: 0, margins: containersSelection.map(() => 22), addings: containersSelection.map(() => 0),
+            marginsMiscs: Array(15).fill(50), addingsMiscs: [],  
+            portDeparture: null, portDestination: portDestination,
+            selectedSeafreights: null, currentOption: 0, options: [] 
         },
         null, // Optionnel, par défaut à null (pas d'expiration)
         true // Optionnel, par défaut à true (sauvegarde automatique activée)
@@ -234,36 +235,28 @@ function GeneratePriceOffer(props: any) {
         }, flex: 2.5 },
     ];
         
-    function formatObject(obj: any) {
-        const packageName = obj.container.packageName;
-        const totalPrice = obj.services.reduce((sum: number, service: any) => sum + service.price, 0);
-        return `${packageName} : ${totalPrice}`;
-    }
-
-    function formatServices(obj: any, currency: string, targetPackageName: string, qty: number) {
-        if (obj.container.packageName === targetPackageName) {
-            const servicesList = obj.services.map((service: any, index: number) => (
-                <React.Fragment key={"someservice"+index}>
-                    <span>- {service.serviceName} : {qty !== 0 ? qty+"x" : null}{service.price} {currency}</span>
-                    {index !== obj.services.length - 1 && <br />} {/* Add <br /> except for the last item */}
-                </React.Fragment>
-            ));
-            return servicesList;
-        } else {
-            return null; // Return null if the package name doesn't match
-        }
-    }
-    
     const handleMarginChange = (index: number, value: any) => {
-        const updatedMargins: any = [...margins];
+        const updatedMargins: any = [...formState.margins];
         updatedMargins[index] = value;
-        setMargins(updatedMargins);
+        setFormState({...formState, margins: updatedMargins});
     };
     
     const handleAddingChange = (index: number, value: any) => {
-        const updatedAddings: any = [...addings];
+        const updatedAddings: any = [...formState.addings];
         updatedAddings[index] = value;
-        setAddings(updatedAddings);
+        setFormState({...formState, addings: updatedAddings});
+    };
+    
+    const handleMarginMiscChange = (index: number, value: any) => {
+        const updatedMarginMiscs: any = [...formState.marginsMiscs];
+        updatedMarginMiscs[index] = value;
+        setFormState({...formState, marginsMiscs: updatedMarginMiscs});
+    };
+    
+    const handleAddingMiscChange = (index: number, value: any) => {
+        const updatedAddingMiscs: any = [...formState.addingMiscs];
+        updatedAddingMiscs[index] = value;
+        setFormState({...formState, addingMiscs: updatedAddingMiscs});
     };
     
     useEffect(() => {
@@ -272,37 +265,35 @@ function GeneratePriceOffer(props: any) {
         }
     }, [loadingCity]);
 
+    // useEffect(() => {
+    //     console.log("Form State : ", formState);
+    // }, [formState]);
+    
     useEffect(() => {
-        getTemplate(defaultTemplate);
+        getTemplate(formState.selectedTemplate);
         getTemplates();
     }, []);
     
     useEffect(() => {
-        getTemplate(selectedTemplate);
-    }, [selectedTemplate]);
+        getTemplate(formState.selectedTemplate);
+    }, [formState.selectedTemplate]);
 
-    useEffect(() => {
-        getSeaFreightPriceOffers();
-    }, [formState.portDestination]);
+    // useEffect(() => {
+    //     getSeaFreightPriceOffers();
+    // }, [formState.portDestination]);
 
-    useEffect(() => {
-        // Initialize margins with default value 22 and addings with default value 0
-        const initialMargins = containersSelection.map(() => 22); // Default margin 22
-        const initialAddings = containersSelection.map(() => 0); // Default adding 0
+    // useEffect(() => {
+    //     // Initialize margins with default value 22 and addings with default value 0
+    //     const initialMargins = containersSelection.map(() => 22); // Default margin 22
+    //     const initialAddings = containersSelection.map(() => 0); // Default adding 0
         
-        setMargins(initialMargins);
-        setAddings(initialAddings);
-    }, [containersSelection]); // Assuming containersSelection is a prop or state
+    //     // setMargins(initialMargins);
+    //     // setAddings(initialAddings);
+    // }, [containersSelection]); // Assuming containersSelection is a prop or state
     
     useEffect(() => {
-        console.log("Table", tableMiscs);
-        console.log("Haulage", miscs);
-        console.log("Seafreight", miscsHaulage);
         if (generalMiscs !== null && miscs !== null && miscsHaulage !== null) {
             setTableMiscs([...miscsHaulage, ...miscs, ...generalMiscs]);
-            // setRowSelectionModel3([...miscsHaulage, ...miscs].map((elm: any) => elm.miscellaneousId));
-            // var auxTab = [...miscsHaulage, ...miscs];
-            // setFormState({...formState, rowSelectionModel3: auxTab.map((elm: any) => elm.miscellaneousId)});
         }
     }, [generalMiscs, miscs, miscsHaulage]);
     
@@ -318,18 +309,7 @@ function GeneratePriceOffer(props: any) {
         }
     }, [formState.activeStep, seafreights]);
 
-    // useEffect(() => {
-    //     // console.log("Table", tableMiscs);
-    //     // console.log("Haulage", miscs);
-    //     // console.log("Seafreight", miscsHaulage);
-    //     if (!loadGeneralMiscs && !loadResults && !loadMiscsHaulage) {
-    //         setTableMiscs([...miscsHaulage, ...miscs, ...generalMiscs]);
-    //         setRowSelectionModel3([...miscsHaulage, ...miscs].map((elm: any) => elm.miscellaneousId));
-    //     }
-    // }, [loadGeneralMiscs, loadResults, loadMiscsHaulage]);
-
     // Stepper functions
-    const [activeStep, setActiveStep] = React.useState(0);
     const [skipped, setSkipped] = React.useState(new Set<number>());
 
     const isStepOptional = (step: number) => {
@@ -349,21 +329,14 @@ function GeneratePriceOffer(props: any) {
         }
         if (formState.activeStep === 0) {
             if (formState.selectedHaulage !== null && formState.selectedHaulage !== undefined) {
-                // setFormState({...formState, portDeparture: ports1.find((elm: any) => elm.portName === formState.selectedHaulage.loadingPort)});
-                // setPortDeparture(ports1.find((elm: any) => elm.portName === formState.selectedHaulage.loadingPort));
-                
-                // if (formState.selectedSeafreight === null || formState.selectedSeafreight === undefined) {
-                //     setLoadResults(true);
-                //     getSeaFreightPriceOffers();
-                // }
                 setLoadResults(true);
                 getSeaFreightPriceOffers();
                 
                 setFormState({
                     ...formState, 
                     portDeparture: ports1.find((elm: any) => elm.portId === formState.selectedHaulage.loadingPortId), 
-                    activeStep: formState.activeStep !== undefined ? formState.activeStep + 1 : 0 });
-                // setActiveStep((prevActiveStep) => prevActiveStep + 1);
+                    activeStep: formState.activeStep !== undefined ? formState.activeStep + 1 : 0 
+                });
                 setSkipped(newSkipped);
             }
             else {
@@ -372,9 +345,8 @@ function GeneratePriceOffer(props: any) {
         }
         if (formState.activeStep === 1) {
             // Check if seafreights have the same carrier
-            var seafreightSelected = seafreights.filter((elm: any) => formState.rowSelectionModel.includes(elm.seaFreightId));
+            var seafreightSelected = formState.selectedSeafreights;
             if (checkCarrierConsistency(seafreightSelected) || (!checkCarrierConsistency(seafreightSelected) && window.confirm("All the selected offers must be related to the same carrier, do you want to continue?"))) {
-                console.log("fState", formState);
                 if (formState.selectedSeafreight !== null && formState.selectedSeafreight !== undefined) {
                     if (formState.selectedMisc === null && formState.selectedMisc === undefined) {
                         setLoadResults(true);
@@ -385,15 +357,10 @@ function GeneratePriceOffer(props: any) {
                         getHaulageMiscellaneousPriceOffers();
                     }
                     
-                    // setLoadResults(true);
-                    // getMiscellaneousPriceOffers();
-                    // setLoadMiscsHaulage(true);
-                    // getHaulageMiscellaneousPriceOffers();
                     setLoadGeneralMiscs(true);
                     getGeneralMiscellaneousPriceOffers();
                     
                     setFormState({...formState, activeStep: formState.activeStep !== undefined ? formState.activeStep + 1 : 0 });
-                    // setActiveStep((prevActiveStep) => prevActiveStep + 1);
                     setSkipped(newSkipped);
                 }
                 else {
@@ -402,9 +369,7 @@ function GeneratePriceOffer(props: any) {
             }
         }
         if (formState.activeStep === 2) {
-            console.log("fState", formState);
             setFormState({...formState, activeStep: formState.activeStep !== undefined ? formState.activeStep + 1 : 0 });
-            // setActiveStep((prevActiveStep) => prevActiveStep + 1);
             setSkipped(newSkipped);
         }
         if (formState.activeStep === 3) {
@@ -414,7 +379,6 @@ function GeneratePriceOffer(props: any) {
 
     const handleBack = () => {
         setFormState({...formState, activeStep: formState.activeStep !== undefined ? formState.activeStep - 1 : 0 });
-        // setActiveStep((prevActiveStep) => prevActiveStep - 1);
     };
 
     const handleSkip = () => {
@@ -427,7 +391,6 @@ function GeneratePriceOffer(props: any) {
         }
 
         setFormState({...formState, activeStep: formState.activeStep !== undefined ? formState.activeStep + 1 : 0 });
-        // setActiveStep((prevActiveStep) => prevActiveStep + 1);
         setSkipped((prevSkipped) => {
             const newSkipped = new Set(prevSkipped.values());
             newSkipped.add(formState.activeStep);
@@ -437,7 +400,6 @@ function GeneratePriceOffer(props: any) {
 
     const handleReset = () => {
         setFormState({...formState, activeStep: 0 });
-        // setActiveStep(0);
     };
 
     function displayContainers(value: any) {
@@ -453,10 +415,38 @@ function GeneratePriceOffer(props: any) {
     }
 
 
+    function totalCalculatePrice(type: string, quantity: number, index: number, option: any) {
+        // Calculate seafreight prices
+        var seafreightPrices = 0;
+        var seafreightSelected = seafreights !== null ? option.selectedSeafreights.find((elm: any) => elm.containers[0].container.packageName === type) : null;
+        if (seafreightSelected !== null && seafreightSelected !== undefined) {
+            seafreightPrices = seafreightSelected.containers[0].services.reduce((sum: number, service: any) => sum + service.price, 0)*quantity;
+        }
+        
+        // Calculate haulage prices
+        var haulagePrices = 0;
+        if (option.selectedHaulage !== null && option.selectedHaulage !== undefined && option.selectedHaulage.containerNames.includes(type)) {
+            haulagePrices = haulagePrices + option.selectedHaulage.unitTariff*quantity;
+        } 
+        
+        // Calculate miscellaneous prices
+        var miscPrices = 0;
+        var allMiscs = option.myMiscs;
+        var miscsSelected = allMiscs.filter((elm: any) => elm.defaultContainer === type);
+        if (miscsSelected !== null && miscsSelected !== undefined) {
+            for (var i = 0; i < miscsSelected.length; i++) {
+                miscPrices =  miscPrices + getTotalNumber(miscsSelected[i].containers)*quantity;
+            }
+        }
+        
+        var finalValue = ((seafreightPrices+haulagePrices+miscPrices)*(option.margins[index]/100)+seafreightPrices+haulagePrices+miscPrices).toFixed(2);
+        return Number(finalValue)+Number(option.addings[index]);
+    }
+
     function calculateContainerPrice(type: string, quantity: number, index: number) {
         // Calculate seafreight prices
         var seafreightPrices = 0;
-        var seafreightSelected = seafreights.filter((elm: any) => formState.rowSelectionModel.includes(elm.seaFreightId)).find((elm: any) => elm.containers[0].container.packageName === type);
+        var seafreightSelected = seafreights !== null ? formState.selectedSeafreights.find((elm: any) => elm.containers[0].container.packageName === type) : null;
         if (seafreightSelected !== null && seafreightSelected !== undefined) {
             seafreightPrices = seafreightSelected.containers[0].services.reduce((sum: number, service: any) => sum + service.price, 0)*quantity;
         }
@@ -477,15 +467,15 @@ function GeneratePriceOffer(props: any) {
             }
         }
         
-        var finalValue = ((seafreightPrices+haulagePrices+miscPrices)*(margins[index]/100)+seafreightPrices+haulagePrices+miscPrices).toFixed(2);
-        return Number(finalValue)+Number(addings[index]);
+        var finalValue = ((seafreightPrices+haulagePrices+miscPrices)*(formState.margins[index]/100)+seafreightPrices+haulagePrices+miscPrices).toFixed(2);
+        return Number(finalValue)+Number(formState.addings[index]);
     }
 
     function calculateSeafreightPrice(type: string, quantity: number, index: number) {
         // Calculate seafreight prices
         var seafreightPrices = 0;
         if (seafreights !== null) {
-            var seafreightSelected = seafreights.filter((elm: any) => formState.rowSelectionModel.includes(elm.seaFreightId)).find((elm: any) => elm.containers[0].container.packageName === type);
+            var seafreightSelected = formState.selectedSeafreights.find((elm: any) => elm.containers[0].container.packageName === type);
             if (seafreightSelected !== null && seafreightSelected !== undefined) {
                 seafreightPrices = seafreightSelected.containers[0].services.reduce((sum: number, service: any) => sum + service.price, 0)*quantity;
             }
@@ -495,8 +485,8 @@ function GeneratePriceOffer(props: any) {
         // Calculate miscellaneous prices
         var miscPrices = 0;
         // I removed miscPrices temporarily
-        var finalValue = ((seafreightPrices+haulagePrices+miscPrices)*(margins[index]/100)+seafreightPrices+haulagePrices+miscPrices).toFixed(2);
-        return Number(finalValue)+Number(addings[index]);
+        var finalValue = ((seafreightPrices+haulagePrices+miscPrices)*(formState.margins[index]/100)+seafreightPrices+haulagePrices+miscPrices).toFixed(2);
+        return Number(finalValue)+Number(formState.addings[index]);
     }
 
     const getHaulagePriceOffers = async () => {
@@ -572,7 +562,11 @@ function GeneratePriceOffer(props: any) {
                 var urlSent = createGetRequestUrl2(protectedResources.apiLisPricing.endPoint+"/Pricing/SeaFreightsOffersRequest?", auxPortDeparture.portId, formState.portDestination.portId, containersFormatted);
                 const response = await (context as BackendService<any>).getWithToken(urlSent, token);
                 var myContainers = containersSelection.map((elm: any) => elm.container);
+                setAllSeafreights(response);
                 setSeafreights(response.filter((elm: any) => myContainers.includes(elm.containers[0].container.packageName)).map((elm: any) => { return {...elm, defaultContainer: elm.containers[0].container.packageName}}));
+            }
+            else {
+                console.log("Port departure : ", auxPortDeparture);
             }
             setLoadResults(false);
         }
@@ -590,21 +584,13 @@ function GeneratePriceOffer(props: any) {
                 return null;
             });
             
-            var myFreights = formState.rowSelectionModel.length !== 0 && seafreights !== null ? seafreights.filter((elm: any) => formState.rowSelectionModel.includes(elm.seaFreightId)) : [];
+            var myFreights = formState.rowSelectionModel.length !== 0 && seafreights !== null ? formState.selectedSeafreights : [];
             var suppliersRecentlySelected = myFreights.map((elm: any) => { return {carrierName: elm.carrierName, defaultContainer: elm.defaultContainer} });
             
             var arrayFinal = response.length !== 0 ? 
                 response[0].suppliers.filter((elm: any) => myContainers.includes(elm.containers[0].container.packageName)).filter((elm: any) => new Date(elm.validUntil) > new Date()).filter((elm: any) => suppliersRecentlySelected.some((val: any) => val.carrierName === elm.supplierName && val.defaultContainer === elm.containers[0].container.packageName)).map((elm: any) => { return {...elm, defaultContainer: elm.containers[0].container.packageName}})
             : [];
             setMiscs(arrayFinal);
-            
-            // if (miscs !== null && generalMiscs !== null) {
-            //     console.log("xxx");
-            //     setTableMiscs([...arrayFinal, ...miscs, ...generalMiscs]);
-            //     setFormState({...formState, rowSelectionModel3: [...arrayFinal, ...miscs].map((elm: any) => elm.miscellaneousId)});
-            //     // setRowSelectionModel3([...arrayFinal, ...miscs].map((elm: any) => elm.miscellaneousId));
-            // }
-
             setLoadResults(false);
         }
     }
@@ -614,11 +600,9 @@ function GeneratePriceOffer(props: any) {
         if (context && account) {
             var response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisPricing.endPoint+"/Miscellaneous/Miscellaneous?withShipment=false", tempToken);
             
-            console.log(response);
-            var myFreights = formState.rowSelectionModel.length !== 0 && seafreights !== null ? seafreights.filter((elm: any) => formState.rowSelectionModel.includes(elm.seaFreightId)) : [];
+            var myFreights = formState.rowSelectionModel.length !== 0 && seafreights !== null ? formState.selectedSeafreights : [];
             var suppliersRecentlySelected = myFreights.map((elm: any) => { return {carrierName: elm.carrierName, defaultContainer: elm.defaultContainer} });
-            console.log(suppliersRecentlySelected);
-
+            
             var arrayFinal = response.length !== 0 ? 
                 response
                 .filter((elm: any) => new Date(elm.validUntil) > new Date())
@@ -630,14 +614,6 @@ function GeneratePriceOffer(props: any) {
                 }})
             : [];
             setGeneralMiscs(arrayFinal);
-            
-            // if (miscsHaulage !== null && miscs !== null) {
-            //     console.log("xxx");
-            //     setTableMiscs([...miscsHaulage, ...miscs, ...arrayFinal]);
-            //     setFormState({...formState, rowSelectionModel3: [...miscsHaulage, ...miscs].map((elm: any) => elm.miscellaneousId)});
-            //     // setRowSelectionModel3([...miscsHaulage, ...miscs].map((elm: any) => elm.miscellaneousId));
-            // }
-
             setLoadGeneralMiscs(false);
         }
     }
@@ -667,14 +643,6 @@ function GeneratePriceOffer(props: any) {
             
             var arrayFinal = response.length !== 0 ? response[0].suppliers.filter((elm: any) => myContainers.includes(elm.containers[0].container.packageName)).filter((elm: any) => new Date(elm.validUntil) > new Date()) : [];
             setMiscsHaulage(arrayFinal);
-            
-            // if (miscs !== null && generalMiscs !== null) {
-            //     console.log("xxx");
-            //     setTableMiscs([...arrayFinal, ...miscs, generalMiscs]);
-            //     setFormState({...formState, rowSelectionModel3: [...arrayFinal, ...miscs].map((elm: any) => elm.miscellaneousId)});
-            //     // setRowSelectionModel3([...arrayFinal, ...miscs].map((elm: any) => elm.miscellaneousId));
-            // }
-            
             setLoadMiscsHaulage(false);
         }
     }
@@ -705,26 +673,6 @@ function GeneratePriceOffer(props: any) {
                     }
                 }
                 if (formState.selectedMisc !== undefined && formState.selectedMisc !== null) {
-                    // miscellaneous = [
-                    //     {
-                    //         "id": formState.selectedMisc.id,
-                    //         "departurePortId": null,
-                    //         "destinationPortId": null,
-                    //         "departurePortName": null,
-                    //         "destinationPortName": null,
-                    //         "supplierId": 0,
-                    //         "supplierName": formState.selectedMisc.supplierName,
-                    //         "currency": formState.selectedMisc.currency,
-                    //         "price20": formState.selectedMisc.price20,
-                    //         "price40": formState.selectedMisc.price40,
-                    //         "price20dry": formState.selectedMisc.price20dry,
-                    //         "price20rf": formState.selectedMisc.price20rf,
-                    //         "price40dry": formState.selectedMisc.price40dry,
-                    //         "price40hc": formState.selectedMisc.price40hc,
-                    //         "price40hcrf": formState.selectedMisc.price40hcRf,
-                    //         "validUntil": formState.selectedMisc.validUntil,
-                    //     }                      
-                    // ];
                     miscellaneous = formState.myMiscs.map((elm: any) => {
                         return {
                             "id": elm.miscellaneousId,
@@ -805,7 +753,7 @@ function GeneratePriceOffer(props: any) {
 
     const getTemplates = async () => {
         if (context && account) {
-            const response = await (context as BackendService<any>).getSingle(protectedResources.apiLisTemplate.endPoint+"/Template");
+            const response = await (context as BackendService<any>).getSingle(protectedResources.apiLisTemplate.endPoint+"/Template?Tags=offer");
             if (response !== null && response.data !== undefined) {
                 setTemplates(response.data);
                 setLoadTemplates(false);
@@ -840,7 +788,8 @@ function GeneratePriceOffer(props: any) {
             // Si la variable est non nulle/vide, l'encapsuler dans <strong>
             if (variables[trimmedName]) {
                 return `<strong>${variables[trimmedName]}</strong>`;
-            } else {
+            } 
+            else {
                 return `{{${trimmedName}}}`; // Laisser le placeholder si la variable est nulle/vide
             }
         });
@@ -856,33 +805,73 @@ function GeneratePriceOffer(props: any) {
         var destinationPort = formState.portDestination !== undefined && formState.portDestination !== null ? formState.portDestination.portName+', '+formState.portDestination.country.toUpperCase() : "";
         var commodities:any = tags.map((elm: any) => elm.productName).join(',');
         
-        // var auxServices = [...miscs,...formState.myMiscs];
-        var auxServices = formState.myMiscs;
-        var listServices = auxServices !== null && auxServices.length !== 0 ? 
-            auxServices.map((elm: any, index: number) => elm.defaultContainer !== null ? "<p>- "+getServices(elm.containers, elm.currency)+" inclus</p>" : "<p>- "+getServicesTotal(elm.containers, elm.currency, 50)+" supplémentaires</p>").join("")
-        : "<br>";
+        // var auxServices = formState.myMiscs;
+        // var listServices = auxServices !== null && auxServices.length !== 0 && templateBase !== null ? 
+        //     auxServices.map((elm: any, index: number) => elm.defaultContainer !== null ? "<p>- "+getServices(elm.containers, elm.currency)+" "+t('included', { lng: templateBase.currentVersion.includes("English") ? "en" : "fr" })+"</p>" : "<p>- "+getServicesTotal(elm.containers, elm.currency, formState.marginsMiscs[index])+" "+t('additionals', { lng: templateBase.currentVersion.includes("English") ? "en" : "fr" })+"</p>").join("")
+        // : "<br>";
+        var listServices = "";
         
-        var pricesContainers = containersSelection !== null && formState.selectedSeafreight !== null && formState.selectedSeafreight !== undefined ? 
-        containersSelection.map((elm: any, index: number) => 
-        {
-            var auxFrequency = 0;
-            var auxTransitTime = "";
-            var aux1 = seafreights !== undefined && seafreights !== null ? seafreights.filter((val: any) => formState.rowSelectionModel.includes(val.seaFreightId)).find((val: any) => val.defaultContainer === elm.container) : [];
-            if (calculateSeafreightPrice(elm.container, elm.quantity, index) !== 0) {
-                if (aux1 !== undefined) {
-                    auxFrequency = aux1.frequency;
-                    auxTransitTime = aux1.transitTime;
-                }
-                return "<p><strong>"+calculateContainerPrice(elm.container, elm.quantity, index)+" "
-                +formState.selectedSeafreight.currency+" / "+elm.container
-                +" / Tous les "+auxFrequency
-                +" jours / Délai de mer : "+auxTransitTime
-                +" jours</strong></p>"
+        var auxPricesContainers = [];
+        if (templateBase !== null) {
+            for (var i = 0; i < formState.options.length; i++) {
+                var option: any = formState.options[i];
+                var auxPricesTotal = containersSelection !== null && option.selectedSeafreight !== null && option.selectedSeafreight !== undefined && seafreights !== null ? 
+                containersSelection.map((elm: any, index: number) => {
+                    var auxFrequency = 0;
+                    var auxTransitTime = "";
+                    var aux1 = option.selectedSeafreights.find((val: any) => val.defaultContainer === elm.container);
+                    // console.log(aux1);
+                    if (aux1 !== undefined && templateBase !== null) {
+                        if (aux1 !== undefined) {
+                            auxFrequency = aux1.frequency;
+                            auxTransitTime = aux1.transitTime;
+                        }
+                        return "<strong>"+totalCalculatePrice(elm.container, elm.quantity, index, option)+" "+option.selectedSeafreight.currency+" / "+elm.container
+                        +" / "+t('every', { lng: templateBase.currentVersion.includes("English") ? "en" : "fr" })+" "+auxFrequency
+                        +" "+t('days', { lng: templateBase.currentVersion.includes("English") ? "en" : "fr" })+" / "+t('transitTime', { lng: templateBase.currentVersion.includes("English") ? "en" : "fr" })+" : "+auxTransitTime
+                        +" "+t('days', { lng: templateBase.currentVersion.includes("English") ? "en" : "fr" })+"</strong><br>"
+                    }
+                    else {
+                        return null;
+                    }
+                }).join("") : "";
+    
+                var auxPricesPrecisions = option.selectedHaulage !== undefined && option.selectedHaulage !== null && templateBase !== null ? 
+                    t('loadingOf', { lng: templateBase.currentVersion.includes("English") ? "en" : "fr" })+option.selectedHaulage.freeTime
+                    +t('includedForEachContainer', { lng: templateBase.currentVersion.includes("English") ? "en" : "fr" })+option.selectedHaulage.overtimeTariff
+                    +t('byHourIndivisible', { lng: templateBase.currentVersion.includes("English") ? "en" : "fr" }) 
+                : "";
+    
+                var auxPricesServices = option.myMiscs !== null && option.myMiscs.length !== 0 && templateBase !== null ? 
+                    option.myMiscs.map((elm: any, index: number) => elm.defaultContainer !== null ? "<p>- "+getServices(elm.containers, elm.currency)+" "+t('included', { lng: templateBase.currentVersion.includes("English") ? "en" : "fr" })+"</p>" : "<p>- "+getServicesTotal(elm.containers, elm.currency, option.marginsMiscs[index])+" "+t('additionals', { lng: templateBase.currentVersion.includes("English") ? "en" : "fr" })+"</p>").join("")
+                : "<br>";
+    
+                auxPricesContainers.push("<p># "+t('offer', { lng: templateBase.currentVersion.includes("English") ? "en" : "fr" }).toUpperCase()+" "+Number(i+1)+"<p/>"+auxPricesTotal+auxPricesPrecisions+auxPricesServices);
             }
-            else {
-                return null;
-            }
-        }).join("") : "";
+        }
+        var pricesContainers = templateBase !== null ? auxPricesContainers.join("<p>"+t('', { lng: templateBase.currentVersion.includes("English") ? "en" : "fr" })+"</p>") : "";    
+        
+        // var pricesContainers = containersSelection !== null && formState.selectedSeafreight !== null && formState.selectedSeafreight !== undefined ? 
+        // containersSelection.map((elm: any, index: number) => {
+        //     var auxFrequency = 0;
+        //     var auxTransitTime = "";
+        //     var aux1 = seafreights !== undefined && seafreights !== null ? formState.selectedSeafreights.find((val: any) => val.defaultContainer === elm.container) : [];
+        //     if (calculateSeafreightPrice(elm.container, elm.quantity, index) !== 0 && templateBase !== null) {
+        //         if (aux1 !== undefined) {
+        //             auxFrequency = aux1.frequency;
+        //             auxTransitTime = aux1.transitTime;
+        //         }
+        //         return "<p><strong>"+calculateContainerPrice(elm.container, elm.quantity, index)+" "
+        //         +formState.selectedSeafreight.currency+" / "+elm.container
+        //         +" / "+t('every', { lng: templateBase.currentVersion.includes("English") ? "en" : "fr" })+" "+auxFrequency
+        //         +" "+t('days', { lng: templateBase.currentVersion.includes("English") ? "en" : "fr" })+" / "+t('transitTime', { lng: templateBase.currentVersion.includes("English") ? "en" : "fr" })+" : "+auxTransitTime
+        //         +" "+t('days', { lng: templateBase.currentVersion.includes("English") ? "en" : "fr" })+"</strong></p>"
+        //     }
+        //     else {
+        //         return null;
+        //     }
+        // }).join("") : "";
+        
         var clientName = clientNumber !== null ? clientNumber.contactName : null;
         var freeTime = formState.selectedHaulage !== null && formState.selectedHaulage !== undefined ? formState.selectedHaulage.freeTime : "";
         var overtimeTariff = formState.selectedHaulage !== null && formState.selectedHaulage !== undefined ? formState.selectedHaulage.overtimeTariff : "";
@@ -904,34 +893,73 @@ function GeneratePriceOffer(props: any) {
         var destinationPort = formState.portDestination !== undefined && formState.portDestination !== null ? formState.portDestination.portName+', '+formState.portDestination.country.toUpperCase() : "";
         var commodities:any = tags.map((elm: any) => elm.productName).join(',');
         
-        // var auxServices = [...miscs,...formState.myMiscs];
-        var auxServices = formState.myMiscs;
-        // console.log(auxServices);
-        var listServices = auxServices !== undefined && auxServices !== null && auxServices.length !== 0 ? 
-            auxServices.map((elm: any) => elm.defaultContainer !== null ? "<p>- "+getServices(elm.containers, elm.currency)+" inclus</p>" : "<p>- "+getServicesTotal(elm.containers, elm.currency, 50)+" supplémentaires</p>").join("")
-        : "<br>";
+        // var auxServices = formState.myMiscs;
+        // var listServices = auxServices !== undefined && auxServices !== null && auxServices.length !== 0 && templateBase !== null ? 
+        //     auxServices.map((elm: any, index: number) => elm.defaultContainer !== null ? "<p>- "+getServices(elm.containers, elm.currency)+" "+t('included', { lng: templateBase.currentVersion.includes("English") ? "en" : "fr" })+"</p>" : "<p>- "+getServicesTotal(elm.containers, elm.currency, formState.marginsMiscs[index])+" "+t('additionals', { lng: templateBase.currentVersion.includes("English") ? "en" : "fr" })+"</p>").join("")
+        // : "<br>";
+        var listServices = "";
         
-        var pricesContainers = containersSelection !== null && formState.selectedSeafreight !== null && formState.selectedSeafreight !== undefined && seafreights !== null ? 
-        containersSelection.map((elm: any, index: number) => 
-        {
-            var auxFrequency = 0;
-            var auxTransitTime = "";
-            var aux1 = seafreights.filter((val: any) => formState.rowSelectionModel.includes(val.seaFreightId)).find((val: any) => val.defaultContainer === elm.container);
-            if (calculateSeafreightPrice(elm.container, elm.quantity, index) !== 0) {
-                if (aux1 !== undefined) {
-                    auxFrequency = aux1.frequency;
-                    auxTransitTime = aux1.transitTime;
-                }
-                return "<p><strong>"+calculateContainerPrice(elm.container, elm.quantity, index)+" "
-                +formState.selectedSeafreight.currency+" / "+elm.container
-                +" / Tous les "+auxFrequency
-                +" jours / Délai de mer : "+auxTransitTime
-                +" jours</strong></p>"
+        var auxPricesContainers = [];
+        if (templateBase !== null) {
+            for (var i = 0; i < formState.options.length; i++) {
+                var option: any = formState.options[i];
+                var auxPricesTotal = containersSelection !== null && option.selectedSeafreight !== null && option.selectedSeafreight !== undefined && seafreights !== null ? 
+                containersSelection.map((elm: any, index: number) => {
+                    var auxFrequency = 0;
+                    var auxTransitTime = "";
+                    var aux1 = option.selectedSeafreights.find((val: any) => val.defaultContainer === elm.container);
+                    // console.log(aux1);
+                    if (aux1 !== undefined && templateBase !== null) {
+                        if (aux1 !== undefined) {
+                            auxFrequency = aux1.frequency;
+                            auxTransitTime = aux1.transitTime;
+                        }
+                        return "<strong>"+totalCalculatePrice(elm.container, elm.quantity, index, option)+" "+option.selectedSeafreight.currency+" / "+elm.container
+                        +" / "+t('every', { lng: templateBase.currentVersion.includes("English") ? "en" : "fr" })+" "+auxFrequency
+                        +" "+t('days', { lng: templateBase.currentVersion.includes("English") ? "en" : "fr" })+" / "+t('transitTime', { lng: templateBase.currentVersion.includes("English") ? "en" : "fr" })+" : "+auxTransitTime
+                        +" "+t('days', { lng: templateBase.currentVersion.includes("English") ? "en" : "fr" })+"</strong><br>"
+                    }
+                    else {
+                        return null;
+                    }
+                }).join("") : "";
+    
+                var auxPricesPrecisions = option.selectedHaulage !== undefined && option.selectedHaulage !== null && templateBase !== null ? 
+                    t('loadingOf', { lng: templateBase.currentVersion.includes("English") ? "en" : "fr" })+option.selectedHaulage.freeTime
+                    +t('includedForEachContainer', { lng: templateBase.currentVersion.includes("English") ? "en" : "fr" })+option.selectedHaulage.overtimeTariff
+                    +t('byHourIndivisible', { lng: templateBase.currentVersion.includes("English") ? "en" : "fr" }) 
+                : "";
+    
+                var auxPricesServices = option.myMiscs !== null && option.myMiscs.length !== 0 && templateBase !== null ? 
+                    option.myMiscs.map((elm: any, index: number) => elm.defaultContainer !== null ? "<p>- "+getServices(elm.containers, elm.currency)+" "+t('included', { lng: templateBase.currentVersion.includes("English") ? "en" : "fr" })+"</p>" : "<p>- "+getServicesTotal(elm.containers, elm.currency, option.marginsMiscs[index])+" "+t('additionals', { lng: templateBase.currentVersion.includes("English") ? "en" : "fr" })+"</p>").join("")
+                : "<br>";
+    
+                auxPricesContainers.push("<p># "+t('offer', { lng: templateBase.currentVersion.includes("English") ? "en" : "fr" }).toUpperCase()+" "+Number(i+1)+"<p/>"+auxPricesTotal+auxPricesPrecisions+auxPricesServices);
             }
-            else {
-                return null;
-            }
-        }).join("") : "";
+        }
+        var pricesContainers = templateBase !== null ? auxPricesContainers.join("<p>"+t('', { lng: templateBase.currentVersion.includes("English") ? "en" : "fr" })+"</p>") : "";    
+        
+        // var pricesContainers = containersSelection !== null && formState.selectedSeafreight !== null && formState.selectedSeafreight !== undefined && seafreights !== null ? 
+        // containersSelection.map((elm: any, index: number) => {
+        //     var auxFrequency = 0;
+        //     var auxTransitTime = "";
+        //     var aux1 = formState.selectedSeafreights.find((val: any) => val.defaultContainer === elm.container);
+        //     if (calculateSeafreightPrice(elm.container, elm.quantity, index) !== 0 && templateBase !== null) {
+        //         if (aux1 !== undefined) {
+        //             auxFrequency = aux1.frequency;
+        //             auxTransitTime = aux1.transitTime;
+        //         }
+        //         return "<p><strong>"+calculateContainerPrice(elm.container, elm.quantity, index)+" "
+        //         +formState.selectedSeafreight.currency+" / "+elm.container
+        //         +" / "+t('every', { lng: templateBase.currentVersion.includes("English") ? "en" : "fr" })+" "+auxFrequency
+        //         +" "+t('days', { lng: templateBase.currentVersion.includes("English") ? "en" : "fr" })+" / "+t('transitTime', { lng: templateBase.currentVersion.includes("English") ? "en" : "fr" })+" : "+auxTransitTime
+        //         +" "+t('days', { lng: templateBase.currentVersion.includes("English") ? "en" : "fr" })+"</strong></p>"
+        //     }
+        //     else {
+        //         return null;
+        //     }
+        // }).join("") : "";
+        
         var clientName = clientNumber !== null ? clientNumber.contactName : null;
         var freeTime = formState.selectedHaulage !== null && formState.selectedHaulage !== undefined ? formState.selectedHaulage.freeTime : "";
         var overtimeTariff = formState.selectedHaulage !== null && formState.selectedHaulage !== undefined ? formState.selectedHaulage.overtimeTariff : "";
@@ -941,7 +969,7 @@ function GeneratePriceOffer(props: any) {
 
         const variables = { loadingCity, destinationPort, commodities, clientName, freeTime, overtimeTariff, frequency, transitTime, containersQuantities, listServices, pricesContainers };
         rteRef.current?.editor?.commands.setContent(generateEmailContent(mailLanguage !== "en" ? templateBase.content : templateBase.contentEn, variables));
-    }, [tags, departure, clientNumber, formState.portDestination, formState.selectedSeafreight, formState.selectedHaulage, formState.selectedMisc, containersSelection, margins, addings, seafreights]);
+    }, [tags, departure, clientNumber, formState.portDestination, formState.selectedSeafreight, formState.selectedHaulage, formState.selectedMisc, containersSelection, formState.margins, formState.addings, formState.marginsMiscs, seafreights, formState.options]);
 
 
 
@@ -1073,17 +1101,13 @@ function GeneratePriceOffer(props: any) {
                                                         getRowHeight={() => "auto" }
                                                         sx={gridStyles}
                                                         onRowSelectionModelChange={(newRowSelectionModel: any) => {
-                                                            // setRowSelectionModel2(newRowSelectionModel);
-                                                            // setSelectedHaulage(newRowSelectionModel.length !== 0 ? haulages.find((elm: any) => elm.id === newRowSelectionModel[0]) : null);
                                                             setFormState({
                                                                 ...formState, 
                                                                 selectedHaulage: newRowSelectionModel.length !== 0 ? haulages.find((elm: any) => elm.id === newRowSelectionModel[0]) : null, 
                                                                 rowSelectionModel2: newRowSelectionModel
                                                             });
-                                                            // handleChangeFormState(newRowSelectionModel.length !== 0 ? haulages.find((elm: any) => elm.id === newRowSelectionModel[0]) : null, "selectedHaulage");
                                                         }}
                                                         rowSelectionModel={formState.rowSelectionModel2}
-                                                        // onRowClick={handleRowHaulagesClick}
                                                     /> :
                                                     <Box>
                                                         <Alert severity="error">{t('noResults')}</Alert>
@@ -1124,7 +1148,6 @@ function GeneratePriceOffer(props: any) {
                                                     renderInput={(params: any) => <TextField {...params} />}
                                                     onChange={(e: any, value: any) => { 
                                                         setFormState({...formState, portDeparture: value});
-                                                        // setPortDeparture(value); 
                                                     }}
                                                     fullWidth
                                                 /> : <Skeleton />
@@ -1162,39 +1185,48 @@ function GeneratePriceOffer(props: any) {
                                                 /> : <Skeleton />
                                             }
                                         </Grid>
-                                        <Grid container>
-                                            <Grid item xs={8}>
-                                                <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>
-                                                    {
-                                                        formState.portDeparture !== undefined && formState.portDeparture !== null && formState.portDestination !== undefined && formState.portDestination !== null ?
-                                                        t('listSeaFreightsPricingOffers')+t('fromDotted')+formState.portDeparture.portName+"-"+formState.portDestination.portName : 
-                                                        t('listSeaFreightsPricingOffers')
-                                                    }
-                                                </Typography>
-                                            </Grid>
-                                            <Grid item xs={4}>
-                                                <Button 
-                                                    variant="contained" 
-                                                    color="inherit" 
-                                                    sx={{ 
-                                                        textTransform: "none", backgroundColor: "#fff", 
-                                                        color: "#333", float: "right", marginTop: "8px", marginLeft: "10px"
-                                                    }} 
-                                                    onClick={getSeaFreightPriceOffers}
-                                                >
-                                                    {t('reload')} <RestartAlt fontSize='small' />
-                                                </Button>
-                                                <Button 
-                                                    variant="contained" 
-                                                    color="inherit" 
-                                                    sx={{ 
-                                                        textTransform: "none", backgroundColor: "#fff", 
-                                                        color: "#333", float: "right", marginTop: "8px"
-                                                    }}
-                                                    onClick={() => setModalRequestSeafreight(true)}
-                                                >
-                                                    {t('requestSeafreightPrice')}
-                                                </Button>
+                                        <Grid item xs={12}>
+                                            <Grid container>
+                                                <Grid item xs={7}>
+                                                    <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>
+                                                        {
+                                                            formState.portDeparture !== undefined && formState.portDeparture !== null && formState.portDestination !== undefined && formState.portDestination !== null ?
+                                                            t('listSeaFreightsPricingOffers')+t('fromDotted')+formState.portDeparture.portName+"-"+formState.portDestination.portName : 
+                                                            t('listSeaFreightsPricingOffers')
+                                                        }
+                                                    </Typography>
+                                                </Grid>
+                                                <Grid item xs={5}>
+                                                    <Button 
+                                                        variant="contained" 
+                                                        color="inherit" 
+                                                        sx={{ 
+                                                            textTransform: "none", backgroundColor: "#fff", 
+                                                            color: "#333", float: "right", marginTop: "8px", marginLeft: "10px"
+                                                        }} 
+                                                        onClick={getSeaFreightPriceOffers}
+                                                    >
+                                                        {t('reload')} <RestartAlt fontSize='small' />
+                                                    </Button>
+                                                    <Button 
+                                                        variant="contained" color="inherit" 
+                                                        sx={{ float: "right", backgroundColor: "#fff", marginTop: "8px", textTransform: "none", ml: 1 }} 
+                                                        onClick={() => { setModalSeafreight(true); }}
+                                                    >
+                                                        {t('newSeafreight')}
+                                                    </Button>
+                                                    <Button 
+                                                        variant="contained" 
+                                                        color="inherit" 
+                                                        sx={{ 
+                                                            textTransform: "none", backgroundColor: "#fff", 
+                                                            color: "#333", float: "right", marginTop: "8px"
+                                                        }}
+                                                        onClick={() => setModalRequestSeafreight(true)}
+                                                    >
+                                                        {t('requestSeafreightPrice')}
+                                                    </Button>
+                                                </Grid>
                                             </Grid>
                                         </Grid>
                                         
@@ -1232,15 +1264,14 @@ function GeneratePriceOffer(props: any) {
                                                             if (newRowSelectionModel.length <= containersSelection.length) {
                                                                 var myFreights = newRowSelectionModel.length !== 0 ? seafreights.filter((elm: any) => newRowSelectionModel.includes(elm.seaFreightId)) : [];
                                                                 if (checkDifferentDefaultContainer(myFreights)) {
-                                                                    // setRowSelectionModel(newRowSelectionModel);
-                                                                    // setSelectedSeafreight(newRowSelectionModel.length !== 0 ? seafreights.find((elm: any) => elm.seaFreightId === newRowSelectionModel[0]) : null);
+                                                                    var selSf = newRowSelectionModel.length !== 0 ? seafreights.filter((sfreight: any) => newRowSelectionModel.includes(sfreight.seaFreightId)) : null;
+                                                                    console.log("Sfreights : ", selSf);
                                                                     setFormState({
                                                                         ...formState, 
                                                                         rowSelectionModel: newRowSelectionModel, 
+                                                                        selectedSeafreights: seafreights.filter((sfreight: any) => newRowSelectionModel.includes(sfreight.seaFreightId)), 
                                                                         selectedSeafreight: newRowSelectionModel.length !== 0 ? seafreights.find((elm: any) => elm.seaFreightId === newRowSelectionModel[0]) : null
                                                                     });
-                                                                    // setMySeafreights(myFreights);
-                                                                    // setSelectedSeafreight(newRowSelectionModel.length !== 0 ? seafreights.filter((elm: any) => newRowSelectionModel.includes(elm.seaFreightId)) : null);
                                                                 }
                                                                 else {
                                                                     enqueueSnackbar("You can only select offers with different container types!", { variant: "warning", anchorOrigin: { horizontal: "right", vertical: "top"} });
@@ -1252,7 +1283,6 @@ function GeneratePriceOffer(props: any) {
                                                         }}
                                                         rowSelectionModel={formState.rowSelectionModel}
                                                         checkboxSelection
-                                                        // onRowClick={handleRowSeafreightsClick}
                                                     />
                                                 </Box> : 
                                                 <Box>
@@ -1268,7 +1298,7 @@ function GeneratePriceOffer(props: any) {
                                     formState.activeStep === 2 ? 
                                     <Grid container spacing={2} mt={1} px={2}>
                                         <Grid item xs={12}>
-                                            <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>{t('listMiscPricingOffers')+t('fromDotted')+formState.portDeparture.portName+"-"+formState.portDestination.portName}</Typography>
+                                            <Typography variant="h5" sx={{ my: 1, fontSize: 18, fontWeight: "bold" }}>{t('listMiscPricingOffers')+t('fromDotted')+formState.portDeparture.portName+"-"+formState.portDestination.portName}</Typography>
                                             <Grid container spacing={2}>
                                                 <Grid item xs={8}>
                                                     <Typography variant="h6" sx={{ mt: 2, fontSize: 17, fontWeight: "bold" }}>
@@ -1333,12 +1363,6 @@ function GeneratePriceOffer(props: any) {
                                                                     },
                                                                 }}
                                                                 onRowSelectionModelChange={(newRowSelectionModel: any) => {
-                                                                    // setRowSelectionModel3(newRowSelectionModel);
-                                                                    // setMyMiscs(newRowSelectionModel.length !== 0 ? 
-                                                                    //     tableMiscs
-                                                                    //     .filter((elm: any) => newRowSelectionModel.includes(elm.miscellaneousId))
-                                                                    //     .map((elm: any) => { return {...elm, defaultContainer: elm.containers[0].container.packageName}}) : 
-                                                                    // []);
                                                                     setFormState({
                                                                         ...formState, 
                                                                         selectedMisc: newRowSelectionModel.length !== 0 ? generalMiscs.find((elm: any) => elm.id === newRowSelectionModel[0]) : null,
@@ -1348,11 +1372,9 @@ function GeneratePriceOffer(props: any) {
                                                                         .map((elm: any) => { return {...elm, defaultContainer: elm.containers[0].container.packageName}}) : [],
                                                                         rowSelectionModel3: newRowSelectionModel
                                                                     });
-                                                                    // setSelectedMisc(newRowSelectionModel.length !== 0 ? generalMiscs.find((elm: any) => elm.id === newRowSelectionModel[0]) : null);
                                                                 }}
                                                                 rowSelectionModel={formState.rowSelectionModel3}
                                                                 checkboxSelection
-                                                                // onRowClick={handleRowMiscsClick}
                                                             />
                                                         </Box> : <Alert severity="error">{t('noResults')}</Alert>
                                                         : <Skeleton />
@@ -1366,193 +1388,377 @@ function GeneratePriceOffer(props: any) {
                                 {
                                     formState.activeStep === 3 ?
                                     <Grid container spacing={2} mt={1} px={2}>
-                                        {
-                                            formState.selectedHaulage !== null && formState.selectedHaulage !== undefined ? 
-                                            <Grid item xs={12}>
-                                                <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>{t('selectedHaulage')}</Typography>
-                                                <Box sx={{ overflow: "auto" }}>
-                                                    <DataGrid
-                                                        rows={[formState.selectedHaulage]}
-                                                        columns={columnsHaulages}
-                                                        // hideFooter
-                                                        initialState={{
-                                                            pagination: {
-                                                                paginationModel: {
-                                                                    pageSize: 10,
-                                                                },
-                                                            },
-                                                        }}
-                                                        pageSizeOptions={[5, 10]}
-                                                        getRowId={(row: any) => row?.id}
-                                                        getRowHeight={() => "auto" }
-                                                        sx={sizeStyles}
-                                                        disableRowSelectionOnClick
-                                                    />
-                                                </Box>
-                                            </Grid> : null
-                                        }
                                         <Grid item xs={12}>
-                                            <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>{t('selectedSeafreight')}</Typography>
-                                            <Box sx={{ overflow: "auto" }}>
-                                                <DataGrid
-                                                    rows={
-                                                        seafreights !== undefined && seafreights !== null ? 
-                                                        seafreights.filter((elm: any) => formState.rowSelectionModel !== undefined && formState.rowSelectionModel !== null ? formState.rowSelectionModel.includes(elm.seaFreightId) : []) : []
+                                            <Button
+                                                variant="contained" 
+                                                color="inherit" 
+                                                sx={whiteButtonStyles}
+                                                style={{ marginRight: 8 }}
+                                                onClick={(e: any) => {
+                                                    var thisOption = {
+                                                        haulageType: formState.haulageType, selectedTemplate: formState.selectedTemplate, 
+                                                        selectedHaulage: formState.selectedHaulage, rowSelectionModel2: formState.rowSelectionModel2, 
+                                                        selectedSeafreight: formState.selectedSeafreight, rowSelectionModel: formState.rowSelectionModel,  
+                                                        selectedMisc: formState.selectedMisc, myMiscs: formState.myMiscs, rowSelectionModel3: formState.rowSelectionModel3, 
+                                                        activeStep: formState.activeStep, margins: formState.margins, addings: formState.addings,
+                                                        marginsMiscs: formState.marginsMiscs, addingsMiscs: formState.addingsMiscs,  
+                                                        portDeparture: formState.portDeparture, portDestination: formState.portDestination, 
+                                                        selectedSeafreights: formState.selectedSeafreights
+                                                    };
+
+                                                    if (formState.currentOption === null || formState.options.length === 0 || formState.currentOption >= formState.options.length) {
+                                                        setFormState({...formState, options: [...formState.options, thisOption] });
                                                     }
-                                                    columns={columnsSeafreights}
-                                                    // hideFooter
-                                                    initialState={{
-                                                        pagination: {
-                                                            paginationModel: {
-                                                                pageSize: 10,
-                                                            },
-                                                        },
-                                                    }}
-                                                    pageSizeOptions={[5, 10]}
-                                                    getRowId={(row: any) => row?.seaFreightId}
-                                                    getRowHeight={() => "auto" }
-                                                    sx={sizeStyles}
-                                                    disableRowSelectionOnClick
-                                                />
-                                            </Box>
-                                        </Grid>
-                                        {
-                                            formState.myMiscs !== null && formState.myMiscs.length !== 0 ? 
-                                            <Grid item xs={12}>
-                                                <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>Selected miscellaneous</Typography>
-                                                <Box sx={{ overflow: "auto" }}>
-                                                    <DataGrid
-                                                        rows={formState.myMiscs}
-                                                        columns={columnsMiscs}
-                                                        // hideFooter
-                                                        initialState={{
-                                                            pagination: {
-                                                                paginationModel: {
-                                                                    pageSize: 10,
-                                                                },
-                                                            },
-                                                        }}
-                                                        pageSizeOptions={[5, 10]}
-                                                        getRowId={(row: any) => row?.miscellaneousId}
-                                                        getRowHeight={() => "auto" }
-                                                        sx={sizeStyles}
-                                                        disableRowSelectionOnClick
-                                                    />
-                                                </Box>
-                                            </Grid> : null
-                                        }
-                                        <Grid item xs={8}>
-                                            <InputLabel htmlFor="selectedTemplate" sx={inputLabelStyles}>{t('selectedTemplate')}</InputLabel>
-                                            {
-                                                loadTemplates !== true ?
-                                                <NativeSelect
-                                                    id="selectedTemplate"
-                                                    value={selectedTemplate}
-                                                    onChange={(e: any) => { setSelectedTemplate(e.target.value); }}
-                                                    input={<BootstrapInput />}
-                                                    fullWidth
-                                                >
-                                                    {templates.map((elm: any, i: number) => (
-                                                        <option key={"templateElm-"+i} value={elm.id}>{elm.name}</option>
-                                                    ))}
-                                                </NativeSelect>
-                                                : <Skeleton />
-                                            }
-                                        </Grid>
-                                        <Grid item xs={4}>
-                                            <InputLabel htmlFor="mailLanguage" sx={inputLabelStyles}>{t('mailLanguage')}</InputLabel>
-                                            <ToggleButtonGroup
-                                                color="primary"
-                                                value={mailLanguage}
-                                                exclusive
-                                                // size="small"
-                                                onChange={(event: React.MouseEvent<HTMLElement>, newValue: string,) => { 
-                                                    setMailLanguage(newValue); 
+                                                    else {
+                                                        setFormState((prevState: any) => {
+                                                            const options = [...prevState.options];
+                                                            options[prevState.currentOption] = {
+                                                                ...options[prevState.currentOption], 
+                                                                haulageType: formState.haulageType, selectedTemplate: formState.selectedTemplate, 
+                                                                selectedHaulage: formState.selectedHaulage, rowSelectionModel2: formState.rowSelectionModel2, 
+                                                                selectedSeafreight: formState.selectedSeafreight, rowSelectionModel: formState.rowSelectionModel,  
+                                                                selectedMisc: formState.selectedMisc, myMiscs: formState.myMiscs, rowSelectionModel3: formState.rowSelectionModel3, 
+                                                                activeStep: formState.activeStep, margins: formState.margins, addings: formState.addings,
+                                                                marginsMiscs: formState.marginsMiscs, addingsMiscs: formState.addingsMiscs,  
+                                                                portDeparture: formState.portDeparture, portDestination: formState.portDestination, 
+                                                                selectedSeafreights: formState.selectedSeafreights
+                                                            };
+                                                            return {...prevState, options};
+                                                        });
+                                                    }
                                                 }}
-                                                aria-label="Platform"
-                                                fullWidth
-                                                sx={{ mt: 1, maxHeight: "44px" }}
                                             >
-                                                <ToggleButton value="fr"><img src="/assets/img/flags/flag-fr.png" style={{ width: "12px", marginRight: "6px" }} alt="flag english" /> Français</ToggleButton>
-                                                <ToggleButton disabled value="en"><img src="/assets/img/flags/flag-en.png" style={{ width: "12px", marginRight: "6px" }} alt="flag english" /> English</ToggleButton>
-                                            </ToggleButtonGroup>
-                                        </Grid>
-                                        <Grid item xs={12}>
-                                            <Box sx={{ border: "1px solid #e5e5e5", backgroundColor: "#fff", p: 2 }}>
                                                 {
-                                                    containersSelection !== null && formState.rowSelectionModel.length !== 0 && seafreights !== undefined && seafreights !== null ?
-                                                    seafreights.filter((elm: any) => formState.rowSelectionModel.includes(elm.seaFreightId))
-                                                    .map((element: any, index: number) => {
-                                                        var containerElm = containersSelection.find((val: any) => val.container === element.containers[0].container.packageName);
-                                                        var allMiscs = formState.myMiscs;
-                                                        console.log(allMiscs);
-                                                        var miscsSelected = [];
-                                                        if (containerElm !== undefined && containerElm !== null) {
-                                                            miscsSelected = allMiscs.filter((elm: any) => elm.defaultContainer === containerElm.container);
-                                                        }
-                                                        
-                                                        return (
-                                                            <React.Fragment key={"containerRow-"+index}>
-                                                                <ContainerElement
-                                                                    key={"containerElm-"+index} 
-                                                                    elm={containerElm}
-                                                                    index={index}
-                                                                    adding={addings[index]}
-                                                                    margin={margins[index]}
-                                                                    handleAddingChange={handleAddingChange}
-                                                                    handleMarginChange={handleMarginChange}
-                                                                    purchasePrice={Number(((calculateContainerPrice(containerElm.container, containerElm.quantity, index)-addings[index])/(1+margins[index]/100)).toFixed(2))+" "+t(element.currency)}
-                                                                    profit={Number((calculateContainerPrice(containerElm.container, containerElm.quantity, index) - ((calculateContainerPrice(containerElm.container, containerElm.quantity, index)-addings[index])/(1+margins[index]/100))).toFixed(2))+" "+t(element.currency)}
-                                                                    salePrice={calculateContainerPrice(containerElm.container, containerElm.quantity, index)+" "+t(element.currency)}
-                                                                    haulagePrice={formState.selectedHaulage !== null && formState.selectedHaulage !== undefined && formState.selectedHaulage.containerNames.includes(containerElm.container) ? containerElm.quantity+"x"+formState.selectedHaulage.unitTariff+" "+t(element.currency) : "N/A"}
-                                                                    seafreightPrice={formatServices(element.containers[0], t(element.currency), containerElm.container, containerElm.quantity) || "N/A"}
-                                                                    miscellaneousPrice={miscsSelected.length !== 0 ? miscsSelected.map((value: any, id: number) => {
-                                                                        return <span key={"sMiscs-"+id}>
-                                                                            <span>- {getServicesTotal2(value.containers, t(element.currency), containerElm.quantity)}</span>
-                                                                            {id !== miscsSelected.length - 1 && <br />}
-                                                                        </span>
-                                                                    }) : "N/A"}
-                                                                />
-                                                            </React.Fragment>
-                                                        );
-                                                    }) : null
+                                                    formState.currentOption === null || formState.options.length === 0 || formState.currentOption >= formState.options.length ? 
+                                                    "Save option" : "Edit option"
                                                 }
-                                            </Box>
+                                            </Button>
+                                            <Button
+                                                variant="contained" 
+                                                color="inherit" 
+                                                sx={whiteButtonStyles}
+                                                style={{ marginRight: 8 }}
+                                                onClick={(e: any) => {
+                                                    setFormState({
+                                                        ...formState, 
+                                                        currentOption: formState.options !== undefined ? formState.options.length : 0,
+                                                        haulageType: "", selectedTemplate: defaultTemplate, 
+                                                        selectedHaulage: null, rowSelectionModel2: [],
+                                                        selectedSeafreight: null, rowSelectionModel: [], 
+                                                        selectedMisc: null, myMiscs: [], rowSelectionModel3: [],
+                                                        activeStep: 0, margins: containersSelection.map(() => 22), addings: containersSelection.map(() => 0),
+                                                        marginsMiscs: Array(15).fill(50), addingsMiscs: [],  
+                                                        portDeparture: null, portDestination: portDestination
+                                                    });
+                                                }}
+                                            >
+                                                New option
+                                            </Button>
+                                            <Button
+                                                variant="contained" 
+                                                color="inherit" 
+                                                sx={whiteButtonStyles}
+                                                style={{ marginRight: 8 }}
+                                                onClick={(e: any) => { setModalCompare(true); }}
+                                            >
+                                                Compare options
+                                            </Button>
                                         </Grid>
                                         <Grid item xs={12}>
-                                            <InputLabel htmlFor="details" sx={inputLabelStyles}>{t('detailsOffer')}</InputLabel>
                                             {
-                                                formState.selectedSeafreight !== null && formState.selectedSeafreight !== undefined ? 
-                                                <Box sx={{ mt: 2 }}>
-                                                    {
-                                                        loadTemplate !== true ?
-                                                        <RichTextEditor
-                                                            ref={rteRef}
-                                                            extensions={[StarterKit]}
-                                                            content={getDefaultContent(mailLanguage !== "en" ? templateBase.content : templateBase.contentEn)}
-                                                            renderControls={() => (
-                                                            <MenuControlsContainer>
-                                                                <MenuSelectHeading />
-                                                                <MenuDivider />
-                                                                <MenuButtonBold />
-                                                                <MenuButtonItalic />
-                                                                <MenuButtonStrikethrough />
-                                                                <MenuButtonOrderedList />
-                                                                <MenuButtonBulletedList />
-                                                                <MenuSelectTextAlign />
-                                                                <MenuButtonEditLink />
-                                                                <MenuButtonHorizontalRule />
-                                                                <MenuButtonUndo />
-                                                                <MenuButtonRedo />
-                                                            </MenuControlsContainer>
-                                                            )}
-                                                        />
-                                                        : <Skeleton />
-                                                    }
-                                                </Box>   
+                                                formState.options !== undefined && formState.options.length !== 0 ? 
+                                                formState.options.map((elm: any, id: number) => {
+                                                    return (
+                                                        <ListItem 
+                                                            key={"lItem-"+id} 
+                                                            sx={formState.currentOption === id ? 
+                                                                { background: "teal", color: "#fff", border: "1px solid #eeeeee", py: 2 } : 
+                                                                { background: "#fff", border: "1px solid #eeeeee", py: 2 }
+                                                            }
+                                                            secondaryAction={
+                                                                <>
+                                                                    {/* <IconButton edge="end" aria-label="delete" sx={{ mr: 1 }}>
+                                                                        <Visibility />
+                                                                    </IconButton>
+                                                                    <IconButton edge="end" aria-label="delete">
+                                                                        <Delete />
+                                                                    </IconButton> */}
+                                                                    <Button 
+                                                                        variant="contained" color="inherit" sx={whiteButtonStyles} 
+                                                                        style={{ marginRight: 8, marginBottom: 16 }}
+                                                                        onClick={(e: any) => { 
+                                                                            // console.log("Elm : ", elm);
+                                                                            setFormState({
+                                                                                ...formState, 
+                                                                                currentOption: id,
+                                                                                haulageType: elm.haulageType, selectedTemplate: elm.selectedTemplate, 
+                                                                                selectedHaulage: elm.selectedHaulage, rowSelectionModel2: elm.rowSelectionModel2,
+                                                                                selectedSeafreight: elm.selectedSeafreight, rowSelectionModel: elm.rowSelectionModel, 
+                                                                                selectedMisc: elm.selectedMisc, myMiscs: elm.myMiscs, rowSelectionModel3: elm.rowSelectionModel3,
+                                                                                margins: elm.margins, addings: elm.addings, marginsMiscs: elm.marginsMiscs, 
+                                                                                portDeparture: elm.portDeparture, portDestination: elm.portDestination, 
+                                                                                selectedSeafreights: elm.selectedSeafreights
+                                                                            });
+                                                                        }}
+                                                                    >
+                                                                        Select option
+                                                                    </Button>
+                                                                    <Button 
+                                                                        variant="contained" color="inherit" sx={whiteButtonStyles} 
+                                                                        style={{ marginBottom: 16 }}
+                                                                        onClick={(e: any) => { setFormState({...formState, options: formState.options.filter((opt: any, i: number) => i !== id)}); }}
+                                                                    >
+                                                                        Delete option
+                                                                    </Button>
+                                                                </>
+                                                            }
+                                                        >
+                                                            <ListItemText 
+                                                                sx={{ mt: 0 }}
+                                                                primary={
+                                                                    elm.selectedSeafreight !== undefined && elm.selectedSeafreight !== null ? 
+                                                                    elm.selectedSeafreight.departurePortName+" - "+elm.selectedSeafreight.destinationPortName+" | "+elm.selectedSeafreight.carrierName 
+                                                                    : "N/A"
+                                                                }
+                                                                primaryTypographyProps={{ fontWeight: "bold" }} 
+                                                            />
+                                                        </ListItem>
+                                                    );
+                                                })
                                                 : null
                                             }
                                         </Grid>
+                                        {
+                                            formState.options !== undefined && formState.options.length !== 0 ? 
+                                            <>
+                                                {
+                                                    formState.selectedHaulage !== null && formState.selectedHaulage !== undefined ? 
+                                                    <Grid item xs={12}>
+                                                        <Typography variant="h5" sx={{ my: 1, fontSize: 18, fontWeight: "bold" }}>{t('selectedHaulage')}</Typography>
+                                                        <Box sx={{ overflow: "auto" }}>
+                                                            <DataGrid
+                                                                rows={[formState.selectedHaulage]}
+                                                                columns={columnsHaulages}
+                                                                initialState={{
+                                                                    pagination: {
+                                                                        paginationModel: {
+                                                                            pageSize: 10,
+                                                                        },
+                                                                    },
+                                                                }}
+                                                                pageSizeOptions={[5, 10]}
+                                                                getRowId={(row: any) => row?.id}
+                                                                getRowHeight={() => "auto" }
+                                                                sx={sizeStyles}
+                                                                disableRowSelectionOnClick
+                                                            />
+                                                        </Box>
+                                                    </Grid> : null
+                                                }
+                                                {
+                                                    formState.selectedSeafreights !== undefined && formState.selectedSeafreights !== null ? 
+                                                    <Grid item xs={12}>
+                                                        <Typography variant="h5" sx={{ my: 1, fontSize: 18, fontWeight: "bold" }}>{t('selectedSeafreight')}</Typography>
+                                                        <Box sx={{ overflow: "auto" }}>
+                                                            <DataGrid
+                                                                // rows={allSeafreights.filter((sfreight: any) => formState.rowSelectionModel.includes(sfreight.seaFreightId))}
+                                                                rows={formState.selectedSeafreights}
+                                                                columns={columnsSeafreights}
+                                                                initialState={{
+                                                                    pagination: {
+                                                                        paginationModel: {
+                                                                            pageSize: 10,
+                                                                        },
+                                                                    },
+                                                                }}
+                                                                pageSizeOptions={[5, 10]}
+                                                                getRowId={(row: any) => row?.seaFreightId}
+                                                                getRowHeight={() => "auto" }
+                                                                sx={sizeStyles}
+                                                                disableRowSelectionOnClick
+                                                            />
+                                                        </Box>
+                                                    </Grid> : null
+                                                }
+                                                {
+                                                    formState.myMiscs !== null && formState.myMiscs.length !== 0 ? 
+                                                    <Grid item xs={12}>
+                                                        <Typography variant="h5" sx={{ my: 1, fontSize: 18, fontWeight: "bold" }}>{t('selectedMisc')}</Typography>
+                                                        <Box sx={{ overflow: "auto" }}>
+                                                            <DataGrid
+                                                                rows={formState.myMiscs}
+                                                                columns={columnsMiscs}
+                                                                initialState={{
+                                                                    pagination: {
+                                                                        paginationModel: {
+                                                                            pageSize: 10,
+                                                                        },
+                                                                    },
+                                                                }}
+                                                                pageSizeOptions={[5, 10]}
+                                                                getRowId={(row: any) => row?.miscellaneousId}
+                                                                getRowHeight={() => "auto" }
+                                                                sx={sizeStyles}
+                                                                disableRowSelectionOnClick
+                                                            />
+                                                        </Box>
+                                                    </Grid> : null
+                                                }
+                                                <Grid item xs={8}>
+                                                    <InputLabel htmlFor="selectedTemplate" sx={inputLabelStyles}>{t('selectedTemplate')}</InputLabel>
+                                                    {
+                                                        loadTemplates !== true ?
+                                                        <NativeSelect
+                                                            id="selectedTemplate"
+                                                            value={formState.selectedTemplate}
+                                                            onChange={(e: any) => { 
+                                                                setFormState({...formState, selectedTemplate: e.target.value});
+                                                            }}
+                                                            input={<BootstrapInput />}
+                                                            fullWidth
+                                                        >
+                                                            {templates.map((elm: any, i: number) => (
+                                                                <option key={"templateElm-"+i} value={elm.id}>{elm.name}</option>
+                                                            ))}
+                                                        </NativeSelect> : <Skeleton />
+                                                    }
+                                                </Grid>
+                                                <Grid item xs={4}>
+                                                    <InputLabel htmlFor="mailLanguage" sx={inputLabelStyles}>{t('mailLanguage')}</InputLabel>
+                                                    <ToggleButtonGroup
+                                                        color="primary"
+                                                        value={mailLanguage}
+                                                        exclusive
+                                                        onChange={(event: React.MouseEvent<HTMLElement>, newValue: string,) => { 
+                                                            setMailLanguage(newValue); 
+                                                        }}
+                                                        aria-label="Platform"
+                                                        fullWidth
+                                                        sx={{ mt: 1, maxHeight: "44px" }}
+                                                    >
+                                                        <ToggleButton value="fr"><img src="/assets/img/flags/flag-fr.png" style={{ width: "12px", marginRight: "6px" }} alt="flag english" /> Français</ToggleButton>
+                                                        <ToggleButton disabled value="en"><img src="/assets/img/flags/flag-en.png" style={{ width: "12px", marginRight: "6px" }} alt="flag english" /> English</ToggleButton>
+                                                    </ToggleButtonGroup>
+                                                </Grid>
+                                                <Grid item xs={12}>
+                                                    <Grid container spacing={0} sx={{ border: "1px solid #e5e5e5", backgroundColor: "#fff", px: 2, py: 1 }}>
+                                                        <Grid item xs={12}>
+                                                            <Typography variant="h5" sx={{ mt: 1, fontSize: 15, fontWeight: "bold" }}>Transport price margins</Typography>
+                                                        </Grid>
+                                                        {
+                                                            containersSelection !== null && formState.rowSelectionModel.length !== 0 && seafreights !== undefined && seafreights !== null ?
+                                                            formState.selectedSeafreights
+                                                            .map((element: any, index: number) => {
+                                                                var containerElm = containersSelection.find((val: any) => val.container === element.containers[0].container.packageName);
+                                                                var allMiscs = formState.myMiscs;
+                                                                var miscsSelected = [];
+                                                                if (containerElm !== undefined && containerElm !== null) {
+                                                                    miscsSelected = allMiscs.filter((elm: any) => elm.defaultContainer === containerElm.container);
+                                                                }
+                                                                
+                                                                return (
+                                                                    <Grid item xs={6} key={"containerRow-"+index}>
+                                                                        <ContainerElement
+                                                                            key={"containerElm-"+index} 
+                                                                            elm={containerElm}
+                                                                            index={index}
+                                                                            adding={formState.addings[index]}
+                                                                            margin={formState.margins[index]}
+                                                                            handleAddingChange={handleAddingChange}
+                                                                            handleMarginChange={handleMarginChange}
+                                                                            purchasePrice={Number(((calculateContainerPrice(containerElm.container, containerElm.quantity, index)-formState.addings[index])/(1+formState.margins[index]/100)).toFixed(2))+" "+t(element.currency)}
+                                                                            profit={Number((calculateContainerPrice(containerElm.container, containerElm.quantity, index) - ((calculateContainerPrice(containerElm.container, containerElm.quantity, index)-formState.addings[index])/(1+formState.margins[index]/100))).toFixed(2))+" "+t(element.currency)}
+                                                                            salePrice={calculateContainerPrice(containerElm.container, containerElm.quantity, index)+" "+t(element.currency)}
+                                                                            haulagePrice={formState.selectedHaulage !== null && formState.selectedHaulage !== undefined && formState.selectedHaulage.containerNames.includes(containerElm.container) ? containerElm.quantity+"x"+formState.selectedHaulage.unitTariff+" "+t(element.currency) : "N/A"}
+                                                                            seafreightPrice={formatServices(element.containers[0], t(element.currency), containerElm.container, containerElm.quantity) || "N/A"}
+                                                                            miscellaneousPrice={miscsSelected.length !== 0 ? miscsSelected.map((value: any, id: number) => {
+                                                                                return <span key={"sMiscs-"+id}>
+                                                                                    <span>- {getServicesTotal2(value.containers, t(element.currency), containerElm.quantity)}</span>
+                                                                                    {id !== miscsSelected.length - 1 && <br />}
+                                                                                </span>
+                                                                            }) : "N/A"}
+                                                                        />
+                                                                    </Grid>
+                                                                );
+                                                            }) : null
+                                                        }
+                                                    </Grid>
+
+                                                    {
+                                                        formState.myMiscs !== null && formState.myMiscs.length !== 0 && formState.marginsMiscs.length !== 0 ? 
+                                                        <Grid container spacing={0} sx={{ border: "1px solid #e5e5e5", backgroundColor: "#fff", p: 2 }}>
+                                                            {
+                                                                formState.myMiscs.map((elm: any, id: number) => myServices(elm.containers)).map((element: any, index: number) => {
+                                                                    return (
+                                                                        <Grid item xs={6} key={"marginMiscs-"+index}>
+                                                                            <Grid container spacing={2}>
+                                                                                <Grid item xs={12} sx={{ pt: 0 }}>
+                                                                                    <Typography variant="h5" sx={{ fontSize: 15, fontWeight: "bold" }}>Service price margins</Typography>
+                                                                                </Grid>
+                                                                                <Grid item xs={8}>
+                                                                                    <InputLabel htmlFor={"miscMargin-"+index} sx={inputLabelStyles}>{t('margin')} %</InputLabel>
+                                                                                    <BootstrapInput 
+                                                                                        id={"miscMargin-"+index} 
+                                                                                        type="number" fullWidth 
+                                                                                        inputProps={{ min: 0, max: 100 }} 
+                                                                                        value={formState.marginsMiscs[index]} 
+                                                                                        onChange={(e: any) => {
+                                                                                            handleMarginMiscChange(index, e.target.value);
+                                                                                        }} 
+                                                                                    />
+                                                                                </Grid>
+                                                                                <Grid item xs={12}>
+                                                                                    <Typography sx={{ fontSize: 14 }}>
+                                                                                        <span>{element[0].serviceName}</span>
+                                                                                        <span> | {t('purchasePrice')} : {element[0].price} €</span>
+                                                                                        <span> | {t('profit')} : {(element[0].price*(formState.marginsMiscs[index]/100)).toFixed(2)} €</span>
+                                                                                        <span> | {t('salePrice')} : {(element[0].price*(1+formState.marginsMiscs[index]/100)).toFixed(2)} €</span> 
+                                                                                    </Typography>
+                                                                                </Grid>
+                                                                            </Grid>
+                                                                        </Grid>
+                                                                    );
+                                                                })
+                                                            }
+                                                        </Grid> : null
+                                                    }
+                                                </Grid>
+                                                <Grid item xs={12}>
+                                                    <InputLabel htmlFor="details" sx={inputLabelStyles}>{t('detailsOffer')}</InputLabel>
+                                                    {
+                                                        formState.selectedSeafreight !== null && formState.selectedSeafreight !== undefined ? 
+                                                        <Box sx={{ mt: 2 }}>
+                                                            {
+                                                                loadTemplate !== true ?
+                                                                <RichTextEditor
+                                                                    ref={rteRef}
+                                                                    extensions={[StarterKit]}
+                                                                    content={getDefaultContent(mailLanguage !== "en" ? templateBase.content : templateBase.contentEn)}
+                                                                    renderControls={() => (
+                                                                    <MenuControlsContainer>
+                                                                        <MenuSelectHeading />
+                                                                        <MenuDivider />
+                                                                        <MenuButtonBold />
+                                                                        <MenuButtonItalic />
+                                                                        <MenuButtonStrikethrough />
+                                                                        <MenuButtonOrderedList />
+                                                                        <MenuButtonBulletedList />
+                                                                        <MenuSelectTextAlign />
+                                                                        <MenuButtonEditLink />
+                                                                        <MenuButtonHorizontalRule />
+                                                                        <MenuButtonUndo />
+                                                                        <MenuButtonRedo />
+                                                                    </MenuControlsContainer>
+                                                                    )}
+                                                                />
+                                                                : <Skeleton />
+                                                            }
+                                                        </Box>   
+                                                        : null
+                                                    }
+                                                </Grid>
+                                            </> : <Grid item xs={12}><Alert severity="info">You need to save some options to send</Alert></Grid>
+                                        }
                                     </Grid>
                                     : null
                                 }
@@ -1593,7 +1799,6 @@ function GeneratePriceOffer(props: any) {
             >
                 <RequestPriceHaulage
                     token={tempToken} 
-                    // companies={clients}
                     ports={ports}
                     loadingCity={loadingCity}
                     loadingPort={formState.portDeparture}
@@ -1613,7 +1818,6 @@ function GeneratePriceOffer(props: any) {
                     token={tempToken} 
                     products={products} 
                     commodities={tags}
-                    // companies={clients}
                     ports={ports}
                     portLoading={formState.portDeparture}
                     portDischarge={formState.portDestination} 
@@ -1646,10 +1850,45 @@ function GeneratePriceOffer(props: any) {
                 fullWidth
             >
                 <NewHaulage 
+                    token={tempToken}
                     ports={ports}
+                    loadingCity={loadingCity}
                     containers={containers}
                     closeModal={() => setModalHaulage(false)}
                     callBack={() => { getHaulagePriceOffers(); }}
+                />
+            </BootstrapDialog>
+
+            {/* Create new seafreight */}
+            <BootstrapDialog
+                onClose={() => setModalSeafreight(false)}
+                aria-labelledby="custom-dialog-titleSeafreight"
+                open={modalSeafreight}
+                maxWidth="lg"
+                fullWidth
+            >
+                <NewSeafreight 
+                    token={tempToken}
+                    ports={ports}
+                    portLoading={formState.portDeparture}
+                    portDischarge={formState.portDestination}
+                    containers={containers}
+                    closeModal={() => setModalSeafreight(false)}
+                    callBack={() => { getSeaFreightPriceOffers(); }}
+                />
+            </BootstrapDialog>
+
+            {/* Compare options */}
+            <BootstrapDialog
+                onClose={() => setModalCompare(false)}
+                aria-labelledby="custom-dialog-titleCompare"
+                open={modalCompare}
+                maxWidth="lg"
+                fullWidth
+            >
+                <CompareOptions 
+                    options={formState.options} 
+                    closeModal={() => { setModalCompare(false); }} 
                 />
             </BootstrapDialog>
         </Grid>

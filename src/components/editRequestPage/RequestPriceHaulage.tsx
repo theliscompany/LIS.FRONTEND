@@ -32,9 +32,12 @@ function createGetRequestUrl(variable1: number, variable2: number) {
 const defaultTemplate = "658e7e0d27587b09811c13ca";
 
 function RequestPriceHaulage(props: any) {
-    const [subject, setSubject] = useState<string>(props.loadingCity !== null ? props.loadingCity.city.toUpperCase()+","+props.loadingCity.country.toUpperCase()+" / RATE REQUEST HAULAGE" : "");
+    const { t } = useTranslation();
+    
+    const [subject, setSubject] = useState<string>(props.loadingCity !== null ? props.loadingCity.city.toUpperCase()+","+props.loadingCity.country.toUpperCase()+" / "+t("rateRequestHaulage") : "");
     const [recipients, setRecipients] = useState<any>([]);
     const [emptyPickupDepot, setEmptyPickupDepot] = useState<string>("");
+    const [haulageType, setHaulageType] = useState<string>("On trailer, direct loading");
     const [loadingCityObj, setLoadingCityObj] = useState<any>(props.loadingCity);
     // const [loadingCity, setLoadingCity] = useState<string>("");
     const [deliveryPort, setDeliveryPort] = useState<any>(props.loadingPort);
@@ -57,7 +60,14 @@ function RequestPriceHaulage(props: any) {
     const account = useAccount(accounts[0] || {});
 
     const context = useAuthorizedBackendApi();
-    const { t } = useTranslation();
+    
+    const haulageTypeOptions = [
+        { value: "On trailer, direct loading", label: t('haulageType1') },
+        { value: "On trailer, Loading with Interval", label: t('haulageType2') },
+        { value: "Side loader, direct loading", label: t('haulageType3') },
+        { value: "Side loader, Loading with Interval, from trailer to floor", label: t('haulageType4') },
+        { value: "Side loader, Loading with Interval, from floor to trailer", label: t('haulageType5') }
+    ];
     
     const postEmail = async(from: string, to: string, subject: string, htmlContent: string) => {
         const form = new FormData();
@@ -65,12 +75,7 @@ function RequestPriceHaulage(props: any) {
         form.append('To', to);
         form.append('Subject', subject);
         form.append('HtmlContent', htmlContent);
-        // if (fileValue !== undefined) {
-        //     for (var i=0; i < fileValue.length; i++) {
-        //         form.append('Attachments', fileValue[i]);
-        //     }
-        // }
-
+        
         fetch(protectedResources.apiLisQuotes.endPoint+'/Email', {
             method: 'POST',
             headers: {
@@ -82,7 +87,6 @@ function RequestPriceHaulage(props: any) {
         .then((response) => response.json())
         .then((response: any) => {
             if (response !== undefined && response !== null && response.code == 200) {
-                // enqueueSnackbar(t('messageSuccessSent'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
                 enqueueSnackbar(t('mailSentTo')+to, { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
             }
             else {
@@ -145,10 +149,8 @@ function RequestPriceHaulage(props: any) {
             try {
                 const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisCrm.endPoint+"/Contact/GetContacts?category=2&pageSize=1000", token);
                 if (response !== null && response !== undefined) {
-                    // console.log(response);
                     // Removing duplicates from client array
                     setHauliersData(response.data.filter((obj: any, index: number, self: any) => index === self.findIndex((o: any) => o.contactName === obj.contactName)));
-                    // console.log(response.filter((obj: any, index: number, self: any) => index === self.findIndex((o: any) => o.contactName === obj.contactName)));
                 }
             }
             catch (err: any) {
@@ -183,16 +185,10 @@ function RequestPriceHaulage(props: any) {
     const searchHaulages = async () => {
         if (context && account) {
             setLoad(true);
-            // setHauliersData([]);
             var requestFormatted = createGetRequestUrl(loadingCityObj?.portId, deliveryPort?.portId);
             const response = await (context as BackendService<any>).getWithToken(requestFormatted, props.token);
             if (response !== null && response !== undefined) {
                 var aux = getAllHauliers(response);
-                // console.log(response.length !== 0 ? aux : "None");
-                
-                // if (aux.length !== 0) {
-                //     setRecipients(hauliersData.filter((obj: any) => aux.includes(obj.contactName) && obj.email !== "" && obj.email !== null));
-                // }
                 setRecipients(hauliersData.filter((obj: any) => aux.includes(obj.contactName) && obj.email !== "" && obj.email !== null));
                 setLoad(false);
             }
@@ -204,7 +200,7 @@ function RequestPriceHaulage(props: any) {
 
     const getTemplates = async () => {
         if (context && account) {
-            const response = await (context as BackendService<any>).getSingle(protectedResources.apiLisTemplate.endPoint+"/Template");
+            const response = await (context as BackendService<any>).getSingle(protectedResources.apiLisTemplate.endPoint+"/Template?Tags=haulage");
             if (response !== null && response.data !== undefined) {
                 setTemplates(response.data);
                 console.log(response);
@@ -253,7 +249,7 @@ function RequestPriceHaulage(props: any) {
 
         var destinationPort = deliveryPort !== null ? deliveryPort.portName+', '+deliveryPort.country.toUpperCase() : "";
         
-        const variables = { loadingCity, destinationPort, emptyPickupDepot };
+        const variables = { loadingCity, destinationPort, emptyPickupDepot, haulageType };
         return generateEmailContent(template, variables);
     }
 
@@ -265,7 +261,7 @@ function RequestPriceHaulage(props: any) {
         }
         
         if (loadingCityObj !== null) {
-            setSubject(loadingCity+" / RATE REQUEST HAULAGE");
+            setSubject(loadingCity+" / "+t("rateRequestHaulage"));
         }
         else {
             setSubject("");
@@ -285,9 +281,9 @@ function RequestPriceHaulage(props: any) {
 
         var destinationPort = deliveryPort !== null ? deliveryPort.portName+', '+deliveryPort.country : "";
         
-        const variables = { loadingCity, destinationPort, emptyPickupDepot };
+        const variables = { loadingCity, destinationPort, emptyPickupDepot, haulageType };
         rteRef.current?.editor?.commands.setContent(generateEmailContent(templateBase, variables));
-    }, [loadingCityObj, deliveryPort, emptyPickupDepot, templateBase, selectedTemplate]);
+    }, [loadingCityObj, deliveryPort, haulageType, emptyPickupDepot, templateBase, selectedTemplate]);
 
     useEffect(() => {
         getClients();
@@ -303,7 +299,7 @@ function RequestPriceHaulage(props: any) {
     return (
         <>
             {
-                hauliersData !== null ?
+                true ? // hauliersData !== null
                 <>
                     <BootstrapDialogTitle id="custom-dialog-title6" onClose={props.closeModal}>
                         <b>{t('priceRequestHaulage')}</b>
@@ -338,7 +334,6 @@ function RequestPriceHaulage(props: any) {
                                                     onChange={(e: any, value: any) => { setRecipients(value); }}
                                                     fullWidth
                                                 />
-                                                {/* <Alert severity="info">S.O. Bongo</Alert> */}
                                             </> : <Skeleton />
                                         }
                                     </Grid>
@@ -349,6 +344,20 @@ function RequestPriceHaulage(props: any) {
                                     <Grid item xs={12} md={12} mt={0.5}>
                                         <InputLabel htmlFor="emptyPickupDepot" sx={inputLabelStyles}>{t('emptyPickupDepot')}</InputLabel>
                                         <BootstrapInput id="emptyPickupDepot" type="text" value={emptyPickupDepot} onChange={(e: any) => setEmptyPickupDepot(e.target.value)} fullWidth />
+                                    </Grid>
+                                    <Grid item xs={12} md={12}>
+                                        <InputLabel htmlFor="haulageType" sx={inputLabelStyles}>{t('haulageType')}</InputLabel>
+                                        <NativeSelect
+                                            id="haulageType"
+                                            value={haulageType}
+                                            onChange={(e: any) => { setHaulageType(e.target.value) }}
+                                            input={<BootstrapInput />}
+                                            fullWidth
+                                        >
+                                            {haulageTypeOptions.map((elm: any, i: number) => (
+                                                <option key={"haulageElm-"+i} value={elm.value}>{elm.label}</option>
+                                            ))}
+                                        </NativeSelect>
                                     </Grid>
                                     <Grid item xs={12} md={12} mt={0.5}>
                                         <InputLabel htmlFor="loading-city" sx={inputLabelStyles}>{t('loadingCity')}</InputLabel>
@@ -405,8 +414,7 @@ function RequestPriceHaulage(props: any) {
                                                 {templates.map((elm: any, i: number) => (
                                                     <option key={"templateElm-"+i} value={elm.id}>{elm.name}</option>
                                                 ))}
-                                            </NativeSelect>
-                                            : <Skeleton />
+                                            </NativeSelect> : <Skeleton />
                                         }
                                     </Grid>
 

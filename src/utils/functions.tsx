@@ -1,3 +1,7 @@
+import React from "react";
+import { AuthenticationResult } from "@azure/msal-browser";
+import { t } from "i18next";
+
 function removeAccents(input: string) {
     return input.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 }
@@ -108,6 +112,26 @@ export function complexEquality(str1: string, str2: string) {
     return str1.includes(str2) || str2.includes(str1);
 }
    
+export function formatObject(obj: any) {
+    const packageName = obj.container.packageName;
+    const totalPrice = obj.services.reduce((sum: number, service: any) => sum + service.price, 0);
+    return `${packageName} : ${totalPrice}`;
+}
+
+export function formatServices(obj: any, currency: string, targetPackageName: string, qty: number) {
+    if (obj.container.packageName === targetPackageName) {
+        const servicesList = obj.services.map((service: any, index: number) => (
+            <React.Fragment key={"someservice"+index}>
+                <span>- {service.serviceName} : {qty !== 0 ? qty+"x" : null}{service.price} {currency}</span>
+                {index !== obj.services.length - 1 && <br />} {/* Add <br /> except for the last item */}
+            </React.Fragment>
+        ));
+        return servicesList;
+    } else {
+        return null; // Return null if the package name doesn't match
+    }
+}
+
 export function calculateTotal(data: any) {
     // Initialize total price and package name
     let total = 0;
@@ -162,7 +186,7 @@ export function getServicesTotal(data: any, currency: string, margin: number) {
         // Loop through the services in the current data object
         for(let j = 0; j < data[i].services.length; j++) {
             let service = data[i].services[j];
-            services.push(`${service.serviceName} : ${service.price*(1+margin/100)} ${currency}`);
+            services.push(`${service.serviceName} : ${(service.price*(1+margin/100)).toFixed(2)} ${currency}`);
         }
     }
 
@@ -200,6 +224,22 @@ export function getServices(data: any, currency: string) {
 
     // Return the services and their total price in the desired format
     return services.join('; ');
+}
+
+export function myServices(data: any) {
+    let services = [];
+
+    // Loop through the data
+    for(let i = 0; i < data.length; i++) {
+        // Loop through the services in the current data object
+        for(let j = 0; j < data[i].services.length; j++) {
+            let service = data[i].services[j];
+            services.push(service);
+        }
+    }
+
+    // Return the services
+    return services;
 }
 
 export function removeDuplicatesWithLatestUpdated(data: any) {
@@ -536,3 +576,112 @@ export function arePhoneticallyClose(word1: string, word2: string) {
 
     return metaphone1 === metaphone2;
 }
+
+export function sortSuppliersByCarrierAgentName(array: any) {
+    array.forEach((port: any) => {
+        port.suppliers.sort((a: any, b: any) => {
+            const carrierA = a.carrierAgentName.toUpperCase();
+            const carrierB = b.carrierAgentName.toUpperCase();
+    
+            if (carrierA < carrierB) {
+                return -1;
+            }
+            if (carrierA > carrierB) {
+                return 1;
+            }
+            // names must be equal
+            return 0;
+        });
+    });
+    return array;
+}
+
+export function sortHauliersByName(array: any) {
+    array.forEach((item: any) => {
+        item.hauliers.sort((a: any, b: any) => {
+            const nameA = a.haulierName.toUpperCase();
+            const nameB = b.haulierName.toUpperCase();
+    
+            if (nameA < nameB) {
+                return -1;
+            }
+            if (nameA > nameB) {
+                return 1;
+            }
+            // names must be equal
+            return 0;
+        });
+    });
+    return array;
+}
+
+export function isJSON(str: string) {
+    try {
+        let newJson = JSON.parse(str);
+        return typeof newJson === "object" && newJson !== str || false
+    } 
+    catch (e: any) {
+        return false;
+    }
+};
+
+export function getTotalPrice(seaFreightObject: any) {
+    let totalPrice = 0;
+  
+    // Loop through the containers array
+    for (const container of seaFreightObject.containers) {
+        // Loop through the services array inside each container
+        for (const service of container.services) {
+            // Add the price of the service to the totalPrice
+            totalPrice += service.price;
+        }
+    }
+  
+    return totalPrice;
+}
+
+export function getTotalPrices(seaFreights: any) {
+    var listPrices = 0;
+    for (const seaFreight of seaFreights) {
+        const totalPrice = getTotalPrice(seaFreight);
+        listPrices += totalPrice;
+    }
+    
+    return listPrices;
+}
+
+export async function getToken(instance: any, account: any, scope: any) {
+    await instance.acquireTokenSilent({
+        scopes: scope.scopes,
+        account: account
+    })
+    .then((response: AuthenticationResult) => {
+        return response.accessToken;
+    })
+    .catch(() => {
+        return instance.acquireTokenPopup({
+            ...scope,
+            account: account
+            }).then((response: any) => {
+                return response.accessToken;
+            });
+        }
+    );
+}
+
+export const getAccessToken = async (instance: any, scope: any, account: any) => {
+    try {
+        const response = await instance.acquireTokenSilent({
+            scopes: scope.scopes,
+            account: account,
+        });
+        return response.accessToken;
+    } 
+    catch (error) {
+        const response = await instance.acquireTokenPopup({
+            ...scope,
+            account: account,
+        });
+        return response.accessToken;
+    }
+};

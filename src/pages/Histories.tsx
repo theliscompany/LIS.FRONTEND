@@ -3,7 +3,7 @@ import { Alert, Box, Button, Chip, Grid, InputLabel, Skeleton, Typography } from
 import { BootstrapInput, datetimeStyles, gridStyles, inputLabelStyles } from '../utils/misc/styles';
 import { enqueueSnackbar, SnackbarProvider } from 'notistack';
 import SearchIcon from '@mui/icons-material/Search';
-import { protectedResources } from '../config/authConfig';
+import { loginRequest, protectedResources } from '../config/authConfig';
 import { useAuthorizedBackendApi } from '../api/api';
 import { BackendService } from '../utils/services/fetch';
 import { Link } from 'react-router-dom';
@@ -14,6 +14,7 @@ import { RequestResponseDto } from '../utils/models/models';
 import { useTranslation } from 'react-i18next';
 import { GridColDef, GridValueFormatterParams, GridRenderCellParams, DataGrid } from '@mui/x-data-grid';
 import { useAccount, useMsal } from '@azure/msal-react';
+import { getAccessToken, getToken } from '../utils/functions';
 
 function createGetRequestUrl(variable1: Dayjs|null, variable2: Dayjs|null, variable3: string, variable4: string) {
     let url = protectedResources.apiLisQuotes.endPoint+'/RequestQuoteHistory?';
@@ -90,7 +91,9 @@ function Histories(props: any) {
     const getHistories = async () => {
         if (context && account) {
             setLoad(true);
-            const response = await (context as BackendService<any>).getSingle(protectedResources.apiLisQuotes.endPoint+"/RequestQuoteHistory");
+            const token: any = await getAccessToken(instance, loginRequest, account);
+            
+            const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisQuotes.endPoint+"/RequestQuoteHistory", token);
             if (response !== null && response.code !== undefined) {
                 if (response.code === 200) {
                     console.log(response.data);
@@ -107,8 +110,10 @@ function Histories(props: any) {
     const searchHistories = async () => {
         if (context && account) {
             setLoad(true);
+            const token: any = await getAccessToken(instance, loginRequest, account);
+
             var requestFormatted = createGetRequestUrl(assignedDateStart, assignedDateEnd, assigneeId, requestQuoteId);
-            const response: RequestResponseDto = await (context as BackendService<any>).getSingle(requestFormatted);
+            const response: RequestResponseDto = await (context as BackendService<any>).getWithToken(requestFormatted, token);
             if (response !== null && response.code !== undefined && response.data !== undefined) {
                 if (response.code === 200) {
                     setLoad(false);
@@ -186,35 +191,6 @@ function Histories(props: any) {
                                             sx={gridStyles}
                                             disableRowSelectionOnClick
                                         />
-                                        {/* <Table aria-label="simple table" sx={{ border: 1, borderColor: "#e5e5e5" }}>
-                                            <TableHead>
-                                                <TableRow>
-                                                    <TableCell align="left" sx={{ fontSize: 16, fontWeight: "bolder" }}>Id</TableCell>
-                                                    <TableCell align="left" sx={{ fontSize: 16, fontWeight: "bolder" }}>{t('requestQuoteId')}</TableCell>
-                                                    <TableCell align="left" sx={{ fontSize: 16, fontWeight: "bolder" }}>{t('assignee')}</TableCell>
-                                                    <TableCell align="left" sx={{ fontSize: 16, fontWeight: "bolder" }}>{t('assigneeEmail')}</TableCell>
-                                                    <TableCell align="left" sx={{ fontSize: 16, fontWeight: "bolder" }}>{t('assignDate')}</TableCell>
-                                                    <TableCell align="left" sx={{ fontSize: 16, fontWeight: "bolder" }}>{t('unassignDate')}</TableCell>
-                                                    <TableCell align="left"><b></b></TableCell>
-                                                </TableRow>
-                                            </TableHead>
-                                            <TableBody>
-                                                {
-                                                    histories.map((row: any, i: number) => (
-                                                        <TableRow key={"history-"+row.id} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-                                                            <TableCell align="left">{row.id}</TableCell>
-                                                            <TableCell align="left">
-                                                                <Link to={"/admin/request/"+row.requestQuoteId}>{row.requestQuoteId}</Link>
-                                                            </TableCell>
-                                                            <TableCell align="left">{row.assignee !== null ? row.assignee.name+" (#"+row.assignee.id+")" : "Not defined"}</TableCell>
-                                                            <TableCell align="left">{row.assignee !== null ? row.assignee.email : "Not defined"}</TableCell>
-                                                            <TableCell align="left">{row.assignedAt !== null ? (new Date(row.assignedAt)).toLocaleString() : <Chip label={t('currentlyAssigned')} color="success" />}</TableCell>
-                                                            <TableCell align="left">{row.unassignedAt !== null ? (new Date(row.unassignedAt)).toLocaleString() : <Chip label={t('currentlyAssigned')} color="success" />}</TableCell>
-                                                        </TableRow>
-                                                    ))
-                                                }
-                                            </TableBody>
-                                        </Table> */}
                                     </Box>
                                 </Box> : <Alert severity="warning">{t('noResults')}</Alert>
                                 : <Skeleton sx={{ mt: 3 }} />
