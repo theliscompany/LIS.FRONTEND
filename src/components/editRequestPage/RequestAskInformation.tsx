@@ -12,7 +12,7 @@ function RequestAskInformation(props: any) {
     const [mailSubject, setMailSubject] = useState<string>("");
     const [mailContent, setMailContent] = useState<string>("");
     
-    const { accounts } = useMsal();
+    const { instance, accounts } = useMsal();
     const account = useAccount(accounts[0] || {});
 
     const context = useAuthorizedBackendApi();
@@ -20,9 +20,9 @@ function RequestAskInformation(props: any) {
     
     const askInformations = async () => {
         if (mailContent !== "") {
-            if (context && account) {
+            if (account && instance && context) {
                 var dataSent = { "content": mailContent, "requestQuoteId": props.id, "subject": mailSubject, "noteType": "InformationRequest", email: props.email, "idUser": account?.username };
-                const response = await (context as BackendService<any>).post(protectedResources.apiLisQuotes.endPoint+"/RequestQuoteNotes", dataSent);
+                const response = await (context?.service as BackendService<any>).post(protectedResources.apiLisQuotes.endPoint+"/RequestQuoteNotes", dataSent);
                 if (response !== null) {
                     props.closeModal();
                     enqueueSnackbar(t('messageSuccessSent'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });

@@ -8,9 +8,9 @@ import { graphRequest, loginRequest, protectedResources } from '../config/authCo
 import { useAuthorizedBackendApi } from '../api/api';
 import { BackendService } from '../utils/services/fetch';
 import { useAccount, useMsal } from '@azure/msal-react';
-import { AuthenticationResult } from '@azure/msal-browser';
 import { useTranslation } from 'react-i18next';
 import { DataGrid, GridColDef, GridRenderCellParams } from '@mui/x-data-grid';
+import { getAccessToken } from '../utils/functions';
 
 function UsersAssignment(props: any) {
     const [load, setLoad] = useState<boolean>(false);
@@ -60,32 +60,16 @@ function UsersAssignment(props: any) {
     
     useEffect(() => {
         getAssignees();
-        //loadUsers();
-    }, [account, instance]);
+    }, [account, instance, context]);
     
     const getAssignees = async () => {
-        if (context && account) {
-            const token = await instance.acquireTokenSilent({
-                scopes: loginRequest.scopes,
-                account: account
-            })
-            .then((response: AuthenticationResult) => {
-                return response.accessToken;
-            })
-            .catch(() => {
-                return instance.acquireTokenPopup({
-                    ...loginRequest,
-                    account: account
-                    }).then((response) => {
-                        return response.accessToken;
-                    });
-                }
-            );
-            setTempToken(token);
+        if (account && instance && context) {
+            // const token = await getAccessToken(instance, loginRequest, account);
+            // setTempToken(token);
             
             try {
                 setLoad(true);
-                const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisQuotes.endPoint+"/Assignee", token);
+                const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisQuotes.endPoint+"/Assignee", context.tokenLogin);
                 if (response !== null && response.code !== undefined) {
                     if (response.code === 200) {
                         //console.log(response);
@@ -136,24 +120,8 @@ function UsersAssignment(props: any) {
     }
     
     const loadUsers = async () => {
-        if(account) {
-            const token = await instance.acquireTokenSilent({
-                scopes: graphRequest.scopes,
-                account: account
-            })
-            .then((response: AuthenticationResult)=>{
-                return response.accessToken;
-            })
-            .catch(() => {
-                return instance.acquireTokenPopup({
-                    ...graphRequest,
-                    account: account
-                    }).then((response) => {
-                        return response.accessToken;
-                    });
-                }
-            );
-
+        if(account && instance) {
+            const token = await getAccessToken(instance, graphRequest, account);
             getUsersFromAAD(token);
         }
     }
@@ -161,16 +129,16 @@ function UsersAssignment(props: any) {
     const removeAsManager = async (email: string) => {
         var assignee = assignees.find((user: any) => user.email === email);
         if (assignee) {
-            if (context && account) {
+            if (account && instance && context) {
                 setLoad(true);
-                const response = await (context as BackendService<any>).deleteWithToken(protectedResources.apiLisQuotes.endPoint+"/Assignee/"+assignee.id, tempToken);
+                const response = await (context?.service as BackendService<any>).deleteWithToken(protectedResources.apiLisQuotes.endPoint+"/Assignee/"+assignee.id, context.tokenLogin);
                 if (response !== null && response.code !== undefined) {
                     if (response.code === 200) {
                         //console.log(response);
                         enqueueSnackbar(t('operationSuccess'), { variant: "info", anchorOrigin: { horizontal: "right", vertical: "top"} });
 
                         // Here i refresh the assignees (to do a lot cleaner)
-                        const response2 = await (context as BackendService<any>).getWithToken(protectedResources.apiLisQuotes.endPoint+"/Assignee", tempToken);
+                        const response2 = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisQuotes.endPoint+"/Assignee", context.tokenLogin);
                         if (response2 !== null && response2.code !== undefined) {
                             if (response2.code === 200) {
                                 setAssignees(response2.data);
@@ -192,15 +160,15 @@ function UsersAssignment(props: any) {
     }
 
     const assignAsManager = async (name: string, email: string, idUser: string) => {
-        if (context && account) {
+        if (account && instance && context) {
             let content = { "name": name, "email": email, "idUser": idUser };
-            const response = await (context as BackendService<any>).postWithToken(protectedResources.apiLisQuotes.endPoint+"/Assignee", content, tempToken);
+            const response = await (context?.service as BackendService<any>).postWithToken(protectedResources.apiLisQuotes.endPoint+"/Assignee", content, context.tokenLogin);
             if (response !== null && response.status === 201) {
                 //console.log(response);
                 enqueueSnackbar(t('assigneeCreatedSuccess'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
 
                 // Here i refresh the assignees (to do a lot cleaner)
-                const response2 = await (context as BackendService<any>).getWithToken(protectedResources.apiLisQuotes.endPoint+"/Assignee", tempToken);
+                const response2 = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisQuotes.endPoint+"/Assignee", context.tokenLogin);
                 if (response2 !== null && response2.code !== undefined) {
                     if (response2.code === 200) {
                         setAssignees(response2.data);

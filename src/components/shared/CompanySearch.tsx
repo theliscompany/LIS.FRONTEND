@@ -8,6 +8,7 @@ import { useMsal, useAccount } from "@azure/msal-react";
 import { useAuthorizedBackendApi } from "../../api/api";
 import { crmRequest, protectedResources } from "../../config/authConfig";
 import { BackendService } from "../../utils/services/fetch";
+import { getAccessToken } from "../../utils/functions";
 
 interface CompanyAutocompleteProps {
     id: string;
@@ -28,31 +29,16 @@ const CompanySearch: React.FC<CompanyAutocompleteProps> = ({ id, value, onChange
     const account = useAccount(accounts[0] || {});
 
     const debouncedSearch = debounce(async (search: string) => {
-        if (context && account) {
+        if (account && instance && context) {
             setLoading(true);
-            const token = await instance.acquireTokenSilent({
-                scopes: crmRequest.scopes,
-                account: account
-            })
-            .then((response: AuthenticationResult) => {
-                return response.accessToken;
-            })
-            .catch(() => {
-                return instance.acquireTokenPopup({
-                    ...crmRequest,
-                    account: account
-                    }).then((response) => {
-                        return response.accessToken;
-                    });
-                }
-            );
+            // const token = await getAccessToken(instance, crmRequest, account);
             
             var requestString = protectedResources.apiLisCrm.endPoint+"/Contact/GetContacts?contactName="+search+"&category="+category;
             if (category === 0) {
                 requestString = protectedResources.apiLisCrm.endPoint+"/Contact/GetContacts?contactName="+search;
             }
             
-            const response = await (context as BackendService<any>).getWithToken(requestString, token);
+            const response = await (context?.service as BackendService<any>).getWithToken(requestString, context.tokenCrm);
             if (response !== null && response !== undefined && response.length !== 0) {
                 console.log(response);
                 setOptions(response.data);

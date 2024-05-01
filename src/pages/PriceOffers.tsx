@@ -45,7 +45,7 @@ function PriceOffers() {
     const [modal, setModal] = useState<boolean>(false);
     const [currentId, setCurrentId] = useState<string>("");
 
-    const { accounts } = useMsal();
+    const { instance, accounts } = useMsal();
     const account = useAccount(accounts[0] || {});
         
     const context = useAuthorizedBackendApi();
@@ -95,9 +95,9 @@ function PriceOffers() {
     }, []);
     
     const getPriceOffers = async () => {
-        if (context && account) {
+        if (account && instance && context) {
             setLoad(true);
-            const response = await (context as BackendService<any>).getSingle(protectedResources.apiLisOffer.endPoint+"/QuoteOffer");
+            const response = await (context?.service as BackendService<any>).getSingle(protectedResources.apiLisOffer.endPoint+"/QuoteOffer");
             if (response !== null && response.code !== undefined) {
                 if (response.code === 200) {
                     console.log(response.data);
@@ -114,8 +114,8 @@ function PriceOffers() {
     }
     
     const deleteOffer = async (id: string) => {
-        if (context && account) {
-            const response = await (context as any).delete(protectedResources.apiLisOffer.endPoint+"/QuoteOffer/"+id);
+        if (account && instance && context) {
+            const response = await (context?.service as any).delete(protectedResources.apiLisOffer.endPoint+"/QuoteOffer/"+id);
             if (response !== null && response.code !== undefined) {
                 if (response.code === 200) {
                     enqueueSnackbar(t('offerDeleted'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });

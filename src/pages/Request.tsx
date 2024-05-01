@@ -115,7 +115,7 @@ function Request() {
         getPorts();
         getProducts();
         loadRequest();
-    }, []);
+    }, [account, instance, context]);
     
     useEffect(() => {
         if (ports !== null && products !== null && requestData !== null) {
@@ -130,13 +130,13 @@ function Request() {
     }, [ports, products]);
 
     const getAssignees = async () => {
-        if (context && account) {
-            const token = await getAccessToken(instance, loginRequest, account);
-            setTempToken(token);
+        if (account && instance && context) {
+            // const token = await getAccessToken(instance, loginRequest, account);
+            // setTempToken(token);
             
             try {
                 setLoadAssignees(true);
-                const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisQuotes.endPoint+"/Assignee", token);
+                const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisQuotes.endPoint+"/Assignee", context.tokenLogin);
                 if (response !== null && response.code !== undefined) {
                     if (response.code === 200) {
                         setAssignees(response.data);
@@ -158,11 +158,11 @@ function Request() {
     }
     
     const loadRequest = async () => {
-        if (context && account) {
-            const token = await getAccessToken(instance, loginRequest, account);
+        if (account && instance && context) {
+            // const token = await getAccessToken(instance, loginRequest, account);
 
             try {
-                const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisQuotes.endPoint+"/Request/"+id, token);
+                const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisQuotes.endPoint+"/Request/"+id, context.tokenLogin);
                 if (response !== null && response.code !== undefined) {
                     if (response.code === 200) {
                         setRequestData(response.data);
@@ -215,7 +215,7 @@ function Request() {
             auxUnits = unitsSelection;
         }
         
-        if (context && account) {
+        if (account && instance && context) {
             var postcode1 = departure.postalCode !== null && departure.postalCode !== undefined ? departure.postalCode : "";
             var postcode2 = arrival.postalCode !== null && arrival.postalCode !== undefined ? arrival.postalCode : "";
 
@@ -247,7 +247,7 @@ function Request() {
                 assigneeId: Number(assignedManager)
             };
 
-            const data = await (context as BackendService<any>).put(protectedResources.apiLisQuotes.endPoint+"/Request/"+id, body);
+            const data = await (context?.service as BackendService<any>).putWithToken(protectedResources.apiLisQuotes.endPoint+"/Request/"+id, body, context.tokenLogin);
             if (data?.status === 200) {
                 enqueueSnackbar(t('requestEditedSuccess'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
             }
@@ -262,10 +262,10 @@ function Request() {
     }
     
     const getPorts = async () => {
-        if (context && account) {
-            const token = await getAccessToken(instance, transportRequest, account);
+        if (account && instance && context) {
+            // const token = await getAccessToken(instance, transportRequest, account);
             
-            const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Port/Ports?pageSize=2000", token);
+            const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Port/Ports?pageSize=2000", context.tokenTransport);
             if (response !== null && response !== undefined) {
                 // console.log(response);
                 var addedCoordinatesPorts = addedCoordinatesToPorts(response);
@@ -277,10 +277,10 @@ function Request() {
     }
     
     const getProducts = async () => {
-        if (context && account) {
-            const token = await getAccessToken(instance, transportRequest, account);
+        if (account && instance && context) {
+            // const token = await getAccessToken(instance, transportRequest, account);
             
-            const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Product?pageSize=500", token);
+            const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Product?pageSize=500", context.tokenTransport);
             if (response !== null && response !== undefined) {
                 setProducts(response);
             }  
@@ -352,23 +352,26 @@ function Request() {
                         </Grid>
                         
                         {/* Request Form COMPONENT */}
-                        <RequestForm 
-                            context={context} account={account} instance={instance}
-                            id={id} tempToken={tempToken}
-                            assignedManager={assignedManager} setAssignedManager={setAssignedManager}
-                            assignees={assignees} loadAssignees={loadAssignees}
-                            message={message} setMessage={setMessage}
-                            phone={phone} setPhone={setPhone}
-                            packingType={packingType} containers={containers}
-                            clientNumber={clientNumber} setClientNumber={setClientNumber}
-                            departure={departure} setDeparture={setDeparture}
-                            arrival={arrival} setArrival={setArrival} 
-                            email={email} setEmail={setEmail}
-                            tags={tags} setTags={setTags}
-                            containersSelection={containersSelection} setContainersSelection={setContainersSelection}
-                            getClosestDeparture={getClosestDeparture} getClosestArrival={getClosestArrival}
-                            products={products} openModalContainer={() => setModal10(true)}
-                        />
+                        {
+                            context ? 
+                            <RequestForm 
+                                context={context} account={account} instance={instance}
+                                id={id} tempToken={context.tokenLogin}
+                                assignedManager={assignedManager} setAssignedManager={setAssignedManager}
+                                assignees={assignees} loadAssignees={loadAssignees}
+                                message={message} setMessage={setMessage}
+                                phone={phone} setPhone={setPhone}
+                                packingType={packingType} containers={containers}
+                                clientNumber={clientNumber} setClientNumber={setClientNumber}
+                                departure={departure} setDeparture={setDeparture}
+                                arrival={arrival} setArrival={setArrival} 
+                                email={email} setEmail={setEmail}
+                                tags={tags} setTags={setTags}
+                                containersSelection={containersSelection} setContainersSelection={setContainersSelection}
+                                getClosestDeparture={getClosestDeparture} getClosestArrival={getClosestArrival}
+                                products={products} openModalContainer={() => setModal10(true)}
+                            /> : null
+                        }
                         
                         {/* Generate Price Offer COMPONENT */}
                         {

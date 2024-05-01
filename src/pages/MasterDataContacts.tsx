@@ -15,6 +15,7 @@ import { Edit, Delete } from '@mui/icons-material';
 import CountrySelect from '../components/shared/CountrySelect';
 import { countries } from '../utils/constants';
 import { MuiTelInput } from 'mui-tel-input';
+import { getAccessToken } from '../utils/functions';
 
 const MasterDataContacts: any = (props: any) => {
     const [products, setContacts] = useState<any>(null);
@@ -54,28 +55,13 @@ const MasterDataContacts: any = (props: any) => {
     }
       
     const getContacts = async () => {
-        if (context && account) {
+        if (account && instance && context) {
             setLoadResults(true);
 
-            const token = await instance.acquireTokenSilent({
-                scopes: crmRequest.scopes,
-                account: account
-            })
-            .then((response: AuthenticationResult) => {
-                return response.accessToken;
-            })
-            .catch(() => {
-                return instance.acquireTokenPopup({
-                    ...crmRequest,
-                    account: account
-                    }).then((response) => {
-                        return response.accessToken;
-                    });
-                }
-            );
-            setTempToken(token);
+            // const token = await getAccessToken(instance, crmRequest, account);
+            // setTempToken(token);
             
-            const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisCrm.endPoint+"/Contact/GetContacts?pageSize=4000", token);
+            const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisCrm.endPoint+"/Contact/GetContacts?pageSize=4000", context.tokenCrm);
             if (response !== null && response !== undefined) {
                 setContacts(response.data);
                 setLoadResults(false);
@@ -88,9 +74,9 @@ const MasterDataContacts: any = (props: any) => {
     }
     
     const deleteContact = async (id: string) => {
-        if (context && account) {
+        if (account && instance && context) {
             try {
-                const response = await (context as BackendService<any>).deleteWithToken(protectedResources.apiLisCrm.endPoint+"/Contact/DeleteContact/"+id, tempToken);
+                const response = await (context?.service as BackendService<any>).deleteWithToken(protectedResources.apiLisCrm.endPoint+"/Contact/DeleteContact/"+id, context.tokenCrm);
                 console.log(response);
                 enqueueSnackbar(t('rowDeletedSuccess'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
                 setModal2(false);
@@ -105,7 +91,7 @@ const MasterDataContacts: any = (props: any) => {
     
     useEffect(() => {
         getContacts();
-    }, []);
+    }, [instance, account]);
 
     const columnsContacts: GridColDef[] = [
         { field: 'contactId', headerName: t('id'), flex: 0.5 },
@@ -141,23 +127,8 @@ const MasterDataContacts: any = (props: any) => {
     
     const createNewContact = async () => {
         if (country !== null && testName !== "" && testPhone !== "" && testEmail !== "" && addressCountry !== "") {
-            if (account && context) {
-                const token = await instance.acquireTokenSilent({
-                    scopes: transportRequest.scopes,
-                    account: account
-                })
-                .then((response: AuthenticationResult) => {
-                    return response.accessToken;
-                })
-                .catch(() => {
-                    return instance.acquireTokenPopup({
-                        ...transportRequest,
-                        account: account
-                        }).then((response) => {
-                            return response.accessToken;
-                        });
-                    }
-                );
+            if (account && instance && context) {
+                // const token = await getAccessToken(instance, transportRequest, account);
                 
                 try {
                     var dataSent = null;
@@ -173,7 +144,7 @@ const MasterDataContacts: any = (props: any) => {
                             "email": testEmail,
                             "categories": getCategoryNames(selectedCategories)
                         };
-                        response = await (context as BackendService<any>).putWithToken(protectedResources.apiLisCrm.endPoint+"/Contact/UpdateContact/"+currentEditId, dataSent, token);
+                        response = await (context?.service as BackendService<any>).putWithToken(protectedResources.apiLisCrm.endPoint+"/Contact/UpdateContact/"+currentEditId, dataSent, context.tokenCrm);
                     }
                     else {
                         dataSent = {
@@ -185,7 +156,7 @@ const MasterDataContacts: any = (props: any) => {
                             "email": testEmail,
                             "categories": getCategoryNames(selectedCategories)
                         };
-                        response = await (context as BackendService<any>).postWithToken(protectedResources.apiLisCrm.endPoint+"/Contact/CreateContact", dataSent, token);
+                        response = await (context?.service as BackendService<any>).postWithToken(protectedResources.apiLisCrm.endPoint+"/Contact/CreateContact", dataSent, context.tokenCrm);
                     }
                     enqueueSnackbar(currentEditId === "" ? "The contact has been added with success!" : "The contact has been edited with success!", { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
                     getContacts();
@@ -204,8 +175,8 @@ const MasterDataContacts: any = (props: any) => {
     
     const getContact = async (id: string) => {
         setLoadEdit(true)
-        if (context && account) {
-            const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisCrm.endPoint+"/Contact/GetContactById/"+id, tempToken);
+        if (account && instance && context) {
+            const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisCrm.endPoint+"/Contact/GetContactById/"+id, context.tokenCrm);
             if (response !== null && response !== undefined) {
                 console.log(response);
                 setTestName(response.data.contactName);

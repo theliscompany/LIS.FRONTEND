@@ -12,6 +12,7 @@ import { DataGrid, GridColDef, GridRenderCellParams, GridToolbar } from '@mui/x-
 import { t } from 'i18next';
 import { sizingStyles, gridStyles, BootstrapDialog, BootstrapDialogTitle, buttonCloseStyles, BootstrapInput, actionButtonStyles, inputLabelStyles } from '../utils/misc/styles';
 import { Edit, Delete } from '@mui/icons-material';
+import { getAccessToken } from '../utils/functions';
 
 const MasterDataProducts: any = (props: any) => {
     const [products, setProducts] = useState<any>(null);
@@ -31,31 +32,14 @@ const MasterDataProducts: any = (props: any) => {
     const context = useAuthorizedBackendApi();
     
     const getProducts = async () => {
-        if (context && account) {
+        if (account && instance && context) {
             setLoadResults(true);
-
-            const token = await instance.acquireTokenSilent({
-                scopes: transportRequest.scopes,
-                account: account
-            })
-            .then((response: AuthenticationResult) => {
-                return response.accessToken;
-            })
-            .catch(() => {
-                return instance.acquireTokenPopup({
-                    ...transportRequest,
-                    account: account
-                    }).then((response) => {
-                        return response.accessToken;
-                    });
-                }
-            );
-            
-            const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Product?pageSize=500", token);
+            // const token = await getAccessToken(instance, transportRequest, account);
+            const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Product?pageSize=500", context.tokenTransport);
             if (response !== null && response !== undefined) {
                 setProducts(response);
                 setLoadResults(false);
-                setTempToken(token);
+                // setTempToken(token);
                 // setProducts(response.filter((obj: any) => obj.productsTypeId.includes(5) || obj.productsTypeId.includes(2))); // Filter the products for miscellaneous (MISCELLANEOUS = 5 & HAULAGE = 2)
             }
             else {
@@ -65,9 +49,9 @@ const MasterDataProducts: any = (props: any) => {
     }
     
     const deleteProductPrice = async (id: string) => {
-        if (context && account) {
+        if (account && instance && context) {
             try {
-                const response = await (context as BackendService<any>).deleteWithToken(protectedResources.apiLisTransport.endPoint+"/Product/"+id, tempToken);
+                const response = await (context?.service as BackendService<any>).deleteWithToken(protectedResources.apiLisTransport.endPoint+"/Product/"+id, context.tokenTransport);
                 console.log(response);
                 enqueueSnackbar(t('rowDeletedSuccess'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
                 setModal2(false);
@@ -82,7 +66,7 @@ const MasterDataProducts: any = (props: any) => {
     
     useEffect(() => {
         getProducts();
-    }, []);
+    }, [account, instance, account]);
 
     const columnsProducts: GridColDef[] = [
         { field: 'productId', headerName: t('id'), flex: 1 },
@@ -103,23 +87,8 @@ const MasterDataProducts: any = (props: any) => {
     
     const createNewProduct = async () => {
         if (testName !== "") {
-            if (account && context) {
-                const token = await instance.acquireTokenSilent({
-                    scopes: transportRequest.scopes,
-                    account: account
-                })
-                .then((response: AuthenticationResult) => {
-                    return response.accessToken;
-                })
-                .catch(() => {
-                    return instance.acquireTokenPopup({
-                        ...transportRequest,
-                        account: account
-                        }).then((response) => {
-                            return response.accessToken;
-                        });
-                    }
-                );
+            if (account && instance && context) {
+                // const token = await getAccessToken(instance, transportRequest, account);
                 
                 try {
                     var dataSent = null;
@@ -131,7 +100,7 @@ const MasterDataProducts: any = (props: any) => {
                             // "productDescription": testDescription,
                             // "productsTypeId": selectedProductTypes
                         };
-                        response = await (context as BackendService<any>).putWithToken(protectedResources.apiLisTransport.endPoint+"/Product/"+currentEditId, dataSent, token);
+                        response = await (context?.service as BackendService<any>).putWithToken(protectedResources.apiLisTransport.endPoint+"/Product/"+currentEditId, dataSent, context.tokenTransport);
                     }
                     else {
                         dataSent = {
@@ -139,7 +108,7 @@ const MasterDataProducts: any = (props: any) => {
                             // "productDescription": testDescription,
                             // "productsTypeId": selectedProductTypes
                         };
-                        response = await (context as BackendService<any>).postWithToken(protectedResources.apiLisTransport.endPoint+"/Product", dataSent, token);
+                        response = await (context?.service as BackendService<any>).postWithToken(protectedResources.apiLisTransport.endPoint+"/Product", dataSent, context.tokenTransport);
                     }
                     enqueueSnackbar(currentEditId === "" ? "The product has been added with success!" : "The product has been edited with success!", { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
                     getProducts();
@@ -158,8 +127,8 @@ const MasterDataProducts: any = (props: any) => {
     
     const getProduct = async (id: string) => {
         setLoadEdit(true)
-        if (context && account) {
-            const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Product/"+id, tempToken);
+        if (account && instance && context) {
+            const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Product/"+id, context.tokenTransport);
             if (response !== null && response !== undefined) {
                 console.log(response);
                 setTestName(response.productName);

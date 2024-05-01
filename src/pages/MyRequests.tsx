@@ -19,6 +19,7 @@ import { useTranslation } from 'react-i18next';
 import RequestViewItem from '../components/requestsPage/RequestViewItem';
 import AutocompleteSearch from '../components/shared/AutocompleteSearch';
 import { AuthenticationResult } from '@azure/msal-browser';
+import { getAccessToken } from '../utils/functions';
 
 function createGetRequestUrl(variable1: string, variable2: string, variable3: string, variable4: string, variable5: Dayjs|null, variable6: Dayjs|null, variable7: Dayjs|null, variable8: Dayjs|null, assigneeId: number) {
     let url = protectedResources.apiLisQuotes.endPoint+'/Request?';
@@ -84,29 +85,13 @@ function MyRequests() {
     
     useEffect(() => {
         getAssignees();
-    }, [instance, account, context]);
+    }, [instance, account]);
 
     const getAssignees = async () => {
-        if (context && account) {
-            const token = await instance.acquireTokenSilent({
-                scopes: loginRequest.scopes,
-                account: account
-            })
-            .then((response: AuthenticationResult) => {
-                return response.accessToken;
-            })
-            .catch(() => {
-                return instance.acquireTokenPopup({
-                    ...loginRequest,
-                    account: account
-                    }).then((response) => {
-                        return response.accessToken;
-                    });
-                }
-            );
-
-            setLoad(true);
-            const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisQuotes.endPoint+"/Assignee", token);
+        if (account && instance && context) {
+            // const token = await getAccessToken(instance, loginRequest, account);
+            // setLoad(true);
+            const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisQuotes.endPoint+"/Assignee", context.tokenLogin);
             if (response !== null && response.code !== undefined) {
                 if (response.code === 200) {
                     setCurrentUser(response.data.find((elm: any) => elm.email === account?.username));
@@ -121,11 +106,11 @@ function MyRequests() {
     }
 
     const loadRequests = async (assigneesList: any) => {
-        if (context && account) {
+        if (account && instance && context) {
             //setLoad(true);
             var auxAssignee = assigneesList.find((elm: any) => elm.email === account?.username);
             if (auxAssignee !== undefined) {
-                const response: RequestResponseDto = await (context as BackendService<any>).getSingle(protectedResources.apiLisQuotes.endPoint+"/Request?AssigneeId="+auxAssignee.id);
+                const response: RequestResponseDto = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisQuotes.endPoint+"/Request?AssigneeId="+auxAssignee.id, context.tokenLogin);
                 if (response !== null && response.code !== undefined && response.data !== undefined) {
                     if (response.code === 200) {
                         setLoad(false);
@@ -145,7 +130,7 @@ function MyRequests() {
     }
 
     const searchRequests = async () => {
-        if (context && account) {
+        if (account && instance && context) {
             setLoad(true);
             var idAssignee = currentUser.id;
             
@@ -156,7 +141,7 @@ function MyRequests() {
             console.log(auxDeparture, auxArrival);
 
             var requestFormatted = createGetRequestUrl(auxDeparture, auxArrival, packingType, status, createdDateStart, createdDateEnd, updatedDateStart, updatedDateEnd, idAssignee);
-            const response: RequestResponseDto = await (context as BackendService<any>).getSingle(requestFormatted);
+            const response: RequestResponseDto = await (context?.service as BackendService<any>).getSingle(requestFormatted);
             if (response !== null && response.code !== undefined && response.data !== undefined) {
                 if (response.code === 200) {
                     setLoad(false);

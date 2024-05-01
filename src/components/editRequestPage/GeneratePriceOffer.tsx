@@ -10,7 +10,7 @@ import { DataGrid, GridColDef, GridColumnHeaderParams, GridRenderCellParams, Gri
 import StarterKit from '@tiptap/starter-kit';
 import { t } from 'i18next';
 import React from 'react';
-import { calculateTotal, checkCarrierConsistency, checkDifferentDefaultContainer, formatObject, formatServices, generateRandomNumber, getServices, getServicesTotal, getServicesTotal2, getTotalNumber, hashCode, myServices, removeDuplicatesWithLatestUpdated } from '../../utils/functions';
+import { calculateTotal, checkCarrierConsistency, checkDifferentDefaultContainer, formatObject, formatServices, generateRandomNumber, getAccessToken, getServices, getServicesTotal, getServicesTotal2, getTotalNumber, hashCode, myServices, removeDuplicatesWithLatestUpdated } from '../../utils/functions';
 import AutocompleteSearch from '../shared/AutocompleteSearch';
 import ContainerElement from './ContainerElement';
 import ContainerPrice from './ContainerPrice';
@@ -253,17 +253,11 @@ function GeneratePriceOffer(props: any) {
         setFormState({...formState, marginsMiscs: updatedMarginMiscs});
     };
     
-    const handleAddingMiscChange = (index: number, value: any) => {
-        const updatedAddingMiscs: any = [...formState.addingMiscs];
-        updatedAddingMiscs[index] = value;
-        setFormState({...formState, addingMiscs: updatedAddingMiscs});
-    };
-    
     useEffect(() => {
         if (loadingCity !== null) {
             getHaulagePriceOffers();
         }
-    }, [loadingCity]);
+    }, [loadingCity, account, instance, account]);
 
     // useEffect(() => {
     //     console.log("Form State : ", formState);
@@ -271,27 +265,14 @@ function GeneratePriceOffer(props: any) {
     
     useEffect(() => {
         getTemplates();
-    }, []);
+    }, [account, instance, account]);
     
     useEffect(() => {
         if (formState.selectedTemplate !== undefined && formState.selectedTemplate !== null) {
             getTemplate(formState.selectedTemplate);
         }
-    }, [formState.selectedTemplate]);
+    }, [formState.selectedTemplate, account, instance, account]);
 
-    // useEffect(() => {
-    //     getSeaFreightPriceOffers();
-    // }, [formState.portDestination]);
-
-    // useEffect(() => {
-    //     // Initialize margins with default value 22 and addings with default value 0
-    //     const initialMargins = containersSelection.map(() => 22); // Default margin 22
-    //     const initialAddings = containersSelection.map(() => 0); // Default adding 0
-        
-    //     // setMargins(initialMargins);
-    //     // setAddings(initialAddings);
-    // }, [containersSelection]); // Assuming containersSelection is a prop or state
-    
     useEffect(() => {
         if (generalMiscs !== null && miscs !== null && miscsHaulage !== null) {
             setTableMiscs([...miscsHaulage, ...miscs, ...generalMiscs]);
@@ -308,7 +289,7 @@ function GeneratePriceOffer(props: any) {
         if (formState.activeStep === 3 && seafreights === null) {
             getSeaFreightPriceOffers();
         }
-    }, [formState.activeStep, seafreights]);
+    }, [formState.activeStep, seafreights, account, instance, account]);
 
     // Stepper functions
     const [skipped, setSkipped] = React.useState(new Set<number>());
@@ -495,24 +476,9 @@ function GeneratePriceOffer(props: any) {
     }
 
     const getHaulagePriceOffers = async () => {
-        if (context && account) {
-            const token = await instance.acquireTokenSilent({
-                scopes: pricingRequest.scopes,
-                account: account
-            })
-            .then((response: AuthenticationResult) => {
-                return response.accessToken;
-            })
-            .catch((err: any) => {
-                console.log(err);
-                return instance.acquireTokenPopup({
-                    ...pricingRequest,
-                    account: account
-                }).then((response: any) => {
-                    return response.accessToken;
-                });
-            });
-            setTempToken(token);
+        if (account && instance && context) {
+            // const token = await getAccessToken(instance, pricingRequest, account);
+            // setTempToken(token);
             
             setLoadResults(true);
             var postalCode = loadingCity !== null ? loadingCity.postalCode !== undefined ? loadingCity.postalCode : "" : ""; 
@@ -529,31 +495,16 @@ function GeneratePriceOffer(props: any) {
             // I removed the loadingDate
             var containersFormatted = (containersSelection.map((elm: any) => elm.id)).join("&ContainerTypesId="); 
             var urlSent = createGetRequestUrl(protectedResources.apiLisPricing.endPoint+"/Pricing/HaulagesOfferRequest?", formState.haulageType, city, containersFormatted);
-            const response = await (context as BackendService<any>).getWithToken(urlSent, token);
+            const response = await (context?.service as BackendService<any>).getWithToken(urlSent, context.tokenPricing);
             setLoadResults(false);
             setHaulages(removeDuplicatesWithLatestUpdated(response));
         }
     }
 
     const getSeaFreightPriceOffers = async () => {
-        if (context && account) {
-            const token = await instance.acquireTokenSilent({
-                scopes: pricingRequest.scopes,
-                account: account
-            })
-            .then((response: AuthenticationResult) => {
-                return response.accessToken;
-            })
-            .catch((err: any) => {
-                console.log(err);
-                return instance.acquireTokenPopup({
-                    ...pricingRequest,
-                    account: account
-                }).then((response: any) => {
-                    return response.accessToken;
-                });
-            });
-            setTempToken(token);
+        if (account && instance && context) {
+            // const token = await getAccessToken(instance, pricingRequest, account);
+            // setTempToken(token);
             
             setLoadResults(true);
             var containersFormatted = (containersSelection.map((elm: any) => elm.id)).join("&ContainerTypesId=");
@@ -565,7 +516,7 @@ function GeneratePriceOffer(props: any) {
 
             if (auxPortDeparture !== undefined && auxPortDeparture !== null && formState.portDestination !== undefined && formState.portDestination !== null) {
                 var urlSent = createGetRequestUrl2(protectedResources.apiLisPricing.endPoint+"/Pricing/SeaFreightsOffersRequest?", auxPortDeparture.portId, formState.portDestination.portId, containersFormatted);
-                const response = await (context as BackendService<any>).getWithToken(urlSent, token);
+                const response = await (context?.service as BackendService<any>).getWithToken(urlSent, context.tokenPricing);
                 var myContainers = containersSelection.map((elm: any) => elm.container);
                 setAllSeafreights(response);
                 setSeafreights(response.filter((elm: any) => myContainers.includes(elm.containers[0].container.packageName)).map((elm: any) => { return {...elm, defaultContainer: elm.containers[0].container.packageName}}));
@@ -579,8 +530,8 @@ function GeneratePriceOffer(props: any) {
 
     const getMiscellaneousPriceOffers = async () => {
         setLoadResults(true);
-        if (context && account) {
-            const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisPricing.endPoint+"/Miscellaneous/Miscellaneous?departurePortId="+formState.portDeparture.portId+"&destinationPortId="+formState.portDestination.portId+"&withShipment=true", tempToken);
+        if (account && instance && context) {
+            const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisPricing.endPoint+"/Miscellaneous/Miscellaneous?departurePortId="+formState.portDeparture.portId+"&destinationPortId="+formState.portDestination.portId+"&withShipment=true", context.tokenPricing);
             
             var myContainers = containersSelection.map((elm: any, index: any) => {
                 if (calculateSeafreightPrice(elm.container, elm.quantity, index) !== 0) {
@@ -604,8 +555,8 @@ function GeneratePriceOffer(props: any) {
 
     const getGeneralMiscellaneousPriceOffers = async () => {
         setLoadGeneralMiscs(true);
-        if (context && account) {
-            var response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisPricing.endPoint+"/Miscellaneous/Miscellaneous?withShipment=false", tempToken);
+        if (account && instance && context) {
+            var response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisPricing.endPoint+"/Miscellaneous/Miscellaneous?withShipment=false", context.tokenPricing);
             
             var myFreights = formState.rowSelectionModel.length !== 0 && seafreights !== null && formState.selectedSeafreights !== undefined && formState.selectedSeafreights !== null ? 
                 formState.selectedSeafreights 
@@ -629,7 +580,7 @@ function GeneratePriceOffer(props: any) {
 
     const getHaulageMiscellaneousPriceOffers = async () => {
         setLoadMiscsHaulage(true)
-        if (context && account) {
+        if (account && instance && context) {
             var postalCode = loadingCity !== null ? loadingCity.postalCode !== undefined ? loadingCity.postalCode : "" : ""; 
             var city = "";
             if (postalCode !== "") {
@@ -648,7 +599,7 @@ function GeneratePriceOffer(props: any) {
                 return null;
             });
             
-            const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisPricing.endPoint+"/Miscellaneous/Miscellaneous?supplierId="+formState.selectedHaulage.haulierId+"&departurePortId="+Number(hashCode(city))+"&destinationPortId="+formState.selectedHaulage.loadingPortId+"&withShipment=true", tempToken);
+            const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisPricing.endPoint+"/Miscellaneous/Miscellaneous?supplierId="+formState.selectedHaulage.haulierId+"&departurePortId="+Number(hashCode(city))+"&destinationPortId="+formState.selectedHaulage.loadingPortId+"&withShipment=true", context.tokenPricing);
             
             var arrayFinal = response.length !== 0 ? response[0].suppliers.filter((elm: any) => myContainers.includes(elm.containers[0].container.packageName)).filter((elm: any) => new Date(elm.validUntil) > new Date()) : [];
             setMiscsHaulage(arrayFinal);
@@ -658,7 +609,7 @@ function GeneratePriceOffer(props: any) {
 
     const createNewOffer = async () => {
         if (formState.selectedSeafreight !== null && formState.selectedSeafreight !== undefined) {
-            if (context && account) {
+            if (account && instance && context) {
                 setLoadNewOffer(true);
                 var haulage = null;
                 var miscellaneous = null;
@@ -743,7 +694,7 @@ function GeneratePriceOffer(props: any) {
                     "extraFee": 0,
                     "totalPrice": 0
                 };
-                const response = await (context as BackendService<any>).postReturnJson(protectedResources.apiLisOffer.endPoint+"/QuoteOffer", dataSent);
+                const response = await (context?.service as BackendService<any>).postReturnJson(protectedResources.apiLisOffer.endPoint+"/QuoteOffer", dataSent);
                 
                 if (response !== null) {
                     enqueueSnackbar(t('offerSuccessSent'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
@@ -761,8 +712,8 @@ function GeneratePriceOffer(props: any) {
     }
 
     const getTemplates = async () => {
-        if (context && account) {
-            const response = await (context as BackendService<any>).getSingle(protectedResources.apiLisTemplate.endPoint+"/Template?Tags=offer");
+        if (account && instance && context) {
+            const response = await (context?.service as BackendService<any>).getSingle(protectedResources.apiLisTemplate.endPoint+"/Template?Tags=offer");
             if (response !== null && response.data !== undefined) {
                 setTemplates(response.data);
                 setLoadTemplates(false);
@@ -776,8 +727,8 @@ function GeneratePriceOffer(props: any) {
     // Work on the template
     const getTemplate = async (id: string) => {
         setLoadTemplate(true)
-        if (context && account) {
-            const response = await (context as BackendService<any>).getSingle(protectedResources.apiLisTemplate.endPoint+"/Template/"+id);
+        if (account && instance && context) {
+            const response = await (context?.service as BackendService<any>).getSingle(protectedResources.apiLisTemplate.endPoint+"/Template/"+id);
             if (response !== null && response !== undefined) {
                 setTemplateBase(response.data);
                 setLoadTemplate(false);
@@ -1809,13 +1760,16 @@ function GeneratePriceOffer(props: any) {
                 maxWidth="lg"
                 fullWidth
             >
-                <RequestPriceHaulage
-                    token={tempToken} 
-                    ports={ports}
-                    loadingCity={loadingCity}
-                    loadingPort={formState.portDeparture}
-                    closeModal={() => setModalRequestHaulage(false)}
-                />
+                {
+                    context ?
+                    <RequestPriceHaulage
+                        token={context.tokenPricing} 
+                        ports={ports}
+                        loadingCity={loadingCity}
+                        loadingPort={formState.portDeparture}
+                        closeModal={() => setModalRequestHaulage(false)}
+                    /> : null
+                }
             </BootstrapDialog>
 
             {/* Price request seafreight FCL (modalRequestSeafreight) */}
@@ -1826,17 +1780,20 @@ function GeneratePriceOffer(props: any) {
                 maxWidth="lg"
                 fullWidth
             >
-                <RequestPriceRequest 
-                    token={tempToken} 
-                    products={products} 
-                    commodities={tags}
-                    ports={ports}
-                    portLoading={formState.portDeparture}
-                    portDischarge={formState.portDestination} 
-                    containers={containers} 
-                    containersSelection={containersSelection}
-                    closeModal={() => setModalRequestSeafreight(false)} 
-                />
+                {
+                    context ? 
+                    <RequestPriceRequest 
+                        token={context.tokenPricing} 
+                        products={products} 
+                        commodities={tags}
+                        ports={ports}
+                        portLoading={formState.portDeparture}
+                        portDischarge={formState.portDestination} 
+                        containers={containers} 
+                        containersSelection={containersSelection}
+                        closeModal={() => setModalRequestSeafreight(false)} 
+                    /> : null
+                }
             </BootstrapDialog>
 
             {/* Create new misc (modalNewMisc) */}
@@ -1861,14 +1818,17 @@ function GeneratePriceOffer(props: any) {
                 maxWidth="lg"
                 fullWidth
             >
-                <NewHaulage 
-                    token={tempToken}
-                    ports={ports}
-                    loadingCity={loadingCity}
-                    containers={containers}
-                    closeModal={() => setModalHaulage(false)}
-                    callBack={() => { getHaulagePriceOffers(); }}
-                />
+                {
+                    context ? 
+                    <NewHaulage 
+                        token={context.tokenPricing}
+                        ports={ports}
+                        loadingCity={loadingCity}
+                        containers={containers}
+                        closeModal={() => setModalHaulage(false)}
+                        callBack={() => { getHaulagePriceOffers(); }}
+                    /> : null
+                }
             </BootstrapDialog>
 
             {/* Create new seafreight */}
@@ -1879,15 +1839,18 @@ function GeneratePriceOffer(props: any) {
                 maxWidth="lg"
                 fullWidth
             >
-                <NewSeafreight 
-                    token={tempToken}
-                    ports={ports}
-                    portLoading={formState.portDeparture}
-                    portDischarge={formState.portDestination}
-                    containers={containers}
-                    closeModal={() => setModalSeafreight(false)}
-                    callBack={() => { getSeaFreightPriceOffers(); }}
-                />
+                {
+                    context ? 
+                    <NewSeafreight 
+                        token={context.tokenPricing}
+                        ports={ports}
+                        portLoading={formState.portDeparture}
+                        portDischarge={formState.portDestination}
+                        containers={containers}
+                        closeModal={() => setModalSeafreight(false)}
+                        callBack={() => { getSeaFreightPriceOffers(); }}
+                    /> : null
+                }
             </BootstrapDialog>
 
             {/* Compare options */}

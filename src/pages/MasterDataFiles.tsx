@@ -14,6 +14,7 @@ import { sizingStyles, gridStyles, BootstrapDialog, BootstrapDialogTitle, button
 import { Edit, Delete } from '@mui/icons-material';
 import CountrySelect from '../components/shared/CountrySelect';
 import { countries } from '../utils/constants';
+import { getAccessToken } from '../utils/functions';
 
 const MasterDataFiles: any = (props: any) => {
     const [products, setFiles] = useState<any>(null);
@@ -32,31 +33,14 @@ const MasterDataFiles: any = (props: any) => {
     const context = useAuthorizedBackendApi();
     
     const getFiles = async () => {
-        if (context && account) {
+        if (account && instance && context) {
             setLoadResults(true);
-
-            const token = await instance.acquireTokenSilent({
-                scopes: transportRequest.scopes,
-                account: account
-            })
-            .then((response: AuthenticationResult) => {
-                return response.accessToken;
-            })
-            .catch(() => {
-                return instance.acquireTokenPopup({
-                    ...transportRequest,
-                    account: account
-                    }).then((response) => {
-                        return response.accessToken;
-                    });
-                }
-            );
-            
-            const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/File/Files?pageSize=2000", token);
+            // const token = await getAccessToken(instance, transportRequest, account);
+            const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/File/Files?pageSize=2000", context.tokenTransport);
             if (response !== null && response !== undefined) {
                 setFiles(response);
                 setLoadResults(false);
-                setTempToken(token);
+                // setTempToken(token);
                 // setFiles(response.filter((obj: any) => obj.productsTypeId.includes(5) || obj.productsTypeId.includes(2))); // Filter the products for miscellaneous (MISCELLANEOUS = 5 & HAULAGE = 2)
             }
             else {
@@ -66,9 +50,9 @@ const MasterDataFiles: any = (props: any) => {
     }
     
     const deleteFile = async (id: string) => {
-        if (context && account) {
+        if (account && instance && context) {
             try {
-                const response = await (context as BackendService<any>).deleteWithToken(protectedResources.apiLisTransport.endPoint+"/File/DeleteFile/"+id, tempToken);
+                const response = await (context?.service as BackendService<any>).deleteWithToken(protectedResources.apiLisTransport.endPoint+"/File/DeleteFile/"+id, context.tokenTransport);
                 console.log(response);
                 enqueueSnackbar(t('rowDeletedSuccess'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
                 setModal2(false);
@@ -83,7 +67,7 @@ const MasterDataFiles: any = (props: any) => {
     
     useEffect(() => {
         getFiles();
-    }, []);
+    }, [account, instance, account]);
 
     const columnsFiles: GridColDef[] = [
         { field: 'portId', headerName: t('id'), flex: 1 },
@@ -105,23 +89,8 @@ const MasterDataFiles: any = (props: any) => {
     
     const createNewFile = async () => {
         if (testName !== "" && country !== null) {
-            if (account && context) {
-                const token = await instance.acquireTokenSilent({
-                    scopes: transportRequest.scopes,
-                    account: account
-                })
-                .then((response: AuthenticationResult) => {
-                    return response.accessToken;
-                })
-                .catch(() => {
-                    return instance.acquireTokenPopup({
-                        ...transportRequest,
-                        account: account
-                        }).then((response) => {
-                            return response.accessToken;
-                        });
-                    }
-                );
+            if (account && instance && context) {
+                // const token = await getAccessToken(instance, transportRequest, account);
                 
                 try {
                     var dataSent = null;
@@ -132,14 +101,14 @@ const MasterDataFiles: any = (props: any) => {
                             "portName": testName.toUpperCase(),
                             "country": country.label.toUpperCase(),
                         };
-                        response = await (context as BackendService<any>).putWithToken(protectedResources.apiLisTransport.endPoint+"/File/UpdateFile/"+currentEditId, dataSent, token);
+                        response = await (context?.service as BackendService<any>).putWithToken(protectedResources.apiLisTransport.endPoint+"/File/UpdateFile/"+currentEditId, dataSent, context.tokenTransport);
                     }
                     else {
                         dataSent = {
                             "portName": testName.toUpperCase(),
                             "country": country.label.toUpperCase(),
                         };
-                        response = await (context as BackendService<any>).postWithToken(protectedResources.apiLisTransport.endPoint+"/File/CreateFile", dataSent, token);
+                        response = await (context?.service as BackendService<any>).postWithToken(protectedResources.apiLisTransport.endPoint+"/File/CreateFile", dataSent, context.tokenTransport);
                     }
                     enqueueSnackbar(currentEditId === "" ? "The port has been added with success!" : "The port has been edited with success!", { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
                     getFiles();
@@ -158,8 +127,8 @@ const MasterDataFiles: any = (props: any) => {
     
     const getFile = async (id: string) => {
         setLoadEdit(true)
-        if (context && account) {
-            const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/File/GetFile/"+id, tempToken);
+        if (account && instance && context) {
+            const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/File/GetFile/"+id, context.tokenTransport);
             if (response !== null && response !== undefined) {
                 console.log(response);
                 setTestName(response.portName);

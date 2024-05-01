@@ -8,6 +8,7 @@ import { useAuthorizedBackendApi } from "../../api/api";
 import { useAccount, useMsal } from "@azure/msal-react";
 import { crmRequest, protectedResources } from "../../config/authConfig";
 import { AuthenticationResult } from "@azure/msal-browser";
+import { getAccessToken } from "../../utils/functions";
 
 interface LocationAutocompleteProps {
     id: string;
@@ -42,29 +43,13 @@ const ClientSearch: React.FC<LocationAutocompleteProps> = ({ id, name, value, on
     const account = useAccount(accounts[0] || {});
 
     const debouncedSearch = debounce(async (search: string) => {
-        if (context && account) {
+        if (account && instance && context) {
             setLoading(true);
-            const token = await instance.acquireTokenSilent({
-                scopes: crmRequest.scopes,
-                account: account
-            })
-            .then((response: AuthenticationResult) => {
-                return response.accessToken;
-            })
-            .catch(() => {
-                return instance.acquireTokenPopup({
-                    ...crmRequest,
-                    account: account
-                    }).then((response) => {
-                        return response.accessToken;
-                    });
-                }
-            );
+            // const token = await getAccessToken(instance, crmRequest, account);
             
             if (checkFormatCode(search)) {
                 // First i search by contact number
-                const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisCrm.endPoint+"/Contact/GetContacts?contactNumber="+search+"&category=1", token);
-                // const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisCrm.endPoint+"/Contact/GetContacts", token);
+                const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisCrm.endPoint+"/Contact/GetContacts?contactNumber="+search+"&category=1", context.tokenCrm);
                 if (response !== null && response !== undefined && response.length !== 0) {
                     console.log(response);
                     // Removing duplicates from result before rendering
@@ -73,7 +58,7 @@ const ClientSearch: React.FC<LocationAutocompleteProps> = ({ id, name, value, on
             } 
             else {
                 // If i dont find i search by contact name
-                const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisCrm.endPoint+"/Contact/GetContacts?contactName="+search+"&category=1", token);
+                const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisCrm.endPoint+"/Contact/GetContacts?contactName="+search+"&category=1", context.tokenCrm);
                 if (response !== null && response !== undefined) {
                     console.log(response);
                     // Removing duplicates from result before rendering

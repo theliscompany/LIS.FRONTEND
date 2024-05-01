@@ -23,7 +23,7 @@ import AutocompleteSearch from '../components/shared/AutocompleteSearch';
 import RequestPriceHaulage from '../components/editRequestPage/RequestPriceHaulage';
 import { Anchor, Mail } from '@mui/icons-material';
 import NewContact from '../components/editRequestPage/NewContact';
-import { compareServices, extractCityAndPostalCode, flattenData2, hashCode, parseLocation, parseLocation2, reverseTransformArray, sortHauliersByName, transformArray } from '../utils/functions';
+import { compareServices, extractCityAndPostalCode, flattenData2, getAccessToken, hashCode, parseLocation, parseLocation2, reverseTransformArray, sortHauliersByName, transformArray } from '../utils/functions';
 import ServicesTable from '../components/seafreightPage/ServicesTable';
 import NewService from '../components/shared/NewService';
 import NewPort from '../components/shared/NewPort';
@@ -162,42 +162,14 @@ function Haulages() {
         getPorts();
         getHaulages();
         getProtectedData();
-    }, []);
+    }, [account, instance, account]);
     
-    const deflattenData2 = (flattenedData: any) => {
-        return flattenedData.map((item: any) => ({
-            miscellaneousServiceId: item.id,
-            service: {
-                serviceId: item.serviceId, // Original structure did not include this in the flattened data
-                serviceName: item.serviceName,
-                price: item.price,
-                containers: item.containers // Assuming this was not included in the flattened version
-            },
-            containers: containerTypes
-        }));
-    };
-
     const getClients = async () => {
-        if (context && account) {
-            const token = await instance.acquireTokenSilent({
-                scopes: crmRequest.scopes,
-                account: account
-            })
-            .then((response: AuthenticationResult) => {
-                return response.accessToken;
-            })
-            .catch(() => {
-                return instance.acquireTokenPopup({
-                    ...crmRequest,
-                    account: account
-                    }).then((response) => {
-                        return response.accessToken;
-                    });
-                }
-            );
+        if (account && instance && context) {
+            // const token = await getAccessToken(instance, crmRequest, account);
             
             try {
-                const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisCrm.endPoint+"/Contact/GetContacts?category=2&pageSize=1000", token);
+                const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisCrm.endPoint+"/Contact/GetContacts?category=2&pageSize=1000", context.tokenCrm);
                 if (response !== null && response !== undefined) {
                     // Removing duplicates from client array
                     setClients(response.data.filter((obj: any, index: number, self: any) => index === self.findIndex((o: any) => o.contactName === obj.contactName)));
@@ -210,8 +182,8 @@ function Haulages() {
     }
     
     const getPorts = async () => {
-        if (context && account) {
-            const response = await (context as BackendService<any>).getSingle(protectedResources.apiLisTransport.endPoint+"/Port/Ports?pageSize=2000");
+        if (account && instance && context) {
+            const response = await (context?.service as BackendService<any>).getSingle(protectedResources.apiLisTransport.endPoint+"/Port/Ports?pageSize=2000");
             if (response !== null && response !== undefined) {
                 setPorts(response);
             }  
@@ -219,32 +191,17 @@ function Haulages() {
     }
     
     const getProtectedData = async () => {
-        if (context && account) {
-            const token = await instance.acquireTokenSilent({
-                scopes: transportRequest.scopes,
-                account: account
-            })
-            .then((response: AuthenticationResult) => {
-                return response.accessToken;
-            })
-            .catch(() => {
-                return instance.acquireTokenPopup({
-                    ...transportRequest,
-                    account: account
-                    }).then((response) => {
-                        return response.accessToken;
-                    });
-                }
-            );
+        if (account && instance && context) {
+            // const token = await getAccessToken(instance, transportRequest, account);
             
-            getServices(token);
-            getContainers(token);
+            getServices("");
+            getContainers("");
         }
     }
     
     const getServices = async (token: string) => {
-        if (context && account) {
-            const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Service?pageSize=500", token);
+        if (account && instance && context) {
+            const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Service?pageSize=500", context.tokenTransport);
             if (response !== null && response !== undefined) {
                 setAllServices(response);
                 setServices(response.sort((a: any, b: any) => compareServices(a, b)).filter((obj: any) => obj.servicesTypeId.includes(2))); // Filter the services for haulages (HAULAGE = 2)
@@ -257,23 +214,11 @@ function Haulages() {
     }
     
     const getHaulages = async () => {
-        if (context && account) {
-            const token = await instance.acquireTokenSilent({
-                scopes: pricingRequest.scopes,
-                account: account
-            }).then((response:AuthenticationResult)=>{
-                return response.accessToken;
-            }).catch(() => {
-                return instance.acquireTokenPopup({
-                    ...pricingRequest,
-                    account: account
-                    }).then((response) => {
-                        return response.accessToken;
-                });
-            });
-            setTempToken(token);
+        if (account && instance && context) {
+            // const token = await getAccessToken(instance, pricingRequest, account);
+            // setTempToken(token);
 
-            const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisPricing.endPoint+"/Haulage/Haulages", token);
+            const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisPricing.endPoint+"/Haulage/Haulages", context.tokenPricing);
             if (response !== null && response !== undefined) {
                 setHaulages(sortHauliersByName(response));
                 setLoad(false);
@@ -305,8 +250,8 @@ function Haulages() {
     
     const getHaulage = async (id: string) => {
         setLoadEdit(true)
-        if (context && account) {
-            const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisPricing.endPoint+"/Haulage/Haulage?offerId="+id, tempToken);
+        if (account && instance && context) {
+            const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisPricing.endPoint+"/Haulage/Haulage?offerId="+id, context.tokenPricing);
             if (response !== null && response !== undefined) {
                 var auxHaulier = {contactId: response.haulierId, contactName: response.haulierName};
                 var auxValidUntil = dayjs(response.validUntil);
@@ -339,10 +284,10 @@ function Haulages() {
     }
     
     const searchHaulages = async () => {
-        if (context && account) {
+        if (account && instance && context) {
             setLoad(true);
             var requestFormatted = createGetRequestUrl(searchedLoadingPort?.portId, searchedHaulier?.contactId, searchedLoadingCity?.city.toUpperCase());
-            const response = await (context as BackendService<any>).getWithToken(requestFormatted, tempToken);
+            const response = await (context?.service as BackendService<any>).getWithToken(requestFormatted, context.tokenPricing);
             if (response !== null && response !== undefined) {
                 setHaulages(response);
                 setLoad(false);
@@ -356,7 +301,7 @@ function Haulages() {
 
     const createUpdateHaulage = async () => {
         if (haulier !== null && loadingCity !== null && loadingPort !== null && freeTime > 0 && unitTariff > 0 && overtimeTariff > 0 && multiStop > 0 && validUntil !== null && containerTypes.length > 0) {
-            if (context && account) {
+            if (account && instance && context) {
                 var dataSent = null;
                 
                 var postalCode = loadingCity !== null ? loadingCity.postalCode !== undefined ? loadingCity.postalCode : "" : ""; 
@@ -412,7 +357,7 @@ function Haulages() {
                         "containers": containerTypes,
                     };    
                 }
-                const response = await (context as BackendService<any>).postWithToken(protectedResources.apiLisPricing.endPoint+"/Haulage/Haulage", dataSent, tempToken);
+                const response = await (context?.service as BackendService<any>).postWithToken(protectedResources.apiLisPricing.endPoint+"/Haulage/Haulage", dataSent, context.tokenPricing);
                 if (response !== null && response !== undefined) {
                     setModal2(false);
                     enqueueSnackbar(t('successCreated'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
@@ -429,9 +374,9 @@ function Haulages() {
     }
 
     const deleteHaulagePrice = async (id: string) => {
-        if (context && account) {
+        if (account && instance && context) {
             // alert("Function not available yet!");
-            const response = await (context as BackendService<any>).deleteWithToken(protectedResources.apiLisPricing.endPoint+"/Haulage/DeleteHaulage?offerId="+id, tempToken);
+            const response = await (context?.service as BackendService<any>).deleteWithToken(protectedResources.apiLisPricing.endPoint+"/Haulage/DeleteHaulage?offerId="+id, context.tokenPricing);
             if (response !== null && response !== undefined) {
                 enqueueSnackbar(t('rowDeletedSuccess'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
                 setModal(false);
@@ -443,134 +388,6 @@ function Haulages() {
         }
     }
     
-    const getMiscellaneouses = async (carrier1: any, auxCity: any, auxPort: any, validUntil1: any, container: any, isCopy: boolean) => {
-        if (context && account) {
-            setLoadMiscs(true);
-            
-            var token = null;
-            if (tempToken === "") {
-                token = await instance.acquireTokenSilent({
-                    scopes: pricingRequest.scopes,
-                    account: account
-                }).then((response:AuthenticationResult)=>{
-                    return response.accessToken;
-                }).catch(() => {
-                    return instance.acquireTokenPopup({
-                        ...pricingRequest,
-                        account: account
-                        }).then((response) => {
-                            return response.accessToken;
-                    });
-                });
-                setTempToken(token);    
-            }
-
-            if (carrier1 !== null) {
-                var postalCode = auxCity !== null ? auxCity.postalCode !== undefined ? auxCity.postalCode : "" : ""; 
-                var city = "";
-                if (postalCode !== "") {
-                    if (postalCode === null) {
-                        city = auxCity.city;
-                    }
-                    else {
-                        city = auxCity.city+' '+postalCode;
-                    }
-                }
-                
-                // const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisPricing.endPoint+"/Miscellaneous/Miscellaneous?SupplierId="+carrier1.contactId+"&withShipment=false", token !== null ? token : tempToken);
-                const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisPricing.endPoint+"/Miscellaneous/Miscellaneous?SupplierId="+carrier1.contactId+"&departurePortId="+Number(hashCode(city))+"&destinationPortId="+auxPort.portId+"&withShipment=true", token !== null ? token : tempToken);
-                if (response !== null && response !== undefined && response.length !== 0) {
-                    // Here i check if the result is good
-                    var selectedElement = response[0].suppliers[0];
-                    if (response.length !== 0 && selectedElement !== undefined) {
-                        setLoadMiscs(false);
-                        
-                        // Dont update the miscellaneousId is it's a new price
-                        if (!isCopy) {
-                            setMiscellaneousId(selectedElement.miscellaneousId);
-                        }
-                        
-                        setServicesData2(flattenData2(reverseTransformArray(selectedElement.containers)));
-                    }
-                    else {
-                        setLoadMiscs(false);
-                    }
-                }
-                else {
-                    setLoadMiscs(false);
-                }
-            }
-        }
-        else {
-            setLoadMiscs(false)
-        }
-    }
-    
-    const createMiscellaneous = async () => {
-        if (validUntil !== null && haulier !== null) {
-            if (context && account) {
-                var postalCode = loadingCity !== null ? loadingCity.postalCode !== undefined ? loadingCity.postalCode : "" : ""; 
-                var city = loadingCity !== null ? loadingCity.city.toUpperCase()+', '+loadingCity.country.toUpperCase() : "";
-                if (postalCode !== "") {
-                    if (postalCode === null) {
-                        city = loadingCity.city;
-                    }
-                    else {
-                        city = loadingCity.city+' '+postalCode;
-                    }
-                }
-                
-                var dataSent = null;
-                if (miscellaneousId !== "" && miscellaneousId !== undefined) {
-                    dataSent = {
-                        "miscellaneousId": miscellaneousId,
-                        "id": miscellaneousId,
-                        "departurePortId": hashCode(city),
-                        "destinationPortId": loadingPort.portId,
-                        "departurePortName": city,
-                        "destinationPortName": loadingPort.portName,
-                        "supplierId": haulier.contactId,
-                        "supplierName": haulier.contactName,
-                        "currency": currency,
-                        "validUntil": validUntil?.toISOString(),
-                        "comment": "with haulage",
-                        "containers": transformArray(deflattenData2(servicesData2)),
-                        "services": deflattenData2(servicesData2),
-                        "updated": (new Date()).toISOString()
-                    };
-                }
-                else {
-                    dataSent = {
-                        // "miscellaneousId": currentEditId,
-                        "departurePortId": hashCode(city),
-                        "destinationPortId": loadingPort.portId,
-                        "departurePortName": city,
-                        "destinationPortName": loadingPort.portName,
-                        "supplierId": haulier.contactId,
-                        "supplierName": haulier.contactName,
-                        "currency": currency,
-                        "validUntil": validUntil?.toISOString(),
-                        "comment": "with haulage",
-                        "containers": transformArray(deflattenData2(servicesData2)),
-                        "services": deflattenData2(servicesData2),
-                        "updated": (new Date()).toISOString()
-                    };
-                }
-                console.log(dataSent);
-                const response = await (context as BackendService<any>).postWithToken(protectedResources.apiLisPricing.endPoint+"/Miscellaneous/Miscellaneous", dataSent, tempToken);
-                if (response !== null && response !== undefined) {
-                    setModal2(false);
-                }
-                else {
-                    enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
-                }
-            }
-        }
-        // else {
-        //     enqueueSnackbar(t('fieldsEmptySeafreight'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
-        // }
-    }
-
     return (
         <div style={{ background: "#fff", borderTopLeftRadius: 20, borderTopRightRadius: 20 }}>
             <SnackbarProvider />
@@ -903,14 +720,16 @@ function Haulages() {
                 maxWidth="lg"
                 fullWidth
             >
-                <RequestPriceHaulage
-                    token={tempToken} 
-                    // companies={clients}
-                    ports={ports}
-                    loadingCity={null}
-                    loadingPort={null}
-                    closeModal={() => setModal5(false)}
-                />
+                {
+                    context ? 
+                    <RequestPriceHaulage
+                        token={context.tokenPricing} 
+                        ports={ports}
+                        loadingCity={null}
+                        loadingPort={null}
+                        closeModal={() => setModal5(false)}
+                    /> : null
+                }
             </BootstrapDialog>
 
             {/* Add a new contact */}

@@ -136,7 +136,7 @@ function Landing() {
   
     const postEmail = async(from: string, to: string, subject: string, htmlContent: string) => {
         const body: MailData = { from: from, to: to, subject: subject, htmlContent: htmlContent };
-        const data = await (context as BackendService<any>).postForm(protectedResources.apiLisQuotes.endPoint+"/Email", body);
+        const data = await (context?.service as BackendService<any>).postForm(protectedResources.apiLisQuotes.endPoint+"/Email", body);
         console.log(data);
         if (data?.status === 200) {
             enqueueSnackbar(t('messageSuccessSent'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });

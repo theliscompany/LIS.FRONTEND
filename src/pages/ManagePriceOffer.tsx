@@ -31,6 +31,7 @@ import {
 	type RichTextEditorRef,
 } from "mui-tiptap";
 import { MuiFileInput } from 'mui-file-input';
+import { getAccessToken } from '../utils/functions';
 
 function statusLabel(value: string) {
 	if (value === "Accepted")
@@ -64,11 +65,11 @@ function ManagePriceOffer(props: any) {
 
 	useEffect(() => {
 		getContainers();
-	}, [context]);
+	}, [account, instance, account]);
 
 	const loadOffer = async () => {
-		if (context && account) {
-			const response = await (context as BackendService<any>).getSingle(protectedResources.apiLisOffer.endPoint + "/QuoteOffer/" + id);
+		if (account && instance && context) {
+			const response = await (context?.service as BackendService<any>).getSingle(protectedResources.apiLisOffer.endPoint + "/QuoteOffer/" + id);
 			if (response !== null && response.code !== undefined) {
 				if (response.code === 200) {
 					console.log(response.data);
@@ -89,26 +90,11 @@ function ManagePriceOffer(props: any) {
 	}
 
 	const getContainers = async () => {
-		if (context && account) {
+		if (account && instance && context) {
 			setLoad(true);
-			const token = await instance.acquireTokenSilent({
-				scopes: transportRequest.scopes,
-				account: account
-			})
-			.then((response: AuthenticationResult) => {
-				return response.accessToken;
-			})
-			.catch(() => {
-				return instance.acquireTokenPopup({
-					...transportRequest,
-					account: account
-				})
-				.then((response) => {
-					return response.accessToken;
-				});
-			});
+			// const token = await getAccessToken(instance, transportRequest, account);
 
-			const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint + "/Package/Containers", token);
+			const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint + "/Package/Containers", context.tokenTransport);
 			console.log("Containers", response);
 			if (response !== null && response !== undefined) {
 				setContainers(response);
@@ -120,7 +106,7 @@ function ManagePriceOffer(props: any) {
 	}
 
 	const updateOffer = async () => {
-		if (context && account) {
+		if (account && instance && context) {
 			const body: any = {
 				"requestQuoteId": offer.requestQuoteId,
 				"comment": rteRef.current?.editor?.getHTML(),
@@ -146,7 +132,7 @@ function ManagePriceOffer(props: any) {
 				"totalPrice": offer.totalPrice
 			};
 
-			const data = await (context as BackendService<any>).put(protectedResources.apiLisOffer.endPoint + "/QuoteOffer/" + id, body);
+			const data = await (context?.service as BackendService<any>).put(protectedResources.apiLisOffer.endPoint + "/QuoteOffer/" + id, body);
 			if (data?.status === 200) {
 				enqueueSnackbar(t('priceOfferUpdated'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top" } });
 			}
@@ -188,13 +174,13 @@ function ManagePriceOffer(props: any) {
 	}
 
 	const acceptOffer = async () => {
-		if (context && account) {
+		if (account && instance && context) {
 			const body: any = {
 				id: id,
 				newStatus: "Accepted",
 			};
 
-			const data = await (context as BackendService<any>).put(protectedResources.apiLisOffer.endPoint+"/QuoteOffer/"+id+"/status?newStatus=Accepted", body);
+			const data = await (context?.service as BackendService<any>).put(protectedResources.apiLisOffer.endPoint+"/QuoteOffer/"+id+"/status?newStatus=Accepted", body);
 			if (data?.status === 200) {
 				enqueueSnackbar(t('priceOfferApproved'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top" } });
 
@@ -226,13 +212,13 @@ function ManagePriceOffer(props: any) {
 	}
 
 	const rejectOffer = async () => {
-		if (context && account) {
+		if (account && instance && context) {
 			const body: any = {
 				id: id,
 				newStatus: "Rejected",
 			};
 
-			const data = await (context as BackendService<any>).put(protectedResources.apiLisOffer.endPoint + "/QuoteOffer/" + id + "/status?newStatus=Rejected", body);
+			const data = await (context?.service as BackendService<any>).put(protectedResources.apiLisOffer.endPoint + "/QuoteOffer/" + id + "/status?newStatus=Rejected", body);
 			if (data?.status === 200) {
 				enqueueSnackbar(t('priceOfferRejected'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top" } });
 				loadOffer();

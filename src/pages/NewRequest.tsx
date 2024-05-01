@@ -69,9 +69,9 @@ function NewRequest(props: any) {
     const { t } = useTranslation();
     
     const getProducts = async () => {
-        if (context && account) {
-            const token = await getAccessToken(instance, transportRequest, account);            
-            const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Product?pageSize=500", token);
+        if (account && instance && context) {
+            // const token = await getAccessToken(instance, transportRequest, account);            
+            const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Product?pageSize=500", context.tokenTransport);
             console.log(response);
             if (response !== null && response !== undefined) {
                 setProducts(response);
@@ -101,13 +101,13 @@ function NewRequest(props: any) {
     }, [instance, account, context]);
 
     const getAssignees = async () => {
-        if (context && account) {
-            const token = await getAccessToken(instance, loginRequest, account);
-            setTempToken(token);
+        if (account && instance && context) {
+            // const token = await getAccessToken(instance, loginRequest, account);
+            // setTempToken(token);
 
             try {
                 setLoadUser(true);
-                const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisQuotes.endPoint+"/Assignee", token);
+                const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisQuotes.endPoint+"/Assignee", context.tokenLogin);
                 if (response !== null && response.code !== undefined) {
                     if (response.code === 200) {
                         var aux = response.data.find((elm: any) => elm.email === account?.username);
@@ -136,8 +136,8 @@ function NewRequest(props: any) {
 
     const assignManager = async (idQuote: string) => {
         if (currentUser !== null && currentUser !== undefined && currentUser !== "") {
-            if (context && account) {
-                const response = await (context as BackendService<any>).putWithToken(protectedResources.apiLisQuotes.endPoint+"/Assignee/"+idQuote+"/"+formState.assignedManager, [], tempToken);
+            if (account && instance && context) {
+                const response = await (context?.service as BackendService<any>).putWithToken(protectedResources.apiLisQuotes.endPoint+"/Assignee/"+idQuote+"/"+formState.assignedManager, [], context.tokenLogin);
                 if (response !== null) {
                     setLoad(false);
                 }

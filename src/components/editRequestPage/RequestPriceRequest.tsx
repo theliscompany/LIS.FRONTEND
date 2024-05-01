@@ -18,6 +18,7 @@ import { RichTextEditor, MenuControlsContainer, MenuSelectHeading, MenuDivider, 
 import './../../App.css';
 import { Anchor } from '@mui/icons-material';
 import { AuthenticationResult } from '@azure/msal-browser';
+import { getAccessToken } from '../../utils/functions';
 
 function createGetRequestUrl(variable1: number, variable2: number) {
     let url = protectedResources.apiLisPricing.endPoint+"/SeaFreight/GetSeaFreights?";
@@ -157,26 +158,11 @@ function RequestPriceRequest(props: any) {
     }
 
     const getClients = async () => {
-        if (context && account) {
-            const token = await instance.acquireTokenSilent({
-                scopes: crmRequest.scopes,
-                account: account
-            })
-            .then((response: AuthenticationResult) => {
-                return response.accessToken;
-            })
-            .catch(() => {
-                return instance.acquireTokenPopup({
-                    ...crmRequest,
-                    account: account
-                    }).then((response) => {
-                        return response.accessToken;
-                    });
-                }
-            );
+        if (account && instance && context) {
+            // const token = await getAccessToken(instance, crmRequest, account);
             
             try {
-                const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisCrm.endPoint+"/Contact/GetContacts?category=5&pageSize=1000", token);
+                const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisCrm.endPoint+"/Contact/GetContacts?category=5&pageSize=1000", context.tokenCrm);
                 if (response !== null && response !== undefined) {
                     // Removing duplicates from client array
                     setCarriersData(response.data.filter((obj: any, index: number, self: any) => index === self.findIndex((o: any) => o.contactName === obj.contactName)));
@@ -189,10 +175,10 @@ function RequestPriceRequest(props: any) {
     }
     
     const searchSeafreights = async () => {
-        if (context && account) {
+        if (account && instance && context) {
             setLoad(true);
             var requestFormatted = createGetRequestUrl(portLoading?.portId, portDischarge?.portId);
-            const response = await (context as BackendService<any>).getWithToken(requestFormatted, props.token);
+            const response = await (context?.service as BackendService<any>).getWithToken(requestFormatted, props.token);
             if (response !== null && response !== undefined) {
                 var aux = getAllCarriers(response);
                 setRecipients(carriersData.filter((obj: any) => aux.includes(obj.contactName) && obj.email !== "" && obj.email !== null));
@@ -205,8 +191,8 @@ function RequestPriceRequest(props: any) {
     }
 
     const getTemplates = async () => {
-        if (context && account) {
-            const response = await (context as BackendService<any>).getSingle(protectedResources.apiLisTemplate.endPoint+"/Template?Tags=seafreight");
+        if (account && instance && context) {
+            const response = await (context?.service as BackendService<any>).getSingle(protectedResources.apiLisTemplate.endPoint+"/Template?Tags=seafreight");
             if (response !== null && response.data !== undefined) {
                 setTemplates(response.data);
                 console.log(response);
@@ -221,8 +207,8 @@ function RequestPriceRequest(props: any) {
     
     const getTemplate = async (id: string) => {
         setLoadTemplate(true)
-        if (context && account) {
-            const response = await (context as BackendService<any>).getSingle(protectedResources.apiLisTemplate.endPoint+"/Template/"+id);
+        if (account && instance && context) {
+            const response = await (context?.service as BackendService<any>).getSingle(protectedResources.apiLisTemplate.endPoint+"/Template/"+id);
             if (response !== null && response !== undefined) {
                 setTemplateBase(response.data.content);
                 setLoadTemplate(false);
@@ -260,7 +246,7 @@ function RequestPriceRequest(props: any) {
 
     useEffect(() => {
         getTemplate(selectedTemplate);
-    }, [selectedTemplate]);
+    }, [selectedTemplate, account, instance, account]);
 
     useEffect(() => {
         var departurePort = portLoading !== null ? portLoading.portName : "";
@@ -276,13 +262,13 @@ function RequestPriceRequest(props: any) {
     useEffect(() => {
         getClients();
         getTemplates();
-    }, []);
+    }, [account, instance, account]);
 
     useEffect(() => {
         if (carriersData !== null) {
             searchSeafreights();
         }
-    }, [portLoading, carriersData]);
+    }, [portLoading, carriersData, account, instance, account]);
 
     return (
         <>
