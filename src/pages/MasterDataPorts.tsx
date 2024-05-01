@@ -14,6 +14,7 @@ import { sizingStyles, gridStyles, BootstrapDialog, BootstrapDialogTitle, button
 import { Edit, Delete } from '@mui/icons-material';
 import CountrySelect from '../components/shared/CountrySelect';
 import { countries } from '../utils/constants';
+import { getAccessToken } from '../utils/functions';
 
 const MasterDataPorts: any = (props: any) => {
     const [products, setPorts] = useState<any>(null);
@@ -34,30 +35,12 @@ const MasterDataPorts: any = (props: any) => {
     const getPorts = async () => {
         if (context && account) {
             setLoadResults(true);
-
-            const token = await instance.acquireTokenSilent({
-                scopes: transportRequest.scopes,
-                account: account
-            })
-            .then((response: AuthenticationResult) => {
-                return response.accessToken;
-            })
-            .catch(() => {
-                return instance.acquireTokenPopup({
-                    ...transportRequest,
-                    account: account
-                    }).then((response) => {
-                        return response.accessToken;
-                    });
-                }
-            );
-            
+            const token = await getAccessToken(instance, transportRequest, account);
+            setTempToken(token);
             const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Port/Ports?pageSize=2000", token);
             if (response !== null && response !== undefined) {
                 setPorts(response);
                 setLoadResults(false);
-                setTempToken(token);
-                // setPorts(response.filter((obj: any) => obj.productsTypeId.includes(5) || obj.productsTypeId.includes(2))); // Filter the products for miscellaneous (MISCELLANEOUS = 5 & HAULAGE = 2)
             }
             else {
                 setLoadResults(false);
@@ -106,22 +89,7 @@ const MasterDataPorts: any = (props: any) => {
     const createNewPort = async () => {
         if (testName !== "" && country !== null) {
             if (account && context) {
-                const token = await instance.acquireTokenSilent({
-                    scopes: transportRequest.scopes,
-                    account: account
-                })
-                .then((response: AuthenticationResult) => {
-                    return response.accessToken;
-                })
-                .catch(() => {
-                    return instance.acquireTokenPopup({
-                        ...transportRequest,
-                        account: account
-                        }).then((response) => {
-                            return response.accessToken;
-                        });
-                    }
-                );
+                const token = await getAccessToken(instance, transportRequest, account);
                 
                 try {
                     var dataSent = null;

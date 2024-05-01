@@ -23,7 +23,7 @@ import NewContact from './NewContact';
 import { actionButtonStyles, inputLabelStyles, gridStyles, BootstrapDialog, BootstrapDialogTitle, buttonCloseStyles, datetimeStyles, BootstrapInput, whiteButtonStyles } from '../../utils/misc/styles';
 import NewService from '../shared/NewService';
 import { containerPackages } from '../../utils/constants';
-import { compareServices } from '../../utils/functions';
+import { compareServices, getAccessToken } from '../../utils/functions';
 
 function createGetRequestUrl(variable1: number, variable2: number, variable3: number) {
     let url = protectedResources.apiLisPricing.endPoint+"/Miscellaneous/Miscellaneous?";
@@ -233,22 +233,7 @@ function NewMiscellaneous(props: any) {
     
     const getProtectedData = async () => {
         if (context && account) {
-            const token = await instance.acquireTokenSilent({
-                scopes: transportRequest.scopes,
-                account: account
-            })
-            .then((response: AuthenticationResult) => {
-                return response.accessToken;
-            })
-            .catch(() => {
-                return instance.acquireTokenPopup({
-                    ...transportRequest,
-                    account: account
-                    }).then((response) => {
-                        return response.accessToken;
-                    });
-                }
-            );
+            const token = await getAccessToken(instance, transportRequest, account);
             
             getServices(token);
             getContainers(token);
@@ -274,19 +259,7 @@ function NewMiscellaneous(props: any) {
 
             var token = null;
             if (tempToken === "") {
-                token = await instance.acquireTokenSilent({
-                    scopes: pricingRequest.scopes,
-                    account: account
-                }).then((response:AuthenticationResult)=>{
-                    return response.accessToken;
-                }).catch(() => {
-                    return instance.acquireTokenPopup({
-                        ...pricingRequest,
-                        account: account
-                        }).then((response) => {
-                            return response.accessToken;
-                    });
-                });
+                token = await getAccessToken(instance, pricingRequest, account);
                 setTempToken(token);    
             }
             

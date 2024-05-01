@@ -8,9 +8,9 @@ import { graphRequest, loginRequest, protectedResources } from '../config/authCo
 import { useAuthorizedBackendApi } from '../api/api';
 import { BackendService } from '../utils/services/fetch';
 import { useAccount, useMsal } from '@azure/msal-react';
-import { AuthenticationResult } from '@azure/msal-browser';
 import { useTranslation } from 'react-i18next';
 import { DataGrid, GridColDef, GridRenderCellParams } from '@mui/x-data-grid';
+import { getAccessToken } from '../utils/functions';
 
 function UsersAssignment(props: any) {
     const [load, setLoad] = useState<boolean>(false);
@@ -65,22 +65,7 @@ function UsersAssignment(props: any) {
     
     const getAssignees = async () => {
         if (context && account) {
-            const token = await instance.acquireTokenSilent({
-                scopes: loginRequest.scopes,
-                account: account
-            })
-            .then((response: AuthenticationResult) => {
-                return response.accessToken;
-            })
-            .catch(() => {
-                return instance.acquireTokenPopup({
-                    ...loginRequest,
-                    account: account
-                    }).then((response) => {
-                        return response.accessToken;
-                    });
-                }
-            );
+            const token = await getAccessToken(instance, loginRequest, account);
             setTempToken(token);
             
             try {
@@ -137,23 +122,7 @@ function UsersAssignment(props: any) {
     
     const loadUsers = async () => {
         if(account) {
-            const token = await instance.acquireTokenSilent({
-                scopes: graphRequest.scopes,
-                account: account
-            })
-            .then((response: AuthenticationResult)=>{
-                return response.accessToken;
-            })
-            .catch(() => {
-                return instance.acquireTokenPopup({
-                    ...graphRequest,
-                    account: account
-                    }).then((response) => {
-                        return response.accessToken;
-                    });
-                }
-            );
-
+            const token = await getAccessToken(instance, graphRequest, account);
             getUsersFromAAD(token);
         }
     }

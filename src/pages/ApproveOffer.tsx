@@ -11,6 +11,7 @@ import { BackendService } from '../utils/services/fetch';
 import { BootstrapInput, gridStyles, inputLabelStyles } from '../utils/misc/styles';
 import { DataGrid, GridColumnHeaderParams, GridRenderCellParams, GridValueFormatterParams, GridValueGetterParams } from '@mui/x-data-grid';
 import { useTranslation } from 'react-i18next';
+import { getAccessToken } from '../utils/functions';
 
 function ApproveOffer(props: any) {
     const [load, setLoad] = useState<boolean>(true);
@@ -59,22 +60,7 @@ function ApproveOffer(props: any) {
     const getContainers = async () => {
         if (context && account) {
             setLoad(true);
-            const token = await instance.acquireTokenSilent({
-                scopes: transportRequest.scopes,
-                account: account
-            })
-            .then((response: AuthenticationResult) => {
-                return response.accessToken;
-            })
-            .catch(() => {
-                return instance.acquireTokenPopup({
-                    ...transportRequest,
-                    account: account
-                    }).then((response) => {
-                        return response.accessToken;
-                    });
-                }
-            );
+            const token = await getAccessToken(instance, transportRequest, account);
             
             const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Package/Containers", token);
             console.log("Containers", response);

@@ -12,6 +12,7 @@ import { DataGrid, GridColDef, GridRenderCellParams, GridToolbar } from '@mui/x-
 import { t } from 'i18next';
 import { sizingStyles, gridStyles, BootstrapDialog, BootstrapDialogTitle, buttonCloseStyles, BootstrapInput, actionButtonStyles, inputLabelStyles } from '../utils/misc/styles';
 import { Edit, Delete } from '@mui/icons-material';
+import { getAccessToken } from '../utils/functions';
 
 const MasterDataProducts: any = (props: any) => {
     const [products, setProducts] = useState<any>(null);
@@ -33,24 +34,7 @@ const MasterDataProducts: any = (props: any) => {
     const getProducts = async () => {
         if (context && account) {
             setLoadResults(true);
-
-            const token = await instance.acquireTokenSilent({
-                scopes: transportRequest.scopes,
-                account: account
-            })
-            .then((response: AuthenticationResult) => {
-                return response.accessToken;
-            })
-            .catch(() => {
-                return instance.acquireTokenPopup({
-                    ...transportRequest,
-                    account: account
-                    }).then((response) => {
-                        return response.accessToken;
-                    });
-                }
-            );
-            
+            const token = await getAccessToken(instance, transportRequest, account);
             const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Product?pageSize=500", token);
             if (response !== null && response !== undefined) {
                 setProducts(response);
@@ -104,22 +88,7 @@ const MasterDataProducts: any = (props: any) => {
     const createNewProduct = async () => {
         if (testName !== "") {
             if (account && context) {
-                const token = await instance.acquireTokenSilent({
-                    scopes: transportRequest.scopes,
-                    account: account
-                })
-                .then((response: AuthenticationResult) => {
-                    return response.accessToken;
-                })
-                .catch(() => {
-                    return instance.acquireTokenPopup({
-                        ...transportRequest,
-                        account: account
-                        }).then((response) => {
-                            return response.accessToken;
-                        });
-                    }
-                );
+                const token = await getAccessToken(instance, transportRequest, account);
                 
                 try {
                     var dataSent = null;

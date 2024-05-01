@@ -15,6 +15,7 @@ import { Edit, Delete } from '@mui/icons-material';
 import CountrySelect from '../components/shared/CountrySelect';
 import { countries } from '../utils/constants';
 import { MuiTelInput } from 'mui-tel-input';
+import { getAccessToken } from '../utils/functions';
 
 const MasterDataContacts: any = (props: any) => {
     const [products, setContacts] = useState<any>(null);
@@ -57,22 +58,7 @@ const MasterDataContacts: any = (props: any) => {
         if (context && account) {
             setLoadResults(true);
 
-            const token = await instance.acquireTokenSilent({
-                scopes: crmRequest.scopes,
-                account: account
-            })
-            .then((response: AuthenticationResult) => {
-                return response.accessToken;
-            })
-            .catch(() => {
-                return instance.acquireTokenPopup({
-                    ...crmRequest,
-                    account: account
-                    }).then((response) => {
-                        return response.accessToken;
-                    });
-                }
-            );
+            const token = await getAccessToken(instance, crmRequest, account);
             setTempToken(token);
             
             const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisCrm.endPoint+"/Contact/GetContacts?pageSize=4000", token);
@@ -142,22 +128,7 @@ const MasterDataContacts: any = (props: any) => {
     const createNewContact = async () => {
         if (country !== null && testName !== "" && testPhone !== "" && testEmail !== "" && addressCountry !== "") {
             if (account && context) {
-                const token = await instance.acquireTokenSilent({
-                    scopes: transportRequest.scopes,
-                    account: account
-                })
-                .then((response: AuthenticationResult) => {
-                    return response.accessToken;
-                })
-                .catch(() => {
-                    return instance.acquireTokenPopup({
-                        ...transportRequest,
-                        account: account
-                        }).then((response) => {
-                            return response.accessToken;
-                        });
-                    }
-                );
+                const token = await getAccessToken(instance, transportRequest, account);
                 
                 try {
                     var dataSent = null;

@@ -14,6 +14,7 @@ import { sizingStyles, gridStyles, BootstrapDialog, BootstrapDialogTitle, button
 import { Edit, Delete } from '@mui/icons-material';
 import CountrySelect from '../components/shared/CountrySelect';
 import { countries } from '../utils/constants';
+import { getAccessToken } from '../utils/functions';
 
 const MasterDataFiles: any = (props: any) => {
     const [products, setFiles] = useState<any>(null);
@@ -34,24 +35,7 @@ const MasterDataFiles: any = (props: any) => {
     const getFiles = async () => {
         if (context && account) {
             setLoadResults(true);
-
-            const token = await instance.acquireTokenSilent({
-                scopes: transportRequest.scopes,
-                account: account
-            })
-            .then((response: AuthenticationResult) => {
-                return response.accessToken;
-            })
-            .catch(() => {
-                return instance.acquireTokenPopup({
-                    ...transportRequest,
-                    account: account
-                    }).then((response) => {
-                        return response.accessToken;
-                    });
-                }
-            );
-            
+            const token = await getAccessToken(instance, transportRequest, account);
             const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/File/Files?pageSize=2000", token);
             if (response !== null && response !== undefined) {
                 setFiles(response);
@@ -106,22 +90,7 @@ const MasterDataFiles: any = (props: any) => {
     const createNewFile = async () => {
         if (testName !== "" && country !== null) {
             if (account && context) {
-                const token = await instance.acquireTokenSilent({
-                    scopes: transportRequest.scopes,
-                    account: account
-                })
-                .then((response: AuthenticationResult) => {
-                    return response.accessToken;
-                })
-                .catch(() => {
-                    return instance.acquireTokenPopup({
-                        ...transportRequest,
-                        account: account
-                        }).then((response) => {
-                            return response.accessToken;
-                        });
-                    }
-                );
+                const token = await getAccessToken(instance, transportRequest, account);
                 
                 try {
                     var dataSent = null;

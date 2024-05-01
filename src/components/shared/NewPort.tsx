@@ -7,8 +7,8 @@ import { enqueueSnackbar } from 'notistack';
 import { BackendService } from '../../utils/services/fetch';
 import { transportRequest, protectedResources } from '../../config/authConfig';
 import { useAccount, useMsal } from '@azure/msal-react';
-import { AuthenticationResult } from '@azure/msal-browser';
 import CountrySelect from './CountrySelect';
+import { getAccessToken } from '../../utils/functions';
 
 function NewPort(props: any) {
     const [testName, setTestName] = useState<string>("");
@@ -24,22 +24,7 @@ function NewPort(props: any) {
     const createNewPort = async () => {
         if (testName !== "" && country !== null) {
             if (account && context) {
-                const token = await instance.acquireTokenSilent({
-                    scopes: transportRequest.scopes,
-                    account: account
-                })
-                .then((response: AuthenticationResult) => {
-                    return response.accessToken;
-                })
-                .catch(() => {
-                    return instance.acquireTokenPopup({
-                        ...transportRequest,
-                        account: account
-                        }).then((response) => {
-                            return response.accessToken;
-                        });
-                    }
-                );
+                const token = await getAccessToken(instance, transportRequest, account);
     
                 var dataSent = {
                     "portName": testName,

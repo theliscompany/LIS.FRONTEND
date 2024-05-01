@@ -23,7 +23,7 @@ import AutocompleteSearch from '../components/shared/AutocompleteSearch';
 import RequestPriceHaulage from '../components/editRequestPage/RequestPriceHaulage';
 import { Anchor, Mail } from '@mui/icons-material';
 import NewContact from '../components/editRequestPage/NewContact';
-import { compareServices, extractCityAndPostalCode, flattenData2, hashCode, parseLocation, parseLocation2, reverseTransformArray, sortHauliersByName, transformArray } from '../utils/functions';
+import { compareServices, extractCityAndPostalCode, flattenData2, getAccessToken, hashCode, parseLocation, parseLocation2, reverseTransformArray, sortHauliersByName, transformArray } from '../utils/functions';
 import ServicesTable from '../components/seafreightPage/ServicesTable';
 import NewService from '../components/shared/NewService';
 import NewPort from '../components/shared/NewPort';
@@ -179,22 +179,7 @@ function Haulages() {
 
     const getClients = async () => {
         if (context && account) {
-            const token = await instance.acquireTokenSilent({
-                scopes: crmRequest.scopes,
-                account: account
-            })
-            .then((response: AuthenticationResult) => {
-                return response.accessToken;
-            })
-            .catch(() => {
-                return instance.acquireTokenPopup({
-                    ...crmRequest,
-                    account: account
-                    }).then((response) => {
-                        return response.accessToken;
-                    });
-                }
-            );
+            const token = await getAccessToken(instance, crmRequest, account);
             
             try {
                 const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisCrm.endPoint+"/Contact/GetContacts?category=2&pageSize=1000", token);
@@ -220,22 +205,7 @@ function Haulages() {
     
     const getProtectedData = async () => {
         if (context && account) {
-            const token = await instance.acquireTokenSilent({
-                scopes: transportRequest.scopes,
-                account: account
-            })
-            .then((response: AuthenticationResult) => {
-                return response.accessToken;
-            })
-            .catch(() => {
-                return instance.acquireTokenPopup({
-                    ...transportRequest,
-                    account: account
-                    }).then((response) => {
-                        return response.accessToken;
-                    });
-                }
-            );
+            const token = await getAccessToken(instance, transportRequest, account);
             
             getServices(token);
             getContainers(token);
@@ -258,19 +228,7 @@ function Haulages() {
     
     const getHaulages = async () => {
         if (context && account) {
-            const token = await instance.acquireTokenSilent({
-                scopes: pricingRequest.scopes,
-                account: account
-            }).then((response:AuthenticationResult)=>{
-                return response.accessToken;
-            }).catch(() => {
-                return instance.acquireTokenPopup({
-                    ...pricingRequest,
-                    account: account
-                    }).then((response) => {
-                        return response.accessToken;
-                });
-            });
+            const token = await getAccessToken(instance, pricingRequest, account);
             setTempToken(token);
 
             const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisPricing.endPoint+"/Haulage/Haulages", token);
@@ -443,134 +401,6 @@ function Haulages() {
         }
     }
     
-    const getMiscellaneouses = async (carrier1: any, auxCity: any, auxPort: any, validUntil1: any, container: any, isCopy: boolean) => {
-        if (context && account) {
-            setLoadMiscs(true);
-            
-            var token = null;
-            if (tempToken === "") {
-                token = await instance.acquireTokenSilent({
-                    scopes: pricingRequest.scopes,
-                    account: account
-                }).then((response:AuthenticationResult)=>{
-                    return response.accessToken;
-                }).catch(() => {
-                    return instance.acquireTokenPopup({
-                        ...pricingRequest,
-                        account: account
-                        }).then((response) => {
-                            return response.accessToken;
-                    });
-                });
-                setTempToken(token);    
-            }
-
-            if (carrier1 !== null) {
-                var postalCode = auxCity !== null ? auxCity.postalCode !== undefined ? auxCity.postalCode : "" : ""; 
-                var city = "";
-                if (postalCode !== "") {
-                    if (postalCode === null) {
-                        city = auxCity.city;
-                    }
-                    else {
-                        city = auxCity.city+' '+postalCode;
-                    }
-                }
-                
-                // const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisPricing.endPoint+"/Miscellaneous/Miscellaneous?SupplierId="+carrier1.contactId+"&withShipment=false", token !== null ? token : tempToken);
-                const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisPricing.endPoint+"/Miscellaneous/Miscellaneous?SupplierId="+carrier1.contactId+"&departurePortId="+Number(hashCode(city))+"&destinationPortId="+auxPort.portId+"&withShipment=true", token !== null ? token : tempToken);
-                if (response !== null && response !== undefined && response.length !== 0) {
-                    // Here i check if the result is good
-                    var selectedElement = response[0].suppliers[0];
-                    if (response.length !== 0 && selectedElement !== undefined) {
-                        setLoadMiscs(false);
-                        
-                        // Dont update the miscellaneousId is it's a new price
-                        if (!isCopy) {
-                            setMiscellaneousId(selectedElement.miscellaneousId);
-                        }
-                        
-                        setServicesData2(flattenData2(reverseTransformArray(selectedElement.containers)));
-                    }
-                    else {
-                        setLoadMiscs(false);
-                    }
-                }
-                else {
-                    setLoadMiscs(false);
-                }
-            }
-        }
-        else {
-            setLoadMiscs(false)
-        }
-    }
-    
-    const createMiscellaneous = async () => {
-        if (validUntil !== null && haulier !== null) {
-            if (context && account) {
-                var postalCode = loadingCity !== null ? loadingCity.postalCode !== undefined ? loadingCity.postalCode : "" : ""; 
-                var city = loadingCity !== null ? loadingCity.city.toUpperCase()+', '+loadingCity.country.toUpperCase() : "";
-                if (postalCode !== "") {
-                    if (postalCode === null) {
-                        city = loadingCity.city;
-                    }
-                    else {
-                        city = loadingCity.city+' '+postalCode;
-                    }
-                }
-                
-                var dataSent = null;
-                if (miscellaneousId !== "" && miscellaneousId !== undefined) {
-                    dataSent = {
-                        "miscellaneousId": miscellaneousId,
-                        "id": miscellaneousId,
-                        "departurePortId": hashCode(city),
-                        "destinationPortId": loadingPort.portId,
-                        "departurePortName": city,
-                        "destinationPortName": loadingPort.portName,
-                        "supplierId": haulier.contactId,
-                        "supplierName": haulier.contactName,
-                        "currency": currency,
-                        "validUntil": validUntil?.toISOString(),
-                        "comment": "with haulage",
-                        "containers": transformArray(deflattenData2(servicesData2)),
-                        "services": deflattenData2(servicesData2),
-                        "updated": (new Date()).toISOString()
-                    };
-                }
-                else {
-                    dataSent = {
-                        // "miscellaneousId": currentEditId,
-                        "departurePortId": hashCode(city),
-                        "destinationPortId": loadingPort.portId,
-                        "departurePortName": city,
-                        "destinationPortName": loadingPort.portName,
-                        "supplierId": haulier.contactId,
-                        "supplierName": haulier.contactName,
-                        "currency": currency,
-                        "validUntil": validUntil?.toISOString(),
-                        "comment": "with haulage",
-                        "containers": transformArray(deflattenData2(servicesData2)),
-                        "services": deflattenData2(servicesData2),
-                        "updated": (new Date()).toISOString()
-                    };
-                }
-                console.log(dataSent);
-                const response = await (context as BackendService<any>).postWithToken(protectedResources.apiLisPricing.endPoint+"/Miscellaneous/Miscellaneous", dataSent, tempToken);
-                if (response !== null && response !== undefined) {
-                    setModal2(false);
-                }
-                else {
-                    enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
-                }
-            }
-        }
-        // else {
-        //     enqueueSnackbar(t('fieldsEmptySeafreight'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
-        // }
-    }
-
     return (
         <div style={{ background: "#fff", borderTopLeftRadius: 20, borderTopRightRadius: 20 }}>
             <SnackbarProvider />

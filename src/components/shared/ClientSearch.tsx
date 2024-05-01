@@ -8,6 +8,7 @@ import { useAuthorizedBackendApi } from "../../api/api";
 import { useAccount, useMsal } from "@azure/msal-react";
 import { crmRequest, protectedResources } from "../../config/authConfig";
 import { AuthenticationResult } from "@azure/msal-browser";
+import { getAccessToken } from "../../utils/functions";
 
 interface LocationAutocompleteProps {
     id: string;
@@ -44,22 +45,7 @@ const ClientSearch: React.FC<LocationAutocompleteProps> = ({ id, name, value, on
     const debouncedSearch = debounce(async (search: string) => {
         if (context && account) {
             setLoading(true);
-            const token = await instance.acquireTokenSilent({
-                scopes: crmRequest.scopes,
-                account: account
-            })
-            .then((response: AuthenticationResult) => {
-                return response.accessToken;
-            })
-            .catch(() => {
-                return instance.acquireTokenPopup({
-                    ...crmRequest,
-                    account: account
-                    }).then((response) => {
-                        return response.accessToken;
-                    });
-                }
-            );
+            const token = await getAccessToken(instance, crmRequest, account);
             
             if (checkFormatCode(search)) {
                 // First i search by contact number

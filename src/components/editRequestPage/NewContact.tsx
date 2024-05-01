@@ -10,6 +10,7 @@ import { useAccount, useMsal } from '@azure/msal-react';
 import { AuthenticationResult } from '@azure/msal-browser';
 import { MuiTelInput } from 'mui-tel-input';
 import CountrySelect from '../shared/CountrySelect';
+import { getAccessToken } from '../../utils/functions';
 
 function NewContact(props: any) {
     const [testName, setTestName] = useState<string>("");
@@ -40,22 +41,7 @@ function NewContact(props: any) {
         console.log(country);
         if (country !== null && testName !== "" && testPhone !== "" && testEmail !== "" && addressCountry !== "") {
             if (account && context) {
-                const token = await instance.acquireTokenSilent({
-                    scopes: crmRequest.scopes,
-                    account: account
-                })
-                .then((response: AuthenticationResult) => {
-                    return response.accessToken;
-                })
-                .catch(() => {
-                    return instance.acquireTokenPopup({
-                        ...crmRequest,
-                        account: account
-                        }).then((response) => {
-                            return response.accessToken;
-                        });
-                    }
-                );
+                const token = await getAccessToken(instance, crmRequest, account);
     
                 var dataSent = {
                     "contactName": testName,

@@ -23,7 +23,7 @@ export function AuthorizedBackendApiProvider(props:any):any {
                     scopes: loginRequest.scopes,
                     account: account
                 })
-                .then((response:AuthenticationResult)=>{
+                .then((response: AuthenticationResult)=>{
                     return response.accessToken;
                 })
                 .catch(()=>{
@@ -36,7 +36,6 @@ export function AuthorizedBackendApiProvider(props:any):any {
                 });
 
                 console.log(token);
-
                 setAccessToken(token);
             }
         }

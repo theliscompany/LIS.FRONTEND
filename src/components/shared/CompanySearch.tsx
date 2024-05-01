@@ -8,6 +8,7 @@ import { useMsal, useAccount } from "@azure/msal-react";
 import { useAuthorizedBackendApi } from "../../api/api";
 import { crmRequest, protectedResources } from "../../config/authConfig";
 import { BackendService } from "../../utils/services/fetch";
+import { getAccessToken } from "../../utils/functions";
 
 interface CompanyAutocompleteProps {
     id: string;
@@ -30,22 +31,7 @@ const CompanySearch: React.FC<CompanyAutocompleteProps> = ({ id, value, onChange
     const debouncedSearch = debounce(async (search: string) => {
         if (context && account) {
             setLoading(true);
-            const token = await instance.acquireTokenSilent({
-                scopes: crmRequest.scopes,
-                account: account
-            })
-            .then((response: AuthenticationResult) => {
-                return response.accessToken;
-            })
-            .catch(() => {
-                return instance.acquireTokenPopup({
-                    ...crmRequest,
-                    account: account
-                    }).then((response) => {
-                        return response.accessToken;
-                    });
-                }
-            );
+            const token = await getAccessToken(instance, crmRequest, account);
             
             var requestString = protectedResources.apiLisCrm.endPoint+"/Contact/GetContacts?contactName="+search+"&category="+category;
             if (category === 0) {

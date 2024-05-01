@@ -24,7 +24,7 @@ import RequestPriceRequest from '../components/editRequestPage/RequestPriceReque
 import { Anchor, FileCopy, Mail } from '@mui/icons-material';
 import NewContact from '../components/editRequestPage/NewContact';
 import ServicesTable from '../components/seafreightPage/ServicesTable';
-import { transformArray, reverseTransformArray, flattenData, flattenData2, compareServices, sortSuppliersByCarrierAgentName } from '../utils/functions';
+import { transformArray, reverseTransformArray, flattenData, flattenData2, compareServices, sortSuppliersByCarrierAgentName, getAccessToken } from '../utils/functions';
 import NewService from '../components/shared/NewService';
 import NewPort from '../components/shared/NewPort';
 
@@ -158,23 +158,7 @@ function Seafreights() {
     
     const getProducts = async () => {
         if (context && account) {
-            const token = await instance.acquireTokenSilent({
-                scopes: transportRequest.scopes,
-                account: account
-            })
-            .then((response: AuthenticationResult) => {
-                return response.accessToken;
-            })
-            .catch(() => {
-                return instance.acquireTokenPopup({
-                    ...transportRequest,
-                    account: account
-                    }).then((response) => {
-                        return response.accessToken;
-                    });
-                }
-            );
-            
+            const token = await getAccessToken(instance, transportRequest, account);
             const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Product?pageSize=500", token);
             if (response !== null && response !== undefined) {
                 setProducts(response);
@@ -184,22 +168,7 @@ function Seafreights() {
     
     const getClients = async () => {
         if (context && account) {
-            const token = await instance.acquireTokenSilent({
-                scopes: crmRequest.scopes,
-                account: account
-            })
-            .then((response: AuthenticationResult) => {
-                return response.accessToken;
-            })
-            .catch(() => {
-                return instance.acquireTokenPopup({
-                    ...crmRequest,
-                    account: account
-                    }).then((response) => {
-                        return response.accessToken;
-                    });
-                }
-            );
+            const token = await getAccessToken(instance, crmRequest, account);
             
             try {
                 const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisCrm.endPoint+"/Contact/GetContacts?category=5&pageSize=1000", token);
@@ -225,23 +194,7 @@ function Seafreights() {
     
     const getProtectedData = async () => {
         if (context && account) {
-            const token = await instance.acquireTokenSilent({
-                scopes: transportRequest.scopes,
-                account: account
-            })
-            .then((response: AuthenticationResult) => {
-                return response.accessToken;
-            })
-            .catch(() => {
-                return instance.acquireTokenPopup({
-                    ...transportRequest,
-                    account: account
-                    }).then((response) => {
-                        return response.accessToken;
-                    });
-                }
-            );
-            
+            const token = await getAccessToken(instance, transportRequest, account);
             getServices(token);
             getContainers(token);
         }
@@ -264,19 +217,7 @@ function Seafreights() {
     
     const getSeafreights = async () => {
         if (context && account) {
-            const token = await instance.acquireTokenSilent({
-                scopes: pricingRequest.scopes,
-                account: account
-            }).then((response:AuthenticationResult)=>{
-                return response.accessToken;
-            }).catch(() => {
-                return instance.acquireTokenPopup({
-                    ...pricingRequest,
-                    account: account
-                    }).then((response) => {
-                        return response.accessToken;
-                });
-            });
+            const token = await getAccessToken(instance, pricingRequest, account);
             setTempToken(token);
             
             const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisPricing.endPoint+"/SeaFreight/GetSeaFreights", token);
@@ -455,19 +396,7 @@ function Seafreights() {
             
             var token = null;
             if (tempToken === "") {
-                token = await instance.acquireTokenSilent({
-                    scopes: pricingRequest.scopes,
-                    account: account
-                }).then((response:AuthenticationResult)=>{
-                    return response.accessToken;
-                }).catch(() => {
-                    return instance.acquireTokenPopup({
-                        ...pricingRequest,
-                        account: account
-                        }).then((response) => {
-                            return response.accessToken;
-                    });
-                });
+                token = await getAccessToken(instance, pricingRequest, account);
                 setTempToken(token);    
             }
 
@@ -657,13 +586,7 @@ function Seafreights() {
                     </Grid> : <Skeleton sx={{ mx: 5, mt: 3 }} />
                 }
             </Box>
-            <BootstrapDialog
-                onClose={() => setModal(false)}
-                aria-labelledby="custom-dialog-title"
-                open={modal}
-                maxWidth="sm"
-                fullWidth
-            >
+            <BootstrapDialog open={modal} onClose={() => setModal(false)} maxWidth="sm" fullWidth>
                 <BootstrapDialogTitle id="custom-dialog-title" onClose={() => setModal(false)}>
                     <b>{t('deleteRowSeafreight')}</b>
                 </BootstrapDialogTitle>
@@ -673,13 +596,7 @@ function Seafreights() {
                     <Button variant="contained" onClick={() => setModal(false)} sx={buttonCloseStyles}>{t('close')}</Button>
                 </DialogActions>
             </BootstrapDialog>
-            <BootstrapDialog
-                onClose={() => setModal2(false)}
-                aria-labelledby="custom-dialog-title2"
-                open={modal2}
-                maxWidth="lg"
-                fullWidth
-            >
+            <BootstrapDialog open={modal2} onClose={() => setModal2(false)} maxWidth="lg" fullWidth>
                 <BootstrapDialogTitle id="custom-dialog-title2" onClose={() => setModal2(false)}>
                     <b>{currentEditId === "" ? t('createRowSeafreight') : t('editRowSeafreight')}</b>
                 </BootstrapDialogTitle>
@@ -893,13 +810,7 @@ function Seafreights() {
             </BootstrapDialog>
 
             {/* Price request seafreight FCL */}
-            <BootstrapDialog
-                onClose={() => setModal6(false)}
-                aria-labelledby="custom-dialog-title5"
-                open={modal6}
-                maxWidth="lg"
-                fullWidth
-            >
+            <BootstrapDialog open={modal6} onClose={() => setModal6(false)} maxWidth="lg" fullWidth>
                 {
                     products !== null ?
                     <RequestPriceRequest 
@@ -917,46 +828,18 @@ function Seafreights() {
             </BootstrapDialog>
 
             {/* Add a new contact - carrier */}
-            <BootstrapDialog
-                onClose={() => setModal7(false)}
-                aria-labelledby="custom-dialog-title7"
-                open={modal7}
-                maxWidth="md"
-                fullWidth
-            >
-                <NewContact 
-                    categories={["SHIPPING_LINES"]}
-                    closeModal={() => setModal7(false)}
-                    callBack={getClients}
-                />
+            <BootstrapDialog open={modal7} onClose={() => setModal7(false)} maxWidth="md" fullWidth>
+                <NewContact categories={["SHIPPING_LINES"]} closeModal={() => setModal7(false)} callBack={getClients} />
             </BootstrapDialog>
 
             {/* Create new service */}
-            <BootstrapDialog
-                onClose={() => setModal8(false)}
-                aria-labelledby="custom-dialog-title8"
-                open={modal8}
-                maxWidth="md"
-                fullWidth
-            >
-                <NewService 
-                    closeModal={() => setModal8(false)}
-                    callBack={getServices}
-                />
+            <BootstrapDialog open={modal8} onClose={() => setModal8(false)} maxWidth="md" fullWidth>
+                <NewService closeModal={() => setModal8(false)} callBack={getServices} />
             </BootstrapDialog>
 
             {/* Create new port */}
-            <BootstrapDialog
-                onClose={() => setModal9(false)}
-                aria-labelledby="custom-dialog-title9"
-                open={modal9}
-                maxWidth="md"
-                fullWidth
-            >
-                <NewPort 
-                    closeModal={() => setModal9(false)}
-                    callBack={getPorts}
-                />
+            <BootstrapDialog open={modal9} onClose={() => setModal9(false)} maxWidth="md" fullWidth>
+                <NewPort closeModal={() => setModal9(false)} callBack={getPorts} />
             </BootstrapDialog>
         </div>
     );

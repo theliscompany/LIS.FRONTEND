@@ -8,6 +8,7 @@ import { BackendService } from '../../utils/services/fetch';
 import { transportRequest, protectedResources } from '../../config/authConfig';
 import { useAccount, useMsal } from '@azure/msal-react';
 import { AuthenticationResult } from '@azure/msal-browser';
+import { getAccessToken } from '../../utils/functions';
 
 function NewService(props: any) {
     const [testName, setTestName] = useState<string>("");
@@ -36,23 +37,7 @@ function NewService(props: any) {
     const createNewService = async () => {
         if (testName !== "" && selectedServiceTypes.length !== 0) {
             if (account && context) {
-                const token = await instance.acquireTokenSilent({
-                    scopes: transportRequest.scopes,
-                    account: account
-                })
-                .then((response: AuthenticationResult) => {
-                    return response.accessToken;
-                })
-                .catch(() => {
-                    return instance.acquireTokenPopup({
-                        ...transportRequest,
-                        account: account
-                        }).then((response) => {
-                            return response.accessToken;
-                        });
-                    }
-                );
-    
+                const token = await getAccessToken(instance, transportRequest, account);
                 var dataSent = {
                     "serviceName": testName,
                     "serviceDescription": testDescription,

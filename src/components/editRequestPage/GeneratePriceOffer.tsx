@@ -10,7 +10,7 @@ import { DataGrid, GridColDef, GridColumnHeaderParams, GridRenderCellParams, Gri
 import StarterKit from '@tiptap/starter-kit';
 import { t } from 'i18next';
 import React from 'react';
-import { calculateTotal, checkCarrierConsistency, checkDifferentDefaultContainer, formatObject, formatServices, generateRandomNumber, getServices, getServicesTotal, getServicesTotal2, getTotalNumber, hashCode, myServices, removeDuplicatesWithLatestUpdated } from '../../utils/functions';
+import { calculateTotal, checkCarrierConsistency, checkDifferentDefaultContainer, formatObject, formatServices, generateRandomNumber, getAccessToken, getServices, getServicesTotal, getServicesTotal2, getTotalNumber, hashCode, myServices, removeDuplicatesWithLatestUpdated } from '../../utils/functions';
 import AutocompleteSearch from '../shared/AutocompleteSearch';
 import ContainerElement from './ContainerElement';
 import ContainerPrice from './ContainerPrice';
@@ -496,22 +496,7 @@ function GeneratePriceOffer(props: any) {
 
     const getHaulagePriceOffers = async () => {
         if (context && account) {
-            const token = await instance.acquireTokenSilent({
-                scopes: pricingRequest.scopes,
-                account: account
-            })
-            .then((response: AuthenticationResult) => {
-                return response.accessToken;
-            })
-            .catch((err: any) => {
-                console.log(err);
-                return instance.acquireTokenPopup({
-                    ...pricingRequest,
-                    account: account
-                }).then((response: any) => {
-                    return response.accessToken;
-                });
-            });
+            const token = await getAccessToken(instance, pricingRequest, account);
             setTempToken(token);
             
             setLoadResults(true);
@@ -537,22 +522,7 @@ function GeneratePriceOffer(props: any) {
 
     const getSeaFreightPriceOffers = async () => {
         if (context && account) {
-            const token = await instance.acquireTokenSilent({
-                scopes: pricingRequest.scopes,
-                account: account
-            })
-            .then((response: AuthenticationResult) => {
-                return response.accessToken;
-            })
-            .catch((err: any) => {
-                console.log(err);
-                return instance.acquireTokenPopup({
-                    ...pricingRequest,
-                    account: account
-                }).then((response: any) => {
-                    return response.accessToken;
-                });
-            });
+            const token = await getAccessToken(instance, pricingRequest, account);
             setTempToken(token);
             
             setLoadResults(true);

@@ -31,6 +31,7 @@ import {
 	type RichTextEditorRef,
 } from "mui-tiptap";
 import { MuiFileInput } from 'mui-file-input';
+import { getAccessToken } from '../utils/functions';
 
 function statusLabel(value: string) {
 	if (value === "Accepted")
@@ -91,22 +92,7 @@ function ManagePriceOffer(props: any) {
 	const getContainers = async () => {
 		if (context && account) {
 			setLoad(true);
-			const token = await instance.acquireTokenSilent({
-				scopes: transportRequest.scopes,
-				account: account
-			})
-			.then((response: AuthenticationResult) => {
-				return response.accessToken;
-			})
-			.catch(() => {
-				return instance.acquireTokenPopup({
-					...transportRequest,
-					account: account
-				})
-				.then((response) => {
-					return response.accessToken;
-				});
-			});
+			const token = await getAccessToken(instance, transportRequest, account);
 
 			const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint + "/Package/Containers", token);
 			console.log("Containers", response);

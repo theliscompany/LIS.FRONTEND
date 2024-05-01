@@ -19,6 +19,7 @@ import { useTranslation } from 'react-i18next';
 import RequestViewItem from '../components/requestsPage/RequestViewItem';
 import AutocompleteSearch from '../components/shared/AutocompleteSearch';
 import { AuthenticationResult } from '@azure/msal-browser';
+import { getAccessToken } from '../utils/functions';
 
 function createGetRequestUrl(variable1: string, variable2: string, variable3: string, variable4: string, variable5: Dayjs|null, variable6: Dayjs|null, variable7: Dayjs|null, variable8: Dayjs|null, assigneeId: number) {
     let url = protectedResources.apiLisQuotes.endPoint+'/Request?';
@@ -88,23 +89,7 @@ function MyRequests() {
 
     const getAssignees = async () => {
         if (context && account) {
-            const token = await instance.acquireTokenSilent({
-                scopes: loginRequest.scopes,
-                account: account
-            })
-            .then((response: AuthenticationResult) => {
-                return response.accessToken;
-            })
-            .catch(() => {
-                return instance.acquireTokenPopup({
-                    ...loginRequest,
-                    account: account
-                    }).then((response) => {
-                        return response.accessToken;
-                    });
-                }
-            );
-
+            const token = await getAccessToken(instance, loginRequest, account);
             setLoad(true);
             const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisQuotes.endPoint+"/Assignee", token);
             if (response !== null && response.code !== undefined) {

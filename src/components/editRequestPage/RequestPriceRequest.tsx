@@ -18,6 +18,7 @@ import { RichTextEditor, MenuControlsContainer, MenuSelectHeading, MenuDivider, 
 import './../../App.css';
 import { Anchor } from '@mui/icons-material';
 import { AuthenticationResult } from '@azure/msal-browser';
+import { getAccessToken } from '../../utils/functions';
 
 function createGetRequestUrl(variable1: number, variable2: number) {
     let url = protectedResources.apiLisPricing.endPoint+"/SeaFreight/GetSeaFreights?";
@@ -158,22 +159,7 @@ function RequestPriceRequest(props: any) {
 
     const getClients = async () => {
         if (context && account) {
-            const token = await instance.acquireTokenSilent({
-                scopes: crmRequest.scopes,
-                account: account
-            })
-            .then((response: AuthenticationResult) => {
-                return response.accessToken;
-            })
-            .catch(() => {
-                return instance.acquireTokenPopup({
-                    ...crmRequest,
-                    account: account
-                    }).then((response) => {
-                        return response.accessToken;
-                    });
-                }
-            );
+            const token = await getAccessToken(instance, crmRequest, account);
             
             try {
                 const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisCrm.endPoint+"/Contact/GetContacts?category=5&pageSize=1000", token);
