@@ -89,7 +89,7 @@ function Histories(props: any) {
     ];
     
     const getHistories = async () => {
-        if (context && account) {
+        if (account && instance) {
             setLoad(true);
             const token: any = await getAccessToken(instance, loginRequest, account);
             
@@ -108,7 +108,7 @@ function Histories(props: any) {
     }
 
     const searchHistories = async () => {
-        if (context && account) {
+        if (account && instance) {
             setLoad(true);
             const token: any = await getAccessToken(instance, loginRequest, account);
 

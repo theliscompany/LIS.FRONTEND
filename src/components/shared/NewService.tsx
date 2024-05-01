@@ -36,7 +36,7 @@ function NewService(props: any) {
 
     const createNewService = async () => {
         if (testName !== "" && selectedServiceTypes.length !== 0) {
-            if (account && context) {
+            if (account && instance) {
                 const token = await getAccessToken(instance, transportRequest, account);
                 var dataSent = {
                     "serviceName": testName,

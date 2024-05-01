@@ -129,7 +129,7 @@ function RequestPriceHaulage(props: any) {
     }
 
     const getClients = async () => {
-        if (context && account) {
+        if (account && instance) {
             const token = await getAccessToken(instance, crmRequest, account);
             
             try {
@@ -169,7 +169,7 @@ function RequestPriceHaulage(props: any) {
     }
 
     const searchHaulages = async () => {
-        if (context && account) {
+        if (account && instance) {
             setLoad(true);
             var requestFormatted = createGetRequestUrl(loadingCityObj?.portId, deliveryPort?.portId);
             const response = await (context as BackendService<any>).getWithToken(requestFormatted, props.token);
@@ -185,7 +185,7 @@ function RequestPriceHaulage(props: any) {
     }
 
     const getTemplates = async () => {
-        if (context && account) {
+        if (account && instance) {
             const response = await (context as BackendService<any>).getSingle(protectedResources.apiLisTemplate.endPoint+"/Template?Tags=haulage");
             if (response !== null && response.data !== undefined) {
                 setTemplates(response.data);
@@ -201,7 +201,7 @@ function RequestPriceHaulage(props: any) {
     
     const getTemplate = async (id: string) => {
         setLoadTemplate(true)
-        if (context && account) {
+        if (account && instance) {
             const response = await (context as BackendService<any>).getSingle(protectedResources.apiLisTemplate.endPoint+"/Template/"+id);
             if (response !== null && response !== undefined) {
                 setTemplateBase(response.data.content);

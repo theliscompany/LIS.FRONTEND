@@ -20,7 +20,7 @@ function RequestAskInformation(props: any) {
     
     const askInformations = async () => {
         if (mailContent !== "") {
-            if (context && account) {
+            if (account && instance) {
                 var dataSent = { "content": mailContent, "requestQuoteId": props.id, "subject": mailSubject, "noteType": "InformationRequest", email: props.email, "idUser": account?.username };
                 const response = await (context as BackendService<any>).post(protectedResources.apiLisQuotes.endPoint+"/RequestQuoteNotes", dataSent);
                 if (response !== null) {

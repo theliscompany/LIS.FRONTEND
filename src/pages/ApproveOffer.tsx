@@ -37,7 +37,7 @@ function ApproveOffer(props: any) {
     }, [context]);
 
     const loadOffer = async () => {
-        if (context && account) {
+        if (account && instance) {
             const response = await (context as BackendService<any>).getSingle(protectedResources.apiLisOffer.endPoint+"/QuoteOffer/"+id);
             if (response !== null && response.code !== undefined) {
                 if (response.code === 200) {
@@ -58,7 +58,7 @@ function ApproveOffer(props: any) {
     }
 
     const getContainers = async () => {
-        if (context && account) {
+        if (account && instance) {
             setLoad(true);
             const token = await getAccessToken(instance, transportRequest, account);
             

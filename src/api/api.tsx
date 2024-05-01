@@ -18,7 +18,7 @@ export function AuthorizedBackendApiProvider(props:any):any {
 
     useEffect(()=>{
         const getToken = async () => {
-            if(account) {
+            if (account && instance) {
                 const token = await instance.acquireTokenSilent({
                     scopes: loginRequest.scopes,
                     account: account

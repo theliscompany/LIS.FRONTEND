@@ -130,7 +130,7 @@ function Request() {
     }, [ports, products]);
 
     const getAssignees = async () => {
-        if (context && account) {
+        if (account && instance) {
             const token = await getAccessToken(instance, loginRequest, account);
             setTempToken(token);
             
@@ -158,7 +158,7 @@ function Request() {
     }
     
     const loadRequest = async () => {
-        if (context && account) {
+        if (account && instance) {
             const token = await getAccessToken(instance, loginRequest, account);
 
             try {
@@ -215,7 +215,7 @@ function Request() {
             auxUnits = unitsSelection;
         }
         
-        if (context && account) {
+        if (account && instance) {
             var postcode1 = departure.postalCode !== null && departure.postalCode !== undefined ? departure.postalCode : "";
             var postcode2 = arrival.postalCode !== null && arrival.postalCode !== undefined ? arrival.postalCode : "";
 
@@ -262,7 +262,7 @@ function Request() {
     }
     
     const getPorts = async () => {
-        if (context && account) {
+        if (account && instance) {
             const token = await getAccessToken(instance, transportRequest, account);
             
             const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Port/Ports?pageSize=2000", token);
@@ -277,7 +277,7 @@ function Request() {
     }
     
     const getProducts = async () => {
-        if (context && account) {
+        if (account && instance) {
             const token = await getAccessToken(instance, transportRequest, account);
             
             const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Product?pageSize=500", token);

@@ -20,7 +20,7 @@ function RequestAddNote(props: any) {
     const addRequestNote = async () => {
         // console.log(account);
         if (generalNote !== "") {
-            if (context && account) {
+            if (account && instance) {
                 var dataSent = { "content": generalNote, "requestQuoteId": props.id, "noteType": "General", "idUser": account?.username };
                 const response = await (context as BackendService<any>).post(protectedResources.apiLisQuotes.endPoint+"/RequestQuoteNotes", dataSent);
                 if (response !== null) {

@@ -69,7 +69,7 @@ function NewSeafreight(props: any) {
     };
 
     const getServices = async (token: string) => {
-        if (context && account) {
+        if (account && instance) {
             const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Service?pageSize=500", token);
             if (response !== null && response !== undefined) {
                 console.log(response.sort((a: any, b: any) => b.serviceName - a.serviceName));
@@ -81,7 +81,7 @@ function NewSeafreight(props: any) {
     
     const createSeafreight = async () => {
         if (servicesData.length !== 0 && portLoading !== null && portDischarge !== null && carrier !== null && carrierAgent !== null && frequency !== 0 && transitTime !== 0 && validUntil !== null) {
-            if (context && account) {
+            if (account && instance) {
                 var dataSent = null;
                 dataSent = {
                     // "seaFreightId": "string",

@@ -178,7 +178,7 @@ function Haulages() {
     };
 
     const getClients = async () => {
-        if (context && account) {
+        if (account && instance) {
             const token = await getAccessToken(instance, crmRequest, account);
             
             try {
@@ -195,7 +195,7 @@ function Haulages() {
     }
     
     const getPorts = async () => {
-        if (context && account) {
+        if (account && instance) {
             const response = await (context as BackendService<any>).getSingle(protectedResources.apiLisTransport.endPoint+"/Port/Ports?pageSize=2000");
             if (response !== null && response !== undefined) {
                 setPorts(response);
@@ -204,7 +204,7 @@ function Haulages() {
     }
     
     const getProtectedData = async () => {
-        if (context && account) {
+        if (account && instance) {
             const token = await getAccessToken(instance, transportRequest, account);
             
             getServices(token);
@@ -213,7 +213,7 @@ function Haulages() {
     }
     
     const getServices = async (token: string) => {
-        if (context && account) {
+        if (account && instance) {
             const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Service?pageSize=500", token);
             if (response !== null && response !== undefined) {
                 setAllServices(response);
@@ -227,7 +227,7 @@ function Haulages() {
     }
     
     const getHaulages = async () => {
-        if (context && account) {
+        if (account && instance) {
             const token = await getAccessToken(instance, pricingRequest, account);
             setTempToken(token);
 
@@ -263,7 +263,7 @@ function Haulages() {
     
     const getHaulage = async (id: string) => {
         setLoadEdit(true)
-        if (context && account) {
+        if (account && instance) {
             const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisPricing.endPoint+"/Haulage/Haulage?offerId="+id, tempToken);
             if (response !== null && response !== undefined) {
                 var auxHaulier = {contactId: response.haulierId, contactName: response.haulierName};
@@ -297,7 +297,7 @@ function Haulages() {
     }
     
     const searchHaulages = async () => {
-        if (context && account) {
+        if (account && instance) {
             setLoad(true);
             var requestFormatted = createGetRequestUrl(searchedLoadingPort?.portId, searchedHaulier?.contactId, searchedLoadingCity?.city.toUpperCase());
             const response = await (context as BackendService<any>).getWithToken(requestFormatted, tempToken);
@@ -314,7 +314,7 @@ function Haulages() {
 
     const createUpdateHaulage = async () => {
         if (haulier !== null && loadingCity !== null && loadingPort !== null && freeTime > 0 && unitTariff > 0 && overtimeTariff > 0 && multiStop > 0 && validUntil !== null && containerTypes.length > 0) {
-            if (context && account) {
+            if (account && instance) {
                 var dataSent = null;
                 
                 var postalCode = loadingCity !== null ? loadingCity.postalCode !== undefined ? loadingCity.postalCode : "" : ""; 
@@ -387,7 +387,7 @@ function Haulages() {
     }
 
     const deleteHaulagePrice = async (id: string) => {
-        if (context && account) {
+        if (account && instance) {
             // alert("Function not available yet!");
             const response = await (context as BackendService<any>).deleteWithToken(protectedResources.apiLisPricing.endPoint+"/Haulage/DeleteHaulage?offerId="+id, tempToken);
             if (response !== null && response !== undefined) {

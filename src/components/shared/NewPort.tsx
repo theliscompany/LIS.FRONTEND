@@ -23,7 +23,7 @@ function NewPort(props: any) {
     
     const createNewPort = async () => {
         if (testName !== "" && country !== null) {
-            if (account && context) {
+            if (account && instance) {
                 const token = await getAccessToken(instance, transportRequest, account);
     
                 var dataSent = {

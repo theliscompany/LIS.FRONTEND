@@ -24,7 +24,7 @@ function RequestListNotes(props: any) {
     }, [context]);
     
     const getNotes = async (idRequest: string|undefined) => {
-        if (context && account) {
+        if (account && instance) {
             setLoadNotes(true);
             const response = await (context as BackendService<any>).getSingle(protectedResources.apiLisQuotes.endPoint+"/RequestQuoteNotes?requestQuoteId="+idRequest);
             if (response !== null && response.code !== undefined) {
@@ -41,7 +41,7 @@ function RequestListNotes(props: any) {
     }
     
     const deleteNote = async (idNote: string) => {
-        if (context && account) {
+        if (account && instance) {
             const response = await (context as any).delete(protectedResources.apiLisQuotes.endPoint+"/RequestQuoteNotes/"+idNote);
             if (response !== null && response.code !== undefined) {
                 if (response.code === 200) {

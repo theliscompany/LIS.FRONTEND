@@ -148,7 +148,7 @@ function Templates() {
     }, []);
     
     const getTemplates = async () => {
-        if (context && account) {
+        if (account && instance) {
             // const token = await instance.acquireTokenSilent({
             //     scopes: pricingRequest.scopes,
             //     account: account
@@ -185,7 +185,7 @@ function Templates() {
     
     const getTemplate = async (id: string) => {
         setLoadEdit(true)
-        if (context && account) {
+        if (account && instance) {
             const response = await (context as BackendService<any>).getSingle(protectedResources.apiLisTemplate.endPoint+"/Template/"+id);
             if (response !== null && response !== undefined) {
                 setName(response.data.name);
@@ -203,7 +203,7 @@ function Templates() {
     }
     
     const searchTemplates = async () => {
-        if (context && account) {
+        if (account && instance) {
             setLoad(true);
             var requestFormatted = createGetRequestUrl(searchedName);
             const response = await (context as BackendService<any>).getSingle(requestFormatted);
@@ -220,7 +220,7 @@ function Templates() {
 
     const createUpdateTemplate = async () => {
         if (name !== "" && rteRef.current?.editor?.getHTML() !== "") {
-            if (context && account) {
+            if (account && instance) {
                 var dataSent = null;
                 if (currentEditId !== "") {
                     dataSent = {
@@ -278,7 +278,7 @@ function Templates() {
     }
 
     const deleteTemplate = async (id: string) => {
-        if (context && account) {
+        if (account && instance) {
             // alert("Function not available yet!");
             const response = await (context as BackendService<any>).delete(protectedResources.apiLisTemplate.endPoint+"/Template/"+id);
             if (response !== null && response !== undefined) {

@@ -91,11 +91,11 @@ function Requests() {
     }, [context]);
 
     const loadRequests = async () => {
-        if (context && account) {
+        if (account && instance) {
             setLoad(true);
             const token = await getAccessToken(instance, loginRequest, account);
             setTempToken(token);
-            
+
             const response: RequestResponseDto = await (context as BackendService<any>).getWithToken(search !== undefined ? protectedResources.apiLisQuotes.endPoint+"/Request?Search="+search : protectedResources.apiLisQuotes.endPoint+"/Request", token);
             if (response !== null && response.code !== undefined && response.data !== undefined) {
                 if (response.code === 200) {
@@ -111,7 +111,7 @@ function Requests() {
     }
 
     const searchRequests = async () => {
-        if (context && account) {
+        if (account && instance) {
             setLoad(true);
             
             var postcode1 = "";

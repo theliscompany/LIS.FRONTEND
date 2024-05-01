@@ -161,7 +161,7 @@ function RequestPriceOffer(props: any) {
     }
 
     const searchSeafreights = async () => {
-        if (context && account) {
+        if (account && instance) {
             setLoad(true);
             // setCarriersData([]);
             var requestFormatted = createGetRequestUrl(portLoading?.portId, portDischarge?.portId);
@@ -184,7 +184,7 @@ function RequestPriceOffer(props: any) {
     }
 
     const getTemplates = async () => {
-        if (context && account) {
+        if (account && instance) {
             const response = await (context as BackendService<any>).getSingle(protectedResources.apiLisTemplate.endPoint+"/Template");
             if (response !== null && response.data !== undefined) {
                 setTemplates(response.data);
@@ -200,7 +200,7 @@ function RequestPriceOffer(props: any) {
     
     const getTemplate = async (id: string) => {
         setLoadTemplate(true)
-        if (context && account) {
+        if (account && instance) {
             const response = await (context as BackendService<any>).getSingle(protectedResources.apiLisTemplate.endPoint+"/Template/"+id);
             if (response !== null && response !== undefined) {
                 setTemplateBase(response.data.content);

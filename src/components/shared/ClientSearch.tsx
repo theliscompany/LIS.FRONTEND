@@ -43,7 +43,7 @@ const ClientSearch: React.FC<LocationAutocompleteProps> = ({ id, name, value, on
     const account = useAccount(accounts[0] || {});
 
     const debouncedSearch = debounce(async (search: string) => {
-        if (context && account) {
+        if (account && instance) {
             setLoading(true);
             const token = await getAccessToken(instance, crmRequest, account);
             

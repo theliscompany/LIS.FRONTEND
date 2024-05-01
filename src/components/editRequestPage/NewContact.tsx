@@ -40,7 +40,7 @@ function NewContact(props: any) {
     const createNewContact = async () => {
         console.log(country);
         if (country !== null && testName !== "" && testPhone !== "" && testEmail !== "" && addressCountry !== "") {
-            if (account && context) {
+            if (account && instance) {
                 const token = await getAccessToken(instance, crmRequest, account);
     
                 var dataSent = {

@@ -66,7 +66,7 @@ function RequestsSearch() {
     }, [context, search]);
 
     const loadRequests = async () => {
-        if (context && account) {
+        if (account && instance) {
             setLoad(true);
             const response: RequestResponseDto = await (context as BackendService<any>).getSingle(search !== undefined ? protectedResources.apiLisQuotes.endPoint+"/Request?Search="+search : protectedResources.apiLisQuotes.endPoint+"/Request");
             if (response !== null && response.code !== undefined && response.data !== undefined) {
@@ -83,7 +83,7 @@ function RequestsSearch() {
     }
 
     const searchRequests = async () => {
-        if (context && account) {
+        if (account && instance) {
             setLoad(true);
             
             var postcode1 = "";

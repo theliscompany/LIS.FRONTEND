@@ -32,7 +32,7 @@ const MasterDataProducts: any = (props: any) => {
     const context = useAuthorizedBackendApi();
     
     const getProducts = async () => {
-        if (context && account) {
+        if (account && instance) {
             setLoadResults(true);
             const token = await getAccessToken(instance, transportRequest, account);
             const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Product?pageSize=500", token);
@@ -49,7 +49,7 @@ const MasterDataProducts: any = (props: any) => {
     }
     
     const deleteProductPrice = async (id: string) => {
-        if (context && account) {
+        if (account && instance) {
             try {
                 const response = await (context as BackendService<any>).deleteWithToken(protectedResources.apiLisTransport.endPoint+"/Product/"+id, tempToken);
                 console.log(response);
@@ -87,7 +87,7 @@ const MasterDataProducts: any = (props: any) => {
     
     const createNewProduct = async () => {
         if (testName !== "") {
-            if (account && context) {
+            if (account && instance) {
                 const token = await getAccessToken(instance, transportRequest, account);
                 
                 try {
@@ -127,7 +127,7 @@ const MasterDataProducts: any = (props: any) => {
     
     const getProduct = async (id: string) => {
         setLoadEdit(true)
-        if (context && account) {
+        if (account && instance) {
             const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Product/"+id, tempToken);
             if (response !== null && response !== undefined) {
                 console.log(response);

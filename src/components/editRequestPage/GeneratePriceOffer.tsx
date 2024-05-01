@@ -495,7 +495,7 @@ function GeneratePriceOffer(props: any) {
     }
 
     const getHaulagePriceOffers = async () => {
-        if (context && account) {
+        if (account && instance) {
             const token = await getAccessToken(instance, pricingRequest, account);
             setTempToken(token);
             
@@ -521,7 +521,7 @@ function GeneratePriceOffer(props: any) {
     }
 
     const getSeaFreightPriceOffers = async () => {
-        if (context && account) {
+        if (account && instance) {
             const token = await getAccessToken(instance, pricingRequest, account);
             setTempToken(token);
             
@@ -549,7 +549,7 @@ function GeneratePriceOffer(props: any) {
 
     const getMiscellaneousPriceOffers = async () => {
         setLoadResults(true);
-        if (context && account) {
+        if (account && instance) {
             const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisPricing.endPoint+"/Miscellaneous/Miscellaneous?departurePortId="+formState.portDeparture.portId+"&destinationPortId="+formState.portDestination.portId+"&withShipment=true", tempToken);
             
             var myContainers = containersSelection.map((elm: any, index: any) => {
@@ -574,7 +574,7 @@ function GeneratePriceOffer(props: any) {
 
     const getGeneralMiscellaneousPriceOffers = async () => {
         setLoadGeneralMiscs(true);
-        if (context && account) {
+        if (account && instance) {
             var response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisPricing.endPoint+"/Miscellaneous/Miscellaneous?withShipment=false", tempToken);
             
             var myFreights = formState.rowSelectionModel.length !== 0 && seafreights !== null && formState.selectedSeafreights !== undefined && formState.selectedSeafreights !== null ? 
@@ -599,7 +599,7 @@ function GeneratePriceOffer(props: any) {
 
     const getHaulageMiscellaneousPriceOffers = async () => {
         setLoadMiscsHaulage(true)
-        if (context && account) {
+        if (account && instance) {
             var postalCode = loadingCity !== null ? loadingCity.postalCode !== undefined ? loadingCity.postalCode : "" : ""; 
             var city = "";
             if (postalCode !== "") {
@@ -628,7 +628,7 @@ function GeneratePriceOffer(props: any) {
 
     const createNewOffer = async () => {
         if (formState.selectedSeafreight !== null && formState.selectedSeafreight !== undefined) {
-            if (context && account) {
+            if (account && instance) {
                 setLoadNewOffer(true);
                 var haulage = null;
                 var miscellaneous = null;
@@ -731,7 +731,7 @@ function GeneratePriceOffer(props: any) {
     }
 
     const getTemplates = async () => {
-        if (context && account) {
+        if (account && instance) {
             const response = await (context as BackendService<any>).getSingle(protectedResources.apiLisTemplate.endPoint+"/Template?Tags=offer");
             if (response !== null && response.data !== undefined) {
                 setTemplates(response.data);
@@ -746,7 +746,7 @@ function GeneratePriceOffer(props: any) {
     // Work on the template
     const getTemplate = async (id: string) => {
         setLoadTemplate(true)
-        if (context && account) {
+        if (account && instance) {
             const response = await (context as BackendService<any>).getSingle(protectedResources.apiLisTemplate.endPoint+"/Template/"+id);
             if (response !== null && response !== undefined) {
                 setTemplateBase(response.data);

@@ -33,7 +33,7 @@ const MasterDataPorts: any = (props: any) => {
     const context = useAuthorizedBackendApi();
     
     const getPorts = async () => {
-        if (context && account) {
+        if (account && instance) {
             setLoadResults(true);
             const token = await getAccessToken(instance, transportRequest, account);
             setTempToken(token);
@@ -49,7 +49,7 @@ const MasterDataPorts: any = (props: any) => {
     }
     
     const deletePort = async (id: string) => {
-        if (context && account) {
+        if (account && instance) {
             try {
                 const response = await (context as BackendService<any>).deleteWithToken(protectedResources.apiLisTransport.endPoint+"/Port/DeletePort/"+id, tempToken);
                 console.log(response);
@@ -88,7 +88,7 @@ const MasterDataPorts: any = (props: any) => {
     
     const createNewPort = async () => {
         if (testName !== "" && country !== null) {
-            if (account && context) {
+            if (account && instance) {
                 const token = await getAccessToken(instance, transportRequest, account);
                 
                 try {
@@ -126,7 +126,7 @@ const MasterDataPorts: any = (props: any) => {
     
     const getPort = async (id: string) => {
         setLoadEdit(true)
-        if (context && account) {
+        if (account && instance) {
             const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Port/GetPort/"+id, tempToken);
             if (response !== null && response !== undefined) {
                 console.log(response);

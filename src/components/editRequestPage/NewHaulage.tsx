@@ -57,7 +57,7 @@ function NewHaulage(props: any) {
     const createHaulage = async () => {
         setLoad(true);
         if (haulier !== null && loadingCity !== null && loadingPort !== null && freeTime > 0 && unitTariff > 0 && overtimeTariff > 0 && multiStop > 0 && validUntil !== null && containerTypes.length > 0) {
-            if (context && account) {
+            if (account && instance) {
                 var dataSent = null;
                 var postalCode = loadingCity !== null ? loadingCity.postalCode !== undefined ? loadingCity.postalCode : "" : ""; 
                 var city = loadingCity !== null ? loadingCity.city.toUpperCase()+', '+loadingCity.country.toUpperCase() : "";

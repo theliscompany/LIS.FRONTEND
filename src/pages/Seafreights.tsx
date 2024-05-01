@@ -157,7 +157,7 @@ function Seafreights() {
     // }, [miscellaneousId]);
     
     const getProducts = async () => {
-        if (context && account) {
+        if (account && instance) {
             const token = await getAccessToken(instance, transportRequest, account);
             const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Product?pageSize=500", token);
             if (response !== null && response !== undefined) {
@@ -167,7 +167,7 @@ function Seafreights() {
     }
     
     const getClients = async () => {
-        if (context && account) {
+        if (account && instance) {
             const token = await getAccessToken(instance, crmRequest, account);
             
             try {
@@ -184,7 +184,7 @@ function Seafreights() {
     }
     
     const getPorts = async () => {
-        if (context && account) {
+        if (account && instance) {
             const response = await (context as BackendService<any>).getSingle(protectedResources.apiLisTransport.endPoint+"/Port/Ports?pageSize=2000");
             if (response !== null && response !== undefined) {
                 setPorts(response);
@@ -193,7 +193,7 @@ function Seafreights() {
     }
     
     const getProtectedData = async () => {
-        if (context && account) {
+        if (account && instance) {
             const token = await getAccessToken(instance, transportRequest, account);
             getServices(token);
             getContainers(token);
@@ -201,7 +201,7 @@ function Seafreights() {
     }
 
     const getServices = async (token: string) => {
-        if (context && account) {
+        if (account && instance) {
             const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Service?pageSize=500", token);
             if (response !== null && response !== undefined) {
                 console.log(response.sort((a: any, b: any) => b.serviceName - a.serviceName));
@@ -216,7 +216,7 @@ function Seafreights() {
     }
     
     const getSeafreights = async () => {
-        if (context && account) {
+        if (account && instance) {
             const token = await getAccessToken(instance, pricingRequest, account);
             setTempToken(token);
             
@@ -261,7 +261,7 @@ function Seafreights() {
     
     const getSeafreight = async (id: string, isCopy: boolean) => {
         setLoadEdit(true)
-        if (context && account) {
+        if (account && instance) {
             const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisPricing.endPoint+"/SeaFreight/SeaFreight?seaFreightId="+id, tempToken);
             if (response !== null && response !== undefined) {
                 var auxCarrier = {contactId: response.carrierId, contactName: response.carrierName};
@@ -299,7 +299,7 @@ function Seafreights() {
     }
     
     const searchSeafreights = async () => {
-        if (context && account) {
+        if (account && instance) {
             setLoad(true);
             var requestFormatted = createGetRequestUrl(portDeparture?.portId, portDestination?.portId, searchedCarrier?.contactId);
             const response = await (context as BackendService<any>).getWithToken(requestFormatted, tempToken);
@@ -315,7 +315,7 @@ function Seafreights() {
 
     const createUpdateSeafreight = async () => {
         if (servicesData.length !== 0 && portLoading !== null && portDischarge !== null && carrier !== null && carrierAgent !== null && frequency !== 0 && transitTime !== 0 && validUntil !== null) {
-            if (context && account) {
+            if (account && instance) {
                 var dataSent = null;
                 if (currentEditId !== "") {
                     dataSent = {
@@ -377,7 +377,7 @@ function Seafreights() {
     }
 
     const deleteSeafreightPrice = async (id: string) => {
-        if (context && account) {
+        if (account && instance) {
             const response = await (context as BackendService<any>).deleteWithToken(protectedResources.apiLisPricing.endPoint+"/SeaFreight/DeleteSeaFreightPrice?id="+id, tempToken);
             if (response !== null && response !== undefined) {
                 enqueueSnackbar(t('rowDeletedSuccess'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
@@ -391,7 +391,7 @@ function Seafreights() {
     }
 
     const getMiscellaneouses = async (carrier1: any, portLoading1: any, portDischarge1: any, validUntil1: any, container: any, isCopy: boolean) => {
-        if (context && account) {
+        if (account && instance) {
             setLoadMiscs(true);
             
             var token = null;

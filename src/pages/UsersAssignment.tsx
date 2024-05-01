@@ -64,7 +64,7 @@ function UsersAssignment(props: any) {
     }, [account, instance]);
     
     const getAssignees = async () => {
-        if (context && account) {
+        if (account && instance) {
             const token = await getAccessToken(instance, loginRequest, account);
             setTempToken(token);
             
@@ -130,7 +130,7 @@ function UsersAssignment(props: any) {
     const removeAsManager = async (email: string) => {
         var assignee = assignees.find((user: any) => user.email === email);
         if (assignee) {
-            if (context && account) {
+            if (account && instance) {
                 setLoad(true);
                 const response = await (context as BackendService<any>).deleteWithToken(protectedResources.apiLisQuotes.endPoint+"/Assignee/"+assignee.id, tempToken);
                 if (response !== null && response.code !== undefined) {
@@ -161,7 +161,7 @@ function UsersAssignment(props: any) {
     }
 
     const assignAsManager = async (name: string, email: string, idUser: string) => {
-        if (context && account) {
+        if (account && instance) {
             let content = { "name": name, "email": email, "idUser": idUser };
             const response = await (context as BackendService<any>).postWithToken(protectedResources.apiLisQuotes.endPoint+"/Assignee", content, tempToken);
             if (response !== null && response.status === 201) {

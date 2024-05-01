@@ -226,7 +226,7 @@ function Miscellaneous() {
     }, [showHaulages, ports]);
     
     const getPorts = async () => {
-        if (context && account) {
+        if (account && instance) {
             const response = await (context as BackendService<any>).getSingle(protectedResources.apiLisTransport.endPoint+"/Port/Ports?pageSize=2000");
             if (response !== null && response !== undefined) {
                 setPorts(response);
@@ -235,7 +235,7 @@ function Miscellaneous() {
     }
     
     const getProtectedData = async () => {
-        if (context && account) {
+        if (account && instance) {
             const token = await getAccessToken(instance, transportRequest, account);
             getServices(token);
             getContainers(token);
@@ -243,7 +243,7 @@ function Miscellaneous() {
     }
 
     const getServices = async (token: string) => {
-        if (context && account) {
+        if (account && instance) {
             const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Service?pageSize=500", token);
             if (response !== null && response !== undefined) {
                 setServices(response.sort((a: any, b: any) => compareServices(a, b)).filter((obj: any) => obj.servicesTypeId.includes(5))); // Filter the services for miscellaneous (MISCELLANEOUS = 5)
@@ -256,7 +256,7 @@ function Miscellaneous() {
     }
     
     const getMiscellaneouses = async () => {
-        if (context && account) {
+        if (account && instance) {
             setLoad(true);
 
             var token = null;
@@ -302,7 +302,7 @@ function Miscellaneous() {
     
     const getMiscellaneous = async (id: string) => {
         setLoadEdit(true)
-        if (context && account) {
+        if (account && instance) {
             const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisPricing.endPoint+"/Miscellaneous/Miscellaneous?id="+id+"&withShipment="+withShipment, tempToken);
             if (response !== null && response !== undefined) {
                 console.log(response.services);
@@ -324,7 +324,7 @@ function Miscellaneous() {
     }
     
     const searchMiscellaneous = async () => {
-        if (context && account) {
+        if (account && instance) {
             setLoad(true);
             var requestFormatted = createGetRequestUrl(portDeparture?.portId, portDestination?.portId, searchedSupplier?.contactId);
             const response = await (context as BackendService<any>).getWithToken(requestFormatted+"&withShipment="+withShipment, tempToken);
@@ -342,7 +342,7 @@ function Miscellaneous() {
 
     const createMiscellaneous = async () => {
         if (servicesSelection !== null && validUntil !== null) {
-            if (context && account) {
+            if (account && instance) {
                 var dataSent = null;
                 var urlString = "";
 
@@ -430,7 +430,7 @@ function Miscellaneous() {
     }
 
     const deleteMiscellaneous = async (id: string) => {
-        if (context && account) {
+        if (account && instance) {
             // alert("Function not available yet!");
             const response = await (context as BackendService<any>).deleteWithToken(protectedResources.apiLisPricing.endPoint+"/Miscellaneous/DeleteMiscellaneous/"+id, tempToken);
             if (response !== null && response !== undefined) {

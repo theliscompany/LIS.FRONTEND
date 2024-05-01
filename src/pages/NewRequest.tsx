@@ -69,7 +69,7 @@ function NewRequest(props: any) {
     const { t } = useTranslation();
     
     const getProducts = async () => {
-        if (context && account) {
+        if (account && instance) {
             const token = await getAccessToken(instance, transportRequest, account);            
             const response = await (context as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Product?pageSize=500", token);
             console.log(response);
@@ -101,7 +101,7 @@ function NewRequest(props: any) {
     }, [instance, account, context]);
 
     const getAssignees = async () => {
-        if (context && account) {
+        if (account && instance) {
             const token = await getAccessToken(instance, loginRequest, account);
             setTempToken(token);
 
@@ -136,7 +136,7 @@ function NewRequest(props: any) {
 
     const assignManager = async (idQuote: string) => {
         if (currentUser !== null && currentUser !== undefined && currentUser !== "") {
-            if (context && account) {
+            if (account && instance) {
                 const response = await (context as BackendService<any>).putWithToken(protectedResources.apiLisQuotes.endPoint+"/Assignee/"+idQuote+"/"+formState.assignedManager, [], tempToken);
                 if (response !== null) {
                     setLoad(false);
