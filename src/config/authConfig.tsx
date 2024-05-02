@@ -66,5 +66,8 @@ export const protectedResources = {
   },
   apiLisTemplate: {
     endPoint: process.env.REACT_APP_API_LIS_TEMPLATE_ENDPOINT
+  }, 
+  apiLisFiles: {
+    endPoint: "https://lis-document-svc.azurewebsites.net/api"
   }
 }

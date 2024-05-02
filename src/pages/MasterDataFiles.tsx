@@ -1,4 +1,3 @@
-import * as React from 'react';
 import { useState, useEffect } from 'react';
 import Box from '@mui/material/Box';
 import { SnackbarProvider, enqueueSnackbar } from 'notistack';
@@ -6,18 +5,18 @@ import { useMsal, useAccount } from '@azure/msal-react';
 import { useAuthorizedBackendApi } from '../api/api';
 import { protectedResources, transportRequest } from '../config/authConfig';
 import { BackendService } from '../utils/services/fetch';
-import { AuthenticationResult } from '@azure/msal-browser';
 import { Alert, Button, DialogActions, DialogContent, Grid, IconButton, InputLabel, MenuItem, Select, Skeleton, Typography } from '@mui/material';
 import { DataGrid, GridColDef, GridRenderCellParams, GridToolbar } from '@mui/x-data-grid';
 import { t } from 'i18next';
 import { sizingStyles, gridStyles, BootstrapDialog, BootstrapDialogTitle, buttonCloseStyles, BootstrapInput, actionButtonStyles, inputLabelStyles } from '../utils/misc/styles';
-import { Edit, Delete } from '@mui/icons-material';
-import CountrySelect from '../components/shared/CountrySelect';
+import { Edit, Delete, Download } from '@mui/icons-material';
 import { countries } from '../utils/constants';
-import { getAccessToken } from '../utils/functions';
+import { MuiFileInput } from 'mui-file-input';
+import axios, { AxiosResponse } from 'axios';
+import { getExtensionFromContentType } from '../utils/functions';
 
 const MasterDataFiles: any = (props: any) => {
-    const [products, setFiles] = useState<any>(null);
+    const [files, setFiles] = useState<any>(null);
     const [loadResults, setLoadResults] = useState<boolean>(true);
     const [loadEdit, setLoadEdit] = useState<boolean>(false);
     const [modal, setModal] = useState<boolean>(false);
@@ -26,6 +25,7 @@ const MasterDataFiles: any = (props: any) => {
     const [country, setCountry] = useState<any>(null);
     const [currentId, setCurrentId] = useState<string>("");
     const [currentEditId, setCurrentEditId] = useState<string>("");
+    const [fileValue, setFileValue] = useState<File[] | undefined>(undefined);
     const [tempToken, setTempToken] = useState<string>("");
     
     const { instance, accounts } = useMsal();
@@ -35,13 +35,10 @@ const MasterDataFiles: any = (props: any) => {
     const getFiles = async () => {
         if (account && instance && context) {
             setLoadResults(true);
-            // const token = await getAccessToken(instance, transportRequest, account);
-            const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/File/Files?pageSize=2000", context.tokenTransport);
-            if (response !== null && response !== undefined) {
-                setFiles(response);
+            const response = await (context?.service as BackendService<any>).getSingle(protectedResources.apiLisFiles.endPoint+"/Files");
+            if (response !== null && response.data !== undefined && response !== undefined) {
+                setFiles(response.data);
                 setLoadResults(false);
-                // setTempToken(token);
-                // setFiles(response.filter((obj: any) => obj.productsTypeId.includes(5) || obj.productsTypeId.includes(2))); // Filter the products for miscellaneous (MISCELLANEOUS = 5 & HAULAGE = 2)
             }
             else {
                 setLoadResults(false);
@@ -52,7 +49,7 @@ const MasterDataFiles: any = (props: any) => {
     const deleteFile = async (id: string) => {
         if (account && instance && context) {
             try {
-                const response = await (context?.service as BackendService<any>).deleteWithToken(protectedResources.apiLisTransport.endPoint+"/File/DeleteFile/"+id, context.tokenTransport);
+                const response = await (context?.service as BackendService<any>).delete(protectedResources.apiLisFiles.endPoint+"/Files/"+id);
                 console.log(response);
                 enqueueSnackbar(t('rowDeletedSuccess'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
                 setModal2(false);
@@ -70,16 +67,27 @@ const MasterDataFiles: any = (props: any) => {
     }, [account, instance, account]);
 
     const columnsFiles: GridColDef[] = [
-        { field: 'portId', headerName: t('id'), flex: 1 },
-        { field: 'portName', headerName: t('portName'), flex: 3 },
-        { field: 'country', headerName: t('country'), flex: 3 },
+        // { field: 'id', headerName: t('id'), flex: 1 },
+        { field: 'fileName', headerName: t('fileName'), flex: 3 },
+        { field: 'contentType', headerName: t('contentType'), flex: 1 },
+        { field: 'size', headerName: t('size'), flex: 1 },
+        { field: 'uploadedAt', headerName: t('uploadedAt'), renderCell: (params: GridRenderCellParams) => {
+            return (
+                <Box sx={{ my: 1, mr: 1 }}>
+                    {params.row.uploadedAt !== null ? (new Date(params.row.uploadedAt)).toLocaleString() : null}
+                </Box>
+            );
+        }, flex: 1 },
         { field: 'xxx', headerName: t('Actions'), renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box sx={{ my: 1, mr: 1 }}>
-                    <IconButton size="small" title={t('editRowFile')} sx={{ mr: 0.5 }} onClick={() => { setCurrentEditId(params.row.portId); resetForm(); getFile(params.row.portId); setModal(true); }}>
-                        <Edit fontSize="small" />
+                    <IconButton size="small" title={t('downloadFile')} sx={{ mr: 0.5 }} onClick={() => { downloadFile(params.row.id, params.row.fileName, params.row.contentType); }}>
+                        <Download fontSize="small" />
                     </IconButton>
-                    <IconButton size="small" title={t('deleteRowFile')} onClick={() => { setCurrentId(params.row.portId); setModal2(true); }}>
+                    {/* <IconButton size="small" title={t('editRowFile')} sx={{ mr: 0.5 }} onClick={() => { setCurrentEditId(params.row.id); resetForm(); getFile(params.row.id); setModal(true); }}>
+                        <Edit fontSize="small" />
+                    </IconButton> */}
+                    <IconButton size="small" title={t('deleteRowFile')} onClick={() => { setCurrentId(params.row.id); setModal2(true); }}>
                         <Delete fontSize="small" />
                     </IconButton>
                 </Box>
@@ -87,29 +95,49 @@ const MasterDataFiles: any = (props: any) => {
         }, minWidth: 120, flex: 1 },
     ];
     
+    const uploadFile = async () => {
+        if (fileValue !== undefined && fileValue !== null) {
+            try {
+                const formData = new FormData();
+                formData.append('file', fileValue[0]);
+            
+                const response: AxiosResponse = await axios({
+                    url: protectedResources.apiLisFiles.endPoint+"/Files/upload",
+                    method: 'POST',
+                    data: formData,
+                    headers: {
+                        'Content-Type': 'multipart/form-data', 
+                    },
+                });
+                
+                enqueueSnackbar("The file has been added with success!", { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                getFiles();
+                setModal(false);
+                console.log(response);
+            } 
+            catch (error) {
+                enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                console.log(error);
+            }
+        }
+        else {
+            enqueueSnackbar("The file field is empty, please verify it and pick a file.", { variant: "warning", anchorOrigin: { horizontal: "right", vertical: "top"} });
+        }
+    };
+
     const createNewFile = async () => {
-        if (testName !== "" && country !== null) {
+        if (fileValue !== null) {
             if (account && instance && context) {
                 // const token = await getAccessToken(instance, transportRequest, account);
                 
                 try {
                     var dataSent = null;
                     var response = null;
-                    if (currentEditId !== "") {
-                        dataSent = {
-                            "portId": currentEditId,
-                            "portName": testName.toUpperCase(),
-                            "country": country.label.toUpperCase(),
-                        };
-                        response = await (context?.service as BackendService<any>).putWithToken(protectedResources.apiLisTransport.endPoint+"/File/UpdateFile/"+currentEditId, dataSent, context.tokenTransport);
-                    }
-                    else {
-                        dataSent = {
-                            "portName": testName.toUpperCase(),
-                            "country": country.label.toUpperCase(),
-                        };
-                        response = await (context?.service as BackendService<any>).postWithToken(protectedResources.apiLisTransport.endPoint+"/File/CreateFile", dataSent, context.tokenTransport);
-                    }
+                    dataSent = {
+                        "file": fileValue,
+                    };
+                    response = await (context?.service as BackendService<any>).post(protectedResources.apiLisFiles.endPoint+"/Files/upload", dataSent);
+                    
                     enqueueSnackbar(currentEditId === "" ? "The port has been added with success!" : "The port has been edited with success!", { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
                     getFiles();
                     setModal(false);    
@@ -126,9 +154,9 @@ const MasterDataFiles: any = (props: any) => {
     }
     
     const getFile = async (id: string) => {
-        setLoadEdit(true)
+        setLoadEdit(true);
         if (account && instance && context) {
-            const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/File/GetFile/"+id, context.tokenTransport);
+            const response = await (context?.service as BackendService<any>).getSingle(protectedResources.apiLisFiles.endPoint+"/Files/"+id+"?download=false");
             if (response !== null && response !== undefined) {
                 console.log(response);
                 setTestName(response.portName);
@@ -138,13 +166,56 @@ const MasterDataFiles: any = (props: any) => {
             else {
                 setLoadEdit(false);
             }
-            // console.log(response);
+        }
+        else {
+            setLoadEdit(false);
         }
     }
     
+    // const downloadFile = async (id: string) => {
+    //     setLoadEdit(true);
+    //     if (account && instance && context) {
+    //         const response = await (context?.service as BackendService<any>).get(protectedResources.apiLisFiles.endPoint+"/Files/"+id+"?download=true");
+    //         if (response !== null && response !== undefined) {
+    //             console.log(response);
+    //             setLoadEdit(false);
+    //         }
+    //         else {
+    //             setLoadEdit(false);
+    //         }
+    //     }
+    //     else {
+    //         setLoadEdit(false);
+    //     }
+    // }
+    const downloadFile = async (id: string, name: string, type: string) => {
+        try {
+            const response = await axios({
+                url: protectedResources.apiLisFiles.endPoint+"/Files/"+id+"?download=true", 
+                method: 'GET',
+                responseType: 'blob', // important for file download
+                headers: {
+                    'Content-Type': 'multipart/form-data', 
+                },
+            });
+            
+            var extension = getExtensionFromContentType(type);
+            
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', name+"."+extension); // replace with your file name and extension
+            document.body.appendChild(link);
+            link.click();
+            link.parentNode?.removeChild(link);
+        } 
+        catch (error) {
+            console.log(error);
+        }
+    };
+    
     const resetForm = () => {
-        setTestName("");
-        setCountry(null);
+        setFileValue(undefined);
     }
     
     return (
@@ -167,10 +238,10 @@ const MasterDataFiles: any = (props: any) => {
                     <Grid item xs={12}>
                         {
                             !loadResults ? 
-                            products !== null && products.length !== 0 ?
+                            files !== null && files.length !== 0 ?
                             <Box sx={{ overflow: "auto" }}>
                                 <DataGrid
-                                    rows={products}
+                                    rows={files}
                                     columns={columnsFiles}
                                     // hideFooter
                                     initialState={{
@@ -181,7 +252,7 @@ const MasterDataFiles: any = (props: any) => {
                                         },
                                     }}
                                     pageSizeOptions={[5, 10, 25, 50]}
-                                    getRowId={(row: any) => row?.portId}
+                                    getRowId={(row: any) => row?.id}
                                     getRowHeight={() => "auto" }
                                     style={sizingStyles}
                                     sx={gridStyles}
@@ -221,18 +292,19 @@ const MasterDataFiles: any = (props: any) => {
                         loadEdit === false ?
                         <Grid container spacing={2}>
                             <Grid item xs={12}>
-                                <InputLabel htmlFor="test-name" sx={inputLabelStyles}>{t('portName')}</InputLabel>
-                                <BootstrapInput id="test-name" type="text" value={testName} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTestName(e.target.value)} fullWidth />
-                            </Grid>
-                            <Grid item xs={12}>
-                                <InputLabel htmlFor="test-country" sx={inputLabelStyles}>{t('country')}</InputLabel>
-                                <CountrySelect id="test-country" value={country} onChange={setCountry} fullWidth />
+                                <InputLabel htmlFor="fileSent" sx={inputLabelStyles}>{t('fileSent')}</InputLabel>
+                                <MuiFileInput
+                                    id="fileSent" size="small" 
+                                    variant="outlined" multiple fullWidth /*inputProps={{ accept: '.pdf' }}*/
+                                    value={fileValue} sx={{ mt: 1 }} 
+                                    onChange={(newValue: any) => { console.log(newValue); setFileValue(newValue); }}
+                                />
                             </Grid>
                         </Grid> : <Skeleton />
                     }
                 </DialogContent>
                 <DialogActions>
-                    <Button variant="contained" onClick={() => { createNewFile(); }} sx={actionButtonStyles}>{t('validate')}</Button>
+                    <Button variant="contained" onClick={() => { uploadFile(); }} sx={actionButtonStyles}>{t('validate')}</Button>
                     <Button variant="contained" onClick={() => setModal(false)} sx={buttonCloseStyles}>{t('close')}</Button>
                 </DialogActions>
             </BootstrapDialog>

@@ -45,7 +45,7 @@ import Search from '@mui/icons-material/Search';
 
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Anchor, AnchorOutlined, ContactsOutlined, ExpandLess, ExpandMore, FolderOutlined, Inventory, InventoryOutlined, RoomService, RoomServiceOutlined } from '@mui/icons-material';
+import { Anchor, AnchorOutlined, AttachFileOutlined, ContactsOutlined, ExpandLess, ExpandMore, FolderOutlined, Inventory, InventoryOutlined, RoomService, RoomServiceOutlined } from '@mui/icons-material';
 
 function stringToColor(string: string) {
     let hash = 0;
@@ -312,48 +312,6 @@ function Layout(props: {children?: React.ReactNode}) {
 
                             <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }} />
                             <Box sx={{ flexGrow: 0 }}>
-                                {/* {
-                                    notifications != null ?
-                                    <React.Fragment>
-                                        <DarkTooltip title="Notifications">
-                                            <IconButton onClick={handleOpenNotificationsMenu} size="large" sx={{ color: "rgba(0, 0, 0, 0.54)", mx: 2 }}>
-                                                <Badge badgeContent={notifications.length} color="error">
-                                                    <NotificationsIcon />
-                                                </Badge>
-                                            </IconButton>
-                                        </DarkTooltip>
-                                        <Menu
-                                            sx={{ mt: '45px' }}
-                                            PaperProps={{ sx: { width: "375px" } }}
-                                            MenuListProps={{ sx: { paddingTop: "0px", paddingBottom: "0px" } }}
-                                            id="menu-notifications"
-                                            anchorEl={anchorElNotifications}
-                                            anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
-                                            keepMounted
-                                            transformOrigin={{ vertical: 'top', horizontal: 'right' }}
-                                            open={Boolean(anchorElNotifications)}
-                                            onClose={handleCloseNotificationsMenu}
-                                        >
-                                            <div style={{ height: "74px", display: "flex", flexDirection: "column", alignItems: "left", justifyContent: "center", background: "rgb(246, 248, 252)", marginBottom: "8px" }}>
-                                                <Typography variant="h6" sx={{ fontWeight: "bolder", mx: 3 }}>Notifications</Typography >
-                                            </div>
-                                            {
-                                                notifications.map((item: any, i: any) => {
-                                                    return (
-                                                        <MenuItem dense key={"msg-"+i} title="View" component="a" href={"/admin/request/"+item.id}>
-                                                            <ListItemIcon className="cs-listitemicon">
-                                                                <RequestQuoteIcon fontSize="small" />
-                                                            </ListItemIcon>
-                                                            <ListItemText primary={<Typography variant="subtitle2" noWrap={true}>{"Request from " + item.email}</Typography>} />
-                                                        </MenuItem>)
-                                                })
-                                            }
-                                        </Menu>
-
-                                    </React.Fragment>
-                                    : null
-                                } */}
-                                
                                 <DarkTooltip title={t('changeLanguage')}>
                                     <Button sx={{ mr: 3, border: 1, borderColor: "#ced4da", borderRadius: 1, p: 1, width: "125px" }} onClick={handleOpenLangMenu}>
                                         <Box sx={{ display: "flex", flexDirection: "row", justifyContent: "center", alignItems: "center" }}>
@@ -654,6 +612,18 @@ function Layout(props: {children?: React.ReactNode}) {
                                                     <ContactsOutlined fontSize="small" />
                                                 </ListItemIcon>
                                                 <ListItemText primary={t('contacts')} primaryTypographyProps={{ fontSize: 14 }} />
+                                            </ListItemButton>
+                                        </DarkTooltip>
+                                        </ListItem>
+                                    </NavLink>
+                                    <NavLink to="/admin/files" className={({ isActive }) => isActive ? "cs-navlink-active" : "cs-navlink"}>
+                                        <ListItem className="cs-listitem" key={"Files"} disablePadding disableGutters sx={{ pl: 2 }}>
+                                        <DarkTooltip title={t('files')} placement="right" arrow>
+                                            <ListItemButton className="cs-listitembutton">
+                                                <ListItemIcon className="cs-listitemicon">
+                                                    <AttachFileOutlined fontSize="small" />
+                                                </ListItemIcon>
+                                                <ListItemText primary={t('files')} primaryTypographyProps={{ fontSize: 14 }} />
                                             </ListItemButton>
                                         </DarkTooltip>
                                         </ListItem>

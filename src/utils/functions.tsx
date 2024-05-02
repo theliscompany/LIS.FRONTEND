@@ -685,3 +685,53 @@ export const getAccessToken = async (instance: any, scope: any, account: any) =>
         return response.accessToken;
     }
 };
+
+export const getExtensionFromContentType = (contentType: string): string => {
+    const contentTypeMap: { [key: string]: string } = {
+      // Audio
+      'audio/aac': 'aac',
+      'audio/mpeg': 'mp3',
+      'audio/mp4': 'm4a',
+      'audio/ogg': 'oga',
+      'audio/wav': 'wav',
+      'audio/webm': 'weba',
+  
+      // Font
+      'font/ttf': 'ttf',
+      'font/otf': 'otf',
+      'font/woff': 'woff',
+      'font/woff2': 'woff2',
+  
+      // Image
+      'image/bmp': 'bmp',
+      'image/gif': 'gif',
+      'image/jpeg': 'jpeg',
+      'image/jpg': 'jpg',
+      'image/png': 'png',
+      'image/svg+xml': 'svg',
+      'image/tiff': 'tiff',
+      'image/webp': 'webp',
+  
+      // Text
+      'text/css': 'css',
+      'text/csv': 'csv',
+      'text/html': 'html',
+      'text/javascript': 'js',
+      'text/plain': 'txt',
+      'text/xml': 'xml',
+  
+      // Video
+      'video/mp4': 'mp4',
+      'video/mpeg': 'mpeg',
+      'video/ogg': 'ogv',
+      'video/webm': 'webm',
+  
+      // Other
+      'application/json': 'json',
+      'application/pdf': 'pdf',
+      'application/zip': 'zip',
+      'application/octet-stream': 'bin',
+    };
+  
+    return contentTypeMap[contentType] || 'unknown';
+};

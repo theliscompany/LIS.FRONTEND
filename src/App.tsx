@@ -31,6 +31,7 @@ import MasterDataServices from './pages/MasterDataServices';
 import MasterDataProducts from './pages/MasterDataProducts';
 import MasterDataPorts from './pages/MasterDataPorts';
 import MasterDataContacts from './pages/MasterDataContacts';
+import MasterDataFiles from './pages/MasterDataFiles';
 
 const App = () => {
   return (
@@ -59,6 +60,7 @@ const App = () => {
 							<Route path="products" element={<MasterDataProducts />} />
 							<Route path="ports" element={<MasterDataPorts />} />
 							<Route path="contacts" element={<MasterDataContacts />} />
+							<Route path="files" element={<MasterDataFiles />} />
 						</Route> 
 						<Route path="/" element={<Layout children={<Requests />} />} />
 						<Route path="login" element={<Layout children={<Requests />} />} />
