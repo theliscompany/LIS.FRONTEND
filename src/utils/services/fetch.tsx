@@ -13,7 +13,7 @@ export class BackendService<T> {
             method: "GET",
             headers: {
                 "Accept": "application/json",
-                "Authorization": authorization
+                // "Authorization": authorization
             }
         };
     }
@@ -23,7 +23,7 @@ export class BackendService<T> {
         return {
             method: "DELETE",
             headers: {
-                "Authorization": authorization
+                // "Authorization": authorization
             }
         };
     }
@@ -83,7 +83,7 @@ export class BackendService<T> {
             headers: {
                 "Content-Type": "application/json",
                 "Accept": "application/json",
-                "Authorization": authorization
+                // "Authorization": authorization
             }
         };
 
@@ -195,7 +195,7 @@ export class BackendService<T> {
             headers: {
                 "Content-Type": "application/json",
                 "Accept": "application/json",
-                "Authorization": authorization
+                // "Authorization": authorization
             }
         };
 

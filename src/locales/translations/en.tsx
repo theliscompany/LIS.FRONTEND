@@ -455,5 +455,11 @@ export const en = {
   includedForEachContainer: " hours included for each container, then ", 
   byHourIndivisible: " EUR per indivisible hour.",
   or: "OR", 
-  offer: "Offer"
+  offer: "Offer", 
+  files: "Files",
+  fileName: "File name",
+  contentType: "Content type", 
+  size: "Size in bytes",
+  uploadedAt: "Uploaded at",
+  downloadFile: "Download file"
 };

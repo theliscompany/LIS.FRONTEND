@@ -93,7 +93,7 @@ function Histories(props: any) {
             setLoad(true);
             // const token: any = await getAccessToken(instance, loginRequest, account);
             
-            const response = await (context?.service as any).getWithToken(protectedResources.apiLisQuotes.endPoint+"/RequestQuoteHistory", context.tokenLogin);
+            const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisQuotes.endPoint+"/RequestQuoteHistory", context.tokenLogin);
             if (response !== null && response.code !== undefined) {
                 if (response.code === 200) {
                     console.log(response.data);
