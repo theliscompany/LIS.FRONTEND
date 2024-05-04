@@ -3,10 +3,9 @@ import { BootstrapDialog, BootstrapDialogTitle, BootstrapInput, gridStyles, inpu
 import { Accordion, AccordionDetails, AccordionSummary, Alert, Autocomplete, Box, Button, Chip, Grid, IconButton, InputLabel, ListItem, ListItemButton, ListItemText, NativeSelect, Skeleton, Step, StepLabel, Stepper, TextField, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material';
 import { enqueueSnackbar } from 'notistack';
 import { BackendService } from '../../utils/services/fetch';
-import { protectedResources, pricingRequest } from '../../config/authConfig';
-import { AuthenticationResult } from '@azure/msal-browser';
+import { protectedResources } from '../../config/authConfig';
 import { Anchor, Delete, ExpandMore, RestartAlt, Visibility } from '@mui/icons-material';
-import { DataGrid, GridColDef, GridColumnHeaderParams, GridRenderCellParams, GridRowSelectionModel, GridToolbar, GridValueFormatterParams, GridValueGetterParams } from '@mui/x-data-grid';
+import { DataGrid, GridColDef, GridColumnHeaderParams, GridRenderCellParams, GridToolbar, GridValueFormatterParams, GridValueGetterParams } from '@mui/x-data-grid';
 import StarterKit from '@tiptap/starter-kit';
 import { t } from 'i18next';
 import React from 'react';
@@ -1351,71 +1350,55 @@ function GeneratePriceOffer(props: any) {
                                         {
                                             formState.options !== undefined && formState.options !== null ? 
                                             <Grid item xs={12}>
-                                                <Button
-                                                    variant="contained" 
-                                                    color="inherit" 
-                                                    sx={whiteButtonStyles}
-                                                    style={{ marginRight: 8 }}
-                                                    onClick={(e: any) => {
-                                                        var thisOption = {
-                                                            haulageType: formState.haulageType, selectedTemplate: formState.selectedTemplate, 
-                                                            selectedHaulage: formState.selectedHaulage, rowSelectionModel2: formState.rowSelectionModel2, 
-                                                            selectedSeafreight: formState.selectedSeafreight, rowSelectionModel: formState.rowSelectionModel,  
-                                                            selectedMisc: formState.selectedMisc, myMiscs: formState.myMiscs, rowSelectionModel3: formState.rowSelectionModel3, 
-                                                            activeStep: formState.activeStep, margins: formState.margins, addings: formState.addings,
-                                                            marginsMiscs: formState.marginsMiscs, addingsMiscs: formState.addingsMiscs,  
-                                                            portDeparture: formState.portDeparture, portDestination: formState.portDestination, 
-                                                            selectedSeafreights: formState.selectedSeafreights
-                                                        };
+                                                {
+                                                    formState.currentOption === null || formState.options.length === 0 || formState.currentOption >= formState.options.length ? 
+                                                    <Button
+                                                        variant="contained" 
+                                                        color="inherit" 
+                                                        sx={whiteButtonStyles}
+                                                        style={{ marginRight: 8 }}
+                                                        onClick={(e: any) => {
+                                                            var thisOption = {
+                                                                haulageType: formState.haulageType, selectedTemplate: formState.selectedTemplate, 
+                                                                selectedHaulage: formState.selectedHaulage, rowSelectionModel2: formState.rowSelectionModel2, 
+                                                                selectedSeafreight: formState.selectedSeafreight, rowSelectionModel: formState.rowSelectionModel,  
+                                                                selectedMisc: formState.selectedMisc, myMiscs: formState.myMiscs, rowSelectionModel3: formState.rowSelectionModel3, 
+                                                                activeStep: formState.activeStep, margins: formState.margins, addings: formState.addings,
+                                                                marginsMiscs: formState.marginsMiscs, addingsMiscs: formState.addingsMiscs,  
+                                                                portDeparture: formState.portDeparture, portDestination: formState.portDestination, 
+                                                                selectedSeafreights: formState.selectedSeafreights
+                                                            };
 
-                                                        if (formState.currentOption === null || formState.options.length === 0 || formState.currentOption >= formState.options.length) {
                                                             setFormState({...formState, options: [...formState.options, thisOption] });
-                                                        }
-                                                        else {
-                                                            setFormState((prevState: any) => {
-                                                                const options = [...prevState.options];
-                                                                options[prevState.currentOption] = {
-                                                                    ...options[prevState.currentOption], 
-                                                                    haulageType: formState.haulageType, selectedTemplate: formState.selectedTemplate, 
-                                                                    selectedHaulage: formState.selectedHaulage, rowSelectionModel2: formState.rowSelectionModel2, 
-                                                                    selectedSeafreight: formState.selectedSeafreight, rowSelectionModel: formState.rowSelectionModel,  
-                                                                    selectedMisc: formState.selectedMisc, myMiscs: formState.myMiscs, rowSelectionModel3: formState.rowSelectionModel3, 
-                                                                    activeStep: formState.activeStep, margins: formState.margins, addings: formState.addings,
-                                                                    marginsMiscs: formState.marginsMiscs, addingsMiscs: formState.addingsMiscs,  
-                                                                    portDeparture: formState.portDeparture, portDestination: formState.portDestination, 
-                                                                    selectedSeafreights: formState.selectedSeafreights
-                                                                };
-                                                                return {...prevState, options};
+                                                        }}
+                                                    >
+                                                        Save option
+                                                    </Button> : null
+                                                }
+                                                {
+                                                    formState.options !== undefined && formState.options.length < 3 ? 
+                                                    <Button
+                                                        variant="contained" 
+                                                        color="inherit" 
+                                                        sx={whiteButtonStyles}
+                                                        style={{ marginRight: 8 }}
+                                                        onClick={(e: any) => {
+                                                            setFormState({
+                                                                ...formState, 
+                                                                currentOption: formState.options !== undefined ? formState.options.length : 0,
+                                                                haulageType: "", selectedTemplate: defaultTemplate, 
+                                                                selectedHaulage: null, rowSelectionModel2: [],
+                                                                selectedSeafreight: null, rowSelectionModel: [], 
+                                                                selectedMisc: null, myMiscs: [], rowSelectionModel3: [],
+                                                                activeStep: 0, margins: containersSelection.map(() => 22), addings: containersSelection.map(() => 0),
+                                                                marginsMiscs: Array(15).fill(50), addingsMiscs: [],  
+                                                                portDeparture: null, portDestination: portDestination
                                                             });
-                                                        }
-                                                    }}
-                                                >
-                                                    {
-                                                        formState.currentOption === null || formState.options.length === 0 || formState.currentOption >= formState.options.length ? 
-                                                        "Save option" : "Edit option"
-                                                    }
-                                                </Button>
-                                                <Button
-                                                    variant="contained" 
-                                                    color="inherit" 
-                                                    sx={whiteButtonStyles}
-                                                    style={{ marginRight: 8 }}
-                                                    onClick={(e: any) => {
-                                                        setFormState({
-                                                            ...formState, 
-                                                            currentOption: formState.options !== undefined ? formState.options.length : 0,
-                                                            haulageType: "", selectedTemplate: defaultTemplate, 
-                                                            selectedHaulage: null, rowSelectionModel2: [],
-                                                            selectedSeafreight: null, rowSelectionModel: [], 
-                                                            selectedMisc: null, myMiscs: [], rowSelectionModel3: [],
-                                                            activeStep: 0, margins: containersSelection.map(() => 22), addings: containersSelection.map(() => 0),
-                                                            marginsMiscs: Array(15).fill(50), addingsMiscs: [],  
-                                                            portDeparture: null, portDestination: portDestination
-                                                        });
-                                                    }}
-                                                >
-                                                    New option
-                                                </Button>
+                                                        }}
+                                                    >
+                                                        New option
+                                                    </Button> : null
+                                                }
                                                 <Button
                                                     variant="contained" 
                                                     color="inherit" 
@@ -1440,12 +1423,36 @@ function GeneratePriceOffer(props: any) {
                                                             }
                                                             secondaryAction={
                                                                 <>
-                                                                    {/* <IconButton edge="end" aria-label="delete" sx={{ mr: 1 }}>
-                                                                        <Visibility />
-                                                                    </IconButton>
-                                                                    <IconButton edge="end" aria-label="delete">
-                                                                        <Delete />
-                                                                    </IconButton> */}
+                                                                    {
+                                                                        formState.currentOption === id ? 
+                                                                        <Button
+                                                                            variant="contained" 
+                                                                            color="inherit" 
+                                                                            sx={whiteButtonStyles}
+                                                                            style={{ marginRight: 8, marginBottom: 16 }}
+                                                                            onClick={(e: any) => {
+                                                                                setFormState((prevState: any) => {
+                                                                                    const options = [...prevState.options];
+                                                                                    options[prevState.currentOption] = {
+                                                                                        ...options[prevState.currentOption], 
+                                                                                        haulageType: formState.haulageType, selectedTemplate: formState.selectedTemplate, 
+                                                                                        selectedHaulage: formState.selectedHaulage, rowSelectionModel2: formState.rowSelectionModel2, 
+                                                                                        selectedSeafreight: formState.selectedSeafreight, rowSelectionModel: formState.rowSelectionModel,  
+                                                                                        selectedMisc: formState.selectedMisc, myMiscs: formState.myMiscs, rowSelectionModel3: formState.rowSelectionModel3, 
+                                                                                        activeStep: formState.activeStep, margins: formState.margins, addings: formState.addings,
+                                                                                        marginsMiscs: formState.marginsMiscs, addingsMiscs: formState.addingsMiscs,  
+                                                                                        portDeparture: formState.portDeparture, portDestination: formState.portDestination, 
+                                                                                        selectedSeafreights: formState.selectedSeafreights
+                                                                                    };
+                                                                                    return {...prevState, options};
+                                                                                });
+
+                                                                                enqueueSnackbar("Option updated with success!", { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                                                                            }}
+                                                                        >
+                                                                            Edit option
+                                                                        </Button> : null
+                                                                    }
                                                                     <Button 
                                                                         variant="contained" color="inherit" sx={whiteButtonStyles} 
                                                                         style={{ marginRight: 8, marginBottom: 16 }}

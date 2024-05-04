@@ -4,7 +4,7 @@ import { MuiTelInput } from 'mui-tel-input';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { inputLabelStyles, BootstrapInput, whiteButtonStyles, BootstrapDialog, BootstrapDialogTitle, buttonCloseStyles } from '../utils/misc/styles';
 import { enqueueSnackbar, SnackbarProvider } from 'notistack';
-import { loginRequest, protectedResources, transportRequest } from '../config/authConfig';
+import { protectedResources } from '../config/authConfig';
 import { useAuthorizedBackendApi } from '../api/api';
 import { BackendService } from '../utils/services/fetch';
 import { useAccount, useMsal } from '@azure/msal-react';
@@ -14,13 +14,10 @@ import ClientSearch from '../components/shared/ClientSearch';
 import NewContact from '../components/editRequestPage/NewContact';
 import { containerPackages } from '../utils/constants';
 import useProcessStatePersistence from '../utils/processes/useProcessStatePersistence';
-import { getAccessToken } from '../utils/functions';
 
 function validMail(mail: string) {
     return /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/.test(mail);
 }
-
-let packingOptions = ["Unit", "Bundle", "Bag", "Pallet", "Carton", "Lot", "Crate"];
 
 function NewRequest(props: any) {
     const [load, setLoad] = useState<boolean>(false);
@@ -40,8 +37,6 @@ function NewRequest(props: any) {
     
     const [modal7, setModal7] = useState<boolean>(false);
     const [modal10, setModal10] = useState<boolean>(false);
-
-    const [tempToken, setTempToken] = useState<string>("");
 
     const { instance, accounts } = useMsal();
     const account = useAccount(accounts[0] || {});
@@ -70,7 +65,6 @@ function NewRequest(props: any) {
     
     const getProducts = async () => {
         if (account && instance && context) {
-            // const token = await getAccessToken(instance, transportRequest, account);            
             const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Product?pageSize=500", context.tokenTransport);
             console.log(response);
             if (response !== null && response !== undefined) {
@@ -102,9 +96,6 @@ function NewRequest(props: any) {
 
     const getAssignees = async () => {
         if (account && instance && context) {
-            // const token = await getAccessToken(instance, loginRequest, account);
-            // setTempToken(token);
-
             try {
                 setLoadUser(true);
                 const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisQuotes.endPoint+"/Assignee", context.tokenLogin);
@@ -113,10 +104,6 @@ function NewRequest(props: any) {
                         var aux = response.data.find((elm: any) => elm.email === account?.username);
                         setAssignees(response.data);
                         setCurrentUser(aux);
-                        if (aux !== null && aux !== undefined && aux !== "") {
-                            // setAssignedManager(aux.id);
-                            // handleChangeFormState(aux.id, "assignedManager");
-                        }
                         setLoadUser(false);
                     }
                     else {
@@ -339,7 +326,6 @@ function NewRequest(props: any) {
                                                     sx={{ border: "1px solid #e5e5e5" }}
                                                     secondaryAction={
                                                         <IconButton edge="end" onClick={() => {
-                                                            // setContainersSelection((prevItems: any) => prevItems.filter((item: any, i: number) => i !== index));
                                                             handleChangeFormState(formState.containersSelection.filter((item: any, i: number) => i !== index), "containersSelection");
                                                         }}>
                                                             <DeleteIcon />
@@ -358,7 +344,6 @@ function NewRequest(props: any) {
                                 </> : null
                             }
                         </Grid>                                
-                        
                         
                         <Grid item xs={12} md={6} mt={1} mb={1}>
                             <InputLabel htmlFor="tags" sx={inputLabelStyles}>{t('specifics')}</InputLabel>
@@ -409,13 +394,7 @@ function NewRequest(props: any) {
             </BootstrapDialog>
 
             {/* New container type */}
-            <BootstrapDialog
-                onClose={() => setModal10(false)}
-                aria-labelledby="custom-dialog-title10"
-                open={modal10}
-                maxWidth="lg"
-                fullWidth
-            >
+            <BootstrapDialog open={modal10} onClose={() => setModal10(false)} maxWidth="lg" fullWidth>
                 <BootstrapDialogTitle id="custom-dialog-title" onClose={() => setModal10(false)}>
                     <b>Add a container</b>
                 </BootstrapDialogTitle>

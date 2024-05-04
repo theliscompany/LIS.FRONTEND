@@ -161,7 +161,7 @@ function RequestForm(props: any) {
                             <BootstrapInput id="request-message" type="text" multiline rows={3.5} value={props.message} onChange={(e: React.ChangeEvent<HTMLInputElement>) => props.setMessage(e.target.value)} fullWidth />
                         </Grid>
                         <Grid item xs={12} md={6} mt={1}>
-                            <InputLabel htmlFor="assigned-manager" sx={inputLabelStyles}>{t('props.assignedManager')}</InputLabel>
+                            <InputLabel htmlFor="assigned-manager" sx={inputLabelStyles}>{t('assignedManager')}</InputLabel>
                             {
                                 !props.loadAssignees && props.assignees !== null ? 
                                 <>

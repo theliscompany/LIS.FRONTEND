@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { Alert, Box, Button, DialogActions, DialogContent, Grid, InputLabel, NativeSelect, Skeleton, Typography } from '@mui/material';
 import { inputLabelStyles, BootstrapInput, BootstrapDialog, whiteButtonStyles, BootstrapDialogTitle, buttonCloseStyles } from '../utils/misc/styles';
 import { enqueueSnackbar, SnackbarProvider } from 'notistack';
-import { loginRequest, protectedResources, transportRequest } from '../config/authConfig';
+import { protectedResources } from '../config/authConfig';
 import { useAuthorizedBackendApi } from '../api/api';
 import { BackendService } from '../utils/services/fetch';
 import { MuiChipsInputChip } from 'mui-chips-input';
@@ -13,7 +13,7 @@ import RequestListNotes from '../components/editRequestPage/RequestListNotes';
 import RequestAddNote from '../components/editRequestPage/RequestAddNote';
 import RequestAskInformation from '../components/editRequestPage/RequestAskInformation';
 import RequestChangeStatus from '../components/editRequestPage/RequestChangeStatus';
-import { arePhoneticallyClose, complexEquality, findClosestSeaPort, getAccessToken, parseContact, parseLocation, similar, sortByCloseness } from '../utils/functions';
+import { arePhoneticallyClose, complexEquality, findClosestSeaPort, parseContact, parseLocation, similar, sortByCloseness } from '../utils/functions';
 import NewContact from '../components/editRequestPage/NewContact';
 import { containerPackages } from '../utils/constants';
 // @ts-ignore
@@ -67,11 +67,9 @@ function Request() {
     const [ports1, setPorts1] = useState<any>(null);
     const [ports2, setPorts2] = useState<any>(null);
     const [containers, setContainers] = useState<any>(null);
-    const [tempToken, setTempToken] = useState<string>("");
 
     let { id } = useParams();
     const navigate = useNavigate();
-
     const { instance, accounts } = useMsal();
     const account = useAccount(accounts[0] || {});
     const context = useAuthorizedBackendApi();
@@ -131,9 +129,6 @@ function Request() {
 
     const getAssignees = async () => {
         if (account && instance && context) {
-            // const token = await getAccessToken(instance, loginRequest, account);
-            // setTempToken(token);
-            
             try {
                 setLoadAssignees(true);
                 const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisQuotes.endPoint+"/Assignee", context.tokenLogin);
@@ -159,8 +154,6 @@ function Request() {
     
     const loadRequest = async () => {
         if (account && instance && context) {
-            // const token = await getAccessToken(instance, loginRequest, account);
-
             try {
                 const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisQuotes.endPoint+"/Request/"+id, context.tokenLogin);
                 if (response !== null && response.code !== undefined) {
@@ -263,11 +256,8 @@ function Request() {
     
     const getPorts = async () => {
         if (account && instance && context) {
-            // const token = await getAccessToken(instance, transportRequest, account);
-            
             const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Port/Ports?pageSize=2000", context.tokenTransport);
             if (response !== null && response !== undefined) {
-                // console.log(response);
                 var addedCoordinatesPorts = addedCoordinatesToPorts(response);
                 setPorts(addedCoordinatesPorts);
                 console.log(response);
@@ -278,8 +268,6 @@ function Request() {
     
     const getProducts = async () => {
         if (account && instance && context) {
-            // const token = await getAccessToken(instance, transportRequest, account);
-            
             const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Product?pageSize=500", context.tokenTransport);
             if (response !== null && response !== undefined) {
                 setProducts(response);

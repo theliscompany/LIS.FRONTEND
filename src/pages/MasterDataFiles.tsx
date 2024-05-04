@@ -3,14 +3,13 @@ import Box from '@mui/material/Box';
 import { SnackbarProvider, enqueueSnackbar } from 'notistack';
 import { useMsal, useAccount } from '@azure/msal-react';
 import { useAuthorizedBackendApi } from '../api/api';
-import { protectedResources, transportRequest } from '../config/authConfig';
+import { protectedResources } from '../config/authConfig';
 import { BackendService } from '../utils/services/fetch';
-import { Alert, Button, DialogActions, DialogContent, Grid, IconButton, InputLabel, MenuItem, Select, Skeleton, Typography } from '@mui/material';
+import { Alert, Button, DialogActions, DialogContent, Grid, IconButton, InputLabel, Skeleton, Typography } from '@mui/material';
 import { DataGrid, GridColDef, GridRenderCellParams, GridToolbar } from '@mui/x-data-grid';
 import { t } from 'i18next';
-import { sizingStyles, gridStyles, BootstrapDialog, BootstrapDialogTitle, buttonCloseStyles, BootstrapInput, actionButtonStyles, inputLabelStyles } from '../utils/misc/styles';
-import { Edit, Delete, Download } from '@mui/icons-material';
-import { countries } from '../utils/constants';
+import { sizingStyles, gridStyles, BootstrapDialog, BootstrapDialogTitle, buttonCloseStyles, actionButtonStyles, inputLabelStyles } from '../utils/misc/styles';
+import { Delete, Download } from '@mui/icons-material';
 import { MuiFileInput } from 'mui-file-input';
 import axios, { AxiosResponse } from 'axios';
 import { getExtensionFromContentType } from '../utils/functions';
@@ -21,12 +20,9 @@ const MasterDataFiles: any = (props: any) => {
     const [loadEdit, setLoadEdit] = useState<boolean>(false);
     const [modal, setModal] = useState<boolean>(false);
     const [modal2, setModal2] = useState<boolean>(false);
-    const [testName, setTestName] = useState<string>("");
-    const [country, setCountry] = useState<any>(null);
     const [currentId, setCurrentId] = useState<string>("");
     const [currentEditId, setCurrentEditId] = useState<string>("");
     const [fileValue, setFileValue] = useState<File[] | undefined>(undefined);
-    const [tempToken, setTempToken] = useState<string>("");
     
     const { instance, accounts } = useMsal();
     const account = useAccount(accounts[0] || {});
@@ -84,9 +80,6 @@ const MasterDataFiles: any = (props: any) => {
                     <IconButton size="small" title={t('downloadFile')} sx={{ mr: 0.5 }} onClick={() => { downloadFile(params.row.id, params.row.fileName, params.row.contentType); }}>
                         <Download fontSize="small" />
                     </IconButton>
-                    {/* <IconButton size="small" title={t('editRowFile')} sx={{ mr: 0.5 }} onClick={() => { setCurrentEditId(params.row.id); resetForm(); getFile(params.row.id); setModal(true); }}>
-                        <Edit fontSize="small" />
-                    </IconButton> */}
                     <IconButton size="small" title={t('deleteRowFile')} onClick={() => { setCurrentId(params.row.id); setModal2(true); }}>
                         <Delete fontSize="small" />
                     </IconButton>
@@ -125,69 +118,6 @@ const MasterDataFiles: any = (props: any) => {
         }
     };
 
-    const createNewFile = async () => {
-        if (fileValue !== null) {
-            if (account && instance && context) {
-                // const token = await getAccessToken(instance, transportRequest, account);
-                
-                try {
-                    var dataSent = null;
-                    var response = null;
-                    dataSent = {
-                        "file": fileValue,
-                    };
-                    response = await (context?.service as BackendService<any>).post(protectedResources.apiLisFiles.endPoint+"/Files/upload", dataSent);
-                    
-                    enqueueSnackbar(currentEditId === "" ? "The port has been added with success!" : "The port has been edited with success!", { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
-                    getFiles();
-                    setModal(false);    
-                }
-                catch (err: any) {
-                    console.log(err);
-                    enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
-                }
-            }
-        }
-        else {
-            enqueueSnackbar("One or many the fields are empty, please verify the form and fill everything.", { variant: "warning", anchorOrigin: { horizontal: "right", vertical: "top"} });
-        }
-    }
-    
-    const getFile = async (id: string) => {
-        setLoadEdit(true);
-        if (account && instance && context) {
-            const response = await (context?.service as BackendService<any>).getSingle(protectedResources.apiLisFiles.endPoint+"/Files/"+id+"?download=false");
-            if (response !== null && response !== undefined) {
-                console.log(response);
-                setTestName(response.portName);
-                setCountry(countries.find((elm: any) => elm.label.toUpperCase() === response.country));
-                setLoadEdit(false);
-            }
-            else {
-                setLoadEdit(false);
-            }
-        }
-        else {
-            setLoadEdit(false);
-        }
-    }
-    
-    // const downloadFile = async (id: string) => {
-    //     setLoadEdit(true);
-    //     if (account && instance && context) {
-    //         const response = await (context?.service as BackendService<any>).get(protectedResources.apiLisFiles.endPoint+"/Files/"+id+"?download=true");
-    //         if (response !== null && response !== undefined) {
-    //             console.log(response);
-    //             setLoadEdit(false);
-    //         }
-    //         else {
-    //             setLoadEdit(false);
-    //         }
-    //     }
-    //     else {
-    //         setLoadEdit(false);
-    //     }
-    // }
     const downloadFile = async (id: string, name: string, type: string) => {
         try {
             const response = await axios({

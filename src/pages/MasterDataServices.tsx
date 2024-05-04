@@ -4,15 +4,13 @@ import Box from '@mui/material/Box';
 import { SnackbarProvider, enqueueSnackbar } from 'notistack';
 import { useMsal, useAccount } from '@azure/msal-react';
 import { useAuthorizedBackendApi } from '../api/api';
-import { protectedResources, transportRequest } from '../config/authConfig';
+import { protectedResources } from '../config/authConfig';
 import { BackendService } from '../utils/services/fetch';
-import { AuthenticationResult } from '@azure/msal-browser';
 import { Alert, Button, DialogActions, DialogContent, Grid, IconButton, InputLabel, MenuItem, Select, Skeleton, Typography } from '@mui/material';
 import { DataGrid, GridColDef, GridRenderCellParams, GridToolbar } from '@mui/x-data-grid';
 import { t } from 'i18next';
 import { sizingStyles, gridStyles, BootstrapDialog, BootstrapDialogTitle, buttonCloseStyles, BootstrapInput, actionButtonStyles, inputLabelStyles } from '../utils/misc/styles';
 import { Edit, Delete } from '@mui/icons-material';
-import { getAccessToken } from '../utils/functions';
 
 const MasterDataServices: any = (props: any) => {
     const [services, setServices] = useState<any>(null);
@@ -25,7 +23,6 @@ const MasterDataServices: any = (props: any) => {
     const [selectedServiceTypes, setSelectedServiceTypes] = useState<number[]>([]);
     const [currentId, setCurrentId] = useState<string>("");
     const [currentEditId, setCurrentEditId] = useState<string>("");
-    const [tempToken, setTempToken] = useState<string>("");
     
     const { instance, accounts } = useMsal();
     const account = useAccount(accounts[0] || {});
@@ -34,13 +31,10 @@ const MasterDataServices: any = (props: any) => {
     const getServices = async () => {
         if (account && instance && context) {
             setLoadResults(true);
-            // const token = await getAccessToken(instance, transportRequest, account);
             const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Service?pageSize=500", context.tokenTransport);
             if (response !== null && response !== undefined) {
                 setServices(response);
                 setLoadResults(false);
-                // setTempToken(context.toke);
-                // setServices(response.filter((obj: any) => obj.servicesTypeId.includes(5) || obj.servicesTypeId.includes(2))); // Filter the services for miscellaneous (MISCELLANEOUS = 5 & HAULAGE = 2)
             }
             else {
                 setLoadResults(false);
@@ -81,9 +75,7 @@ const MasterDataServices: any = (props: any) => {
             return (
                 <Box sx={{ my: 2 }}>
                     {
-                        params.row.servicesTypeId.map((id: any) => servicesOptions.find((service) => service.value === id)?.name)
-                        .filter(Boolean)
-                        .join(", ")
+                        params.row.servicesTypeId.map((id: any) => servicesOptions.find((service) => service.value === id)?.name).filter(Boolean).join(", ")
                     }
                 </Box>
             );
@@ -105,8 +97,6 @@ const MasterDataServices: any = (props: any) => {
     const createNewService = async () => {
         if (testName !== "" && selectedServiceTypes.length !== 0) {
             if (account && instance && context) {
-                // const token = await getAccessToken(instance, transportRequest, account);
-
                 try {
                     var dataSent = null;
                     var response = null;
@@ -155,7 +145,6 @@ const MasterDataServices: any = (props: any) => {
             else {
                 setLoadEdit(false);
             }
-            // console.log(response);
         }
     }
     
@@ -190,7 +179,6 @@ const MasterDataServices: any = (props: any) => {
                                 <DataGrid
                                     rows={services}
                                     columns={columnsServices}
-                                    // hideFooter
                                     initialState={{
                                         pagination: {
                                             paginationModel: {
@@ -212,7 +200,6 @@ const MasterDataServices: any = (props: any) => {
                                         },
                                     }}
                                     disableRowSelectionOnClick
-                                    // onRowClick={handleRowSeafreightsClick}
                                 />
                             </Box> : 
                             <Box>

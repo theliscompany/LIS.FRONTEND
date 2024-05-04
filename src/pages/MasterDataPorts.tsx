@@ -4,17 +4,15 @@ import Box from '@mui/material/Box';
 import { SnackbarProvider, enqueueSnackbar } from 'notistack';
 import { useMsal, useAccount } from '@azure/msal-react';
 import { useAuthorizedBackendApi } from '../api/api';
-import { protectedResources, transportRequest } from '../config/authConfig';
+import { protectedResources } from '../config/authConfig';
 import { BackendService } from '../utils/services/fetch';
-import { AuthenticationResult } from '@azure/msal-browser';
-import { Alert, Button, DialogActions, DialogContent, Grid, IconButton, InputLabel, MenuItem, Select, Skeleton, Typography } from '@mui/material';
+import { Alert, Button, DialogActions, DialogContent, Grid, IconButton, InputLabel, Skeleton, Typography } from '@mui/material';
 import { DataGrid, GridColDef, GridRenderCellParams, GridToolbar } from '@mui/x-data-grid';
 import { t } from 'i18next';
 import { sizingStyles, gridStyles, BootstrapDialog, BootstrapDialogTitle, buttonCloseStyles, BootstrapInput, actionButtonStyles, inputLabelStyles } from '../utils/misc/styles';
 import { Edit, Delete } from '@mui/icons-material';
 import CountrySelect from '../components/shared/CountrySelect';
 import { countries } from '../utils/constants';
-import { getAccessToken } from '../utils/functions';
 
 const MasterDataPorts: any = (props: any) => {
     const [products, setPorts] = useState<any>(null);
@@ -35,8 +33,6 @@ const MasterDataPorts: any = (props: any) => {
     const getPorts = async () => {
         if (account && instance && context) {
             setLoadResults(true);
-            // const token = await getAccessToken(instance, transportRequest, account);
-            // setTempToken(token);
             const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Port/Ports?pageSize=2000", context.tokenTransport);
             if (response !== null && response !== undefined) {
                 setPorts(response);
@@ -89,8 +85,6 @@ const MasterDataPorts: any = (props: any) => {
     const createNewPort = async () => {
         if (testName !== "" && country !== null) {
             if (account && instance && context) {
-                // const token = await getAccessToken(instance, transportRequest, account);
-                
                 try {
                     var dataSent = null;
                     var response = null;
@@ -137,7 +131,6 @@ const MasterDataPorts: any = (props: any) => {
             else {
                 setLoadEdit(false);
             }
-            // console.log(response);
         }
     }
     
@@ -171,7 +164,6 @@ const MasterDataPorts: any = (props: any) => {
                                 <DataGrid
                                     rows={products}
                                     columns={columnsPorts}
-                                    // hideFooter
                                     initialState={{
                                         pagination: {
                                             paginationModel: {
@@ -193,7 +185,6 @@ const MasterDataPorts: any = (props: any) => {
                                         },
                                     }}
                                     disableRowSelectionOnClick
-                                    // onRowClick={handleRowSeafreightsClick}
                                 />
                             </Box> : 
                             <Box>
@@ -236,13 +227,7 @@ const MasterDataPorts: any = (props: any) => {
                 </DialogActions>
             </BootstrapDialog>
 
-            <BootstrapDialog
-                onClose={() => setModal2(false)}
-                aria-labelledby="custom-dialog-title"
-                open={modal2}
-                maxWidth="sm"
-                fullWidth
-            >
+            <BootstrapDialog open={modal2} onClose={() => setModal2(false)} maxWidth="sm" fullWidth>
                 <BootstrapDialogTitle id="custom-dialog-title" onClose={() => setModal2(false)}>
                     <b>{t('deleteRowPort')}</b>
                 </BootstrapDialogTitle>

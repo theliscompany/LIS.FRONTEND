@@ -7,9 +7,8 @@ import { SnackbarProvider, enqueueSnackbar } from 'notistack';
 import { useAuthorizedBackendApi } from '../api/api';
 import { protectedResources } from '../config/authConfig';
 import { BackendService } from '../utils/services/fetch';
-import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { BootstrapDialog, BootstrapDialogTitle, actionButtonStyles, buttonCloseStyles, gridStyles, sizingStyles } from '../utils/misc/styles';
+import { BootstrapDialog, BootstrapDialogTitle, actionButtonStyles, buttonCloseStyles, sizingStyles } from '../utils/misc/styles';
 import { NavLink } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { DataGrid, GridColDef, GridRenderCellParams, GridValueFormatterParams } from '@mui/x-data-grid';
@@ -102,7 +101,6 @@ function PriceOffers() {
                 if (response.code === 200) {
                     console.log(response.data);
                     setOffers(response.data.reverse());
-                    // setOffers([]);
                     setLoad(false);
                 }
                 else {
@@ -152,7 +150,6 @@ function PriceOffers() {
                                         <DataGrid
                                             rows={offers}
                                             columns={columnsOffers}
-                                            // hideFooter
                                             getRowId={(row: any) => row?.id}
                                             getRowHeight={() => "auto" }
                                             sx={sizingStyles}
@@ -165,13 +162,7 @@ function PriceOffers() {
                     }
                 </Box>
             </Box>
-            <BootstrapDialog
-                onClose={() => setModal(false)}
-                aria-labelledby="custom-dialog-title"
-                open={modal}
-                maxWidth="sm"
-                fullWidth
-            >
+            <BootstrapDialog open={modal} onClose={() => setModal(false)} maxWidth="sm" fullWidth>
                 <BootstrapDialogTitle id="custom-dialog-title" onClose={() => setModal(false)}>
                     <b>{t('confirmDeletion')}</b>
                 </BootstrapDialogTitle>
