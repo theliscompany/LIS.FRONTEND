@@ -9,7 +9,7 @@ import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 import { Alert, Button, Grid, InputLabel, NativeSelect, Skeleton } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import { BootstrapInput, datetimeStyles, inputLabelStyles } from '../utils/misc/styles';
-import { loginRequest, protectedResources } from '../config/authConfig';
+import { protectedResources } from '../config/authConfig';
 import { enqueueSnackbar, SnackbarProvider } from 'notistack';
 import { useAuthorizedBackendApi } from '../api/api';
 import { BackendService } from '../utils/services/fetch';
@@ -18,8 +18,6 @@ import { useAccount, useMsal } from '@azure/msal-react';
 import { useTranslation } from 'react-i18next';
 import RequestViewItem from '../components/requestsPage/RequestViewItem';
 import AutocompleteSearch from '../components/shared/AutocompleteSearch';
-import { AuthenticationResult } from '@azure/msal-browser';
-import { getAccessToken } from '../utils/functions';
 
 function createGetRequestUrl(variable1: string, variable2: string, variable3: string, variable4: string, variable5: Dayjs|null, variable6: Dayjs|null, variable7: Dayjs|null, variable8: Dayjs|null, assigneeId: number) {
     let url = protectedResources.apiLisQuotes.endPoint+'/Request?';
@@ -89,8 +87,6 @@ function MyRequests() {
 
     const getAssignees = async () => {
         if (account && instance && context) {
-            // const token = await getAccessToken(instance, loginRequest, account);
-            // setLoad(true);
             const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisQuotes.endPoint+"/Assignee", context.tokenLogin);
             if (response !== null && response.code !== undefined) {
                 if (response.code === 200) {

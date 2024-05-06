@@ -4,18 +4,16 @@ import Box from '@mui/material/Box';
 import { SnackbarProvider, enqueueSnackbar } from 'notistack';
 import { useMsal, useAccount } from '@azure/msal-react';
 import { useAuthorizedBackendApi } from '../api/api';
-import { crmRequest, protectedResources, transportRequest } from '../config/authConfig';
+import { protectedResources } from '../config/authConfig';
 import { BackendService } from '../utils/services/fetch';
-import { AuthenticationResult } from '@azure/msal-browser';
 import { Alert, Button, DialogActions, DialogContent, Grid, IconButton, InputLabel, MenuItem, Select, Skeleton, Typography } from '@mui/material';
 import { DataGrid, GridColDef, GridRenderCellParams, GridToolbar } from '@mui/x-data-grid';
 import { t } from 'i18next';
 import { sizingStyles, gridStyles, BootstrapDialog, BootstrapDialogTitle, buttonCloseStyles, BootstrapInput, actionButtonStyles, inputLabelStyles } from '../utils/misc/styles';
-import { Edit, Delete } from '@mui/icons-material';
+import { Edit } from '@mui/icons-material';
 import CountrySelect from '../components/shared/CountrySelect';
 import { countries } from '../utils/constants';
 import { MuiTelInput } from 'mui-tel-input';
-import { getAccessToken } from '../utils/functions';
 
 const MasterDataContacts: any = (props: any) => {
     const [products, setContacts] = useState<any>(null);
@@ -31,7 +29,6 @@ const MasterDataContacts: any = (props: any) => {
     const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
     const [currentId, setCurrentId] = useState<string>("");
     const [currentEditId, setCurrentEditId] = useState<string>("");
-    const [tempToken, setTempToken] = useState<string>("");
     
     const { instance, accounts } = useMsal();
     const account = useAccount(accounts[0] || {});
@@ -57,15 +54,10 @@ const MasterDataContacts: any = (props: any) => {
     const getContacts = async () => {
         if (account && instance && context) {
             setLoadResults(true);
-
-            // const token = await getAccessToken(instance, crmRequest, account);
-            // setTempToken(token);
-            
             const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisCrm.endPoint+"/Contact/GetContacts?pageSize=4000", context.tokenCrm);
             if (response !== null && response !== undefined) {
                 setContacts(response.data);
                 setLoadResults(false);
-                // setContacts(response.filter((obj: any) => obj.productsTypeId.includes(5) || obj.productsTypeId.includes(2))); // Filter the products for miscellaneous (MISCELLANEOUS = 5 & HAULAGE = 2)
             }
             else {
                 setLoadResults(false);
@@ -99,7 +91,6 @@ const MasterDataContacts: any = (props: any) => {
         { field: 'contactNumber', headerName: t('contactNumber'), flex: 0.75 },
         { field: 'phone', headerName: t('phone'), flex: 1 },
         { field: 'email', headerName: t('email'), flex: 1 },
-        // { field: 'countryCode', headerName: t('countryCode'), flex: 0.5 },
         { field: 'categories', headerName: t('categories'), renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box sx={{ my: 2 }}>
@@ -189,7 +180,6 @@ const MasterDataContacts: any = (props: any) => {
             else {
                 setLoadEdit(false);
             }
-            // console.log(response);
         }
     }
     
@@ -227,7 +217,6 @@ const MasterDataContacts: any = (props: any) => {
                                 <DataGrid
                                     rows={products}
                                     columns={columnsContacts}
-                                    // hideFooter
                                     initialState={{
                                         pagination: {
                                             paginationModel: {
@@ -249,7 +238,6 @@ const MasterDataContacts: any = (props: any) => {
                                         },
                                     }}
                                     disableRowSelectionOnClick
-                                    // onRowClick={handleRowSeafreightsClick}
                                 />
                             </Box> : 
                             <Box>
@@ -323,13 +311,7 @@ const MasterDataContacts: any = (props: any) => {
                 </DialogActions>
             </BootstrapDialog>
 
-            <BootstrapDialog
-                onClose={() => setModal2(false)}
-                aria-labelledby="custom-dialog-title"
-                open={modal2}
-                maxWidth="sm"
-                fullWidth
-            >
+            <BootstrapDialog open={modal2} onClose={() => setModal2(false)} maxWidth="sm" fullWidth>
                 <BootstrapDialogTitle id="custom-dialog-title" onClose={() => setModal2(false)}>
                     <b>{t('deleteRowContact')}</b>
                 </BootstrapDialogTitle>

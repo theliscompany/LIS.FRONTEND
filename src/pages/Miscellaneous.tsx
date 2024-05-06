@@ -10,7 +10,7 @@ import Popper from '@mui/material/Popper';
 import { SnackbarProvider, enqueueSnackbar } from 'notistack';
 import { useTranslation } from 'react-i18next';
 import { useAuthorizedBackendApi } from '../api/api';
-import { pricingRequest, protectedResources, transportRequest } from '../config/authConfig';
+import { protectedResources } from '../config/authConfig';
 import { BackendService } from '../utils/services/fetch';
 import { GridColDef, GridRenderCellParams, DataGrid } from '@mui/x-data-grid';
 import { BootstrapDialog, BootstrapDialogTitle, BootstrapInput, actionButtonStyles, buttonCloseStyles, datetimeStyles, gridStyles, inputIconStyles, inputLabelStyles, whiteButtonStyles } from '../utils/misc/styles';
@@ -18,14 +18,13 @@ import CompanySearch from '../components/shared/CompanySearch';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import dayjs, { Dayjs } from 'dayjs';
-import { AuthenticationResult } from '@azure/msal-browser';
 import { useMsal, useAccount } from '@azure/msal-react';
-import { CategoryEnum, containerPackages } from '../utils/constants';
+import { containerPackages } from '../utils/constants';
 import NewContact from '../components/editRequestPage/NewContact';
 import { Anchor } from '@mui/icons-material';
 import NewService from '../components/shared/NewService';
 import NewPort from '../components/shared/NewPort';
-import { compareServices, getAccessToken } from '../utils/functions';
+import { compareServices } from '../utils/functions';
 
 function createGetRequestUrl(variable1: number, variable2: number, variable3: number) {
     let url = protectedResources.apiLisPricing.endPoint+"/Miscellaneous/Miscellaneous?";
@@ -78,10 +77,7 @@ function Miscellaneous() {
     const [withShipment, setWithShipment] = useState<boolean>(true);
     const [showHaulages, setShowHaulages] = useState<boolean>(false);
 
-    const [tempToken, setTempToken] = useState<string>("");
-    
-    const { t } = useTranslation();
-    
+    const { t } = useTranslation();    
     const { instance, accounts } = useMsal();
     const account = useAccount(accounts[0] || {});
     const context = useAuthorizedBackendApi();
@@ -180,13 +176,6 @@ function Miscellaneous() {
                 </Box>
             );
         }, flex: 0.75 },
-        // { field: 'created', headerName: t('created'), renderCell: (params: GridRenderCellParams) => {
-        //     return (
-        //         <Box sx={{ my: 1, mr: 1 }}>
-        //             <Chip label={(new Date(params.row.created)).toLocaleDateString().slice(0,10)} color={(new Date()).getTime() - (new Date(params.row.created)).getTime() > 0 ? "default" : "default"}></Chip>
-        //         </Box>
-        //     );
-        // }, minWidth: 100, flex: 0.5 },
         { field: 'xxx', headerName: t('Actions'), renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box sx={{ my: 1, mr: 1 }}>
@@ -235,7 +224,6 @@ function Miscellaneous() {
     
     const getProtectedData = async () => {
         if (account && instance && context) {
-            // const token = await getAccessToken(instance, transportRequest, account);
             getServices("");
             getContainers("");
         }
@@ -257,13 +245,7 @@ function Miscellaneous() {
     const getMiscellaneouses = async () => {
         if (account && instance && context) {
             setLoad(true);
-
             var token = null;
-            // if (tempToken === "") {
-            //     token = await getAccessToken(instance, pricingRequest, account);
-            //     setTempToken(token);    
-            // }
-            
             const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisPricing.endPoint+"/Miscellaneous/Miscellaneous?withShipment="+withShipment, token !== null ? token : context.tokenPricing);
             if (response !== null && response !== undefined) {
                 setAllMiscs(response);
@@ -630,34 +612,9 @@ function Miscellaneous() {
                         }
                     </Grid> : <Skeleton sx={{ mx: 1, mt: 3, width: "100%" }} /> : null
                 }
-                {/* {
-                    withShipment !== true ? 
-                    <Grid item xs={12}>
-                       <Box sx={{ overflow: "auto", width: { xs: "calc(100vw - 80px)", md: "100%" } }}>
-                        {
-                            miscsWithoutShipment !== null && miscsWithoutShipment.length !== 0 ?
-                            <DataGrid
-                                rows={miscsWithoutShipment}
-                                columns={columnsMiscs}
-                                hideFooter
-                                getRowId={(row: any) => row?.miscellaneousId}
-                                getRowHeight={() => "auto" }
-                                sx={gridStyles}
-                                disableRowSelectionOnClick
-                            /> : <Skeleton />
-                        }
-                        </Box>
-                    </Grid> : null
-                } */}
                 </Grid>
             </Box>
-            <BootstrapDialog
-                onClose={() => setModal(false)}
-                aria-labelledby="custom-dialog-title"
-                open={modal}
-                maxWidth="sm"
-                fullWidth
-            >
+            <BootstrapDialog open={modal} onClose={() => setModal(false)} maxWidth="sm" fullWidth>
                 <BootstrapDialogTitle id="custom-dialog-title" onClose={() => setModal(false)}>
                     <b>{t('deleteRowMisc')}</b>
                 </BootstrapDialogTitle>
@@ -944,45 +901,18 @@ function Miscellaneous() {
             </BootstrapDialog>
 
             {/* Add a new contact */}
-            <BootstrapDialog
-                onClose={() => setModal7(false)}
-                aria-labelledby="custom-dialog-title7"
-                open={modal7}
-                maxWidth="md"
-                fullWidth
-            >
-                <NewContact 
-                    categories={["OTHERS","SUPPLIERS"]}
-                    closeModal={() => setModal7(false)}
-                />
+            <BootstrapDialog open={modal7} onClose={() => setModal7(false)} maxWidth="md" fullWidth>
+                <NewContact categories={["OTHERS","SUPPLIERS"]} closeModal={() => setModal7(false)} />
             </BootstrapDialog>
 
             {/* Create new service */}
-            <BootstrapDialog
-                onClose={() => setModal8(false)}
-                aria-labelledby="custom-dialog-title8"
-                open={modal8}
-                maxWidth="md"
-                fullWidth
-            >
-                <NewService 
-                    closeModal={() => setModal8(false)}
-                    callBack={getServices}
-                />
+            <BootstrapDialog open={modal8} onClose={() => setModal8(false)} maxWidth="md" fullWidth>
+                <NewService closeModal={() => setModal8(false)} callBack={getServices} />
             </BootstrapDialog>
 
             {/* Create new port */}
-            <BootstrapDialog
-                onClose={() => setModal9(false)}
-                aria-labelledby="custom-dialog-title9"
-                open={modal9}
-                maxWidth="md"
-                fullWidth
-            >
-                <NewPort 
-                    closeModal={() => setModal9(false)}
-                    callBack={getPorts}
-                />
+            <BootstrapDialog open={modal9} onClose={() => setModal9(false)} maxWidth="md" fullWidth>
+                <NewPort closeModal={() => setModal9(false)} callBack={getPorts} />
             </BootstrapDialog>
         </div>
     );

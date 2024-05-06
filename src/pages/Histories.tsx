@@ -3,7 +3,7 @@ import { Alert, Box, Button, Chip, Grid, InputLabel, Skeleton, Typography } from
 import { BootstrapInput, datetimeStyles, gridStyles, inputLabelStyles } from '../utils/misc/styles';
 import { enqueueSnackbar, SnackbarProvider } from 'notistack';
 import SearchIcon from '@mui/icons-material/Search';
-import { loginRequest, protectedResources } from '../config/authConfig';
+import { protectedResources } from '../config/authConfig';
 import { useAuthorizedBackendApi } from '../api/api';
 import { BackendService } from '../utils/services/fetch';
 import { Link } from 'react-router-dom';
@@ -14,7 +14,6 @@ import { RequestResponseDto } from '../utils/models/models';
 import { useTranslation } from 'react-i18next';
 import { GridColDef, GridValueFormatterParams, GridRenderCellParams, DataGrid } from '@mui/x-data-grid';
 import { useAccount, useMsal } from '@azure/msal-react';
-import { getAccessToken, getToken } from '../utils/functions';
 
 function createGetRequestUrl(variable1: Dayjs|null, variable2: Dayjs|null, variable3: string, variable4: string) {
     let url = protectedResources.apiLisQuotes.endPoint+'/RequestQuoteHistory?';

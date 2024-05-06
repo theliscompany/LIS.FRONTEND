@@ -9,6 +9,8 @@ export enum CategoryEnum
     SHIPPING_AGENCY = 11
 }
 
+export let packingOptions = ["Unit", "Bundle", "Bag", "Pallet", "Carton", "Lot", "Crate"];
+
 export const containerPackages = [
     {
         "packageId": 8,

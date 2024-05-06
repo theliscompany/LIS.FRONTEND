@@ -626,7 +626,7 @@ export function isJSON(str: string) {
 };
 
 export function getTotalPrice(seaFreightObject: any) {
-    let totalPrice = 0;
+    let totalPrice:number = 0;
   
     // Loop through the containers array
     for (const container of seaFreightObject.containers) {
@@ -637,7 +637,7 @@ export function getTotalPrice(seaFreightObject: any) {
         }
     }
   
-    return totalPrice;
+    return Number(totalPrice);
 }
 
 export function getTotalPrices(seaFreights: any) {
@@ -647,7 +647,7 @@ export function getTotalPrices(seaFreights: any) {
         listPrices += totalPrice;
     }
     
-    return listPrices;
+    return Number(listPrices);
 }
 
 export async function getToken(instance: any, account: any, scope: any) {

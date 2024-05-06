@@ -4,15 +4,13 @@ import Box from '@mui/material/Box';
 import { SnackbarProvider, enqueueSnackbar } from 'notistack';
 import { useMsal, useAccount } from '@azure/msal-react';
 import { useAuthorizedBackendApi } from '../api/api';
-import { protectedResources, transportRequest } from '../config/authConfig';
+import { protectedResources } from '../config/authConfig';
 import { BackendService } from '../utils/services/fetch';
-import { AuthenticationResult } from '@azure/msal-browser';
-import { Alert, Button, DialogActions, DialogContent, Grid, IconButton, InputLabel, MenuItem, Select, Skeleton, Typography } from '@mui/material';
+import { Alert, Button, DialogActions, DialogContent, Grid, IconButton, InputLabel, Skeleton, Typography } from '@mui/material';
 import { DataGrid, GridColDef, GridRenderCellParams, GridToolbar } from '@mui/x-data-grid';
 import { t } from 'i18next';
 import { sizingStyles, gridStyles, BootstrapDialog, BootstrapDialogTitle, buttonCloseStyles, BootstrapInput, actionButtonStyles, inputLabelStyles } from '../utils/misc/styles';
 import { Edit, Delete } from '@mui/icons-material';
-import { getAccessToken } from '../utils/functions';
 
 const MasterDataProducts: any = (props: any) => {
     const [products, setProducts] = useState<any>(null);
@@ -21,11 +19,8 @@ const MasterDataProducts: any = (props: any) => {
     const [modal, setModal] = useState<boolean>(false);
     const [modal2, setModal2] = useState<boolean>(false);
     const [testName, setTestName] = useState<string>("");
-    const [testDescription, setTestDescription] = useState<string>("");
-    const [selectedProductTypes, setSelectedProductTypes] = useState<number[]>([]);
     const [currentId, setCurrentId] = useState<string>("");
     const [currentEditId, setCurrentEditId] = useState<string>("");
-    const [tempToken, setTempToken] = useState<string>("");
     
     const { instance, accounts } = useMsal();
     const account = useAccount(accounts[0] || {});
@@ -88,8 +83,6 @@ const MasterDataProducts: any = (props: any) => {
     const createNewProduct = async () => {
         if (testName !== "") {
             if (account && instance && context) {
-                // const token = await getAccessToken(instance, transportRequest, account);
-                
                 try {
                     var dataSent = null;
                     var response = null;
@@ -97,16 +90,12 @@ const MasterDataProducts: any = (props: any) => {
                         dataSent = {
                             "productId": currentEditId,
                             "productName": testName,
-                            // "productDescription": testDescription,
-                            // "productsTypeId": selectedProductTypes
                         };
                         response = await (context?.service as BackendService<any>).putWithToken(protectedResources.apiLisTransport.endPoint+"/Product/"+currentEditId, dataSent, context.tokenTransport);
                     }
                     else {
                         dataSent = {
                             "productName": testName,
-                            // "productDescription": testDescription,
-                            // "productsTypeId": selectedProductTypes
                         };
                         response = await (context?.service as BackendService<any>).postWithToken(protectedResources.apiLisTransport.endPoint+"/Product", dataSent, context.tokenTransport);
                     }
@@ -137,7 +126,6 @@ const MasterDataProducts: any = (props: any) => {
             else {
                 setLoadEdit(false);
             }
-            // console.log(response);
         }
     }
     
@@ -170,7 +158,6 @@ const MasterDataProducts: any = (props: any) => {
                                 <DataGrid
                                     rows={products}
                                     columns={columnsProducts}
-                                    // hideFooter
                                     initialState={{
                                         pagination: {
                                             paginationModel: {
@@ -192,7 +179,6 @@ const MasterDataProducts: any = (props: any) => {
                                         },
                                     }}
                                     disableRowSelectionOnClick
-                                    // onRowClick={handleRowSeafreightsClick}
                                 />
                             </Box> : 
                             <Box>
