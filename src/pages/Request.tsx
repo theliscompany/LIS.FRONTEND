@@ -21,6 +21,7 @@ import { JSON as seaPorts } from 'sea-ports';
 import GeneratePriceOffer from '../components/editRequestPage/GeneratePriceOffer';
 import NewPort from '../components/shared/NewPort';
 import RequestForm from '../components/editRequestPage/RequestForm';
+import NewProduct from '../components/shared/NewProduct';
 // @ts-ignore
 
 // let packingOptions = ["Unit", "Bundle", "Bag", "Pallet", "Carton", "Lot", "Crate"];
@@ -47,6 +48,7 @@ function Request() {
     const [modal8, setModal8] = useState<boolean>(false);
     const [modal9, setModal9] = useState<boolean>(false);
     const [modal10, setModal10] = useState<boolean>(false);
+    const [modal11, setModal11] = useState<boolean>(false);
     
     const [assignedManager, setAssignedManager] = useState<string>("");
     const [assignees, setAssignees] = useState<any>(null);
@@ -311,6 +313,13 @@ function Request() {
                             <Button 
                                 variant="contained" color="inherit" 
                                 sx={{ float: "right", backgroundColor: "#fff", textTransform: "none", ml: 2 }} 
+                                onClick={() => { setModal11(true); }}
+                            >
+                                {t('newProduct')}
+                            </Button>
+                            <Button 
+                                variant="contained" color="inherit" 
+                                sx={{ float: "right", backgroundColor: "#fff", textTransform: "none", ml: 2 }} 
                                 onClick={() => { setModal9(true); }}
                             >
                                 {t('createNewPort')}
@@ -415,6 +424,11 @@ function Request() {
             {/* Create new port */}
             <BootstrapDialog open={modal9} onClose={() => setModal9(false)} maxWidth="md" fullWidth>
                 <NewPort closeModal={() => setModal9(false)} callBack={getPorts} />
+            </BootstrapDialog>
+
+            {/* Create new product */}
+            <BootstrapDialog open={modal11} onClose={() => setModal11(false)} maxWidth="md" fullWidth>
+                <NewProduct closeModal={() => setModal11(false)} callBack={getProducts} />
             </BootstrapDialog>
 
             {/* New container type */}

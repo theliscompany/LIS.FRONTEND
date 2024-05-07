@@ -412,7 +412,7 @@ export const en = {
   editRowService: "Edit a service",
   createRowService: "Create a service",
   products: "Products",
-  newProduct: "Create a new product",
+  newProduct: "New product",
   deleteRowProduct: "Delete a product",
   editRowProduct: "Edit a product",
   createRowProduct: "Create a product",

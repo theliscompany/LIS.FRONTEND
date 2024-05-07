@@ -412,7 +412,7 @@ export const fr = {
   editRowService: "Modifier un service",
   createRowService: "Créer un service",
   products: "Produits",
-  newProduct: "Créer un nouveau produit",
+  newProduct: "Nouveau produit",
   deleteRowProduct: "Supprimer un produit",
   editRowProduct: "Modifier un produit",
   createRowProduct: "Créer un produit",

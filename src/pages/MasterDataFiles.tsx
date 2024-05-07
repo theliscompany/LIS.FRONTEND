@@ -159,6 +159,13 @@ const MasterDataFiles: any = (props: any) => {
                     <Grid item xs={12} md={4}>
                         <Button 
                             variant="contained" color="inherit" 
+                            sx={{ float: "right", backgroundColor: "#fff", textTransform: "none", ml: 2 }} 
+                            onClick={() => { getFiles(); }} 
+                        >
+                            {t('reload')}
+                        </Button>
+                        <Button 
+                            variant="contained" color="inherit" 
                             sx={{ float: "right", backgroundColor: "#fff", textTransform: "none" }} 
                             onClick={() => { setCurrentEditId(""); resetForm(); setModal(true); }} 
                         >

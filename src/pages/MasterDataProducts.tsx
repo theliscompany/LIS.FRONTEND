@@ -1,12 +1,11 @@
 import * as React from 'react';
 import { useState, useEffect } from 'react';
-import Box from '@mui/material/Box';
 import { SnackbarProvider, enqueueSnackbar } from 'notistack';
 import { useMsal, useAccount } from '@azure/msal-react';
 import { useAuthorizedBackendApi } from '../api/api';
 import { protectedResources } from '../config/authConfig';
 import { BackendService } from '../utils/services/fetch';
-import { Alert, Button, DialogActions, DialogContent, Grid, IconButton, InputLabel, Skeleton, Typography } from '@mui/material';
+import { Alert, Box, Button, DialogActions, DialogContent, Grid, IconButton, InputLabel, Skeleton, Typography } from '@mui/material';
 import { DataGrid, GridColDef, GridRenderCellParams, GridToolbar } from '@mui/x-data-grid';
 import { t } from 'i18next';
 import { sizingStyles, gridStyles, BootstrapDialog, BootstrapDialogTitle, buttonCloseStyles, BootstrapInput, actionButtonStyles, inputLabelStyles } from '../utils/misc/styles';
@@ -29,13 +28,10 @@ const MasterDataProducts: any = (props: any) => {
     const getProducts = async () => {
         if (account && instance && context) {
             setLoadResults(true);
-            // const token = await getAccessToken(instance, transportRequest, account);
             const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Product?pageSize=500", context.tokenTransport);
             if (response !== null && response !== undefined) {
                 setProducts(response);
                 setLoadResults(false);
-                // setTempToken(token);
-                // setProducts(response.filter((obj: any) => obj.productsTypeId.includes(5) || obj.productsTypeId.includes(2))); // Filter the products for miscellaneous (MISCELLANEOUS = 5 & HAULAGE = 2)
             }
             else {
                 setLoadResults(false);
@@ -142,6 +138,13 @@ const MasterDataProducts: any = (props: any) => {
                         <Typography sx={{ fontSize: 18, mb: 1 }}><b>{t('listProducts')}</b></Typography>
                     </Grid>
                     <Grid item xs={12} md={4}>
+                        <Button 
+                            variant="contained" color="inherit" 
+                            sx={{ float: "right", backgroundColor: "#fff", textTransform: "none", ml: 2 }} 
+                            onClick={() => { getProducts(); }} 
+                        >
+                            {t('reload')}
+                        </Button>
                         <Button 
                             variant="contained" color="inherit" 
                             sx={{ float: "right", backgroundColor: "#fff", textTransform: "none" }} 
