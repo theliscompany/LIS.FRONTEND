@@ -8,11 +8,14 @@ import { protectedResources } from '../config/authConfig';
 import { BackendService } from '../utils/services/fetch';
 import { Alert, Button, DialogActions, DialogContent, Grid, IconButton, InputLabel, MenuItem, Select, Skeleton, Typography } from '@mui/material';
 import { DataGrid, GridColDef, GridRenderCellParams, GridToolbar } from '@mui/x-data-grid';
-import { t } from 'i18next';
+// import { t } from 'i18next';
 import { sizingStyles, gridStyles, BootstrapDialog, BootstrapDialogTitle, buttonCloseStyles, BootstrapInput, actionButtonStyles, inputLabelStyles } from '../utils/misc/styles';
 import { Edit, Delete } from '@mui/icons-material';
+import { useTranslation } from 'react-i18next';
 
 const MasterDataServices: any = (props: any) => {
+    const { t } = useTranslation();
+    
     const [services, setServices] = useState<any>(null);
     const [loadResults, setLoadResults] = useState<boolean>(true);
     const [loadEdit, setLoadEdit] = useState<boolean>(false);
@@ -163,6 +166,13 @@ const MasterDataServices: any = (props: any) => {
                         <Typography sx={{ fontSize: 18, mb: 1 }}><b>{t('listServices')}</b></Typography>
                     </Grid>
                     <Grid item xs={12} md={4}>
+                        <Button 
+                            variant="contained" color="inherit" 
+                            sx={{ float: "right", backgroundColor: "#fff", textTransform: "none", ml: 2 }} 
+                            onClick={() => { getServices(); }} 
+                        >
+                            {t('reload')}
+                        </Button>
                         <Button 
                             variant="contained" color="inherit" 
                             sx={{ float: "right", backgroundColor: "#fff", textTransform: "none" }} 

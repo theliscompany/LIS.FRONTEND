@@ -7,11 +7,9 @@ import { enqueueSnackbar } from 'notistack';
 import { BackendService } from '../../utils/services/fetch';
 import { protectedResources } from '../../config/authConfig';
 import { useAccount, useMsal } from '@azure/msal-react';
-import CountrySelect from './CountrySelect';
 
-function NewPort(props: any) {
+function NewProduct(props: any) {
     const [testName, setTestName] = useState<string>("");
-    const [country, setCountry] = useState<any>(null);
     
     const { instance, accounts } = useMsal();
     const account = useAccount(accounts[0] || {});
@@ -19,20 +17,17 @@ function NewPort(props: any) {
     const context = useAuthorizedBackendApi();
     const { t } = useTranslation();
     
-    const createNewPort = async () => {
-        if (testName !== "" && country !== null) {
+    const createNewProduct = async () => {
+        if (testName !== "") {
             if (account && instance && context) {
-                // const token = await getAccessToken(instance, transportRequest, account);
-    
                 var dataSent = {
-                    "portName": testName,
-                    "country": country.label
+                    "productName": testName,
                 };
                 
                 try {
-                    const response = await (context?.service as BackendService<any>).postWithToken(protectedResources.apiLisTransport.endPoint+"/Port/CreatePort", dataSent, context.tokenTransport);
+                    const response = await (context?.service as BackendService<any>).postWithToken(protectedResources.apiLisTransport.endPoint+"/Product", dataSent, context.tokenTransport);
                     if (response !== null) {
-                        enqueueSnackbar("The port has been added with success!", { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                        enqueueSnackbar("The product has been added with success!", { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
                         
                         if (props.callBack !== undefined && props.callBack !== null) {
                             props.callBack();
@@ -56,27 +51,23 @@ function NewPort(props: any) {
     
     return (
         <>
-            <BootstrapDialogTitle id="custom-dialog-title7" onClose={props.closeModal}>
-                <b>Create new port</b>
+            <BootstrapDialogTitle id="custom-dialog-title77" onClose={props.closeModal}>
+                <b>Create new product</b>
             </BootstrapDialogTitle>
             <DialogContent dividers>
                 <Grid container spacing={2}>
                     <Grid item xs={12}>
-                        <InputLabel htmlFor="test-name" sx={inputLabelStyles}>Port name</InputLabel>
+                        <InputLabel htmlFor="test-name" sx={inputLabelStyles}>Product name</InputLabel>
                         <BootstrapInput id="test-name" type="text" value={testName} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTestName(e.target.value)} fullWidth />
-                    </Grid>
-                    <Grid item xs={12}>
-                        <InputLabel htmlFor="test-country" sx={inputLabelStyles}>Country</InputLabel>
-                        <CountrySelect id="test-country" value={country} onChange={setCountry} fullWidth />
                     </Grid>
                 </Grid>
             </DialogContent>
             <DialogActions>
-                <Button variant="contained" onClick={() => { createNewPort(); }} sx={actionButtonStyles}>{t('validate')}</Button>
+                <Button variant="contained" onClick={() => { createNewProduct(); }} sx={actionButtonStyles}>{t('validate')}</Button>
                 <Button variant="contained" onClick={props.closeModal} sx={buttonCloseStyles}>{t('close')}</Button>
             </DialogActions>
         </>
     );
 }
 
-export default NewPort;
+export default NewProduct;

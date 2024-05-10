@@ -22,7 +22,7 @@ function RequestAddNote(props: any) {
         if (generalNote !== "") {
             if (account && instance && context) {
                 var dataSent = { "content": generalNote, "requestQuoteId": props.id, "noteType": "General", "idUser": account?.username };
-                const response = await (context?.service as BackendService<any>).post(protectedResources.apiLisQuotes.endPoint+"/RequestQuoteNotes", dataSent);
+                const response = await (context?.service as BackendService<any>).postWithToken(protectedResources.apiLisQuotes.endPoint+"/RequestQuoteNotes", dataSent, context.tokenLogin);
                 if (response !== null) {
                     props.closeModal();
                     enqueueSnackbar(t('commentSuccessAdded'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });

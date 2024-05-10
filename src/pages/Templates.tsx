@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Accordion, AccordionDetails, AccordionSummary, Alert, Autocomplete, Box, Button, Chip, DialogActions, DialogContent, Grid, IconButton, InputLabel, ListItem, ListItemText, NativeSelect, Skeleton, TextField, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material';
+import { Alert, Autocomplete, Box, Button, Chip, DialogActions, DialogContent, Grid, IconButton, InputLabel, Skeleton, TextField, Typography } from '@mui/material';
 import AddCircleOutlinedIcon from '@mui/icons-material/AddCircleOutlined';
 import SearchIcon from '@mui/icons-material/Search';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -7,15 +7,13 @@ import EditIcon from '@mui/icons-material/Edit';
 import { SnackbarProvider, enqueueSnackbar } from 'notistack';
 import { useTranslation } from 'react-i18next';
 import { useAuthorizedBackendApi } from '../api/api';
-import { pricingRequest, protectedResources, transportRequest } from '../config/authConfig';
+import { protectedResources } from '../config/authConfig';
 import { BackendService } from '../utils/services/fetch';
-import { GridColDef, GridValueFormatterParams, GridRenderCellParams, DataGrid } from '@mui/x-data-grid';
-import { BootstrapDialog, BootstrapDialogTitle, BootstrapInput, actionButtonStyles, buttonCloseStyles, datetimeStyles, gridStyles, inputLabelStyles, whiteButtonStyles } from '../utils/misc/styles';
-import CompanySearch from '../components/shared/CompanySearch';
+import { GridColDef, GridRenderCellParams, DataGrid } from '@mui/x-data-grid';
+import { BootstrapDialog, BootstrapDialogTitle, BootstrapInput, actionButtonStyles, buttonCloseStyles, datetimeStyles, gridStyles, inputLabelStyles } from '../utils/misc/styles';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
-import dayjs, { Dayjs } from 'dayjs';
-import { AuthenticationResult } from '@azure/msal-browser';
+import { Dayjs } from 'dayjs';
 import { useMsal, useAccount } from '@azure/msal-react';
 import { MuiChipsInputChip } from 'mui-chips-input';
 import StarterKit from '@tiptap/starter-kit';
@@ -36,27 +34,6 @@ import {
     MenuButtonRedo, 
     type RichTextEditorRef,
 } from 'mui-tiptap';
-import { t } from 'i18next';
-import RichTextEditorGeneral from '../components/shared/RichTextEditorGeneral';
-
-const variableOptions = [
-    { label: t('listContainers'), value: "listContainers" },
-    { label: t('loadingCity'), value: "loadingCity" },
-    { label: t('departurePort'), value: "departurePort" },
-    { label: t('destinationPort'), value: "destinationPort" },
-    { label: t('emptyPickupDepot'), value: "emptyPickupDepot" },
-    { label: t('commodities'), value: "commodities" },
-    { label: t('etd'), value: "etd" },
-    { label: t('frequency'), value: "frequency" },
-    { label: t('transitTime'), value: "transitTime" },
-    { label: t('freeTime'), value: "freeTime" },
-    { label: t('overtimeTariff2'), value: "overtimeTariff" },
-    { label: t('listServices'), value: "listServices" },
-    { label: t('containersQuantities'), value: "containersQuantities" },
-    { label: t('pricesContainers'), value: "pricesContainers" },
-    { label: t('clientName'), value: "clientName" },
-    { label: t('haulageType'), value: "haulageType" },
-];
 
 function createGetRequestUrl(variable1: string) {
     let url = protectedResources.apiLisTemplate.endPoint+"/Template?";
@@ -95,7 +72,6 @@ function Templates() {
     const [tags, setTags] = useState<MuiChipsInputChip[]>([]);
     
     const [mailLanguage, setMailLanguage] = useState<string>("fr");
-    const [tempToken, setTempToken] = useState<string>("");
     
     const rteRef = useRef<RichTextEditorRef>(null);
     const rteRef2 = useRef<RichTextEditorRef>(null);
@@ -105,6 +81,25 @@ function Templates() {
     const { instance, accounts } = useMsal();
     const account = useAccount(accounts[0] || {});
     const context = useAuthorizedBackendApi();
+    
+    const variableOptions = [
+        { label: t('listContainers'), value: "listContainers" },
+        { label: t('loadingCity'), value: "loadingCity" },
+        { label: t('departurePort'), value: "departurePort" },
+        { label: t('destinationPort'), value: "destinationPort" },
+        { label: t('emptyPickupDepot'), value: "emptyPickupDepot" },
+        { label: t('commodities'), value: "commodities" },
+        { label: t('etd'), value: "etd" },
+        { label: t('frequency'), value: "frequency" },
+        { label: t('transitTime'), value: "transitTime" },
+        { label: t('freeTime'), value: "freeTime" },
+        { label: t('overtimeTariff2'), value: "overtimeTariff" },
+        { label: t('listServices'), value: "listServices" },
+        { label: t('containersQuantities'), value: "containersQuantities" },
+        { label: t('pricesContainers'), value: "pricesContainers" },
+        { label: t('clientName'), value: "clientName" },
+        { label: t('haulageType'), value: "haulageType" },
+    ];
     
     const columnsTemplates: GridColDef[] = [
         { field: 'name', headerName: t('name'), minWidth: 125, flex: 1 },

@@ -165,7 +165,7 @@ function RequestPriceOffer(props: any) {
             setLoad(true);
             // setCarriersData([]);
             var requestFormatted = createGetRequestUrl(portLoading?.portId, portDischarge?.portId);
-            const response = await (context?.service as BackendService<any>).getWithToken(requestFormatted, props.token);
+            const response = await (context?.service as BackendService<any>).getWithToken(requestFormatted, context.tokenPricing);
             if (response !== null && response !== undefined) {
                 var aux = getAllCarriers(response);
                 console.log(response.length !== 0 ? aux : "None");

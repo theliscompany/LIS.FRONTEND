@@ -1,15 +1,15 @@
 import { useEffect, useRef, useState } from 'react';
-import { BootstrapDialog, BootstrapDialogTitle, BootstrapInput, gridStyles, inputIconStyles, inputLabelStyles, sizeStyles, sizingStyles, whiteButtonStyles } from '../../utils/misc/styles';
-import { Accordion, AccordionDetails, AccordionSummary, Alert, Autocomplete, Box, Button, Chip, Grid, IconButton, InputLabel, ListItem, ListItemButton, ListItemText, NativeSelect, Skeleton, Step, StepLabel, Stepper, TextField, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material';
+import { BootstrapDialog, BootstrapDialogTitle, BootstrapInput, actionButtonStyles, anyButtonStyles, buttonCloseStyles, gridStyles, inputIconStyles, inputLabelStyles, sizeStyles, sizingStyles, whiteButtonStyles } from '../../utils/misc/styles';
+import { Accordion, AccordionDetails, AccordionSummary, Alert, Autocomplete, Box, Button, Chip, DialogActions, DialogContent, Grid, IconButton, InputLabel, ListItem, ListItemButton, ListItemText, NativeSelect, Skeleton, Step, StepLabel, Stepper, TextField, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material';
 import { enqueueSnackbar } from 'notistack';
 import { BackendService } from '../../utils/services/fetch';
 import { protectedResources } from '../../config/authConfig';
 import { Anchor, Delete, ExpandMore, RestartAlt, Visibility } from '@mui/icons-material';
 import { DataGrid, GridColDef, GridColumnHeaderParams, GridRenderCellParams, GridToolbar, GridValueFormatterParams, GridValueGetterParams } from '@mui/x-data-grid';
 import StarterKit from '@tiptap/starter-kit';
-import { t } from 'i18next';
+// import { t } from 'i18next';
 import React from 'react';
-import { calculateTotal, checkCarrierConsistency, checkDifferentDefaultContainer, formatObject, formatServices, generateRandomNumber, getAccessToken, getServices, getServicesTotal, getServicesTotal2, getTotalNumber, hashCode, myServices, removeDuplicatesWithLatestUpdated } from '../../utils/functions';
+import { calculateTotal, checkCarrierConsistency, checkDifferentDefaultContainer, formatObject, formatServices, generateRandomNumber, getAccessToken, getCityCountry, getServices, getServicesTotal, getServicesTotal2, getTotalNumber, hashCode, myServices, removeDuplicatesWithLatestUpdated } from '../../utils/functions';
 import AutocompleteSearch from '../shared/AutocompleteSearch';
 import ContainerElement from './ContainerElement';
 import ContainerPrice from './ContainerPrice';
@@ -22,6 +22,10 @@ import useProcessStatePersistence from '../../utils/processes/useProcessStatePer
 import NewHaulage from './NewHaulage';
 import NewSeafreight from './NewSeafreight';
 import CompareOptions from './CompareOptions';
+import { haulageTypeOptions } from '../../utils/constants';
+import { MuiFileInput } from 'mui-file-input';
+import axios, { AxiosResponse } from 'axios';
+import { useTranslation } from 'react-i18next';
 
 function createGetRequestUrl(url: string, variable2: string, variable3: string, variable4: string) {
     if (variable2) {
@@ -64,11 +68,14 @@ function GeneratePriceOffer(props: any) {
         loadingCity, setLoadingCity,
         portDestination, ports, products, ports1, ports2, containers 
     } = props;
+
+    const { t } = useTranslation();
     
     const [loadResults, setLoadResults] = useState<boolean>(false);
     const [loadGeneralMiscs, setLoadGeneralMiscs] = useState<boolean>(false);
     const [loadMiscsHaulage, setLoadMiscsHaulage] = useState<boolean>(false);
     const [loadNewOffer, setLoadNewOffer] = useState<boolean>(false);
+    const [loadStatus, setLoadStatus] = useState<boolean>(false);
     
     const [haulages, setHaulages] = useState<any>(null);
     const [seafreights, setSeafreights] = useState<any>(null);
@@ -77,8 +84,6 @@ function GeneratePriceOffer(props: any) {
     const [miscsHaulage, setMiscsHaulage] = useState<any>([]);
     const [generalMiscs, setGeneralMiscs] = useState<any>(null);
     const [tableMiscs, setTableMiscs] = useState<any>(null);
-    
-    const [tempToken, setTempToken] = useState<string>("");
     
     const [templates, setTemplates] = useState<any>([]);
     const [loadTemplates, setLoadTemplates] = useState<boolean>(false);
@@ -92,11 +97,16 @@ function GeneratePriceOffer(props: any) {
     const [modalHaulage, setModalHaulage] = useState<boolean>(false);
     const [modalSeafreight, setModalSeafreight] = useState<boolean>(false);
     const [modalCompare, setModalCompare] = useState<boolean>(false);
+    const [modalFile, setModalFile] = useState<boolean>(false);
+    
+    const [files, setFiles] = useState<any>(null);
+    const [fileValue, setFileValue] = useState<File[] | undefined>(undefined);
     
     const rteRef = useRef<RichTextEditorRef>(null);
     
     const [formState, setFormState] = useProcessStatePersistence(
-        account?.name,
+        "allAccounts",
+        // account?.name,
         'generatePriceOfferTest'+id,
         { 
             haulageType: "", selectedTemplate: defaultTemplate, 
@@ -106,7 +116,8 @@ function GeneratePriceOffer(props: any) {
             activeStep: 0, margins: containersSelection.map(() => 22), addings: containersSelection.map(() => 0),
             marginsMiscs: Array(15).fill(50), addingsMiscs: [],  
             portDeparture: null, portDestination: portDestination,
-            selectedSeafreights: null, currentOption: 0, options: [] 
+            selectedSeafreights: null, currentOption: 0, options: [], 
+            files: []
         },
         null, // Optionnel, par défaut à null (pas d'expiration)
         true // Optionnel, par défaut à true (sauvegarde automatique activée)
@@ -117,14 +128,7 @@ function GeneratePriceOffer(props: any) {
     };
     
     const steps = [t('selectHaulage'), t('selectSeafreight'), t('selectMisc'), t('sendOffer')];
-    const haulageTypeOptions = [
-        { value: "On trailer, direct loading", label: t('haulageType1') },
-        { value: "On trailer, Loading with Interval", label: t('haulageType2') },
-        { value: "Side loader, direct loading", label: t('haulageType3') },
-        { value: "Side loader, Loading with Interval, from trailer to floor", label: t('haulageType4') },
-        { value: "Side loader, Loading with Interval, from floor to trailer", label: t('haulageType5') }
-    ];
-
+    
     const columnsSeafreights: GridColDef[] = [
         { field: 'carrierName', headerName: t('carrier'), flex: 1.25 },
         { field: 'carrierAgentName', headerName: t('carrierAgent'), flex: 1.25 },
@@ -263,6 +267,7 @@ function GeneratePriceOffer(props: any) {
     // }, [formState]);
     
     useEffect(() => {
+        getFiles();
         getTemplates();
     }, [account, instance, account]);
     
@@ -381,6 +386,70 @@ function GeneratePriceOffer(props: any) {
 
     const handleReset = () => {
         setFormState({...formState, activeStep: 0 });
+    };
+
+    const changeStatus = async (value: string) => {
+        if (account && instance && context) {
+            setLoadStatus(true);
+            const body: any = {
+                newStatus: value,
+                customMessage: ""
+            };
+
+            const data = await (context?.service as BackendService<any>).putWithToken(protectedResources.apiLisQuotes.endPoint+"/Request/"+props.id+"/changeStatus", body, context.tokenLogin);
+            if (data?.status === 200) {
+                setLoadStatus(false);
+                enqueueSnackbar(t('requestStatusUpdated'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
+            }
+            else {
+                setLoadNewOffer(false);
+                enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+            }
+        }
+    }
+
+    const getFiles = async () => {
+        if (account && instance && context) {
+            setLoadResults(true);
+            const response = await (context?.service as BackendService<any>).getSingle(protectedResources.apiLisFiles.endPoint+"/Files");
+            if (response !== null && response.data !== undefined && response !== undefined) {
+                setFiles(response.data);
+                setLoadResults(false);
+            }
+            else {
+                setLoadResults(false);
+            }
+        }
+    }
+    
+    const uploadFile = async () => {
+        if (fileValue !== undefined && fileValue !== null) {
+            try {
+                const formData = new FormData();
+                formData.append('file', fileValue[0]);
+            
+                const response: AxiosResponse = await axios({
+                    url: protectedResources.apiLisFiles.endPoint+"/Files/upload",
+                    method: 'POST',
+                    data: formData,
+                    headers: {
+                        'Content-Type': 'multipart/form-data', 
+                    },
+                });
+                
+                enqueueSnackbar("The file has been added with success!", { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                getFiles();
+                setModalFile(false);
+                console.log(response);
+            } 
+            catch (error) {
+                enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                console.log(error);
+            }
+        }
+        else {
+            enqueueSnackbar("The file field is empty, please verify it and pick a file.", { variant: "warning", anchorOrigin: { horizontal: "right", vertical: "top"} });
+        }
     };
 
     function displayContainers(value: any) {
@@ -612,82 +681,23 @@ function GeneratePriceOffer(props: any) {
                 setLoadNewOffer(true);
                 var haulage = null;
                 var miscellaneous = null;
-                if (formState.selectedHaulage !== null && formState.selectedHaulage !== undefined) {
-                    haulage = {
-                        "id": formState.selectedHaulage.id,
-                        "haulierId": 0,
-                        "haulierName": formState.selectedHaulage.haulierName,
-                        "currency": formState.selectedHaulage.currency,
-                        "loadingCityName": formState.selectedHaulage.loadingPort,
-                        "freeTime": formState.selectedHaulage.freeTime,
-                        "multiStop": formState.selectedHaulage.multiStop,
-                        "overtimeTariff": formState.selectedHaulage.overtimeTariff,
-                        "unitTariff": formState.selectedHaulage.unitTariff,
-                        "haulageType": formState.haulageType,
-                        // "loadingPort": loadingCity.name,
-                        "loadingPort": loadingCity.city,
-                        "validUntil": formState.selectedHaulage.validUntil,
-                        // "loadingPortId": loadingCity.id,
-                        "containerNames": [null]
-                    }
-                }
-                if (formState.selectedMisc !== undefined && formState.selectedMisc !== null) {
-                    miscellaneous = formState.myMiscs.map((elm: any) => {
-                        return {
-                            "id": elm.miscellaneousId,
-                            "departurePortId": null,
-                            "destinationPortId": null,
-                            "departurePortName": null,
-                            "destinationPortName": null,
-                            "supplierId": 0,
-                            "supplierName": elm.supplierName,
-                            "currency": elm.currency,
-                            "price20": elm.total20,
-                            "price40": elm.total40,
-                            "price20dry": elm.total20Dry,
-                            "price20rf": elm.total20RF,
-                            "price40dry": elm.total40Dry,
-                            "price40hc": elm.total40HC,
-                            "price40hcrf": elm.total40HCRF,
-                            "validUntil": elm.validUntil,
-                        }
-                    })
-                }
                 var dataSent = {
                     "requestQuoteId": Number(id),
                     "comment": rteRef.current?.editor?.getHTML(),
-                    // "quoteOfferNumber": transformId(uuidv4()),
                     "quoteOfferVm": 0,
                     "quoteOfferId": 10,
                     "quoteOfferNumber": generateRandomNumber(),
-                    "createdBy": account?.username,
+                    // "createdBy": account?.username,
+                    "createdBy": JSON.stringify(formState),
                     "emailUser": email,
                     "haulage": haulage,
                     "miscellaneousList": miscellaneous,
-                    "seaFreight": {
-                        "id": formState.selectedSeafreight.seaFreightId,
-                        "departurePortId": formState.portDeparture.portId,
-                        "destinationPortId": formState.portDestination.portId,
-                        "departurePortName": formState.selectedSeafreight.departurePortName,
-                        "destinationPortName": formState.portDestination.portName,
-                        "carrierId": 0,
-                        "carrierName": formState.selectedSeafreight.carrierName,
-                        "carrierAgentId": 0,
-                        "carrierAgentName": formState.selectedSeafreight.carrierAgentName,
-                        "currency": formState.selectedSeafreight.currency,
-                        "transitTime": formState.selectedSeafreight.transitTime,
-                        "frequency": formState.selectedSeafreight.frequency,
-                        "price20dry": formState.selectedSeafreight.price20dry,
-                        "price20rf": formState.selectedSeafreight.price20rf,
-                        "price40dry": formState.selectedSeafreight.price40dry,
-                        "price40hc": formState.selectedSeafreight.price40hc,
-                        "price40hcrf": formState.selectedSeafreight.price40hcrf,
-                        "validUntil": formState.selectedSeafreight.validUntil,
-                    },
+                    "seaFreight": null,
                     "containers": containersSelection.map((elm: any) => { return { "containerId": elm.id, quantity: elm.quantity } }),
                     "departureDate": (new Date("01/01/2022")).toISOString(),
                     "departurePortId": formState.portDeparture.portId,
                     "destinationPortId": formState.portDestination.portId,
+                    "haulageType": getCityCountry(props.requestData.departure)+" - "+getCityCountry(props.requestData.arrival),
                     "margin": 0,
                     "reduction": 0,
                     "extraFee": 0,
@@ -696,8 +706,9 @@ function GeneratePriceOffer(props: any) {
                 const response = await (context?.service as BackendService<any>).postReturnJson(protectedResources.apiLisOffer.endPoint+"/QuoteOffer", dataSent);
                 
                 if (response !== null) {
-                    enqueueSnackbar(t('offerSuccessSent'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                    enqueueSnackbar(t('offerSuccessCreated'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
                     setLoadNewOffer(false);
+                    changeStatus("Valider");
                 }
                 else {
                     enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
@@ -995,7 +1006,7 @@ function GeneratePriceOffer(props: any) {
                                                 <option key={"kdq-"} value="">{t('anyType')}</option>
                                                 {
                                                     haulageTypeOptions.map((item: any, i: number) => (
-                                                        <option key={"kdq"+i} value={item.value}>{item.label}</option>
+                                                        <option key={"kdq"+i} value={item.value}>{t(item.label)}</option>
                                                     ))
                                                 }
                                             </NativeSelect>
@@ -1048,6 +1059,12 @@ function GeneratePriceOffer(props: any) {
                                                         rows={haulages}
                                                         columns={columnsHaulages}
                                                         // hideFooter
+                                                        // disableColumnFilter
+                                                        // disableDensitySelector
+                                                        // slots={{
+                                                        //     toolbar: GridToolbar
+                                                        // }}
+                                                        // slotProps={{ toolbar: { printOptions: { disableToolbarButton: true } } }}
                                                         initialState={{
                                                             pagination: {
                                                                 paginationModel: {
@@ -1368,11 +1385,10 @@ function GeneratePriceOffer(props: any) {
                                                                 portDeparture: formState.portDeparture, portDestination: formState.portDestination, 
                                                                 selectedSeafreights: formState.selectedSeafreights
                                                             };
-
                                                             setFormState({...formState, options: [...formState.options, thisOption] });
                                                         }}
                                                     >
-                                                        Save option
+                                                        {t('saveOption')}
                                                     </Button> : null
                                                 }
                                                 {
@@ -1396,7 +1412,7 @@ function GeneratePriceOffer(props: any) {
                                                             });
                                                         }}
                                                     >
-                                                        New option
+                                                        {t('newOption')}
                                                     </Button> : null
                                                 }
                                                 <Button
@@ -1406,7 +1422,7 @@ function GeneratePriceOffer(props: any) {
                                                     style={{ marginRight: 8 }}
                                                     onClick={(e: any) => { setModalCompare(true); }}
                                                 >
-                                                    Compare options
+                                                    {t('compareOptions')}
                                                 </Button>
                                             </Grid> : null
                                         }
@@ -1450,7 +1466,7 @@ function GeneratePriceOffer(props: any) {
                                                                                 enqueueSnackbar("Option updated with success!", { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
                                                                             }}
                                                                         >
-                                                                            Edit option
+                                                                            {t('updateOption')}
                                                                         </Button> : null
                                                                     }
                                                                     <Button 
@@ -1471,14 +1487,14 @@ function GeneratePriceOffer(props: any) {
                                                                             });
                                                                         }}
                                                                     >
-                                                                        Select option
+                                                                        {t('selectOption')}
                                                                     </Button>
                                                                     <Button 
                                                                         variant="contained" color="inherit" sx={whiteButtonStyles} 
                                                                         style={{ marginBottom: 16 }}
                                                                         onClick={(e: any) => { setFormState({...formState, options: formState.options.filter((opt: any, i: number) => i !== id)}); }}
                                                                     >
-                                                                        Delete option
+                                                                        {t('deleteOption')}
                                                                     </Button>
                                                                 </>
                                                             }
@@ -1487,7 +1503,7 @@ function GeneratePriceOffer(props: any) {
                                                                 sx={{ mt: 0 }}
                                                                 primary={
                                                                     elm.selectedSeafreight !== undefined && elm.selectedSeafreight !== null ? 
-                                                                    elm.selectedSeafreight.departurePortName+" - "+elm.selectedSeafreight.destinationPortName+" | "+elm.selectedSeafreight.carrierName 
+                                                                    Number(id+1)+"# "+elm.selectedSeafreight.departurePortName+" - "+elm.selectedSeafreight.destinationPortName+" | "+elm.selectedSeafreight.carrierName 
                                                                     : "N/A"
                                                                 }
                                                                 primaryTypographyProps={{ fontWeight: "bold" }} 
@@ -1574,7 +1590,7 @@ function GeneratePriceOffer(props: any) {
                                                         </Box>
                                                     </Grid> : null
                                                 }
-                                                <Grid item xs={8}>
+                                                <Grid item xs={4}>
                                                     <InputLabel htmlFor="selectedTemplate" sx={inputLabelStyles}>{t('selectedTemplate')}</InputLabel>
                                                     {
                                                         loadTemplates !== true && formState.selectedTemplate !== undefined && formState.selectedTemplate !== null ?
@@ -1593,7 +1609,40 @@ function GeneratePriceOffer(props: any) {
                                                         </NativeSelect> : <Skeleton />
                                                     }
                                                 </Grid>
-                                                <Grid item xs={4}>
+                                                {
+                                                    formState.files !== undefined ? 
+                                                    files !== null ?
+                                                    <Grid item xs={6}>
+                                                        <InputLabel htmlFor="selectedFiles" sx={inputLabelStyles}>{t('fileSent')}</InputLabel>
+                                                        <Autocomplete
+                                                            disablePortal
+                                                            multiple
+                                                            id="selectedFiles"
+                                                            getOptionLabel={(option: any) => { 
+                                                                return option.fileName;
+                                                            }}
+                                                            value={formState.files}
+                                                            options={files}
+                                                            fullWidth
+                                                            onChange={(e: any, value: any) => { 
+                                                                setFormState({...formState, files: value});
+                                                            }}
+                                                            renderInput={(params: any) => <TextField {...params} label="" />}
+                                                            sx={{ mt: 1 }}
+                                                        />
+                                                    </Grid> : <Skeleton />
+                                                    : null
+                                                }
+                                                <Grid item xs={2}>
+                                                    <Button 
+                                                        variant="contained" color="inherit" 
+                                                        sx={{ float: "right", backgroundColor: "#fff", textTransform: "none", mt: 4 }} 
+                                                        onClick={() => { setModalFile(true); }} 
+                                                    >
+                                                        {t('uploadFile')}
+                                                    </Button>
+                                                </Grid>
+                                                {/* <Grid item xs={4}>
                                                     <InputLabel htmlFor="mailLanguage" sx={inputLabelStyles}>{t('mailLanguage')}</InputLabel>
                                                     <ToggleButtonGroup
                                                         color="primary"
@@ -1609,7 +1658,7 @@ function GeneratePriceOffer(props: any) {
                                                         <ToggleButton value="fr"><img src="/assets/img/flags/flag-fr.png" style={{ width: "12px", marginRight: "6px" }} alt="flag english" /> Français</ToggleButton>
                                                         <ToggleButton disabled value="en"><img src="/assets/img/flags/flag-en.png" style={{ width: "12px", marginRight: "6px" }} alt="flag english" /> English</ToggleButton>
                                                     </ToggleButtonGroup>
-                                                </Grid>
+                                                </Grid> */}
                                                 <Grid item xs={12}>
                                                     <Grid container spacing={0} sx={{ border: "1px solid #e5e5e5", backgroundColor: "#fff", px: 2, py: 1 }}>
                                                         <Grid item xs={12}>
@@ -1745,13 +1794,31 @@ function GeneratePriceOffer(props: any) {
                                     </Button>
                                     <Box sx={{ flex: '1 1 auto' }} />
                                     {isStepOptional(formState.activeStep) && (
-                                    <Button variant="contained" color="inherit" sx={whiteButtonStyles} onClick={handleSkip} style={{ marginRight: "10px" }}>
-                                        {t('skip')}
-                                    </Button>
+                                        <Button variant="contained" color="inherit" sx={whiteButtonStyles} onClick={handleSkip} style={{ marginRight: "10px" }}>
+                                            {t('skip')}
+                                        </Button>
                                     )}
-                                    <Button variant="contained" color="inherit" sx={whiteButtonStyles} onClick={handleNext} disabled={formState.activeStep === steps.length - 1 ? loadNewOffer : false}>
-                                        {formState.activeStep === steps.length - 1 ? t('sendOfferValidation') : t('nextStep')}
-                                    </Button>
+                                    {
+                                        props.type === "standard" ? 
+                                        <Button 
+                                            variant="contained" color="inherit" sx={whiteButtonStyles} 
+                                            onClick={() => { 
+                                                formState.activeStep === steps.length - 1 ? 
+                                                props.status !== "EnCoursDeTraitement" ? changeStatus("EnCoursDeTraitement") : console.log("") 
+                                                : handleNext() 
+                                            }} 
+                                            style={props.status === "EnCoursDeTraitement" ? { display: "none" } : {}}
+                                            disabled={formState.activeStep === steps.length - 1 ? loadStatus : false}
+                                        >
+                                            {formState.activeStep === steps.length - 1 ? t('sendOfferValidation') : t('nextStep')}
+                                        </Button> : null
+                                    }
+                                    {
+                                        props.type === "handle" ? 
+                                        <Button variant="contained" color={formState.activeStep === steps.length - 1 ? "primary" : "inherit"} sx={anyButtonStyles} onClick={handleNext} disabled={formState.activeStep === steps.length - 1 ? loadNewOffer : false}>
+                                            {formState.activeStep === steps.length - 1 ? t('createOffer') : t('nextStep')}
+                                        </Button> : null
+                                    }
                                 </Box>
                             </React.Fragment>
                         )}
@@ -1872,6 +1939,32 @@ function GeneratePriceOffer(props: any) {
                     options={formState.options} 
                     closeModal={() => { setModalCompare(false); }} 
                 />
+            </BootstrapDialog>
+
+            {/* Create file */}
+            <BootstrapDialog open={modalFile} onClose={() => setModalFile(false)} maxWidth="sm" fullWidth>
+                <BootstrapDialogTitle id="custom-dialog-title99" onClose={() => setModalFile(false)}>
+                    <b>{t('createRowFile')}</b>
+                </BootstrapDialogTitle>
+                <DialogContent dividers>
+                    <Grid container spacing={2}>
+                        <Grid item xs={12}>
+                            <InputLabel htmlFor="fileSent" sx={inputLabelStyles}>{t('file')}</InputLabel>
+                            <MuiFileInput
+                                id="fileSent" size="small" 
+                                variant="outlined" multiple fullWidth
+                                value={fileValue} sx={{ mt: 1 }} 
+                                onChange={(newValue: any) => { 
+                                    setFileValue(newValue); 
+                                }}
+                            />
+                        </Grid>
+                    </Grid>
+                </DialogContent>
+                <DialogActions>
+                    <Button variant="contained" onClick={() => { uploadFile(); }} sx={actionButtonStyles}>{t('validate')}</Button>
+                    <Button variant="contained" onClick={() => setModalFile(false)} sx={buttonCloseStyles}>{t('close')}</Button>
+                </DialogActions>
             </BootstrapDialog>
         </Grid>
     );

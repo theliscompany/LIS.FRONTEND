@@ -22,7 +22,7 @@ import CompanySearch from '../shared/CompanySearch';
 import NewContact from './NewContact';
 import { actionButtonStyles, inputLabelStyles, gridStyles, BootstrapDialog, BootstrapDialogTitle, buttonCloseStyles, datetimeStyles, BootstrapInput, whiteButtonStyles } from '../../utils/misc/styles';
 import NewService from '../shared/NewService';
-import { containerPackages } from '../../utils/constants';
+import { containerPackages, currencyOptions } from '../../utils/constants';
 import { compareServices, getAccessToken } from '../../utils/functions';
 
 function createGetRequestUrl(variable1: number, variable2: number, variable3: number) {
@@ -87,13 +87,6 @@ function NewMiscellaneous(props: any) {
         return <Popper {...props} ref={ref} placement="top-start" />;
     });
       
-    const currencyOptions = [
-        { code: "EUR", label: 'Euro - €' },
-        { code: 'GBP', label: 'British pound - £' },
-        { code: "USD", label: 'Dollar - $' },
-        { code: "FCFA", label: 'Franc CFA - FCFA' }
-    ]
-    
     function calculateTotal(data: any) {
         // Initialize total price and package name
         let total = 0;

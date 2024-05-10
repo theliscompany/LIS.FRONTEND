@@ -10,7 +10,7 @@ import { useAccount, useMsal } from '@azure/msal-react';
 import { Anchor } from '@mui/icons-material';
 import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import { CategoryEnum } from '../../utils/constants';
+import { CategoryEnum, currencyOptions, haulageTypeOptions } from '../../utils/constants';
 import AutocompleteSearch from '../shared/AutocompleteSearch';
 import CompanySearch from '../shared/CompanySearch';
 import { Dayjs } from 'dayjs';
@@ -38,21 +38,6 @@ function NewHaulage(props: any) {
 
     const context = useAuthorizedBackendApi();
     const { t } = useTranslation();
-    
-    const currencyOptions = [
-        { code: "EUR", label: 'Euro - €' },
-        { code: 'GBP', label: 'British pound - £' },
-        { code: "USD", label: 'Dollar - $' },
-        { code: "FCFA", label: 'Franc CFA - FCFA' }
-    ]
-
-    const haulageTypeOptions = [
-        { value: "On trailer, direct loading", label: t('haulageType1') },
-        { value: "On trailer, Loading with Interval", label: t('haulageType2') },
-        { value: "Side loader, direct loading", label: t('haulageType3') },
-        { value: "Side loader, Loading with Interval, from trailer to floor", label: t('haulageType4') },
-        { value: "Side loader, Loading with Interval, from floor to trailer", label: t('haulageType5') }
-    ];
     
     const createHaulage = async () => {
         setLoad(true);
@@ -217,7 +202,7 @@ function NewHaulage(props: any) {
                             fullWidth
                         >
                             {haulageTypeOptions.map((elm: any, i: number) => (
-                                <option key={"haulageElm-"+i} value={elm.value}>{elm.label}</option>
+                                <option key={"haulageElm-"+i} value={elm.value}>{t(elm.label)}</option>
                             ))}
                         </NativeSelect>
                     </Grid>

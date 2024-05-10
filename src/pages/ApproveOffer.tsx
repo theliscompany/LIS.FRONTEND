@@ -74,7 +74,7 @@ function ApproveOffer(props: any) {
     }
     
     const acceptOffer = async () => {
-        if(context) {
+        if(account && instance && context) {
             const body: any = {
                 id: id,
                 newStatus: "Accepted",
@@ -93,7 +93,7 @@ function ApproveOffer(props: any) {
     }
 
     const rejectOffer = async () => {
-        if(context) {
+        if(account && instance && context) {
             const body: any = {
                 id: id,
                 newStatus: "Rejected",

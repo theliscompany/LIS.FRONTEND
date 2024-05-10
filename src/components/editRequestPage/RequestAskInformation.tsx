@@ -22,7 +22,7 @@ function RequestAskInformation(props: any) {
         if (mailContent !== "") {
             if (account && instance && context) {
                 var dataSent = { "content": mailContent, "requestQuoteId": props.id, "subject": mailSubject, "noteType": "InformationRequest", email: props.email, "idUser": account?.username };
-                const response = await (context?.service as BackendService<any>).post(protectedResources.apiLisQuotes.endPoint+"/RequestQuoteNotes", dataSent);
+                const response = await (context?.service as BackendService<any>).postWithToken(protectedResources.apiLisQuotes.endPoint+"/RequestQuoteNotes", dataSent, context.tokenLogin);
                 if (response !== null) {
                     props.closeModal();
                     enqueueSnackbar(t('messageSuccessSent'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });

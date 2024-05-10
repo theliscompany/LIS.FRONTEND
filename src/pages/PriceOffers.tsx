@@ -8,35 +8,12 @@ import { useAuthorizedBackendApi } from '../api/api';
 import { protectedResources } from '../config/authConfig';
 import { BackendService } from '../utils/services/fetch';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { BootstrapDialog, BootstrapDialogTitle, actionButtonStyles, buttonCloseStyles, sizingStyles } from '../utils/misc/styles';
+import { BootstrapDialog, BootstrapDialogTitle, buttonCloseStyles, sizingStyles, whiteButtonStyles } from '../utils/misc/styles';
 import { NavLink } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { DataGrid, GridColDef, GridRenderCellParams, GridValueFormatterParams } from '@mui/x-data-grid';
 import { Edit, RestartAltOutlined, Visibility } from '@mui/icons-material';
-
-function colors(value: string) {
-    switch (value) {
-        case "Pending": 
-            return "warning";
-            break;
-        case "Accepted":
-            return "success";
-            break;
-        case "Rejected": 
-            return "secondary";
-            break;
-        case "No response": 
-            return "default";
-            break;
-    }
-}
-
-function statusLabel(value: string) {
-    if (value === "Accepted")
-        return "Approved";
-    else
-        return value;
-}
+import { statusLabel, colorsTypes } from '../utils/functions';
 
 function PriceOffers() {
     const [load, setLoad] = useState<boolean>(true);
@@ -52,25 +29,27 @@ function PriceOffers() {
     const { t } = useTranslation();
     
     const columnsOffers: GridColDef[] = [
-        { field: 'requestQuoteId', headerName: t('email'), renderCell: (params: GridRenderCellParams) => {
+        { field: 'requestQuoteId', headerName: t('id'), flex: 0.5 },
+        { field: 'emailUser', headerName: t('email'), renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box>
-                    <Link to={"/admin/request/"+params.row.requestQuoteId}>{params.row.emailUser}</Link>
+                    <Link to={"/admin/handle-request/"+params.row.requestQuoteId}>{params.row.emailUser}</Link>
                 </Box>
             );
         }, minWidth: 200, flex: 1 },
         { field: 'created', headerName: t('created'), valueFormatter: (params: GridValueFormatterParams) => `${(new Date(params.value)).toLocaleString().slice(0,10)}`, minWidth: 100, flex: 0.5 },
-        { field: 'xxx', headerName: t('departurePort'), renderCell: (params: GridRenderCellParams) => {
-            return (<Box>{params.row.seaFreight.departurePortName}</Box>);
-        }, minWidth: 100, flex: 0.75 },
-        { field: 'yyy', headerName: t('arrivalPort'), renderCell: (params: GridRenderCellParams) => {
-            return (<Box>{params.row.seaFreight.destinationPortName}</Box>);
-        }, minWidth: 100, flex: 0.75 },
-        { field: 'zzz', headerName: t('status'), renderCell: (params: GridRenderCellParams) => {
-            return (<Box><Chip label={statusLabel(params.row.status)} color={colors(params.row.status)} /></Box>);
+        { field: 'haulageType', headerName: t('trip'), minWidth: 125, flex: 1.5 },
+        // { field: 'xxx', headerName: t('departurePort'), renderCell: (params: GridRenderCellParams) => {
+        //     return (<Box>{params.row.seaFreight.departurePortName}</Box>);
+        // }, minWidth: 100, flex: 0.75 },
+        // { field: 'yyy', headerName: t('arrivalPort'), renderCell: (params: GridRenderCellParams) => {
+        //     return (<Box>{params.row.seaFreight.destinationPortName}</Box>);
+        // }, minWidth: 100, flex: 0.75 },
+        { field: 'status', headerName: t('status'), renderCell: (params: GridRenderCellParams) => {
+            return (<Box><Chip label={statusLabel(params.row.status)} color={colorsTypes(params.row.status)} /></Box>);
         }, minWidth: 100, flex: 0.5 },
-        { field: 'qqq', headerName: t('clientApproval'), renderCell: (params: GridRenderCellParams) => {
-            return (<Box>{params.row.status !== "Accepted" && params.row.clientApproval === "Pending" ? <Chip label={t('noEmail')} /> : <Chip label={params.row.clientApproval} color={colors(params.row.clientApproval)} />}</Box>);
+        { field: 'clientApproval', headerName: t('clientApproval'), renderCell: (params: GridRenderCellParams) => {
+            return (<Box>{params.row.status !== "Accepted" && params.row.clientApproval === "Pending" ? <Chip label={t('noEmail')} /> : <Chip label={params.row.clientApproval} color={colorsTypes(params.row.clientApproval)} />}</Box>);
         }, minWidth: 100, flex: 0.5 },
         { field: 'www', headerName: t('Actions'), renderCell: (params: GridRenderCellParams) => {
             return (
@@ -78,7 +57,7 @@ function PriceOffers() {
                     <IconButton component={NavLink} to={"/admin/quote-offers/"+params.row.id} sx={{ mr: 1 }} title="Handle the offer">
                         <Visibility fontSize="small" />
                     </IconButton>
-                    <IconButton component={NavLink} to={"/admin/request/"+params.row.requestQuoteId} title="View the request" sx={{ mr: 1 }}>
+                    <IconButton component={NavLink} to={"/admin/handle-request/"+params.row.requestQuoteId} title="View the request" sx={{ mr: 1 }}>
                         <Edit fontSize="small" />
                     </IconButton>
                     <IconButton onClick={() => { setCurrentId(params.row.id); setModal(true); }}>
@@ -107,7 +86,10 @@ function PriceOffers() {
                     setLoad(false);
                 }
             }
-            console.log(response);
+            else {
+                setLoad(false);
+            }
+            // console.log(response);
         }
     }
     
@@ -134,7 +116,7 @@ function PriceOffers() {
                 <Typography variant="h5" sx={{mt: {xs: 4, md: 1.5, lg: 1.5 }}} px={5}><b>{t('generatedPriceOffers')}</b></Typography>
                 <Grid container spacing={2} mt={0} px={5}>
                     <Grid item xs={12}>
-                        <Button variant="contained" sx={actionButtonStyles} onClick={() => { getPriceOffers(); }}>
+                        <Button color="inherit" variant="contained" sx={whiteButtonStyles} style={{ float: "right" }} onClick={() => { getPriceOffers(); }}>
                             {t('reload')} <RestartAltOutlined sx={{ ml: 0.5, pb: 0.45, justifyContent: "center", alignItems: "center" }} fontSize="small" />
                         </Button>
                     </Grid>

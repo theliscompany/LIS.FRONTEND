@@ -1,5 +1,5 @@
 import { Grid, Accordion, AccordionSummary, Typography, AccordionDetails, InputLabel, Autocomplete, TextField, Skeleton, Button, ListItem, IconButton, ListItemText, NativeSelect } from '@mui/material';
-import { t } from 'i18next';
+// import { t } from 'i18next';
 import { MuiTelInput } from 'mui-tel-input';
 import { inputLabelStyles, BootstrapInput, whiteButtonStyles } from '../../utils/misc/styles';
 import AutocompleteSearch from '../shared/AutocompleteSearch';
@@ -8,13 +8,21 @@ import { Delete, ExpandMore } from '@mui/icons-material';
 import { enqueueSnackbar } from 'notistack';
 import { protectedResources } from '../../config/authConfig';
 import { BackendService } from '../../utils/services/fetch';
+import { useTranslation } from 'react-i18next';
+import { useAccount, useMsal } from '@azure/msal-react';
+import { useAuthorizedBackendApi } from '../../api/api';
 
 function RequestForm(props: any) {
+    const { t } = useTranslation();
     
+    const { instance, accounts } = useMsal();
+	const account = useAccount(accounts[0] || {});
+	const context = useAuthorizedBackendApi();
+	
     const assignManager = async () => {
         if (props.assignedManager !== null && props.assignedManager !== undefined && props.assignedManager !== "") {
-            if (props.context && props.account) {
-                const response = await (props.context?.service as BackendService<any>).putWithToken(protectedResources.apiLisQuotes.endPoint+"/Assignee/"+props.id+"/"+props.assignedManager, [], props.tempToken);
+            if (account && instance && context) {
+                const response = await (context?.service as BackendService<any>).putWithToken(protectedResources.apiLisQuotes.endPoint+"/Assignee/"+props.id+"/"+props.assignedManager, [], context.tokenLogin);
                 if (response !== null) {
                     enqueueSnackbar(t('managerAssignedRequest'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
                 }
@@ -29,8 +37,8 @@ function RequestForm(props: any) {
     }
 
     const removeManager = async () => {
-        if (props.context && props.account) {
-            const response = await (props.context?.service as BackendService<any>).putWithToken(protectedResources.apiLisQuotes.endPoint+"/Assignee/unassign/"+props.id, [], props.tempToken);
+        if (account && instance && context) {
+            const response = await (context?.service as BackendService<any>).putWithToken(protectedResources.apiLisQuotes.endPoint+"/Assignee/unassign/"+props.id, [], context.tokenLogin);
             if (response !== null) {
                 enqueueSnackbar(t('managerRemovedRequest'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
                 props.setAssignedManager("");

@@ -8,12 +8,10 @@ import { enqueueSnackbar } from 'notistack';
 import { loginRequest, protectedResources } from '../../config/authConfig';
 import { BackendService } from '../../utils/services/fetch';
 import { useAccount, useMsal } from '@azure/msal-react';
-import { getAccessToken } from '../../utils/functions';
 
 function RequestListNotes(props: any) {
     const [loadNotes, setLoadNotes] = useState<boolean>(true);
     const [notes, setNotes] = useState<any>(null);
-    const [tempToken, setTempToken] = useState<string>("");
     
     const context = useAuthorizedBackendApi();
     const { t } = useTranslation();

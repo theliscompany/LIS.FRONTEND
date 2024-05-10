@@ -32,6 +32,8 @@ import MasterDataProducts from './pages/MasterDataProducts';
 import MasterDataPorts from './pages/MasterDataPorts';
 import MasterDataContacts from './pages/MasterDataContacts';
 import MasterDataFiles from './pages/MasterDataFiles';
+import ValidatedRequests from './pages/ValidatedRequests';
+import HandleRequest from './pages/HandleRequest';
 
 const App = () => {
   return (
@@ -47,8 +49,10 @@ const App = () => {
 							<Route path="search/:search" element={<RequestsSearch />} />
 							<Route path="search" element={<RequestsSearch />} />
 							<Route path="request/:id" element={<Request />} />
+							<Route path="handle-request/:id" element={<HandleRequest />} />
 							<Route path="new-request" element={<NewRequest />} />
 							<Route path="my-requests" element={<MyRequests />} />
+							<Route path="pending-requests" element={<ValidatedRequests />} />
 							<Route path="quote-offers" element={<PriceOffers />} />
 							<Route path="quote-offers/:id" element={<ManagePriceOffer />} />
 							<Route path="users" element={<UsersAssignment />} />

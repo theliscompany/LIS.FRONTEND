@@ -11,7 +11,7 @@ import { AuthenticationResult } from '@azure/msal-browser';
 import { Anchor } from '@mui/icons-material';
 import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import { CategoryEnum } from '../../utils/constants';
+import { CategoryEnum, currencyOptions } from '../../utils/constants';
 import CompanySearch from '../shared/CompanySearch';
 import { Dayjs } from 'dayjs';
 import NewContact from './NewContact';
@@ -44,13 +44,6 @@ function NewSeafreight(props: any) {
     const context = useAuthorizedBackendApi();
     const { t } = useTranslation();
     
-    const currencyOptions = [
-        { code: "EUR", label: 'Euro - €' },
-        { code: 'GBP', label: 'British pound - £' },
-        { code: "USD", label: 'Dollar - $' },
-        { code: "FCFA", label: 'Franc CFA - FCFA' }
-    ]
-
     useEffect(() => {
         getServices(props.token);
     }, [account, instance, account]);
@@ -104,7 +97,7 @@ function NewSeafreight(props: any) {
                 };
 
                 console.log(dataSent);
-                const response = await (context?.service as BackendService<any>).postWithToken(protectedResources.apiLisPricing.endPoint+"/SeaFreight/SeaFreight", dataSent, props.token);
+                const response = await (context?.service as BackendService<any>).postWithToken(protectedResources.apiLisPricing.endPoint+"/SeaFreight/SeaFreight", dataSent, context.tokenPricing);
                 if (response !== null && response !== undefined) {
                     props.closeModal();
                     enqueueSnackbar(t('successCreated'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });

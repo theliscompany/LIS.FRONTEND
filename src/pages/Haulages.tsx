@@ -8,7 +8,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { SnackbarProvider, enqueueSnackbar } from 'notistack';
 import { useTranslation } from 'react-i18next';
 import { useAuthorizedBackendApi } from '../api/api';
-import { crmRequest, pricingRequest, protectedResources, transportRequest } from '../config/authConfig';
+import { protectedResources } from '../config/authConfig';
 import { BackendService } from '../utils/services/fetch';
 import { GridColDef, GridValueFormatterParams, GridRenderCellParams, DataGrid, GridValueGetterParams, GridColumnHeaderParams } from '@mui/x-data-grid';
 import { BootstrapDialog, BootstrapDialogTitle, BootstrapInput, actionButtonStyles, buttonCloseStyles, datetimeStyles, gridStyles, inputIconStyles, inputLabelStyles } from '../utils/misc/styles';
@@ -16,15 +16,13 @@ import CompanySearch from '../components/shared/CompanySearch';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import dayjs, { Dayjs } from 'dayjs';
-import { AuthenticationResult } from '@azure/msal-browser';
 import { useMsal, useAccount } from '@azure/msal-react';
-import { CategoryEnum, containerPackages } from '../utils/constants';
+import { CategoryEnum, containerPackages, currencyOptions, haulageTypeOptions } from '../utils/constants';
 import AutocompleteSearch from '../components/shared/AutocompleteSearch';
 import RequestPriceHaulage from '../components/editRequestPage/RequestPriceHaulage';
 import { Anchor, Mail } from '@mui/icons-material';
 import NewContact from '../components/editRequestPage/NewContact';
-import { compareServices, extractCityAndPostalCode, flattenData2, getAccessToken, hashCode, parseLocation, parseLocation2, reverseTransformArray, sortHauliersByName, transformArray } from '../utils/functions';
-import ServicesTable from '../components/seafreightPage/ServicesTable';
+import { compareServices, extractCityAndPostalCode, parseLocation2, sortHauliersByName } from '../utils/functions';
 import NewService from '../components/shared/NewService';
 import NewPort from '../components/shared/NewPort';
 
@@ -52,7 +50,6 @@ function createGetRequestUrl(variable1: number, variable2: number, variable3: st
 function Haulages() {
     const [load, setLoad] = useState<boolean>(true);
     const [loadEdit, setLoadEdit] = useState<boolean>(false);
-    const [loadMiscs, setLoadMiscs] = useState<boolean>(false);
     const [modal, setModal] = useState<boolean>(false);
     const [modal2, setModal2] = useState<boolean>(false);
     const [modal5, setModal5] = useState<boolean>(false);
@@ -85,8 +82,6 @@ function Haulages() {
     const [containerTypes, setContainerTypes] = useState<any>([]);
     const [comment, setComment] = useState<string>("");
 
-    const [tempToken, setTempToken] = useState<string>("");
-    
     const [servicesData2, setServicesData2] = useState<any>([]);
     const [miscellaneousId, setMiscellaneousId] = useState<string>("");
     const [allServices, setAllServices] = useState<any>(null);
@@ -97,21 +92,6 @@ function Haulages() {
     const { instance, accounts } = useMsal();
     const account = useAccount(accounts[0] || {});
     const context = useAuthorizedBackendApi();
-    
-    const currencyOptions = [
-        { code: "EUR", label: 'Euro - €' },
-        { code: 'GBP', label: 'British pound - £' },
-        { code: "USD", label: 'Dollar - $' },
-        { code: "FCFA", label: 'Franc CFA - FCFA' }
-    ]
-
-    const haulageTypeOptions = [
-        { value: "On trailer, direct loading", label: t('haulageType1') },
-        { value: "On trailer, Loading with Interval", label: t('haulageType2') },
-        { value: "Side loader, direct loading", label: t('haulageType3') },
-        { value: "Side loader, Loading with Interval, from trailer to floor", label: t('haulageType4') },
-        { value: "Side loader, Loading with Interval, from floor to trailer", label: t('haulageType5') }
-    ];
     
     const columnsHaulages: GridColDef[] = [
         { field: 'haulierName', headerName: t('haulier'), minWidth: 125, flex: 1.4 },
@@ -635,7 +615,7 @@ function Haulages() {
                                     fullWidth
                                 >
                                     {haulageTypeOptions.map((elm: any, i: number) => (
-                                        <option key={"haulageElm-"+i} value={elm.value}>{elm.label}</option>
+                                        <option key={"haulageElm-"+i} value={elm.value}>{t(elm.label)}</option>
                                     ))}
                                 </NativeSelect>
                             </Grid>

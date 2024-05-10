@@ -19,7 +19,7 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import dayjs, { Dayjs } from 'dayjs';
 import { useMsal, useAccount } from '@azure/msal-react';
-import { containerPackages } from '../utils/constants';
+import { containerPackages, currencyOptions } from '../utils/constants';
 import NewContact from '../components/editRequestPage/NewContact';
 import { Anchor } from '@mui/icons-material';
 import NewService from '../components/shared/NewService';
@@ -86,13 +86,6 @@ function Miscellaneous() {
         return <Popper {...props} ref={ref} placement="top-start" />;
     });
       
-    const currencyOptions = [
-        { code: "EUR", label: 'Euro - €' },
-        { code: 'GBP', label: 'British pound - £' },
-        { code: "USD", label: 'Dollar - $' },
-        { code: "FCFA", label: 'Franc CFA - FCFA' }
-    ]
-    
     function calculateTotal(data: any) {
         // Initialize total price and package name
         let total = 0;

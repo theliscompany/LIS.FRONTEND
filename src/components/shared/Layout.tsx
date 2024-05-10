@@ -15,20 +15,17 @@ import MenuIcon from '@mui/icons-material/Menu';
 import PeopleIcon from '@mui/icons-material/PeopleAltOutlined';
 import AddIcon from '@mui/icons-material/AddCircleOutline';
 import HomeIcon from '@mui/icons-material/HomeOutlined';
-import FirstPageIcon from '@mui/icons-material/FirstPage';
 import DirectionsBoatIcon from '@mui/icons-material/DirectionsBoatOutlined';
 import LocalShippingIcon from '@mui/icons-material/LocalShippingOutlined';
 import Inventory2Icon from "@mui/icons-material/Inventory2Outlined"
 import AssignmentOutlinedIcon from '@mui/icons-material/AssignmentOutlined';
 import RequestQuoteOutlinedIcon from '@mui/icons-material/RequestQuoteOutlined';
 import TextSnippetOutlinedIcon from '@mui/icons-material/TextSnippetOutlined';
-import StarBorder from '@mui/icons-material/StarBorder';
 import Avatar from '@mui/material/Avatar';
 import MenuItem from '@mui/material/MenuItem';
 import Menu from '@mui/material/Menu';
 import IconButton from '@mui/material/IconButton';
 import Button from '@mui/material/Button';
-import LastPageIcon from '@mui/icons-material/LastPage';
 import AutoFixHighIcon from '@mui/icons-material/AutoFixHighOutlined';
 import PortraitIcon from '@mui/icons-material/Portrait';
 import GroupsIcon from '@mui/icons-material/Groups';
@@ -45,7 +42,7 @@ import Search from '@mui/icons-material/Search';
 
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Anchor, AnchorOutlined, AttachFileOutlined, ContactsOutlined, ExpandLess, ExpandMore, FolderOutlined, Inventory, InventoryOutlined, RoomService, RoomServiceOutlined } from '@mui/icons-material';
+import { Anchor, AnchorOutlined, AttachFileOutlined, ContactsOutlined, ExpandLess, ExpandMore, FolderOutlined, Inventory, InventoryOutlined, RoomService, RoomServiceOutlined, TaskAltOutlined } from '@mui/icons-material';
 
 function stringToColor(string: string) {
     let hash = 0;
@@ -366,19 +363,19 @@ function Layout(props: {children?: React.ReactNode}) {
                                         <ListItemIcon className="cs-listitemicon">
                                             <PortraitIcon fontSize="small" />
                                         </ListItemIcon>
-                                        <ListItemText primary={t('viewProfile')} primaryTypographyProps={{ fontSize: 14 }} />
+                                        <ListItemText primary={t('viewProfile')} primaryTypographyProps={{ fontSize: 13 }} />
                                     </MenuItem>
                                     <MenuItem dense key={"x1-My Requests"} title={t('myRequests')} component="a" href="/admin/my-requests">
                                         <ListItemIcon className="cs-listitemicon">
                                             <AutoFixHighIcon fontSize="small" />
                                         </ListItemIcon>
-                                        <ListItemText primary={t('myRequests')} primaryTypographyProps={{ fontSize: 14 }} />
+                                        <ListItemText primary={t('myRequests')} primaryTypographyProps={{ fontSize: 13 }} />
                                     </MenuItem>
                                     <MenuItem dense key={"x1-Invite Members"} title={t('inviteMembers')} onClick={handleCloseUserMenu}>
                                         <ListItemIcon className="cs-listitemicon">
                                             <GroupsIcon fontSize="small" />
                                         </ListItemIcon>
-                                        <ListItemText primary={t('inviteMembers')} primaryTypographyProps={{ fontSize: 14 }} />
+                                        <ListItemText primary={t('inviteMembers')} primaryTypographyProps={{ fontSize: 13 }} />
                                     </MenuItem>
                                     <Divider />
                                     <MenuItem dense key={"x1-Logout"} title="Logout" onClick={handleLogout}>
@@ -415,7 +412,7 @@ function Layout(props: {children?: React.ReactNode}) {
                                         <ListItemIcon className="cs-listitemicon">
                                             <HomeIcon fontSize="small" />
                                         </ListItemIcon>
-                                        <ListItemText primary={t('overview')} primaryTypographyProps={{ fontSize: 14 }} />
+                                        <ListItemText primary={t('overview')} primaryTypographyProps={{ fontSize: 13 }} />
                                     </ListItemButton>
                                 </DarkTooltip>
                                 </ListItem>
@@ -427,7 +424,7 @@ function Layout(props: {children?: React.ReactNode}) {
                                         <ListItemIcon className="cs-listitemicon">
                                             <PeopleIcon fontSize="small" />
                                         </ListItemIcon>
-                                        <ListItemText primary={t('users')} primaryTypographyProps={{ fontSize: 14 }} />
+                                        <ListItemText primary={t('users')} primaryTypographyProps={{ fontSize: 13 }} />
                                     </ListItemButton>
                                 </DarkTooltip>
                                 </ListItem>
@@ -437,7 +434,7 @@ function Layout(props: {children?: React.ReactNode}) {
                                     <ListItemIcon className="cs-listitemicon">
                                         <AssignmentOutlinedIcon fontSize="small" />
                                     </ListItemIcon>
-                                    <ListItemText primary={t('requests')} primaryTypographyProps={{ fontSize: 14 }} />
+                                    <ListItemText primary={t('requests')} primaryTypographyProps={{ fontSize: 13 }} />
                                     {openRequests ? <ExpandLess /> : <ExpandMore />}
                                 </ListItemButton>
                             </ListItem>
@@ -450,7 +447,7 @@ function Layout(props: {children?: React.ReactNode}) {
                                                 <ListItemIcon className="cs-listitemicon">
                                                     <AddIcon fontSize="small" />
                                                 </ListItemIcon>
-                                                <ListItemText primary={t('newRequest')} primaryTypographyProps={{ fontSize: 14 }} />
+                                                <ListItemText primary={t('newRequest')} primaryTypographyProps={{ fontSize: 13 }} />
                                             </ListItemButton>
                                         </DarkTooltip>
                                         </ListItem>
@@ -462,7 +459,7 @@ function Layout(props: {children?: React.ReactNode}) {
                                                 <ListItemIcon className="cs-listitemicon">
                                                     <AutoFixHighIcon fontSize="small" />
                                                 </ListItemIcon>
-                                                <ListItemText primary={t('myRequests')} primaryTypographyProps={{ fontSize: 14 }} />
+                                                <ListItemText primary={t('myRequests')} primaryTypographyProps={{ fontSize: 13 }} />
                                             </ListItemButton>
                                         </DarkTooltip>
                                         </ListItem>
@@ -474,7 +471,19 @@ function Layout(props: {children?: React.ReactNode}) {
                                                 <ListItemIcon className="cs-listitemicon">
                                                     <NotificationsIcon fontSize="small" />
                                                 </ListItemIcon>
-                                                <ListItemText primary={t('requests')} primaryTypographyProps={{ fontSize: 14 }} />
+                                                <ListItemText primary={t('requests')} primaryTypographyProps={{ fontSize: 13 }} />
+                                            </ListItemButton>
+                                        </DarkTooltip>
+                                        </ListItem>
+                                    </NavLink>
+                                    <NavLink to="/admin/pending-requests" className={({ isActive }) => isActive ? "cs-navlink-active" : "cs-navlink"}>
+                                        <ListItem className="cs-listitem" key={"Pending requests"} disablePadding disableGutters sx={{ pl: 2 }}>
+                                        <DarkTooltip title={t('pendingRequests')} placement="right" arrow>
+                                            <ListItemButton className="cs-listitembutton">
+                                                <ListItemIcon className="cs-listitemicon">
+                                                    <TaskAltOutlined fontSize="small" />
+                                                </ListItemIcon>
+                                                <ListItemText primary={t('pendingRequests')} primaryTypographyProps={{ fontSize: 13 }} />
                                             </ListItemButton>
                                         </DarkTooltip>
                                         </ListItem>
@@ -487,7 +496,7 @@ function Layout(props: {children?: React.ReactNode}) {
                                     <ListItemIcon className="cs-listitemicon">
                                         <RequestQuoteOutlinedIcon fontSize="small" />
                                     </ListItemIcon>
-                                    <ListItemText primary={t('pricing')} primaryTypographyProps={{ fontSize: 14 }} />
+                                    <ListItemText primary={t('pricing')} primaryTypographyProps={{ fontSize: 13 }} />
                                     {openPrices ? <ExpandLess /> : <ExpandMore />}
                                 </ListItemButton>
                             </ListItem>
@@ -500,7 +509,7 @@ function Layout(props: {children?: React.ReactNode}) {
                                                 <ListItemIcon className="cs-listitemicon">
                                                     <LocalShippingIcon fontSize="small" />
                                                 </ListItemIcon>
-                                                <ListItemText primary={t('haulages')} primaryTypographyProps={{ fontSize: 14 }} />
+                                                <ListItemText primary={t('haulages')} primaryTypographyProps={{ fontSize: 13 }} />
                                             </ListItemButton>
                                         </DarkTooltip>
                                         </ListItem>
@@ -512,7 +521,7 @@ function Layout(props: {children?: React.ReactNode}) {
                                                 <ListItemIcon className="cs-listitemicon">
                                                     <DirectionsBoatIcon fontSize="small" />
                                                 </ListItemIcon>
-                                                <ListItemText primary={t('seafreights')} primaryTypographyProps={{ fontSize: 14 }} />
+                                                <ListItemText primary={t('seafreights')} primaryTypographyProps={{ fontSize: 13 }} />
                                             </ListItemButton>
                                         </DarkTooltip>
                                         </ListItem>
@@ -524,7 +533,7 @@ function Layout(props: {children?: React.ReactNode}) {
                                                 <ListItemIcon className="cs-listitemicon">
                                                     <Inventory2Icon fontSize="small" />
                                                 </ListItemIcon>
-                                                <ListItemText primary={t('miscellaneous')} primaryTypographyProps={{ fontSize: 14 }} />
+                                                <ListItemText primary={t('miscellaneous')} primaryTypographyProps={{ fontSize: 13 }} />
                                             </ListItemButton>
                                         </DarkTooltip>
                                         </ListItem>
@@ -539,7 +548,7 @@ function Layout(props: {children?: React.ReactNode}) {
                                         <ListItemIcon className="cs-listitemicon">
                                             <PortraitIcon fontSize="small" />
                                         </ListItemIcon>
-                                        <ListItemText primary={t('priceOffers')} primaryTypographyProps={{ fontSize: 14 }} />
+                                        <ListItemText primary={t('priceOffers')} primaryTypographyProps={{ fontSize: 13 }} />
                                     </ListItemButton>
                                 </DarkTooltip>
                                 </ListItem>
@@ -551,7 +560,7 @@ function Layout(props: {children?: React.ReactNode}) {
                                         <ListItemIcon className="cs-listitemicon">
                                             <TextSnippetOutlinedIcon fontSize="small" />
                                         </ListItemIcon>
-                                        <ListItemText primary={t('templates')} primaryTypographyProps={{ fontSize: 14 }} />
+                                        <ListItemText primary={t('templates')} primaryTypographyProps={{ fontSize: 13 }} />
                                     </ListItemButton>
                                 </DarkTooltip>
                                 </ListItem>
@@ -562,7 +571,7 @@ function Layout(props: {children?: React.ReactNode}) {
                                     <ListItemIcon className="cs-listitemicon">
                                         <FolderOutlined fontSize="small" />
                                     </ListItemIcon>
-                                    <ListItemText primary={t('masterdata')} primaryTypographyProps={{ fontSize: 14 }} />
+                                    <ListItemText primary={t('masterdata')} primaryTypographyProps={{ fontSize: 13 }} />
                                     {openMasterdata ? <ExpandLess /> : <ExpandMore />}
                                 </ListItemButton>
                             </ListItem>
@@ -575,7 +584,7 @@ function Layout(props: {children?: React.ReactNode}) {
                                                 <ListItemIcon className="cs-listitemicon">
                                                     <RoomServiceOutlined fontSize="small" />
                                                 </ListItemIcon>
-                                                <ListItemText primary={t('services')} primaryTypographyProps={{ fontSize: 14 }} />
+                                                <ListItemText primary={t('services')} primaryTypographyProps={{ fontSize: 13 }} />
                                             </ListItemButton>
                                         </DarkTooltip>
                                         </ListItem>
@@ -587,7 +596,7 @@ function Layout(props: {children?: React.ReactNode}) {
                                                 <ListItemIcon className="cs-listitemicon">
                                                     <InventoryOutlined fontSize="small" />
                                                 </ListItemIcon>
-                                                <ListItemText primary={t('products')} primaryTypographyProps={{ fontSize: 14 }} />
+                                                <ListItemText primary={t('products')} primaryTypographyProps={{ fontSize: 13 }} />
                                             </ListItemButton>
                                         </DarkTooltip>
                                         </ListItem>
@@ -599,7 +608,7 @@ function Layout(props: {children?: React.ReactNode}) {
                                                 <ListItemIcon className="cs-listitemicon">
                                                     <AnchorOutlined fontSize="small" />
                                                 </ListItemIcon>
-                                                <ListItemText primary={t('ports')} primaryTypographyProps={{ fontSize: 14 }} />
+                                                <ListItemText primary={t('ports')} primaryTypographyProps={{ fontSize: 13 }} />
                                             </ListItemButton>
                                         </DarkTooltip>
                                         </ListItem>
@@ -611,7 +620,7 @@ function Layout(props: {children?: React.ReactNode}) {
                                                 <ListItemIcon className="cs-listitemicon">
                                                     <ContactsOutlined fontSize="small" />
                                                 </ListItemIcon>
-                                                <ListItemText primary={t('contacts')} primaryTypographyProps={{ fontSize: 14 }} />
+                                                <ListItemText primary={t('contacts')} primaryTypographyProps={{ fontSize: 13 }} />
                                             </ListItemButton>
                                         </DarkTooltip>
                                         </ListItem>
@@ -623,7 +632,7 @@ function Layout(props: {children?: React.ReactNode}) {
                                                 <ListItemIcon className="cs-listitemicon">
                                                     <AttachFileOutlined fontSize="small" />
                                                 </ListItemIcon>
-                                                <ListItemText primary={t('files')} primaryTypographyProps={{ fontSize: 14 }} />
+                                                <ListItemText primary={t('files')} primaryTypographyProps={{ fontSize: 13 }} />
                                             </ListItemButton>
                                         </DarkTooltip>
                                         </ListItem>
@@ -641,7 +650,7 @@ function Layout(props: {children?: React.ReactNode}) {
                                         <ListItemIcon className="cs-listitemicon">
                                             {open ? <FirstPageIcon fontSize="small" /> : <LastPageIcon fontSize="small" />}
                                         </ListItemIcon>
-                                        <ListItemText primary={t('collapse')} primaryTypographyProps={{ fontSize: 14 }} />
+                                        <ListItemText primary={t('collapse')} primaryTypographyProps={{ fontSize: 13 }} />
                                     </ListItemButton>
                                 </DarkTooltip>
                             </ListItem>
