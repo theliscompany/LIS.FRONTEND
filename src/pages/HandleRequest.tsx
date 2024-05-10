@@ -21,7 +21,7 @@ import RequestFormHeader from '../components/editRequestPage/RequestFormHeader';
 
 // let packingOptions = ["Unit", "Bundle", "Bag", "Pallet", "Carton", "Lot", "Crate"];
 
-function Request() {
+function HandleRequest() {
     const [load, setLoad] = useState<boolean>(false);
     const [loadAssignees, setLoadAssignees] = useState<boolean>(true);
     const [requestData, setRequestData] = useState<any>(null);
@@ -333,7 +333,7 @@ function Request() {
                                 ports={ports} products={products}
                                 ports1={ports1} ports2={ports2}
                                 containers={containers} status={status}
-                                requestData={requestData} type="standard"
+                                requestData={requestData} type="handle"
                             />
                             : <Grid item xs={12}><Skeleton /></Grid>
                         }
@@ -361,4 +361,4 @@ function Request() {
     );
 }
 
-export default Request;
+export default HandleRequest;

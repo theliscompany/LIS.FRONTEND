@@ -19,7 +19,7 @@ import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import dayjs, { Dayjs } from 'dayjs';
 import { AuthenticationResult } from '@azure/msal-browser';
 import { useMsal, useAccount } from '@azure/msal-react';
-import { CategoryEnum, containerPackages } from '../utils/constants';
+import { CategoryEnum, containerPackages, currencyOptions } from '../utils/constants';
 import RequestPriceRequest from '../components/editRequestPage/RequestPriceRequest';
 import { Anchor, FileCopy, Mail } from '@mui/icons-material';
 import NewContact from '../components/editRequestPage/NewContact';
@@ -82,20 +82,12 @@ function Seafreights() {
     const [servicesData, setServicesData] = useState<any>([]);
     // const [servicesData2, setServicesData2] = useState<any>([]);
     // const [miscellaneousId, setMiscellaneousId] = useState<string>("");
-    const [tempToken, setTempToken] = useState<string>("");
     
     const { t } = useTranslation();
     
     const { instance, accounts } = useMsal();
     const account = useAccount(accounts[0] || {});
     const context = useAuthorizedBackendApi();
-    
-    const currencyOptions = [
-        { code: "EUR", label: 'Euro - €' },
-        { code: 'GBP', label: 'British pound - £' },
-        { code: "USD", label: 'Dollar - $' },
-        { code: "FCFA", label: 'Franc CFA - FCFA' }
-    ]
     
     const columnsSeafreights: GridColDef[] = [
         { field: 'carrierAgentName', headerName: t('carrierAgent'), minWidth: 125, flex: 1.4 },

@@ -178,7 +178,7 @@ function RequestPriceRequest(props: any) {
         if (account && instance && context) {
             setLoad(true);
             var requestFormatted = createGetRequestUrl(portLoading?.portId, portDischarge?.portId);
-            const response = await (context?.service as BackendService<any>).getWithToken(requestFormatted, props.token);
+            const response = await (context?.service as BackendService<any>).getWithToken(requestFormatted, context.tokenPricing);
             if (response !== null && response !== undefined) {
                 var aux = getAllCarriers(response);
                 setRecipients(carriersData.filter((obj: any) => aux.includes(obj.contactName) && obj.email !== "" && obj.email !== null));

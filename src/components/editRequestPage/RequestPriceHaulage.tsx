@@ -1,19 +1,18 @@
 import { useEffect, useRef, useState } from 'react';
 import { BootstrapDialogTitle, BootstrapInput, buttonCloseStyles, inputIconStyles, inputLabelStyles } from '../../utils/misc/styles';
-import { Autocomplete, Box, Button, DialogActions, DialogContent, Grid, InputLabel, NativeSelect, Skeleton, TextField, ToggleButton, ToggleButtonGroup } from '@mui/material';
+import { Autocomplete, Box, Button, DialogActions, DialogContent, Grid, InputLabel, NativeSelect, Skeleton, TextField } from '@mui/material';
 import { useAuthorizedBackendApi } from '../../api/api';
 import { useTranslation } from 'react-i18next';
 import { enqueueSnackbar } from 'notistack';
 import { BackendService } from '../../utils/services/fetch';
-import { crmRequest, protectedResources } from '../../config/authConfig';
+import { protectedResources } from '../../config/authConfig';
 import { useAccount, useMsal } from '@azure/msal-react';
 import StarterKit from '@tiptap/starter-kit';
 import { RichTextEditor, MenuControlsContainer, MenuSelectHeading, MenuDivider, MenuButtonBold, MenuButtonItalic, MenuButtonStrikethrough, MenuButtonOrderedList, MenuButtonBulletedList, MenuSelectTextAlign, MenuButtonEditLink, MenuButtonHorizontalRule, MenuButtonUndo, MenuButtonRedo, type RichTextEditorRef, } from 'mui-tiptap';
 import './../../App.css';
 import AutocompleteSearch from '../shared/AutocompleteSearch';
 import { Anchor } from '@mui/icons-material';
-import { AuthenticationResult } from '@azure/msal-browser';
-import { getAccessToken } from '../../utils/functions';
+import { haulageTypeOptions } from '../../utils/constants';
 
 function createGetRequestUrl(variable1: number, variable2: number) {
     let url = protectedResources.apiLisPricing.endPoint+"/Haulage/Haulages?";
@@ -61,14 +60,6 @@ function RequestPriceHaulage(props: any) {
     const account = useAccount(accounts[0] || {});
 
     const context = useAuthorizedBackendApi();
-    
-    const haulageTypeOptions = [
-        { value: "On trailer, direct loading", label: t('haulageType1') },
-        { value: "On trailer, Loading with Interval", label: t('haulageType2') },
-        { value: "Side loader, direct loading", label: t('haulageType3') },
-        { value: "Side loader, Loading with Interval, from trailer to floor", label: t('haulageType4') },
-        { value: "Side loader, Loading with Interval, from floor to trailer", label: t('haulageType5') }
-    ];
     
     const postEmail = async(from: string, to: string, subject: string, htmlContent: string) => {
         const form = new FormData();
@@ -172,7 +163,7 @@ function RequestPriceHaulage(props: any) {
         if (account && instance && context) {
             setLoad(true);
             var requestFormatted = createGetRequestUrl(loadingCityObj?.portId, deliveryPort?.portId);
-            const response = await (context?.service as BackendService<any>).getWithToken(requestFormatted, props.token);
+            const response = await (context?.service as BackendService<any>).getWithToken(requestFormatted, context.tokenPricing);
             if (response !== null && response !== undefined) {
                 var aux = getAllHauliers(response);
                 setRecipients(hauliersData.filter((obj: any) => aux.includes(obj.contactName) && obj.email !== "" && obj.email !== null));
@@ -341,7 +332,7 @@ function RequestPriceHaulage(props: any) {
                                             fullWidth
                                         >
                                             {haulageTypeOptions.map((elm: any, i: number) => (
-                                                <option key={"haulageElm-"+i} value={elm.value}>{elm.label}</option>
+                                                <option key={"haulageElm-"+i} value={elm.value}>{t(elm.label)}</option>
                                             ))}
                                         </NativeSelect>
                                     </Grid>

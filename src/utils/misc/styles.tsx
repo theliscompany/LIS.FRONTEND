@@ -125,6 +125,11 @@ export const whiteButtonStyles = {
   textTransform: "none"
 }
 
+export const anyButtonStyles = { 
+  mt: 2, 
+  textTransform: "none"
+}
+
 export const actionButtonStyles = { 
   textTransform: "none",
   alignItems: "flex-end", 

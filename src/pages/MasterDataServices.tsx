@@ -8,11 +8,14 @@ import { protectedResources } from '../config/authConfig';
 import { BackendService } from '../utils/services/fetch';
 import { Alert, Button, DialogActions, DialogContent, Grid, IconButton, InputLabel, MenuItem, Select, Skeleton, Typography } from '@mui/material';
 import { DataGrid, GridColDef, GridRenderCellParams, GridToolbar } from '@mui/x-data-grid';
-import { t } from 'i18next';
+// import { t } from 'i18next';
 import { sizingStyles, gridStyles, BootstrapDialog, BootstrapDialogTitle, buttonCloseStyles, BootstrapInput, actionButtonStyles, inputLabelStyles } from '../utils/misc/styles';
 import { Edit, Delete } from '@mui/icons-material';
+import { useTranslation } from 'react-i18next';
 
 const MasterDataServices: any = (props: any) => {
+    const { t } = useTranslation();
+    
     const [services, setServices] = useState<any>(null);
     const [loadResults, setLoadResults] = useState<boolean>(true);
     const [loadEdit, setLoadEdit] = useState<boolean>(false);

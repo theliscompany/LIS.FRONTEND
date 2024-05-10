@@ -6,41 +6,30 @@ import { useAuthorizedBackendApi } from '../../api/api';
 import { enqueueSnackbar } from 'notistack';
 import { BackendService } from '../../utils/services/fetch';
 import { protectedResources } from '../../config/authConfig';
+import { statusTypes } from '../../utils/constants';
+import { useAccount, useMsal } from '@azure/msal-react';
 
 function RequestChangeStatus(props: any) {
     const [statusMessage, setStatusMessage] = useState<string>("");
     const [selectedStatus, setSelectedStatus] = useState('EnAttente');
     
+    const { instance, accounts } = useMsal();
+    const account = useAccount(accounts[0] || {});
     const context = useAuthorizedBackendApi();
     const { t } = useTranslation();
-    
-    const statusTypes = [
-        { type: "EnAttente", label: t('labelEnAttente'), value: "En attente", description: t('descriptionEnAttente') }, 
-        { type: "Valider", label: t('labelValider'), value: "Validé", description: t('descriptionValider') }, 
-        { type: "Rejeter", label: t('labelRejeter'), value: "Rejeté", description: t('descriptionRejeter') }, 
-        { type: "EnCoursDeTraitement", label: t('labelEnCoursDeTraitement'), value: "En cours de traitement", description: t('descriptionEnCoursDeTraitement') }, 
-        { type: "EnTransit", label: t('labelEnTransit'), value: "En transit", description: t('descriptionEnTransit') }, 
-        { type: "EnDouane", label: t('labelEnDouane'), value: "En douane", description: t('descriptionEnDouane') }, 
-        { type: "LivraisonEnCours", label: t('labelLivraisonEnCours'), value: "Livraison en cours", description: t('descriptionLivraisonEnCours') }, 
-        { type: "Livre", label: t('labelLivre'), value: "Livré", description: t('descriptionLivre') }, 
-        { type: "Annule", label: t('labelAnnule'), value: "Annulé", description: t('descriptionAnnule') }, 
-        { type: "Retour", label: t('labelRetour'), value: "Retourné", description: t('descriptionRetour') }, 
-        { type: "Problème", label: t('labelProbleme'), value: "Problème", description: t('descriptionProbleme') }, 
-        { type: "EnAttenteDeFacturation", label: t('labelEnAttenteDeFacturation'), value: "En attente de facturation", description: t('descriptionEnAttenteDeFacturation') } 
-    ];
     
     const handleChangeStatus = (event: React.ChangeEvent<HTMLInputElement>) => {
         setSelectedStatus((event.target as HTMLInputElement).value);
     };
 
     const changeStatusRequest = async () => {
-        if(context) {
+        if (account && instance && context) {
             const body: any = {
                 newStatus: selectedStatus,
                 customMessage: statusMessage
             };
 
-            const data = await (context?.service as BackendService<any>).put(protectedResources.apiLisQuotes.endPoint+"/Request/"+props.id+"/changeStatus", body);
+            const data = await (context?.service as BackendService<any>).putWithToken(protectedResources.apiLisQuotes.endPoint+"/Request/"+props.id+"/changeStatus", body, context.tokenLogin);
             if (data?.status === 200) {
                 props.closeModal();
                 enqueueSnackbar(t('requestStatusUpdated'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
@@ -72,7 +61,7 @@ function RequestChangeStatus(props: any) {
                                 onChange={handleChangeStatus}
                             >
                                 {
-                                    statusTypes.map((elm: any) => <DarkTooltip key={"StatusType-"+elm.type} title={elm.label} placement="right" arrow><FormControlLabel value={elm.type} control={<Radio />} label={elm.label} /></DarkTooltip>)
+                                    statusTypes.map((elm: any) => <DarkTooltip key={"StatusType-"+elm.type} title={t(elm.label)} placement="right" arrow><FormControlLabel value={elm.type} control={<Radio />} label={t(elm.label)} /></DarkTooltip>)
                                 }
                             </RadioGroup>
                         </FormControl>

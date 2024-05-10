@@ -735,3 +735,67 @@ export const getExtensionFromContentType = (contentType: string): string => {
   
     return contentTypeMap[contentType] || 'unknown';
 };
+
+// export const colorsTypes = (value: string) => {
+//     switch (value) {
+//         case "Pending": 
+//             return "warning";
+//             break;
+//         case "EnCoursDeTraitement": 
+//             return "info";
+//             break;
+//         case "Accepted":
+//             return "success";
+//             break;
+//         case "Rejected": 
+//             return "secondary";
+//             break;
+//         case "No response": 
+//             return "default";
+//             break;
+//     }
+// }
+
+export function statusLabel(value: string) {
+    if (value === "Accepted")
+        return "Approved";
+    else
+        return value;
+}
+
+export function colorsTypes(value: string) {
+    switch (value) {
+        case "EnAttente": 
+            return "warning";
+            break;
+        case "EnCoursDeTraitement":
+            return "info";
+            break;
+        case "Valider":
+            return "success";
+            break;
+        case "Accepted":
+            return "success";
+            break;
+        case "New":
+            return "warning";
+            break;
+        case "Rejeter": 
+            return "error";
+            break;
+        case "Problème": 
+            return "error";
+            break;
+        case "Rejected": 
+            return "error";
+            break;
+        case "No response": 
+            return "default";
+            break;
+    }
+}
+
+export function getCityCountry(text: string) {
+    const parts = text.split(',');
+    return parts[0] + ', ' + parts[1];
+}

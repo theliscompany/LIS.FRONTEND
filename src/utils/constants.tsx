@@ -11,6 +11,40 @@ export enum CategoryEnum
 
 export let packingOptions = ["Unit", "Bundle", "Bag", "Pallet", "Carton", "Lot", "Crate"];
 
+export var statusTypes = [
+  { type: "EnAttente", label: 'labelEnAttente', value: "En attente", description: 'descriptionEnAttente' }, 
+  { type: "Valider", label: 'labelValider', value: "Validé", description: 'descriptionValider' }, 
+  { type: "Rejeter", label: 'labelRejeter', value: "Rejeté", description: 'descriptionRejeter' }, 
+  { type: "EnCoursDeTraitement", label: 'labelEnCoursDeTraitement', value: "En cours de traitement", description: 'descriptionEnCoursDeTraitement' }, 
+  // { type: "EnTransit", label: 'labelEnTransit', value: "En transit", description: 'descriptionEnTransit' }, 
+  // { type: "EnDouane", label: 'labelEnDouane', value: "En douane", description: 'descriptionEnDouane' }, 
+  // { type: "LivraisonEnCours", label: 'labelLivraisonEnCours', value: "Livraison en cours", description: 'descriptionLivraisonEnCours' }, 
+  // { type: "Livre", label: 'labelLivre', value: "Livré", description: 'descriptionLivre' }, 
+  { type: "Annule", label: 'labelAnnule', value: "Annulé", description: 'descriptionAnnule' }, 
+  // { type: "Retour", label: 'labelRetour', value: "Retourné", description: 'descriptionRetour' }, 
+  { type: "Problème", label: 'labelProbleme', value: "Problème", description: 'descriptionProbleme' }, 
+  // { type: "EnAttenteDeFacturation", label: 'labelEnAttenteDeFacturation', value: "En attente de facturation", description: 'descriptionEnAttenteDeFacturation' },
+  // { type: "Accepted", label: 'labelValider', value: "Validé", description: 'descriptionValider' }, 
+  // { type: "Rejected", label: 'labelRejeter', value: "Rejeté", description: 'descriptionRejeter' }, 
+  { type: "New", label: 'labelNew', value: "Nouveau", description: 'descriptionNew' }, 
+];
+
+export const currencyOptions = [
+  { code: "EUR", label: 'Euro - €' },
+  { code: 'GBP', label: 'British pound - £' },
+  { code: "USD", label: 'Dollar - $' },
+  { code: "FCFA", label: 'Franc CFA - FCFA' }
+]
+
+export const haulageTypeOptions = [
+  { value: "On trailer, direct loading", label: 'haulageType1' },
+  { value: "On trailer, Loading with Interval", label: 'haulageType2' },
+  { value: "Side loader, direct loading", label: 'haulageType3' },
+  { value: "Side loader, Loading with Interval, from trailer to floor", label: 'haulageType4' },
+  { value: "Side loader, Loading with Interval, from floor to trailer", label: 'haulageType5' }
+];
+
+
 export const containerPackages = [
     {
         "packageId": 8,

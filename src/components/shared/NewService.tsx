@@ -5,10 +5,8 @@ import { useAuthorizedBackendApi } from '../../api/api';
 import { useTranslation } from 'react-i18next';
 import { enqueueSnackbar } from 'notistack';
 import { BackendService } from '../../utils/services/fetch';
-import { transportRequest, protectedResources } from '../../config/authConfig';
+import { protectedResources } from '../../config/authConfig';
 import { useAccount, useMsal } from '@azure/msal-react';
-import { AuthenticationResult } from '@azure/msal-browser';
-import { getAccessToken } from '../../utils/functions';
 
 function NewService(props: any) {
     const [testName, setTestName] = useState<string>("");

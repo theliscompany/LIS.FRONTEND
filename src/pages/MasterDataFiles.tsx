@@ -7,14 +7,17 @@ import { protectedResources } from '../config/authConfig';
 import { BackendService } from '../utils/services/fetch';
 import { Alert, Button, DialogActions, DialogContent, Grid, IconButton, InputLabel, Skeleton, Typography } from '@mui/material';
 import { DataGrid, GridColDef, GridRenderCellParams, GridToolbar } from '@mui/x-data-grid';
-import { t } from 'i18next';
+// import { t } from 'i18next';
 import { sizingStyles, gridStyles, BootstrapDialog, BootstrapDialogTitle, buttonCloseStyles, actionButtonStyles, inputLabelStyles } from '../utils/misc/styles';
 import { Delete, Download } from '@mui/icons-material';
 import { MuiFileInput } from 'mui-file-input';
 import axios, { AxiosResponse } from 'axios';
 import { getExtensionFromContentType } from '../utils/functions';
+import { useTranslation } from 'react-i18next';
 
 const MasterDataFiles: any = (props: any) => {
+    const { t } = useTranslation();
+    
     const [files, setFiles] = useState<any>(null);
     const [loadResults, setLoadResults] = useState<boolean>(true);
     const [loadEdit, setLoadEdit] = useState<boolean>(false);
