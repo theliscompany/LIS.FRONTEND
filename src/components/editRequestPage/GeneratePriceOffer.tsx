@@ -123,12 +123,7 @@ function GeneratePriceOffer(props: any) {
         true // Optionnel, par défaut à true (sauvegarde automatique activée)
     );
     
-    const handleChangeFormState = (value: any, name: string) => {
-        setFormState({ ...formState, [name]: value });
-    };
-    
     const steps = [t('selectHaulage'), t('selectSeafreight'), t('selectMisc'), t('sendOffer')];
-    
     const columnsSeafreights: GridColDef[] = [
         { field: 'carrierName', headerName: t('carrier'), flex: 1.25 },
         { field: 'carrierAgentName', headerName: t('carrierAgent'), flex: 1.25 },

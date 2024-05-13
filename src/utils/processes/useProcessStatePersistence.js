@@ -10,13 +10,16 @@ const useProcessStatePersistence = (userId, processName, initialState, expiresIn
     const fetchPersistedState = async () => {
       try {
         const cachedState = localStorage.getItem(processName);
+        // console.log("cache : ", cachedState);
         if (cachedState) {
           setState(JSON.parse(cachedState));
-        } else {
+        } 
+        else {
           const response = await axios.get(`${API_BASE_URL}/api/ProcessState/${userId}/${processName}`);
+          // console.log("response : ", response);
           if (response.data) {
-            setState(JSON.parse(response.data.stateData));
-            localStorage.setItem(processName, response.data.stateData);
+            setState(JSON.parse(response.data.data.stateData));
+            localStorage.setItem(processName, response.data.data.stateData);
           }
         }
       } catch (error) {
@@ -39,7 +42,8 @@ const useProcessStatePersistence = (userId, processName, initialState, expiresIn
             expiresIn,
           });
         }
-      } catch (error) {
+      } 
+      catch (error) {
         console.error('Failed to persist state:', error);
         // TODO: Implement retry mechanism
       }
