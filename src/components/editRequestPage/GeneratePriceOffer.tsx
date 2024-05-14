@@ -26,6 +26,7 @@ import { haulageTypeOptions } from '../../utils/constants';
 import { MuiFileInput } from 'mui-file-input';
 import axios, { AxiosResponse } from 'axios';
 import { useTranslation } from 'react-i18next';
+import PriceOffer from './PriceOffer';
 
 function createGetRequestUrl(url: string, variable2: string, variable3: string, variable4: string) {
     if (variable2) {
@@ -98,7 +99,10 @@ function GeneratePriceOffer(props: any) {
     const [modalSeafreight, setModalSeafreight] = useState<boolean>(false);
     const [modalCompare, setModalCompare] = useState<boolean>(false);
     const [modalFile, setModalFile] = useState<boolean>(false);
+    const [modalOffer, setModalOffer] = useState<boolean>(false);
     
+    const [loadCurrentOffer, setLoadCurrentOffer] = useState<boolean>(false);
+    const [currentOffer, setCurrentOffer] = useState<any>(null);
     const [files, setFiles] = useState<any>(null);
     const [fileValue, setFileValue] = useState<File[] | undefined>(undefined);
     
@@ -700,10 +704,15 @@ function GeneratePriceOffer(props: any) {
                 };
                 const response = await (context?.service as BackendService<any>).postReturnJson(protectedResources.apiLisOffer.endPoint+"/QuoteOffer", dataSent);
                 
-                if (response !== null) {
+                if (response !== null && response.code === 201) {
                     enqueueSnackbar(t('offerSuccessCreated'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                    console.log(response);
                     setLoadNewOffer(false);
                     changeStatus("Valider");
+                    
+                    setCurrentOffer(response.data);
+                    setLoadCurrentOffer(true);
+                    setModalOffer(true);
                 }
                 else {
                     enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
@@ -1795,7 +1804,7 @@ function GeneratePriceOffer(props: any) {
                                                 {t('skip')}
                                             </Button>
                                         )}
-                                        {
+                                        {/* {
                                             props.type === "standard" ? 
                                             <Button 
                                                 variant="contained" color="inherit" sx={whiteButtonStyles} 
@@ -1809,11 +1818,25 @@ function GeneratePriceOffer(props: any) {
                                             >
                                                 {formState.activeStep === steps.length - 1 ? t('sendOfferValidation') : t('nextStep')}
                                             </Button> : null
-                                        }
+                                        } */}
                                         {
                                             props.type === "handle" ? 
                                             <Button variant="contained" color={formState.activeStep === steps.length - 1 ? "primary" : "inherit"} sx={anyButtonStyles} onClick={handleNext} disabled={formState.activeStep === steps.length - 1 ? loadNewOffer : false}>
                                                 {formState.activeStep === steps.length - 1 ? t('createOffer') : t('nextStep')}
+                                            </Button> : null
+                                        }
+                                        {
+                                            props.type === "standard" ? 
+                                            <Button 
+                                                variant="contained" 
+                                                color={formState.activeStep === steps.length - 1 ? "primary" : "inherit"} 
+                                                sx={anyButtonStyles} 
+                                                onClick={() => { 
+                                                    formState.activeStep === steps.length - 1 ? changeStatus("EnCoursDeTraitement") : handleNext() 
+                                                }}
+                                                disabled={formState.activeStep === steps.length - 1 ? loadNewOffer : false}
+                                            >
+                                                {formState.activeStep === steps.length - 1 ? t('sendOfferValidation') : t('nextStep')}
                                             </Button> : null
                                         }
                                     </Box>
@@ -1823,14 +1846,9 @@ function GeneratePriceOffer(props: any) {
                     </AccordionDetails>
                 </Accordion> : <Skeleton />
             }
+            
             {/* Price request haulage (modalRequestHaulage) */}
-            <BootstrapDialog
-                onClose={() => setModalRequestHaulage(false)}
-                aria-labelledby="custom-dialog-title5"
-                open={modalRequestHaulage}
-                maxWidth="lg"
-                fullWidth
-            >
+            <BootstrapDialog open={modalRequestHaulage} onClose={() => setModalRequestHaulage(false)} maxWidth="lg" fullWidth>
                 {
                     context ?
                     <RequestPriceHaulage
@@ -1844,13 +1862,7 @@ function GeneratePriceOffer(props: any) {
             </BootstrapDialog>
 
             {/* Price request seafreight FCL (modalRequestSeafreight) */}
-            <BootstrapDialog
-                onClose={() => setModalRequestSeafreight(false)}
-                aria-labelledby="custom-dialog-title6"
-                open={modalRequestSeafreight}
-                maxWidth="lg"
-                fullWidth
-            >
+            <BootstrapDialog open={modalRequestSeafreight} onClose={() => setModalRequestSeafreight(false)} maxWidth="lg" fullWidth>
                 {
                     context ? 
                     <RequestPriceRequest 
@@ -1868,27 +1880,34 @@ function GeneratePriceOffer(props: any) {
             </BootstrapDialog>
 
             {/* Create new misc (modalNewMisc) */}
-            <BootstrapDialog
-                onClose={() => setModalNewMisc(false)}
-                aria-labelledby="custom-dialog-title9"
-                open={modalNewMisc}
-                maxWidth="lg"
-                fullWidth
-            >
-                <BootstrapDialogTitle id="custom-dialog-title" onClose={() => setModalNewMisc(false)}>
+            <BootstrapDialog open={modalNewMisc} onClose={() => setModalNewMisc(false)} maxWidth="lg" fullWidth>
+                <BootstrapDialogTitle id="bootstrap-dialog-titleB" onClose={() => setModalNewMisc(false)}>
                     <b>{t('createRowMisc')}</b>
                 </BootstrapDialogTitle>
                 <NewMiscellaneous closeModal={() => setModalNewMisc(false)} updateMiscs={getGeneralMiscellaneousPriceOffers} />
             </BootstrapDialog>
 
+            {/* Create new offer */}
+            <BootstrapDialog open={modalOffer} onClose={() => setModalOffer(false)} maxWidth="lg" fullWidth>
+                <BootstrapDialogTitle id="bootstrap-dialog-titleA" onClose={() => setModalOffer(false)}>
+                    <b>{t('manageOffer')}</b>
+                </BootstrapDialogTitle>
+                <DialogContent dividers>
+                    {
+                        currentOffer !== null && formState !== undefined ? 
+                        <PriceOffer
+                            id={currentOffer.id} files={formState.files} options={formState.options}
+                            offer={currentOffer} setOffer={setCurrentOffer}
+                        /> : <Skeleton />
+                    }
+                </DialogContent>
+                <DialogActions>
+                    <Button variant="contained" onClick={() => setModalOffer(false)} sx={buttonCloseStyles}>{t('close')}</Button>
+                </DialogActions>
+            </BootstrapDialog>
+
             {/* Create new haulage */}
-            <BootstrapDialog
-                onClose={() => setModalHaulage(false)}
-                aria-labelledby="custom-dialog-titleHaulage"
-                open={modalHaulage}
-                maxWidth="lg"
-                fullWidth
-            >
+            <BootstrapDialog open={modalHaulage} onClose={() => setModalHaulage(false)} maxWidth="lg" fullWidth>
                 {
                     context ? 
                     <NewHaulage 
@@ -1903,13 +1922,7 @@ function GeneratePriceOffer(props: any) {
             </BootstrapDialog>
 
             {/* Create new seafreight */}
-            <BootstrapDialog
-                onClose={() => setModalSeafreight(false)}
-                aria-labelledby="custom-dialog-titleSeafreight"
-                open={modalSeafreight}
-                maxWidth="lg"
-                fullWidth
-            >
+            <BootstrapDialog open={modalSeafreight} onClose={() => setModalSeafreight(false)} maxWidth="lg" fullWidth>
                 {
                     context ? 
                     <NewSeafreight 
@@ -1925,13 +1938,7 @@ function GeneratePriceOffer(props: any) {
             </BootstrapDialog>
 
             {/* Compare options */}
-            <BootstrapDialog
-                onClose={() => setModalCompare(false)}
-                aria-labelledby="custom-dialog-titleCompare"
-                open={modalCompare}
-                maxWidth="lg"
-                fullWidth
-            >
+            <BootstrapDialog open={modalCompare} onClose={() => setModalCompare(false)} maxWidth="lg" fullWidth>
                 <CompareOptions 
                     options={formState.options} 
                     closeModal={() => { setModalCompare(false); }} 

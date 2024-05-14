@@ -25,7 +25,7 @@ function RequestFormHeader(props: any) {
     // Find the status type by type
     const statusType = statusTypes.find((elm) => elm.type === props.status);
     // Translate the label
-    const label = statusType ? t(statusType.label) : 'Unknown Status';
+    const label = statusType ? t(statusType.label) : '';
 
     return (
         <>

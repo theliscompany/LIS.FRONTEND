@@ -114,7 +114,7 @@ function HandleRequest() {
             setPorts1(sortByCloseness(parseLocation(requestData.departure), ports));
             setPorts2(sortByCloseness(parseLocation(requestData.arrival), ports));
         }
-    }, [ports, products]);
+    }, [ports, products, requestData]);
 
     const getAssignees = async () => {
         if (account && instance && context) {
