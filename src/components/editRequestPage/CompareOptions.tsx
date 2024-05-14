@@ -277,9 +277,9 @@ function CompareOptions(props: any) {
                                     Miscellaneous details 
                                     {option1.myMiscs.map((elm: any, id: number) => {
                                         return (
-                                            <p key={"ssvf1-"+id} style={{ marginTop: 2, marginBottom: 2 }}>
+                                            <div key={"ssvf1-"+id} style={{ marginTop: 2, marginBottom: 2 }}>
                                                 {elm.textServices}
-                                            </p>
+                                            </div>
                                         );
                                     })}
                                 </ListItem>
@@ -325,9 +325,9 @@ function CompareOptions(props: any) {
                                     Miscellaneous details 
                                     {option2.myMiscs.map((elm: any, id: number) => {
                                         return (
-                                            <p key={"ssvf1-"+id} style={{ marginTop: 2, marginBottom: 2 }}>
+                                            <div key={"ssvf1-"+id} style={{ marginTop: 2, marginBottom: 2 }}>
                                                 {elm.textServices}
-                                            </p>
+                                            </div>
                                         );
                                     })}
                                 </ListItem>
@@ -373,9 +373,9 @@ function CompareOptions(props: any) {
                                     Miscellaneous details 
                                     {option3.myMiscs.map((elm: any, id: number) => {
                                         return (
-                                            <p key={"ssvf1-"+id} style={{ marginTop: 2, marginBottom: 2 }}>
+                                            <div key={"ssvf1-"+id} style={{ marginTop: 2, marginBottom: 2 }}>
                                                 {elm.textServices}
-                                            </p>
+                                            </div>
                                         );
                                     })}
                                 </ListItem>
