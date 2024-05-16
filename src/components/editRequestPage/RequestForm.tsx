@@ -81,7 +81,7 @@ function RequestForm(props: any) {
                         </Grid>
                         <Grid item xs={12} md={6} mt={1}>
                             <InputLabel htmlFor="departure" sx={inputLabelStyles}>{t('departure')}</InputLabel>
-                            <AutocompleteSearch id="departure" value={props.departure} onChange={props.setDeparture} callBack={props.getClosestDeparture} fullWidth />
+                            <AutocompleteSearch id="departure" value={props.departure} onChange={props.setDeparture} callBack={props.getClosestDeparture} fullWidth disabled />
                         </Grid>
                         <Grid item xs={12} md={6}>
                             <InputLabel htmlFor="whatsapp-phone-number" sx={inputLabelStyles} style={{ marginTop: "8px" }}>{t('whatsappNumber')}</InputLabel>
@@ -94,7 +94,7 @@ function RequestForm(props: any) {
                         </Grid>
                         <Grid item xs={12} md={6} mt={1}>
                             <InputLabel htmlFor="arrival" sx={inputLabelStyles}>{t('arrival')}</InputLabel>
-                            <AutocompleteSearch id="arrival" value={props.arrival} onChange={props.setArrival} callBack={props.getClosestArrival} fullWidth />
+                            <AutocompleteSearch id="arrival" value={props.arrival} onChange={props.setArrival} callBack={props.getClosestArrival} fullWidth disabled />
                         </Grid>
                         <Grid item xs={12} md={6}>
                             <InputLabel htmlFor="request-email" sx={inputLabelStyles}>{t('emailAddress')}</InputLabel>
@@ -121,6 +121,7 @@ function RequestForm(props: any) {
                                     renderInput={(params: any) => <TextField {...params} sx={{ textTransform: "lowercase" }} />}
                                     onChange={(e: any, value: any) => { props.setTags(value); }}
                                     fullWidth
+                                    disabled
                                 /> : <Skeleton />
                             }
                         </Grid>
@@ -129,7 +130,13 @@ function RequestForm(props: any) {
                             <InputLabel htmlFor="listContainers" sx={inputLabelStyles} style={{ marginBottom: "8px", position: "relative", top: "12px" }}>{t('listContainers')}</InputLabel>
                         </Grid>
                         <Grid item xs={3}>
-                            <Button variant="contained" color="inherit" sx={whiteButtonStyles} style={{ float: "right" }} onClick={props.openModalContainer} >{t('addContainer')}</Button>
+                            <Button 
+                                variant="contained" color="inherit" 
+                                sx={whiteButtonStyles} style={{ float: "right" }} 
+                                onClick={props.openModalContainer} disabled
+                            >
+                                {t('addContainer')}
+                            </Button>
                         </Grid>
                         <Grid item xs={12}>
                             {
@@ -144,9 +151,13 @@ function RequestForm(props: any) {
                                                 <ListItem
                                                     sx={{ border: "1px solid #e5e5e5" }}
                                                     secondaryAction={
-                                                        <IconButton edge="end" onClick={() => {
-                                                            props.setContainersSelection((prevItems: any) => prevItems.filter((item: any, i: number) => i !== index));
-                                                        }}>
+                                                        <IconButton 
+                                                            edge="end"
+                                                            disabled  
+                                                            onClick={() => {
+                                                                props.setContainersSelection((prevItems: any) => prevItems.filter((item: any, i: number) => i !== index));
+                                                            }}
+                                                        >
                                                             <Delete />
                                                         </IconButton>
                                                     }
@@ -166,7 +177,7 @@ function RequestForm(props: any) {
                         
                         <Grid item xs={12} md={6} mt={.5} sx={{ display: { xs: 'none', md: 'block' } }}>
                             <InputLabel htmlFor="request-message" sx={inputLabelStyles}>{t('details')}</InputLabel>
-                            <BootstrapInput id="request-message" type="text" multiline rows={3.5} value={props.message} onChange={(e: React.ChangeEvent<HTMLInputElement>) => props.setMessage(e.target.value)} fullWidth />
+                            <BootstrapInput id="request-message" type="text" multiline rows={3.5} value={props.message} onChange={(e: React.ChangeEvent<HTMLInputElement>) => props.setMessage(e.target.value)} fullWidth disabled />
                         </Grid>
                         <Grid item xs={12} md={6} mt={1}>
                             <InputLabel htmlFor="assigned-manager" sx={inputLabelStyles}>{t('assignedManager')}</InputLabel>
@@ -179,6 +190,7 @@ function RequestForm(props: any) {
                                         onChange={(e: any) => { props.setAssignedManager(e.target.value); }}
                                         input={<BootstrapInput />}
                                         fullWidth
+                                        disabled
                                     >
                                         <option value="">{t('noAgentAssigned')}</option>
                                         {

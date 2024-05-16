@@ -7,14 +7,12 @@ import { protectedResources } from '../config/authConfig';
 import { BootstrapDialog, BootstrapDialogTitle, buttonCloseStyles } from '../utils/misc/styles';
 import { useTranslation } from 'react-i18next';
 
-
 function AcceptOffer(props: any) {
     const [load, setLoad] = useState<boolean>(true);
     const [modal, setModal] = useState<boolean>(true);
     const [isAccepted, setIsAccepted] = useState<boolean>(false);
     
     let { id } = useParams();
-    
     const { t } = useTranslation();
         
     useEffect(() => {
@@ -33,22 +31,16 @@ function AcceptOffer(props: any) {
         }).then((data: any) => {
             setLoad(false);
             setIsAccepted(true);
-            enqueueSnackbar(t('priceOfferApproved'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
+            enqueueSnackbar(t('priceOfferApproved'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top" } });
         }).catch(error => { 
             setLoad(false);
-            enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+            enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top" } });
         });
     }
     
     return (
         <div className="App">
-            <BootstrapDialog
-                onClose={() => setModal(false)}
-                aria-labelledby="custom-dialog-title"
-                open={modal}
-                maxWidth="md"
-                fullWidth
-            >
+            <BootstrapDialog open={modal} onClose={() => setModal(false)} maxWidth="md" fullWidth>
                 <BootstrapDialogTitle id="custom-dialog-title" onClose={() => setModal(false)}>
                     <b>{t('messageModal')}</b>
                 </BootstrapDialogTitle>

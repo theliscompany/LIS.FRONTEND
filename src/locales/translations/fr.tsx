@@ -167,7 +167,7 @@ export const fr = {
   byOmnifreight: "par Omnifreight",
   byClient: "par le client",
   statusIs: "Le statut de cette offre est",
-  approveOffer: "Approuver l'offre",
+  approveOffer: "Approuver et envoyer l'offre",
   updateOffer: "Mettre à jour l'offre",
   manageOffer: "Gérer l'offre",
   priceOfferRejected: "Votre offre de prix a été rejetée avec succès.",

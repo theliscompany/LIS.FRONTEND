@@ -166,7 +166,7 @@ export const en = {
   byOmnifreight: "by Omnifreight",
   byClient: "by the customer",
   statusIs: "The status of this offer is",
-  approveOffer: "Approve the offer",
+  approveOffer: "Approve and send the offer",
   updateOffer: "Update the offer",
   manageOffer: "Manage offer",
   priceOfferRejected: "Your price offer has been rejected with success.",
