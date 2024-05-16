@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { Alert, Button, Chip, Grid, Typography } from "@mui/material";
+import { Alert, Badge, Box, Button, Chip, Grid, Typography } from "@mui/material";
 import { useTranslation } from "react-i18next";
-import { BootstrapDialog, whiteButtonStyles } from "../../utils/misc/styles";
+import { BootstrapDialog, StyledBadge, whiteButtonStyles } from "../../utils/misc/styles";
 import RequestAddNote from "./RequestAddNote";
 import RequestAskInformation from "./RequestAskInformation";
 import RequestChangeStatus from "./RequestChangeStatus";
@@ -30,10 +30,12 @@ function RequestFormHeader(props: any) {
     return (
         <>
             <Grid item xs={6}>
-                <Typography variant="body2" color="dodgerblue" sx={{ fontWeight: "bold" }}>
-                    <span style={{ color: 'red' }}>{t('quoteNumber')} : </span> N° {props.trackingNumber}
+                <Box>
+                    <Typography variant="body2" color="dodgerblue" sx={{ fontWeight: "bold", display: "inline" }}>
+                        <span style={{ color: 'red' }}>{t('quoteNumber')} : </span> N° {props.trackingNumber}
+                    </Typography>
                     <Chip size="small" label={label} color={colorsTypes(props.status)} sx={{ ml: 1 }} />
-                </Typography>
+                </Box>
             </Grid>
             <Grid item xs={6}>
                 <Button 
@@ -71,7 +73,9 @@ function RequestFormHeader(props: any) {
                 <Button variant="contained" color="primary" sx={{ mt: 2, mr: 2, textTransform: "none" }} onClick={props.editRequest} >{t('editRequest')}</Button>
                 <Button variant="contained" color="inherit" sx={whiteButtonStyles} onClick={() => { setModalStatus(true); }} >{t('changeStatus')}</Button>
                 <Button variant="contained" color="inherit" sx={whiteButtonStyles} style={{ float: "right" }} onClick={() => { setModalAddNote(true); }} >{t('addCommentNote')}</Button>
-                <Button variant="contained" color="inherit" sx={whiteButtonStyles} style={{ float: "right", marginRight: "10px" }} onClick={() => { setModalListNotes(true); }} >{t('listNotes')}</Button>
+                <StyledBadge color="error" badgeContent="" overlap="circular" variant="dot" style={{ float: "right", marginRight: "10px" }}>
+                    <Button variant="contained" color="inherit" sx={whiteButtonStyles} onClick={() => { setModalListNotes(true); }} >{t('listNotes')}</Button>
+                </StyledBadge>
             </Grid>
 
             {/* Ask for information */}

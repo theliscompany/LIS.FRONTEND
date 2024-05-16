@@ -1,4 +1,4 @@
-import { Dialog, DialogTitle, IconButton, InputBase, Tooltip, TooltipProps } from '@mui/material';
+import { Badge, BadgeProps, Dialog, DialogTitle, IconButton, InputBase, Tooltip, TooltipProps } from '@mui/material';
 import { tooltipClasses } from '@mui/material/Tooltip';
 import { alpha, styled } from '@mui/material/styles';
 import { DialogTitleProps } from '../models/models';
@@ -256,3 +256,11 @@ export const BootstrapDialogTitle = (props: DialogTitleProps) => {
   );
 }
 
+export const StyledBadge = styled(Badge)<BadgeProps>(({ theme }) => ({
+  '& .MuiBadge-badge': {
+    right: 0,
+    top: 16,
+    // border: `2px solid ${theme.palette.background.paper}`,
+    padding: '0 4px',
+  },
+}));

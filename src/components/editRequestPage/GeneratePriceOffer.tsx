@@ -439,7 +439,8 @@ function GeneratePriceOffer(props: any) {
                 enqueueSnackbar("The file has been added with success!", { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
                 getFiles();
                 setModalFile(false);
-                console.log(response);
+                // console.log(response.data.data);
+                setFormState({...formState, files: [...formState.files, response.data.data]});
             } 
             catch (error) {
                 enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
@@ -1401,7 +1402,7 @@ function GeneratePriceOffer(props: any) {
                                                         formState.options !== undefined && formState.options.length < 3 ? 
                                                         <Button
                                                             variant="contained" 
-                                                            color="inherit" 
+                                                            color="primary" 
                                                             sx={whiteButtonStyles}
                                                             style={{ marginRight: 8 }}
                                                             onClick={(e: any) => {
