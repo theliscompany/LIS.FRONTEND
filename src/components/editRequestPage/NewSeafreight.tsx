@@ -34,6 +34,8 @@ function NewSeafreight(props: any) {
     const [containerTypes, setContainerTypes] = useState<any>([]);
     const [comment, setComment] = useState<string>("");
     const [servicesData, setServicesData] = useState<any>([]);
+    const [loadSeafreight, setLoadSeafreight] = useState<boolean>(false);
+
     const [modalNewCarrier, setModalNewCarrier] = useState<boolean>(false);
     const [modalNewService, setModalNewService] = useState<boolean>(false);
     const [modalNewPort, setModalNewPort] = useState<boolean>(false);
@@ -75,6 +77,7 @@ function NewSeafreight(props: any) {
     const createSeafreight = async () => {
         if (servicesData.length !== 0 && portLoading !== null && portDischarge !== null && carrier !== null && carrierAgent !== null && frequency !== 0 && transitTime !== 0 && validUntil !== null) {
             if (account && instance && context) {
+                setLoadSeafreight(true);
                 var dataSent = null;
                 dataSent = {
                     // "seaFreightId": "string",
@@ -101,14 +104,17 @@ function NewSeafreight(props: any) {
                 if (response !== null && response !== undefined) {
                     props.closeModal();
                     enqueueSnackbar(t('successCreated'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                    setLoadSeafreight(false);
                     props.callBack();
                 }
                 else {
+                    setLoadSeafreight(false);
                     enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
                 }
             }
         }
         else {
+            setLoadSeafreight(false);
             enqueueSnackbar(t('fieldsEmptySeafreight'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
         }
     }
@@ -291,7 +297,7 @@ function NewSeafreight(props: any) {
                 </Grid>
             </DialogContent>
             <DialogActions>
-                <Button variant="contained" onClick={() => { createSeafreight(); }} sx={actionButtonStyles}>{t('validate')}</Button>
+                <Button variant="contained" onClick={() => { createSeafreight(); }} sx={actionButtonStyles} disabled={loadSeafreight}>{t('validate')}</Button>
                 <Button variant="contained" onClick={props.closeModal} sx={buttonCloseStyles}>{t('close')}</Button>
             </DialogActions>
                 

@@ -199,8 +199,20 @@ function RequestForm(props: any) {
                                             ))
                                         }
                                     </NativeSelect>
-                                    <Button variant="contained" color="inherit" sx={whiteButtonStyles} style={{ marginRight: "10px" }} onClick={assignManager} >{t('updateManager')}</Button>
-                                    <Button variant="contained" color="inherit" sx={whiteButtonStyles} onClick={removeManager} >{t('removeManager')}</Button>
+                                    <Button 
+                                        variant="contained" color="inherit" 
+                                        sx={whiteButtonStyles} style={{ marginRight: "10px" }} 
+                                        onClick={assignManager} disabled
+                                    >
+                                        {t('updateManager')}
+                                    </Button>
+                                    <Button 
+                                        variant="contained" color="inherit" 
+                                        sx={whiteButtonStyles} 
+                                        onClick={removeManager} disabled
+                                    >
+                                        {t('removeManager')}
+                                    </Button>
                                 </> : <Skeleton sx={{ mt: 3 }} />   
                             }
                         </Grid>

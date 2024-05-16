@@ -1,15 +1,15 @@
 import { useEffect, useRef, useState } from 'react';
 import { BootstrapDialog, BootstrapDialogTitle, BootstrapInput, actionButtonStyles, anyButtonStyles, buttonCloseStyles, gridStyles, inputIconStyles, inputLabelStyles, sizeStyles, sizingStyles, whiteButtonStyles } from '../../utils/misc/styles';
-import { Accordion, AccordionDetails, AccordionSummary, Alert, Autocomplete, Box, Button, Chip, DialogActions, DialogContent, Grid, IconButton, InputLabel, ListItem, ListItemButton, ListItemText, NativeSelect, Skeleton, Step, StepLabel, Stepper, TextField, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material';
+import { Accordion, AccordionDetails, AccordionSummary, Alert, Autocomplete, Box, Button, Chip, DialogActions, DialogContent, Grid, IconButton, InputLabel, ListItem, ListItemButton, ListItemText, NativeSelect, Skeleton, Step, StepLabel, Stepper, TextField, Typography } from '@mui/material';
 import { enqueueSnackbar } from 'notistack';
 import { BackendService } from '../../utils/services/fetch';
 import { protectedResources } from '../../config/authConfig';
-import { Anchor, Delete, ExpandMore, RestartAlt, Visibility } from '@mui/icons-material';
+import { Anchor, Delete, ExpandMore, RestartAlt } from '@mui/icons-material';
 import { DataGrid, GridColDef, GridColumnHeaderParams, GridRenderCellParams, GridToolbar, GridValueFormatterParams, GridValueGetterParams } from '@mui/x-data-grid';
 import StarterKit from '@tiptap/starter-kit';
 // import { t } from 'i18next';
 import React from 'react';
-import { calculateTotal, checkCarrierConsistency, checkDifferentDefaultContainer, formatObject, formatServices, generateRandomNumber, getAccessToken, getCityCountry, getServices, getServicesTotal, getServicesTotal2, getTotalNumber, hashCode, myServices, removeDuplicatesWithLatestUpdated } from '../../utils/functions';
+import { calculateTotal, checkCarrierConsistency, checkDifferentDefaultContainer, formatObject, formatServices, generateRandomNumber, getCityCountry, getServices, getServicesTotal, getServicesTotal2, getTotalNumber, hashCode, myServices, removeDuplicatesWithLatestUpdated } from '../../utils/functions';
 import AutocompleteSearch from '../shared/AutocompleteSearch';
 import ContainerElement from './ContainerElement';
 import ContainerPrice from './ContainerPrice';
@@ -401,6 +401,7 @@ function GeneratePriceOffer(props: any) {
                 enqueueSnackbar(t('requestStatusUpdated'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
             }
             else {
+                setLoadStatus(false);
                 setLoadNewOffer(false);
                 enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
             }
@@ -1378,8 +1379,8 @@ function GeneratePriceOffer(props: any) {
                                                         formState.currentOption === null || formState.options.length === 0 || formState.currentOption >= formState.options.length ? 
                                                         <Button
                                                             variant="contained" 
-                                                            color="inherit" 
-                                                            sx={whiteButtonStyles}
+                                                            color="primary" 
+                                                            sx={anyButtonStyles}
                                                             style={{ marginRight: 8 }}
                                                             onClick={(e: any) => {
                                                                 var thisOption = {
@@ -1402,7 +1403,7 @@ function GeneratePriceOffer(props: any) {
                                                         formState.options !== undefined && formState.options.length < 3 ? 
                                                         <Button
                                                             variant="contained" 
-                                                            color="primary" 
+                                                            color="inherit" 
                                                             sx={whiteButtonStyles}
                                                             style={{ marginRight: 8 }}
                                                             onClick={(e: any) => {
@@ -1835,7 +1836,7 @@ function GeneratePriceOffer(props: any) {
                                                 onClick={() => { 
                                                     formState.activeStep === steps.length - 1 ? changeStatus("EnCoursDeTraitement") : handleNext() 
                                                 }}
-                                                disabled={formState.activeStep === steps.length - 1 ? loadNewOffer : false}
+                                                disabled={formState.activeStep === steps.length - 1 ? loadStatus : false}
                                             >
                                                 {formState.activeStep === steps.length - 1 ? t('sendOfferValidation') : t('nextStep')}
                                             </Button> : null
@@ -1941,7 +1942,7 @@ function GeneratePriceOffer(props: any) {
             {/* Compare options */}
             <BootstrapDialog open={modalCompare} onClose={() => setModalCompare(false)} maxWidth="lg" fullWidth>
                 <CompareOptions 
-                    options={formState.options} 
+                    options={formState.options.filter((elm: any) => elm !== null)} 
                     closeModal={() => { setModalCompare(false); }} 
                 />
             </BootstrapDialog>
