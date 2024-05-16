@@ -1,10 +1,10 @@
 import { useState } from 'react';
-import { BootstrapDialogTitle, BootstrapInput, buttonCloseStyles, inputLabelStyles } from '../../utils/misc/styles';
-import { Autocomplete, Box, Button, DialogActions, DialogContent, Grid, InputLabel, List, ListItem, NativeSelect, TextField, Typography } from '@mui/material';
+import { BootstrapDialogTitle, buttonCloseStyles, inputLabelStyles } from '../../utils/misc/styles';
+import { Autocomplete, Button, DialogActions, DialogContent, Grid, InputLabel, List, ListItem, TextField } from '@mui/material';
 import { useAuthorizedBackendApi } from '../../api/api';
 import { useTranslation } from 'react-i18next';
 import { useAccount, useMsal } from '@azure/msal-react';
-import { formatServices, getServicesTotal, getServicesTotal2, getTotalPrice, getTotalPrices } from '../../utils/functions';
+import { getServicesTotal, getTotalPrice, getTotalPrices } from '../../utils/functions';
 
 function CompareOptions(props: any) {
     const [option1, setOption1] = useState<any>(props.options[0] !== undefined && props.options[0] !== null ? props.options[0] : null);
@@ -245,20 +245,20 @@ function CompareOptions(props: any) {
                                 {
                                     option1.selectedHaulage !== null ? 
                                     <>
-                                        <ListItem divider sx={getBestTotalIndex([option1,option2,option3]) === 0 ? { background: "limegreen", color: "#000" } : {}}>
+                                        <ListItem divider sx={getBestTotalIndex(props.options) === 0 ? { background: "limegreen", color: "#000" } : {}}>
                                             <strong>Total Unit Price : {option1.selectedHaulage.unitTariff+getTotalPrices(option1.selectedSeafreights)+getTotalPrices(option1.myMiscs)} €</strong>
                                         </ListItem>
                                         <ListItem divider>Haulier Name : {option1.selectedHaulage.haulierName}</ListItem>
-                                        <ListItem divider sx={getBestHaulageIndex([option1,option2,option3]) === 0 ? { background: "limegreen", color: "#000" } : {}}>Haulage Tariff : {option1.selectedHaulage.unitTariff} €</ListItem>
-                                        <ListItem divider sx={getBestMultiStopIndex([option1,option2,option3]) === 0 ? { background: "limegreen", color: "#000" } : {}}>Multi Stop : {option1.selectedHaulage.multiStop} €</ListItem>
-                                        <ListItem divider sx={getBestOvertimeIndex([option1,option2,option3]) === 0 ? { background: "limegreen", color: "#000" } : {}}>Overtime Tariff : {option1.selectedHaulage.overtimeTariff} €</ListItem>
+                                        <ListItem divider sx={getBestHaulageIndex(props.options) === 0 ? { background: "limegreen", color: "#000" } : {}}>Haulage Tariff : {option1.selectedHaulage.unitTariff} €</ListItem>
+                                        <ListItem divider sx={getBestMultiStopIndex(props.options) === 0 ? { background: "limegreen", color: "#000" } : {}}>Multi Stop : {option1.selectedHaulage.multiStop} €</ListItem>
+                                        <ListItem divider sx={getBestOvertimeIndex(props.options) === 0 ? { background: "limegreen", color: "#000" } : {}}>Overtime Tariff : {option1.selectedHaulage.overtimeTariff} €</ListItem>
                                     </> : 
-                                    <ListItem divider sx={getBestAltTotalIndex([option1,option2,option3]) === 0 ? { background: "#FFF", color: "#000" } : {}}>
+                                    <ListItem divider sx={getBestAltTotalIndex(props.options) === 0 ? { background: "#FFF", color: "#000" } : {}}>
                                         <strong>Total Unit Price : {getTotalPrices(option1.selectedSeafreights)+getTotalPrices(option1.myMiscs)} €</strong>
                                     </ListItem>
                                 }
                                 <ListItem divider>Carrier Name : {option1.selectedSeafreight.carrierName}</ListItem>
-                                <ListItem divider sx={getBestSeafreightIndex([option1,option2,option3]) === 0 ? { background: "limegreen", color: "#000" } : {}}>Seafreight Tariff : {getTotalPrices(option1.selectedSeafreights)} €</ListItem>
+                                <ListItem divider sx={getBestSeafreightIndex(props.options) === 0 ? { background: "limegreen", color: "#000" } : {}}>Seafreight Tariff : {getTotalPrices(option1.selectedSeafreights)} €</ListItem>
                                 <ListItem divider sx={{ display: "block" }}>
                                     Seafreight details 
                                     {option1.selectedSeafreights.map((elm: any, id: number) => {
@@ -272,7 +272,7 @@ function CompareOptions(props: any) {
                                         );
                                     })}
                                 </ListItem>
-                                <ListItem divider sx={getBestMiscIndex([option1,option2,option3]) === 0 ? { background: "limegreen", color: "#000" } : {}}>Miscellaneous Tariff : {getTotalPrices(option1.myMiscs)} €</ListItem>
+                                <ListItem divider sx={getBestMiscIndex(props.options) === 0 ? { background: "limegreen", color: "#000" } : {}}>Miscellaneous Tariff : {getTotalPrices(option1.myMiscs)} €</ListItem>
                                 <ListItem sx={{ display: "block" }}>
                                     Miscellaneous details 
                                     {option1.myMiscs.map((elm: any, id: number) => {
@@ -293,20 +293,20 @@ function CompareOptions(props: any) {
                                 {
                                     option2.selectedHaulage !== null ? 
                                     <>
-                                        <ListItem divider sx={getBestTotalIndex([option1,option2,option3]) === 1 ? { background: "limegreen", color: "#000" } : {}}>
+                                        <ListItem divider sx={getBestTotalIndex(props.options) === 1 ? { background: "limegreen", color: "#000" } : {}}>
                                             <strong>Total Unit Price : {option2.selectedHaulage.unitTariff+getTotalPrices(option2.selectedSeafreights)+getTotalPrices(option2.myMiscs)} €</strong>
                                         </ListItem>
                                         <ListItem divider>Haulier Name : {option2.selectedHaulage.haulierName}</ListItem>
-                                        <ListItem divider sx={getBestHaulageIndex([option1,option2,option3]) === 1 ? { background: "limegreen", color: "#000" } : {}}>Haulage Tariff : {option2.selectedHaulage.unitTariff} €</ListItem>
-                                        <ListItem divider sx={getBestMultiStopIndex([option1,option2,option3]) === 1 ? { background: "limegreen", color: "#000" } : {}}>Multi Stop : {option2.selectedHaulage.multiStop} €</ListItem>
-                                        <ListItem divider sx={getBestOvertimeIndex([option1,option2,option3]) === 1 ? { background: "limegreen", color: "#000" } : {}}>Overtime Tariff : {option2.selectedHaulage.overtimeTariff} €</ListItem>        
+                                        <ListItem divider sx={getBestHaulageIndex(props.options) === 1 ? { background: "limegreen", color: "#000" } : {}}>Haulage Tariff : {option2.selectedHaulage.unitTariff} €</ListItem>
+                                        <ListItem divider sx={getBestMultiStopIndex(props.options) === 1 ? { background: "limegreen", color: "#000" } : {}}>Multi Stop : {option2.selectedHaulage.multiStop} €</ListItem>
+                                        <ListItem divider sx={getBestOvertimeIndex(props.options) === 1 ? { background: "limegreen", color: "#000" } : {}}>Overtime Tariff : {option2.selectedHaulage.overtimeTariff} €</ListItem>        
                                     </> : 
-                                    <ListItem divider sx={getBestAltTotalIndex([option1,option2,option3]) === 1 ? { background: "#FFF", color: "#000" } : {}}>
+                                    <ListItem divider sx={getBestAltTotalIndex(props.options) === 1 ? { background: "#FFF", color: "#000" } : {}}>
                                         <strong>Total Unit Price : {getTotalPrices(option2.selectedSeafreights)+getTotalPrices(option2.myMiscs)} €</strong>
                                     </ListItem>
                                 }
                                 <ListItem divider>Carrier Name : {option2.selectedSeafreight.carrierName}</ListItem>
-                                <ListItem divider sx={getBestSeafreightIndex([option1,option2,option3]) === 1 ? { background: "limegreen", color: "#000" } : {}}>Seafreight Tariff : {getTotalPrices(option2.selectedSeafreights)} €</ListItem>
+                                <ListItem divider sx={getBestSeafreightIndex(props.options) === 1 ? { background: "limegreen", color: "#000" } : {}}>Seafreight Tariff : {getTotalPrices(option2.selectedSeafreights)} €</ListItem>
                                 <ListItem divider sx={{ display: "block" }}>
                                     Seafreight details 
                                     {option2.selectedSeafreights.map((elm: any, id: number) => {
@@ -320,7 +320,7 @@ function CompareOptions(props: any) {
                                         );
                                     })}
                                 </ListItem>
-                                <ListItem divider sx={getBestMiscIndex([option1,option2,option3]) === 1 ? { background: "limegreen", color: "#000" } : {}}>Miscellaneous Tariff : {getTotalPrices(option2.myMiscs)} €</ListItem>
+                                <ListItem divider sx={getBestMiscIndex(props.options) === 1 ? { background: "limegreen", color: "#000" } : {}}>Miscellaneous Tariff : {getTotalPrices(option2.myMiscs)} €</ListItem>
                                 <ListItem sx={{ display: "block" }}>
                                     Miscellaneous details 
                                     {option2.myMiscs.map((elm: any, id: number) => {
@@ -341,20 +341,20 @@ function CompareOptions(props: any) {
                                 {
                                     option3.selectedHaulage !== null ? 
                                     <>
-                                        <ListItem divider sx={getBestTotalIndex([option1,option2,option3]) === 2 ? { background: "limegreen", color: "#000" } : {}}>
+                                        <ListItem divider sx={getBestTotalIndex(props.options) === 2 ? { background: "limegreen", color: "#000" } : {}}>
                                             <strong>Total Unit Price : {option3.selectedHaulage.unitTariff+getTotalPrices(option3.selectedSeafreights)+getTotalPrices(option3.myMiscs)} €</strong>
                                         </ListItem>
                                         <ListItem divider>Haulier Name : {option3.selectedHaulage.haulierName}</ListItem>
-                                        <ListItem divider sx={getBestHaulageIndex([option1,option2,option3]) === 2 ? { background: "limegreen", color: "#000" } : {}}>Haulage Tariff : {option3.selectedHaulage.unitTariff} €</ListItem>
-                                        <ListItem divider sx={getBestMultiStopIndex([option1,option2,option3]) === 2 ? { background: "limegreen", color: "#000" } : {}}>Multi Stop : {option3.selectedHaulage.multiStop} €</ListItem>
-                                        <ListItem divider sx={getBestOvertimeIndex([option1,option2,option3]) === 2 ? { background: "limegreen", color: "#000" } : {}}>Overtime Tariff : {option3.selectedHaulage.overtimeTariff} €</ListItem>        
+                                        <ListItem divider sx={getBestHaulageIndex(props.options) === 2 ? { background: "limegreen", color: "#000" } : {}}>Haulage Tariff : {option3.selectedHaulage.unitTariff} €</ListItem>
+                                        <ListItem divider sx={getBestMultiStopIndex(props.options) === 2 ? { background: "limegreen", color: "#000" } : {}}>Multi Stop : {option3.selectedHaulage.multiStop} €</ListItem>
+                                        <ListItem divider sx={getBestOvertimeIndex(props.options) === 2 ? { background: "limegreen", color: "#000" } : {}}>Overtime Tariff : {option3.selectedHaulage.overtimeTariff} €</ListItem>        
                                     </> : 
-                                    <ListItem divider sx={getBestAltTotalIndex([option1,option2,option3]) === 2 ? { background: "#FFF", color: "#000" } : {}}>
+                                    <ListItem divider sx={getBestAltTotalIndex(props.options) === 2 ? { background: "#FFF", color: "#000" } : {}}>
                                         <strong>Total Unit Price : {getTotalPrices(option3.selectedSeafreights)+getTotalPrices(option3.myMiscs)} €</strong>
                                     </ListItem>
                                 }
                                 <ListItem divider>Carrier Name : {option3.selectedSeafreight.carrierName}</ListItem>
-                                <ListItem divider sx={getBestSeafreightIndex([option1,option2,option3]) === 2 ? { background: "limegreen", color: "#000" } : {}}>Seafreight Tariff : {getTotalPrices(option3.selectedSeafreights)} €</ListItem>
+                                <ListItem divider sx={getBestSeafreightIndex(props.options) === 2 ? { background: "limegreen", color: "#000" } : {}}>Seafreight Tariff : {getTotalPrices(option3.selectedSeafreights)} €</ListItem>
                                 <ListItem divider sx={{ display: "block" }}>
                                     Seafreight details 
                                     {option3.selectedSeafreights.map((elm: any, id: number) => {
@@ -368,7 +368,7 @@ function CompareOptions(props: any) {
                                         );
                                     })}
                                 </ListItem>
-                                <ListItem divider sx={getBestMiscIndex([option1,option2,option3]) === 2 ? { background: "limegreen", color: "#000" } : {}}>Miscellaneous Tariff : {getTotalPrices(option3.myMiscs)} €</ListItem>
+                                <ListItem divider sx={getBestMiscIndex(props.options) === 2 ? { background: "limegreen", color: "#000" } : {}}>Miscellaneous Tariff : {getTotalPrices(option3.myMiscs)} €</ListItem>
                                 <ListItem sx={{ display: "block" }}>
                                     Miscellaneous details 
                                     {option3.myMiscs.map((elm: any, id: number) => {
