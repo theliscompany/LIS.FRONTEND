@@ -481,5 +481,6 @@ export const fr = {
   newOption: "Nouvelle option",
   compareOptions: "Comparer les options",
   youNeedOptions: "Vous devez enregistrer des options à envoyer",
-  saveOption: "Enregistrer l'option"
+  saveOption: "Enregistrer l'option",
+  resendOffer: "Renvoyer l'offre",
 };

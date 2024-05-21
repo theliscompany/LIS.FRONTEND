@@ -17,7 +17,12 @@ export const overlayStyles = {
     zIndex: 1,
     borderRadius: 0
 };
-  
+
+export const activeStyles = {
+  background: "limegreen", 
+  color: "#000"
+}
+
 export const imageStyles = {
     width: "100vw"
 };

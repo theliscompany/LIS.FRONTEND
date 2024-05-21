@@ -217,7 +217,9 @@ function PriceOffer(props: any) {
                         sx={{ mr: 1, textTransform: "none" }} 
                         onClick={acceptOffer}
                         // disabled={props.offer.status !== "Pending"}
-                    >{t('approveOffer')}</Button>
+                    >
+						{ props.offer.status !== "Pending" ? t('resendOffer') : t('approveOffer') }
+					</Button>
                     <Button
                         variant="contained" 
                         color="secondary" 
