@@ -9,7 +9,7 @@ import { DataGrid, GridColDef, GridColumnHeaderParams, GridRenderCellParams, Gri
 import StarterKit from '@tiptap/starter-kit';
 // import { t } from 'i18next';
 import React from 'react';
-import { calculateTotal, checkCarrierConsistency, checkDifferentDefaultContainer, formatObject, formatServices, generateRandomNumber, getCityCountry, getServices, getServicesTotal, getServicesTotal2, getTotalNumber, hashCode, myServices, removeDuplicatesWithLatestUpdated } from '../../utils/functions';
+import { calculateTotal, checkCarrierConsistency, checkDifferentDefaultContainer, formatObject, formatServices, generateRandomNumber, getCityCountry, getServices, getServicesTotal, getServicesTotal2, getTotalNumber, getTotalPrices, hashCode, myServices, removeDuplicatesWithLatestUpdated } from '../../utils/functions';
 import AutocompleteSearch from '../shared/AutocompleteSearch';
 import ContainerElement from './ContainerElement';
 import ContainerPrice from './ContainerPrice';
@@ -1510,11 +1510,33 @@ function GeneratePriceOffer(props: any) {
                                                                 <ListItemText 
                                                                     sx={{ mt: 0 }}
                                                                     primary={
-                                                                        elm.selectedSeafreight !== undefined && elm.selectedSeafreight !== null ? 
-                                                                        Number(id+1)+"# "+elm.selectedSeafreight.departurePortName+" - "+elm.selectedSeafreight.destinationPortName+" | "+elm.selectedSeafreight.carrierName 
-                                                                        : "N/A"
+                                                                        <div>
+                                                                            <span style={{ display: "inline-block", minWidth: "450px" }}>
+                                                                                {
+                                                                                    elm.selectedSeafreight !== undefined && elm.selectedSeafreight !== null ? 
+                                                                                    Number(id+1)+"# "+elm.selectedSeafreight.departurePortName+" - "+elm.selectedSeafreight.destinationPortName+" | "+elm.selectedSeafreight.carrierName 
+                                                                                    : "N/A"
+                                                                                }
+                                                                            </span>
+                                                                            {
+                                                                                elm.selectedHaulage !== null ? 
+                                                                                <span style={formState.currentOption !== id ? { color: "teal", marginLeft: "20px" } : { color: "white", marginLeft: "20px"}}>
+                                                                                    Haulage : {elm.selectedHaulage.unitTariff} €
+                                                                                </span> : null
+                                                                            }
+                                                                            {
+                                                                                <span style={formState.currentOption !== id ? { color: "teal", marginLeft: "20px" } : { color: "white", marginLeft: "20px"}}>
+                                                                                    Freight : {getTotalPrices(elm.selectedSeafreights)} €
+                                                                                </span>
+                                                                            }
+                                                                            {
+                                                                                <span style={formState.currentOption !== id ? { color: "teal", marginLeft: "20px" } : { color: "white", marginLeft: "20px"}}>
+                                                                                    Misc : {getTotalPrices(elm.myMiscs)} €
+                                                                                </span>
+                                                                            }
+                                                                        </div>
                                                                     }
-                                                                    primaryTypographyProps={{ fontWeight: "bold" }} 
+                                                                    primaryTypographyProps={{ fontWeight: "bold", fontSize: 13 }} 
                                                                 />
                                                             </ListItem>
                                                         );

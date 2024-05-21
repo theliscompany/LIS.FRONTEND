@@ -45,7 +45,6 @@ const ClientSearch: React.FC<LocationAutocompleteProps> = ({ id, name, value, on
     const debouncedSearch = debounce(async (search: string) => {
         if (account && instance && context) {
             setLoading(true);
-            // const token = await getAccessToken(instance, crmRequest, account);
             
             if (checkFormatCode(search)) {
                 // First i search by contact number

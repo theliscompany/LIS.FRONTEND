@@ -475,11 +475,12 @@ export const en = {
   newQuoteOffer: "New quote offer",
   yourAttachments: "The message will be sent with the following attachments", 
   noAttachments: "The message does not have attachments", 
-  updateOption: "Update option",
-  selectOption: "Select option",
-  deleteOption: "Delete option",
+  updateOption: "Update",
+  selectOption: "Select",
+  deleteOption: "Delete",
   newOption: "New option",
   compareOptions: "Compare options",
   youNeedOptions: "You need to save some options to send",
-  saveOption: "Save option"
+  saveOption: "Save option",
+  resendOffer: "Resend the offer",
 };
