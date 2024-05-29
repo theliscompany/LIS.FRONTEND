@@ -291,7 +291,7 @@ function RequestPriceRequest(props: any) {
                                                     multiple    
                                                     disablePortal
                                                     id="recipients"
-                                                    placeholder="Carriers recipients"
+                                                    // placeholder="Carriers recipients"
                                                     options={carriersData}
                                                     getOptionLabel={(option: any) => { 
                                                         if (option !== undefined && option !== null && option !== "") {
@@ -304,7 +304,7 @@ function RequestPriceRequest(props: any) {
                                                     }}
                                                     value={recipients}
                                                     sx={{ mt: 1 }}
-                                                    renderInput={(params: any) => <TextField {...params} sx={{ textTransform: "lowercase" }} />}
+                                                    renderInput={(params: any) => <TextField placeholder="Carriers recipients" {...params} sx={{ textTransform: "lowercase" }} />}
                                                     onChange={(e: any, value: any) => { setRecipients(value); }}
                                                     fullWidth
                                                 />
@@ -323,7 +323,7 @@ function RequestPriceRequest(props: any) {
                                                 multiple    
                                                 disablePortal
                                                 id="commodities"
-                                                placeholder="Machinery, Household goods, etc"
+                                                // placeholder="Machinery, Household goods, etc"
                                                 options={props.products}
                                                 getOptionLabel={(option: any) => { 
                                                     if (option !== null && option !== undefined) {
@@ -333,7 +333,7 @@ function RequestPriceRequest(props: any) {
                                                 }}
                                                 value={commoditiesArr}
                                                 sx={{ mt: 1 }}
-                                                renderInput={(params: any) => <TextField {...params} sx={{ textTransform: "lowercase" }} />}
+                                                renderInput={(params: any) => <TextField placeholder="Machinery, Household goods, etc" {...params} sx={{ textTransform: "lowercase" }} />}
                                                 onChange={(e: any, value: any) => { setCommoditiesArr(value); }}
                                                 fullWidth
                                             /> : <Skeleton />

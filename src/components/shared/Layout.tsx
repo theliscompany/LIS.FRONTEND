@@ -42,36 +42,11 @@ import Search from '@mui/icons-material/Search';
 
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Anchor, AnchorOutlined, AttachFileOutlined, ContactsOutlined, ExpandLess, ExpandMore, FolderOutlined, Inventory, InventoryOutlined, RoomService, RoomServiceOutlined, TaskAltOutlined } from '@mui/icons-material';
-
-function stringToColor(string: string) {
-    let hash = 0;
-    let i;
-
-    /* eslint-disable no-bitwise */
-    for (i = 0; i < string.length; i += 1) {
-        hash = string.charCodeAt(i) + ((hash << 5) - hash);
-    }
-
-    let color = '#';
-
-    for (i = 0; i < 3; i += 1) {
-        const value = (hash >> (i * 8)) & 0xff;
-        color += `00${value.toString(16)}`.slice(-2);
-    }
-    /* eslint-enable no-bitwise */
-
-    return color;
-}
-
-function stringAvatar(name: string | undefined) {
-    return {
-        sx: {
-            bgcolor: name !== undefined ? stringToColor(name) : "#333",
-        },
-        children: `${name?.split(' ')[0][0]}`,
-    };
-}
+import { Anchor, AnchorOutlined, AttachFileOutlined, ContactsOutlined, ExpandLess, ExpandMore, FirstPage, FolderOutlined, Inventory, InventoryOutlined, LastPage, RoomService, RoomServiceOutlined, TaskAltOutlined } from '@mui/icons-material';
+import { useAppDispatch } from '../../store';
+import { fetchAssignees, fetchContactBusinesses, fetchPorts, fetchProducts, fetchServices } from '../../store/masterdata.slice';
+import { useAuthorizedBackendApi } from '../../api/api';
+import { stringAvatar } from '../../utils/functions';
 
 const drawerWidth = 220;
 
@@ -92,7 +67,7 @@ const closedMixin = (theme: Theme): CSSObject => ({
     overflowX: 'hidden',
     width: `calc(${theme.spacing(7)} + 1px)`,
     [theme.breakpoints.up('sm')]: {
-        width: `calc(${theme.spacing(8)} + 1px)`,
+        width: `calc(${theme.spacing(7)} + 1px)`,
     },
 });
 
@@ -130,6 +105,19 @@ function Layout(props: {children?: React.ReactNode}) {
 
     const { t, i18n } = useTranslation();
     
+    const context = useAuthorizedBackendApi();
+    const dispatch = useAppDispatch();
+
+    React.useEffect(() => {
+        if (context) {
+            dispatch(fetchPorts(context));
+            dispatch(fetchServices(context));
+            dispatch(fetchProducts(context));
+            dispatch(fetchAssignees(context));
+        }
+    }, [context, dispatch])
+      
+  
     const handleOpenNavMenu = (event: any) => {
         setAnchorElNav(event.currentTarget);
     };
@@ -174,6 +162,9 @@ function Layout(props: {children?: React.ReactNode}) {
 
     const handleDrawerClose = () => {
         setOpen(false);
+        setOpenMasterdata(false);
+        setOpenPrices(false);
+        setOpenRequests(false);
     };
 
     // const loadRequests = async () => {
@@ -640,21 +631,21 @@ function Layout(props: {children?: React.ReactNode}) {
                                 </List>
                             </Collapse>
 
-                            
+                            <List dense sx={{ position: "fixed", bottom: "0px", left: "10px", right: "10px", maxWidth: open ? "200px" : "40px" }}>
+                                <ListItem className="cs-listitem" key={"Collapse"} disablePadding disableGutters>
+                                    <DarkTooltip title={t('collapse')} placement="right" arrow>
+                                        <ListItemButton className="cs-listitembutton" onClick={open ? handleDrawerClose : handleDrawerOpen}>
+                                            <ListItemIcon className="cs-listitemicon">
+                                                {open ? <FirstPage fontSize="small" /> : <LastPage fontSize="small" />}
+                                            </ListItemIcon>
+                                            <ListItemText primary={open ? t('collapse') : ""} primaryTypographyProps={{ fontSize: 13 }} />
+                                        </ListItemButton>
+                                    </DarkTooltip>
+                                </ListItem>
+                            </List>
                         </List>
                         
-                        {/* <List dense sx={{ position: "absolute", bottom: "0px", left: "10px", right: "10px" }}>
-                            <ListItem className="cs-listitem" key={"Collapse"} disablePadding disableGutters>
-                                <DarkTooltip title={t('collapse')} placement="right" arrow>
-                                    <ListItemButton className="cs-listitembutton" onClick={open ? handleDrawerClose : handleDrawerOpen}>
-                                        <ListItemIcon className="cs-listitemicon">
-                                            {open ? <FirstPageIcon fontSize="small" /> : <LastPageIcon fontSize="small" />}
-                                        </ListItemIcon>
-                                        <ListItemText primary={t('collapse')} primaryTypographyProps={{ fontSize: 13 }} />
-                                    </ListItemButton>
-                                </DarkTooltip>
-                            </ListItem>
-                        </List> */}
+                        
                     </Box>
                 </Drawer>
                 

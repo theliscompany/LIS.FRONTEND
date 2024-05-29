@@ -9,7 +9,7 @@ import { BackendService } from '../utils/services/fetch';
 import { Alert, Button, DialogActions, DialogContent, Grid, IconButton, InputLabel, MenuItem, Select, Skeleton, Typography } from '@mui/material';
 import { DataGrid, GridColDef, GridRenderCellParams, GridToolbar } from '@mui/x-data-grid';
 // import { t } from 'i18next';
-import { sizingStyles, gridStyles, BootstrapDialog, BootstrapDialogTitle, buttonCloseStyles, BootstrapInput, actionButtonStyles, inputLabelStyles } from '../utils/misc/styles';
+import { sizingStyles, gridStyles, BootstrapDialog, BootstrapDialogTitle, buttonCloseStyles, BootstrapInput, actionButtonStyles, inputLabelStyles, properties } from '../utils/misc/styles';
 import { Edit } from '@mui/icons-material';
 import CountrySelect from '../components/shared/CountrySelect';
 import { countries } from '../utils/constants';
@@ -291,7 +291,16 @@ const MasterDataContacts: any = (props: any) => {
                             </Grid>
                             <Grid item xs={12}>
                                 <InputLabel htmlFor="phone-number" sx={inputLabelStyles}>{t('whatsappNumber')}</InputLabel>
-                                <MuiTelInput id="phone-number" value={testPhone} onChange={setTestPhone} defaultCountry="CM" preferredCountries={["CM", "BE", "KE"]} fullWidth sx={{ mt: 1 }} />
+                                <MuiTelInput 
+                                    id="phone-number" 
+                                    value={testPhone} 
+                                    onChange={setTestPhone} 
+                                    defaultCountry="CM" 
+                                    preferredCountries={["CM", "BE", "KE"]} 
+                                    fullWidth 
+                                    sx={{ mt: 1 }}
+                                    {...properties} 
+                                />
                             </Grid>
                             <Grid item xs={12}>
                                 <InputLabel htmlFor="test-categories" sx={inputLabelStyles}>{t('categories')}</InputLabel>

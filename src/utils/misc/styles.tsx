@@ -1,8 +1,15 @@
-import { Badge, BadgeProps, Dialog, DialogTitle, IconButton, InputBase, Tooltip, TooltipProps } from '@mui/material';
+import { Badge, BadgeProps, Dialog, DialogTitle, IconButton, InputBase, TextFieldClasses, Tooltip, TooltipProps } from '@mui/material';
 import { tooltipClasses } from '@mui/material/Tooltip';
 import { alpha, styled } from '@mui/material/styles';
 import { DialogTitleProps } from '../models/models';
 import CloseIcon from '@mui/icons-material/Close';
+
+export const myTextFieldClasses: Partial<TextFieldClasses> = {
+  root: 'my-root-class',
+  // other properties...
+};
+
+export const properties: any = {};
 
 export const overlayStyles = {
     position: 'absolute',

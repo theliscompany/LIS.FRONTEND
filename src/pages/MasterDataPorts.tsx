@@ -14,6 +14,8 @@ import { Edit, Delete } from '@mui/icons-material';
 import CountrySelect from '../components/shared/CountrySelect';
 import { countries } from '../utils/constants';
 import { useTranslation } from 'react-i18next';
+import { useAppDispatch } from '../store';
+import { fetchPorts } from '../store/masterdata.slice';
 
 const MasterDataPorts: any = (props: any) => {
     const { t } = useTranslation();
@@ -32,6 +34,8 @@ const MasterDataPorts: any = (props: any) => {
     const { instance, accounts } = useMsal();
     const account = useAccount(accounts[0] || {});
     const context = useAuthorizedBackendApi();
+
+    const dispatch = useAppDispatch();
     
     const getPorts = async () => {
         if (account && instance && context) {
@@ -40,6 +44,9 @@ const MasterDataPorts: any = (props: any) => {
             if (response !== null && response !== undefined) {
                 setPorts(response);
                 setLoadResults(false);
+
+                // Bad method, must directly use the value in the store and work with it
+                dispatch(fetchPorts(context));
             }
             else {
                 setLoadResults(false);

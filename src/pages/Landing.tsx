@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Alert, Autocomplete, Box, Button, Card, CardActions, CardContent, Checkbox, DialogActions, DialogContent, Grid, InputLabel, ListItemText, MenuItem, NativeSelect, Select, SelectChangeEvent, Skeleton, TextField, Typography, Menu } from '@mui/material';
 import FaceIcon from '@mui/icons-material/Face';
-import { bottomStyles, cardStyles, buttonStyles, buttonCloseStyles, inputLabelStyles, cardTextStyles, BootstrapInput, BootstrapDialog, BootstrapDialogTitle } from '../utils/misc/styles';
+import { bottomStyles, cardStyles, buttonStyles, buttonCloseStyles, inputLabelStyles, cardTextStyles, BootstrapInput, BootstrapDialog, BootstrapDialogTitle, properties } from '../utils/misc/styles';
 // import '../../App.css';
 // @ts-ignore
 import { CookieBanner } from '@palmabit/react-cookie-law';
@@ -20,7 +20,7 @@ import { MailData } from '../utils/models/models';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
-function Landing() {
+const Landing = (props: any) => {
     const isAuthenticated = useIsAuthenticated();
     const { lang } = useParams();
     
@@ -450,7 +450,13 @@ function Landing() {
                     <Grid container spacing={2} mt={1} px={2}>
                         <Grid item xs={12} md={6}>
                             <InputLabel htmlFor="whatsapp-phone-number" sx={inputLabelStyles}>{t('whatsappNumber')}</InputLabel>
-                            <MuiTelInput id="whatsapp-phone-number" value={phone} onChange={setPhone} defaultCountry="CM" preferredCountries={["CM", "BE", "KE"]} fullWidth sx={{ mt: 1 }} />
+                            <MuiTelInput 
+                                id="whatsapp-phone-number" 
+                                value={phone} onChange={setPhone} 
+                                defaultCountry="CM" preferredCountries={["CM", "BE", "KE"]} 
+                                fullWidth sx={{ mt: 1 }}
+                                {...properties} 
+                            />
                         </Grid>
                         <Grid item xs={12} md={6}>
                             <InputLabel htmlFor="request-email" sx={inputLabelStyles}>{t('emailAddress')}</InputLabel>
@@ -491,7 +497,7 @@ function Landing() {
                                     multiple    
                                     disablePortal
                                     id="cargo-products"
-                                    placeholder="Machinery, Household goods, etc"
+                                    // placeholder="Machinery, Household goods, etc"
                                     options={products}
                                     getOptionLabel={(option: any) => { 
                                         if (option !== null && option !== undefined) {
@@ -501,7 +507,7 @@ function Landing() {
                                     }}
                                     value={tags}
                                     sx={{ mt: 1 }}
-                                    renderInput={(params: any) => <TextField {...params} sx={{ textTransform: "lowercase" }} />}
+                                    renderInput={(params: any) => <TextField placeholder="Machinery, Household goods, etc" {...params} sx={{ textTransform: "lowercase" }} />}
                                     onChange={(e: any, value: any) => { setTags(value); }}
                                     fullWidth
                                 /> : <Skeleton />
@@ -542,7 +548,13 @@ function Landing() {
                     <Grid container spacing={2} mt={1} px={2}>
                         <Grid item xs={12} md={6}>
                             <InputLabel htmlFor="phone-number" sx={inputLabelStyles}>{t('whatsappNumber')}</InputLabel>
-                            <MuiTelInput id="phone-number" value={phone} onChange={setPhone} defaultCountry="CM" preferredCountries={["CM", "BE", "KE"]} fullWidth sx={{ mt: 1 }} />
+                            <MuiTelInput 
+                                id="phone-number" 
+                                value={phone} onChange={setPhone} 
+                                defaultCountry="CM" preferredCountries={["CM", "BE", "KE"]} 
+                                fullWidth sx={{ mt: 1 }}
+                                {...properties} 
+                            />
                         </Grid>
                         <Grid item xs={12} md={6}>
                             <InputLabel htmlFor="contact-email" sx={inputLabelStyles}>{t('email')}</InputLabel>
@@ -604,7 +616,17 @@ function Landing() {
                     <Grid container spacing={2} mt={1} px={2}>
                         <Grid item xs={12} md={6}>
                             <InputLabel htmlFor="whatsapp-number" sx={inputLabelStyles}>{t('whatsappNumber')}</InputLabel>
-                            <MuiTelInput id="whatsapp-number" className="custom-phone-number" value={phone} onChange={setPhone} defaultCountry="CM" preferredCountries={["CM", "BE", "KE"]} fullWidth sx={{ mt: 1 }} />
+                            <MuiTelInput 
+                                id="whatsapp-number" 
+                                className="custom-phone-number" 
+                                value={phone} 
+                                onChange={setPhone} 
+                                defaultCountry="CM" 
+                                preferredCountries={["CM", "BE", "KE"]} 
+                                fullWidth 
+                                sx={{ mt: 1 }}
+                                {...properties} 
+                            />
                         </Grid>
                         <Grid item xs={12} md={6}>
                             <InputLabel htmlFor="download-email" sx={inputLabelStyles}>{t('email')}</InputLabel>

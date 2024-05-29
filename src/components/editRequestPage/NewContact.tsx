@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { BootstrapDialogTitle, BootstrapInput, actionButtonStyles, buttonCloseStyles, inputLabelStyles } from '../../utils/misc/styles';
+import { BootstrapDialogTitle, BootstrapInput, actionButtonStyles, buttonCloseStyles, inputLabelStyles, myTextFieldClasses, properties } from '../../utils/misc/styles';
 import { Button, DialogActions, DialogContent, Grid, InputLabel, Typography } from '@mui/material';
 import { useAuthorizedBackendApi } from '../../api/api';
 import { useTranslation } from 'react-i18next';
@@ -7,10 +7,16 @@ import { enqueueSnackbar } from 'notistack';
 import { BackendService } from '../../utils/services/fetch';
 import { crmRequest, protectedResources } from '../../config/authConfig';
 import { useAccount, useMsal } from '@azure/msal-react';
-import { AuthenticationResult } from '@azure/msal-browser';
-import { MuiTelInput } from 'mui-tel-input';
+import { MuiTelInput, MuiTelInputProps } from 'mui-tel-input';
 import CountrySelect from '../shared/CountrySelect';
-import { getAccessToken } from '../../utils/functions';
+// import styled from '@emotion/styled';
+
+// type MyTelInputProps = Omit<MuiTelInputProps, 'error' | 'variant' | 'children' | 'classes' | 'defaultChecked' | 'suppressContentEditableWarning' | 'suppressHydrationWarning'> & {
+//     id: string;
+//     sx: object;
+// };
+
+// const WithStyledFlag = styled(MuiTelInput)``;
 
 function NewContact(props: any) {
     const [testName, setTestName] = useState<string>("");
@@ -25,6 +31,10 @@ function NewContact(props: any) {
     const context = useAuthorizedBackendApi();
     const { t } = useTranslation();
     
+    const handleChange = (newPhone: string) => {
+        setTestPhone(newPhone)
+    }
+
     var namesArray = [
         {type: "", name: t('client')},
         {type: "OTHERS", name: t('supplier')},
@@ -110,7 +120,17 @@ function NewContact(props: any) {
                     </Grid>
                     <Grid item xs={12}>
                         <InputLabel htmlFor="phone-number" sx={inputLabelStyles}>{t('whatsappNumber')}</InputLabel>
-                        <MuiTelInput id="phone-number" value={testPhone} onChange={setTestPhone} defaultCountry="CM" preferredCountries={["CM", "BE", "KE"]} fullWidth sx={{ mt: 1 }} />
+                        <MuiTelInput 
+                            id="phone-number" 
+                            value={testPhone} 
+                            onChange={handleChange} 
+                            defaultCountry="CM" 
+                            preferredCountries={["CM", "BE", "KE"]} 
+                            fullWidth 
+                            sx={{ mt: 1 }}
+                            error={false}
+                            {...properties}
+                        />
                     </Grid>
                 </Grid>
             </DialogContent>

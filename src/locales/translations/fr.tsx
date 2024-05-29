@@ -483,4 +483,5 @@ export const fr = {
   youNeedOptions: "Vous devez enregistrer des options à envoyer",
   saveOption: "Enregistrer l'option",
   resendOffer: "Renvoyer l'offre",
+  goToOptions: "Aller aux options"
 };

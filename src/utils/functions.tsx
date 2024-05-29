@@ -47,30 +47,56 @@ export const findClosestSeaPort = (myPort: any, seaPorts: any) => {
     return closestPort;
 }
 
+// export function sortByCloseness(myPort: any, seaPorts: any) {
+//     const myCoordinates = [myPort.latitude, myPort.longitude];
+
+//     // Calculate distances and add them to the sea ports
+//     seaPorts.forEach((seaPort: any) => {
+//         const seaPortCoordinates = seaPort.coordinates;
+//         if (seaPortCoordinates !== undefined) {
+//             const distance = calculateDistance(myCoordinates, seaPortCoordinates);
+//             seaPort.distance = distance; // Add the distance to each sea port
+//         } 
+//         else {
+//             seaPort.distance = Infinity; // Ports without coordinates are considered farthest
+//         }
+//     });
+
+//     // Sort the sea ports by distance
+//     seaPorts.sort((a: any, b: any) => a.distance - b.distance);
+
+//     // Remove the "distance" property from the sorted ports
+//     seaPorts.forEach((seaPort: any) => {
+//         delete seaPort.distance;
+//     });
+
+//     return seaPorts;
+// }
+
 export function sortByCloseness(myPort: any, seaPorts: any) {
     const myCoordinates = [myPort.latitude, myPort.longitude];
 
-    // Calculate distances and add them to the sea ports
-    seaPorts.forEach((seaPort: any) => {
+    // Calculate distances and create a new array of objects with the distance property
+    const seaPortsWithDistances = seaPorts.map((seaPort: any) => {
         const seaPortCoordinates = seaPort.coordinates;
         if (seaPortCoordinates !== undefined) {
             const distance = calculateDistance(myCoordinates, seaPortCoordinates);
-            seaPort.distance = distance; // Add the distance to each sea port
+            return { ...seaPort, distance }; // Create a new object with the distance property
         } else {
-            seaPort.distance = Infinity; // Ports without coordinates are considered farthest
+            return { ...seaPort, distance: Infinity }; // Create a new object with the distance property
         }
     });
 
-    // Sort the sea ports by distance
-    seaPorts.sort((a: any, b: any) => a.distance - b.distance);
+    // Sort the new array of objects by distance
+    seaPortsWithDistances.sort((a: any, b: any) => a.distance - b.distance);
 
-    // Remove the "distance" property from the sorted ports
-    seaPorts.forEach((seaPort: any) => {
-        delete seaPort.distance;
+    // Remove the "distance" property from the sorted objects and return the result
+    return seaPortsWithDistances.map((seaPort: any) => {
+        const { distance, ...seaPortWithoutDistance } = seaPort; // Use destructuring to remove the distance property
+        return seaPortWithoutDistance;
     });
-
-    return seaPorts;
 }
+
 
 export function generateRandomNumber() {
     const maxNumbers = 100000;
@@ -799,3 +825,33 @@ export function getCityCountry(text: string) {
     const parts = text.split(',');
     return parts[0] + ', ' + parts[1];
 }
+
+export function stringToColor(string: string) {
+    let hash = 0;
+    let i;
+
+    /* eslint-disable no-bitwise */
+    for (i = 0; i < string.length; i += 1) {
+        hash = string.charCodeAt(i) + ((hash << 5) - hash);
+    }
+
+    let color = '#';
+
+    for (i = 0; i < 3; i += 1) {
+        const value = (hash >> (i * 8)) & 0xff;
+        color += `00${value.toString(16)}`.slice(-2);
+    }
+    /* eslint-enable no-bitwise */
+
+    return color;
+}
+
+export function stringAvatar(name: string | undefined) {
+    return {
+        sx: {
+            bgcolor: name !== undefined ? stringToColor(name) : "#333",
+        },
+        children: `${name?.split(' ')[0][0]}`,
+    };
+}
+
