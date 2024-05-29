@@ -1,7 +1,7 @@
 import { Grid, Accordion, AccordionSummary, Typography, AccordionDetails, InputLabel, Autocomplete, TextField, Skeleton, Button, ListItem, IconButton, ListItemText, NativeSelect } from '@mui/material';
 // import { t } from 'i18next';
 import { MuiTelInput } from 'mui-tel-input';
-import { inputLabelStyles, BootstrapInput, whiteButtonStyles } from '../../utils/misc/styles';
+import { inputLabelStyles, BootstrapInput, whiteButtonStyles, properties } from '../../utils/misc/styles';
 import AutocompleteSearch from '../shared/AutocompleteSearch';
 import ClientSearch from '../shared/ClientSearch';
 import { Delete, ExpandMore } from '@mui/icons-material';
@@ -90,6 +90,7 @@ function RequestForm(props: any) {
                                 value={props.phone} onChange={props.setPhone} 
                                 defaultCountry="CM" preferredCountries={["CM", "BE", "KE"]} 
                                 fullWidth sx={{ mt: 1 }} disabled 
+                                {...properties}
                             />
                         </Grid>
                         <Grid item xs={12} md={6} mt={1}>
@@ -108,7 +109,7 @@ function RequestForm(props: any) {
                                     multiple    
                                     disablePortal
                                     id="tags"
-                                    placeholder="Machinery, Household goods, etc"
+                                    // placeholder="Machinery, Household goods, etc"
                                     options={props.products}
                                     getOptionLabel={(option: any) => { 
                                         if (option !== null && option !== undefined) {
@@ -118,7 +119,7 @@ function RequestForm(props: any) {
                                     }}
                                     value={props.tags}
                                     sx={{ mt: 1 }}
-                                    renderInput={(params: any) => <TextField {...params} sx={{ textTransform: "lowercase" }} />}
+                                    renderInput={(params: any) => <TextField placeholder="Machinery, Household goods, etc" {...params} sx={{ textTransform: "lowercase" }} />}
                                     onChange={(e: any, value: any) => { props.setTags(value); }}
                                     fullWidth
                                     disabled

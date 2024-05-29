@@ -4,7 +4,7 @@ import { Accordion, AccordionDetails, AccordionSummary, Alert, Autocomplete, Box
 import { enqueueSnackbar } from 'notistack';
 import { BackendService } from '../../utils/services/fetch';
 import { protectedResources } from '../../config/authConfig';
-import { Anchor, Delete, ExpandMore, RestartAlt } from '@mui/icons-material';
+import { Anchor, ExpandMore, RestartAlt } from '@mui/icons-material';
 import { DataGrid, GridColDef, GridColumnHeaderParams, GridRenderCellParams, GridToolbar, GridValueFormatterParams, GridValueGetterParams } from '@mui/x-data-grid';
 import StarterKit from '@tiptap/starter-kit';
 // import { t } from 'i18next';
@@ -104,7 +104,7 @@ function GeneratePriceOffer(props: any) {
     const [loadCurrentOffer, setLoadCurrentOffer] = useState<boolean>(false);
     const [currentOffer, setCurrentOffer] = useState<any>(null);
     const [files, setFiles] = useState<any>(null);
-    const [fileValue, setFileValue] = useState<File[] | undefined>(undefined);
+    const [fileValue, setFileValue] = useState<File[] | undefined>(undefined);    
     
     const rteRef = useRef<RichTextEditorRef>(null);
     
@@ -1660,7 +1660,7 @@ function GeneratePriceOffer(props: any) {
                                                                 renderInput={(params: any) => <TextField {...params} label="" />}
                                                                 sx={{ mt: 1 }}
                                                             />
-                                                        </Grid> : <Skeleton />
+                                                        </Grid> : <Grid item xs={6}><Skeleton /></Grid>
                                                         : null
                                                     }
                                                     <Grid item xs={2}>
@@ -1820,9 +1820,14 @@ function GeneratePriceOffer(props: any) {
                                             disabled={formState.activeStep === 0}
                                             onClick={handleBack}
                                         >
-                                            {t('back')}
+                                            {t('back')} (to edit offer N° #{Number(formState.currentOption+1)})
                                         </Button>
                                         <Box sx={{ flex: '1 1 auto' }} />
+                                        {isStepOptional(formState.activeStep) && formState.options !== undefined && formState.options.length !== 0 && (
+                                            <Button variant="contained" color="inherit" sx={whiteButtonStyles} onClick={() => { setFormState({...formState, activeStep: 3 }); }} style={{ marginRight: "10px" }}>
+                                                {t('goToOptions')}
+                                            </Button>
+                                        )}
                                         {isStepOptional(formState.activeStep) && (
                                             <Button variant="contained" color="inherit" sx={whiteButtonStyles} onClick={handleSkip} style={{ marginRight: "10px" }}>
                                                 {t('skip')}

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Alert, Badge, Box, Button, Chip, Grid, Typography } from "@mui/material";
+import { Alert, Badge, Box, Button, Chip, Grid, ListItemButton, ListItemIcon, ListItemText, Popover, Typography } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import { BootstrapDialog, StyledBadge, whiteButtonStyles } from "../../utils/misc/styles";
 import RequestAddNote from "./RequestAddNote";
@@ -11,6 +11,7 @@ import NewProduct from "../shared/NewProduct";
 import NewContact from "./NewContact";
 import { statusTypes } from "../../utils/constants";
 import { colorsTypes } from "../../utils/functions";
+import { Anchor, AnchorOutlined, Contacts, ContactsOutlined, Drafts, Inventory, Inventory2, InventoryOutlined, Send } from "@mui/icons-material";
 
 function RequestFormHeader(props: any) {
     const [modal, setModal] = useState<boolean>(false);
@@ -20,6 +21,16 @@ function RequestFormHeader(props: any) {
     const [modalNewContact, setModalNewContact] = useState<boolean>(false);
     const [modalNewPort, setModalNewPort] = useState<boolean>(false);
     const [modalNewProduct, setModalNewProduct] = useState<boolean>(false);
+
+    const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
+    const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+        setAnchorEl(event.currentTarget);
+    };
+    const handleClose = () => {
+        setAnchorEl(null);
+    };
+    const open = Boolean(anchorEl);
+    const id = open ? 'simple-popover' : undefined;
     
     const { t } = useTranslation();
     // Find the status type by type
@@ -41,6 +52,42 @@ function RequestFormHeader(props: any) {
                 <Button 
                     variant="contained" color="inherit" 
                     sx={{ float: "right", backgroundColor: "#fff", textTransform: "none", ml: 2 }} 
+                    onClick={handleClick}
+                >
+                    Settings
+                </Button>
+
+                <Popover
+                    id={id}
+                    open={open}
+                    anchorEl={anchorEl}
+                    onClose={handleClose}
+                    anchorOrigin={{
+                        vertical: 'bottom',
+                        horizontal: 'right',
+                    }}
+                    transformOrigin={{
+                        vertical: 'top',
+                        horizontal: 'right',
+                    }}
+                >
+                    <ListItemButton onClick={() => { setModalNewPort(true); handleClose(); }}>
+                        <ListItemIcon><AnchorOutlined /></ListItemIcon>
+                        <ListItemText primary={t('createNewPort')} />
+                    </ListItemButton>
+                    <ListItemButton onClick={() => { setModalNewContact(true); handleClose(); }}>
+                        <ListItemIcon><ContactsOutlined /></ListItemIcon>
+                        <ListItemText primary={t('createNewContact')} />
+                    </ListItemButton>
+                    <ListItemButton onClick={() => { setModalNewProduct(true); handleClose(); }}>
+                        <ListItemIcon><InventoryOutlined /></ListItemIcon>
+                        <ListItemText primary={t('newProduct')} />
+                    </ListItemButton>
+                </Popover>
+                
+                {/* <Button 
+                    variant="contained" color="inherit" 
+                    sx={{ float: "right", backgroundColor: "#fff", textTransform: "none", ml: 2 }} 
                     onClick={() => { setModalNewProduct(true); }}
                 >
                     {t('newProduct')}
@@ -58,7 +105,7 @@ function RequestFormHeader(props: any) {
                     onClick={() => { setModalNewContact(true); }}
                 >
                     {t('createNewContact')}
-                </Button>
+                </Button> */}
             </Grid>
             <Grid item xs={12}>
                 <Alert 

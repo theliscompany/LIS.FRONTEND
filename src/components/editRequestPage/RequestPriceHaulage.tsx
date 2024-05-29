@@ -294,7 +294,7 @@ function RequestPriceHaulage(props: any) {
                                                     multiple    
                                                     disablePortal
                                                     id="recipients"
-                                                    placeholder="Carriers recipients"
+                                                    // placeholder="Carriers recipients"
                                                     options={hauliersData}
                                                     getOptionLabel={(option: any) => { 
                                                         if (option !== undefined && option !== null && option !== "") {
@@ -307,7 +307,7 @@ function RequestPriceHaulage(props: any) {
                                                     }}
                                                     value={recipients}
                                                     sx={{ mt: 1 }}
-                                                    renderInput={(params: any) => <TextField {...params} sx={{ textTransform: "lowercase" }} />}
+                                                    renderInput={(params: any) => <TextField placeholder="Carriers recipients" {...params} sx={{ textTransform: "lowercase" }} />}
                                                     onChange={(e: any, value: any) => { setRecipients(value); }}
                                                     fullWidth
                                                 />

@@ -483,4 +483,5 @@ export const en = {
   youNeedOptions: "You need to save some options to send",
   saveOption: "Save option",
   resendOffer: "Resend the offer",
+  goToOptions: "Go to options"
 };

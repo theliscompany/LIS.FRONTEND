@@ -191,7 +191,7 @@ function DownloadForm(props:{closeDialog(): void}) {
                 <Grid container spacing={2} mt={1}>
                     <Grid item xs={6}>
                         <InputLabel htmlFor="whatsapp-number">Whatsapp number</InputLabel>
-                        <MuiTelInput defaultCountry="CM" preferredCountries={["CM", "BE", "KE"]} value={phone} onChange={setPhone} fullWidth sx={{ mt: 1 }} />
+                        {/* <MuiTelInput defaultCountry="CM" preferredCountries={["CM", "BE", "KE"]} value={phone} onChange={setPhone} fullWidth sx={{ mt: 1 }} /> */}
                     </Grid>
                     <Grid item xs={6}>
                         <InputLabel htmlFor="email">Email</InputLabel>

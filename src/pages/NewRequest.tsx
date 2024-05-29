@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Autocomplete, Box, Button, Grid, InputLabel, NativeSelect, Skeleton, TextField, Typography, ListItem, ListItemText, IconButton, DialogActions, DialogContent } from '@mui/material';
 import { MuiTelInput } from 'mui-tel-input';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { inputLabelStyles, BootstrapInput, whiteButtonStyles, BootstrapDialog, BootstrapDialogTitle, buttonCloseStyles } from '../utils/misc/styles';
+import { inputLabelStyles, BootstrapInput, whiteButtonStyles, BootstrapDialog, BootstrapDialogTitle, buttonCloseStyles, properties } from '../utils/misc/styles';
 import { enqueueSnackbar, SnackbarProvider } from 'notistack';
 import { protectedResources } from '../config/authConfig';
 import { useAuthorizedBackendApi } from '../api/api';
@@ -14,6 +14,7 @@ import ClientSearch from '../components/shared/ClientSearch';
 import NewContact from '../components/editRequestPage/NewContact';
 import { containerPackages } from '../utils/constants';
 import useProcessStatePersistence from '../utils/processes/useProcessStatePersistence';
+import { useSelector } from 'react-redux';
 
 function validMail(mail: string) {
     return /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/.test(mail);
@@ -43,6 +44,9 @@ function NewRequest(props: any) {
     
     const context = useAuthorizedBackendApi();
 
+    var ourProducts: any = useSelector((state: any) => state.masterdata.products);
+    var ourAssignees: any = useSelector((state: any) => state.masterdata.assignees);
+        
     const [formState, setFormState] = useProcessStatePersistence(
         account?.name,
         'newRequestTest',
@@ -65,11 +69,16 @@ function NewRequest(props: any) {
     
     const getProducts = async () => {
         if (account && instance && context) {
-            const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Product?pageSize=500", context.tokenTransport);
-            console.log(response);
-            if (response !== null && response !== undefined) {
-                setProducts(response);
-            }  
+            if (ourProducts.length !== 0) {
+                console.log(ourProducts);
+                setProducts(ourProducts);    
+            }
+            else {
+                const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Product?pageSize=500", context.tokenTransport);
+                if (response !== null && response !== undefined) {
+                    setProducts(response);
+                }      
+            }    
         }
     }
     
@@ -96,27 +105,34 @@ function NewRequest(props: any) {
 
     const getAssignees = async () => {
         if (account && instance && context) {
-            try {
-                setLoadUser(true);
-                const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisQuotes.endPoint+"/Assignee", context.tokenLogin);
-                if (response !== null && response.code !== undefined) {
-                    if (response.code === 200) {
-                        var aux = response.data.find((elm: any) => elm.email === account?.username);
-                        setAssignees(response.data);
-                        setCurrentUser(aux);
-                        setLoadUser(false);
+            if (ourAssignees !== undefined) {
+                console.log(ourAssignees);
+                setAssignees(ourAssignees.data);
+                setLoadUser(false);
+            }
+            else {
+                try {
+                    setLoadUser(true);
+                    const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisQuotes.endPoint+"/Assignee", context.tokenLogin);
+                    if (response !== null && response.code !== undefined) {
+                        if (response.code === 200) {
+                            var aux = response.data.find((elm: any) => elm.email === account?.username);
+                            setAssignees(response.data);
+                            setCurrentUser(aux);
+                            setLoadUser(false);
+                        }
+                        else {
+                            setLoadUser(false);
+                        }
                     }
                     else {
                         setLoadUser(false);
                     }
                 }
-                else {
+                catch (err: any) {
                     setLoadUser(false);
+                    console.log(err);
                 }
-            }
-            catch (err: any) {
-                setLoadUser(false);
-                console.log(err);
             }
         }
     }
@@ -274,6 +290,7 @@ function NewRequest(props: any) {
                                 fullWidth 
                                 disabled
                                 sx={{ mt: 1 }} 
+                                {...properties}
                             />
                         </Grid>
                         <Grid item xs={12} md={6}>
@@ -353,7 +370,7 @@ function NewRequest(props: any) {
                                     multiple    
                                     disablePortal
                                     id="tags"
-                                    placeholder="Machinery, Household goods, etc"
+                                    // placeholder="Machinery, Household goods, etc"
                                     options={products}
                                     getOptionLabel={(option: any) => { 
                                         if (option !== null && option !== undefined) {
@@ -361,7 +378,7 @@ function NewRequest(props: any) {
                                         }
                                         return ""; 
                                     }}
-                                    renderInput={(params: any) => <TextField {...params} sx={{ textTransform: "lowercase" }} />}
+                                    renderInput={(params: any) => <TextField placeholder="Machinery, Household goods, etc" {...params} sx={{ textTransform: "lowercase" }} />}
                                     value={formState.tags}
                                     onChange={(e: any, value: any) => { handleChangeFormState(value, "tags"); }}
                                     sx={{ mt: 1 }}
