@@ -483,5 +483,11 @@ export const en = {
   youNeedOptions: "You need to save some options to send",
   saveOption: "Save option",
   resendOffer: "Resend the offer",
-  goToOptions: "Go to options"
+  goToOptions: "Go to options",
+  selectOptionOffer: "I want the offer",
+  refuseOffers: "Refuse all offers",
+  systemLanguage: "Mail language",
+  langtextfr: "French",
+  langtexten: "English",
+  confirmationOffer: "Confirmation of the selected offer"
 };

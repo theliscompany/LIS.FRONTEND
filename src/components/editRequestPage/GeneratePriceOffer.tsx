@@ -9,7 +9,7 @@ import { DataGrid, GridColDef, GridColumnHeaderParams, GridRenderCellParams, Gri
 import StarterKit from '@tiptap/starter-kit';
 // import { t } from 'i18next';
 import React from 'react';
-import { calculateTotal, checkCarrierConsistency, checkDifferentDefaultContainer, formatObject, formatServices, generateRandomNumber, getCityCountry, getServices, getServicesTotal, getServicesTotal2, getTotalNumber, getTotalPrices, hashCode, myServices, removeDuplicatesWithLatestUpdated } from '../../utils/functions';
+import { calculateTotal, checkCarrierConsistency, checkDifferentDefaultContainer, formatObject, formatServices, generateRandomNumber, getCity, getCityCountry, getServices, getServicesTotal, getServicesTotal2, getTotalNumber, getTotalPrices, hashCode, myServices, parseDate, removeDuplicatesWithLatestUpdated } from '../../utils/functions';
 import AutocompleteSearch from '../shared/AutocompleteSearch';
 import ContainerElement from './ContainerElement';
 import ContainerPrice from './ContainerPrice';
@@ -682,27 +682,66 @@ function GeneratePriceOffer(props: any) {
                 setLoadNewOffer(true);
                 var haulage = null;
                 var miscellaneous = null;
+                // var dataSent = {
+                //     "requestQuoteId": Number(id),
+                //     "comment": rteRef.current?.editor?.getHTML(),
+                //     "quoteOfferVm": 0,
+                //     "quoteOfferId": 10,
+                //     "quoteOfferNumber": generateRandomNumber(),
+                //     // "createdBy": account?.username,
+                //     "createdBy": JSON.stringify(formState),
+                //     "emailUser": email,
+                //     "haulage": haulage,
+                //     "miscellaneousList": miscellaneous,
+                //     "seaFreight": null,
+                //     "containers": containersSelection.map((elm: any) => { return { "containerId": elm.id, quantity: elm.quantity } }),
+                //     "departureDate": (new Date("01/01/2022")).toISOString(),
+                //     "departurePortId": formState.portDeparture.portId,
+                //     "destinationPortId": formState.portDestination.portId,
+                //     "haulageType": getCityCountry(props.requestData.departure)+" - "+getCityCountry(props.requestData.arrival),
+                //     "margin": 0,
+                //     "reduction": 0,
+                //     "extraFee": 0,
+                //     "totalPrice": 0
+                // };
+                // console.log("Options : ", formState.options[0].myMiscs[0].containers);
+                var sentOptions = formState.options.map((item: any) => {
+                    return {
+                        ...item,
+                        selectedHaulage: {
+                            ...item.selectedHaulage, 
+                            loadingCityName: getCity(props.requestData.departure)
+                        }, 
+                        selectedSeafreight: {
+                            ...item.selectedSeafreight, 
+                            validUntil: item.selectedSeafreight.validUntil !== null ? parseDate(item.selectedSeafreight.validUntil) : "2100-01-01T00:00:00Z"
+                        },
+                        selectedSeafreights: item.selectedSeafreights.map((elm: any) => { 
+                            return {...elm, validUntil: elm.validUntil !== null ? parseDate(elm.validUntil) : "2100-01-01T00:00:00Z"} 
+                        }),
+                        myMiscs: item.myMiscs.map((elm: any) => {
+                            return {
+                                ...elm, 
+                                defaultContainer: elm.defaultContainer !== null ? elm.defaultContainer : "N/A",
+                                services: elm.services.map((val: any) => {
+                                    return {...val, containers: val.containers.map((obj: any) => { return {...obj, packageName: obj.packageName !== null ? obj.packageName : "N/A"} }) }
+                                }),
+                                containers: elm.services[0].containers.map((obj: any) => { return {...obj, packageName: obj.packageName !== null ? obj.packageName : "N/A"} })
+                            }
+                        })
+                    }; 
+                });
+                // console.log("Options : ", sentOptions[0].myMiscs[0].containers);
+                
                 var dataSent = {
                     "requestQuoteId": Number(id),
                     "comment": rteRef.current?.editor?.getHTML(),
-                    "quoteOfferVm": 0,
-                    "quoteOfferId": 10,
                     "quoteOfferNumber": generateRandomNumber(),
-                    // "createdBy": account?.username,
-                    "createdBy": JSON.stringify(formState),
+                    "quoteOfferVm": 0,
                     "emailUser": email,
-                    "haulage": haulage,
-                    "miscellaneousList": miscellaneous,
-                    "seaFreight": null,
-                    "containers": containersSelection.map((elm: any) => { return { "containerId": elm.id, quantity: elm.quantity } }),
-                    "departureDate": (new Date("01/01/2022")).toISOString(),
-                    "departurePortId": formState.portDeparture.portId,
-                    "destinationPortId": formState.portDestination.portId,
-                    "haulageType": getCityCountry(props.requestData.departure)+" - "+getCityCountry(props.requestData.arrival),
-                    "margin": 0,
-                    "reduction": 0,
-                    "extraFee": 0,
-                    "totalPrice": 0
+                    "options": sentOptions,
+                    "files": formState.files.map((elm: any) => { return {...elm, url: ""}}),
+                    "selectedOption": -1
                 };
                 const response = await (context?.service as BackendService<any>).postReturnJson(protectedResources.apiLisOffer.endPoint+"/QuoteOffer", dataSent);
                 

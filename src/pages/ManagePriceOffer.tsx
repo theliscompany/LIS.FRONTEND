@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useAccount, useMsal } from '@azure/msal-react';
-import { Typography, Box } from '@mui/material';
+import { Typography, Box, Skeleton } from '@mui/material';
 import { useAuthorizedBackendApi } from '../api/api';
 import { protectedResources } from '../config/authConfig';
 import { BackendService } from '../utils/services/fetch';
@@ -41,12 +41,35 @@ function ManagePriceOffer(props: any) {
 			const response = await (context?.service as BackendService<any>).getSingle(protectedResources.apiLisOffer.endPoint+"/QuoteOffer/"+id);
 			if (response !== null && response.code !== undefined) {
 				if (response.code === 200) {
+					
 					console.log(response.data);
-					var objTotal = JSON.parse(response.data.createdBy);
+					var objTotal = response.data;
 					setFiles(objTotal.files);
 					setOptions(objTotal.options);
 					setOffer(response.data);
 					setOfferNumber(response.data.quoteOfferNumber);
+					
+					
+					var optionsButtons = response.data.options.map((elm: any, index: number) => {
+						return `<a href="#" style="display:inline-block;background-color:#008089;color:#fff;padding:10px 20px;text-decoration:none" target="_blank">${t('selectOptionOffer')} #${Number(index+1)}</a>`;
+					});
+					var footer = `
+					<div>${account?.name}</div>
+					<div style="font-family: Verdana; padding-top: 30px; padding-bottom: 20px;">
+						${optionsButtons}
+						<a href="${process.env.REACT_APP_ORIGIN_URL+"/refuseOffer/"+response.data.id}" style="display:inline-block;background-color:#F2F2F2;color:#008089;padding:10px 20px;text-decoration:none" target="_blank">${t('refuseOffers')}</a>
+						<div style="margin-top: 15px;"><a target="_blank" href="www.omnifreight.eu">www.omnifreight.eu</a></div>
+						<div style="padding-bottom: 10px;"><a target="_blank" href="http://www.facebook.com/omnifreight">http://www.facebook.com/omnifreight</a></div>
+						<div>Italiëlei 211</div>
+						<div>2000 Antwerpen</div>
+						<div>Belgium</div>
+						<div>E-mail: transport@omnifreight.eu</div>
+						<div>Tel +32.3.295.38.82</div>
+						<div>Fax +32.3.295.38.77</div>
+						<div>Whatsapp +32.494.40.24.25</div>
+						<img src="http://www.omnifreight.eu/Images/omnifreight_logo.jpg" style="max-width: 200px;">
+					</div>
+					`;
 					setContent(response.data.comment);
 					// setLoad(false);
 				}
@@ -70,10 +93,13 @@ function ManagePriceOffer(props: any) {
 			<Box py={2.5}>
 				<Typography variant="h5" sx={{ mt: { xs: 4, md: 1.5, lg: 1.5 } }} mx={5}><b>{t('manageOffer')} N° {offerNumber}</b></Typography>
 				<Box>
-					<PriceOffer
-						id={id} files={files} options={options}
-						offer={offer} setOffer={setOffer}
-					/>
+					{
+						files !== null && options !== null && offer !== null ? 
+						<PriceOffer
+							id={id} files={files} options={options}
+							offer={offer} setOffer={setOffer}
+						/> : <Skeleton sx={{ mx: 5, my: 2 }} />
+					}
 				</Box>
 			</Box>
 		</div>
