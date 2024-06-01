@@ -1,4 +1,4 @@
-import { Alert, Box, Button, Grid, InputLabel, Skeleton } from '@mui/material';
+import { Alert, Box, Button, Grid, InputLabel, NativeSelect, Skeleton } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import StarterKit from '@tiptap/starter-kit';
 import {
@@ -17,6 +17,7 @@ import { useState } from 'react';
 
 function PriceOffer(props: any) {
     const [subject, setSubject] = useState<string>("Nouveau devis pour client");
+	const [language, setLanguage] = useState<string>("fr");
 	const [load, setLoad] = useState<boolean>(false);
 	
     const { t } = useTranslation();
@@ -24,8 +25,31 @@ function PriceOffer(props: any) {
 	const account = useAccount(accounts[0] || {});
 	const context = useAuthorizedBackendApi();
 
+	console.log(props);
+	var optionsButtons = props.offer.options.map((elm: any, index: number) => {
+		return `<a href="#" onclick="return false;" style="display:inline-block;background-color:#008089;color:#fff;padding:10px 20px;text-decoration:none">${t('selectOptionOffer', {lng: language})} #${Number(index+1)}</a>`;
+	});
+	var myFooter = `
+	<div>${account?.name}</div>
+	<div style="font-family: Verdana; padding-top: 30px; padding-bottom: 20px;">
+		${optionsButtons}
+		<a href="#" onclick="return false;" style="display:inline-block;background-color:#F2F2F2;color:#008089;padding:10px 20px;text-decoration:none">${t('refuseOffers', {lng: language})}</a>
+		<div style="margin-top: 15px;"><a target="_blank" href="www.omnifreight.eu">www.omnifreight.eu</a></div>
+		<div style="padding-bottom: 10px;"><a target="_blank" href="http://www.facebook.com/omnifreight">http://www.facebook.com/omnifreight</a></div>
+		<div>Italiëlei 211</div>
+		<div>2000 Antwerpen</div>
+		<div>Belgium</div>
+		<div>E-mail: transport@omnifreight.eu</div>
+		<div>Tel +32.3.295.38.82</div>
+		<div>Fax +32.3.295.38.77</div>
+		<div>Whatsapp +32.494.40.24.25</div>
+		<img src="http://www.omnifreight.eu/Images/omnifreight_logo.jpg" style="max-width: 200px;">
+	</div>
+	`;
+	
 	const downloadFile = async (id: string, name: string, type: string) => {
-        try {
+        console.log("Id : ", id);
+		try {
             const response = await axios({
                 url: protectedResources.apiLisFiles.endPoint+"/Files/"+id+"?download=true", 
                 method: 'GET',
@@ -49,10 +73,12 @@ function PriceOffer(props: any) {
     
 	async function sendEmailWithAttachments(from: string, to: string, subject: string, htmlContent: string, attachments: any) {
 		const formData = new FormData();
+		console.log("Attachments : ", attachments);
 		// Append the attachments to the FormData object
-		for (const { fileName, url, id, contentType } of attachments) {
+		for (const { fileName, url, id, fileId, contentType } of attachments) {
+			var auxId = id !== undefined ? id : fileId;
 			try {
-				var filePromise = await downloadFile(id, fileName, contentType);
+				var filePromise = await downloadFile(auxId, fileName, contentType);
 				formData.append('Attachments', filePromise !== null ? filePromise : "");
 			}
 			catch (err: any) {
@@ -86,7 +112,7 @@ function PriceOffer(props: any) {
 			if (response !== null && response.code !== undefined) {
 				if (response.code === 200) {
 					console.log(response.data);
-					var objTotal = JSON.parse(response.data.createdBy);
+					// var objTotal = JSON.parse(response.data.createdBy);
 					props.setOffer(response.data);
 					setLoad(false);
 				}
@@ -108,13 +134,13 @@ function PriceOffer(props: any) {
 			if (data?.status === 200) {
 				enqueueSnackbar(t('priceOfferApproved'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top" } });
 				var optionsButtons = props.options.map((elm: any, index: number) => {
-					return `<a href="${process.env.REACT_APP_ORIGIN_URL+"/acceptOffer/"+props.id}?option=${index}" style="display:inline-block;background-color:#008089;color:#fff;padding:10px 20px;text-decoration:none" target="_blank">Choisir l'offre #${Number(index+1)}</a>`;
+					return `<a href="${process.env.REACT_APP_ORIGIN_URL+"/acceptOffer/"+props.id}?option=${index}" style="display:inline-block;background-color:#008089;color:#fff;padding:10px 20px;text-decoration:none" target="_blank">${t('selectOptionOffer', {lng: language})} #${Number(index+1)}</a>`;
 				});
 				var footer = `
 				<div>${account?.name}</div>
                 <div style="font-family: Verdana; padding-top: 30px; padding-bottom: 20px;">
 					${optionsButtons}
-					<a href="${process.env.REACT_APP_ORIGIN_URL+"/refuseOffer/"+props.id}" style="display:inline-block;background-color:#F2F2F2;color:#008089;padding:10px 20px;text-decoration:none" target="_blank">Refuser les offres</a>
+					<a href="${process.env.REACT_APP_ORIGIN_URL+"/refuseOffer/"+props.id}" style="display:inline-block;background-color:#F2F2F2;color:#008089;padding:10px 20px;text-decoration:none" target="_blank">${t('refuseOffers', {lng: language})}</a>
 					<div style="margin-top: 15px;"><a target="_blank" href="www.omnifreight.eu">www.omnifreight.eu</a></div>
 					<div style="padding-bottom: 10px;"><a target="_blank" href="http://www.facebook.com/omnifreight">http://www.facebook.com/omnifreight</a></div>
 					<div>Italiëlei 211</div>
@@ -166,7 +192,7 @@ function PriceOffer(props: any) {
                 <Grid item xs={12}>
                     <Alert severity='info'>{t('yourAttachments')} : {props.files.length !== 0 ? props.files.map((elm: any) => { return elm.fileName }).join(", ") : t('noAttachments')}</Alert>
                 </Grid>
-                <Grid item xs={12} md={12}>
+                <Grid item xs={12} md={8}>
                     <InputLabel htmlFor="subject" sx={inputLabelStyles}>{t('subject')}</InputLabel>
                     <BootstrapInput 
                         id="subject" 
@@ -176,27 +202,33 @@ function PriceOffer(props: any) {
                         fullWidth 
                     />
                 </Grid>
+                <Grid item xs={12} md={4}>
+                    <InputLabel htmlFor="sysLanguage" sx={inputLabelStyles}>{t('systemLanguage')}</InputLabel>
+                    <NativeSelect
+						id="sysLanguage"
+						value={language}
+						onChange={(e: any) => { setLanguage(e.target.value); }}
+						input={<BootstrapInput />}
+						fullWidth
+					>
+						{
+							["fr", "en"].map((row: any, i: number) => (
+								<option key={"sysLang-"+i} value={row}>{t('langtext'+row)}</option>
+							))
+						}
+					</NativeSelect>
+                </Grid>
                 <Grid item xs={12}>
                     <InputLabel htmlFor="details" sx={inputLabelStyles}>{t('messageSentCustomer')}</InputLabel>
-                    <Box sx={{ mt: 2 }}>
-                        <RichTextReadOnly
+                    <Box sx={{ mt: 2, p: 2, border: "1px solid #ced4da" }}>
+						<div dangerouslySetInnerHTML={{__html: props.offer.comment+myFooter}} />
+                        {/* <RichTextReadOnly
                             // ref={rteRef}
                             extensions={[StarterKit]}
-                            content={props.offer.comment}
-                        />
+                            content={props.offer.comment+myFooter}
+                        /> */}
                     </Box>
                 </Grid>
-                {/* <Grid item xs={12}>
-                <Typography variant="h6">
-                    { 
-                        props.offer.seaFreight !== null ? 
-                        <Chip variant="outlined" size="medium"
-                            label={"TOTAL PRICE : "+ Number(props.offer.totalPrice+props.offer.totalPrice*margin/100-props.offer.totalPrice*reduction/100+adding*1).toString()+" "+props.offer.seaFreight.currency}
-                            sx={{ fontWeight: "bold", fontSize: 16, py: 3 }} 
-                        /> : null
-                    }
-                </Typography>
-                </Grid> */}
                 <Grid item xs={12} md={6}>
                     <Alert severity="info">
                         {t('statusIs')} : <div>- <strong>{statusLabel(props.offer.status)}</strong> {t('byOmnifreight')}</div>

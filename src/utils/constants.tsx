@@ -44,6 +44,10 @@ export const haulageTypeOptions = [
   { value: "Side loader, Loading with Interval, from floor to trailer", label: 'haulageType5' }
 ];
 
+export const languageOptions = [
+  { value: "", label: "" },
+  { value: "", label: "" },
+];
 
 export const containerPackages = [
     {

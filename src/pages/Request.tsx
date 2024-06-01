@@ -156,6 +156,54 @@ function Request() {
         }
     }
     
+    const getContainers = async () => {
+        setContainers(containerPackages);
+    }
+    
+    const getPorts = async () => {
+        if (account && instance && context) {
+            if (ourPorts.length !== 0) {
+                console.log(ourPorts);
+                var addedCoordinatesPorts = addedCoordinatesToPorts(ourPorts);
+                setPorts(addedCoordinatesPorts);
+            }
+            else {
+                const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Port/Ports?pageSize=2000", context.tokenTransport);
+                if (response !== null && response !== undefined) {
+                    var addedCoordinatesPorts = addedCoordinatesToPorts(response);
+                    setPorts(addedCoordinatesPorts);
+                    console.log(response);
+                    console.log(addedCoordinatesPorts);
+                }
+            }
+        }
+        
+        // if (account && instance && context) {
+        //     const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Port/Ports?pageSize=2000", context.tokenTransport);
+        //     if (response !== null && response !== undefined) {
+        //         var addedCoordinatesPorts = addedCoordinatesToPorts(response);
+        //         setPorts(addedCoordinatesPorts);
+        //         console.log(response);
+        //         console.log(addedCoordinatesPorts);
+        //     }  
+        // }
+    }
+    
+    const getProducts = async () => {
+        if (account && instance && context) {
+            if (ourProducts.length !== 0) {
+                console.log(ourProducts);
+                setProducts(ourProducts);    
+            }
+            else {
+                const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Product?pageSize=500", context.tokenTransport);
+                if (response !== null && response !== undefined) {
+                    setProducts(response);
+                }      
+            }    
+        }
+    }
+
     const loadRequest = async () => {
         if (account && instance && context) {
             try {
@@ -251,54 +299,6 @@ function Request() {
             else {
                 enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
             }
-        }
-    }
-
-    const getContainers = async () => {
-        setContainers(containerPackages);
-    }
-    
-    const getPorts = async () => {
-        if (account && instance && context) {
-            if (ourPorts.length !== 0) {
-                console.log(ourPorts);
-                var addedCoordinatesPorts = addedCoordinatesToPorts(ourPorts);
-                setPorts(addedCoordinatesPorts);
-            }
-            else {
-                const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Port/Ports?pageSize=2000", context.tokenTransport);
-                if (response !== null && response !== undefined) {
-                    var addedCoordinatesPorts = addedCoordinatesToPorts(response);
-                    setPorts(addedCoordinatesPorts);
-                    console.log(response);
-                    console.log(addedCoordinatesPorts);
-                }
-            }
-        }
-        
-        // if (account && instance && context) {
-        //     const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Port/Ports?pageSize=2000", context.tokenTransport);
-        //     if (response !== null && response !== undefined) {
-        //         var addedCoordinatesPorts = addedCoordinatesToPorts(response);
-        //         setPorts(addedCoordinatesPorts);
-        //         console.log(response);
-        //         console.log(addedCoordinatesPorts);
-        //     }  
-        // }
-    }
-    
-    const getProducts = async () => {
-        if (account && instance && context) {
-            if (ourProducts.length !== 0) {
-                console.log(ourProducts);
-                setProducts(ourProducts);    
-            }
-            else {
-                const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Product?pageSize=500", context.tokenTransport);
-                if (response !== null && response !== undefined) {
-                    setProducts(response);
-                }      
-            }    
         }
     }
 

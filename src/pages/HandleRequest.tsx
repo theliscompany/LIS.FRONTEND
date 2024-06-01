@@ -17,6 +17,7 @@ import GeneratePriceOffer from '../components/editRequestPage/GeneratePriceOffer
 import RequestForm from '../components/editRequestPage/RequestForm';
 import AddContainer from '../components/editRequestPage/AddContainer';
 import RequestFormHeader from '../components/editRequestPage/RequestFormHeader';
+import { useSelector } from 'react-redux';
 // @ts-ignore
 
 // let packingOptions = ["Unit", "Bundle", "Bag", "Pallet", "Carton", "Lot", "Crate"];
@@ -64,6 +65,10 @@ function HandleRequest() {
     const context = useAuthorizedBackendApi();
     const { t } = useTranslation();
     
+    var ourPorts: any = useSelector((state: any) => state.masterdata.ports);
+    var ourProducts: any = useSelector((state: any) => state.masterdata.products);
+    var ourAssignees: any = useSelector((state: any) => state.masterdata.assignees);
+        
     function initializeSeaPorts() {
         var auxArray = [];
         for (const [key, value] of Object.entries(seaPorts)) {
@@ -118,29 +123,80 @@ function HandleRequest() {
 
     const getAssignees = async () => {
         if (account && instance && context) {
-            try {
-                setLoadAssignees(true);
-                const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisQuotes.endPoint+"/Assignee", context.tokenLogin);
-                if (response !== null && response.code !== undefined) {
-                    if (response.code === 200) {
-                        setAssignees(response.data);
-                        setLoadAssignees(false);
+            if (ourAssignees !== undefined) {
+                console.log(ourAssignees);
+                setAssignees(ourAssignees.data);
+                setLoadAssignees(false);
+            }
+            else {
+                try {
+                    setLoadAssignees(true);
+                    const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisQuotes.endPoint+"/Assignee", context.tokenLogin);
+                    if (response !== null && response.code !== undefined) {
+                        if (response.code === 200) {
+                            setAssignees(response.data);
+                            setLoadAssignees(false);
+                        }
+                        else {
+                            setLoadAssignees(false);
+                        }
                     }
                     else {
                         setLoadAssignees(false);
-                    }
+                    }   
                 }
-                else {
+                catch (err: any) {
                     setLoadAssignees(false);
-                }   
-            }
-            catch (err: any) {
-                setLoadAssignees(false);
-                console.log(err);
-            }
+                    console.log(err);
+                }
+            }    
         }
     }
     
+    const getPorts = async () => {
+        if (account && instance && context) {
+            if (ourPorts.length !== 0) {
+                console.log(ourPorts);
+                var addedCoordinatesPorts = addedCoordinatesToPorts(ourPorts);
+                setPorts(addedCoordinatesPorts);
+            }
+            else {
+                const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Port/Ports?pageSize=2000", context.tokenTransport);
+                if (response !== null && response !== undefined) {
+                    var addedCoordinatesPorts = addedCoordinatesToPorts(response);
+                    setPorts(addedCoordinatesPorts);
+                    console.log(response);
+                    console.log(addedCoordinatesPorts);
+                }
+            }
+        }
+        
+        // if (account && instance && context) {
+        //     const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Port/Ports?pageSize=2000", context.tokenTransport);
+        //     if (response !== null && response !== undefined) {
+        //         var addedCoordinatesPorts = addedCoordinatesToPorts(response);
+        //         setPorts(addedCoordinatesPorts);
+        //         console.log(response);
+        //         console.log(addedCoordinatesPorts);
+        //     }  
+        // }
+    }
+    
+    const getProducts = async () => {
+        if (account && instance && context) {
+            if (ourProducts.length !== 0) {
+                console.log(ourProducts);
+                setProducts(ourProducts);    
+            }
+            else {
+                const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Product?pageSize=500", context.tokenTransport);
+                if (response !== null && response !== undefined) {
+                    setProducts(response);
+                }      
+            }    
+        }
+    }
+
     const loadRequest = async () => {
         if (account && instance && context) {
             try {
@@ -243,27 +299,6 @@ function HandleRequest() {
         setContainers(containerPackages);
     }
     
-    const getPorts = async () => {
-        if (account && instance && context) {
-            const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Port/Ports?pageSize=2000", context.tokenTransport);
-            if (response !== null && response !== undefined) {
-                var addedCoordinatesPorts = addedCoordinatesToPorts(response);
-                setPorts(addedCoordinatesPorts);
-                console.log(response);
-                console.log(addedCoordinatesPorts);
-            }  
-        }
-    }
-    
-    const getProducts = async () => {
-        if (account && instance && context) {
-            const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Product?pageSize=500", context.tokenTransport);
-            if (response !== null && response !== undefined) {
-                setProducts(response);
-            }  
-        }
-    }
-
     function getClosestDeparture(value: any) {
         if (value !== null && value !== undefined) {
             const closest = findClosestSeaPort(value, ports);

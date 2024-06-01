@@ -821,6 +821,12 @@ export function colorsTypes(value: string) {
     }
 }
 
+export function getCity(text: string) {
+    const parts = text.split(',');
+    var lastPart = parts[4] !== undefined ? ", "+parts[4] : "";
+    return parts[0]+lastPart;
+}
+
 export function getCityCountry(text: string) {
     const parts = text.split(',');
     return parts[0] + ', ' + parts[1];
@@ -855,3 +861,28 @@ export function stringAvatar(name: string | undefined) {
     };
 }
 
+// Function to parse date in "MM/dd/yyyy hh:mm:ss tt" format and convert to ISO 8601
+export function parseDate(dateString: string) {
+    const options = {
+        year: 'numeric', month: 'numeric', day: 'numeric',
+        hour: 'numeric', minute: 'numeric', second: 'numeric',
+        hour12: true
+    };
+    const dateObj = new Date(dateString);
+    if (!isNaN(dateObj.getTime())) {
+        const parsedDate = new Date(dateString);
+        return parsedDate.toISOString();
+    } else {
+        return null;
+    }
+}
+// export function parseDate(dateString: any) {
+//     const parts = dateString.split(/[/\/ :]+/);
+//     const isPM = parts[parts.length - 2] === 'PM';
+//     let hour = parseInt(parts[parts.length - 3]);
+//     if (isPM) {
+//         hour += 12;
+//     }
+//     const dateObj = new Date(parts[parts.length - 1], parts[0] - 1, parts[1], hour, parts[parts.length - 2]);
+//     return dateObj.toISOString();
+// }

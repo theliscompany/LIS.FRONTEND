@@ -22,8 +22,7 @@ function PriceOffers() {
     const [currentId, setCurrentId] = useState<string>("");
 
     const { instance, accounts } = useMsal();
-    const account = useAccount(accounts[0] || {});
-        
+    const account = useAccount(accounts[0] || {});    
     const context = useAuthorizedBackendApi();
     
     const { t } = useTranslation();
@@ -38,13 +37,14 @@ function PriceOffers() {
             );
         }, minWidth: 200, flex: 1 },
         { field: 'created', headerName: t('created'), valueFormatter: (params: GridValueFormatterParams) => `${(new Date(params.value)).toLocaleString().slice(0,10)}`, minWidth: 100, flex: 0.5 },
-        { field: 'haulageType', headerName: t('trip'), minWidth: 125, flex: 1.5 },
-        // { field: 'xxx', headerName: t('departurePort'), renderCell: (params: GridRenderCellParams) => {
-        //     return (<Box>{params.row.seaFreight.departurePortName}</Box>);
-        // }, minWidth: 100, flex: 0.75 },
-        // { field: 'yyy', headerName: t('arrivalPort'), renderCell: (params: GridRenderCellParams) => {
-        //     return (<Box>{params.row.seaFreight.destinationPortName}</Box>);
-        // }, minWidth: 100, flex: 0.75 },
+        // { field: 'haulageType', headerName: t('trip'), minWidth: 125, flex: 1.5 },
+        { field: 'route', headerName: t('trip'), renderCell: (params: GridRenderCellParams) => {
+            return (
+                <Box>
+                    {params.row.options[0].selectedHaulage.loadingCityName} - {params.row.options[0].selectedSeafreight.destinationPortName}
+                </Box>
+            );
+        }, minWidth: 200, flex: 1 },
         { field: 'status', headerName: t('status'), renderCell: (params: GridRenderCellParams) => {
             return (<Box><Chip label={statusLabel(params.row.status)} color={colorsTypes(params.row.status)} /></Box>);
         }, minWidth: 100, flex: 0.5 },

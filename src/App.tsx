@@ -16,7 +16,6 @@ import Histories from './pages/Histories';
 import MyRequests from './pages/MyRequests';
 import PriceOffers from './pages/PriceOffers';
 import ManagePriceOffer from './pages/ManagePriceOffer';
-import ApproveOffer from './pages/ApproveOffer';
 
 // Remove if locales are not used
 import './locales/i18n';
@@ -76,7 +75,6 @@ const App = () => {
 							<Route path="privacy-policy" element={<Privacy />} />
 							<Route path="tracking" element={<Tracking />} />
 							<Route path="tracking/:id" element={<Tracking />} />
-							<Route path="quote-offers/approve/:id" element={<ApproveOffer />} />
 							<Route path="acceptOffer/:id" element={<AcceptOffer />} />
 							<Route path="refuseOffer/:id" element={<RefuseOffer />} />
 							<Route path="*" element={<NotFound />} />
