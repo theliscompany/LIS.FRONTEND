@@ -146,7 +146,7 @@ export const en = {
   supplier: "Supplier",
   searchOffers: "Search for offers",
   listOffers: "List of offers",
-  sendOffer: "Send an offer",
+  sendOffer: "Review+send offer",
   loadingText: "Loading...",
   typeSomething: "No results, type something...",
   typeSomethingSearch: "Type something to search...",
@@ -493,5 +493,15 @@ export const en = {
   endMailWord: "Sincerely",
   hello: "Hello",
   confirmationOfferText: "We have taken your choice into account and we are happy to confirm that we will proceed with the reservation of your expedition according to the following terms : ",
-  confirmationOfferThanks: "Thank you for taking the time to choose the offer that best suits your needs for shipping your cargo."
+  confirmationOfferThanks: "Thank you for taking the time to choose the offer that best suits your needs for shipping your cargo.",
+  miscDetails: "Miscellaneous details",
+  seafreightDetails: "Seafreight details",
+  haulageTariff: "Haulage Tariff",
+  seafreightTariff: "Seafreight Tariff",
+  miscTariff: "Miscellaneous Tariff",
+  totalUnitPrice: "Total Unit Price",
+  details2: "Details",
+  category: "Category",
+  serviceItem: "Service Item",
+  value: "Value"
 };
