@@ -489,5 +489,9 @@ export const en = {
   systemLanguage: "Mail language",
   langtextfr: "French",
   langtexten: "English",
-  confirmationOffer: "Confirmation of the selected offer"
+  confirmationOffer: "Confirmation of the selected offer",
+  endMailWord: "Sincerely",
+  hello: "Hello",
+  confirmationOfferText: "We have taken your choice into account and we are happy to confirm that we will proceed with the reservation of your expedition according to the following terms : ",
+  confirmationOfferThanks: "Thank you for taking the time to choose the offer that best suits your needs for shipping your cargo."
 };
