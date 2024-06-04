@@ -12,7 +12,7 @@ import NewContact from "./NewContact";
 import { statusTypes } from "../../utils/constants";
 import { colorsTypes } from "../../utils/functions";
 import { AnchorOutlined, ContactsOutlined, InventoryOutlined, Save, NoteAdd, Settings, InfoOutlined, NotesOutlined, Edit, SaveAlt } from "@mui/icons-material";
-
+import ManageHistoryRoundedIcon from '@mui/icons-material/ManageHistoryRounded';
 function RequestFormHeader(props: any) {
     const [modal, setModal] = useState<boolean>(false);
     const [modalStatus, setModalStatus] = useState<boolean>(false);
@@ -45,7 +45,7 @@ function RequestFormHeader(props: any) {
 
     return (
         <>
-            <Grid item xs={6}>
+            <Grid item xs={12}>
                 <Box>
                     <Typography variant="body2" color="dodgerblue" sx={{ fontWeight: "bold", display: "inline" }}>
                         <span style={{ color: 'red' }}>{t('quoteNumber')} : </span> N° {props.trackingNumber}
@@ -54,33 +54,33 @@ function RequestFormHeader(props: any) {
                 </Box>
             </Grid>
             <Grid item xs={12}>
-                <Toolbar sx={{ backgroundColor: 'lightblue' }}>
+            <Toolbar sx={{ backgroundColor: 'lightblue', padding: '0px' }}>
                     <Tooltip title={t('Save the Request')}>
                         <Button 
-                            variant="text" color="primary" sx={{ mr: 2 }} 
+                            variant="text" color="primary" sx={{ mr: 1 }} 
                             onClick={props.editRequest}
                         >
                             <Save />
                         </Button>
                     </Tooltip>
-                    <Tooltip title={t('Save & Close')}>
+                    {/* <Tooltip title={t('Save & Close')}>
                         <Button 
-                            variant="text" color="primary" sx={{ mr: 2 }} 
+                            variant="text" color="primary" sx={{ mr: 1 }} 
                             onClick={handleSaveAndClose}
                         >
                             <SaveAlt />
                         </Button>
-                    </Tooltip>
+                    </Tooltip> */}
                     <Tooltip title={t('Update the Request Status')}>
                         <Button 
-                            variant="text" color="inherit" sx={{ mr: 2 }} 
+                            variant="text" color="inherit" sx={{ mr: 1 }} 
                             onClick={() => { setModalStatus(true); }}
                         >
-                            <Edit />
+                            <ManageHistoryRoundedIcon />
                         </Button>
                     </Tooltip>
                     <Tooltip title={t('listNotes')}>
-                        <StyledBadge color="error" badgeContent="" overlap="circular" variant="dot" sx={{ mr: 2 }}>
+                        <StyledBadge color="error" badgeContent="" overlap="circular" variant="dot" sx={{ mr: 1 }}>
                             <Button 
                                 variant="text" color="inherit" 
                                 onClick={() => { setModalListNotes(true); }}

@@ -1,0 +1,322 @@
+Folder PATH listing for volume Windows 
+Volume serial number is CCE7-C9EF
+C:.
+|   .env
+|   .gitignore
+|   generate-structure.ps1
+|   package-lock.json
+|   package.json
+|   project-structure.txt
+|   README.md
+|   tsconfig.json
+|   web.config
+|   
++---.vscode
+|       settings.json
+|       
++---docs
+|   |   .nojekyll
+|   |   index.html
+|   |   modules.html
+|   |   
+|   \---assets
+|           highlight.css
+|           icons.js
+|           icons.svg
+|           main.js
+|           navigation.js
+|           search.js
+|           style.css
+|           
++---public
+|   |   favicon.ico
+|   |   index.html
+|   |   logo192.png
+|   |   manifest.json
+|   |   robots.txt
+|   |   
+|   +---assets
+|   |   |   favicon.ico
+|   |   |   favicon2.ico
+|   |   |   omnifreight_flyer.pdf
+|   |   |   
+|   |   \---img
+|   |       |   backimage.jpg
+|   |       |   backimage.png
+|   |       |   bg-masthead.jpg
+|   |       |   bg-showcase-1.jpg
+|   |       |   bg-showcase-2.jpg
+|   |       |   bg-showcase-3.jpg
+|   |       |   contact.jpg
+|   |       |   expedition.jpg
+|   |       |   expedition2.jpg
+|   |       |   expedition3.jpg
+|   |       |   handshake.jpg
+|   |       |   logo-front.png
+|   |       |   logo-omnifreight-big.png
+|   |       |   logo-omnifreight.png
+|   |       |   logo-pro-omnifreight.png
+|   |       |   responsable-contact.jpg
+|   |       |   reverse-handshake.jpg
+|   |       |   testimonials-1.jpg
+|   |       |   testimonials-2.jpg
+|   |       |   testimonials-3.jpg
+|   |       |   
+|   |       \---flags
+|   |               flag-en.png
+|   |               flag-fr.png
+|   |               flag-ne.png
+|   |               
+|   +---css
+|   |       styles.css
+|   |       
+|   \---img
+|       |   about.jpg
+|       |   apple-touch-icon.png
+|       |   banner.jpg
+|       |   bg404.jpg
+|       |   blackbluebg.jpg
+|       |   building-construction.jpg
+|       |   checkemail.jpg
+|       |   container-sales.jpg
+|       |   containers.jpg
+|       |   conventional.jpg
+|       |   cyrillepenaye.jpg
+|       |   dock-image.jpg
+|       |   e-services.png
+|       |   favicon.png
+|       |   fr.gif
+|       |   galaxybg.jpg
+|       |   hero-bg.jpg
+|       |   iconmap.png
+|       |   intermodal.jpg
+|       |   legislation-documents.jpg
+|       |   lispricinglogo.png
+|       |   lispricinglogo2.png
+|       |   lisquoteslogo.png
+|       |   loading-gif.gif
+|       |   login-image.svg
+|       |   logo.jpg
+|       |   logo512.png
+|       |   logolisquotes.png
+|       |   maritime-packaging.jpg
+|       |   nl.gif
+|       |   omnifreight-geographies-full.png
+|       |   omnifreight-geographies-map-full.png
+|       |   omnifreight-geographies-map.png
+|       |   omnifreight-logo.png
+|       |   purplebluebg.jpg
+|       |   reddot.png
+|       |   red_dot.png
+|       |   rolling.jpg
+|       |   survey.jpg
+|       |   testimonials-bg.jpg
+|       |   transport.jpg
+|       |   uk.gif
+|       |   us.gif
+|       |   user-image-small.jpg
+|       |   user-image.jpg
+|       |   
+|       +---admin
+|       |   \---img
+|       |       |   arrow-up.png
+|       |       |   avatar-mini.jpg
+|       |       |   avatar-mini2.jpg
+|       |       |   avatar-mini3.jpg
+|       |       |   avatar-mini4.jpg
+|       |       |   avatar1.jpg
+|       |       |   avatar1_small.jpg
+|       |       |   bg-1.jpg
+|       |       |   chart-texture.jpg
+|       |       |   chat-avatar.jpg
+|       |       |   chat-avatar2.jpg
+|       |       |   customSelect-arrow.gif
+|       |       |   geekslabs.png
+|       |       |   Germany.png
+|       |       |   India.png
+|       |       |   left-arrow.png
+|       |       |   logo-big.png
+|       |       |   mail-avatar.jpg
+|       |       |   profile-avatar.jpg
+|       |       |   profile-widget-avatar.jpg
+|       |       |   right-arrow.png
+|       |       |   Russia.png
+|       |       |   sample-img-1.jpg
+|       |       |   sample-img-2.png
+|       |       |   sample-img-3.png
+|       |       |   search-icon.jpg
+|       |       |   Spain.png
+|       |       |   user.jpg
+|       |       |   user22.png
+|       |       |   
+|       |       \---icons
+|       |               line-icon-c.png
+|       |               line-icon-hover.png
+|       |               line-icon.png
+|       |               search-line-icon.png
+|       |               social.png
+|       |               weather-hover.png
+|       |               weather.png
+|       |               
+|       +---clients
+|       |       client-1.png
+|       |       client-2.png
+|       |       client-3.png
+|       |       client-4.png
+|       |       client-5.png
+|       |       client-6.png
+|       |       
+|       +---portfolio
+|       |       portfolio-1.jpg
+|       |       portfolio-2.jpg
+|       |       portfolio-3.jpg
+|       |       portfolio-4.jpg
+|       |       portfolio-5.jpg
+|       |       portfolio-6.jpg
+|       |       portfolio-7.jpg
+|       |       portfolio-8.jpg
+|       |       portfolio-9.jpg
+|       |       portfolio-details-1.jpg
+|       |       portfolio-details-2.jpg
+|       |       portfolio-details-3.jpg
+|       |       
+|       +---team
+|       |       team-1.jpg
+|       |       team-2.jpg
+|       |       team-3.jpg
+|       |       team-4.jpg
+|       |       
+|       \---testimonials
+|               testimonials-1.jpg
+|               testimonials-2.jpg
+|               testimonials-3.jpg
+|               testimonials-4.jpg
+|               testimonials-5.jpg
+|               
+\---src
+    |   App.css
+    |   App.test.tsx
+    |   App.tsx
+    |   index.css
+    |   index.tsx
+    |   react-app-env.d.ts
+    |   reportWebVitals.ts
+    |   setupTests.ts
+    |   
+    +---api
+    |       api.tsx
+    |       
+    +---components
+    |   |   Documentation.tsx
+    |   |   
+    |   +---editRequestPage
+    |   |       AddContainer.tsx
+    |   |       CompareOptions.tsx
+    |   |       ContainerElement.tsx
+    |   |       ContainerPrice.tsx
+    |   |       GeneratePriceOffer.tsx
+    |   |       NewContact.tsx
+    |   |       NewHaulage.tsx
+    |   |       NewMiscellaneous.tsx
+    |   |       NewSeafreight.tsx
+    |   |       PriceOffer.tsx
+    |   |       RequestAddNote.tsx
+    |   |       RequestAskInformation.tsx
+    |   |       RequestChangeStatus.tsx
+    |   |       RequestForm.tsx
+    |   |       RequestFormHeader.tsx
+    |   |       RequestListNotes.tsx
+    |   |       RequestPriceHaulage.tsx
+    |   |       RequestPriceOffer.tsx
+    |   |       RequestPriceRequest.tsx
+    |   |       
+    |   +---landingPage
+    |   |       Footer.tsx
+    |   |       Testimonies.tsx
+    |   |       
+    |   +---requestsPage
+    |   |       RequestViewItem.tsx
+    |   |       
+    |   +---seafreightPage
+    |   |       ServicesTable.tsx
+    |   |       
+    |   \---shared
+    |           AutocompleteSearch.tsx
+    |           ClientSearch.tsx
+    |           CompanySearch.tsx
+    |           CountrySelect.tsx
+    |           Layout.tsx
+    |           NewPort.tsx
+    |           NewProduct.tsx
+    |           NewService.tsx
+    |           RichTextEditorGeneral.tsx
+    |           
+    +---config
+    |       authConfig.tsx
+    |       
+    +---locales
+    |   |   i18n.tsx
+    |   |   
+    |   \---translations
+    |           en.tsx
+    |           fr.tsx
+    |           
+    +---pages
+    |       AcceptOffer.tsx
+    |       DocsPage.tsx
+    |       HandleRequest.tsx
+    |       Haulages.tsx
+    |       Histories.tsx
+    |       Landing.tsx
+    |       Login.tsx
+    |       ManagePriceOffer.tsx
+    |       MasterDataContacts.tsx
+    |       MasterDataFiles.tsx
+    |       MasterDataPorts.tsx
+    |       MasterDataProducts.tsx
+    |       MasterDataServices.tsx
+    |       Miscellaneous.tsx
+    |       MyRequests.tsx
+    |       NewRequest.tsx
+    |       NotFound.tsx
+    |       PriceOffers.tsx
+    |       Privacy.tsx
+    |       RefuseOffer.tsx
+    |       Request.tsx
+    |       Requests.tsx
+    |       RequestsSearch.tsx
+    |       Seafreights.tsx
+    |       Templates.tsx
+    |       Tracking.tsx
+    |       UsersAssignment.tsx
+    |       ValidatedRequests.tsx
+    |       
+    +---store
+    |       index.tsx
+    |       masterdata.slice.tsx
+    |       
+    \---utils
+        |   constants.tsx
+        |   functions.tsx
+        |   
+        +---misc
+        |       styles.tsx
+        |       
+        +---models
+        |       models.tsx
+        |       
+        +---others
+        |       DownloadForm.tsx
+        |       Login2.tsx
+        |       
+        +---processes
+        |       useProcessStatePersistence.js
+        |       userprocesspage.js
+        |       
+        +---services
+        |       fetch.tsx
+        |       
+        \---styles
+                HideLauncher.css
+                WysiwygEditor.css
+                

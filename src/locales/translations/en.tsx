@@ -24,7 +24,7 @@ export const en = {
   clientNumber: "Customer name (or number)",
   details: "Other details about the request (Optional)",
   assignedManager: "Assigned manager",
-  overviewTitle: "General timeline of the requests",
+  overviewTitle: "Request for Quotes Dashbord",
   assigneeId: "Assignee Id",
   requestQuoteId: "Request Id",
   assignDate: "Assign date",
