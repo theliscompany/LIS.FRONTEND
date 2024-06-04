@@ -251,7 +251,7 @@ function CompareOptions(props: any) {
                                     </TableRow> */}
 
                                     <TableRow>
-                                        <TableCell component="th" scope="row" sx={{background: "lightblue"}}>Haulier Name</TableCell>
+                                        <TableCell component="th" scope="row" sx={{background: "lightblue"}}>{t('haulierName')}</TableCell>
                                         {
                                             option1 !== null && option1 !== "" && option1 !== undefined && option1.selectedHaulage !== null ? 
                                             <TableCell component="th" scope="row">{option1.selectedHaulage.haulierName}</TableCell> : null
@@ -267,7 +267,7 @@ function CompareOptions(props: any) {
                                     </TableRow>
 
                                     <TableRow>
-                                        <TableCell component="th" scope="row" sx={{background: "lightblue"}}>Haulage Tariff</TableCell>
+                                        <TableCell component="th" scope="row" sx={{background: "lightblue"}}>{t('haulageTariff')}</TableCell>
                                         {
                                             option1 !== null && option1 !== "" && option1 !== undefined && option1.selectedHaulage !== null ? 
                                             <TableCell component="th" scope="row" sx={getBestHaulageIndex(props.options) === 0 ? activeStyles : {}}>
@@ -289,7 +289,7 @@ function CompareOptions(props: any) {
                                     </TableRow>
                                     
                                     <TableRow>
-                                        <TableCell component="th" scope="row" sx={{background: "lightblue"}}>Multi Stop Price</TableCell>
+                                        <TableCell component="th" scope="row" sx={{background: "lightblue"}}>{t('multiStop')}</TableCell>
                                         {
                                             option1 !== null && option1 !== "" && option1 !== undefined && option1.selectedHaulage !== null ? 
                                             <TableCell component="th" scope="row" sx={getBestMultiStopIndex(props.options) === 0 ? activeStyles : {}}>
@@ -311,7 +311,7 @@ function CompareOptions(props: any) {
                                     </TableRow>
 
                                     <TableRow>
-                                        <TableCell component="th" scope="row" sx={{background: "lightblue"}}>Overtime Tariff</TableCell>
+                                        <TableCell component="th" scope="row" sx={{background: "lightblue"}}>{t('overtimeTariff')}</TableCell>
                                         {
                                             option1 !== null && option1 !== "" && option1 !== undefined && option1.selectedHaulage !== null ? 
                                             <TableCell component="th" scope="row" sx={getBestOvertimeIndex(props.options) === 0 ? activeStyles : {}}>
@@ -333,7 +333,7 @@ function CompareOptions(props: any) {
                                     </TableRow>
                                                                         
                                     <TableRow>
-                                        <TableCell component="th" scope="row" sx={{background: "lightblue"}}>Carrier</TableCell>
+                                        <TableCell component="th" scope="row" sx={{background: "lightblue"}}>{t('carrier')}</TableCell>
                                         {
                                             option1 !== null && option1 !== "" && option1 !== undefined ? 
                                             <TableCell component="th" scope="row">{option1.selectedSeafreight.carrierName}</TableCell> : null
@@ -349,7 +349,7 @@ function CompareOptions(props: any) {
                                     </TableRow>
                                     
                                     <TableRow>
-                                        <TableCell component="th" scope="row" sx={{background: "lightblue"}}>Seafreight Tariff</TableCell>
+                                        <TableCell component="th" scope="row" sx={{background: "lightblue"}}>{t('seafreightTariff')}</TableCell>
                                         {
                                             option1 !== null && option1 !== "" && option1 !== undefined ? 
                                             <TableCell component="th" scope="row" sx={getBestSeafreightIndex(props.options) === 0 ? activeStyles : {}}>
@@ -371,7 +371,7 @@ function CompareOptions(props: any) {
                                     </TableRow>
                                     
                                     <TableRow>
-                                        <TableCell component="th" scope="row" sx={{background: "lightblue"}}>Seafreight Details</TableCell>
+                                        <TableCell component="th" scope="row" sx={{background: "lightblue"}}>{t('seafreightDetails')}</TableCell>
                                         {
                                             option1 !== null && option1 !== "" && option1 !== undefined ? 
                                             <TableCell component="th" scope="row">
@@ -421,7 +421,7 @@ function CompareOptions(props: any) {
                                     
                                     
                                     <TableRow>
-                                        <TableCell component="th" scope="row" sx={{background: "lightblue"}}>Miscellaneous Tariff</TableCell>
+                                        <TableCell component="th" scope="row" sx={{background: "lightblue"}}>{t('miscTariff')}</TableCell>
                                         {
                                             option1 !== null && option1 !== "" && option1 !== undefined ? 
                                             <TableCell component="th" scope="row" sx={getBestMiscIndex(props.options) === 0 ? activeStyles : {}}>
@@ -444,7 +444,7 @@ function CompareOptions(props: any) {
                                     
                                     
                                     <TableRow>
-                                        <TableCell component="th" scope="row" sx={{background: "lightblue"}}>Miscellaneous Details</TableCell>
+                                        <TableCell component="th" scope="row" sx={{background: "lightblue"}}>{t('miscDetails')}</TableCell>
                                         {
                                             option1 !== null && option1 !== "" && option1 !== undefined ? 
                                             <TableCell component="th" scope="row">
@@ -479,7 +479,7 @@ function CompareOptions(props: any) {
                                     
                                     
                                     <TableRow>
-                                        <TableCell component="th" scope="row" sx={{background: "lightblue"}}><b>Total Unit Price</b></TableCell>
+                                        <TableCell component="th" scope="row" sx={{background: "lightblue"}}><b>{t('totalUnitPrice')}</b></TableCell>
                                         {
                                             option1 !== null && option1 !== "" && option1 !== undefined ? 
                                             option1.selectedHaulage !== null ?
@@ -516,150 +516,6 @@ function CompareOptions(props: any) {
                             </Table>
                         </TableContainer>
                     </Grid>
-                    {/* <Grid item xs={4} sx={{ mb: 5 }}>
-                        {
-                            option1 !== null && option1 !== "" && option1 !== undefined ? 
-                            <List sx={{ border: "1px solid #e5e5e5" }}>
-                                {
-                                    option1.selectedHaulage !== null ? 
-                                    <>
-                                        <ListItem divider sx={getBestTotalIndex(props.options) === 0 ? activeStyles : {}}>
-                                            <strong>Total Unit Price : {option1.selectedHaulage.unitTariff+getTotalPrices(option1.selectedSeafreights)+getTotalPrices(option1.myMiscs)} €</strong>
-                                        </ListItem>
-                                        <ListItem divider>Haulier Name : {option1.selectedHaulage.haulierName}</ListItem>
-                                        <ListItem divider sx={getBestHaulageIndex(props.options) === 0 ? activeStyles : {}}>Haulage Tariff : {option1.selectedHaulage.unitTariff} €</ListItem>
-                                        <ListItem divider sx={getBestMultiStopIndex(props.options) === 0 ? activeStyles : {}}>Multi Stop : {option1.selectedHaulage.multiStop} €</ListItem>
-                                        <ListItem divider sx={getBestOvertimeIndex(props.options) === 0 ? activeStyles : {}}>Overtime Tariff : {option1.selectedHaulage.overtimeTariff} €</ListItem>
-                                    </> : 
-                                    <ListItem divider sx={getBestAltTotalIndex(props.options) === 0 ? activeStyles : {}}>
-                                        <strong>Total Unit Price : {getTotalPrices(option1.selectedSeafreights)+getTotalPrices(option1.myMiscs)} €</strong>
-                                    </ListItem>
-                                }
-                                <ListItem divider>Carrier Name : {option1.selectedSeafreight.carrierName}</ListItem>
-                                <ListItem divider sx={getBestSeafreightIndex(props.options) === 0 ? activeStyles : {}}>Seafreight Tariff : {getTotalPrices(option1.selectedSeafreights)} €</ListItem>
-                                <ListItem divider sx={{ display: "block" }}>
-                                    Seafreight details 
-                                    {option1.selectedSeafreights.map((elm: any, id: number) => {
-                                        return (
-                                            <div key={"ssf1-"+id}>
-                                                <div style={{ marginTop: 2, marginBottom: 2 }}>
-                                                    # {elm.defaultContainer} | {elm.transitTime} {t('days')} : {getTotalPrice(elm)} €
-                                                </div>
-                                                <div>{getServicesTotal(elm.containers, "€", 0)}</div>
-                                            </div>
-                                        );
-                                    })}
-                                </ListItem>
-                                <ListItem divider sx={getBestMiscIndex(props.options) === 0 ? activeStyles : {}}>Miscellaneous Tariff : {getTotalPrices(option1.myMiscs)} €</ListItem>
-                                <ListItem sx={{ display: "block" }}>
-                                    Miscellaneous details 
-                                    {option1.myMiscs.map((elm: any, id: number) => {
-                                        return (
-                                            <div key={"ssvf1-"+id} style={{ marginTop: 2, marginBottom: 2 }}>
-                                                {elm.textServices}
-                                            </div>
-                                        );
-                                    })}
-                                </ListItem>
-                            </List> : null
-                        }
-                    </Grid> */}
-                    {/* <Grid item xs={4} sx={{ mb: 5 }}>
-                        {
-                            option2 !== null && option2 !== "" && option2 !== undefined ? 
-                            <List sx={{ border: "1px solid #e5e5e5" }}>
-                                {
-                                    option2.selectedHaulage !== null ? 
-                                    <>
-                                        <ListItem divider sx={getBestTotalIndex(props.options) === 1 ? activeStyles : {}}>
-                                            <strong>Total Unit Price : {option2.selectedHaulage.unitTariff+getTotalPrices(option2.selectedSeafreights)+getTotalPrices(option2.myMiscs)} €</strong>
-                                        </ListItem>
-                                        <ListItem divider>Haulier Name : {option2.selectedHaulage.haulierName}</ListItem>
-                                        <ListItem divider sx={getBestHaulageIndex(props.options) === 1 ? activeStyles : {}}>Haulage Tariff : {option2.selectedHaulage.unitTariff} €</ListItem>
-                                        <ListItem divider sx={getBestMultiStopIndex(props.options) === 1 ? activeStyles : {}}>Multi Stop : {option2.selectedHaulage.multiStop} €</ListItem>
-                                        <ListItem divider sx={getBestOvertimeIndex(props.options) === 1 ? activeStyles : {}}>Overtime Tariff : {option2.selectedHaulage.overtimeTariff} €</ListItem>        
-                                    </> : 
-                                    <ListItem divider sx={getBestAltTotalIndex(props.options) === 1 ? activeStyles : {}}>
-                                        <strong>Total Unit Price : {getTotalPrices(option2.selectedSeafreights)+getTotalPrices(option2.myMiscs)} €</strong>
-                                    </ListItem>
-                                }
-                                <ListItem divider>Carrier Name : {option2.selectedSeafreight.carrierName}</ListItem>
-                                <ListItem divider sx={getBestSeafreightIndex(props.options) === 1 ? activeStyles : {}}>Seafreight Tariff : {getTotalPrices(option2.selectedSeafreights)} €</ListItem>
-                                <ListItem divider sx={{ display: "block" }}>
-                                    Seafreight details 
-                                    {option2.selectedSeafreights.map((elm: any, id: number) => {
-                                        return (
-                                            <div key={"ssf1-"+id}>
-                                                <div style={{ marginTop: 2, marginBottom: 2 }}>
-                                                    # {elm.defaultContainer} | {elm.transitTime} {t('days')} : {getTotalPrice(elm)} €
-                                                </div>
-                                                <div>{getServicesTotal(elm.containers, "€", 0)}</div>
-                                            </div>
-                                        );
-                                    })}
-                                </ListItem>
-                                <ListItem divider sx={getBestMiscIndex(props.options) === 1 ? activeStyles : {}}>Miscellaneous Tariff : {getTotalPrices(option2.myMiscs)} €</ListItem>
-                                <ListItem sx={{ display: "block" }}>
-                                    Miscellaneous details 
-                                    {option2.myMiscs.map((elm: any, id: number) => {
-                                        return (
-                                            <div key={"ssvf1-"+id} style={{ marginTop: 2, marginBottom: 2 }}>
-                                                {elm.textServices}
-                                            </div>
-                                        );
-                                    })}
-                                </ListItem>
-                            </List> : null
-                        }
-                    </Grid>
-                    <Grid item xs={4} sx={{ mb: 5 }}>
-                        {
-                            option3 !== null && option3 !== "" && option3 !== undefined ? 
-                            <List sx={{ border: "1px solid #e5e5e5" }}>
-                                {
-                                    option3.selectedHaulage !== null ? 
-                                    <>
-                                        <ListItem divider sx={getBestTotalIndex(props.options) === 2 ? activeStyles : {}}>
-                                            <strong>Total Unit Price : {option3.selectedHaulage.unitTariff+getTotalPrices(option3.selectedSeafreights)+getTotalPrices(option3.myMiscs)} €</strong>
-                                        </ListItem>
-                                        <ListItem divider>Haulier Name : {option3.selectedHaulage.haulierName}</ListItem>
-                                        <ListItem divider sx={getBestHaulageIndex(props.options) === 2 ? activeStyles : {}}>Haulage Tariff : {option3.selectedHaulage.unitTariff} €</ListItem>
-                                        <ListItem divider sx={getBestMultiStopIndex(props.options) === 2 ? activeStyles : {}}>Multi Stop : {option3.selectedHaulage.multiStop} €</ListItem>
-                                        <ListItem divider sx={getBestOvertimeIndex(props.options) === 2 ? activeStyles : {}}>Overtime Tariff : {option3.selectedHaulage.overtimeTariff} €</ListItem>        
-                                    </> : 
-                                    <ListItem divider sx={getBestAltTotalIndex(props.options) === 2 ? activeStyles : {}}>
-                                        <strong>Total Unit Price : {getTotalPrices(option3.selectedSeafreights)+getTotalPrices(option3.myMiscs)} €</strong>
-                                    </ListItem>
-                                }
-                                <ListItem divider>Carrier Name : {option3.selectedSeafreight.carrierName}</ListItem>
-                                <ListItem divider sx={getBestSeafreightIndex(props.options) === 2 ? activeStyles : {}}>Seafreight Tariff : {getTotalPrices(option3.selectedSeafreights)} €</ListItem>
-                                <ListItem divider sx={{ display: "block" }}>
-                                    Seafreight details 
-                                    {option3.selectedSeafreights.map((elm: any, id: number) => {
-                                        return (
-                                            <div key={"ssf1-"+id}>
-                                                <div style={{ marginTop: 2, marginBottom: 2 }}>
-                                                    # {elm.defaultContainer} | {elm.transitTime} {t('days')} : {getTotalPrice(elm)} €
-                                                </div>
-                                                <div>{getServicesTotal(elm.containers, "€", 0)}</div>
-                                            </div>
-                                        );
-                                    })}
-                                </ListItem>
-                                <ListItem divider sx={getBestMiscIndex(props.options) === 2 ? activeStyles : {}}>Miscellaneous Tariff : {getTotalPrices(option3.myMiscs)} €</ListItem>
-                                <ListItem sx={{ display: "block" }}>
-                                    Miscellaneous details 
-                                    {option3.myMiscs.map((elm: any, id: number) => {
-                                        return (
-                                            <div key={"ssvf1-"+id} style={{ marginTop: 2, marginBottom: 2 }}>
-                                                {elm.textServices}
-                                            </div>
-                                        );
-                                    })}
-                                </ListItem>
-                            </List> : null
-                        }
-                    </Grid> */}
                 </Grid>
             </DialogContent>
             <DialogActions>

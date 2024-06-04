@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 import { Button, Alert, DialogActions, DialogContent } from '@mui/material';
 import Skeleton from '@mui/material/Skeleton';
 import { enqueueSnackbar } from 'notistack';
 import { protectedResources } from '../config/authConfig';
 import { BootstrapDialog, BootstrapDialogTitle, buttonCloseStyles } from '../utils/misc/styles';
 import { useTranslation } from 'react-i18next';
+import { getServices, getServicesTotal } from '../utils/functions';
 
 function AcceptOffer(props: any) {
     const [load, setLoad] = useState<boolean>(true);
@@ -14,16 +15,79 @@ function AcceptOffer(props: any) {
     
     let { id } = useParams();
     const { t } = useTranslation();
+
+    const location = useLocation();
+    const searchParams = new URLSearchParams(location.search);
+    const currentOption = searchParams.get('option');
+    
+    function getOfferInfo(mail: string, offerNumber: number): {
+        price: string | null;
+        frequency: string;
+        seaDelay: string;
+        extraHour: string;
+        expressMail: string;
+      } | null {
+        const offerRegex = new RegExp(`# OFFRE ${offerNumber}\\s*(.*?)\\s*# OFFRE \\d+|\\s*<p>\\s*Cordialement`, 's');
+        const match = mail.match(offerRegex);
+      
+        if (!match) {
+            return null;
+        }
+      
+        const offerHtml = match[1];
+        const offerContainer = document.createElement('div');
+        offerContainer.innerHTML = offerHtml;
+      
+        // console.log("Offer html : ", offerHtml);
+
+        const strongElements = Array.from(offerContainer.querySelectorAll('strong'));
+        const priceIndex = strongElements.findIndex(el => el.textContent?.includes(`${offerNumber} OFFRE`));
+      
+        if (priceIndex === -1) {
+            return null;
+        }
+      
+        const price = strongElements[priceIndex + 1].textContent;
+        const frequency = strongElements[priceIndex + 1].nextElementSibling?.textContent?.trim() ?? '';
+        const seaDelay = strongElements[priceIndex + 1].nextElementSibling?.nextElementSibling?.textContent?.trim() ?? '';
+        const extraHour = offerContainer.querySelector(`p:contains("Chargement de")`)?.textContent?.match(/\d+ EUR/)?.[0]?.trim() ?? '';
+        const expressMail = offerContainer.querySelector(`p:contains("Express mail")`)?.textContent?.match(/\d+.00 EUR/)?.[0]?.trim() ?? '';
+      
+        return {
+            price,
+            frequency,
+            seaDelay,
+            extraHour,
+            expressMail
+        };
+    }
+      
+    function getOfferContent(mail: string, offerNumber: number, language: string) {
+        const offerRegex = new RegExp(`# ${t('offer', {lng: language}).toUpperCase()} ${offerNumber}\\s*(.*?)\\s*(# ${t('offer', {lng: language}).toUpperCase()} \\d+|<p>\\s*${t('endMailWord', {lng: language})})`, 's');
+        const match = mail.match(offerRegex);
+      
+        if (match) {
+            return match[1].trim();
+        } 
+        else {
+            return "Aucune offre correspondante trouvée.";
+        }
+    }  
         
     useEffect(() => {
+        // var mytext = "<p>Bonjour <strong>CYRILLE PENAYE</strong>,</p><p>Nous vous remercions pour votre demande.</p><p>En notre qualité de commissionnaire expéditeur nous pouvons organiser votre expédition de</p><ul><li><p><strong>1x20' Dry</strong></p></li></ul><p> conteneur(s) chargé(s) avec des <strong>BEER</strong>, sur camion depuis <strong>ANTWERPEN, 2000, BELGIUM</strong> à rendu port de <strong>DOUALA, CAMEROON</strong> suivant l'une de ces offres au choix :</p><p># OFFRE 1</p><p><strong>6525 EUR / 20' Dry / Tous les 2 jours / Délai de mer : 6 jours</strong><br>Chargement de 20 heures inclus pour chaque conteneur, ensuite de 45 EUR par heure indivisible.</p><p>- Express mail : 80.00 EUR supplémentaires</p><p></p><p># OFFRE 2</p><p><strong>3782 EUR / 20' Dry / Tous les 5 jours / Délai de mer : 15 jours</strong><br>Chargement de 2 heures inclus pour chaque conteneur, ensuite de 100 EUR par heure indivisible.</p><p>- Express mail : 60.00 EUR supplémentaires</p><p></p><p>Tarif valable ce jour. Tarifs à confirmer lors de votre réservation.</p><p>Ci-joint vous trouverez nos conditions de commande et de facturation qui, ensemble avec nos conditions générales, sont appliqués.</p><p></p><p>Cordialement</p>";
+        // var infos = getOfferContent(mytext, Number(currentOption)+1);
+        // console.log("Infos : ", infos);
+        
         acceptOffer();
     }, []);
 
     const acceptOffer = async () => {
+        // console.log(currentOption);
         const body: any = {
             id: id,
             newStatus: "Accepted",
-            option: 0
+            option: currentOption !== null && currentOption !== undefined ? Number(currentOption) : 0
         };
 
         fetch(protectedResources.apiLisOffer.endPoint+"/QuoteOffer/"+id+"/approval?newStatus=Accepted", {
@@ -37,11 +101,23 @@ function AcceptOffer(props: any) {
                 throw new Error('Network response was not ok.');
             }
         }).then((data: any) => {
-            console.log(data);
+            // console.log(data);
             var lang = data.data.comment.startsWith("<p>Bonjour") ? "fr" : "en";
-            
+
+            var infos = getOfferContent(data.data.comment, Number(currentOption)+1, lang);
+            console.log("Infos : ", infos);
+            var nOption = currentOption !== null ? currentOption : 0;
             var messageText = `
-            <div style="font-family: Verdana;"></div>
+            <div style="font-family: Verdana;">
+                <p>${t('hello', {lng: lang})} CYRILLE PENAYE,</p>
+                <p>${t('confirmationOfferThanks', {lng: lang})}</p>
+                <p>${t('confirmationOfferText', {lng: lang})}</p>
+                <p>${t('loadingCity', {lng: lang})} : ${data.data.options[nOption].selectedHaulage.loadingCityName}</p>
+                <p>${t('destinationPort', {lng: lang})} : ${data.data.options[nOption].selectedSeafreight.destinationPortName}</p>
+                <p>${infos}</p>
+                <br>
+                <p>${t('endMailWord', {lng: lang})}</p>
+            </div>
             <div style="font-family: Verdana; padding-top: 30px; padding-bottom: 20px;">
                 <div style="margin-top: 15px;"><a target="_blank" href="www.omnifreight.eu">www.omnifreight.eu</a></div>
                 <div style="padding-bottom: 10px;"><a target="_blank" href="http://www.facebook.com/omnifreight">http://www.facebook.com/omnifreight</a></div>
@@ -56,13 +132,14 @@ function AcceptOffer(props: any) {
             </div>
             `;
             
-            sendEmail("pricing@omnifreight.eu", data.data.emailUser, t('confirmationOffer', {lng: lang}), data.data.comment);
+            sendEmail("pricing@omnifreight.eu", data.data.emailUser, t('confirmationOffer', {lng: lang}), messageText);
             setLoad(false);
             setIsAccepted(true);
             enqueueSnackbar(t('priceOfferApproved'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top" } });
         }).catch(error => { 
             setLoad(false);
-            enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top" } });
+            console.log(error);
+            // enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top" } });
         });
     }
     

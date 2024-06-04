@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { BootstrapDialog, BootstrapDialogTitle, BootstrapInput, actionButtonStyles, anyButtonStyles, buttonCloseStyles, gridStyles, inputIconStyles, inputLabelStyles, sizeStyles, sizingStyles, whiteButtonStyles } from '../../utils/misc/styles';
-import { Accordion, AccordionDetails, AccordionSummary, Alert, Autocomplete, Box, Button, Chip, DialogActions, DialogContent, Grid, IconButton, InputLabel, ListItem, ListItemButton, ListItemText, NativeSelect, Skeleton, Step, StepLabel, Stepper, TextField, Typography } from '@mui/material';
+import { Accordion, AccordionDetails, AccordionSummary, Alert, Autocomplete, Box, Button, Chip, DialogActions, DialogContent, Grid, IconButton, InputLabel, ListItem, ListItemButton, ListItemText, NativeSelect, Paper, Skeleton, Step, StepLabel, Stepper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Typography } from '@mui/material';
 import { enqueueSnackbar } from 'notistack';
 import { BackendService } from '../../utils/services/fetch';
 import { protectedResources } from '../../config/authConfig';
@@ -9,7 +9,7 @@ import { DataGrid, GridColDef, GridColumnHeaderParams, GridRenderCellParams, Gri
 import StarterKit from '@tiptap/starter-kit';
 // import { t } from 'i18next';
 import React from 'react';
-import { calculateTotal, checkCarrierConsistency, checkDifferentDefaultContainer, formatObject, formatServices, generateRandomNumber, getCity, getCityCountry, getServices, getServicesTotal, getServicesTotal2, getTotalNumber, getTotalPrices, hashCode, myServices, parseDate, removeDuplicatesWithLatestUpdated } from '../../utils/functions';
+import { calculateTotal, checkCarrierConsistency, checkDifferentDefaultContainer, formatObject, formatServices, generateRandomNumber, getCity, getCityCountry, getServices, getServicesTotal, getServicesTotal2, getTotalNumber, getTotalPrice, getTotalPrices, hashCode, myServices, parseDate, removeDuplicatesWithLatestUpdated } from '../../utils/functions';
 import AutocompleteSearch from '../shared/AutocompleteSearch';
 import ContainerElement from './ContainerElement';
 import ContainerPrice from './ContainerPrice';
@@ -1462,15 +1462,18 @@ function GeneratePriceOffer(props: any) {
                                                             {t('newOption')}
                                                         </Button> : null
                                                     }
-                                                    <Button
-                                                        variant="contained" 
-                                                        color="inherit" 
-                                                        sx={whiteButtonStyles}
-                                                        style={{ marginRight: 8 }}
-                                                        onClick={(e: any) => { setModalCompare(true); }}
-                                                    >
-                                                        {t('compareOptions')}
-                                                    </Button>
+                                                    {
+                                                        formState.options !== undefined && formState.options.length > 1 ? 
+                                                        <Button
+                                                            variant="contained" 
+                                                            color="inherit" 
+                                                            sx={whiteButtonStyles}
+                                                            style={{ marginRight: 8 }}
+                                                            onClick={(e: any) => { setModalCompare(true); }}
+                                                        >
+                                                            {t('compareOptions')}
+                                                        </Button> : null 
+                                                    }
                                                 </Grid> : null
                                             }
                                             <Grid item xs={12}>
@@ -1586,7 +1589,7 @@ function GeneratePriceOffer(props: any) {
                                             {
                                                 formState.options !== undefined && formState.options.length !== 0 ? 
                                                 <>
-                                                    {
+                                                    {/* {
                                                         formState.selectedHaulage !== null && formState.selectedHaulage !== undefined ? 
                                                         <Grid item xs={12}>
                                                             <Typography variant="h5" sx={{ my: 1, fontSize: 18, fontWeight: "bold" }}>{t('selectedHaulage')}</Typography>
@@ -1616,7 +1619,6 @@ function GeneratePriceOffer(props: any) {
                                                             <Typography variant="h5" sx={{ my: 1, fontSize: 18, fontWeight: "bold" }}>{t('selectedSeafreight')}</Typography>
                                                             <Box sx={{ overflow: "auto" }}>
                                                                 <DataGrid
-                                                                    // rows={allSeafreights.filter((sfreight: any) => formState.rowSelectionModel.includes(sfreight.seaFreightId))}
                                                                     rows={formState.selectedSeafreights}
                                                                     columns={columnsSeafreights}
                                                                     initialState={{
@@ -1658,7 +1660,147 @@ function GeneratePriceOffer(props: any) {
                                                                 />
                                                             </Box>
                                                         </Grid> : null
-                                                    }
+                                                    } */}
+
+                                                    <Grid item xs={12}>
+                                                        <TableContainer component={Paper}>
+                                                            <Table size="small">
+                                                                <TableHead>
+                                                                <TableRow>
+                                                                    <TableCell><Typography sx={{ fontSize: 17, fontWeight: "bold" }}>{t('category')}</Typography></TableCell>
+                                                                    <TableCell><Typography sx={{ fontSize: 17, fontWeight: "bold" }}>{t('serviceItem')}</Typography></TableCell>
+                                                                    <TableCell><Typography sx={{ fontSize: 17, fontWeight: "bold" }}>{t('price')}</Typography></TableCell>
+                                                                </TableRow>
+                                                                </TableHead>
+                                                                <TableBody>
+                                                                {/* Haulage Section */}
+                                                                {
+                                                                    formState.selectedHaulage !== null && formState.selectedHaulage !== undefined ? 
+                                                                    <>
+                                                                        <TableRow>
+                                                                            <TableCell rowSpan={9}><Typography sx={{ fontSize: 15 }}>{t('haulage')}</Typography></TableCell>
+                                                                            <TableCell>{t('haulier')}</TableCell>
+                                                                            <TableCell>{formState.selectedHaulage.haulierName}</TableCell>
+                                                                        </TableRow>
+                                                                        <TableRow>
+                                                                            <TableCell>{t('loadingPort')}</TableCell>
+                                                                            <TableCell>{formState.selectedHaulage.loadingPort}</TableCell>
+                                                                        </TableRow>
+                                                                        <TableRow>
+                                                                            <TableCell>{t('containers')}</TableCell>
+                                                                            <TableCell>{formState.selectedHaulage.containerNames.join(', ')}</TableCell>
+                                                                        </TableRow>
+                                                                        <TableRow>
+                                                                            <TableCell>{t('unitTariff')}</TableCell>
+                                                                            <TableCell>{formState.selectedHaulage.unitTariff} €</TableCell>
+                                                                        </TableRow>
+                                                                        <TableRow>
+                                                                            <TableCell>{t('freeTime')}</TableCell>
+                                                                            <TableCell>{formState.selectedHaulage.freeTime} {t('hour')}(s)</TableCell>
+                                                                        </TableRow>
+                                                                        <TableRow>
+                                                                            <TableCell>{t('overtimeTariff')}</TableCell>
+                                                                            <TableCell>{formState.selectedHaulage.overtimeTariff} € / {t('hour')}</TableCell>
+                                                                        </TableRow>
+                                                                        <TableRow>
+                                                                            <TableCell>{t('multiStop')}</TableCell>
+                                                                            <TableCell>{formState.selectedHaulage.multiStop} €</TableCell>
+                                                                        </TableRow>
+                                                                        <TableRow>
+                                                                            <TableCell>{t('validUntil')}</TableCell>
+                                                                            <TableCell>{formState.selectedHaulage.validUntil.slice(0,10)}</TableCell>
+                                                                        </TableRow>
+                                                                        <TableRow>
+                                                                            <TableCell>{t('comment')}</TableCell>
+                                                                            <TableCell>{formState.selectedHaulage.comment}</TableCell>
+                                                                        </TableRow>
+                                                                    </> : null
+                                                                }
+                                                                
+                                                                {/* Sea Freight Section */}
+                                                                {
+                                                                    formState.selectedSeafreights !== undefined && formState.selectedSeafreights !== null ? 
+                                                                    <>
+                                                                        <TableRow>
+                                                                            <TableCell rowSpan={4}><Typography sx={{ fontSize: 15 }}>{t('seafreight')}</Typography></TableCell>
+                                                                            <TableCell>{t('carrier')}</TableCell>
+                                                                            <TableCell>{formState.selectedSeafreight.carrierName}</TableCell>
+                                                                        </TableRow>
+                                                                        <TableRow>
+                                                                            <TableCell>{t('carrierAgent')}</TableCell>
+                                                                            <TableCell>{formState.selectedSeafreight.carrierAgentName}</TableCell>
+                                                                        </TableRow>
+                                                                        {/* <TableRow>
+                                                                            <TableCell>{t('frequency')}</TableCell>
+                                                                            <TableCell>{t('every')} {formState.selectedSeafreight.frequency} {t('days')}</TableCell>
+                                                                        </TableRow>
+                                                                        <TableRow>
+                                                                            <TableCell>{t('transitTime')}</TableCell>
+                                                                            <TableCell>{formState.selectedSeafreight.transitTime} {t('days')}</TableCell>
+                                                                        </TableRow> */}
+                                                                        <TableRow>
+                                                                            <TableCell>{t('prices')}</TableCell>
+                                                                            <TableCell>
+                                                                                {
+                                                                                    formState.selectedSeafreights.map((elm: any, id: number) => {
+                                                                                    return (
+                                                                                        <div key={"sisf1-"+id}>
+                                                                                            <div style={{ marginTop: 2, marginBottom: 2 }}>
+                                                                                                # {elm.defaultContainer} | {elm.transitTime} {t('days')} : {getTotalPrice(elm)} € | {t('every')} {elm.frequency} {t('days')} | {elm.comment}
+                                                                                            </div>
+                                                                                            <div>{getServicesTotal(elm.containers, "€", 0)}</div>
+                                                                                        </div>
+                                                                                    );
+                                                                                })}
+                                                                            </TableCell>
+                                                                        </TableRow>
+                                                                        <TableRow>
+                                                                            <TableCell>{t('validUntil')}</TableCell>
+                                                                            <TableCell>{formState.selectedSeafreight.validUntil.slice(0,10)}</TableCell>
+                                                                        </TableRow>
+                                                                        {/* <TableRow>
+                                                                            <TableCell>{t('comment')}</TableCell>
+                                                                            <TableCell>{formState.selectedSeafreight.comment}</TableCell>
+                                                                        </TableRow> */}
+                                                                    </> : null
+                                                                }
+                                                                
+                                                                {/* Miscellaneous Section */}
+                                                                {
+                                                                    formState.myMiscs !== null && formState.myMiscs.length !== 0 ? 
+                                                                    <>
+                                                                        <TableRow>
+                                                                            <TableCell rowSpan={4}><Typography sx={{ fontSize: 15 }}>{t('miscellaneous')}</Typography></TableCell>
+                                                                            <TableCell>{t('details2')}</TableCell>
+                                                                            <TableCell>
+                                                                                {
+                                                                                    formState.myMiscs.map((elm: any, id: number) => {
+                                                                                    return (
+                                                                                        <div key={"ssvf1-"+id} style={{ marginTop: 2, marginBottom: 2 }}>{elm.textServices}</div>
+                                                                                    );
+                                                                                })}
+                                                                        </TableCell>
+                                                                        </TableRow>
+                                                                        {/* <TableRow>
+                                                                            <TableCell>Unit price</TableCell>
+                                                                            <TableCell>Général : 40 €</TableCell>
+                                                                        </TableRow>
+                                                                        <TableRow>
+                                                                            <TableCell>Service</TableCell>
+                                                                            <TableCell>Express mail : 40.00 €</TableCell>
+                                                                        </TableRow>
+                                                                        <TableRow>
+                                                                            <TableCell>Valid until</TableCell>
+                                                                            <TableCell>20/6/2024</TableCell>
+                                                                        </TableRow> */}
+                                                                        
+                                                                    </> : null
+                                                                }
+                                                                </TableBody>
+                                                            </Table>
+                                                        </TableContainer>
+                                                    </Grid>
+
                                                     <Grid item xs={4}>
                                                         <InputLabel htmlFor="selectedTemplate" sx={inputLabelStyles}>{t('selectedTemplate')}</InputLabel>
                                                         {
