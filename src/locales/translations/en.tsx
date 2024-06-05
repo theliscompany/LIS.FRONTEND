@@ -24,7 +24,7 @@ export const en = {
   clientNumber: "Customer name (or number)",
   details: "Other details about the request (Optional)",
   assignedManager: "Assigned manager",
-  overviewTitle: "Request for Quotes Dashbord",
+  overviewTitle: "Request for Quotes Dashboard",
   assigneeId: "Assignee Id",
   requestQuoteId: "Request Id",
   assignDate: "Assign date",
@@ -510,5 +510,7 @@ export const en = {
   details2: "Details",
   category: "Category",
   serviceItem: "Service Item",
-  value: "Value"
+  value: "Value",
+  simpleSearch: "Simple search",
+  advancedSearch: "Advanced search"
 };
