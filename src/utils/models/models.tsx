@@ -35,4 +35,20 @@ export interface DialogTitleProps {
     children?: React.ReactNode;
     onClose: () => void;
 }
-  
+
+export interface PriceOfferDto {
+
+    id:string;
+    requestQuoteId:number;
+    status:string;
+    quoteOfferNumber:number;
+    created?:string;
+    clientApproval:string;
+}
+export interface PriceOfferResponseDto {
+    code: number;
+    message: string;
+    data?: PriceOfferDto[];
+    error?: string;
+}
+

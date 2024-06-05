@@ -510,5 +510,7 @@ export const fr = {
   details2: "Détails",
   category: "Catégorie",
   serviceItem: "Element de service",
-  value: "Valeur"
+  value: "Valeur",
+  simpleSearch: "Recherche simple",
+  advancedSearch: "Recherche avancée"
 };
