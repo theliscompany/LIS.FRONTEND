@@ -261,9 +261,15 @@ function GeneratePriceOffer(props: any) {
         }
     }, [loadingCity, account, instance, account]);
 
-    // useEffect(() => {
-    //     console.log("Form State : ", formState);
-    // }, [formState]);
+    useEffect(() => {
+        if ((formState.selectedHaulage !== null || formState.selectedSeafreight !== null || formState.options.length !== 0)) {
+            props.setCanEdit(false);
+        }
+        else {
+            props.setCanEdit(true);
+        }
+        console.log("Form State : ", formState);
+    }, [formState]);
     
     useEffect(() => {
         getFiles();
@@ -1801,58 +1807,6 @@ function GeneratePriceOffer(props: any) {
                                                         </TableContainer>
                                                     </Grid>
 
-                                                    <Grid item xs={4}>
-                                                        <InputLabel htmlFor="selectedTemplate" sx={inputLabelStyles}>{t('selectedTemplate')}</InputLabel>
-                                                        {
-                                                            loadTemplates !== true && formState.selectedTemplate !== undefined && formState.selectedTemplate !== null ?
-                                                            <NativeSelect
-                                                                id="selectedTemplate"
-                                                                value={formState.selectedTemplate}
-                                                                onChange={(e: any) => { 
-                                                                    setFormState({...formState, selectedTemplate: e.target.value});
-                                                                }}
-                                                                input={<BootstrapInput />}
-                                                                fullWidth
-                                                            >
-                                                                {templates.map((elm: any, i: number) => (
-                                                                    <option key={"templateElm-"+i} value={elm.id}>{elm.name}</option>
-                                                                ))}
-                                                            </NativeSelect> : <Skeleton />
-                                                        }
-                                                    </Grid>
-                                                    {
-                                                        formState.files !== undefined ? 
-                                                        files !== null ?
-                                                        <Grid item xs={6}>
-                                                            <InputLabel htmlFor="selectedFiles" sx={inputLabelStyles}>{t('fileSent')}</InputLabel>
-                                                            <Autocomplete
-                                                                disablePortal
-                                                                multiple
-                                                                id="selectedFiles"
-                                                                getOptionLabel={(option: any) => { 
-                                                                    return option.fileName;
-                                                                }}
-                                                                value={formState.files}
-                                                                options={files}
-                                                                fullWidth
-                                                                onChange={(e: any, value: any) => { 
-                                                                    setFormState({...formState, files: value});
-                                                                }}
-                                                                renderInput={(params: any) => <TextField {...params} label="" />}
-                                                                sx={{ mt: 1 }}
-                                                            />
-                                                        </Grid> : <Grid item xs={6}><Skeleton /></Grid>
-                                                        : null
-                                                    }
-                                                    <Grid item xs={2}>
-                                                        <Button 
-                                                            variant="contained" color="inherit" 
-                                                            sx={{ float: "right", backgroundColor: "#fff", textTransform: "none", mt: 4 }} 
-                                                            onClick={() => { setModalFile(true); }} 
-                                                        >
-                                                            {t('uploadFile')}
-                                                        </Button>
-                                                    </Grid>
                                                     {/* <Grid item xs={4}>
                                                         <InputLabel htmlFor="mailLanguage" sx={inputLabelStyles}>{t('mailLanguage')}</InputLabel>
                                                         <ToggleButtonGroup
@@ -1952,6 +1906,59 @@ function GeneratePriceOffer(props: any) {
                                                                 }
                                                             </Grid> : null
                                                         }
+                                                    </Grid>
+                                                    
+                                                    <Grid item xs={4}>
+                                                        <InputLabel htmlFor="selectedTemplate" sx={inputLabelStyles}>{t('selectedTemplate')}</InputLabel>
+                                                        {
+                                                            loadTemplates !== true && formState.selectedTemplate !== undefined && formState.selectedTemplate !== null ?
+                                                            <NativeSelect
+                                                                id="selectedTemplate"
+                                                                value={formState.selectedTemplate}
+                                                                onChange={(e: any) => { 
+                                                                    setFormState({...formState, selectedTemplate: e.target.value});
+                                                                }}
+                                                                input={<BootstrapInput />}
+                                                                fullWidth
+                                                            >
+                                                                {templates.map((elm: any, i: number) => (
+                                                                    <option key={"templateElm-"+i} value={elm.id}>{elm.name}</option>
+                                                                ))}
+                                                            </NativeSelect> : <Skeleton />
+                                                        }
+                                                    </Grid>
+                                                    {
+                                                        formState.files !== undefined ? 
+                                                        files !== null ?
+                                                        <Grid item xs={6}>
+                                                            <InputLabel htmlFor="selectedFiles" sx={inputLabelStyles}>{t('fileSent')}</InputLabel>
+                                                            <Autocomplete
+                                                                disablePortal
+                                                                multiple
+                                                                id="selectedFiles"
+                                                                getOptionLabel={(option: any) => { 
+                                                                    return option.fileName;
+                                                                }}
+                                                                value={formState.files}
+                                                                options={files}
+                                                                fullWidth
+                                                                onChange={(e: any, value: any) => { 
+                                                                    setFormState({...formState, files: value});
+                                                                }}
+                                                                renderInput={(params: any) => <TextField {...params} label="" />}
+                                                                sx={{ mt: 1 }}
+                                                            />
+                                                        </Grid> : <Grid item xs={6}><Skeleton /></Grid>
+                                                        : null
+                                                    }
+                                                    <Grid item xs={2}>
+                                                        <Button 
+                                                            variant="contained" color="inherit" 
+                                                            sx={{ float: "right", backgroundColor: "#fff", textTransform: "none", mt: 4 }} 
+                                                            onClick={() => { setModalFile(true); }} 
+                                                        >
+                                                            {t('uploadFile')}
+                                                        </Button>
                                                     </Grid>
                                                     <Grid item xs={12}>
                                                         <InputLabel htmlFor="details" sx={inputLabelStyles}>{t('detailsOffer')}</InputLabel>
@@ -2102,18 +2109,19 @@ function GeneratePriceOffer(props: any) {
                 <BootstrapDialogTitle id="bootstrap-dialog-titleA" onClose={() => setModalOffer(false)}>
                     <b>{t('manageOffer')}</b>
                 </BootstrapDialogTitle>
-                <DialogContent dividers>
-                    {
-                        currentOffer !== null && formState !== undefined ? 
-                        <PriceOffer
-                            id={currentOffer.id} files={formState.files} options={formState.options}
-                            offer={currentOffer} setOffer={setCurrentOffer}
-                        /> : <Skeleton />
-                    }
+                {
+                    currentOffer !== null && formState !== undefined ? 
+                    <PriceOffer
+                        id={currentOffer.id} files={formState.files} options={formState.options}
+                        offer={currentOffer} setOffer={setCurrentOffer} type="modal" closeModal={() => setModalOffer(false)}
+                    /> : <Skeleton />
+                }
+                {/* <DialogContent dividers>
+                    
                 </DialogContent>
                 <DialogActions>
                     <Button variant="contained" onClick={() => setModalOffer(false)} sx={buttonCloseStyles}>{t('close')}</Button>
-                </DialogActions>
+                </DialogActions> */}
             </BootstrapDialog>
 
             {/* Create new haulage */}

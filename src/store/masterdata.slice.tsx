@@ -31,6 +31,13 @@ export const fetchProducts = createAsyncThunk(
     }
 );
 
+export const fetchHSCodes = createAsyncThunk(
+    'masterdata/fetchHSCodes',
+    async(obj:any) => {
+        return await (obj?.service as BackendService<any>).getWithToken(protectedResources.apiLisQuotes.endPoint+"/HSCodeLIS", obj.tokenLogin);
+    }
+);
+
 export const fetchAssignees = createAsyncThunk(
     'masterdata/fetchAssignees',
     async(obj:any) => {
@@ -57,6 +64,9 @@ export const masterdataSlice = createSlice({
         })
         .addCase(fetchProducts.fulfilled, (state: any, action: any) => {
             state.products = action.payload || []
+        })
+        .addCase(fetchHSCodes.fulfilled, (state: any, action: any) => {
+            state.hscodes = action.payload || []
         })
         .addCase(fetchAssignees.fulfilled, (state: any, action: any) => {
             state.assignees = action.payload || []

@@ -44,7 +44,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Anchor, AnchorOutlined, AttachFileOutlined, ContactsOutlined, ExpandLess, ExpandMore, FirstPage, FolderOutlined, Inventory, InventoryOutlined, LastPage, RoomService, RoomServiceOutlined, TaskAltOutlined } from '@mui/icons-material';
 import { useAppDispatch } from '../../store';
-import { fetchAssignees, fetchContactBusinesses, fetchPorts, fetchProducts, fetchServices } from '../../store/masterdata.slice';
+import { fetchAssignees, fetchContactBusinesses, fetchHSCodes, fetchPorts, fetchProducts, fetchServices } from '../../store/masterdata.slice';
 import { useAuthorizedBackendApi } from '../../api/api';
 import { stringAvatar } from '../../utils/functions';
 
@@ -113,6 +113,7 @@ function Layout(props: {children?: React.ReactNode}) {
             dispatch(fetchPorts(context));
             dispatch(fetchServices(context));
             dispatch(fetchProducts(context));
+            dispatch(fetchHSCodes(context));
             dispatch(fetchAssignees(context));
         }
     }, [context, dispatch])
@@ -580,7 +581,7 @@ function Layout(props: {children?: React.ReactNode}) {
                                         </DarkTooltip>
                                         </ListItem>
                                     </NavLink>
-                                    <NavLink to="/admin/products" className={({ isActive }) => isActive ? "cs-navlink-active" : "cs-navlink"}>
+                                    {/* <NavLink to="/admin/products" className={({ isActive }) => isActive ? "cs-navlink-active" : "cs-navlink"}>
                                         <ListItem className="cs-listitem" key={"Products"} disablePadding disableGutters sx={{ pl: 2 }}>
                                         <DarkTooltip title={t('products')} placement="right" arrow>
                                             <ListItemButton className="cs-listitembutton">
@@ -588,6 +589,18 @@ function Layout(props: {children?: React.ReactNode}) {
                                                     <InventoryOutlined fontSize="small" />
                                                 </ListItemIcon>
                                                 <ListItemText primary={t('products')} primaryTypographyProps={{ fontSize: 13 }} />
+                                            </ListItemButton>
+                                        </DarkTooltip>
+                                        </ListItem>
+                                    </NavLink> */}
+                                    <NavLink to="/admin/hscodes" className={({ isActive }) => isActive ? "cs-navlink-active" : "cs-navlink"}>
+                                        <ListItem className="cs-listitem" key={"HS Codes"} disablePadding disableGutters sx={{ pl: 2 }}>
+                                        <DarkTooltip title={t('hscodes')} placement="right" arrow>
+                                            <ListItemButton className="cs-listitembutton">
+                                                <ListItemIcon className="cs-listitemicon">
+                                                    <InventoryOutlined fontSize="small" />
+                                                </ListItemIcon>
+                                                <ListItemText primary={t('hscodes')} primaryTypographyProps={{ fontSize: 13 }} />
                                             </ListItemButton>
                                         </DarkTooltip>
                                         </ListItem>

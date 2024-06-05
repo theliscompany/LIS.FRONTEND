@@ -35,6 +35,7 @@ function NewRequest(props: any) {
     
     const [containers, setContainers] = useState<any>(null);
     const [products, setProducts] = useState<any>(null);
+    const [hscodes, setHSCodes] = useState<any>(null);
     
     const [modal7, setModal7] = useState<boolean>(false);
     const [modal10, setModal10] = useState<boolean>(false);
@@ -44,6 +45,7 @@ function NewRequest(props: any) {
     
     const context = useAuthorizedBackendApi();
 
+    var ourHSCodes: any = useSelector((state: any) => state.masterdata.hscodes);
     var ourProducts: any = useSelector((state: any) => state.masterdata.products);
     var ourAssignees: any = useSelector((state: any) => state.masterdata.assignees);
         
@@ -65,7 +67,7 @@ function NewRequest(props: any) {
         setFormState({ ...formState, [name]: value });
     };
     
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
     
     const getProducts = async () => {
         if (account && instance && context) {
@@ -77,6 +79,21 @@ function NewRequest(props: any) {
                 const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Product?pageSize=500", context.tokenTransport);
                 if (response !== null && response !== undefined) {
                     setProducts(response);
+                }      
+            }    
+        }
+    }
+    
+    const getHSCodes = async () => {
+        if (account && instance && context) {
+            if (ourHSCodes !== undefined && ourHSCodes.length !== 0) {
+                console.log(ourHSCodes);
+                setHSCodes(ourHSCodes);    
+            }
+            else {
+                const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisQuotes.endPoint+"/HSCodeLIS", context.tokenLogin);
+                if (response !== null && response !== undefined) {
+                    setHSCodes(response);
                 }      
             }    
         }
@@ -100,6 +117,7 @@ function NewRequest(props: any) {
     useEffect(() => {
         getContainers();
         getProducts(); 
+        getHSCodes(); 
         getAssignees();
     }, [instance, account, context]);
 
@@ -365,6 +383,38 @@ function NewRequest(props: any) {
                         <Grid item xs={12} md={6} mt={1} mb={1}>
                             <InputLabel htmlFor="tags" sx={inputLabelStyles}>{t('specifics')}</InputLabel>
                             {
+                                hscodes !== null ?
+                                <Autocomplete
+                                    multiple    
+                                    disablePortal
+                                    id="tags"
+                                    // placeholder="Machinery, Household goods, etc"
+                                    options={hscodes}
+                                    getOptionLabel={(option: any) => { 
+                                        if (option !== null && option !== undefined) {
+                                            if (i18n.language === "fr") {
+                                                return option.product_description_Fr;
+                                            }
+                                            else if (i18n.language === "en") {
+                                                return option.product_description_En;
+                                            }
+                                            else {
+                                                return option.product_description_NL;
+                                            }
+                                        }
+                                        return ""; 
+                                    }}
+                                    renderInput={(params: any) => <TextField /*multiline rows={1.85}*/ placeholder="Machinery, Household goods, etc" {...params} sx={{ textTransform: "lowercase" }} />}
+                                    // value={formState.tags}
+                                    // onChange={(e: any, value: any) => { handleChangeFormState(value, "tags"); }}
+                                    sx={{ mt: 1 }}
+                                    fullWidth
+                                /> : <Skeleton />
+                            }
+                        </Grid>
+                        {/* <Grid item xs={12} md={6} mt={1} mb={1}>
+                            <InputLabel htmlFor="tags" sx={inputLabelStyles}>{t('specifics')}</InputLabel>
+                            {
                                 products !== null ?
                                 <Autocomplete
                                     multiple    
@@ -385,7 +435,7 @@ function NewRequest(props: any) {
                                     fullWidth
                                 /> : <Skeleton />
                             }
-                        </Grid>
+                        </Grid> */}
                         <Grid item xs={12} md={6} mt={.5} sx={{ display: { xs: 'none', md: 'block' } }}>
                             <InputLabel htmlFor="message" sx={inputLabelStyles}>{t('details')}</InputLabel>
                             <BootstrapInput 

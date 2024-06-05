@@ -97,7 +97,7 @@ function ManagePriceOffer(props: any) {
 						files !== null && options !== null && offer !== null ? 
 						<PriceOffer
 							id={id} files={files} options={options}
-							offer={offer} setOffer={setOffer}
+							offer={offer} setOffer={setOffer} type="page"
 						/> : <Skeleton sx={{ mx: 5, my: 2 }} />
 					}
 				</Box>
