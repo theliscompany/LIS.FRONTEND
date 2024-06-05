@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Alert, Badge, Box, Button, Chip, Grid, ListItemButton, ListItemIcon, ListItemText, Popover, Typography } from "@mui/material";
+import { Alert, Box, Button, Chip, Grid, ListItemButton, ListItemIcon, ListItemText, Popover, Toolbar, Tooltip, Typography } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import { BootstrapDialog, StyledBadge, whiteButtonStyles } from "../../utils/misc/styles";
 import RequestAddNote from "./RequestAddNote";
@@ -11,8 +11,8 @@ import NewProduct from "../shared/NewProduct";
 import NewContact from "./NewContact";
 import { statusTypes } from "../../utils/constants";
 import { colorsTypes } from "../../utils/functions";
-import { Anchor, AnchorOutlined, Contacts, ContactsOutlined, Drafts, Inventory, Inventory2, InventoryOutlined, Send } from "@mui/icons-material";
-
+import { AnchorOutlined, ContactsOutlined, InventoryOutlined, Save, NoteAdd, Settings, InfoOutlined, NotesOutlined, Edit, SaveAlt } from "@mui/icons-material";
+import ManageHistoryRoundedIcon from '@mui/icons-material/ManageHistoryRounded';
 function RequestFormHeader(props: any) {
     const [modal, setModal] = useState<boolean>(false);
     const [modalStatus, setModalStatus] = useState<boolean>(false);
@@ -31,16 +31,21 @@ function RequestFormHeader(props: any) {
     };
     const open = Boolean(anchorEl);
     const id = open ? 'simple-popover' : undefined;
-    
+
     const { t } = useTranslation();
     // Find the status type by type
     const statusType = statusTypes.find((elm) => elm.type === props.status);
     // Translate the label
     const label = statusType ? t(statusType.label) : '';
 
+    const handleSaveAndClose = () => {
+        props.editRequest();
+        // Additional logic to close the request can be added here
+    };
+
     return (
         <>
-            <Grid item xs={6}>
+            <Grid item xs={12}>
                 <Box>
                     <Typography variant="body2" color="dodgerblue" sx={{ fontWeight: "bold", display: "inline" }}>
                         <span style={{ color: 'red' }}>{t('quoteNumber')} : </span> N° {props.trackingNumber}
@@ -48,81 +53,96 @@ function RequestFormHeader(props: any) {
                     <Chip size="small" label={label} color={colorsTypes(props.status)} sx={{ ml: 1 }} />
                 </Box>
             </Grid>
-            <Grid item xs={6}>
-                <Button 
-                    variant="contained" color="inherit" 
-                    sx={{ float: "right", backgroundColor: "#fff", textTransform: "none", ml: 2 }} 
-                    onClick={handleClick}
-                >
-                    Settings
-                </Button>
+            <Grid item xs={12}>
+            <Toolbar sx={{ backgroundColor: 'lightblue', padding: '0px' }}>
+                    <Tooltip title={t('Save the Request')}>
+                        <Button 
+                            variant="text" color="primary" sx={{ mr: 1 }} 
+                            onClick={props.editRequest}
+                        >
+                            <Save />
+                        </Button>
+                    </Tooltip>
+                    {/* <Tooltip title={t('Save & Close')}>
+                        <Button 
+                            variant="text" color="primary" sx={{ mr: 1 }} 
+                            onClick={handleSaveAndClose}
+                        >
+                            <SaveAlt />
+                        </Button>
+                    </Tooltip> */}
+                    <Tooltip title={t('Update the Request Status')}>
+                        <Button 
+                            variant="text" color="inherit" sx={{ mr: 1 }} 
+                            onClick={() => { setModalStatus(true); }}
+                        >
+                            <ManageHistoryRoundedIcon />
+                        </Button>
+                    </Tooltip>
+                    <Tooltip title={t('listNotes')}>
+                        <StyledBadge color="error" badgeContent="" overlap="circular" variant="dot" sx={{ mr: 1 }}>
+                            <Button 
+                                variant="text" color="inherit" 
+                                onClick={() => { setModalListNotes(true); }}
+                            >
+                                <NotesOutlined />
+                            </Button>
+                        </StyledBadge>
+                    </Tooltip>
+                    <Tooltip title={t('addCommentNote')}>
+                        <Button 
+                            variant="text" color="inherit" sx={{ mr: 2 }} 
+                            onClick={() => { setModalAddNote(true); }}
+                        >
+                            <NoteAdd />
+                        </Button>
+                    </Tooltip>
+                    <Tooltip title={t('askMoreInformation')}>
+                        <Button 
+                            variant="text" color="inherit" sx={{ mr: 2 }} 
+                            onClick={() => { setModal(true); }}
+                        >
+                            <InfoOutlined />
+                        </Button>
+                    </Tooltip>
+                    <Box sx={{ flexGrow: 1 }} />
+                    <Tooltip title={t('settings')}>
+                        <Button 
+                            variant="text" color="inherit" 
+                            onClick={handleClick}
+                        >
+                            <Settings />
+                        </Button>
+                    </Tooltip>
 
-                <Popover
-                    id={id}
-                    open={open}
-                    anchorEl={anchorEl}
-                    onClose={handleClose}
-                    anchorOrigin={{
-                        vertical: 'bottom',
-                        horizontal: 'right',
-                    }}
-                    transformOrigin={{
-                        vertical: 'top',
-                        horizontal: 'right',
-                    }}
-                >
-                    <ListItemButton onClick={() => { setModalNewPort(true); handleClose(); }}>
-                        <ListItemIcon><AnchorOutlined /></ListItemIcon>
-                        <ListItemText primary={t('createNewPort')} />
-                    </ListItemButton>
-                    <ListItemButton onClick={() => { setModalNewContact(true); handleClose(); }}>
-                        <ListItemIcon><ContactsOutlined /></ListItemIcon>
-                        <ListItemText primary={t('createNewContact')} />
-                    </ListItemButton>
-                    <ListItemButton onClick={() => { setModalNewProduct(true); handleClose(); }}>
-                        <ListItemIcon><InventoryOutlined /></ListItemIcon>
-                        <ListItemText primary={t('newProduct')} />
-                    </ListItemButton>
-                </Popover>
-                
-                {/* <Button 
-                    variant="contained" color="inherit" 
-                    sx={{ float: "right", backgroundColor: "#fff", textTransform: "none", ml: 2 }} 
-                    onClick={() => { setModalNewProduct(true); }}
-                >
-                    {t('newProduct')}
-                </Button>
-                <Button 
-                    variant="contained" color="inherit" 
-                    sx={{ float: "right", backgroundColor: "#fff", textTransform: "none", ml: 2 }} 
-                    onClick={() => { setModalNewPort(true); }}
-                >
-                    {t('createNewPort')}
-                </Button>
-                <Button 
-                    variant="contained" color="inherit" 
-                    sx={{ float: "right", backgroundColor: "#fff", textTransform: "none" }} 
-                    onClick={() => { setModalNewContact(true); }}
-                >
-                    {t('createNewContact')}
-                </Button> */}
-            </Grid>
-            <Grid item xs={12}>
-                <Alert 
-                    severity="info" 
-                    sx={{ display: { xs: "block", md: "flex" }, alignItems: "center", justifyContent: "left" }}
-                    action={<Button variant="contained" color="inherit" sx={{ background: "#fff", color: "#333", float: "right", textTransform: "none", position: "relative", bottom: "2px" }} onClick={() => { setModal(true); }}>{t('askMoreInformation')}</Button>}
-                >
-                    <Typography variant="subtitle1" display="inline">{t('doYouThinkInformation')}</Typography>
-                </Alert>
-            </Grid>
-            <Grid item xs={12}>
-                <Button variant="contained" color="primary" sx={{ mt: 2, mr: 2, textTransform: "none" }} onClick={props.editRequest} >{t('editRequest')}</Button>
-                <Button variant="contained" color="inherit" sx={whiteButtonStyles} onClick={() => { setModalStatus(true); }} >{t('changeStatus')}</Button>
-                <Button variant="contained" color="inherit" sx={whiteButtonStyles} style={{ float: "right" }} onClick={() => { setModalAddNote(true); }} >{t('addCommentNote')}</Button>
-                <StyledBadge color="error" badgeContent="" overlap="circular" variant="dot" style={{ float: "right", marginRight: "10px" }}>
-                    <Button variant="contained" color="inherit" sx={whiteButtonStyles} onClick={() => { setModalListNotes(true); }} >{t('listNotes')}</Button>
-                </StyledBadge>
+                    <Popover
+                        id={id}
+                        open={open}
+                        anchorEl={anchorEl}
+                        onClose={handleClose}
+                        anchorOrigin={{
+                            vertical: 'bottom',
+                            horizontal: 'right',
+                        }}
+                        transformOrigin={{
+                            vertical: 'top',
+                            horizontal: 'right',
+                        }}
+                    >
+                        <ListItemButton onClick={() => { setModalNewPort(true); handleClose(); }}>
+                            <ListItemIcon><AnchorOutlined /></ListItemIcon>
+                            <ListItemText primary={t('createNewPort')} />
+                        </ListItemButton>
+                        <ListItemButton onClick={() => { setModalNewContact(true); handleClose(); }}>
+                            <ListItemIcon><ContactsOutlined /></ListItemIcon>
+                            <ListItemText primary={t('createNewContact')} />
+                        </ListItemButton>
+                        <ListItemButton onClick={() => { setModalNewProduct(true); handleClose(); }}>
+                            <ListItemIcon><InventoryOutlined /></ListItemIcon>
+                            <ListItemText primary={t('newProduct')} />
+                        </ListItemButton>
+                    </Popover>
+                </Toolbar>
             </Grid>
 
             {/* Ask for information */}

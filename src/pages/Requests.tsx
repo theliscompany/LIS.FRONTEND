@@ -6,7 +6,7 @@ import { Dayjs } from 'dayjs';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
-import { Alert, Button, Grid, InputLabel, NativeSelect, Skeleton } from '@mui/material';
+import { Alert, Button, Grid, InputLabel, NativeSelect, Skeleton, Switch, FormControlLabel } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import { BootstrapInput, datetimeStyles, inputLabelStyles } from '../utils/misc/styles';
 import { protectedResources } from '../config/authConfig';
@@ -64,6 +64,7 @@ function Requests() {
     const [createdDateEnd, setCreatedDateEnd] = React.useState<Dayjs | null>(null);
     const [updatedDateStart, setUpdatedDateStart] = React.useState<Dayjs | null>(null);
     const [updatedDateEnd, setUpdatedDateEnd] = React.useState<Dayjs | null>(null);
+    const [isAdvanced, setIsAdvanced] = React.useState<boolean>(false); // State to manage search mode
     let { search } = useParams();
 
     const context = useAuthorizedBackendApi();
@@ -132,6 +133,11 @@ function Requests() {
             <SnackbarProvider />
             <Box py={2.5}>
                 <Typography variant="h5" sx={{mt: {xs: 4, md: 1.5, lg: 1.5 }}} px={5}><b>{t('requestsTitle')}</b></Typography>
+                <FormControlLabel
+                    control={<Switch checked={isAdvanced} onChange={() => setIsAdvanced(!isAdvanced)} />}
+                    label={isAdvanced ? t('advancedSearch') : t('simpleSearch')}
+                    sx={{ px: 5 }}
+                />
                 <Grid container spacing={1} px={5} mt={2}>
                     <Grid item xs={12} md={3}>
                         <InputLabel htmlFor="departure" sx={inputLabelStyles}>{t('departure')}</InputLabel>
@@ -142,76 +148,81 @@ function Requests() {
                         <AutocompleteSearch id="arrival" value={arrival} onChange={setArrival} fullWidth />
                     </Grid>
                     
-                    <Grid item xs={12} md={3}>
-                        <InputLabel htmlFor="packing-type" sx={inputLabelStyles}>{t('packingType')}</InputLabel>
-                        <NativeSelect
-                            id="packing-type"
-                            value={packingType}
-                            onChange={handleChangePackingType}
-                            input={<BootstrapInput />}
-                            fullWidth
-                        >
-                            <option value="">{t('allTypes')}</option>
-                            <option value="FCL">{t('fcl')}</option>
-                            <option value="Breakbulk/LCL">{t('breakbulk')}</option>
-                            <option value="Unit RoRo">{t('roro')}</option>
-                        </NativeSelect>
-                    </Grid>
-                    <Grid item xs={12} md={3}>
-                        <InputLabel htmlFor="status-id" sx={inputLabelStyles}>{t('status')}</InputLabel>
-                        <NativeSelect
-                            id="status-id"
-                            value={status}
-                            onChange={handleChangeStatus}
-                            input={<BootstrapInput />}
-                            fullWidth
-                        >
-                            <option value="">{t('allStatus')}</option>
-                            <option value="New">{t('labelEnAttente')}</option>
-                            <option value="Valider">{t('labelValider')}</option>
-                            <option value="Rejeter">{t('labelRejeter')}</option>
-                        </NativeSelect>
-                    </Grid>
-                    <Grid item xs={12} md={3} mt={1}>
-                        <InputLabel htmlFor="created-date-start" sx={inputLabelStyles}>{t('createdDateStart')}</InputLabel>
-                        <LocalizationProvider dateAdapter={AdapterDayjs}>
-                            <DateTimePicker 
-                                value={createdDateStart} 
-                                onChange={(value: any) => { setCreatedDateStart(value) }}
-                                slotProps={{ textField: { id: "created-date-start", fullWidth: true, sx: datetimeStyles }, inputAdornment: { sx: { position: "relative", right: "11.5px" } } }}
-                            />
-                        </LocalizationProvider>
-                    </Grid>
-                    <Grid item xs={12} md={3} mt={1}>
-                        <InputLabel htmlFor="created-date-end" sx={inputLabelStyles}>{t('createdDateEnd')}</InputLabel>
-                        <LocalizationProvider dateAdapter={AdapterDayjs}>
-                            <DateTimePicker 
-                                value={createdDateEnd} 
-                                onChange={(value: any) => { setCreatedDateEnd(value) }}
-                                slotProps={{ textField: { id: "created-date-end", fullWidth: true, sx: datetimeStyles }, inputAdornment: { sx: { position: "relative", right: "11.5px" } } }}
-                            />
-                        </LocalizationProvider>
-                    </Grid>
-                    <Grid item xs={12} md={3} mt={1}>
-                        <InputLabel htmlFor="updated-date-start" sx={inputLabelStyles}>{t('updatedDateStart')}</InputLabel>
-                        <LocalizationProvider dateAdapter={AdapterDayjs}>
-                            <DateTimePicker 
-                                value={updatedDateStart} 
-                                onChange={(value: any) => { setUpdatedDateStart(value) }} 
-                                slotProps={{ textField: { id: "updated-date-start", fullWidth: true, sx: datetimeStyles }, inputAdornment: { sx: { position: "relative", right: "11.5px" } } }}
-                            />
-                        </LocalizationProvider>
-                    </Grid>
-                    <Grid item xs={12} md={3} mt={1}>
-                        <InputLabel htmlFor="updated-date-end" sx={inputLabelStyles}>{t('updatedDateEnd')}</InputLabel>
-                        <LocalizationProvider dateAdapter={AdapterDayjs}>
-                            <DateTimePicker 
-                                value={updatedDateEnd} 
-                                onChange={(value: any) => { setUpdatedDateEnd(value) }} 
-                                slotProps={{ textField: { id: "updated-date-end", fullWidth: true, sx: datetimeStyles }, inputAdornment: { sx: { position: "relative", right: "11.5px" } } }}
-                            />
-                        </LocalizationProvider>
-                    </Grid>
+                    {isAdvanced && (
+                        <>
+                            <Grid item xs={12} md={3}>
+                                <InputLabel htmlFor="packing-type" sx={inputLabelStyles}>{t('packingType')}</InputLabel>
+                                <NativeSelect
+                                    id="packing-type"
+                                    value={packingType}
+                                    onChange={handleChangePackingType}
+                                    input={<BootstrapInput />}
+                                    fullWidth
+                                >
+                                    <option value="">{t('allTypes')}</option>
+                                    <option value="FCL">{t('fcl')}</option>
+                                    <option value="Breakbulk/LCL">{t('breakbulk')}</option>
+                                    <option value="Unit RoRo">{t('roro')}</option>
+                                </NativeSelect>
+                            </Grid>
+                            <Grid item xs={12} md={3}>
+                                <InputLabel htmlFor="status-id" sx={inputLabelStyles}>{t('status')}</InputLabel>
+                                <NativeSelect
+                                    id="status-id"
+                                    value={status}
+                                    onChange={handleChangeStatus}
+                                    input={<BootstrapInput />}
+                                    fullWidth
+                                >
+                                    <option value="">{t('allStatus')}</option>
+                                    <option value="New">{t('labelEnAttente')}</option>
+                                    <option value="Valider">{t('labelValider')}</option>
+                                    <option value="Rejeter">{t('labelRejeter')}</option>
+                                </NativeSelect>
+                            </Grid>
+                            <Grid item xs={12} md={3} mt={1}>
+                                <InputLabel htmlFor="created-date-start" sx={inputLabelStyles}>{t('createdDateStart')}</InputLabel>
+                                <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                    <DateTimePicker 
+                                        value={createdDateStart} 
+                                        onChange={(value: any) => { setCreatedDateStart(value) }}
+                                        slotProps={{ textField: { id: "created-date-start", fullWidth: true, sx: datetimeStyles }, inputAdornment: { sx: { position: "relative", right: "11.5px" } } }}
+                                    />
+                                </LocalizationProvider>
+                            </Grid>
+                            <Grid item xs={12} md={3} mt={1}>
+                                <InputLabel htmlFor="created-date-end" sx={inputLabelStyles}>{t('createdDateEnd')}</InputLabel>
+                                <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                    <DateTimePicker 
+                                        value={createdDateEnd} 
+                                        onChange={(value: any) => { setCreatedDateEnd(value) }}
+                                        slotProps={{ textField: { id: "created-date-end", fullWidth: true, sx: datetimeStyles }, inputAdornment: { sx: { position: "relative", right: "11.5px" } } }}
+                                    />
+                                </LocalizationProvider>
+                            </Grid>
+                            <Grid item xs={12} md={3} mt={1}>
+                                <InputLabel htmlFor="updated-date-start" sx={inputLabelStyles}>{t('updatedDateStart')}</InputLabel>
+                                <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                    <DateTimePicker 
+                                        value={updatedDateStart} 
+                                        onChange={(value: any) => { setUpdatedDateStart(value) }} 
+                                        slotProps={{ textField: { id: "updated-date-start", fullWidth: true, sx: datetimeStyles }, inputAdornment: { sx: { position: "relative", right: "11.5px" } } }}
+                                    />
+                                </LocalizationProvider>
+                            </Grid>
+                            <Grid item xs={12} md={3} mt={1}>
+                                <InputLabel htmlFor="updated-date-end" sx={inputLabelStyles}>{t('updatedDateEnd')}</InputLabel>
+                                <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                    <DateTimePicker 
+                                        value={updatedDateEnd} 
+                                        onChange={(value: any) => { setUpdatedDateEnd(value) }} 
+                                        slotProps={{ textField: { id: "updated-date-end", fullWidth: true, sx: datetimeStyles }, inputAdornment: { sx: { position: "relative", right: "11.5px" } } }}
+                                    />
+                                </LocalizationProvider>
+                            </Grid>
+                        </>
+                    )}
+                    
                     <Grid item xs={12} md={2} mt={1} sx={{ display: "flex", alignItems: "end" }}>
                         <Button 
                             variant="contained" 
