@@ -35,6 +35,7 @@ import ValidatedRequests from './pages/ValidatedRequests';
 import HandleRequest from './pages/HandleRequest';
 import { Provider } from 'react-redux';
 import { store } from './store';
+import MasterDataHSCodes from './pages/MasterDataHSCodes';
 
 const App = () => {
   return (
@@ -64,6 +65,7 @@ const App = () => {
 								<Route path="templates" element={<Templates />} />
 								<Route path="services" element={<MasterDataServices />} />
 								<Route path="products" element={<MasterDataProducts />} />
+								<Route path="hscodes" element={<MasterDataHSCodes />} />
 								<Route path="ports" element={<MasterDataPorts />} />
 								<Route path="contacts" element={<MasterDataContacts />} />
 								<Route path="files" element={<MasterDataFiles />} />

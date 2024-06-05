@@ -654,36 +654,13 @@ function Haulages() {
                                 <InputLabel htmlFor="multiStop" sx={inputLabelStyles}>{t('multiStop')}</InputLabel>
                                 <BootstrapInput id="multiStop" type="number" value={multiStop} onChange={(e: any) => setMultiStop(e.target.value)} fullWidth />
                             </Grid>
-
-                            {/* <Grid item xs={12} md={8}>
-                                <Typography sx={{ fontSize: 18, mb: 1 }}><b>{t('listServices')} - {t('miscellaneous')}</b></Typography>
-                            </Grid> */}
-                            {/* <Grid item xs={12}>
-                                {
-                                    allServices !== null && allServices !== undefined && allServices.length !== 0 ?
-                                    !loadMiscs ? 
-                                    <ServicesTable 
-                                        services={servicesData2} 
-                                        setServices={setServicesData2}
-                                        allServices={allServices}
-                                        type="Miscellaneous"
-                                        container={containerTypes}
-                                        currency={currency}
-                                        servicesOptions={allServices.filter((obj: any) => obj.servicesTypeId.includes(2)).map((elm: any) => elm.serviceName)} // 2 for HAULAGE
-                                    /> : <Skeleton />
-                                    : null
-                                }
-                            </Grid> */}
                         </Grid> : <Skeleton />
                     }
                 </DialogContent>
                 <DialogActions>
                     <Button 
                         variant="contained" color={"primary"} 
-                        onClick={() => { 
-                            createUpdateHaulage(); 
-                            // createMiscellaneous();
-                        }} 
+                        onClick={() => { createUpdateHaulage(); }} 
                         sx={{ mr: 1.5, textTransform: "none" }}
                     >
                         {t('validate')}

@@ -1,4 +1,4 @@
-import { Alert, Box, Button, Grid, InputLabel, NativeSelect, Skeleton } from '@mui/material';
+import { Alert, Box, Button, DialogActions, DialogContent, Grid, InputLabel, NativeSelect, Skeleton } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import StarterKit from '@tiptap/starter-kit';
 import {
@@ -6,7 +6,7 @@ import {
 	RichTextReadOnly,
 } from "mui-tiptap";
 import { getExtensionFromContentType, statusLabel } from '../../utils/functions';
-import { BootstrapInput, inputLabelStyles } from '../../utils/misc/styles';
+import { BootstrapInput, buttonCloseStyles, inputLabelStyles } from '../../utils/misc/styles';
 import { useMsal, useAccount } from '@azure/msal-react';
 import { SnackbarProvider, enqueueSnackbar } from 'notistack';
 import { useAuthorizedBackendApi } from '../../api/api';
@@ -182,87 +182,117 @@ function PriceOffer(props: any) {
 		}
 	}
 
+	const OfferContent = () => {
+		return <>
+			{
+				!load && props.offer !== null ?
+				<Grid container spacing={2} mt={1} px={5}>
+					<Grid item xs={12}>
+						<Alert severity='info'>{t('yourAttachments')} : {props.files.length !== 0 ? props.files.map((elm: any) => { return elm.fileName }).join(", ") : t('noAttachments')}</Alert>
+					</Grid>
+					<Grid item xs={12} md={8}>
+						<InputLabel htmlFor="subject" sx={inputLabelStyles}>{t('subject')}</InputLabel>
+						<BootstrapInput 
+							id="subject" 
+							type="text" name="subject" 
+							value={subject}
+							onChange={(e: any) => { setSubject(e.target.value); }}
+							fullWidth 
+						/>
+					</Grid>
+					<Grid item xs={12} md={4}>
+						<InputLabel htmlFor="sysLanguage" sx={inputLabelStyles}>{t('systemLanguage')}</InputLabel>
+						<NativeSelect
+							id="sysLanguage"
+							value={language}
+							onChange={(e: any) => { setLanguage(e.target.value); }}
+							input={<BootstrapInput />}
+							fullWidth
+						>
+							{
+								["fr", "en"].map((row: any, i: number) => (
+									<option key={"sysLang-"+i} value={row}>{t('langtext'+row)}</option>
+								))
+							}
+						</NativeSelect>
+					</Grid>
+					<Grid item xs={12}>
+						<InputLabel htmlFor="details" sx={inputLabelStyles}>{t('messageSentCustomer')}</InputLabel>
+						<Box sx={{ mt: 2, p: 2, border: "1px solid #ced4da" }}>
+							<div dangerouslySetInnerHTML={{__html: props.offer.comment+myFooter}} />
+							{/* <RichTextReadOnly
+								// ref={rteRef}
+								extensions={[StarterKit]}
+								content={props.offer.comment+myFooter}
+							/> */}
+						</Box>
+					</Grid>
+					<Grid item xs={12} md={6}>
+						<Alert severity="info">
+							{t('statusIs')} : <div>- <strong>{statusLabel(props.offer.status)}</strong> {t('byOmnifreight')}</div>
+							{props.offer.status === "Accepted" ? <div>- <strong>{props.offer.clientApproval}</strong> {t('byClient')}</div> : null}
+						</Alert>
+					</Grid>
+					<Grid item xs={12} md={6} sx={{ pt: 1.5, display: props.type === "modal" ? "none" : "flex", alignItems: "center", justifyContent: "end" }}>
+						{/* <Button 
+							variant="contained" 
+							color="primary" 
+							sx={{ mr: 1, textTransform: "none" }} 
+							onClick={updateOffer}
+							disabled={props.offer.status !== "Pending"}
+						>{t('updateOffer')}</Button> */}
+						<Button 
+							variant="contained" 
+							color="success" 
+							sx={{ mr: 1, textTransform: "none" }} 
+							onClick={acceptOffer}
+							// disabled={props.offer.status !== "Pending"}
+						>
+							{ props.offer.status !== "Pending" ? t('resendOffer') : t('approveOffer') }
+						</Button>
+						<Button
+							variant="contained" 
+							color="secondary" 
+							sx={{ mr: 1, textTransform: "none" }} 
+							onClick={rejectOffer}
+							disabled={props.offer.status !== "Pending"}
+						>{t('rejectOffer')}</Button>
+					</Grid>
+				</Grid> : <Skeleton sx={{ mx: 5, mt: 3 }} />
+			}
+		</>;
+	}
 	
     return (
         <>
-        <SnackbarProvider />
-		{
-            !load && props.offer !== null ?
-            <Grid container spacing={2} mt={1} px={5}>
-                <Grid item xs={12}>
-                    <Alert severity='info'>{t('yourAttachments')} : {props.files.length !== 0 ? props.files.map((elm: any) => { return elm.fileName }).join(", ") : t('noAttachments')}</Alert>
-                </Grid>
-                <Grid item xs={12} md={8}>
-                    <InputLabel htmlFor="subject" sx={inputLabelStyles}>{t('subject')}</InputLabel>
-                    <BootstrapInput 
-                        id="subject" 
-                        type="text" name="subject" 
-                        value={subject}
-                        onChange={(e: any) => { setSubject(e.target.value); }}
-                        fullWidth 
-                    />
-                </Grid>
-                <Grid item xs={12} md={4}>
-                    <InputLabel htmlFor="sysLanguage" sx={inputLabelStyles}>{t('systemLanguage')}</InputLabel>
-                    <NativeSelect
-						id="sysLanguage"
-						value={language}
-						onChange={(e: any) => { setLanguage(e.target.value); }}
-						input={<BootstrapInput />}
-						fullWidth
-					>
-						{
-							["fr", "en"].map((row: any, i: number) => (
-								<option key={"sysLang-"+i} value={row}>{t('langtext'+row)}</option>
-							))
-						}
-					</NativeSelect>
-                </Grid>
-                <Grid item xs={12}>
-                    <InputLabel htmlFor="details" sx={inputLabelStyles}>{t('messageSentCustomer')}</InputLabel>
-                    <Box sx={{ mt: 2, p: 2, border: "1px solid #ced4da" }}>
-						<div dangerouslySetInnerHTML={{__html: props.offer.comment+myFooter}} />
-                        {/* <RichTextReadOnly
-                            // ref={rteRef}
-                            extensions={[StarterKit]}
-                            content={props.offer.comment+myFooter}
-                        /> */}
-                    </Box>
-                </Grid>
-                <Grid item xs={12} md={6}>
-                    <Alert severity="info">
-                        {t('statusIs')} : <div>- <strong>{statusLabel(props.offer.status)}</strong> {t('byOmnifreight')}</div>
-                        {props.offer.status === "Accepted" ? <div>- <strong>{props.offer.clientApproval}</strong> {t('byClient')}</div> : null}
-                    </Alert>
-                </Grid>
-                <Grid item xs={12} md={6} sx={{ pt: 1.5, display: "flex", alignItems: "center", justifyContent: "end" }}>
-                    {/* <Button 
-                        variant="contained" 
-                        color="primary" 
-                        sx={{ mr: 1, textTransform: "none" }} 
-                        onClick={updateOffer}
-                        disabled={props.offer.status !== "Pending"}
-                    >{t('updateOffer')}</Button> */}
-                    <Button 
-                        variant="contained" 
-                        color="success" 
-                        sx={{ mr: 1, textTransform: "none" }} 
-                        onClick={acceptOffer}
-                        // disabled={props.offer.status !== "Pending"}
-                    >
-						{ props.offer.status !== "Pending" ? t('resendOffer') : t('approveOffer') }
-					</Button>
-                    <Button
-                        variant="contained" 
-                        color="secondary" 
-                        sx={{ mr: 1, textTransform: "none" }} 
-                        onClick={rejectOffer}
-                        disabled={props.offer.status !== "Pending"}
-                    >{t('rejectOffer')}</Button>
-                </Grid>
-            </Grid> : <Skeleton sx={{ mx: 5, mt: 3 }} />
-        }
-        </>
+			<SnackbarProvider />
+			{
+				props.type === "modal" ? 
+				<>
+					<DialogContent dividers>
+						<OfferContent />		
+					</DialogContent>
+					<DialogActions>
+						<Button 
+							variant="contained" 
+							color="success" 
+							sx={{ mr: 1, textTransform: "none" }} 
+							onClick={acceptOffer}
+						>
+							{ props.offer.status !== "Pending" ? t('resendOffer') : t('approveOffer') }
+						</Button>
+						<Button
+							variant="contained" 
+							color="secondary" 
+							sx={{ mr: 1, textTransform: "none" }} 
+							onClick={rejectOffer}
+							disabled={props.offer.status !== "Pending"}
+						>{t('rejectOffer')}</Button>
+						<Button variant="contained" onClick={() => props.closeModal()} sx={buttonCloseStyles}>{t('close')}</Button>
+					</DialogActions>
+				</> : <OfferContent />
+			}
+		</>
     );
 }
 

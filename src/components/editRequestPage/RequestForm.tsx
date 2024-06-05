@@ -68,7 +68,7 @@ function RequestForm(props: any) {
                                 name="clientNumber" 
                                 value={props.clientNumber} 
                                 onChange={props.setClientNumber}
-                                disabled 
+                                disabled={!props.canEdit} 
                                 callBack={(value: any) => {
                                     props.setClientNumber(value);
                                     if (props.clientNumber !== null) {
@@ -81,7 +81,7 @@ function RequestForm(props: any) {
                         </Grid>
                         <Grid item xs={12} md={6} mt={1}>
                             <InputLabel htmlFor="departure" sx={inputLabelStyles}>{t('departure')}</InputLabel>
-                            <AutocompleteSearch id="departure" value={props.departure} onChange={props.setDeparture} callBack={props.getClosestDeparture} fullWidth disabled />
+                            <AutocompleteSearch id="departure" value={props.departure} onChange={props.setDeparture} callBack={props.getClosestDeparture} fullWidth disabled={!props.canEdit} />
                         </Grid>
                         <Grid item xs={12} md={6}>
                             <InputLabel htmlFor="whatsapp-phone-number" sx={inputLabelStyles} style={{ marginTop: "8px" }}>{t('whatsappNumber')}</InputLabel>
@@ -89,17 +89,17 @@ function RequestForm(props: any) {
                                 id="whatsapp-phone-number" 
                                 value={props.phone} onChange={props.setPhone} 
                                 defaultCountry="CM" preferredCountries={["CM", "BE", "KE"]} 
-                                fullWidth sx={{ mt: 1 }} disabled 
+                                fullWidth sx={{ mt: 1 }} disabled={!props.canEdit} 
                                 {...properties}
                             />
                         </Grid>
                         <Grid item xs={12} md={6} mt={1}>
                             <InputLabel htmlFor="arrival" sx={inputLabelStyles}>{t('arrival')}</InputLabel>
-                            <AutocompleteSearch id="arrival" value={props.arrival} onChange={props.setArrival} callBack={props.getClosestArrival} fullWidth disabled />
+                            <AutocompleteSearch id="arrival" value={props.arrival} onChange={props.setArrival} callBack={props.getClosestArrival} fullWidth disabled={!props.canEdit} />
                         </Grid>
                         <Grid item xs={12} md={6}>
                             <InputLabel htmlFor="request-email" sx={inputLabelStyles}>{t('emailAddress')}</InputLabel>
-                            <BootstrapInput id="request-email" type="email" value={props.email} onChange={(e: React.ChangeEvent<HTMLInputElement>) => props.setEmail(e.target.value)} fullWidth disabled />
+                            <BootstrapInput id="request-email" type="email" value={props.email} onChange={(e: React.ChangeEvent<HTMLInputElement>) => props.setEmail(e.target.value)} fullWidth disabled={!props.canEdit} />
                         </Grid>
                         <Grid item xs={12} md={6}>
                             <InputLabel htmlFor="tags" sx={inputLabelStyles}>{t('specifics')}</InputLabel>
@@ -122,7 +122,7 @@ function RequestForm(props: any) {
                                     renderInput={(params: any) => <TextField placeholder="Machinery, Household goods, etc" {...params} sx={{ textTransform: "lowercase" }} />}
                                     onChange={(e: any, value: any) => { props.setTags(value); }}
                                     fullWidth
-                                    disabled
+                                    disabled={!props.canEdit}
                                 /> : <Skeleton />
                             }
                         </Grid>
@@ -134,7 +134,7 @@ function RequestForm(props: any) {
                             <Button 
                                 variant="contained" color="inherit" 
                                 sx={whiteButtonStyles} style={{ float: "right" }} 
-                                onClick={props.openModalContainer} disabled
+                                onClick={props.openModalContainer} disabled={!props.canEdit}
                             >
                                 {t('addContainer')}
                             </Button>
@@ -154,7 +154,7 @@ function RequestForm(props: any) {
                                                     secondaryAction={
                                                         <IconButton 
                                                             edge="end"
-                                                            disabled  
+                                                            disabled={!props.canEdit}  
                                                             onClick={() => {
                                                                 props.setContainersSelection((prevItems: any) => prevItems.filter((item: any, i: number) => i !== index));
                                                             }}
@@ -178,7 +178,7 @@ function RequestForm(props: any) {
                         
                         <Grid item xs={12} md={6} mt={.5} sx={{ display: { xs: 'none', md: 'block' } }}>
                             <InputLabel htmlFor="request-message" sx={inputLabelStyles}>{t('details')}</InputLabel>
-                            <BootstrapInput id="request-message" type="text" multiline rows={3.5} value={props.message} onChange={(e: React.ChangeEvent<HTMLInputElement>) => props.setMessage(e.target.value)} fullWidth disabled />
+                            <BootstrapInput id="request-message" type="text" multiline rows={3.5} value={props.message} onChange={(e: React.ChangeEvent<HTMLInputElement>) => props.setMessage(e.target.value)} fullWidth disabled={!props.canEdit} />
                         </Grid>
                         <Grid item xs={12} md={6} mt={1}>
                             <InputLabel htmlFor="assigned-manager" sx={inputLabelStyles}>{t('assignedManager')}</InputLabel>
@@ -191,7 +191,7 @@ function RequestForm(props: any) {
                                         onChange={(e: any) => { props.setAssignedManager(e.target.value); }}
                                         input={<BootstrapInput />}
                                         fullWidth
-                                        disabled
+                                        disabled={!props.canEdit}
                                     >
                                         <option value="">{t('noAgentAssigned')}</option>
                                         {
@@ -203,14 +203,14 @@ function RequestForm(props: any) {
                                     <Button 
                                         variant="contained" color="inherit" 
                                         sx={whiteButtonStyles} style={{ marginRight: "10px" }} 
-                                        onClick={assignManager} disabled
+                                        onClick={assignManager} disabled={!props.canEdit}
                                     >
                                         {t('updateManager')}
                                     </Button>
                                     <Button 
                                         variant="contained" color="inherit" 
                                         sx={whiteButtonStyles} 
-                                        onClick={removeManager} disabled
+                                        onClick={removeManager} disabled={!props.canEdit}
                                     >
                                         {t('removeManager')}
                                     </Button>

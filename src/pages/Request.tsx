@@ -18,8 +18,6 @@ import RequestForm from '../components/editRequestPage/RequestForm';
 import AddContainer from '../components/editRequestPage/AddContainer';
 import RequestFormHeader from '../components/editRequestPage/RequestFormHeader';
 import { useSelector } from 'react-redux';
-import { useAppDispatch } from '../store';
-import { fetchAssignees, fetchPorts, fetchProducts } from '../store/masterdata.slice';
 // @ts-ignore
 
 // let packingOptions = ["Unit", "Bundle", "Bag", "Pallet", "Carton", "Lot", "Crate"];
@@ -59,7 +57,9 @@ function Request() {
     const [ports1, setPorts1] = useState<any>(null);
     const [ports2, setPorts2] = useState<any>(null);
     const [containers, setContainers] = useState<any>(null);
-
+    
+    const [canEdit, setCanEdit] = useState<boolean>(true);
+    
     let { id } = useParams();
     const navigate = useNavigate();
     const { instance, accounts } = useMsal();
@@ -177,16 +177,6 @@ function Request() {
                 }
             }
         }
-        
-        // if (account && instance && context) {
-        //     const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Port/Ports?pageSize=2000", context.tokenTransport);
-        //     if (response !== null && response !== undefined) {
-        //         var addedCoordinatesPorts = addedCoordinatesToPorts(response);
-        //         setPorts(addedCoordinatesPorts);
-        //         console.log(response);
-        //         console.log(addedCoordinatesPorts);
-        //     }  
-        // }
     }
     
     const getProducts = async () => {
@@ -348,10 +338,9 @@ function Request() {
                                 phone={phone} setPhone={setPhone}
                                 packingType={packingType} containers={containers}
                                 clientNumber={clientNumber} setClientNumber={setClientNumber}
-                                departure={departure} setDeparture={setDeparture}
-                                arrival={arrival} setArrival={setArrival} 
-                                email={email} setEmail={setEmail}
-                                tags={tags} setTags={setTags}
+                                departure={departure} setDeparture={setDeparture} arrival={arrival} setArrival={setArrival} 
+                                email={email} setEmail={setEmail} tags={tags} setTags={setTags}
+                                canEdit={canEdit} setCanEdit={setCanEdit}
                                 containersSelection={containersSelection} setContainersSelection={setContainersSelection}
                                 getClosestDeparture={getClosestDeparture} getClosestArrival={getClosestArrival}
                                 products={products} openModalContainer={() => setModal10(true)}
@@ -371,6 +360,7 @@ function Request() {
                                 ports={ports} products={products}
                                 ports1={ports1} ports2={ports2}
                                 containers={containers} status={status}
+                                canEdit={canEdit} setCanEdit={setCanEdit}
                                 requestData={requestData} type="standard"
                             />
                             : <Grid item xs={12}><Skeleton /></Grid>
