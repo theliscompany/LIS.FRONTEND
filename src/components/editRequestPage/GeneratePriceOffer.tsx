@@ -744,6 +744,7 @@ function GeneratePriceOffer(props: any) {
                     "comment": rteRef.current?.editor?.getHTML(),
                     "quoteOfferNumber": generateRandomNumber(),
                     "quoteOfferVm": 0,
+                    "clientNumber": clientNumber.contactNumber,
                     "emailUser": email,
                     "options": sentOptions,
                     "files": formState.files.map((elm: any) => { return {...elm, url: ""}}),
@@ -1595,79 +1596,6 @@ function GeneratePriceOffer(props: any) {
                                             {
                                                 formState.options !== undefined && formState.options.length !== 0 ? 
                                                 <>
-                                                    {/* {
-                                                        formState.selectedHaulage !== null && formState.selectedHaulage !== undefined ? 
-                                                        <Grid item xs={12}>
-                                                            <Typography variant="h5" sx={{ my: 1, fontSize: 18, fontWeight: "bold" }}>{t('selectedHaulage')}</Typography>
-                                                            <Box sx={{ overflow: "auto" }}>
-                                                                <DataGrid
-                                                                    rows={[formState.selectedHaulage]}
-                                                                    columns={columnsHaulages}
-                                                                    initialState={{
-                                                                        pagination: {
-                                                                            paginationModel: {
-                                                                                pageSize: 10,
-                                                                            },
-                                                                        },
-                                                                    }}
-                                                                    pageSizeOptions={[5, 10]}
-                                                                    getRowId={(row: any) => row?.id}
-                                                                    getRowHeight={() => "auto" }
-                                                                    sx={sizeStyles}
-                                                                    disableRowSelectionOnClick
-                                                                />
-                                                            </Box>
-                                                        </Grid> : null
-                                                    }
-                                                    {
-                                                        formState.selectedSeafreights !== undefined && formState.selectedSeafreights !== null ? 
-                                                        <Grid item xs={12}>
-                                                            <Typography variant="h5" sx={{ my: 1, fontSize: 18, fontWeight: "bold" }}>{t('selectedSeafreight')}</Typography>
-                                                            <Box sx={{ overflow: "auto" }}>
-                                                                <DataGrid
-                                                                    rows={formState.selectedSeafreights}
-                                                                    columns={columnsSeafreights}
-                                                                    initialState={{
-                                                                        pagination: {
-                                                                            paginationModel: {
-                                                                                pageSize: 10,
-                                                                            },
-                                                                        },
-                                                                    }}
-                                                                    pageSizeOptions={[5, 10]}
-                                                                    getRowId={(row: any) => row?.seaFreightId}
-                                                                    getRowHeight={() => "auto" }
-                                                                    sx={sizeStyles}
-                                                                    disableRowSelectionOnClick
-                                                                />
-                                                            </Box>
-                                                        </Grid> : null
-                                                    }
-                                                    {
-                                                        formState.myMiscs !== null && formState.myMiscs.length !== 0 ? 
-                                                        <Grid item xs={12}>
-                                                            <Typography variant="h5" sx={{ my: 1, fontSize: 18, fontWeight: "bold" }}>{t('selectedMisc')}</Typography>
-                                                            <Box sx={{ overflow: "auto" }}>
-                                                                <DataGrid
-                                                                    rows={formState.myMiscs}
-                                                                    columns={columnsMiscs}
-                                                                    initialState={{
-                                                                        pagination: {
-                                                                            paginationModel: {
-                                                                                pageSize: 10,
-                                                                            },
-                                                                        },
-                                                                    }}
-                                                                    pageSizeOptions={[5, 10]}
-                                                                    getRowId={(row: any) => row?.miscellaneousId}
-                                                                    getRowHeight={() => "auto" }
-                                                                    sx={sizeStyles}
-                                                                    disableRowSelectionOnClick
-                                                                />
-                                                            </Box>
-                                                        </Grid> : null
-                                                    } */}
-
                                                     <Grid item xs={12}>
                                                         <TableContainer component={Paper}>
                                                             <Table size="small">
@@ -2116,12 +2044,6 @@ function GeneratePriceOffer(props: any) {
                         offer={currentOffer} setOffer={setCurrentOffer} type="modal" closeModal={() => setModalOffer(false)}
                     /> : <Skeleton />
                 }
-                {/* <DialogContent dividers>
-                    
-                </DialogContent>
-                <DialogActions>
-                    <Button variant="contained" onClick={() => setModalOffer(false)} sx={buttonCloseStyles}>{t('close')}</Button>
-                </DialogActions> */}
             </BootstrapDialog>
 
             {/* Create new haulage */}

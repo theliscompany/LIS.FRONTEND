@@ -113,7 +113,7 @@ function AcceptOffer(props: any) {
                 <p>${t('confirmationOfferThanks', {lng: lang})}</p>
                 <p>${t('confirmationOfferText', {lng: lang})}</p>
                 <p>${t('loadingCity', {lng: lang})} : ${data.data.options[nOption].selectedHaulage.loadingCityName}</p>
-                <p>${t('destinationPort', {lng: lang})} : ${data.data.options[nOption].selectedSeafreight.destinationPortName}</p>
+                <p>${t('destinationPort', {lng: lang})} : ${data.data.options[nOption].selectedSeafreights[0].destinationPortName}</p>
                 <p>${infos}</p>
                 <br>
                 <p>${t('endMailWord', {lng: lang})}</p>

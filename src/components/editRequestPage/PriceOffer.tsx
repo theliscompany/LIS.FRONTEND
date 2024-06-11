@@ -1,10 +1,5 @@
 import { Alert, Box, Button, DialogActions, DialogContent, Grid, InputLabel, NativeSelect, Skeleton } from '@mui/material';
 import { useTranslation } from 'react-i18next';
-import StarterKit from '@tiptap/starter-kit';
-import {
-	type RichTextEditorRef,
-	RichTextReadOnly,
-} from "mui-tiptap";
 import { getExtensionFromContentType, statusLabel } from '../../utils/functions';
 import { BootstrapInput, buttonCloseStyles, inputLabelStyles } from '../../utils/misc/styles';
 import { useMsal, useAccount } from '@azure/msal-react';

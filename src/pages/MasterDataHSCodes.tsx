@@ -82,18 +82,18 @@ const MasterDataHSCodes: any = (props: any) => {
         //         </Box>
         //     );
         // }, minWidth: 120, flex: 1 },
-        { field: 'xxx', headerName: t('Actions'), renderCell: (params: GridRenderCellParams) => {
-            return (
-                <Box sx={{ my: 1, mr: 1 }}>
-                    <IconButton size="small" title={t('editRowHSCode')} sx={{ mr: 0.5 }} onClick={() => { setCurrentEditId(params.row.hS_Code); resetForm(); getHSCode(params.row.hS_Code); setModal(true); }}>
-                        <Edit fontSize="small" />
-                    </IconButton>
-                    <IconButton size="small" title={t('deleteRowHSCode')} onClick={() => { setCurrentId(params.row.hS_Code); setModal2(true); }}>
-                        <Delete fontSize="small" />
-                    </IconButton>
-                </Box>
-            );
-        }, minWidth: 120, flex: 1 },
+        // { field: 'xxx', headerName: t('Actions'), renderCell: (params: GridRenderCellParams) => {
+        //     return (
+        //         <Box sx={{ my: 1, mr: 1 }}>
+        //             <IconButton size="small" title={t('editRowHSCode')} sx={{ mr: 0.5 }} onClick={() => { setCurrentEditId(params.row.hS_Code); resetForm(); getHSCode(params.row.hS_Code); setModal(true); }}>
+        //                 <Edit fontSize="small" />
+        //             </IconButton>
+        //             <IconButton size="small" title={t('deleteRowHSCode')} onClick={() => { setCurrentId(params.row.hS_Code); setModal2(true); }}>
+        //                 <Delete fontSize="small" />
+        //             </IconButton>
+        //         </Box>
+        //     );
+        // }, minWidth: 120, flex: 1 },
     ];
     
     const createNewHSCode = async () => {

@@ -41,7 +41,7 @@ function PriceOffers() {
         { field: 'route', headerName: t('trip'), renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box>
-                    {params.row.options[0].selectedHaulage.loadingCityName} - {params.row.options[0].selectedSeafreight.destinationPortName}
+                    {params.row.options[0].selectedHaulage.loadingCityName} - {params.row.options[0].selectedSeafreights[0].destinationPortName}
                 </Box>
             );
         }, minWidth: 200, flex: 1 },
