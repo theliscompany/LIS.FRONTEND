@@ -57,7 +57,7 @@ function PriceOffer(props: any) {
 
 			console.log(response);
 			var extension = getExtensionFromContentType(type);
-            var file = new File([response.data], name+"."+extension, { type });
+            var file = new File([response.data], name, { type });
 			return file;
         } 
         catch (error) {
@@ -67,14 +67,16 @@ function PriceOffer(props: any) {
     };
     
 	async function sendEmailWithAttachments(from: string, to: string, subject: string, htmlContent: string, attachments: any) {
+		var arrayIds: string[] = [];
 		const formData = new FormData();
 		console.log("Attachments : ", attachments);
 		// Append the attachments to the FormData object
 		for (const { fileName, url, id, fileId, contentType } of attachments) {
 			var auxId = id !== undefined ? id : fileId;
 			try {
-				var filePromise = await downloadFile(auxId, fileName, contentType);
+				var filePromise = await downloadFile(auxId, `${auxId}=${fileName}`, contentType);
 				formData.append('Attachments', filePromise !== null ? filePromise : "");
+				// formData.append('Identifiers', [...arrayIds, auxId].join(","));
 			}
 			catch (err: any) {
 				console.log(err);
@@ -87,7 +89,8 @@ function PriceOffer(props: any) {
 		formData.append('Subject', subject);
 		formData.append('HtmlContent', htmlContent);
 		
-		// // Send the email with fetch
+		console.log("Formdata : ", Array.from(formData));
+		// Send the email with fetch
 		fetch(protectedResources.apiLisQuotes.endPoint+'/Email', {
 			method: 'POST',
 			headers: {
