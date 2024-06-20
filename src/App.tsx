@@ -36,6 +36,7 @@ import HandleRequest from './pages/HandleRequest';
 import { Provider } from 'react-redux';
 import { store } from './store';
 import MasterDataHSCodes from './pages/MasterDataHSCodes';
+import Orders from './pages/Orders';
 
 const App = () => {
   return (
@@ -58,6 +59,7 @@ const App = () => {
 								<Route path="pending-requests" element={<ValidatedRequests />} />
 								<Route path="quote-offers" element={<PriceOffers />} />
 								<Route path="quote-offers/:id" element={<ManagePriceOffer />} />
+								<Route path="orders" element={<Orders />} />
 								<Route path="users" element={<UsersAssignment />} />
 								<Route path="seafreights" element={<Seafreights />} />
 								<Route path="haulages" element={<Haulages />} />

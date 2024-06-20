@@ -42,7 +42,7 @@ import Search from '@mui/icons-material/Search';
 
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Anchor, AnchorOutlined, AttachFileOutlined, ContactsOutlined, ExpandLess, ExpandMore, FirstPage, FolderOutlined, Inventory, InventoryOutlined, LastPage, RoomService, RoomServiceOutlined, TaskAltOutlined } from '@mui/icons-material';
+import { Anchor, AnchorOutlined, AttachFileOutlined, ContactsOutlined, ExpandLess, ExpandMore, FirstPage, Folder, FolderOutlined, Inventory, InventoryOutlined, LastPage, RoomService, RoomServiceOutlined, SettingsOutlined, TaskAltOutlined } from '@mui/icons-material';
 import { useAppDispatch } from '../../store';
 import { fetchAssignees, fetchContactBusinesses, fetchHSCodes, fetchPorts, fetchProducts, fetchServices } from '../../store/masterdata.slice';
 import { useAuthorizedBackendApi } from '../../api/api';
@@ -545,6 +545,20 @@ function Layout(props: {children?: React.ReactNode}) {
                                 </DarkTooltip>
                                 </ListItem>
                             </NavLink>
+                            
+                            <NavLink to="/admin/orders" className={({ isActive }) => isActive ? "cs-navlink-active" : "cs-navlink"}>
+                                <ListItem className="cs-listitem" key={"Orders"} disablePadding disableGutters>
+                                <DarkTooltip title={t('orders')} placement="right" arrow>
+                                    <ListItemButton className="cs-listitembutton">
+                                        <ListItemIcon className="cs-listitemicon">
+                                            <FolderOutlined fontSize="small" />
+                                        </ListItemIcon>
+                                        <ListItemText primary={t('orders')} primaryTypographyProps={{ fontSize: 13 }} />
+                                    </ListItemButton>
+                                </DarkTooltip>
+                                </ListItem>
+                            </NavLink>
+                            
                             <NavLink to="/admin/templates" className={({ isActive }) => isActive ? "cs-navlink-active" : "cs-navlink"}>
                                 <ListItem className="cs-listitem" key={"Templates"} disablePadding disableGutters>
                                 <DarkTooltip title={t('templates')} placement="right" arrow>
@@ -561,7 +575,7 @@ function Layout(props: {children?: React.ReactNode}) {
                             <ListItem className="cs-listitem" key={"Masterdata part"} disablePadding disableGutters>
                                 <ListItemButton className="cs-listitembutton" onClick={() => { setOpenMasterdata(!openMasterdata); }}>
                                     <ListItemIcon className="cs-listitemicon">
-                                        <FolderOutlined fontSize="small" />
+                                        <SettingsOutlined fontSize="small" />
                                     </ListItemIcon>
                                     <ListItemText primary={t('masterdata')} primaryTypographyProps={{ fontSize: 13 }} />
                                     {openMasterdata ? <ExpandLess /> : <ExpandMore />}

@@ -1,0 +1,197 @@
+import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { Delete, Edit, RestartAltOutlined, Visibility } from '@mui/icons-material';
+import { Alert, Box, Button, Chip, DialogActions, DialogContent, Grid, IconButton, Skeleton, Typography } from '@mui/material';
+import { DataGrid, GridColDef, GridRenderCellParams, GridValueFormatterParams } from '@mui/x-data-grid';
+import { SnackbarProvider, enqueueSnackbar } from 'notistack';
+import { whiteButtonStyles, sizingStyles, BootstrapDialog, BootstrapDialogTitle, buttonCloseStyles } from '../utils/misc/styles';
+import { NavLink } from 'react-router-dom';
+import { useMsal, useAccount } from '@azure/msal-react';
+import { useTranslation } from 'react-i18next';
+import { useAuthorizedBackendApi } from '../api/api';
+import { protectedResources } from '../config/authConfig';
+import { BackendService } from '../utils/services/fetch';
+import { useSelector } from 'react-redux';
+
+function Orders() {
+    const [load, setLoad] = useState<boolean>(true);
+    const [orders, setOrders] = useState<any>(null);
+    const [modal, setModal] = useState<boolean>(false);
+    const [ports, setPorts] = useState<any>(null);
+    const [currentId, setCurrentId] = useState<string>("");
+
+    const { instance, accounts } = useMsal();
+    const account = useAccount(accounts[0] || {});    
+    const context = useAuthorizedBackendApi();
+    
+    const { t } = useTranslation();
+    
+    var ourPorts: any = useSelector((state: any) => state.masterdata.ports);
+    
+    const columnsOrders: GridColDef[] = [
+        // { field: 'orderId', headerName: t('id'), flex: 0.5 },
+        { field: 'orderNumber', headerName: t('orderNumber'), flex: 0.75 },
+        { field: 'orderDate', headerName: t('orderDate'), renderCell: (params: GridRenderCellParams) => {
+            return (
+                <Box>{params.row.orderDate.slice(0,10)}</Box>
+            );
+        }, flex: 0.75 },
+        
+        // { field: 'departurePort', headerName: t('loadingPort'), flex: 0.5 },
+        // { field: 'destinationPort', headerName: t('dischargePort'), flex: 0.5 },
+        { field: 'refClient', headerName: t('client'), flex: 0.75 },
+        { field: 'refShippingAgent', headerName: t('carrier'), flex: 1.5 },
+        { field: 'departurePort', headerName: t('loadingPort'), renderCell: (params: GridRenderCellParams) => {
+            return (
+                <Box>
+                    {
+                        ports !== null && ports !== undefined && params.row.departurePort !== null ? 
+                        <>
+                            {ports.find((elm: any) => elm.portId === params.row.departurePort).portName}
+                        </> : <span>N/A</span>
+                    }
+                </Box>
+            );
+        }, flex: 1 },
+        { field: 'destinationPort', headerName: t('dischargePort'), renderCell: (params: GridRenderCellParams) => {
+            return (
+                <Box>
+                    {
+                        ports !== null && ports !== undefined && params.row.destinationPort !== null ? 
+                        <>
+                            {ports.find((elm: any) => elm.portId === params.row.destinationPort).portName}
+                        </> : <span>N/A</span>
+                    }
+                </Box>
+            );
+        }, flex: 1 },
+        
+        // { field: 'freightShipmentType', headerName: t('packageType'), flex: 0.5 },
+        // { field: 'fiscalYear', headerName: t('fiscalYear'), flex: 0.5 },
+        { field: 'www', headerName: t('Actions'), renderCell: (params: GridRenderCellParams) => {
+            return (
+                <Box sx={{ my: 1, mr: 1 }}>
+                    <IconButton component={NavLink} disabled to={"/"} title="Edit the order" sx={{ mr: 1 }}>
+                        <Edit fontSize="small" />
+                    </IconButton>
+                    <IconButton onClick={() => { setCurrentId(params.row.orderId); setModal(true); }}>
+                        <Delete fontSize="small" />
+                    </IconButton>
+                </Box>
+            );
+        }, minWidth: 120, flex: 0.5 }
+    ];
+    
+    useEffect(() => {
+        getPorts();
+        getOrders();
+    }, [account, instance, context]);
+    
+    const getPorts = async () => {
+        if (account && instance && context) {
+            if (ourPorts.length !== 0) {
+                console.log(ourPorts);
+                setPorts(ourPorts);
+            }
+            else {
+                const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Port/Ports?pageSize=2000", context.tokenTransport);
+                if (response !== null && response !== undefined) {
+                    console.log(response);
+                    setPorts(response);
+                }
+            }
+        }
+    }
+    
+    const getOrders = async () => {
+        if (account && instance && context) {
+            setLoad(true);
+            const response = await (context?.service as BackendService<any>).getSingle(protectedResources.apiLisShipments.endPoint+"/Orders");
+            if (response !== null && response !== undefined) {
+                console.log(response);
+                setOrders(response);
+                setLoad(false);
+            }
+            else {
+                setLoad(false);
+            }
+            // console.log(response);
+        }
+    }
+    
+    const deleteOrder = async (id: string) => {
+        if (account && instance && context) {
+            try {
+                const response = await (context?.service as any).delete(protectedResources.apiLisShipments.endPoint+"/Orders/"+id);
+                enqueueSnackbar(t('orderDeleted'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                setModal(false);
+                getOrders();
+                // if (response !== null && response !== undefined) {
+                //     enqueueSnackbar(t('orderDeleted'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                //     setModal(false);
+                //     getOrders();
+                // }    
+            }
+            catch (err: any) {
+                enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                console.log(err);
+            }
+        }
+    }
+
+    
+    
+    return (
+        <div style={{ background: "#fff", borderTopLeftRadius: 20, borderTopRightRadius: 20 }}>
+            <SnackbarProvider />
+            <Box py={2.5} sx={{ minWidth: { xs: "100vw", md: "100%" }}}>
+                <Typography variant="h5" sx={{mt: {xs: 4, md: 1.5, lg: 1.5 }}} px={5}><b>{t('listOrders')}</b></Typography>
+                <Grid container spacing={2} mt={0} px={5}>
+                    <Grid item xs={12}>
+                        <Button color="inherit" variant="contained" sx={whiteButtonStyles} style={{ float: "right" }} onClick={() => { getOrders(); }}>
+                            {t('reload')} <RestartAltOutlined sx={{ ml: 0.5, pb: 0.45, justifyContent: "center", alignItems: "center" }} fontSize="small" />
+                        </Button>
+                    </Grid>
+                </Grid>
+                <Box>
+                    {
+                        !load ? 
+                        <Grid container spacing={2} mt={0} px={5}>
+                            <Grid item xs={12}>
+                                {
+                                    orders !== null && orders.length !== 0 ?
+                                    <Box sx={{ overflow: "hidden" }}>
+                                        <DataGrid
+                                            rows={orders}
+                                            columns={columnsOrders}
+                                            getRowId={(row: any) => row?.orderId}
+                                            getRowHeight={() => "auto" }
+                                            sx={sizingStyles}
+                                            disableRowSelectionOnClick
+                                        />
+                                    </Box> : <Alert severity="warning">{t('noResults')}</Alert>
+                                }
+                            </Grid>
+                        </Grid> : <Skeleton sx={{ mx: 5, mt: 3 }} />
+                    }
+                </Box>
+            </Box>
+            <BootstrapDialog open={modal} onClose={() => setModal(false)} maxWidth="sm" fullWidth>
+                <BootstrapDialogTitle id="custom-dialog-title" onClose={() => setModal(false)}>
+                    <b>{t('confirmDeletion')}</b>
+                </BootstrapDialogTitle>
+                <DialogContent dividers>
+                    <Typography variant="subtitle1" gutterBottom px={2}>
+                        {t('areYouSureDeleteOrder')}
+                    </Typography>
+                </DialogContent>
+                <DialogActions>
+                    <Button variant="contained" color="secondary" className="mr-3" onClick={() => { deleteOrder(currentId); }} sx={{ textTransform: "none" }}>{t('delete')}</Button>
+                    <Button variant="contained" onClick={() => setModal(false)} sx={buttonCloseStyles}>{t('close')}</Button>
+                </DialogActions>
+            </BootstrapDialog>
+        </div>
+    );
+}
+
+export default Orders;
