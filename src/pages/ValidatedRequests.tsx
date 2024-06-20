@@ -77,7 +77,7 @@ function ValidatedRequests() {
             if (response !== null && response.code !== undefined && response.data !== undefined) {
                 if (response.code === 200) {
                     setLoad(false);
-                    setRequests(response.data.filter((elm: any) => elm.status !== "New").reverse());
+                    setRequests(response.data.filter((elm: any) => elm.status === "EnCoursDeTraitement").reverse());
                 }
                 else {
                     setLoad(false);

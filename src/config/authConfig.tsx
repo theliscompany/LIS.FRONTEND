@@ -69,5 +69,8 @@ export const protectedResources = {
   }, 
   apiLisFiles: {
     endPoint: "https://lis-document-svc.azurewebsites.net/api"
+  },
+  apiLisShipments: {
+    endPoint: "https://lis-shipment-svc.azurewebsites.net/api"
   }
 }

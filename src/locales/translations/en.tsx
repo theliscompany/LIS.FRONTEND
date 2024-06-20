@@ -512,5 +512,6 @@ export const en = {
   serviceItem: "Service Item",
   value: "Value",
   simpleSearch: "Simple search",
-  advancedSearch: "Advanced search"
+  advancedSearch: "Advanced search",
+  trackingOptions: "You can obtain information about your order using this number : "
 };

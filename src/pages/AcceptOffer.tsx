@@ -84,10 +84,11 @@ function AcceptOffer(props: any) {
 
     const acceptOffer = async () => {
         // console.log(currentOption);
+        var cOption = currentOption !== null && currentOption !== undefined ? Number(currentOption) : 0;
         const body: any = {
             id: id,
             newStatus: "Accepted",
-            option: currentOption !== null && currentOption !== undefined ? Number(currentOption) : 0
+            option: cOption
         };
 
         fetch(protectedResources.apiLisOffer.endPoint+"/QuoteOffer/"+id+"/approval?newStatus=Accepted", {
@@ -101,20 +102,61 @@ function AcceptOffer(props: any) {
                 throw new Error('Network response was not ok.');
             }
         }).then((data: any) => {
-            // console.log(data);
-            var lang = data.data.comment.startsWith("<p>Bonjour") ? "fr" : "en";
+            createOrder(data.data.options[cOption], data.data, cOption);
+            setLoad(false);
+            setIsAccepted(true);
+            enqueueSnackbar(t('priceOfferApproved'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top" } });
+        }).catch(error => { 
+            setLoad(false);
+            console.log(error);
+            // enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top" } });
+        });
+    }
+    
+    const createOrder = async (option: any, offerData: any, currentOpt: number) => {
+        console.log(option);
+        console.log(offerData);
+        const body: any = {
+            orderDate: new Date().toISOString(),
+            customerId: 0,
+            shippingAgent: 0,
+            orderStatus: 0,
+            departurePort: option.portDeparture.portId,
+            destinationPort: option.portDestination.portId,
+        };
 
-            var infos = getOfferContent(data.data.comment, Number(currentOption)+1, lang);
+        fetch(protectedResources.apiLisShipments.endPoint+"/orders", {
+            method: "POST",
+            // mode: "cors",
+            headers: {
+				'accept': '*/*',
+            	'Content-Type': 'application/json'
+			},
+			body: JSON.stringify(body),
+        }).then((response: any) => {
+            if (response.ok) {
+                return response.json();
+            }
+            else {
+                throw new Error('Network response was not ok.');
+            }
+        }).then((data: any) => {
+            console.log("All : ", data);
+            
+            var lang = offerData.comment.startsWith("<p>Bonjour") ? "fr" : "en";
+            var infos = getOfferContent(offerData.comment, Number(currentOpt)+1, lang);
             console.log("Infos : ", infos);
-            var nOption = currentOption !== null ? currentOption : 0;
+            var nOption = currentOpt !== null ? currentOpt : 0;
             var messageText = `
             <div style="font-family: Verdana;">
                 <p>${t('hello', {lng: lang})} CYRILLE PENAYE,</p>
                 <p>${t('confirmationOfferThanks', {lng: lang})}</p>
                 <p>${t('confirmationOfferText', {lng: lang})}</p>
-                <p>${t('loadingCity', {lng: lang})} : ${data.data.options[nOption].selectedHaulage.loadingCityName}</p>
-                <p>${t('destinationPort', {lng: lang})} : ${data.data.options[nOption].selectedSeafreights[0].destinationPortName}</p>
+                <p>${t('loadingCity', {lng: lang})} : ${offerData.options[nOption].selectedHaulage.loadingCityName}</p>
+                <p>${t('destinationPort', {lng: lang})} : ${offerData.options[nOption].selectedSeafreights[0].destinationPortName}</p>
                 <p>${infos}</p>
+                <br>
+                <p>${t('trackingOptions', {lng: lang})} : ${data.orderNumber}</p>
                 <br>
                 <p>${t('endMailWord', {lng: lang})}</p>
             </div>
@@ -132,14 +174,10 @@ function AcceptOffer(props: any) {
             </div>
             `;
             
-            sendEmail("pricing@omnifreight.eu", data.data.emailUser, t('confirmationOffer', {lng: lang}), messageText);
-            setLoad(false);
-            setIsAccepted(true);
-            enqueueSnackbar(t('priceOfferApproved'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top" } });
+            sendEmail("pricing@omnifreight.eu", offerData.emailUser, t('confirmationOffer', {lng: lang}), messageText);
         }).catch(error => { 
             setLoad(false);
             console.log(error);
-            // enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top" } });
         });
     }
     
