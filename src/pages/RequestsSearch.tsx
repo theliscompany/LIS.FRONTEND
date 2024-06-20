@@ -4,7 +4,6 @@ import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import { Alert, Button, Grid, InputLabel, NativeSelect, Skeleton } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
-import { BootstrapInput, inputLabelStyles } from '../utils/misc/styles';
 import { loginRequest, protectedResources } from '../config/authConfig';
 import { enqueueSnackbar, SnackbarProvider } from 'notistack';
 import { useAuthorizedBackendApi } from '../api/api';
@@ -13,9 +12,9 @@ import { useParams } from 'react-router-dom';
 import { RequestResponseDto } from '../utils/models/models';
 import { useTranslation } from 'react-i18next';
 import RequestViewItem from '../components/requestsPage/RequestViewItem';
-import AutocompleteSearch from '../components/shared/AutocompleteSearch';
 import { useAccount, useMsal } from '@azure/msal-react';
-import { getAccessToken } from '../utils/functions';
+import SearchZone from '../components/requestsPage/SearchZone';
+import { Dayjs } from 'dayjs';
 
 function createGetRequestUrl(variable1: string, variable2: string, variable3: string, variable4: string) {
     let url = protectedResources.apiLisQuotes.endPoint+'/Request?';
@@ -45,7 +44,10 @@ function RequestsSearch() {
     const [packingType, setPackingType] = React.useState<string>("");
     const [departure, setDeparture] = React.useState<any>(null);
     const [arrival, setArrival] = React.useState<any>(null);
-    const [tempToken, setTempToken] = React.useState<string>("");
+    const [createdDateStart, setCreatedDateStart] = React.useState<Dayjs | null>(null);
+    const [createdDateEnd, setCreatedDateEnd] = React.useState<Dayjs | null>(null);
+    const [updatedDateStart, setUpdatedDateStart] = React.useState<Dayjs | null>(null);
+    const [updatedDateEnd, setUpdatedDateEnd] = React.useState<Dayjs | null>(null);
     let { search } = useParams();
 
     const context = useAuthorizedBackendApi();
@@ -120,46 +122,20 @@ function RequestsSearch() {
                         search !== undefined ? <b>{t('searchResultsFor')} : {search}</b> : <b>{t('listRequestsQuote')}</b>
                     }
                 </Typography>
+                
+                
                 <Grid container spacing={1} px={5} mt={2}>
-                    <Grid item xs={12} md={3}>
-                        <InputLabel htmlFor="departure" sx={inputLabelStyles}>{t('departure')}</InputLabel>
-                        <AutocompleteSearch id="departure" value={departure} onChange={setDeparture} fullWidth />
-                    </Grid>
-                    <Grid item xs={12} md={3}>
-                        <InputLabel htmlFor="arrival" sx={inputLabelStyles}>{t('arrival')}</InputLabel>
-                        <AutocompleteSearch id="arrival" value={arrival} onChange={setArrival} fullWidth />
-                    </Grid>
+                    <SearchZone 
+                        departure={departure} setDeparture={setDeparture}
+                        arrival={arrival} setArrival={setArrival}
+                        packingType={packingType} handleChangePackingType={handleChangePackingType}
+                        status={status} handleChangeStatus={handleChangeStatus}
+                        updatedDateStart={updatedDateStart} setUpdatedDateStart
+                        updatedDateEnd={updatedDateEnd} setUpdatedDateEnd={setUpdatedDateEnd}
+                        createdDateEnd={createdDateEnd} setCreatedDateEnd={setCreatedDateEnd}
+                        createdDateStart={createdDateStart} setCreatedDateStart={setCreatedDateStart}
+                    />
                     
-                    <Grid item xs={12} md={3}>
-                        <InputLabel htmlFor="packing-type" sx={inputLabelStyles}>{t('packingType')}</InputLabel>
-                        <NativeSelect
-                            id="packing-type"
-                            value={packingType}
-                            onChange={handleChangePackingType}
-                            input={<BootstrapInput />}
-                            fullWidth
-                        >
-                            <option value="">{t('allTypes')}</option>
-                            <option value="FCL">{t('fcl')}</option>
-                            <option value="Breakbulk/LCL">{t('breakbulk')}</option>
-                            <option value="Unit RoRo">{t('roro')}</option>
-                        </NativeSelect>
-                    </Grid>
-                    <Grid item xs={12} md={3}>
-                        <InputLabel htmlFor="status-id" sx={inputLabelStyles}>{t('status')}</InputLabel>
-                        <NativeSelect
-                            id="status-id"
-                            value={status}
-                            onChange={handleChangeStatus}
-                            input={<BootstrapInput />}
-                            fullWidth
-                        >
-                            <option value="">{t('allStatus')}</option>
-                            <option value="EnAttente">{t('EnAttente')}</option>
-                            <option value="Valider">{t('Valider')}</option>
-                            <option value="Rejeter">{t('Rejeter')}</option>
-                        </NativeSelect>
-                    </Grid>
                     <Grid item xs={12} md={2} sx={{ display: "flex", alignItems: "end" }}>
                         <Button 
                             variant="contained" 

@@ -6,7 +6,6 @@ import { enqueueSnackbar } from 'notistack';
 import { protectedResources } from '../config/authConfig';
 import { BootstrapDialog, BootstrapDialogTitle, buttonCloseStyles } from '../utils/misc/styles';
 import { useTranslation } from 'react-i18next';
-import { getServices, getServicesTotal } from '../utils/functions';
 
 function AcceptOffer(props: any) {
     const [load, setLoad] = useState<boolean>(true);
@@ -20,48 +19,6 @@ function AcceptOffer(props: any) {
     const searchParams = new URLSearchParams(location.search);
     const currentOption = searchParams.get('option');
     
-    function getOfferInfo(mail: string, offerNumber: number): {
-        price: string | null;
-        frequency: string;
-        seaDelay: string;
-        extraHour: string;
-        expressMail: string;
-      } | null {
-        const offerRegex = new RegExp(`# OFFRE ${offerNumber}\\s*(.*?)\\s*# OFFRE \\d+|\\s*<p>\\s*Cordialement`, 's');
-        const match = mail.match(offerRegex);
-      
-        if (!match) {
-            return null;
-        }
-      
-        const offerHtml = match[1];
-        const offerContainer = document.createElement('div');
-        offerContainer.innerHTML = offerHtml;
-      
-        // console.log("Offer html : ", offerHtml);
-
-        const strongElements = Array.from(offerContainer.querySelectorAll('strong'));
-        const priceIndex = strongElements.findIndex(el => el.textContent?.includes(`${offerNumber} OFFRE`));
-      
-        if (priceIndex === -1) {
-            return null;
-        }
-      
-        const price = strongElements[priceIndex + 1].textContent;
-        const frequency = strongElements[priceIndex + 1].nextElementSibling?.textContent?.trim() ?? '';
-        const seaDelay = strongElements[priceIndex + 1].nextElementSibling?.nextElementSibling?.textContent?.trim() ?? '';
-        const extraHour = offerContainer.querySelector(`p:contains("Chargement de")`)?.textContent?.match(/\d+ EUR/)?.[0]?.trim() ?? '';
-        const expressMail = offerContainer.querySelector(`p:contains("Express mail")`)?.textContent?.match(/\d+.00 EUR/)?.[0]?.trim() ?? '';
-      
-        return {
-            price,
-            frequency,
-            seaDelay,
-            extraHour,
-            expressMail
-        };
-    }
-      
     function getOfferContent(mail: string, offerNumber: number, language: string) {
         const offerRegex = new RegExp(`# ${t('offer', {lng: language}).toUpperCase()} ${offerNumber}\\s*(.*?)\\s*(# ${t('offer', {lng: language}).toUpperCase()} \\d+|<p>\\s*${t('endMailWord', {lng: language})})`, 's');
         const match = mail.match(offerRegex);
@@ -118,11 +75,15 @@ function AcceptOffer(props: any) {
         console.log(offerData);
         const body: any = {
             orderDate: new Date().toISOString(),
+            refClient: offerData.clientNumber,
+            refShippingAgent: option.selectedSeafreights[0].carrierAgentName,
+            freightShipmentType: option.selectedSeafreights[0].defaultContainer,
             customerId: 0,
             shippingAgent: 0,
             orderStatus: 0,
             departurePort: option.portDeparture.portId,
             destinationPort: option.portDestination.portId,
+            fiscalYear: Number(new Date().getFullYear())
         };
 
         fetch(protectedResources.apiLisShipments.endPoint+"/orders", {

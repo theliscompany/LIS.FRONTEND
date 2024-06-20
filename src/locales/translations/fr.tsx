@@ -16,6 +16,7 @@ export const fr = {
   quantity: "Quantité",
   container: "Conteneur",
   packageName: "Type de package",
+  packageType: "Type de package",
   unitName: "Type d'unité",
   dimensions: "Dimensions",
   weight: "Poids",
@@ -137,6 +138,7 @@ export const fr = {
   prices: "Fret par unité",
   haulier: "Transporteur routier",
   loadingPort: "Port de chargement",
+  dischargePort: "Port de déchargement",
   freeTime: "Temps libre",
   multiStop: "Multi-arrêts",
   overtimeTariff: "Tarif des <br />heures supplémentaires",
@@ -180,8 +182,10 @@ export const fr = {
   errorHappenedRequest: "Une erreur s'est produite lors de l'envoi de votre demande.",
   needFillFields: "Vous devez remplir les champs nom de l'unité, poids et dimensions.",
   offerDeleted: "L'offre a été supprimée avec succès.",
+  orderDeleted: "La commande a été supprimée avec succès.",
   confirmDeletion: "Confirmer la suppression",
   areYouSureDelete: "Êtes-vous sûr de vouloir supprimer cette offre ? Cette opération ne peut pas être annulée.",
+  areYouSureDeleteOrder: "Êtes-vous sûr de vouloir supprimer cette commande ? Cette opération ne peut pas être annulée.",
   delete: "Supprimer",
   privacyPolicy: "Politique de confidentialité",
   introduction: "Introduction",
@@ -513,5 +517,10 @@ export const fr = {
   value: "Valeur",
   simpleSearch: "Recherche simple",
   advancedSearch: "Recherche avancée",
-  trackingOptions: "Vous pouvez obtenir des informations sur votre commande à l'aide de ce numéro : "
+  trackingOptions: "Vous pouvez obtenir des informations sur votre commande à l'aide de ce numéro : ",
+  orders: "Commandes",
+  listOrders: "Liste des commandes",
+  orderNumber: "N° de la commande",
+  fiscalYear: "Année fiscale",
+  orderDate: "Date"
 };
