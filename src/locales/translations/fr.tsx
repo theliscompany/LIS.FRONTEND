@@ -512,5 +512,6 @@ export const fr = {
   serviceItem: "Element de service",
   value: "Valeur",
   simpleSearch: "Recherche simple",
-  advancedSearch: "Recherche avancée"
+  advancedSearch: "Recherche avancée",
+  trackingOptions: "Vous pouvez obtenir des informations sur votre commande à l'aide de ce numéro : "
 };
