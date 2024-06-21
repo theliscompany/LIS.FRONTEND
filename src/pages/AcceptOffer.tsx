@@ -86,7 +86,7 @@ function AcceptOffer(props: any) {
             fiscalYear: Number(new Date().getFullYear())
         };
 
-        fetch(protectedResources.apiLisShipments.endPoint+"/orders", {
+        fetch(protectedResources.apiLisShipments.endPoint+"/Orders", {
             method: "POST",
             // mode: "cors",
             headers: {
