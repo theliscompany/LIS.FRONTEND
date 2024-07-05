@@ -738,13 +738,13 @@ function GeneratePriceOffer(props: any) {
                     }; 
                 });
                 // console.log("Options : ", sentOptions[0].myMiscs[0].containers);
-                
+                console.log("Client Number : ", clientNumber);
                 var dataSent = {
                     "requestQuoteId": Number(id),
                     "comment": rteRef.current?.editor?.getHTML(),
                     "quoteOfferNumber": generateRandomNumber(),
                     "quoteOfferVm": 0,
-                    "clientNumber": clientNumber.contactNumber,
+                    "clientNumber": clientNumber.contactId,
                     "emailUser": email,
                     "options": sentOptions,
                     "files": formState.files.map((elm: any) => { return {...elm, url: ""}}),

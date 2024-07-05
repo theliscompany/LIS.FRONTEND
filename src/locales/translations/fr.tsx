@@ -522,5 +522,14 @@ export const fr = {
   listOrders: "Liste des commandes",
   orderNumber: "N° de la commande",
   fiscalYear: "Année fiscale",
-  orderDate: "Date"
+  orderDate: "Date",
+  seller: "Vendeur",
+  buyer: "Acheteur",
+  customer: "Client",
+  textEtd: "ETD",
+  textEta: "ETA",
+  ship: "Vaisseau", 
+  shippingLine: "Ligne maritime",
+  ratio: "Ratio",
+  vessel: "Vaisseau"
 };

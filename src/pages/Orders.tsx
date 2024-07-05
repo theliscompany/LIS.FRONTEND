@@ -27,51 +27,70 @@ function Orders() {
     const { t } = useTranslation();
     
     var ourPorts: any = useSelector((state: any) => state.masterdata.ports);
+    var ourContacts: any = useSelector((state: any) => state.masterdata.contactBusinesses);
     
     const columnsOrders: GridColDef[] = [
         // { field: 'orderId', headerName: t('id'), flex: 0.5 },
-        { field: 'orderNumber', headerName: t('orderNumber'), flex: 0.75 },
+        { field: 'orderNumber', headerName: t('orderNumber') },
         { field: 'orderDate', headerName: t('orderDate'), renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box>{params.row.orderDate.slice(0,10)}</Box>
             );
-        }, flex: 0.75 },
+        } },
+        { field: 'fiscalYear', headerName: t('fiscalYear') },
         
-        // { field: 'departurePort', headerName: t('loadingPort'), flex: 0.5 },
-        // { field: 'destinationPort', headerName: t('dischargePort'), flex: 0.5 },
-        { field: 'refClient', headerName: t('client'), flex: 0.75 },
-        { field: 'refShippingAgent', headerName: t('carrier'), flex: 1.5 },
+        { field: 'sellerId', headerName: t('seller') },
+        { field: 'buyerId', headerName: t('buyer') },
+        { field: 'customerId', headerName: t('customer') },
+        
         { field: 'departurePort', headerName: t('loadingPort'), renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box>
                     {
                         ports !== null && ports !== undefined && params.row.departurePort !== null ? 
                         <>
-                            {ports.find((elm: any) => elm.portId === params.row.departurePort).portName}
+                            {
+                                ports.find((elm: any) => elm.portId === params.row.departurePort) !== undefined ? 
+                                ports.find((elm: any) => elm.portId === params.row.departurePort).portName : "N/A"
+                            }
                         </> : <span>N/A</span>
                     }
                 </Box>
             );
-        }, flex: 1 },
+        } },
+        { field: 'estimatedDepartureDate', headerName: t('textEtd'), valueFormatter: (params: GridValueFormatterParams) => `${(new Date(params.value)).toLocaleString().slice(0,10)}` },
         { field: 'destinationPort', headerName: t('dischargePort'), renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box>
                     {
                         ports !== null && ports !== undefined && params.row.destinationPort !== null ? 
                         <>
-                            {ports.find((elm: any) => elm.portId === params.row.destinationPort).portName}
+                            {
+                                ports.find((elm: any) => elm.portId === params.row.destinationPort) !== undefined ? 
+                                ports.find((elm: any) => elm.portId === params.row.destinationPort).portName : "N/A"
+                            }
                         </> : <span>N/A</span>
                     }
                 </Box>
             );
-        }, flex: 1 },
+        } },
+        { field: 'estimatedArrivalDate', headerName: t('textEta'), valueFormatter: (params: GridValueFormatterParams) => `${(new Date(params.value)).toLocaleString().slice(0,10)}` },
         
-        // { field: 'freightShipmentType', headerName: t('packageType'), flex: 0.5 },
-        // { field: 'fiscalYear', headerName: t('fiscalYear'), flex: 0.5 },
+        { field: 'shipId', headerName: t('ship') },
+        { field: 'shipLineId', headerName: t('shippingLine') },
+
+        { field: 'freightShipmentType', headerName: t('packageType') },
+        { field: 'yyyy', headerName: t('products') },
+        { field: 'zzzz', headerName: t('margin') },
+        { field: 'wwww', headerName: t('ratio') },
+        
+        // { field: 'refClient', headerName: t('client') },
+        // { field: 'refShippingAgent', headerName: t('carrier') },
+        // // { field: 'freightShipmentType', headerName: t('packageType') },
         { field: 'www', headerName: t('Actions'), renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box sx={{ my: 1, mr: 1 }}>
-                    <IconButton component={NavLink} disabled to={"/"} title="Edit the order" sx={{ mr: 1 }}>
+                    <IconButton component={NavLink} to={"/admin/edit-order/"+params.row.orderId} title="Edit the order" sx={{ mr: 1 }}>
                         <Edit fontSize="small" />
                     </IconButton>
                     <IconButton onClick={() => { setCurrentId(params.row.orderId); setModal(true); }}>
@@ -79,7 +98,7 @@ function Orders() {
                     </IconButton>
                 </Box>
             );
-        }, minWidth: 120, flex: 0.5 }
+        }, minWidth: 120 }
     ];
     
     useEffect(() => {
@@ -109,7 +128,7 @@ function Orders() {
             const response = await (context?.service as BackendService<any>).getSingle(protectedResources.apiLisShipments.endPoint+"/Orders");
             if (response !== null && response !== undefined) {
                 console.log(response);
-                setOrders(response);
+                setOrders(response.filter((elm: any) => elm.fiscalYear !== 2014));
                 setLoad(false);
             }
             else {
@@ -168,6 +187,7 @@ function Orders() {
                                             getRowHeight={() => "auto" }
                                             sx={sizingStyles}
                                             disableRowSelectionOnClick
+                                            style={{ fontSize: "12px" }}
                                         />
                                     </Box> : <Alert severity="warning">{t('noResults')}</Alert>
                                 }
