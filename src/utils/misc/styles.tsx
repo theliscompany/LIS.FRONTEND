@@ -167,7 +167,8 @@ export const gridStyles = {
 }
 
 export const sizingStyles = { 
-  // maxWidth: "calc(100vw - 365px)"
+  maxWidth: "calc(100vw - 365px)"
+  // width: "100%"
 }
 
 export const sizeStyles = { 

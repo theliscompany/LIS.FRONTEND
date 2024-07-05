@@ -18,6 +18,7 @@ function Orders() {
     const [orders, setOrders] = useState<any>(null);
     const [modal, setModal] = useState<boolean>(false);
     const [ports, setPorts] = useState<any>(null);
+    const [contacts, setContacts] = useState<any>(null);
     const [currentId, setCurrentId] = useState<string>("");
 
     const { instance, accounts } = useMsal();
@@ -27,7 +28,7 @@ function Orders() {
     const { t } = useTranslation();
     
     var ourPorts: any = useSelector((state: any) => state.masterdata.ports);
-    var ourContacts: any = useSelector((state: any) => state.masterdata.contactBusinesses);
+    var ourContacts: any = useSelector((state: any) => state.masterdata.contactBusinesses.data);
     
     const columnsOrders: GridColDef[] = [
         // { field: 'orderId', headerName: t('id'), flex: 0.5 },
@@ -39,9 +40,55 @@ function Orders() {
         } },
         { field: 'fiscalYear', headerName: t('fiscalYear') },
         
-        { field: 'sellerId', headerName: t('seller') },
-        { field: 'buyerId', headerName: t('buyer') },
-        { field: 'customerId', headerName: t('customer') },
+        // { field: 'sellerId', headerName: t('seller') },
+        // { field: 'buyerId', headerName: t('buyer') },
+        // { field: 'customerId', headerName: t('customer') },
+        
+        { field: 'sellerId', headerName: t('seller'), renderCell: (params: GridRenderCellParams) => {
+            return (
+                <Box>
+                    {
+                        contacts !== null && contacts !== undefined && params.row.sellerId !== null ? 
+                        <>
+                            {
+                                contacts.find((elm: any) => elm.contactId === params.row.sellerId) !== undefined ? 
+                                contacts.find((elm: any) => elm.contactId === params.row.sellerId).contactName : "N/A"
+                            }
+                        </> : <span>N/A</span>
+                    }
+                </Box>
+            );
+        }, minWidth: 220 },
+        { field: 'buyerId', headerName: t('buyer'), renderCell: (params: GridRenderCellParams) => {
+            return (
+                <Box>
+                    {
+                        contacts !== null && contacts !== undefined && params.row.buyerId !== null ? 
+                        <>
+                            {
+                                contacts.find((elm: any) => elm.contactId === params.row.buyerId) !== undefined ? 
+                                contacts.find((elm: any) => elm.contactId === params.row.buyerId).contactName : "N/A"
+                            }
+                        </> : <span>N/A</span>
+                    }
+                </Box>
+            );
+        }, minWidth: 220 },
+        { field: 'customerId', headerName: t('customer'), renderCell: (params: GridRenderCellParams) => {
+            return (
+                <Box>
+                    {
+                        contacts !== null && contacts !== undefined && params.row.customerId !== null ? 
+                        <>
+                            {
+                                contacts.find((elm: any) => elm.contactId === params.row.customerId) !== undefined ? 
+                                contacts.find((elm: any) => elm.contactId === params.row.customerId).contactName : "N/A"
+                            }
+                        </> : <span>N/A</span>
+                    }
+                </Box>
+            );
+        }, minWidth: 220 },
         
         { field: 'departurePort', headerName: t('loadingPort'), renderCell: (params: GridRenderCellParams) => {
             return (
@@ -77,8 +124,23 @@ function Orders() {
         { field: 'estimatedArrivalDate', headerName: t('textEta'), valueFormatter: (params: GridValueFormatterParams) => `${(new Date(params.value)).toLocaleString().slice(0,10)}` },
         
         { field: 'shipId', headerName: t('ship') },
-        { field: 'shipLineId', headerName: t('shippingLine') },
-
+        // { field: 'shipLineId', headerName: t('shippingLine') },
+        { field: 'shipLineId', headerName: t('shippingLine'), renderCell: (params: GridRenderCellParams) => {
+            return (
+                <Box>
+                    {
+                        contacts !== null && contacts !== undefined && params.row.shipLineId !== null ? 
+                        <>
+                            {
+                                contacts.find((elm: any) => elm.contactId === params.row.shipLineId) !== undefined ? 
+                                contacts.find((elm: any) => elm.contactId === params.row.shipLineId).contactName : "N/A"
+                            }
+                        </> : <span>N/A</span>
+                    }
+                </Box>
+            );
+        }, minWidth: 220 },
+        
         { field: 'freightShipmentType', headerName: t('packageType') },
         { field: 'yyyy', headerName: t('products') },
         { field: 'zzzz', headerName: t('margin') },
@@ -103,6 +165,7 @@ function Orders() {
     
     useEffect(() => {
         getPorts();
+        getContacts();
         getOrders();
     }, [account, instance, context]);
     
@@ -117,6 +180,22 @@ function Orders() {
                 if (response !== null && response !== undefined) {
                     console.log(response);
                     setPorts(response);
+                }
+            }
+        }
+    }
+    
+    const getContacts = async () => {
+        if (account && instance && context) {
+            if (ourContacts.length !== 0) {
+                console.log(ourContacts);
+                setContacts(ourContacts);
+            }
+            else {
+                const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisCrm.endPoint+"/Contact/GetContacts?pageSize=4000", context.tokenCrm);
+                if (response !== null && response !== undefined) {
+                    console.log(response);
+                    setContacts(response);
                 }
             }
         }

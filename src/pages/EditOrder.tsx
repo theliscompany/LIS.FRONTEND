@@ -22,6 +22,7 @@ import dayjs, { Dayjs } from 'dayjs';
 
 function EditOrder() {
     const [load, setLoad] = useState<boolean>(true);
+    const [loadCreate, setLoadCreate] = useState<boolean>(false);
     const [orders, setOrders] = useState<any>(null);
     const [modal, setModal] = useState<boolean>(false);
     const [currentId, setCurrentId] = useState<string>("");
@@ -79,7 +80,7 @@ function EditOrder() {
     var ourCities: any = useSelector((state: any) => state.masterdata.cities);
     var ourPorts: any = useSelector((state: any) => state.masterdata.ports);
     var ourProducts: any = useSelector((state: any) => state.masterdata.products);
-    var ourContacts: any = useSelector((state: any) => state.masterdata.contactBusinesses);
+    var ourContacts: any = useSelector((state: any) => state.masterdata.contactBusinesses.data);
     
     useEffect(() => {
         getPorts();
@@ -88,33 +89,33 @@ function EditOrder() {
         getCities();
         loadOrder();
         // getOrders();
-    }, [account, instance, context]);
+    }, [account, instance, context, contacts, ports, cities]);
     
     const loadOrder = async () => {
-		if (account && instance && context) {
+		if (account && instance && context && contacts !== null && ports !== null && cities !== null) {
             setLoad(true);
             const response = await (context?.service as BackendService<any>).getSingle(protectedResources.apiLisShipments.endPoint+"/Orders/"+id);
             if (response !== null && response !== undefined) {
                 console.log(response);
                 setOrderData(response);
                 // Order data import
-                console.log(ourPorts);
-                setSeller(ourContacts.data.find((elm: any) => elm.contactId === response.sellerId));
-                setCustomer(ourContacts.data.find((elm: any) => elm.contactId === response.customerId));
-                setBuyer(ourContacts.data.find((elm: any) => elm.contactId === response.buyerId));
-                setCarrier(ourContacts.data.find((elm: any) => elm.contactId === response.shipLineId));
-                setCarrierAgent(ourContacts.data.find((elm: any) => elm.contactId === response.shippingAgent));
+                // console.log(ourPorts);
+                setSeller(contacts.find((elm: any) => elm.contactId === response.sellerId));
+                setCustomer(contacts.find((elm: any) => elm.contactId === response.customerId));
+                setBuyer(contacts.find((elm: any) => elm.contactId === response.buyerId));
+                setCarrier(contacts.find((elm: any) => elm.contactId === response.shipLineId));
+                setCarrierAgent(contacts.find((elm: any) => elm.contactId === response.shippingAgent));
                 
-                setPortLoading(ourPorts.find((elm: any) => elm.portId === response.departurePort));
-                setPortDischarge(ourPorts.find((elm: any) => elm.portId === response.destinationPort));
+                setPortLoading(ports.find((elm: any) => elm.portId === response.departurePort));
+                setPortDischarge(ports.find((elm: any) => elm.portId === response.destinationPort));
 
                 setEtd(dayjs(response.estimatedDepartureDate));
                 setEta(dayjs(response.estimatedArrivalDate));
 
                 setIncotermFrom(response.incoTerm);
                 setIncotermTo(response.incotermDestination);
-                setIncotermFromCity(ourCities.find((elm: any) => elm.id === response.city));
-                setIncotermToCity(ourCities.find((elm: any) => elm.id === response.cityIncotermTo));
+                setIncotermFromCity(cities.find((elm: any) => elm.id === response.city));
+                setIncotermToCity(cities.find((elm: any) => elm.id === response.cityIncotermTo));
                 setBookingRef(response.refShippingAgent);
                 setVessel(String(response.shipId));
 
@@ -195,6 +196,78 @@ function EditOrder() {
             }
         }
     }
+
+    const editOrder = async () => {
+        if (account && instance && context) {
+            try {
+                setLoadCreate(true);
+                var dataSent = {
+                    "orderId": Number(id),
+                    "orderNumber": orderData.orderNumber,
+                    "orderDate": orderData.orderDate,
+                    "closeDate": orderData.closeDate,
+                    "sellerId": seller.contactId,
+                    "buyerId": buyer.contactId,
+                    "customerId": customer.contactId,
+                    "shippingAgent": carrierAgent.contactId,
+                    "shipId": orderData.shipId,
+                    "shipLineId": carrier.contactId,
+                    "employeeId": orderData.employeeId,
+                    "paymentCondition": orderData.paymentCondition,
+                    "orderStatus": orderData.orderStatus,
+                    "lastEdited": orderData.lastEdited,
+                    "lastEditor": orderData.lastEditor,
+                    "departurePort": portLoading.portId,
+                    "destinationPort": portDischarge.portId,
+                    "estimatedDepartureDate": etd?.toISOString(),
+                    "estimatedArrivalDate": eta?.toISOString(),
+                    "incoTerm": incotermFrom,
+                    "refClient": referenceCustomer,
+                    "refSeller": referenceSeller,
+                    "refBuyer": referenceBuyer,
+                    "incotermDestination": incotermTo,
+                    "executedInDate": orderData.executedInDate,
+                    "fiscalYear": orderData.fiscalYear,
+                    "isVal1": orderData.isVal1,
+                    "isVal2": orderData.isVal2,
+                    "isVal3": orderData.isVal3,
+                    "isVal4": orderData.isVal4,
+                    "isVal5": orderData.isVal5,
+                    "refShippingAgent": bookingRef,
+                    "flag": orderData.flag,
+                    "docFlag": orderData.docFlag,
+                    "city": incotermFromCity.id,
+                    "freightCharges": orderData.freightCharges,
+                    "freightPayableAt": orderData.freightPayableAt,
+                    "freightMoveType": orderData.freightMoveType,
+                    "freightShipmentType": orderData.freightShipmentType,
+                    "numberOfBlOriginal": orderData.numberOfBlOriginal,
+                    "numberOfBlCopy": orderData.numberOfBlCopy,
+                    "shipperAddress": orderData.shipperAddress,
+                    "consigneeAddress": orderData.consigneeAddress,
+                    "notifyParty": orderData.notifyParty,
+                    "notifyPartyRef": orderData.notifyPartyRef,
+                    "voyageNumber": orderData.voyageNumber,
+                    "lcl": orderData.lcl,
+                    "exportation": orderData.exportation,
+                    "cityIncotermTo": incotermToCity.id,
+                    "invoiceUserId": orderData.invoiceUserId,
+                    "documentationUserId": orderData.documentationUserId,
+                    "operationsUserId": orderData.operationsUserId,
+                    "oblOverview": orderData.oblOverview
+                };
+                const response = await (context?.service as BackendService<any>).putWithToken(protectedResources.apiLisShipments.endPoint+"/Orders/"+id, dataSent, context.tokenLogin);
+                enqueueSnackbar("The order has been edited with success!", { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                loadOrder();
+                setLoadCreate(false);
+            }
+            catch (err: any) {
+                enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                setLoadCreate(false);
+                console.log(err);
+            }
+        }
+    }
     
     // const getOrders = async () => {
     //     if (account && instance && context) {
@@ -228,8 +301,8 @@ function EditOrder() {
                     
                     <CustomTabPanel value={tabValue} index={0}>
                         <Grid container spacing={0.75}>
-                            <Grid item xs={12}>
-                                <Button variant="contained" onClick={() => { console.log("Data"); }} sx={actionButtonStyles}>{t('Save')}</Button>
+                            <Grid item xs={12} sx={{ mb: 2 }}>
+                                <Button variant="contained" onClick={() => { editOrder(); }} sx={actionButtonStyles} disabled={loadCreate}>{t('Save')}</Button>
                                 <Button variant="contained" onClick={() => { loadOrder(); }} sx={actionButtonStyles}>{t('Reload')}</Button>
                             </Grid>
                             <Grid item xs={6}>
@@ -536,7 +609,7 @@ function EditOrder() {
                                                 <BootstrapInput id="vessel" type="text" value={vessel} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setVessel(e.target.value)} fullWidth sx={{ mb: 1 }} />                                                
                                             </Grid>
 
-                                            <Grid item xs={12} sx={{ mt: 0.625 }}>
+                                            <Grid item xs={12} sx={{ mt: 0.375 }}>
                                                 <Typography variant="h6">Cargo Details</Typography>
                                                 <Divider />
                                             </Grid>
