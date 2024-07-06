@@ -133,9 +133,9 @@ const AutocompleteSearch: React.FC<LocationAutocompleteProps> = ({ id, value, on
 
     return (
         <Box sx={{ position: "relative "}}>
-        <IconButton onClick={handleClick} size="small" sx={!loading ? { position: "absolute", top: "-24px", right: "-4px" } : { position: "absolute", top: "-32px", right: "-4px" }}>
+        {/* <IconButton onClick={handleClick} size="small" sx={!loading ? { position: "absolute", top: "-24px", right: "-4px" } : { position: "absolute", top: "-32px", right: "-4px" }}>
             <HelpOutline fontSize="small" />
-        </IconButton>
+        </IconButton> */}
         <Popover
             id={idPop}
             open={openPop}

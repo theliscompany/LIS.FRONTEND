@@ -9,6 +9,10 @@ export enum CategoryEnum
     SHIPPING_AGENCY = 11
 }
 
+export let incotermValues = ["FOB", "EXW", "FCA Warehouse", "CFR"];
+
+export let incotermDestinationValues = ["CFR", "Free On Truck destination", "FOB", "FCA", "FAS", "CPT", "CIP", "DPU", "DAP", "DDP"];
+
 export let packingOptions = ["Unit", "Bundle", "Bag", "Pallet", "Carton", "Lot", "Crate"];
 
 export var statusTypes = [
@@ -47,6 +51,97 @@ export const haulageTypeOptions = [
 export const languageOptions = [
   { value: "", label: "" },
   { value: "", label: "" },
+];
+
+export let allPackages = [
+  {
+    "packageId": 81,
+    "packageName": "UNIT"
+  },
+  {
+    "packageId": 82,
+    "packageName": "BUNDLE"
+  },
+  {
+    "packageId": 83,
+    "packageName": "BAG"
+  },
+  {
+    "packageId": 84,
+    "packageName": "PALLET"
+  },
+  {
+    "packageId": 85,
+    "packageName": "CARTON"
+  },
+  {
+    "packageId": 86,
+    "packageName": "LOT"
+  },
+  {
+    "packageId": 87,
+    "packageName": "CASE"
+  },
+  {
+    "packageId": 8,
+    "packageName": "20' Dry"
+  },
+  {
+    "packageId": 9,
+    "packageName": "40' Dry"
+  },
+  {
+    "packageId": 10,
+    "packageName": "40' HC"
+  },
+  {
+    "packageId": 11,
+    "packageName": "20' VT"
+  },
+  {
+    "packageId": 12,
+    "packageName": "40' VT"
+  },
+  {
+    "packageId": 13,
+    "packageName": "20' RF"
+  },
+  {
+    "packageId": 14,
+    "packageName": "40' RF"
+  },
+  {
+    "packageId": 15,
+    "packageName": "40' HC RF"
+  },
+  {
+    "packageId": 16,
+    "packageName": "20' FL"
+  },
+  {
+    "packageId": 17,
+    "packageName": "40' FL"
+  },
+  {
+    "packageId": 18,
+    "packageName": "20' OT"
+  },
+  {
+    "packageId": 19,
+    "packageName": "40' OT"
+  },
+  {
+    "packageId": 20,
+    "packageName": "20' Tank"
+  },
+  {
+    "packageId": 21,
+    "packageName": "40' Tank"
+  },
+  {
+    "packageId": 23,
+    "packageName": "40' HC OT"
+  },
 ];
 
 export const containerPackages = [

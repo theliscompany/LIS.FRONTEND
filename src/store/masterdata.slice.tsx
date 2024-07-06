@@ -2,6 +2,13 @@ import { createSlice, createAsyncThunk }  from '@reduxjs/toolkit'
 import { protectedResources } from '../config/authConfig'
 import { BackendService } from '../utils/services/fetch';
 
+export const fetchCities = createAsyncThunk(
+    'masterdata/fetchCities',
+    async(obj: any) => {
+        return await (obj?.service as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/City/Cities", obj.tokenTransport);
+    }
+);
+
 export const fetchContactBusinesses = createAsyncThunk(
     'masterdata/fetchContactBusinesses',
     async(obj: any) => {
@@ -56,6 +63,9 @@ export const masterdataSlice = createSlice({
     reducers: {},
     extraReducers: (builder: any) => {
         builder
+        .addCase(fetchCities.fulfilled, (state: any, action: any)=>{
+            state.cities = action.payload || []
+        })
         .addCase(fetchContactBusinesses.fulfilled, (state: any, action: any)=>{
             state.contactBusinesses = action.payload || []
         })

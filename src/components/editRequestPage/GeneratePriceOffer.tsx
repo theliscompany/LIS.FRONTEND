@@ -688,29 +688,6 @@ function GeneratePriceOffer(props: any) {
                 setLoadNewOffer(true);
                 var haulage = null;
                 var miscellaneous = null;
-                // var dataSent = {
-                //     "requestQuoteId": Number(id),
-                //     "comment": rteRef.current?.editor?.getHTML(),
-                //     "quoteOfferVm": 0,
-                //     "quoteOfferId": 10,
-                //     "quoteOfferNumber": generateRandomNumber(),
-                //     // "createdBy": account?.username,
-                //     "createdBy": JSON.stringify(formState),
-                //     "emailUser": email,
-                //     "haulage": haulage,
-                //     "miscellaneousList": miscellaneous,
-                //     "seaFreight": null,
-                //     "containers": containersSelection.map((elm: any) => { return { "containerId": elm.id, quantity: elm.quantity } }),
-                //     "departureDate": (new Date("01/01/2022")).toISOString(),
-                //     "departurePortId": formState.portDeparture.portId,
-                //     "destinationPortId": formState.portDestination.portId,
-                //     "haulageType": getCityCountry(props.requestData.departure)+" - "+getCityCountry(props.requestData.arrival),
-                //     "margin": 0,
-                //     "reduction": 0,
-                //     "extraFee": 0,
-                //     "totalPrice": 0
-                // };
-                // console.log("Options : ", formState.options[0].myMiscs[0].containers);
                 var sentOptions = formState.options.map((item: any) => {
                     return {
                         ...item,
@@ -738,13 +715,13 @@ function GeneratePriceOffer(props: any) {
                     }; 
                 });
                 // console.log("Options : ", sentOptions[0].myMiscs[0].containers);
-                
+                console.log("Client Number : ", clientNumber);
                 var dataSent = {
                     "requestQuoteId": Number(id),
                     "comment": rteRef.current?.editor?.getHTML(),
                     "quoteOfferNumber": generateRandomNumber(),
                     "quoteOfferVm": 0,
-                    "clientNumber": clientNumber.contactNumber,
+                    "clientNumber": clientNumber.contactId,
                     "emailUser": email,
                     "options": sentOptions,
                     "files": formState.files.map((elm: any) => { return {...elm, url: ""}}),

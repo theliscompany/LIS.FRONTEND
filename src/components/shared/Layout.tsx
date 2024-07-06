@@ -44,7 +44,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Anchor, AnchorOutlined, AttachFileOutlined, ContactsOutlined, ExpandLess, ExpandMore, FirstPage, Folder, FolderOutlined, Inventory, InventoryOutlined, LastPage, RoomService, RoomServiceOutlined, SettingsOutlined, TaskAltOutlined } from '@mui/icons-material';
 import { useAppDispatch } from '../../store';
-import { fetchAssignees, fetchContactBusinesses, fetchHSCodes, fetchPorts, fetchProducts, fetchServices } from '../../store/masterdata.slice';
+import { fetchAssignees, fetchCities, fetchContactBusinesses, fetchHSCodes, fetchPorts, fetchProducts, fetchServices } from '../../store/masterdata.slice';
 import { useAuthorizedBackendApi } from '../../api/api';
 import { stringAvatar } from '../../utils/functions';
 
@@ -115,6 +115,8 @@ function Layout(props: {children?: React.ReactNode}) {
             dispatch(fetchProducts(context));
             dispatch(fetchHSCodes(context));
             dispatch(fetchAssignees(context));
+            dispatch(fetchCities(context));
+            dispatch(fetchContactBusinesses(context));
         }
     }, [context, dispatch])
       

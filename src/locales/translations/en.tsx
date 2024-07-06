@@ -520,7 +520,16 @@ export const en = {
   trackingOptions: "You can obtain information about your order using this number : ",
   orders: "Shipments",
   listOrders: "List of shipments",
-  orderNumber: "Order number",
-  fiscalYear: "Fiscal year",
-  orderDate: "Date"
+  orderNumber: "Number",
+  fiscalYear: "Fiscal",
+  orderDate: "Date",
+  seller: "Seller",
+  buyer: "Buyer",
+  customer: "Customer",
+  textEtd: "ETD",
+  textEta: "ETA",
+  ship: "Ship",
+  shippingLine: "Shipping line",
+  ratio: "Ratio",
+  vessel: "Vessel"
 };

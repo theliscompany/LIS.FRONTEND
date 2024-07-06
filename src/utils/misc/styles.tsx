@@ -1,8 +1,14 @@
-import { Badge, BadgeProps, Dialog, DialogTitle, IconButton, InputBase, TextFieldClasses, Tooltip, TooltipProps } from '@mui/material';
+import { Badge, BadgeProps, Box, Dialog, DialogTitle, IconButton, InputBase, TextFieldClasses, Tooltip, TooltipProps } from '@mui/material';
 import { tooltipClasses } from '@mui/material/Tooltip';
 import { alpha, styled } from '@mui/material/styles';
 import { DialogTitleProps } from '../models/models';
 import CloseIcon from '@mui/icons-material/Close';
+
+interface TabPanelProps {
+  children?: React.ReactNode;
+  index: number;
+  value: number;
+}
 
 export const myTextFieldClasses: Partial<TextFieldClasses> = {
   root: 'my-root-class',
@@ -162,6 +168,7 @@ export const gridStyles = {
 
 export const sizingStyles = { 
   maxWidth: "calc(100vw - 365px)"
+  // width: "100%"
 }
 
 export const sizeStyles = { 
@@ -276,3 +283,19 @@ export const StyledBadge = styled(Badge)<BadgeProps>(({ theme }) => ({
     padding: '0 4px',
   },
 }));
+
+export function CustomTabPanel(props: TabPanelProps) {
+  const { children, value, index, ...other } = props;
+
+  return (
+    <div
+      role="tabpanel"
+      hidden={value !== index}
+      id={`simple-tabpanel-${index}`}
+      aria-labelledby={`simple-tab-${index}`}
+      {...other}
+    >
+      {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
+    </div>
+  );
+}
