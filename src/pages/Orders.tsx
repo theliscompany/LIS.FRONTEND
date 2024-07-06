@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Delete, Edit, RestartAltOutlined, Visibility } from '@mui/icons-material';
+import { AddOutlined, Delete, Edit, RestartAltOutlined, Visibility } from '@mui/icons-material';
 import { Alert, Box, Button, Chip, DialogActions, DialogContent, Grid, IconButton, Skeleton, Typography } from '@mui/material';
 import { DataGrid, GridColDef, GridRenderCellParams, GridValueFormatterParams } from '@mui/x-data-grid';
 import { SnackbarProvider, enqueueSnackbar } from 'notistack';
@@ -248,6 +248,12 @@ function Orders() {
                     <Grid item xs={12}>
                         <Button color="inherit" variant="contained" sx={whiteButtonStyles} style={{ float: "right" }} onClick={() => { getOrders(); }}>
                             {t('reload')} <RestartAltOutlined sx={{ ml: 0.5, pb: 0.45, justifyContent: "center", alignItems: "center" }} fontSize="small" />
+                        </Button>
+                        <Button 
+                            color="inherit" variant="contained" sx={whiteButtonStyles} 
+                            style={{ float: "right", marginRight: "5px" }} href="/admin/new-order"
+                        >
+                            {t('New order')} <AddOutlined sx={{ ml: 0.5, pb: 0.45, justifyContent: "center", alignItems: "center" }} fontSize="small" />
                         </Button>
                     </Grid>
                 </Grid>

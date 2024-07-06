@@ -88,11 +88,10 @@ function EditOrder() {
         getContacts();
         getCities();
         loadOrder();
-        // getOrders();
     }, [account, instance, context, contacts, ports, cities]);
     
     const loadOrder = async () => {
-		if (account && instance && context && contacts !== null && ports !== null && cities !== null) {
+		if (account && instance && context && contacts !== null && ports !== null && cities !== null && id !== undefined) {
             setLoad(true);
             const response = await (context?.service as BackendService<any>).getSingle(protectedResources.apiLisShipments.endPoint+"/Orders/"+id);
             if (response !== null && response !== undefined) {
@@ -134,8 +133,8 @@ function EditOrder() {
 	}
 
     const getPorts = async () => {
-        if (account && instance && context) {
-            if (ourPorts.length !== 0) {
+        if (account && instance && context && ports === null) {
+            if (ourPorts !== undefined && ourPorts.length !== 0) {
                 console.log(ourPorts);
                 setPorts(ourPorts);
             }
@@ -150,8 +149,8 @@ function EditOrder() {
     }
 
     const getProducts = async () => {
-        if (account && instance && context) {
-            if (ourProducts.length !== 0) {
+        if (account && instance && context && products !== null) {
+            if (ourProducts !== undefined && ourProducts.length !== 0) {
                 console.log(ourProducts);
                 setProducts(ourProducts);
             }
@@ -166,8 +165,8 @@ function EditOrder() {
     }
 
     const getCities = async () => {
-        if (account && instance && context) {
-            if (ourCities.length !== 0) {
+        if (account && instance && context && cities === null) {
+            if (ourCities !== undefined && ourCities.length !== 0) {
                 console.log(ourCities);
                 setCities(ourCities);
             }
@@ -182,8 +181,8 @@ function EditOrder() {
     }
 
     const getContacts = async () => {
-        if (account && instance && context) {
-            if (ourContacts.length !== 0) {
+        if (account && instance && context && contacts === null) {
+            if (ourContacts !== undefined && ourContacts.length !== 0) {
                 console.log(ourContacts);
                 setContacts(ourContacts);
             }
@@ -201,64 +200,127 @@ function EditOrder() {
         if (account && instance && context) {
             try {
                 setLoadCreate(true);
-                var dataSent = {
-                    "orderId": Number(id),
-                    "orderNumber": orderData.orderNumber,
-                    "orderDate": orderData.orderDate,
-                    "closeDate": orderData.closeDate,
-                    "sellerId": seller.contactId,
-                    "buyerId": buyer.contactId,
-                    "customerId": customer.contactId,
-                    "shippingAgent": carrierAgent.contactId,
-                    "shipId": orderData.shipId,
-                    "shipLineId": carrier.contactId,
-                    "employeeId": orderData.employeeId,
-                    "paymentCondition": orderData.paymentCondition,
-                    "orderStatus": orderData.orderStatus,
-                    "lastEdited": orderData.lastEdited,
-                    "lastEditor": orderData.lastEditor,
-                    "departurePort": portLoading.portId,
-                    "destinationPort": portDischarge.portId,
-                    "estimatedDepartureDate": etd?.toISOString(),
-                    "estimatedArrivalDate": eta?.toISOString(),
-                    "incoTerm": incotermFrom,
-                    "refClient": referenceCustomer,
-                    "refSeller": referenceSeller,
-                    "refBuyer": referenceBuyer,
-                    "incotermDestination": incotermTo,
-                    "executedInDate": orderData.executedInDate,
-                    "fiscalYear": orderData.fiscalYear,
-                    "isVal1": orderData.isVal1,
-                    "isVal2": orderData.isVal2,
-                    "isVal3": orderData.isVal3,
-                    "isVal4": orderData.isVal4,
-                    "isVal5": orderData.isVal5,
-                    "refShippingAgent": bookingRef,
-                    "flag": orderData.flag,
-                    "docFlag": orderData.docFlag,
-                    "city": incotermFromCity.id,
-                    "freightCharges": orderData.freightCharges,
-                    "freightPayableAt": orderData.freightPayableAt,
-                    "freightMoveType": orderData.freightMoveType,
-                    "freightShipmentType": orderData.freightShipmentType,
-                    "numberOfBlOriginal": orderData.numberOfBlOriginal,
-                    "numberOfBlCopy": orderData.numberOfBlCopy,
-                    "shipperAddress": orderData.shipperAddress,
-                    "consigneeAddress": orderData.consigneeAddress,
-                    "notifyParty": orderData.notifyParty,
-                    "notifyPartyRef": orderData.notifyPartyRef,
-                    "voyageNumber": orderData.voyageNumber,
-                    "lcl": orderData.lcl,
-                    "exportation": orderData.exportation,
-                    "cityIncotermTo": incotermToCity.id,
-                    "invoiceUserId": orderData.invoiceUserId,
-                    "documentationUserId": orderData.documentationUserId,
-                    "operationsUserId": orderData.operationsUserId,
-                    "oblOverview": orderData.oblOverview
-                };
-                const response = await (context?.service as BackendService<any>).putWithToken(protectedResources.apiLisShipments.endPoint+"/Orders/"+id, dataSent, context.tokenLogin);
-                enqueueSnackbar("The order has been edited with success!", { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
-                loadOrder();
+                var dataSent = {};
+                if (orderData !== null && id !== undefined) {
+                    dataSent = {
+                        "orderId": Number(id),
+                        "orderNumber": orderData.orderNumber,
+                        "orderDate": orderData.orderDate,
+                        "closeDate": orderData.closeDate,
+                        "sellerId": seller.contactId,
+                        "buyerId": buyer.contactId,
+                        "customerId": customer.contactId,
+                        "shippingAgent": carrierAgent.contactId,
+                        "shipId": orderData.shipId,
+                        "shipLineId": carrier.contactId,
+                        "employeeId": orderData.employeeId,
+                        "paymentCondition": orderData.paymentCondition,
+                        "orderStatus": orderData.orderStatus,
+                        "lastEdited": orderData.lastEdited,
+                        "lastEditor": orderData.lastEditor,
+                        "departurePort": portLoading.portId,
+                        "destinationPort": portDischarge.portId,
+                        "estimatedDepartureDate": etd?.toISOString(),
+                        "estimatedArrivalDate": eta?.toISOString(),
+                        "incoTerm": incotermFrom,
+                        "refClient": referenceCustomer,
+                        "refSeller": referenceSeller,
+                        "refBuyer": referenceBuyer,
+                        "incotermDestination": incotermTo,
+                        "executedInDate": orderData.executedInDate,
+                        "fiscalYear": orderData.fiscalYear,
+                        "isVal1": orderData.isVal1,
+                        "isVal2": orderData.isVal2,
+                        "isVal3": orderData.isVal3,
+                        "isVal4": orderData.isVal4,
+                        "isVal5": orderData.isVal5,
+                        "refShippingAgent": bookingRef,
+                        "flag": orderData.flag,
+                        "docFlag": orderData.docFlag,
+                        "city": incotermFromCity.id,
+                        "freightCharges": orderData.freightCharges,
+                        "freightPayableAt": orderData.freightPayableAt,
+                        "freightMoveType": orderData.freightMoveType,
+                        "freightShipmentType": orderData.freightShipmentType,
+                        "numberOfBlOriginal": orderData.numberOfBlOriginal,
+                        "numberOfBlCopy": orderData.numberOfBlCopy,
+                        "shipperAddress": orderData.shipperAddress,
+                        "consigneeAddress": orderData.consigneeAddress,
+                        "notifyParty": orderData.notifyParty,
+                        "notifyPartyRef": orderData.notifyPartyRef,
+                        "voyageNumber": orderData.voyageNumber,
+                        "lcl": orderData.lcl,
+                        "exportation": orderData.exportation,
+                        "cityIncotermTo": incotermToCity.id,
+                        "invoiceUserId": orderData.invoiceUserId,
+                        "documentationUserId": orderData.documentationUserId,
+                        "operationsUserId": orderData.operationsUserId,
+                        "oblOverview": orderData.oblOverview
+                    };
+                    const response = await (context?.service as BackendService<any>).putWithToken(protectedResources.apiLisShipments.endPoint+"/Orders/"+id, dataSent, context.tokenLogin);
+                    enqueueSnackbar("The order has been edited with success!", { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                    loadOrder();    
+                }
+                else {
+                    dataSent = {
+                        "orderDate": new Date().toISOString(),
+                        // "closeDate": orderData.closeDate,
+                        "sellerId": seller.contactId,
+                        "buyerId": buyer.contactId,
+                        "customerId": customer.contactId,
+                        "shippingAgent": carrierAgent.contactId,
+                        // "shipId": orderData.shipId,
+                        "shipLineId": carrier.contactId,
+                        // "employeeId": orderData.employeeId,
+                        // "paymentCondition": orderData.paymentCondition,
+                        "orderStatus": 0,
+                        // "lastEdited": orderData.lastEdited,
+                        // "lastEditor": orderData.lastEditor,
+                        "departurePort": portLoading.portId,
+                        "destinationPort": portDischarge.portId,
+                        "estimatedDepartureDate": etd?.toISOString(),
+                        "estimatedArrivalDate": eta?.toISOString(),
+                        "incoTerm": incotermFrom,
+                        "refClient": referenceCustomer,
+                        "refSeller": referenceSeller,
+                        "refBuyer": referenceBuyer,
+                        "incotermDestination": incotermTo,
+                        // "executedInDate": orderData.executedInDate,
+                        "fiscalYear": Number(new Date().getFullYear()),
+                        // "isVal1": orderData.isVal1,
+                        // "isVal2": orderData.isVal2,
+                        // "isVal3": orderData.isVal3,
+                        // "isVal4": orderData.isVal4,
+                        // "isVal5": orderData.isVal5,
+                        "refShippingAgent": bookingRef,
+                        // "flag": orderData.flag,
+                        // "docFlag": orderData.docFlag,
+                        "city": incotermFromCity.id,
+                        // "freightCharges": orderData.freightCharges,
+                        // "freightPayableAt": orderData.freightPayableAt,
+                        // "freightMoveType": orderData.freightMoveType,
+                        // "freightShipmentType": orderData.freightShipmentType,
+                        // "numberOfBlOriginal": orderData.numberOfBlOriginal,
+                        // "numberOfBlCopy": orderData.numberOfBlCopy,
+                        // "shipperAddress": orderData.shipperAddress,
+                        // "consigneeAddress": orderData.consigneeAddress,
+                        // "notifyParty": orderData.notifyParty,
+                        // "notifyPartyRef": orderData.notifyPartyRef,
+                        // "voyageNumber": orderData.voyageNumber,
+                        // "lcl": orderData.lcl,
+                        // "exportation": orderData.exportation,
+                        "cityIncotermTo": incotermToCity.id,
+                        // "invoiceUserId": orderData.invoiceUserId,
+                        // "documentationUserId": orderData.documentationUserId,
+                        // "operationsUserId": orderData.operationsUserId,
+                        // "oblOverview": orderData.oblOverview
+                    };
+                    const response = await (context?.service as BackendService<any>).postWithToken(protectedResources.apiLisShipments.endPoint+"/Orders", dataSent, context.tokenLogin);
+                    if (response !== undefined && response !== null) {
+                        enqueueSnackbar("The order has been created with success!", { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                        loadOrder();
+                    }
+                }
                 setLoadCreate(false);
             }
             catch (err: any) {
@@ -289,7 +351,12 @@ function EditOrder() {
         <div style={{ background: "#fff", borderTopLeftRadius: 20, borderTopRightRadius: 20 }}>
             <SnackbarProvider />
             <Box py={2.5} sx={{ minWidth: { xs: "100vw", md: "100%" }}}>
-                <Typography variant="h5" sx={{mt: {xs: 4, md: 1.5, lg: 1.5 }}} px={5}><b>{t('Edit order N°')} {orderId}</b></Typography>
+                <Typography variant="h5" sx={{mt: {xs: 4, md: 1.5, lg: 1.5 }}} px={5}>
+                    {
+                        id !== undefined ? 
+                        <b>{t('Edit order N°')} {orderId}</b> : <b>{t('Create new order')}</b> 
+                    }
+                </Typography>
                 <>
                     <Box sx={{ borderBottom: 1, borderColor: 'divider', px: 5 }}>
                         <Tabs value={tabValue} onChange={handleTabChange} sx={{ mt: 2 }}>
