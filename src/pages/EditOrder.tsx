@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { Delete, Edit, ExpandMore, RestartAltOutlined, Visibility } from '@mui/icons-material';
+import { AddOutlined, Delete, Edit, ExpandMore, ReplayOutlined, RestartAltOutlined, Visibility } from '@mui/icons-material';
 import { Accordion, AccordionDetails, AccordionSummary, Alert, Autocomplete, Box, Button, Chip, DialogActions, DialogContent, Divider, Grid, IconButton, InputLabel, ListItem, ListItemText, NativeSelect, Skeleton, Tab, Tabs, TextField, Typography } from '@mui/material';
 import { DataGrid, GridColDef, GridRenderCellParams, GridValueFormatterParams } from '@mui/x-data-grid';
 import { SnackbarProvider, enqueueSnackbar } from 'notistack';
@@ -14,7 +14,7 @@ import { BackendService } from '../utils/services/fetch';
 import { useSelector } from 'react-redux';
 import ClientSearch from '../components/shared/ClientSearch';
 import CompanySearch from '../components/shared/CompanySearch';
-import { CategoryEnum, allPackages, incotermDestinationValues, incotermValues } from '../utils/constants';
+import { CategoryEnum, allPackages, dataServices, dataServices2, incotermDestinationValues, incotermValues } from '../utils/constants';
 import AutocompleteSearch from '../components/shared/AutocompleteSearch';
 import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
@@ -22,6 +22,7 @@ import dayjs, { Dayjs } from 'dayjs';
 
 function EditOrder() {
     const [load, setLoad] = useState<boolean>(true);
+    const [loadShips, setLoadShips] = useState<boolean>(true);
     const [loadCreate, setLoadCreate] = useState<boolean>(false);
     const [orders, setOrders] = useState<any>(null);
     const [modal, setModal] = useState<boolean>(false);
@@ -30,6 +31,7 @@ function EditOrder() {
     const [cities, setCities] = useState<any>(null);
     const [products, setProducts] = useState<any>(null);
     const [contacts, setContacts] = useState<any>(null);
+    const [ships, setShips] = useState<any>(null);
     const [orderData, setOrderData] = useState<any>(null);
     const [tabValue, setTabValue] = useState<number>(0);
     const [modalCargo, setModalCargo] = useState<boolean>(false);
@@ -37,6 +39,7 @@ function EditOrder() {
     const [customer, setCustomer] = useState<any>(null);
     const [seller, setSeller] = useState<any>(null);
     const [buyer, setBuyer] = useState<any>(null);
+    const [ship, setShip] = useState<any>(null);
     const [referenceCustomer, setReferenceCustomer] = useState<string>("");
     const [referenceSeller, setReferenceSeller] = useState<string>("");
     const [referenceBuyer, setReferenceBuyer] = useState<string>("");
@@ -82,23 +85,57 @@ function EditOrder() {
     var ourProducts: any = useSelector((state: any) => state.masterdata.products);
     var ourContacts: any = useSelector((state: any) => state.masterdata.contactBusinesses.data);
     
+    const columnsServices: GridColDef[] = [
+        // { field: 'orderId', headerName: t('id'), flex: 0.5 },
+        { field: 'serviceName', headerName: t('Service'), flex: 2 },
+        { field: 'quantity', headerName: t('Qty'), flex: 0.5 },
+        { field: 'unitPrice', headerName: t('price'), renderCell: (params: GridRenderCellParams) => {
+            return (
+                <Box>{params.row.unitPrice} €</Box>
+            );
+        }, flex: 0.75 },
+        { field: 'subTotal', headerName: t('Total'), renderCell: (params: GridRenderCellParams) => {
+            return (
+                <Box>{params.row.unitPrice*params.row.quantity} €</Box>
+            );
+        }, flex: 0.75 },
+        { field: 'contactName', headerName: t('supplier'), flex: 2 },
+        { field: 'www', headerName: t('Actions'), renderCell: (params: GridRenderCellParams) => {
+            return (
+                <Box sx={{ my: 1 }}>
+                    <IconButton size="small" title="Edit the service" onClick={() => { setModal(true); }} sx={{ mr: 0.5 }}>
+                        <Edit fontSize="small" />
+                    </IconButton>
+                    <IconButton size="small" title="Delete the service" onClick={() => { setCurrentId(params.row.orderId); setModal(true); }}>
+                        <Delete fontSize="small" />
+                    </IconButton>
+                </Box>
+            );
+        } }
+    ];
+        
     useEffect(() => {
         getPorts();
         getProducts();
         getContacts();
         getCities();
+        getShips();
+        // loadOrder();
+    }, [account, instance, context]);
+
+    useEffect(() => {
         loadOrder();
-    }, [account, instance, context, contacts, ports, cities]);
+    }, [contacts, ports, cities, ships, products]);
     
     const loadOrder = async () => {
-		if (account && instance && context && contacts !== null && ports !== null && cities !== null && id !== undefined) {
+		if (account && instance && context && contacts !== null && ports !== null && cities !== null && ships !== null && id !== undefined) {
             setLoad(true);
             const response = await (context?.service as BackendService<any>).getSingle(protectedResources.apiLisShipments.endPoint+"/Orders/"+id);
             if (response !== null && response !== undefined) {
                 console.log(response);
                 setOrderData(response);
                 // Order data import
-                // console.log(ourPorts);
+                console.log(contacts);
                 setSeller(contacts.find((elm: any) => elm.contactId === response.sellerId));
                 setCustomer(contacts.find((elm: any) => elm.contactId === response.customerId));
                 setBuyer(contacts.find((elm: any) => elm.contactId === response.buyerId));
@@ -117,6 +154,7 @@ function EditOrder() {
                 setIncotermToCity(cities.find((elm: any) => elm.id === response.cityIncotermTo));
                 setBookingRef(response.refShippingAgent);
                 setVessel(String(response.shipId));
+                setShip(ships.find((elm: any) => elm.shipId === Number(response.shipId)));
 
                 setReferenceSeller(response.refSeller);
                 setReferenceCustomer(response.refClient);
@@ -190,8 +228,28 @@ function EditOrder() {
                 const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisCrm.endPoint+"/Contact/GetContacts?pageSize=4000", context.tokenCrm);
                 if (response !== null && response !== undefined) {
                     console.log(response);
-                    setContacts(response);
+                    setContacts(response.data);
                 }
+            }
+        }
+    }
+
+    const getShips = async () => {
+        if (account && instance && context && ships === null) {
+            try {
+                setLoadShips(true);
+                const response = await (context?.service as BackendService<any>).getSingle(protectedResources.apiLisShipments.endPoint+"/Ships?count=1000");
+                if (response !== null && response !== undefined) {
+                    console.log(response);
+                    setShips(response.$values);
+                    setLoadShips(false);
+                }
+                else {
+                    setLoadShips(false);
+                }
+            }
+            catch (err: any) {
+                setLoadShips(false);
             }
         }
     }
@@ -211,7 +269,7 @@ function EditOrder() {
                         "buyerId": buyer.contactId,
                         "customerId": customer.contactId,
                         "shippingAgent": carrierAgent.contactId,
-                        "shipId": orderData.shipId,
+                        "shipId": ship.shipId,
                         "shipLineId": carrier.contactId,
                         "employeeId": orderData.employeeId,
                         "paymentCondition": orderData.paymentCondition,
@@ -570,7 +628,7 @@ function EditOrder() {
                             
                             <Grid item xs={6}>
                                 <Accordion expanded sx={{ width: "100%" }}>
-                                    <AccordionSummary expandIcon={<ExpandMore />} aria-controls="panel1-content" id="panel1-header">
+                                    <AccordionSummary expandIcon={<ExpandMore />} aria-controls="panel2-content" id="panel2-header">
                                         Shipment Information
                                     </AccordionSummary>
                                     <AccordionDetails>
@@ -673,7 +731,34 @@ function EditOrder() {
                                             </Grid>
                                             <Grid item xs={4} sx={{ mt: 0.875 }}>
                                                 <InputLabel htmlFor="vessel" sx={inputLabelStyles}>{t('vessel')}</InputLabel>
-                                                <BootstrapInput id="vessel" type="text" value={vessel} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setVessel(e.target.value)} fullWidth sx={{ mb: 1 }} />                                                
+                                                {
+                                                    ships !== null ? 
+                                                    <Autocomplete
+                                                        disablePortal
+                                                        id="ship"
+                                                        options={ships}
+                                                        renderOption={(props, option, i) => {
+                                                            return (
+                                                                <li {...props} key={option.shipId}>
+                                                                    {option.shipName}
+                                                                </li>
+                                                            );
+                                                        }}
+                                                        getOptionLabel={(option: any) => { 
+                                                            if (option !== null && option !== undefined) {
+                                                                return option.shipName;
+                                                            }
+                                                            return ""; 
+                                                        }}
+                                                        value={ship}
+                                                        sx={{ mt: 1 }}
+                                                        renderInput={(params: any) => <TextField {...params} />}
+                                                        onChange={(e: any, value: any) => { 
+                                                            setShip(value);
+                                                        }}
+                                                        fullWidth
+                                                    /> : <Skeleton />
+                                                }
                                             </Grid>
 
                                             <Grid item xs={12} sx={{ mt: 0.375 }}>
@@ -726,6 +811,132 @@ function EditOrder() {
                                     </AccordionDetails>
                                 </Accordion>
                             </Grid>
+
+                            <Grid item xs={12} sx={{ mt: 1 }}>
+                                <Accordion sx={{ width: "100%" }}>
+                                    <AccordionSummary expandIcon={<ExpandMore />} aria-controls="panel3Z-content" id="panel3Z-header" sx={{ display: "flex" }}>
+                                        Budget
+                                    </AccordionSummary>
+                                    <AccordionDetails>
+                                        <Grid container spacing={0.75}>
+                                            <Grid item xs={6}>
+                                                <Box sx={{ display: "flex" }}>
+                                                    <Box sx={{ width: "50%", display: "flex" }}>Incoming Services</Box>
+                                                    <Box sx={{ width: "50%", display: "flex", justifyContent: "end" }}>
+                                                        <IconButton size="small" sx={{ mr: 1 }} onClick={() => {  }}>
+                                                            <AddOutlined />
+                                                        </IconButton>
+                                                        <IconButton size="small" sx={{ mr: 1 }} onClick={() => {  }}>
+                                                            <ReplayOutlined />
+                                                        </IconButton>
+                                                    </Box> 
+                                                </Box>
+                                                <DataGrid
+                                                    rows={dataServices}
+                                                    columns={columnsServices}
+                                                    getRowId={(row: any) => row?.tag}
+                                                    getRowHeight={() => "auto" }
+                                                    sx={sizingStyles}
+                                                    // initialState={{
+                                                    //     ...dataServices.initialState,
+                                                    //     pagination: { paginationModel: { pageSize: 10 } },
+                                                    // }}                                                    
+                                                    // pageSizeOptions={[5, 10, 25]}
+                                                    disableRowSelectionOnClick
+                                                    style={{ height: "500px", fontSize: "12px" }}
+                                                />
+                                            </Grid>
+                                            <Grid item xs={6}>
+                                                <Box sx={{ display: "flex" }}>
+                                                    <Box sx={{ width: "50%", display: "flex" }}>Outgoing Services</Box>
+                                                    <Box sx={{ width: "50%", display: "flex", justifyContent: "end" }}>
+                                                        <IconButton size="small" sx={{ mr: 1 }} onClick={() => {  }}>
+                                                            <AddOutlined />
+                                                        </IconButton>
+                                                        <IconButton size="small" sx={{ mr: 1 }} onClick={() => {  }}>
+                                                            <ReplayOutlined />
+                                                        </IconButton>
+                                                    </Box> 
+                                                </Box>
+                                                <DataGrid
+                                                    rows={dataServices2}
+                                                    columns={columnsServices}
+                                                    getRowId={(row: any) => row?.tag}
+                                                    getRowHeight={() => "auto" }
+                                                    sx={sizingStyles}
+                                                    // initialState={{
+                                                    //     ...dataServices2.initialState,
+                                                    //     pagination: { paginationModel: { pageSize: 10 } },
+                                                    // }}                                                    
+                                                    // pageSizeOptions={[5, 10, 25]}
+                                                    disableRowSelectionOnClick
+                                                    style={{ height: "500px", fontSize: "12px" }}
+                                                />
+                                            </Grid>
+                                        </Grid>
+                                    </AccordionDetails>
+                                </Accordion>
+                                </Grid>
+
+                            {/* <Grid item xs={6} sx={{ mt: 1 }}>
+                                <Accordion expanded sx={{ width: "100%" }}>
+                                    <AccordionSummary expandIcon={<ExpandMore />} aria-controls="panel3-content" id="panel3-header" sx={{ display: "flex" }}>
+                                        <Box sx={{ width: "50%" }}>Incoming Services</Box>
+                                        <Box sx={{ width: "50%" }}>
+                                            <IconButton size="small" sx={{ mr: 1 }} onClick={() => {  }}>
+                                                <AddOutlined />
+                                            </IconButton>
+                                            <IconButton size="small" sx={{ mr: 1 }} onClick={() => {  }}>
+                                                <ReplayOutlined />
+                                            </IconButton>
+                                        </Box> 
+                                    </AccordionSummary>
+                                    <AccordionDetails>
+                                        <Grid container spacing={0.75}>
+                                            <DataGrid
+                                                rows={dataServices}
+                                                columns={columnsServices}
+                                                getRowId={(row: any) => row?.tag}
+                                                getRowHeight={() => "auto" }
+                                                sx={sizingStyles}
+                                                // pageSizeOptions={[5, 10, 25]}
+                                                disableRowSelectionOnClick
+                                                style={{ fontSize: "12px" }}
+                                            />
+                                        </Grid>
+                                    </AccordionDetails>
+                                </Accordion>
+                            </Grid>
+
+                            <Grid item xs={6} sx={{ mt: 1 }}>
+                                <Accordion expanded sx={{ width: "100%" }}>
+                                    <AccordionSummary expandIcon={<ExpandMore />} aria-controls="panel3-content" id="panel3-header" sx={{ display: "flex" }}>
+                                        <Box sx={{ width: "50%" }}>Outgoing Services</Box>
+                                        <Box sx={{ width: "50%" }}>
+                                            <IconButton size="small" sx={{ mr: 1 }} onClick={() => {  }}>
+                                                <AddOutlined />
+                                            </IconButton>
+                                            <IconButton size="small" sx={{ mr: 1 }} onClick={() => {  }}>
+                                                <ReplayOutlined />
+                                            </IconButton>
+                                        </Box> 
+                                    </AccordionSummary>
+                                    <AccordionDetails>
+                                        <Grid container spacing={0.75}>
+                                            <DataGrid
+                                                rows={dataServices}
+                                                columns={columnsServices}
+                                                getRowId={(row: any) => row?.tag}
+                                                getRowHeight={() => "auto" }
+                                                sx={sizingStyles}
+                                                // pageSizeOptions={[5, 10, 25]}
+                                                disableRowSelectionOnClick
+                                                style={{ fontSize: "12px" }}
+                                            />
+                                        </Grid>
+                                    </AccordionDetails>
+                                </Accordion>
+                            </Grid> */}
                         </Grid>
                         
                     </CustomTabPanel>

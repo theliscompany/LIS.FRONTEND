@@ -531,5 +531,12 @@ export const en = {
   ship: "Ship",
   shippingLine: "Shipping line",
   ratio: "Ratio",
-  vessel: "Vessel"
+  vessel: "Vessel",
+  ships: "Ships",
+  newShip: "New ship",
+  deleteRowShip: "Delete a ship",
+  editRowShip: "Edit a ship",
+  createRowShip: "Create a ship",
+  shipName: "Ship name",
+  listShips: "List of ships",
 };

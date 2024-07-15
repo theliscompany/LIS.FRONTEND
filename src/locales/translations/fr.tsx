@@ -531,5 +531,12 @@ export const fr = {
   ship: "Vaisseau", 
   shippingLine: "Ligne maritime",
   ratio: "Ratio",
-  vessel: "Vaisseau"
+  vessel: "Navire", 
+  ships: "Navires",
+  newShip: "Nouveau navire",
+  deleteRowShip: "Supprimer un navire",
+  editRowShip: "Modifier un navire",
+  createRowShip: "Créer un navire",
+  shipName: "Nom du navire",
+  listShips: "Liste de navires",
 };

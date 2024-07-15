@@ -639,3 +639,189 @@ export const countries: readonly CountryType[] = [
     { code: 'ZM', label: 'Zambia', phone: '260' },
     { code: 'ZW', label: 'Zimbabwe', phone: '263' },
 ];
+
+export let dataServices: any  = [
+  {
+    "serviceName": "Terminal Handling Charges (TH...",
+    "quantity": 1,
+    "unitPrice": 190,
+    "SubTotal": 190,
+    "contactName": "BURGER  LINERAGENCIES",
+    "tag": "0a22e4ca-4c07-4274-8304-06192839c683",
+    "HasVoucher": true,
+    "HasInvoice": false,
+    "comment": "",
+    "SubTotalContact": 2402.5
+  },
+  {
+    "serviceName": "Forwarding Agents Commission ...",
+    "quantity": 1,
+    "unitPrice": -37.5,
+    "SubTotal": -37.5,
+    "contactName": "BURGER  LINERAGENCIES",
+    "tag": "a47c2c10-e675-4eff-8782-37d68bd4c877",
+    "HasVoucher": true,
+    "HasInvoice": false,
+    "comment": "",
+    "SubTotalContact": 2402.5
+  },
+  {
+    "serviceName": "Bunker Adjustment Factor (BAF...",
+    "quantity": 1,
+    "unitPrice": 700,
+    "SubTotal": 700,
+    "contactName": "BURGER  LINERAGENCIES",
+    "tag": "58b9fcc6-bcad-4fec-a6a0-465c3705d7c4",
+    "HasVoucher": true,
+    "HasInvoice": false,
+    "comment": "",
+    "SubTotalContact": 2402.5
+  },
+  {
+    "serviceName": "BL fee",
+    "quantity": 1,
+    "unitPrice": 35,
+    "SubTotal": 35,
+    "contactName": "BURGER  LINERAGENCIES",
+    "tag": "1684de1a-c50c-4a57-80fb-4fc3e2dfecca",
+    "HasVoucher": true,
+    "HasInvoice": false,
+    "comment": "",
+    "SubTotalContact": 2402.5
+  },
+  {
+    "serviceName": "International Shipping Port S...",
+    "quantity": 1,
+    "unitPrice": 15,
+    "SubTotal": 15,
+    "contactName": "BURGER  LINERAGENCIES",
+    "tag": "4dc98bd1-be31-4027-9e6d-826ec337bca1",
+    "HasVoucher": true,
+    "HasInvoice": false,
+    "comment": "",
+    "SubTotalContact": 2402.5
+  },
+  {
+    "serviceName": "Oceanfreight",
+    "quantity": 1,
+    "unitPrice": 1500,
+    "SubTotal": 1500,
+    "contactName": "BURGER  LINERAGENCIES",
+    "tag": "1df3a32a-76a7-4c0c-b28d-a552ab7a12cf",
+    "HasVoucher": true,
+    "HasInvoice": false,
+    "comment": "",
+    "SubTotalContact": 2402.5
+  },
+  {
+    "serviceName": "Container positioning",
+    "quantity": 1,
+    "unitPrice": 265,
+    "SubTotal": 265,
+    "contactName": "HERMES TRANS BVBA",
+    "tag": "c1e4cfe3-a879-4d4c-9724-d4499f3e3b6a",
+    "HasVoucher": true,
+    "HasInvoice": false,
+    "comment": "",
+    "SubTotalContact": 530
+  },
+  {
+    "serviceName": "Container positioning",
+    "quantity": 1,
+    "unitPrice": 265,
+    "SubTotal": 265,
+    "contactName": "HERMES TRANS BVBA",
+    "tag": "60e6044b-cf1f-4f36-b770-fc06a5b06028",
+    "HasVoucher": true,
+    "HasInvoice": false,
+    "comment": "",
+    "SubTotalContact": 530
+  },
+  {
+    "serviceName": "Electronic Cargo Tracking Not...",
+    "quantity": 1,
+    "unitPrice": 55,
+    "SubTotal": 55,
+    "contactName": "PHOENIX EUROPE EXPRESS SA",
+    "tag": "554e7047-46d4-4579-a8b1-6c3eeafc5581",
+    "HasVoucher": true,
+    "HasInvoice": false,
+    "comment": "",
+    "SubTotalContact": 55
+  },
+  {
+    "serviceName": "S.O. Container, used, accepte...",
+    "quantity": 1,
+    "unitPrice": 1130,
+    "SubTotal": 1130,
+    "contactName": "RALTON TRADING & FORWARDING B...",
+    "tag": "fd68720f-54f8-45a6-ae54-961d172574ca",
+    "HasVoucher": true,
+    "HasInvoice": false,
+    "comment": "",
+    "SubTotalContact": 1130
+  },
+  {
+    "serviceName": "Customs formalities",
+    "quantity": 1,
+    "unitPrice": 25,
+    "SubTotal": 25,
+    "contactName": "THEO MACHTELYNCK & FILS",
+    "tag": "c47b3f0e-8af6-444a-a80a-0416a116ee31",
+    "HasVoucher": true,
+    "HasInvoice": false,
+    "comment": "",
+    "SubTotalContact": 75
+  },
+  {
+    "serviceName": "Customs formalities",
+    "quantity": 1,
+    "unitPrice": 50,
+    "SubTotal": 50,
+    "contactName": "THEO MACHTELYNCK & FILS",
+    "tag": "c76b5542-65b0-4032-af7e-170012cbada6",
+    "HasVoucher": true,
+    "HasInvoice": false,
+    "comment": "",
+    "SubTotalContact": 75
+  }
+];
+
+export let dataServices2 = [
+  {
+      "serviceName": "Customs formalities",
+      "quantity": 2,
+      "unitPrice": 50,
+      "SubTotal": 100,
+      "contactName": "AFEEX INTERNATIONAL SPRL",
+      "tag": "39bc4b18-915c-48a5-8e0c-a7a4be3c1fcc",
+      "HasVoucher": false,
+      "HasInvoice": true,
+      "comment": "",
+      "SubTotalContact": 0
+  },
+  {
+      "serviceName": "Oceanfreight",
+      "quantity": 1,
+      "unitPrice": 3475,
+      "SubTotal": 3475,
+      "contactName": "AFEEX INTERNATIONAL SPRL",
+      "tag": "4c49fa69-cbc4-4dfd-911e-cd57a6aad5e3",
+      "HasVoucher": false,
+      "HasInvoice": true,
+      "comment": "",
+      "SubTotalContact": 0
+  },
+  {
+      "serviceName": "S.O. Container, used, accepte...",
+      "quantity": 1,
+      "unitPrice": 1350,
+      "SubTotal": 1350,
+      "contactName": "AFEEX INTERNATIONAL SPRL",
+      "tag": "4cc8fbd5-fcdb-411c-9a04-dedf08ff4e44",
+      "HasVoucher": false,
+      "HasInvoice": true,
+      "comment": "",
+      "SubTotalContact": 0
+  }
+]

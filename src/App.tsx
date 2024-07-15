@@ -38,6 +38,7 @@ import { store } from './store';
 import MasterDataHSCodes from './pages/MasterDataHSCodes';
 import Orders from './pages/Orders';
 import EditOrder from './pages/EditOrder';
+import MasterDataShips from './pages/MasterdataShips';
 
 const App = () => {
   return (
@@ -73,6 +74,7 @@ const App = () => {
 								<Route path="hscodes" element={<MasterDataHSCodes />} />
 								<Route path="ports" element={<MasterDataPorts />} />
 								<Route path="contacts" element={<MasterDataContacts />} />
+								<Route path="ships" element={<MasterDataShips />} />
 								<Route path="files" element={<MasterDataFiles />} />
 							</Route> 
 							<Route path="/" element={<Layout children={<Requests />} />} />
