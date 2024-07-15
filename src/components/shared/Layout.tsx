@@ -42,7 +42,7 @@ import Search from '@mui/icons-material/Search';
 
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Anchor, AnchorOutlined, AttachFileOutlined, ContactsOutlined, ExpandLess, ExpandMore, FirstPage, Folder, FolderOutlined, Inventory, InventoryOutlined, LastPage, RoomService, RoomServiceOutlined, SettingsOutlined, TaskAltOutlined } from '@mui/icons-material';
+import { Anchor, AnchorOutlined, AttachFileOutlined, ContactsOutlined, DirectionsBoatOutlined, DockOutlined, ExpandLess, ExpandMore, FirstPage, Folder, FolderOutlined, Inventory, InventoryOutlined, LastPage, RoomService, RoomServiceOutlined, SettingsOutlined, TaskAltOutlined } from '@mui/icons-material';
 import { useAppDispatch } from '../../store';
 import { fetchAssignees, fetchCities, fetchContactBusinesses, fetchHSCodes, fetchPorts, fetchProducts, fetchServices } from '../../store/masterdata.slice';
 import { useAuthorizedBackendApi } from '../../api/api';
@@ -641,6 +641,18 @@ function Layout(props: {children?: React.ReactNode}) {
                                                     <ContactsOutlined fontSize="small" />
                                                 </ListItemIcon>
                                                 <ListItemText primary={t('contacts')} primaryTypographyProps={{ fontSize: 13 }} />
+                                            </ListItemButton>
+                                        </DarkTooltip>
+                                        </ListItem>
+                                    </NavLink>
+                                    <NavLink to="/admin/ships" className={({ isActive }) => isActive ? "cs-navlink-active" : "cs-navlink"}>
+                                        <ListItem className="cs-listitem" key={"Ships"} disablePadding disableGutters sx={{ pl: 2 }}>
+                                        <DarkTooltip title={t('ships')} placement="right" arrow>
+                                            <ListItemButton className="cs-listitembutton">
+                                                <ListItemIcon className="cs-listitemicon">
+                                                    <DirectionsBoatOutlined fontSize="small" />
+                                                </ListItemIcon>
+                                                <ListItemText primary={t('ships')} primaryTypographyProps={{ fontSize: 13 }} />
                                             </ListItemButton>
                                         </DarkTooltip>
                                         </ListItem>

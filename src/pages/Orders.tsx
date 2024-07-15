@@ -15,6 +15,8 @@ import { useSelector } from 'react-redux';
 
 function Orders() {
     const [load, setLoad] = useState<boolean>(true);
+    const [loadShips, setLoadShips] = useState<boolean>(true);
+    const [ships, setShips] = useState<any>(null);
     const [orders, setOrders] = useState<any>(null);
     const [modal, setModal] = useState<boolean>(false);
     const [ports, setPorts] = useState<any>(null);
@@ -123,7 +125,22 @@ function Orders() {
         } },
         { field: 'estimatedArrivalDate', headerName: t('textEta'), valueFormatter: (params: GridValueFormatterParams) => `${(new Date(params.value)).toLocaleString().slice(0,10)}` },
         
-        { field: 'shipId', headerName: t('ship') },
+        // { field: 'shipId', headerName: t('ship') },
+        { field: 'shipId', headerName: t('ship'), renderCell: (params: GridRenderCellParams) => {
+            return (
+                <Box>
+                    {
+                        ships !== null && ships !== undefined && params.row.shipId !== null ? 
+                        <>
+                            {
+                                ships.find((elm: any) => elm.shipId === params.row.shipId) !== undefined ? 
+                                ships.find((elm: any) => elm.shipId === params.row.shipId).shipName : "N/A"
+                            }
+                        </> : <span>N/A</span>
+                    }
+                </Box>
+            );
+        }, minWidth: 220 },
         // { field: 'shipLineId', headerName: t('shippingLine') },
         { field: 'shipLineId', headerName: t('shippingLine'), renderCell: (params: GridRenderCellParams) => {
             return (
@@ -166,6 +183,7 @@ function Orders() {
     useEffect(() => {
         getPorts();
         getContacts();
+        getShips();
         getOrders();
     }, [account, instance, context]);
     
@@ -201,13 +219,33 @@ function Orders() {
         }
     }
     
+    const getShips = async () => {
+        if (account && instance && context) {
+            try {
+                setLoadShips(true);
+                const response = await (context?.service as BackendService<any>).getSingle(protectedResources.apiLisShipments.endPoint+"/Ships?count=1000");
+                if (response !== null && response !== undefined) {
+                    console.log(response);
+                    setShips(response.$values);
+                    setLoadShips(false);
+                }
+                else {
+                    setLoadShips(false);
+                }
+            }
+            catch (err: any) {
+                setLoadShips(false);
+            }
+        }
+    }
+
     const getOrders = async () => {
         if (account && instance && context) {
             setLoad(true);
             const response = await (context?.service as BackendService<any>).getSingle(protectedResources.apiLisShipments.endPoint+"/Orders");
             if (response !== null && response !== undefined) {
                 console.log(response);
-                setOrders(response.filter((elm: any) => elm.fiscalYear !== 2014));
+                setOrders(response.$values.filter((elm: any) => elm.fiscalYear !== 2014));
                 setLoad(false);
             }
             else {
