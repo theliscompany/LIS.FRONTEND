@@ -206,7 +206,7 @@ function Orders() {
     const getContacts = async () => {
         if (account && instance && context) {
             if (ourContacts.length !== 0) {
-                console.log(ourContacts);
+                // console.log(ourContacts);
                 setContacts(ourContacts);
             }
             else {
