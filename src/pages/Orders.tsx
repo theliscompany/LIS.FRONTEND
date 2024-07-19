@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { AddOutlined, Delete, Edit, RestartAltOutlined, Visibility } from '@mui/icons-material';
 import { Alert, Box, Button, Chip, DialogActions, DialogContent, Grid, IconButton, Skeleton, Typography } from '@mui/material';
 import { DataGrid, GridColDef, GridRenderCellParams, GridValueFormatterParams } from '@mui/x-data-grid';
@@ -27,6 +27,7 @@ function Orders() {
     const account = useAccount(accounts[0] || {});    
     const context = useAuthorizedBackendApi();
     
+    const navigate = useNavigate();
     const { t } = useTranslation();
     
     var ourPorts: any = useSelector((state: any) => state.masterdata.ports);
@@ -310,6 +311,7 @@ function Orders() {
                                             getRowHeight={() => "auto" }
                                             sx={sizingStyles}
                                             disableRowSelectionOnClick
+                                            onRowDoubleClick={((params: any) => navigate("/admin/edit-order/"+params.row.orderId))}
                                             style={{ fontSize: "12px" }}
                                         />
                                     </Box> : <Alert severity="warning">{t('noResults')}</Alert>
