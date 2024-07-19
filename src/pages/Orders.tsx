@@ -252,7 +252,6 @@ function Orders() {
             else {
                 setLoad(false);
             }
-            // console.log(response);
         }
     }
     
@@ -263,11 +262,6 @@ function Orders() {
                 enqueueSnackbar(t('orderDeleted'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
                 setModal(false);
                 getOrders();
-                // if (response !== null && response !== undefined) {
-                //     enqueueSnackbar(t('orderDeleted'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
-                //     setModal(false);
-                //     getOrders();
-                // }    
             }
             catch (err: any) {
                 enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
