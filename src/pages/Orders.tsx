@@ -41,12 +41,7 @@ function Orders() {
                 <Box>{params.row.orderDate.slice(0,10)}</Box>
             );
         } },
-        { field: 'fiscalYear', headerName: t('fiscalYear') },
-        
-        // { field: 'sellerId', headerName: t('seller') },
-        // { field: 'buyerId', headerName: t('buyer') },
-        // { field: 'customerId', headerName: t('customer') },
-        
+        { field: 'fiscalYear', headerName: t('fiscalYear') },        
         { field: 'sellerId', headerName: t('seller'), renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box>
