@@ -68,9 +68,12 @@ export const protectedResources = {
     endPoint: process.env.REACT_APP_API_LIS_TEMPLATE_ENDPOINT
   }, 
   apiLisFiles: {
-    endPoint: "https://lis-document-svc.azurewebsites.net/api"
+    endPoint: process.env.REACT_APP_API_LIS_DOCUMENT_ENDPOINT
   },
   apiLisShipments: {
-    endPoint: "https://lis-shipment-svc.azurewebsites.net/api"
+    endPoint: "http://localhost:5005/api"
+  },
+  apiLisSessionStorage: {
+    endPoint: process.env.REACT_APP_API_LIS_SESSIONSTORAGE_ENDPOINT
   }
 }

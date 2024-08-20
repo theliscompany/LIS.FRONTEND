@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+import { protectedResources } from '../../config/authConfig';
 
-const API_BASE_URL = 'https://lis-sessionstorage-svc.azurewebsites.net';
+// const API_BASE_URL = 'https://lis-sessionstorage-svc.azurewebsites.net/api';
+const API_BASE_URL = protectedResources.apiLisSessionStorage;
 
 const useProcessStatePersistence = (userId, processName, initialState, expiresIn = null, enableAutoSave = true) => {
   const [state, setState] = useState(initialState);
@@ -15,7 +17,7 @@ const useProcessStatePersistence = (userId, processName, initialState, expiresIn
           setState(JSON.parse(cachedState));
         } 
         else {
-          const response = await axios.get(`${API_BASE_URL}/api/ProcessState/${userId}/${processName}`);
+          const response = await axios.get(`${API_BASE_URL}/ProcessState/${userId}/${processName}`);
           // console.log("response : ", response);
           if (response.data) {
             setState(JSON.parse(response.data.data.stateData));
@@ -35,7 +37,7 @@ const useProcessStatePersistence = (userId, processName, initialState, expiresIn
       try {
         localStorage.setItem(processName, JSON.stringify(state));
         if (enableAutoSave) {
-          await axios.post(`${API_BASE_URL}/api/ProcessState`, {
+          await axios.post(`${API_BASE_URL}/ProcessState`, {
             userId,
             processName,
             stateData: JSON.stringify(state),

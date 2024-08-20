@@ -53,12 +53,14 @@ function Request() {
     const [portDeparture, setPortDeparture] = useState<any>(null);
     const [loadingCity, setLoadingCity] = useState<any>(null);
     const [products, setProducts] = useState<any>(null);
+    const [hscodes, setHSCodes] = useState<any>(null);
     const [ports, setPorts] = useState<any>(null);
     const [ports1, setPorts1] = useState<any>(null);
     const [ports2, setPorts2] = useState<any>(null);
     const [containers, setContainers] = useState<any>(null);
     
     const [canEdit, setCanEdit] = useState<boolean>(true);
+    const [valueSpecifics, setValueSpecifics] = useState<string>("products");
     
     let { id } = useParams();
     const navigate = useNavigate();
@@ -68,6 +70,7 @@ function Request() {
     const { t } = useTranslation();
     
     var ourPorts: any = useSelector((state: any) => state.masterdata.ports);
+    var ourHSCodes: any = useSelector((state: any) => state.masterdata.hscodes);
     var ourProducts: any = useSelector((state: any) => state.masterdata.products);
     var ourAssignees: any = useSelector((state: any) => state.masterdata.assignees);
         
@@ -109,12 +112,19 @@ function Request() {
         getAssignees();
         getPorts();
         getProducts();
-        loadRequest();
+        getHSCodes();
+        // loadRequest();
     }, [account, instance, context]);
     
     useEffect(() => {
+        if (hscodes !== null && products !== null) {
+            loadRequest();
+        }
+    }, [products, hscodes]);
+
+    useEffect(() => {
         if (ports !== null && products !== null && requestData !== null) {
-            setTags(requestData.tags !== null ? products.filter((elm: any) => requestData.tags.includes(elm.productName)) : []);
+            // setTags(requestData.tags !== null ? products.filter((elm: any) => requestData.tags.includes(elm.productName)) : []);
             const closestDeparturePort = findClosestSeaPort(parseLocation(requestData.departure), ports);
             const closestArrivalPort = findClosestSeaPort(parseLocation(requestData.arrival), ports);
             setPortDeparture(closestDeparturePort);
@@ -127,7 +137,7 @@ function Request() {
     const getAssignees = async () => {
         if (account && instance && context) {
             if (ourAssignees !== undefined) {
-                console.log(ourAssignees);
+                // console.log(ourAssignees);
                 setAssignees(ourAssignees.data);
                 setLoadAssignees(false);
             }
@@ -163,7 +173,7 @@ function Request() {
     const getPorts = async () => {
         if (account && instance && context) {
             if (ourPorts.length !== 0) {
-                console.log(ourPorts);
+                // console.log(ourPorts);
                 var addedCoordinatesPorts = addedCoordinatesToPorts(ourPorts);
                 setPorts(addedCoordinatesPorts);
             }
@@ -172,8 +182,8 @@ function Request() {
                 if (response !== null && response !== undefined) {
                     var addedCoordinatesPorts = addedCoordinatesToPorts(response);
                     setPorts(addedCoordinatesPorts);
-                    console.log(response);
-                    console.log(addedCoordinatesPorts);
+                    // console.log(response);
+                    // console.log(addedCoordinatesPorts);
                 }
             }
         }
@@ -182,7 +192,7 @@ function Request() {
     const getProducts = async () => {
         if (account && instance && context) {
             if (ourProducts.length !== 0) {
-                console.log(ourProducts);
+                // console.log(ourProducts);
                 setProducts(ourProducts);    
             }
             else {
@@ -194,12 +204,43 @@ function Request() {
         }
     }
 
+    const getHSCodes = async () => {
+        if (account && instance && context) {
+            if (ourHSCodes.length !== 0) {
+                // console.log(ourHSCodes);
+                setHSCodes(ourHSCodes);    
+            }
+            else {
+                const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisQuotes.endPoint+"/HSCodeLIS", context.tokenLogin);
+                if (response !== null && response !== undefined) {
+                    setHSCodes(response);
+                }      
+            }    
+        }
+    }
+
     const loadRequest = async () => {
         if (account && instance && context) {
             try {
                 const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisQuotes.endPoint+"/Request/"+id, context.tokenLogin);
                 if (response !== null && response.code !== undefined) {
                     if (response.code === 200) {
+                        console.log("Resp : ", response); 
+                        // Parse the saved data string into an array of IDs
+                        const savedDataArray = response.data.tags !== null ? response.data.tags.split(',').map(Number) : [];
+                        // Filter the possibleObjects array to only include objects with matching hS_Code
+                        const filteredObjects = hscodes.filter((obj: any) => savedDataArray.includes(obj.hS_Code));
+                        console.log("Array of objs : ", filteredObjects);
+                        if (filteredObjects.length !== 0) {
+                            console.log("HSCODES!!!!");
+                            setValueSpecifics("hscodes");
+                            setTags(filteredObjects);
+                        }
+                        else {
+                            console.log("PRODUCTS!!!!");
+                            setTags(response.data.tags !== null ? products.filter((elm: any) => response.data.tags.includes(elm.productName)) : []);
+                        }
+                        
                         setRequestData(response.data);
                         setEmail(response.data.email);
                         setPhone(response.data.whatsapp);
@@ -242,6 +283,9 @@ function Request() {
     }
     
     const editRequest = async () => {
+        var tags1 = tags !== null && tags !== undefined && tags.length !== 0 ? tags.map((elm: any) => elm.productName).join(',') : null;
+        var tags2 = tags !== null && tags !== undefined && tags.length !== 0 ? tags.map((elm: any) => elm.hS_Code).join(',') : null;
+            
         var auxUnits = [];
         if (packingType === "Breakbulk/LCL") {
             auxUnits = packagesSelection;
@@ -253,7 +297,9 @@ function Request() {
         if (account && instance && context) {
             var postcode1 = departure.postalCode !== null && departure.postalCode !== undefined ? departure.postalCode : "";
             var postcode2 = arrival.postalCode !== null && arrival.postalCode !== undefined ? arrival.postalCode : "";
-
+            console.log("Prods :", tags1);
+            console.log("Codes :", tags2);
+            
             const body: any = {
                 id: Number(id),
                 email: email,
@@ -278,7 +324,9 @@ function Request() {
                 quantity: quantity,
                 detail: message,
                 clientNumber: clientNumber !== null ? String(clientNumber.contactNumber)+", "+clientNumber.contactName : null,
-                tags: tags.length !== 0 ? tags.map((elm: any) => elm.productName).join(',') : null,
+                // tags: tags.length !== 0 ? tags.map((elm: any) => elm.productName).join(',') : null,
+                // tags: tags1 !== "," ? tags1 : tags2 !== "," ? tags2 : null,
+                tags: valueSpecifics !== "hscodes" ? tags1 : tags2,
                 assigneeId: Number(assignedManager)
             };
 
@@ -343,7 +391,8 @@ function Request() {
                                 canEdit={canEdit} setCanEdit={setCanEdit}
                                 containersSelection={containersSelection} setContainersSelection={setContainersSelection}
                                 getClosestDeparture={getClosestDeparture} getClosestArrival={getClosestArrival}
-                                products={products} openModalContainer={() => setModal10(true)}
+                                products={products} hscodes={hscodes} 
+                                valueSpecifics={valueSpecifics} openModalContainer={() => setModal10(true)}
                             /> : null
                         }
                         

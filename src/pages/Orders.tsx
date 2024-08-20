@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { AddOutlined, Delete, Edit, RestartAltOutlined, Visibility } from '@mui/icons-material';
-import { Alert, Box, Button, Chip, DialogActions, DialogContent, Grid, IconButton, Skeleton, Typography } from '@mui/material';
+import { AddOutlined, Delete, Edit, RestartAltOutlined, Search, Visibility } from '@mui/icons-material';
+import { Alert, Autocomplete, Box, Button, Chip, DialogActions, DialogContent, Grid, IconButton, InputLabel, NativeSelect, Skeleton, TextField, Typography } from '@mui/material';
 import { DataGrid, GridColDef, GridRenderCellParams, GridValueFormatterParams } from '@mui/x-data-grid';
 import { SnackbarProvider, enqueueSnackbar } from 'notistack';
-import { whiteButtonStyles, sizingStyles, BootstrapDialog, BootstrapDialogTitle, buttonCloseStyles } from '../utils/misc/styles';
+import { whiteButtonStyles, sizingStyles, BootstrapDialog, BootstrapDialogTitle, buttonCloseStyles, inputLabelStyles, BootstrapInput, datetimeStyles } from '../utils/misc/styles';
 import { NavLink } from 'react-router-dom';
 import { useMsal, useAccount } from '@azure/msal-react';
 import { useTranslation } from 'react-i18next';
@@ -12,17 +12,31 @@ import { useAuthorizedBackendApi } from '../api/api';
 import { protectedResources } from '../config/authConfig';
 import { BackendService } from '../utils/services/fetch';
 import { useSelector } from 'react-redux';
+import { CategoryEnum, incotermValues, orderExportOptions, orderStatusOptions } from '../utils/constants';
+import CompanySearch from '../components/shared/CompanySearch';
+import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { Dayjs } from 'dayjs';
 
 function Orders() {
     const [load, setLoad] = useState<boolean>(true);
     const [loadShips, setLoadShips] = useState<boolean>(true);
-    const [ships, setShips] = useState<any>(null);
     const [orders, setOrders] = useState<any>(null);
     const [modal, setModal] = useState<boolean>(false);
+    const [ships, setShips] = useState<any>(null);
     const [ports, setPorts] = useState<any>(null);
     const [contacts, setContacts] = useState<any>(null);
     const [currentId, setCurrentId] = useState<string>("");
-
+    
+    const [contact, setContact] = useState<any>(null);
+    const [status, setStatus] = useState<number | null>(null);
+    const [fiscal, setFiscal] = useState<number | null>(null);
+    const [exportation, setExportation] = useState<boolean | null>(null);
+    const [loadingPort, setLoadingPort] = useState<any>(null);
+    const [dischargePort, setDischargePort] = useState<any>(null);
+    const [etd, setEtd] = useState<Dayjs | null>(null);
+    const [eta, setEta] = useState<Dayjs | null>(null);
+        
     const { instance, accounts } = useMsal();
     const account = useAccount(accounts[0] || {});    
     const context = useAuthorizedBackendApi();
@@ -33,8 +47,52 @@ function Orders() {
     var ourPorts: any = useSelector((state: any) => state.masterdata.ports);
     var ourContacts: any = useSelector((state: any) => state.masterdata.contactBusinesses.data);
     
+    function createGetRequestUrl(variable1: number, variable2: number, variable3: string, variable4: any, variable5: any, variable6: any, variable7: any, variable8: any) {
+        let url = protectedResources.apiLisShipments.endPoint+"/Orders?";
+        if (variable1) {
+          url += 'Contact=' + encodeURIComponent(variable1) + '&';
+        }
+        if (variable2) {
+          url += 'LoadingPort=' + encodeURIComponent(variable2) + '&';
+        }
+        if (variable3) {
+            url += 'DischargePort=' + encodeURIComponent(variable3) + '&';
+        }
+        if (variable4 !== null && variable4) {
+            url += 'Fiscal=' + encodeURIComponent(String(variable4)) + '&';
+        }
+        if (variable5 !== null && variable5 !== -1 && variable5 !== "-1" && variable5 !== "ALL" && variable5) {
+            url += 'Status=' + encodeURIComponent(String(variable5)) + '&';
+        }
+        if (variable6 !== null && variable6 !== -1 && variable6 !== "-1" && variable6 !== "ALL" && variable6) {
+            url += 'Exportation=' + encodeURIComponent(String(variable6)) + '&';
+        }
+        if (variable7) {
+            url += 'Etd=' + encodeURIComponent(variable7) + '&';
+        }
+        if (variable8) {
+            url += 'Eta=' + encodeURIComponent(variable8) + '&';
+        }
+        
+        if (url.slice(-1) === '&') {
+          url = url.slice(0, -1);
+        }
+        return url;
+    }
+    
     const columnsOrders: GridColDef[] = [
         // { field: 'orderId', headerName: t('id'), flex: 0.5 },
+        { field: 'orderStatus', headerName: t('Status'), renderCell: (params: GridRenderCellParams) => {
+            return (
+                <Box>
+                    <Chip 
+                        label={orderStatusOptions.find((elm: any) => elm.value === params.row.orderStatus)?.label} 
+                        color={orderStatusOptions.find((elm: any) => elm.value === params.row.orderStatus)?.color || "default"} 
+                        sx={{ fontSize: 9.5, textTransform: "none" }}
+                    />
+                </Box>
+            );
+        }, minWidth: 100 },
         { field: 'orderNumber', headerName: t('orderNumber') },
         { field: 'orderDate', headerName: t('orderDate'), renderCell: (params: GridRenderCellParams) => {
             return (
@@ -180,37 +238,53 @@ function Orders() {
         getPorts();
         getContacts();
         getShips();
-        getOrders();
     }, [account, instance, context]);
+
+    useEffect(() => {
+        // console.log("Orders : ", orders);
+        if (contacts !== null && ports !== null && ships !== null) {
+            getOrders();
+        }
+    }, [contacts, ports, ships]);
     
     const getPorts = async () => {
         if (account && instance && context) {
-            if (ourPorts.length !== 0) {
-                console.log(ourPorts);
-                setPorts(ourPorts);
-            }
-            else {
-                const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Port/Ports?pageSize=2000", context.tokenTransport);
-                if (response !== null && response !== undefined) {
-                    console.log(response);
-                    setPorts(response);
+            try {
+                if (ourPorts !== null && ourPorts !== undefined && ourPorts.length !== 0) {
+                    // console.log(ourPorts);
+                    setPorts(ourPorts);
                 }
+                else {
+                    const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Port/Ports?pageSize=2000", context.tokenTransport);
+                    if (response !== null && response !== undefined) {
+                        console.log(response);
+                        setPorts(response);
+                    }
+                }
+            }
+            catch (err: any) {
+                console.log(err);
             }
         }
     }
     
     const getContacts = async () => {
         if (account && instance && context) {
-            if (ourContacts.length !== 0) {
-                // console.log(ourContacts);
-                setContacts(ourContacts);
-            }
-            else {
-                const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisCrm.endPoint+"/Contact/GetContacts?pageSize=4000", context.tokenCrm);
-                if (response !== null && response !== undefined) {
-                    console.log(response);
-                    setContacts(response);
+            try {
+                if (ourContacts !== null && ourContacts !== undefined && ourContacts.length !== 0) {
+                    // console.log(ourContacts);
+                    setContacts(ourContacts);
                 }
+                else {
+                    const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisCrm.endPoint+"/Contact/GetContacts?pageSize=4000", context.tokenCrm);
+                    if (response !== null && response !== undefined) {
+                        console.log(response.data);
+                        setContacts(response.data);
+                    }
+                }
+            }
+            catch (err: any) {
+                console.log(err);
             }
         }
     }
@@ -221,7 +295,7 @@ function Orders() {
                 setLoadShips(true);
                 const response = await (context?.service as BackendService<any>).getSingle(protectedResources.apiLisShipments.endPoint+"/Ships?count=1000");
                 if (response !== null && response !== undefined) {
-                    console.log(response);
+                    // console.log(response);
                     setShips(response.$values);
                     setLoadShips(false);
                 }
@@ -265,6 +339,21 @@ function Orders() {
         }
     }
 
+    const searchOrders = async () => {
+        if (account && instance && context) {
+            setLoad(true);
+            var requestFormatted = createGetRequestUrl(contact?.contactId, loadingPort?.portId, dischargePort?.portId, fiscal, status, exportation, etd, eta);
+            const response = await (context?.service as BackendService<any>).getWithToken(requestFormatted, context.tokenLogin);
+            if (response !== null && response !== undefined) {
+                setOrders(response.$values.filter((elm: any) => elm.fiscalYear !== 2014));
+                setLoad(false);
+            }
+            else {
+                setLoad(false);
+            }
+        }
+    }
+
     
     
     return (
@@ -284,6 +373,151 @@ function Orders() {
                             {t('New order')} <AddOutlined sx={{ ml: 0.5, pb: 0.45, justifyContent: "center", alignItems: "center" }} fontSize="small" />
                         </Button>
                     </Grid>
+                    <Grid item xs={4}>
+                        <InputLabel htmlFor="contact" sx={inputLabelStyles}>{t('Contact')}</InputLabel>
+                        <CompanySearch id="contact" value={contact} onChange={setContact} category={CategoryEnum.CUSTOMERS} fullWidth />
+                    </Grid>
+                    <Grid item xs={4}>
+                        <InputLabel htmlFor="loadingPort" sx={inputLabelStyles}>{t('portLoading')}</InputLabel>
+                        {
+                            ports !== null ?
+                            <Autocomplete
+                                disablePortal
+                                id="loadingPort"
+                                options={ports}
+                                renderOption={(props, option, i) => {
+                                    return (
+                                        <li {...props} key={option.portId}>
+                                            {option.portName+", "+option.country}
+                                        </li>
+                                    );
+                                }}
+                                getOptionLabel={(option: any) => { 
+                                    if (option !== null && option !== undefined) {
+                                        return option.portName+', '+option.country;
+                                    }
+                                    return ""; 
+                                }}
+                                value={loadingPort}
+                                sx={{ mt: 1 }}
+                                renderInput={(params: any) => <TextField {...params} />}
+                                onChange={(e: any, value: any) => { 
+                                    setLoadingPort(value);
+                                }}
+                                fullWidth
+                            /> : <Skeleton />
+                        }
+                    </Grid>
+                    <Grid item xs={4}>
+                        <InputLabel htmlFor="dischargePort" sx={inputLabelStyles}>{t('portDischarge')}</InputLabel>
+                        {
+                            ports !== null ?
+                            <Autocomplete
+                                disablePortal
+                                id="dischargePort"
+                                options={ports}
+                                renderOption={(props, option, i) => {
+                                    return (
+                                        <li {...props} key={option.portId}>
+                                            {option.portName+", "+option.country}
+                                        </li>
+                                    );
+                                }}
+                                getOptionLabel={(option: any) => { 
+                                    if (option !== null && option !== undefined) {
+                                        return option.portName+', '+option.country;
+                                    }
+                                    return ""; 
+                                }}
+                                value={dischargePort}
+                                sx={{ mt: 1 }}
+                                renderInput={(params: any) => <TextField {...params} />}
+                                onChange={(e: any, value: any) => { 
+                                    setDischargePort(value);
+                                }}
+                                fullWidth
+                            /> : <Skeleton />
+                        }
+                    </Grid>
+                    <Grid item xs={2}>
+                        <InputLabel htmlFor="status" sx={inputLabelStyles}>{t('Status')}</InputLabel>
+                        <NativeSelect
+                            id="status"
+                            value={status}
+                            onChange={(e: any) => { setStatus(e.target.value); }}
+                            input={<BootstrapInput />}
+                            fullWidth
+                        >
+                            {
+                                orderStatusOptions.map((row: any, i: number) => (
+                                    <option key={"orderStatus-"+i} value={row.value}>{row.label}</option>
+                                ))
+                            }
+                        </NativeSelect>
+                    </Grid>
+                    <Grid item xs={2}>
+                        <InputLabel htmlFor="fiscal" sx={inputLabelStyles}>{t('fiscalYear')}</InputLabel>
+                        <BootstrapInput id="fiscal" type="number" value={fiscal} onChange={(e: any) => setFiscal(e.target.value)} fullWidth />
+                    </Grid>
+                    <Grid item xs={2}>
+                        <InputLabel htmlFor="exportation" sx={inputLabelStyles}>{t('Exportation')}</InputLabel>
+                        <NativeSelect
+                            id="exportation"
+                            value={exportation}
+                            onChange={(e: any) => { setExportation(e.target.value); }}
+                            input={<BootstrapInput />}
+                            fullWidth
+                        >
+                            {
+                                orderExportOptions.map((row: any, i: number) => (
+                                    <option key={"orderExportation-"+i} value={row.value}>{row.label}</option>
+                                ))
+                            }
+                        </NativeSelect>
+                    </Grid>
+                    <Grid item xs={2}>
+                        <InputLabel htmlFor="etd" sx={inputLabelStyles}>{t('ETD')}</InputLabel>
+                        <LocalizationProvider dateAdapter={AdapterDayjs}>
+                            <DatePicker 
+                                value={etd}
+                                format="DD/MM/YYYY" 
+                                onChange={(value: any) => { setEtd(value) }}
+                                slotProps={{ 
+                                    actionBar: { actions: ['clear'] },
+                                    textField: { id: "etd", fullWidth: true, sx: datetimeStyles }, 
+                                    inputAdornment: { sx: { position: "relative", right: "11.5px" } }
+                                }}
+                            />
+                        </LocalizationProvider>
+                    </Grid>
+                    <Grid item xs={2}>
+                        <InputLabel htmlFor="eta" sx={inputLabelStyles}>{t('ETA')}</InputLabel>
+                        <LocalizationProvider dateAdapter={AdapterDayjs}>
+                            <DatePicker 
+                                value={eta}
+                                format="DD/MM/YYYY" 
+                                onChange={(value: any) => { setEta(value) }}
+                                slotProps={{ 
+                                    actionBar: { actions: ['clear'] },
+                                    textField: { id: "eta", fullWidth: true, sx: datetimeStyles }, 
+                                    inputAdornment: { sx: { position: "relative", right: "11.5px" } } 
+                                }}
+                            />
+                        </LocalizationProvider>
+                    </Grid>
+                    <Grid item xs={2} sx={{ display: "flex", alignItems: "end" }}>
+                        <Button 
+                            variant="contained" 
+                            color="inherit"
+                            startIcon={<Search />} 
+                            size="large"
+                            sx={{ backgroundColor: "#fff", color: "#333", textTransform: "none", mb: 0.15 }}
+                            onClick={searchOrders}
+                            fullWidth
+                        >
+                            {t('search')}
+                        </Button>
+                    </Grid>                     
                 </Grid>
                 <Box>
                     {
@@ -303,6 +537,10 @@ function Orders() {
                                             onRowDoubleClick={((params: any) => navigate("/admin/edit-order/"+params.row.orderId))}
                                             style={{ fontSize: "12px" }}
                                         />
+                                        {/* {
+                                            contacts !== null ? 
+                                             : <Skeleton />
+                                        } */}
                                     </Box> : <Alert severity="warning">{t('noResults')}</Alert>
                                 }
                             </Grid>

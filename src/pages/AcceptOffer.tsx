@@ -135,9 +135,11 @@ function AcceptOffer(props: any) {
             refClient: offerData.clientNumber,
             refShippingAgent: option.selectedSeafreights[0].carrierAgentName,
             freightShipmentType: option.selectedSeafreights[0].defaultContainer,
+            // Contact Id
             customerId: 0,
+            // Contact Id
             shippingAgent: 0,
-            orderStatus: 0,
+            orderStatus: 1,
             departurePort: option.portDeparture.portId,
             destinationPort: option.portDestination.portId,
             fiscalYear: Number(new Date().getFullYear())
