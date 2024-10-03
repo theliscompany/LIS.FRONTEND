@@ -58,6 +58,7 @@ function createGetRequestUrl(variable1: string, variable2: string, variable3: st
 function MyRequests() {
     const [notifications, setNotifications] = useState<any>(null);
     const [load, setLoad] = useState<boolean>(true);
+    const [assignees, setAssignees] = useState<any>(null);
     const [currentUser, setCurrentUser] = useState<any>();
     const [status, setStatus] = useState<string>("");
     const [packingType, setPackingType] = useState<string>("");
@@ -89,11 +90,17 @@ function MyRequests() {
         getAssignees();
     }, [instance, account]);
 
+    useEffect(() => {
+        if (assignees !== null && assignees !== undefined) {
+            loadRequests(assignees)
+        }
+    }, [assignees]);
+
     const getAssignees = async () => {
         if (account && instance && context) {
             if (ourAssignees !== undefined) {
                 console.log(ourAssignees);
-                // setAssignees(ourAssignees.data);
+                setAssignees(ourAssignees.data);
                 setLoad(false);
             }
             else {
@@ -102,8 +109,8 @@ function MyRequests() {
                     const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisQuotes.endPoint+"/Assignee", context.tokenLogin);
                     if (response !== null && response.code !== undefined) {
                         if (response.code === 200) {
-                            // setAssignees(response.data);
-                            loadRequests(response.data);
+                            setAssignees(response.data);
+                            // loadRequests(response.data);
                             setLoad(false);
                         }
                         else {
@@ -142,6 +149,9 @@ function MyRequests() {
         if (account && instance && context) {
             //setLoad(true);
             var auxAssignee = assigneesList.find((elm: any) => elm.email === account?.username);
+            console.log("Acc", account);
+            console.log("Auxlist", assigneesList);
+            console.log("Auxass", auxAssignee);
             if (auxAssignee !== undefined) {
                 const response: RequestResponseDto = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisQuotes.endPoint+"/Request?AssigneeId="+auxAssignee.id, context.tokenLogin);
                 if (response !== null && response.code !== undefined && response.data !== undefined) {
@@ -226,7 +236,7 @@ function MyRequests() {
                         <List sx={{ mt: 3  }}>
                             {
                                 notifications.map((item: any, i: number) => {
-                                    return (<RequestViewItem item={item} i={i} />)
+                                    return (<RequestViewItem key={"dsd"+i} item={item} i={i} />)
                                 })
                             }
                         </List> : <Alert severity="warning" sx={{ mx: 5, mt: 3 }}>{t('noResults')}</Alert>

@@ -172,7 +172,7 @@ function Request() {
     
     const getPorts = async () => {
         if (account && instance && context) {
-            if (ourPorts.length !== 0) {
+            if (ourPorts !== undefined && ourPorts.length !== 0) {
                 // console.log(ourPorts);
                 var addedCoordinatesPorts = addedCoordinatesToPorts(ourPorts);
                 setPorts(addedCoordinatesPorts);
@@ -191,7 +191,7 @@ function Request() {
     
     const getProducts = async () => {
         if (account && instance && context) {
-            if (ourProducts.length !== 0) {
+            if (ourProducts !== undefined && ourProducts.length !== 0) {
                 // console.log(ourProducts);
                 setProducts(ourProducts);    
             }
@@ -206,7 +206,8 @@ function Request() {
 
     const getHSCodes = async () => {
         if (account && instance && context) {
-            if (ourHSCodes.length !== 0) {
+            console.log(ourHSCodes);
+            if (ourHSCodes !== undefined && ourHSCodes.length !== 0) {
                 // console.log(ourHSCodes);
                 setHSCodes(ourHSCodes);    
             }
@@ -406,7 +407,7 @@ function Request() {
                                 loadingCity={loadingCity} setLoadingCity={setLoadingCity}
                                 portDestination={portDestination} setPortDestination={setPortDestination}
                                 containersSelection={containersSelection}
-                                ports={ports} products={products}
+                                ports={ports} products={products} hscodes={hscodes}
                                 ports1={ports1} ports2={ports2}
                                 containers={containers} status={status}
                                 canEdit={canEdit} setCanEdit={setCanEdit}

@@ -893,3 +893,17 @@ export const calculateTotalQuantity = (data:  any) => {
     return data.reduce((total: any, row: any) => total + row.quantity, 0);
 };
 
+export function validateObjectHSCODEFormat(obj: any) {
+    // Check if the object has the required properties with the correct types
+    if (
+        typeof obj.hS_Code === "number" &&
+        typeof obj._4_digit_categories === "string" &&
+        typeof obj.product_description_En === "string" &&
+        typeof obj.product_description_Fr === "string" &&
+        typeof obj.product_description_NL === "string"
+    ) {
+        return true;
+    } else {
+        return false;
+    }
+}

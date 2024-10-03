@@ -1,7 +1,7 @@
 import { ExpandMore, AddOutlined, ReplayOutlined, Delete, Edit } from '@mui/icons-material';
 import { Accordion, AccordionSummary, AccordionDetails, Grid, Box, IconButton, Typography, Skeleton, Autocomplete, Button, DialogActions, DialogContent, InputLabel, TextField } from '@mui/material';
 import { DataGrid, GridColDef, GridRenderCellParams } from '@mui/x-data-grid';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { calculateTotalPrice } from '../../utils/functions';
 import { actionButtonStyles, BootstrapDialog, BootstrapDialogTitle, BootstrapInput, buttonCloseStyles, inputLabelStyles, sizingStyles } from '../../utils/misc/styles';
 import { t } from 'i18next';
@@ -308,7 +308,6 @@ const BudgetShipments = (props: any) => {
                                 style={{ height: "500px", fontSize: "12px" }}
                                 pagination
                                 slots={{
-                                    // toolbar: EditToolbar,
                                     footer: () => (
                                         <Box sx={{ p: 1, borderTop: "1px solid #e5e5e5", display: 'flex', justifyContent: 'flex-end' }}>
                                             <Typography variant="h6" fontSize={14}>

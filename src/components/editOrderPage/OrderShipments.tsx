@@ -1,7 +1,7 @@
-import { Grid, Button, Accordion, AccordionSummary, AccordionDetails, InputLabel, Typography, Divider, NativeSelect, Autocomplete, TextField, Skeleton, Box, IconButton, DialogActions, DialogContent } from '@mui/material';
+import { Grid, Button, Skeleton } from '@mui/material';
 import { t } from 'i18next';
-import React, { useEffect, useState } from 'react';
-import { actionButtonStyles, inputLabelStyles, BootstrapInput, datetimeStyles, whiteButtonStyles, sizingStyles, BootstrapDialog, BootstrapDialogTitle, buttonCloseStyles } from '../../utils/misc/styles';
+import { useEffect, useState } from 'react';
+import { actionButtonStyles } from '../../utils/misc/styles';
 import dayjs, { Dayjs } from 'dayjs';
 import BusinessShipments from './BusinessShipments';
 import InformationShipments from './InformationShipments';
@@ -14,14 +14,7 @@ import { useAuthorizedBackendApi } from '../../api/api';
 
 const OrderShipments = (props: any) => {
     const [load, setLoad] = useState<boolean>(true);
-    const [loadShips, setLoadShips] = useState<boolean>(true);
-    const [loadCargos, setLoadCargos] = useState<boolean>(true);
-    const [loadNotes, setLoadNotes] = useState<boolean>(true);
     const [loadCreate, setLoadCreate] = useState<boolean>(false);
-    const [orders, setOrders] = useState<any>(null);
-    const [modal, setModal] = useState<boolean>(false);
-    const [currentId, setCurrentId] = useState<string>("");
-    const [notes, setNotes] = useState<any>(null);
     const [orderData, setOrderData] = useState<any>(null);
     
     const [customer, setCustomer] = useState<any>(null);
@@ -198,18 +191,12 @@ const OrderShipments = (props: any) => {
     }
     
     const loadOrder = async () => {
-		console.log("Contacts : ", contacts);
-        console.log("Ports : ", ports);
-        console.log("Cities : ", cities);
-        console.log("Ships : ", ships);
-        if (account && instance && context && contacts !== null && ports !== null && cities !== null && ships !== null && id !== undefined) {
+		if (account && instance && context && contacts !== null && ports !== null && cities !== null && ships !== null && id !== undefined) {
             setLoad(true);
             const response = await (context?.service as BackendService<any>).getSingle(protectedResources.apiLisShipments.endPoint+"/Orders/"+id);
             if (response !== null && response !== undefined) {
-                // console.log(response);
                 setOrderData(response);
                 // Order data import
-                // console.log(contacts);
                 setSeller(contacts.find((elm: any) => elm.contactId === response.sellerId));
                 setCustomer(contacts.find((elm: any) => elm.contactId === response.customerId));
                 setBuyer(contacts.find((elm: any) => elm.contactId === response.buyerId));

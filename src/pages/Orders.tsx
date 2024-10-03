@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { AddOutlined, Delete, Edit, RestartAltOutlined, Search, Visibility } from '@mui/icons-material';
+import { AddOutlined, Delete, Edit, ListOutlined, RestartAltOutlined, Search, StarOutlineOutlined, Visibility } from '@mui/icons-material';
 import { Alert, Autocomplete, Box, Button, Chip, DialogActions, DialogContent, Grid, IconButton, InputLabel, NativeSelect, Skeleton, TextField, Typography } from '@mui/material';
-import { DataGrid, GridColDef, GridRenderCellParams, GridValueFormatterParams } from '@mui/x-data-grid';
+import { DataGrid, GridColDef, GridRenderCellParams, GridRowSelectionModel, GridValueFormatterParams } from '@mui/x-data-grid';
 import { SnackbarProvider, enqueueSnackbar } from 'notistack';
 import { whiteButtonStyles, sizingStyles, BootstrapDialog, BootstrapDialogTitle, buttonCloseStyles, inputLabelStyles, BootstrapInput, datetimeStyles } from '../utils/misc/styles';
 import { NavLink } from 'react-router-dom';
@@ -21,9 +21,12 @@ import { Dayjs } from 'dayjs';
 function Orders() {
     const [load, setLoad] = useState<boolean>(true);
     const [loadShips, setLoadShips] = useState<boolean>(true);
+    const [loadFavorites, setLoadFavorites] = useState<boolean>(true);
+    const [modalFavorites, setModalFavorites] = useState<boolean>(true);
     const [orders, setOrders] = useState<any>(null);
     const [modal, setModal] = useState<boolean>(false);
     const [ships, setShips] = useState<any>(null);
+    const [favorites, setFavorites] = useState<any>(null);
     const [ports, setPorts] = useState<any>(null);
     const [contacts, setContacts] = useState<any>(null);
     const [currentId, setCurrentId] = useState<string>("");
@@ -37,6 +40,8 @@ function Orders() {
     const [etd, setEtd] = useState<Dayjs | null>(null);
     const [eta, setEta] = useState<Dayjs | null>(null);
         
+    const [rowSelectionModel, setRowSelectionModel] = useState<GridRowSelectionModel>([]);
+    
     const { instance, accounts } = useMsal();
     const account = useAccount(accounts[0] || {});    
     const context = useAuthorizedBackendApi();
@@ -238,6 +243,7 @@ function Orders() {
         getPorts();
         getContacts();
         getShips();
+        getFavorites();
     }, [account, instance, context]);
 
     useEffect(() => {
@@ -309,6 +315,26 @@ function Orders() {
         }
     }
 
+    const getFavorites = async () => {
+        if (account && instance && context) {
+            try {
+                setLoadFavorites(true);
+                const response = await (context?.service as BackendService<any>).getSingle(protectedResources.apiLisShipments.endPoint+"/Favoris?count=1000");
+                if (response !== null && response !== undefined) {
+                    // console.log(response);
+                    setFavorites(response.$values);
+                    setLoadFavorites(false);
+                }
+                else {
+                    setLoadFavorites(false);
+                }
+            }
+            catch (err: any) {
+                setLoadFavorites(false);
+            }
+        }
+    }
+
     const getOrders = async () => {
         if (account && instance && context) {
             setLoad(true);
@@ -354,6 +380,28 @@ function Orders() {
         }
     }
 
+    const addFavorite = async () => {
+        if (account && instance && context) {
+            console.log(rowSelectionModel);
+            try {
+                if (rowSelectionModel.length !== 0) {
+                    var dataSent = {
+                        "userId": account.name,
+                        "orderId": rowSelectionModel[0],
+                    }
+                    const response = await (context?.service as BackendService<any>).postWithToken(protectedResources.apiLisShipments.endPoint+"/Favoris", dataSent, context.tokenLogin);
+                    if (response !== undefined && response !== null) {
+                        enqueueSnackbar("The order has been added to favorites!", { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                    }
+                }
+            }
+            catch (err: any) {
+                console.log(err);
+                enqueueSnackbar("An error happened!", { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+            }
+        }
+    }
+
     
     
     return (
@@ -363,7 +411,21 @@ function Orders() {
                 <Typography variant="h5" sx={{mt: {xs: 4, md: 1.5, lg: 1.5 }}} px={5}><b>{t('listOrders')}</b></Typography>
                 <Grid container spacing={2} mt={0} px={5}>
                     <Grid item xs={12}>
-                        <Button color="inherit" variant="contained" sx={whiteButtonStyles} style={{ float: "right" }} onClick={() => { getOrders(); }}>
+                        <Button 
+                            color="inherit" variant="contained" 
+                            sx={whiteButtonStyles} style={{ float: "right" }} 
+                            onClick={() => { setModalFavorites(true); }}
+                        >
+                            {t('Favorites')} <ListOutlined sx={{ ml: 0.5, pb: 0.45, justifyContent: "center", alignItems: "center" }} fontSize="small" />
+                        </Button>
+                        <Button 
+                            color="inherit" variant="contained" 
+                            sx={whiteButtonStyles} style={{ float: "right", marginRight: "5px" }} 
+                            onClick={() => { addFavorite(); }} disabled={rowSelectionModel !== null && rowSelectionModel.length === 0}
+                        >
+                            {t('Add favorite')} <StarOutlineOutlined sx={{ ml: 0.5, pb: 0.45, justifyContent: "center", alignItems: "center" }} fontSize="small" />
+                        </Button>
+                        <Button color="inherit" variant="contained" sx={whiteButtonStyles} style={{ float: "right", marginRight: "5px" }} onClick={() => { getOrders(); }}>
                             {t('reload')} <RestartAltOutlined sx={{ ml: 0.5, pb: 0.45, justifyContent: "center", alignItems: "center" }} fontSize="small" />
                         </Button>
                         <Button 
@@ -533,7 +595,11 @@ function Orders() {
                                             getRowId={(row: any) => row?.orderId}
                                             getRowHeight={() => "auto" }
                                             sx={sizingStyles}
-                                            disableRowSelectionOnClick
+                                            onRowSelectionModelChange={(newRowSelectionModel: any) => {
+                                                setRowSelectionModel(newRowSelectionModel);
+                                            }}
+                                            rowSelectionModel={rowSelectionModel}
+                                            // disableRowSelectionOnClick
                                             onRowDoubleClick={((params: any) => navigate("/admin/edit-order/"+params.row.orderId))}
                                             style={{ fontSize: "12px" }}
                                         />
@@ -560,6 +626,18 @@ function Orders() {
                 <DialogActions>
                     <Button variant="contained" color="secondary" className="mr-3" onClick={() => { deleteOrder(currentId); }} sx={{ textTransform: "none" }}>{t('delete')}</Button>
                     <Button variant="contained" onClick={() => setModal(false)} sx={buttonCloseStyles}>{t('close')}</Button>
+                </DialogActions>
+            </BootstrapDialog>
+
+            <BootstrapDialog open={modal} onClose={() => setModalFavorites(false)} maxWidth="sm" fullWidth>
+                <BootstrapDialogTitle id="custom-dialog-title" onClose={() => setModalFavorites(false)}>
+                    <b>{t('Favorites')}</b>
+                </BootstrapDialogTitle>
+                <DialogContent dividers>
+                    
+                </DialogContent>
+                <DialogActions>
+                    <Button variant="contained" onClick={() => setModalFavorites(false)} sx={buttonCloseStyles}>{t('close')}</Button>
                 </DialogActions>
             </BootstrapDialog>
         </div>

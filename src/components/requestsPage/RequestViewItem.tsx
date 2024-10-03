@@ -16,9 +16,13 @@ function RequestViewItem(props: any) {
         const now = new Date();
         const datetime = new Date(date_time);
         const diff = now.getTime() - datetime.getTime();
-        const diffInDays = Math.floor(diff / (1000 * 60 * 60 * 24));
-        const diffInHours = Math.floor(diff / (1000 * 60 * 60));
+    
         const diffInMinutes = Math.floor(diff / (1000 * 60));
+        const diffInHours = Math.floor(diff / (1000 * 60 * 60));
+        const diffInDays = Math.floor(diff / (1000 * 60 * 60 * 24));
+        
+        const diffInMonths = now.getMonth() - datetime.getMonth() + (12 * (now.getFullYear() - datetime.getFullYear()));
+        const diffInYears = now.getFullYear() - datetime.getFullYear();
     
         if (diffInDays === 0) {
             if (diffInHours === 0) {
@@ -28,8 +32,12 @@ function RequestViewItem(props: any) {
             }
         } else if (diffInDays === 1) {
             return t('yesterday');
-        } else {
+        } else if (diffInDays < 30) {
             return diffInDays + " " + t('daysAgo');
+        } else if (diffInMonths < 12) {
+            return diffInMonths === 1 ? t('lastMonth') : diffInMonths + " " + t('monthsAgo');
+        } else {
+            return diffInYears === 1 ? t('lastYear') : diffInYears + " " + t('yearsAgo');
         }
     }
     

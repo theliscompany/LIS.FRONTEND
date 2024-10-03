@@ -145,7 +145,7 @@ function RequestForm(props: any) {
                                     props.valueSpecifics === "products" ? 
                                     <Box>
                                     {
-                                        props.products !== null ?
+                                        props.products !== undefined && props.products !== null ?
                                         <Autocomplete
                                             multiple    
                                             disablePortal
@@ -169,7 +169,7 @@ function RequestForm(props: any) {
                                     </Box> : 
                                     <Box>
                                     {
-                                        props.hscodes !== null ?
+                                        props.hscodes !== undefined && props.hscodes !== null ?
                                         <Autocomplete
                                             multiple    
                                             disablePortal

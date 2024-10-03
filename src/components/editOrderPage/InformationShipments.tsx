@@ -119,6 +119,7 @@ const InformationShipments = (props: any) => {
             }
             catch (err: any) {
                 setLoadCargos(false);
+                setCargos([]);
             }
         }
     }
@@ -284,7 +285,7 @@ const InformationShipments = (props: any) => {
                         <Button 
                             variant="contained" color="inherit" 
                             sx={whiteButtonStyles} style={{ float: "right" }} 
-                            onClick={() => {  }}
+                            onClick={() => { getCargos(); }}
                         >
                             {t('reload')}
                         </Button>

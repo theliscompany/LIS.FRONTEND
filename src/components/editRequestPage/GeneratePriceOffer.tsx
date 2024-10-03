@@ -9,7 +9,7 @@ import { DataGrid, GridColDef, GridColumnHeaderParams, GridRenderCellParams, Gri
 import StarterKit from '@tiptap/starter-kit';
 // import { t } from 'i18next';
 import React from 'react';
-import { calculateTotal, checkCarrierConsistency, checkDifferentDefaultContainer, formatObject, formatServices, generateRandomNumber, getCity, getCityCountry, getServices, getServicesTotal, getServicesTotal2, getTotalNumber, getTotalPrice, getTotalPrices, hashCode, myServices, parseDate, removeDuplicatesWithLatestUpdated } from '../../utils/functions';
+import { calculateTotal, checkCarrierConsistency, checkDifferentDefaultContainer, formatObject, formatServices, generateRandomNumber, getCity, getCityCountry, getServices, getServicesTotal, getServicesTotal2, getTotalNumber, getTotalPrice, getTotalPrices, hashCode, myServices, parseDate, removeDuplicatesWithLatestUpdated, validateObjectHSCODEFormat } from '../../utils/functions';
 import AutocompleteSearch from '../shared/AutocompleteSearch';
 import ContainerElement from './ContainerElement';
 import ContainerPrice from './ContainerPrice';
@@ -67,17 +67,18 @@ function GeneratePriceOffer(props: any) {
         id, email, tags, clientNumber, 
         departure, setDeparture, containersSelection, 
         loadingCity, setLoadingCity,
-        portDestination, ports, products, ports1, ports2, containers 
+        portDestination, ports, products, hscodes, ports1, ports2, containers 
     } = props;
 
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
     
     const [loadResults, setLoadResults] = useState<boolean>(false);
     const [loadGeneralMiscs, setLoadGeneralMiscs] = useState<boolean>(false);
     const [loadMiscsHaulage, setLoadMiscsHaulage] = useState<boolean>(false);
     const [loadNewOffer, setLoadNewOffer] = useState<boolean>(false);
     const [loadStatus, setLoadStatus] = useState<boolean>(false);
-    
+    const [valueSpecifics, setValueSpecifics] = useState<string>("");
+        
     const [haulages, setHaulages] = useState<any>(null);
     const [seafreights, setSeafreights] = useState<any>(null);
     const [allSeafreights, setAllSeafreights] = useState<any>(null);
@@ -256,6 +257,18 @@ function GeneratePriceOffer(props: any) {
     };
     
     useEffect(() => {
+        console.log("Commm: ", props.commodities);
+        if (props.commodities !== null && props.commodities !== undefined && props.commodities.length > 0) {
+            if (validateObjectHSCODEFormat(props.commodities[0])) {
+                setValueSpecifics("hscodes");
+            }
+            else {
+                setValueSpecifics("products");
+            }    
+        } 
+    }, []);
+
+    useEffect(() => {
         if (loadingCity !== null) {
             getHaulagePriceOffers();
         }
@@ -276,6 +289,12 @@ function GeneratePriceOffer(props: any) {
         getTemplates();
     }, [account, instance, account]);
     
+    useEffect(() => {
+        if (formState.haulageType !== undefined && formState.haulageType !== "") {
+            getHaulagePriceOffers();
+        }
+    }, [formState.haulageType, account, instance, account]);
+
     useEffect(() => {
         if (formState.selectedTemplate !== undefined && formState.selectedTemplate !== null) {
             getTemplate(formState.selectedTemplate);
@@ -802,7 +821,20 @@ function GeneratePriceOffer(props: any) {
         }
         
         var destinationPort = formState.portDestination !== undefined && formState.portDestination !== null ? formState.portDestination.portName+', '+formState.portDestination.country.toUpperCase() : "";
-        var commodities:any = tags.map((elm: any) => elm.productName).join(',');
+        // var commodities:any = tags.map((elm: any) => elm.productName).join(',');
+        var commodities:any = valueSpecifics === "products" ? tags.map((elm: any) => elm.productName).join(',') : 
+        tags.map((elm: any) => {
+            if (i18n.language === "fr") {
+                return elm.product_description_Fr;
+            }
+            else if (i18n.language === "en") {
+                return elm.product_description_En;
+            }
+            else {
+                return elm.product_description_NL;
+            }
+        }).join('; ');
+        
         
         // var auxServices = formState.myMiscs;
         // var listServices = auxServices !== null && auxServices.length !== 0 && templateBase !== null ? 
@@ -890,7 +922,20 @@ function GeneratePriceOffer(props: any) {
         }
         
         var destinationPort = formState.portDestination !== undefined && formState.portDestination !== null ? formState.portDestination.portName+', '+formState.portDestination.country.toUpperCase() : "";
-        var commodities:any = tags.map((elm: any) => elm.productName).join(',');
+        // var commodities:any = tags.map((elm: any) => elm.productName).join(',');
+        var commodities:any = valueSpecifics === "products" ? tags.map((elm: any) => elm.productName).join(',') : 
+        tags.map((elm: any) => {
+            if (i18n.language === "fr") {
+                return elm.product_description_Fr;
+            }
+            else if (i18n.language === "en") {
+                return elm.product_description_En;
+            }
+            else {
+                return elm.product_description_NL;
+            }
+        }).join('; ');
+        
         
         // var auxServices = formState.myMiscs;
         // var listServices = auxServices !== undefined && auxServices !== null && auxServices.length !== 0 && templateBase !== null ? 
@@ -1990,6 +2035,7 @@ function GeneratePriceOffer(props: any) {
                     <RequestPriceRequest 
                         token={context.tokenPricing} 
                         products={products} 
+                        hscodes={hscodes}
                         commodities={tags}
                         ports={ports}
                         portLoading={formState.portDeparture}

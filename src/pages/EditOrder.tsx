@@ -1,10 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { AddOutlined, Delete, Edit, ExpandMore, ReplayOutlined } from '@mui/icons-material';
-import { Accordion, AccordionDetails, AccordionSummary, Autocomplete, Box, Button, Chip, DialogActions, DialogContent, Divider, Grid, IconButton, InputLabel, ListItem, ListItemText, NativeSelect, Skeleton, Tab, Tabs, TextField, Typography } from '@mui/material';
-import { DataGrid, GridColDef, GridRenderCellParams } from '@mui/x-data-grid';
-import { SnackbarProvider, enqueueSnackbar } from 'notistack';
-import { whiteButtonStyles, sizingStyles, BootstrapDialog, BootstrapDialogTitle, buttonCloseStyles, CustomTabPanel, BootstrapInput, inputLabelStyles, datetimeStyles, actionButtonStyles } from '../utils/misc/styles';
+import { ExpandMore } from '@mui/icons-material';
+import { Accordion, AccordionDetails, AccordionSummary, Box, Chip, Grid, Skeleton, Tab, Tabs, Typography } from '@mui/material';
+import { SnackbarProvider } from 'notistack';
+import { CustomTabPanel } from '../utils/misc/styles';
 import { useMsal, useAccount } from '@azure/msal-react';
 import { useTranslation } from 'react-i18next';
 import { useAuthorizedBackendApi } from '../api/api';
@@ -13,21 +12,30 @@ import { BackendService } from '../utils/services/fetch';
 import { useSelector } from 'react-redux';
 import { orderStatusOptions } from '../utils/constants';
 import OrderShipments from '../components/editOrderPage/OrderShipments';
+import NoteShipments from '../components/editOrderPage/NoteShipments';
 
 function EditOrder() {
+    const [load, setLoad] = useState<boolean>(true);
     const [loadShips, setLoadShips] = useState<boolean>(true);
-    const [loadNotes, setLoadNotes] = useState<boolean>(true);
     const [ports, setPorts] = useState<any>(null);
     const [cities, setCities] = useState<any>(null);
     const [products, setProducts] = useState<any>(null);
     const [services, setServices] = useState<any>(null);
     const [contacts, setContacts] = useState<any>(null);
     const [ships, setShips] = useState<any>(null);
-    const [notes, setNotes] = useState<any>(null);
     const [orderData, setOrderData] = useState<any>(null);
     const [tabValue, setTabValue] = useState<number>(0);
     const [orderNumber, setOrderNumber] = useState<string>("");
     
+    // const [loadNotes, setLoadNotes] = useState<boolean>(true);
+    // const [notes, setNotes] = useState<any>(null);
+    // const [modalNote, setModalNote] = useState<boolean>(false);
+    // const [currentNoteId, setCurrentNoteId] = useState<string>("");
+    // const [noteTitle, setNoteTitle] = useState<string>("");
+    // const [flag, setFlag] = useState<string>("");
+    // const [textContent, setTextContent] = useState<string>("");
+    // const [alertDate, setAlertDate] = useState<Dayjs | null>(null);
+
     const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
         setTabValue(newValue);
     };
@@ -45,30 +53,10 @@ function EditOrder() {
     var ourServices: any = useSelector((state: any) => state.masterdata.services);
     var ourContacts: any = useSelector((state: any) => state.masterdata.contactBusinesses.data);
     
-    const columnsNotes: GridColDef[] = [
-        { field: 'title', headerName: t('title'), flex: 0.5 },
-        { field: 'noteDate', headerName: t('created'), flex: 0.25 },
-        { field: 'authorId', headerName: t('user'), flex: 0.25 },
-        { field: 'www', headerName: t('Actions'), renderCell: (params: GridRenderCellParams) => {
-            return (
-                <Box sx={{ my: 1 }}>
-                    <IconButton 
-                        edge="end" 
-                        onClick={() => { 
-                            
-                        }} 
-                        sx={{ mr: 0 }}
-                    >
-                        <Edit fontSize='small' />
-                    </IconButton>
-                    <IconButton edge="end" onClick={() => {  }}>
-                        <Delete fontSize='small' />
-                    </IconButton>
-                </Box>
-            );
-        } }
-    ];
-        
+    useEffect(() => {
+        loadOrder();
+    }, [contacts, ports, cities, ships]);
+    
     useEffect(() => {
         getPorts();
         getProducts();
@@ -179,27 +167,21 @@ function EditOrder() {
         }
     }
 
-    const getNotes = async () => {
-        if (account && instance && context) {
-            try {
-                if (id !== undefined) {
-                    setLoadNotes(true);
-                    const response = await (context?.service as BackendService<any>).getSingle(protectedResources.apiLisShipments.endPoint+"/Notes/GetByOrderId/"+id);
-                    if (response !== null && response !== undefined && response.status !== 404) {
-                        console.log("Notes : ", response);
-                        setNotes(response.$values);
-                        setLoadNotes(false);
-                    }
-                    else {
-                        setLoadNotes(false);
-                    }
-                }
+    const loadOrder = async () => {
+		if (account && instance && context && contacts !== null && ports !== null && cities !== null && ships !== null && id !== undefined) {
+            setLoad(true);
+            const response = await (context?.service as BackendService<any>).getSingle(protectedResources.apiLisShipments.endPoint+"/Orders/"+id);
+            if (response !== null && response !== undefined) {
+                setOrderData(response);                
+                setOrderNumber(response.orderNumber);
+                // Order data import end
+                setLoad(false);
             }
-            catch (err: any) {
-                setLoadNotes(false);
+            else {
+                setLoad(false);
             }
         }
-    }
+	}
 
     return (
         <div style={{ background: "#fff", borderTopLeftRadius: 20, borderTopRightRadius: 20 }}>
@@ -245,7 +227,7 @@ function EditOrder() {
                     
                     <CustomTabPanel value={tabValue} index={1}>
                         <Grid container spacing={0.75}>
-                            <Grid item xs={7}>
+                            <Grid item xs={6}>
                                 <Accordion expanded sx={{ width: "100%" }}>
                                     <AccordionSummary expandIcon={<ExpandMore />} aria-controls="panel5-content" id="panel5-header">
                                         Files online
@@ -253,27 +235,11 @@ function EditOrder() {
                                     <AccordionDetails></AccordionDetails>
                                 </Accordion>
                             </Grid>
-                            <Grid item xs={5}>
-                                <Accordion expanded sx={{ width: "100%" }}>
-                                    <AccordionSummary expandIcon={<ExpandMore />} aria-controls="panel5-content" id="panel5-header">
-                                        Notes
-                                    </AccordionSummary>
-                                    <AccordionDetails>
-                                        {
-                                            loadNotes !== false && notes !== null ?
-                                            <DataGrid
-                                                rows={notes}
-                                                columns={columnsNotes}
-                                                getRowId={(row: any) => row?.noteId}
-                                                getRowHeight={() => "auto" }
-                                                sx={sizingStyles}
-                                                disableRowSelectionOnClick
-                                                style={{ height: "300px", fontSize: "12px" }}
-                                                pagination
-                                            /> : <Skeleton />
-                                        }
-                                    </AccordionDetails>
-                                </Accordion>
+                            <Grid item xs={6}>
+                                {
+                                    orderData !== null ? 
+                                    <NoteShipments id={id} orderData={orderData} /> : <Skeleton />
+                                }
                             </Grid>
                         </Grid>
                     </CustomTabPanel>

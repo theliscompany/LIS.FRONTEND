@@ -9,6 +9,11 @@ export enum CategoryEnum
     SHIPPING_AGENCY = 11
 }
 
+export let prioritiesOptions: any = [
+  { label: "NORMAL", value: "NORMAL" },
+  { label: "IMPORTANT", value: "IMPORTANT" },
+];
+
 export let orderStatusOptions: any = [
   { label: "ALL", value: -1, color: "default" },
   { label: "OPEN", value: 1, color: "default" },
