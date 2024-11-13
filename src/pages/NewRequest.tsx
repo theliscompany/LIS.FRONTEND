@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Autocomplete, Box, Button, Grid, InputLabel, NativeSelect, Skeleton, TextField, Typography, ListItem, ListItemText, IconButton, DialogActions, DialogContent } from '@mui/material';
+import { Autocomplete, Box, Button, Grid, InputLabel, NativeSelect, Skeleton, TextField, Typography, ListItem, ListItemText, IconButton, DialogActions, DialogContent, FormControl, FormControlLabel, FormLabel, Radio, RadioGroup } from '@mui/material';
 import { MuiTelInput } from 'mui-tel-input';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { inputLabelStyles, BootstrapInput, whiteButtonStyles, BootstrapDialog, BootstrapDialogTitle, buttonCloseStyles, properties } from '../utils/misc/styles';
@@ -36,6 +36,7 @@ function NewRequest(props: any) {
     const [containers, setContainers] = useState<any>(null);
     const [products, setProducts] = useState<any>(null);
     const [hscodes, setHSCodes] = useState<any>(null);
+    const [valueSpecifics, setValueSpecifics] = useState<string>("hscodes");
     
     const [modal7, setModal7] = useState<boolean>(false);
     const [modal10, setModal10] = useState<boolean>(false);
@@ -173,6 +174,11 @@ function NewRequest(props: any) {
     }
 
     function sendQuotationForm() {
+        var tags1 = formState.tags !== null && formState.tags !== undefined && formState.tags.length !== 0 ? formState.tags.map((elm: any) => elm.productName).join(',') : null;
+        var tags2 = formState.tags !== null && formState.tags !== undefined && formState.tags.length !== 0 ? formState.tags.map((elm: any) => elm.hS_Code).join(',') : null;
+        // console.log(tags1);
+        // console.log(tags2);
+        // console.log("Final tags : ", tags1 !== "," ? tags1 : tags2 !== "," ? tags2 : null);
         if (formState.phone !== "" && formState.email !== "" && formState.arrival !== null && formState.departure !== null && formState.containersSelection.length !== 0 && formState.clientNumber !== null) {
             if (validMail(formState.email)) {
                 setLoad(true);
@@ -203,6 +209,7 @@ function NewRequest(props: any) {
                         containers: formState.containersSelection.map((elm: any, i: number) => { return { 
                             id: containers.find((item: any) => item.packageName === elm.container).packageId, 
                             containers: elm.container, 
+
                             quantity: elm.quantity, 
                         } }),
                         units: auxUnits.map((elm: any, i: number) => { return { 
@@ -214,7 +221,9 @@ function NewRequest(props: any) {
                         } }),
                         quantity: Number(quantity),
                         detail: formState.message,
-                        tags: formState.tags.length !== 0 ? formState.tags.map((elm: any) => elm.productName).join(',') : null,
+                        // tags: formState.tags.length !== 0 ? formState.tags.map((elm: any) => elm.productName).join(',') : null,
+                        // tags: tags1 !== "," ? tags1 : tags2 !== "," ? tags2 : null
+                        tags: valueSpecifics !== "hscodes" ? tags1 : tags2
                     }),
                     headers: myHeaders
                 })
@@ -382,66 +391,93 @@ function NewRequest(props: any) {
                         
                         <Grid item xs={12} md={6} mt={1} mb={1}>
                             <InputLabel htmlFor="tags" sx={inputLabelStyles}>{t('specifics')}</InputLabel>
-                            {
-                                hscodes !== null ?
-                                <Autocomplete
-                                    multiple    
-                                    disablePortal
-                                    id="tags"
-                                    // placeholder="Machinery, Household goods, etc"
-                                    options={hscodes}
-                                    getOptionLabel={(option: any) => { 
-                                        if (option !== null && option !== undefined) {
-                                            if (i18n.language === "fr") {
-                                                return option.product_description_Fr;
-                                            }
-                                            else if (i18n.language === "en") {
-                                                return option.product_description_En;
-                                            }
-                                            else {
-                                                return option.product_description_NL;
-                                            }
-                                        }
-                                        return ""; 
+                            <FormControl>
+                                <RadioGroup 
+                                    row name="row-radio-buttons-group"
+                                    value={valueSpecifics} onChange={(e: any) => { 
+                                        setValueSpecifics(e.target.value);
+                                        setFormState({ ...formState, "tags": [] });
                                     }}
-                                    renderInput={(params: any) => <TextField /*multiline rows={1.85}*/ placeholder="Machinery, Household goods, etc" {...params} sx={{ textTransform: "lowercase" }} />}
-                                    // value={formState.tags}
-                                    // onChange={(e: any, value: any) => { handleChangeFormState(value, "tags"); }}
-                                    sx={{ mt: 1 }}
-                                    fullWidth
-                                /> : <Skeleton />
-                            }
+                                >
+                                    <FormControlLabel value="products" control={<Radio />} label="Products" />
+                                    <FormControlLabel value="hscodes" control={<Radio />} label="HS Codes" />
+                                </RadioGroup>
+                            </FormControl>
+                            <Box>
+                                {
+                                    valueSpecifics === "products" ? 
+                                    <Box>
+                                    {
+                                        products !== null ?
+                                        <Autocomplete
+                                            multiple    
+                                            disablePortal
+                                            id="tags"
+                                            options={products}
+                                            getOptionLabel={(option: any) => { 
+                                                if (option !== null && option !== undefined) {
+                                                    return option.productName;
+                                                }
+                                                return ""; 
+                                            }}
+                                            disableCloseOnSelect
+                                            renderInput={(params: any) => <TextField placeholder="Machinery, Household goods, etc" {...params} sx={{ textTransform: "lowercase" }} />}
+                                            value={formState.tags}
+                                            onChange={(e: any, value: any) => { 
+                                                setFormState({ ...formState, "tags": value });
+                                            }}
+                                            sx={{ mt: 1 }}
+                                            fullWidth
+                                        /> : <Skeleton />
+                                    }
+                                    </Box> : 
+                                    <Box>
+                                    {
+                                        hscodes !== null ?
+                                        <Autocomplete
+                                            multiple    
+                                            disablePortal
+                                            id="tags"
+                                            options={hscodes}
+                                            getOptionLabel={(option: any) => { 
+                                                if (option !== null && option !== undefined) {
+                                                    if (i18n.language === "fr") {
+                                                        return option.product_description_Fr;
+                                                    }
+                                                    else if (i18n.language === "en") {
+                                                        return option.product_description_En;
+                                                    }
+                                                    else {
+                                                        return option.product_description_NL;
+                                                    }
+                                                    // return option._4_digit_categories;
+                                                }
+                                                return ""; 
+                                            }}
+                                            disableCloseOnSelect
+                                            renderInput={(params: any) => <TextField placeholder="Live animals, Cereals, etc" {...params} sx={{ textTransform: "lowercase" }} />}
+                                            value={formState.tags}
+                                            onChange={(e: any, value: any) => { 
+                                                setFormState({ ...formState, "tags": value });
+                                            }}
+                                            sx={{ mt: 1 }}
+                                            fullWidth
+                                        /> : <Skeleton />
+                                    }
+                                    </Box>
+                                }
+                            </Box>
                         </Grid>
                         {/* <Grid item xs={12} md={6} mt={1} mb={1}>
                             <InputLabel htmlFor="tags" sx={inputLabelStyles}>{t('specifics')}</InputLabel>
-                            {
-                                products !== null ?
-                                <Autocomplete
-                                    multiple    
-                                    disablePortal
-                                    id="tags"
-                                    // placeholder="Machinery, Household goods, etc"
-                                    options={products}
-                                    getOptionLabel={(option: any) => { 
-                                        if (option !== null && option !== undefined) {
-                                            return option.productName;
-                                        }
-                                        return ""; 
-                                    }}
-                                    renderInput={(params: any) => <TextField placeholder="Machinery, Household goods, etc" {...params} sx={{ textTransform: "lowercase" }} />}
-                                    value={formState.tags}
-                                    onChange={(e: any, value: any) => { handleChangeFormState(value, "tags"); }}
-                                    sx={{ mt: 1 }}
-                                    fullWidth
-                                /> : <Skeleton />
-                            }
+                            
                         </Grid> */}
                         <Grid item xs={12} md={6} mt={.5} sx={{ display: { xs: 'none', md: 'block' } }}>
                             <InputLabel htmlFor="message" sx={inputLabelStyles}>{t('details')}</InputLabel>
                             <BootstrapInput 
                                 id="message" 
                                 type="text" name="message" 
-                                multiline rows={3.5} 
+                                multiline rows={2.75} 
                                 value={formState.message}
                                 onChange={(e: any) => { handleChangeFormState(e.target.value, "message"); }}
                                 fullWidth 

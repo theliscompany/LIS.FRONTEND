@@ -95,11 +95,6 @@ function Haulages() {
     
     const columnsHaulages: GridColDef[] = [
         { field: 'haulierName', headerName: t('haulier'), minWidth: 125, flex: 1.4 },
-        // { field: 'deliveryPort', headerName: t('deliveryPort'), renderCell: (params: GridRenderCellParams) => {
-        //     return (
-        //         <Box sx={{ my: 2 }}>{params.row.loadingPort}</Box>
-        //     );
-        // }, minWidth: 100, flex: 1 },
         { field: 'unitTariff', headerName: t('unitTariff'), valueGetter: (params: GridValueGetterParams) => `${params.row.unitTariff || ''} ${t(params.row.currency)}`, renderHeader: (params: GridColumnHeaderParams) => (<>Haulage <br />per unit</>), minWidth: 100, flex: 0.75 },
         { field: 'freeTime', headerName: t('freeTime'), valueFormatter: (params: GridValueFormatterParams) => `${params.value || ''} ${t('hours')}`, minWidth: 100, flex: 0.75 },
         { field: 'overtimeTariff', headerName: t('overtimeTariff'), valueGetter: (params: GridValueGetterParams) => `${params.row.overtimeTariff || ''} ${t(params.row.currency)} / ${t('hour')}`, renderHeader: (params: GridColumnHeaderParams) => (<>Overtime <br />tariff</>), minWidth: 100, flex: 1 },
@@ -275,7 +270,6 @@ function Haulages() {
             else {
                 setLoad(false);
             }
-            // console.log(response);
         }
     }
 
@@ -471,13 +465,8 @@ function Haulages() {
                     </Grid> : <Skeleton sx={{ mx: 5, mt: 3 }} />
                 }
             </Box>
-            <BootstrapDialog
-                onClose={() => setModal(false)}
-                aria-labelledby="custom-dialog-title"
-                open={modal}
-                maxWidth="sm"
-                fullWidth
-            >
+            
+            <BootstrapDialog onClose={() => setModal(false)} open={modal} maxWidth="sm" fullWidth>
                 <BootstrapDialogTitle id="custom-dialog-title" onClose={() => setModal(false)}>
                     <b>{t('deleteRowHaulage')}</b>
                 </BootstrapDialogTitle>
@@ -487,13 +476,8 @@ function Haulages() {
                     <Button variant="contained" onClick={() => setModal(false)} sx={buttonCloseStyles}>{t('close')}</Button>
                 </DialogActions>
             </BootstrapDialog>
-            <BootstrapDialog
-                onClose={() => setModal2(false)}
-                aria-labelledby="custom-dialog-title2"
-                open={modal2}
-                maxWidth="lg"
-                fullWidth
-            >
+            
+            <BootstrapDialog onClose={() => setModal2(false)} open={modal2} maxWidth="lg" fullWidth>
                 <BootstrapDialogTitle id="custom-dialog-title2" onClose={() => setModal2(false)}>
                     <b>{currentEditId === "" ? t('createRowHaulage') : t('editRowHaulage')}</b>
                 </BootstrapDialogTitle>
@@ -505,13 +489,6 @@ function Haulages() {
                                 <Typography sx={{ fontSize: 18, mb: 1 }}><b>Haulage price information</b></Typography>
                             </Grid>
                             <Grid item xs={12} md={4}>
-                                {/* <Button 
-                                    variant="contained" color="inherit" 
-                                    sx={{ float: "right", backgroundColor: "#fff", textTransform: "none" }} 
-                                    onClick={() => { setModal8(true); }}
-                                >
-                                    {t('newService')}
-                                </Button> */}
                                 <Button 
                                     variant="contained" color="inherit" 
                                     sx={{ float: "right", backgroundColor: "#fff", textTransform: "none", ml: 1 }} 
@@ -670,13 +647,7 @@ function Haulages() {
             </BootstrapDialog>
 
             {/* Price request haulage  */}
-            <BootstrapDialog
-                onClose={() => setModal5(false)}
-                aria-labelledby="custom-dialog-title5"
-                open={modal5}
-                maxWidth="lg"
-                fullWidth
-            >
+            <BootstrapDialog onClose={() => setModal5(false)} open={modal5} maxWidth="lg" fullWidth>
                 {
                     context ? 
                     <RequestPriceHaulage
@@ -690,13 +661,7 @@ function Haulages() {
             </BootstrapDialog>
 
             {/* Add a new contact */}
-            <BootstrapDialog
-                onClose={() => setModal7(false)}
-                aria-labelledby="custom-dialog-title7"
-                open={modal7}
-                maxWidth="md"
-                fullWidth
-            >
+            <BootstrapDialog onClose={() => setModal7(false)} open={modal7} maxWidth="md" fullWidth>
                 <NewContact 
                     categories={["SUPPLIERS"]}
                     closeModal={() => setModal7(false)}
@@ -705,13 +670,7 @@ function Haulages() {
             </BootstrapDialog>
 
             {/* Create new service */}
-            <BootstrapDialog
-                onClose={() => setModal8(false)}
-                aria-labelledby="custom-dialog-title8"
-                open={modal8}
-                maxWidth="md"
-                fullWidth
-            >
+            <BootstrapDialog onClose={() => setModal8(false)} open={modal8} maxWidth="md" fullWidth>
                 <NewService 
                     closeModal={() => setModal8(false)}
                     callBack={getServices}
@@ -719,13 +678,7 @@ function Haulages() {
             </BootstrapDialog>
 
             {/* Create new port */}
-            <BootstrapDialog
-                onClose={() => setModal9(false)}
-                aria-labelledby="custom-dialog-title9"
-                open={modal9}
-                maxWidth="md"
-                fullWidth
-            >
+            <BootstrapDialog onClose={() => setModal9(false)} open={modal9} maxWidth="md" fullWidth>
                 <NewPort 
                     closeModal={() => setModal9(false)}
                     callBack={getPorts}

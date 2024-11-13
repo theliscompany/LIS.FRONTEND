@@ -9,6 +9,28 @@ export enum CategoryEnum
     SHIPPING_AGENCY = 11
 }
 
+export let prioritiesOptions: any = [
+  { label: "NORMAL", value: "NORMAL" },
+  { label: "IMPORTANT", value: "IMPORTANT" },
+];
+
+export let orderStatusOptions: any = [
+  { label: "ALL", value: -1, color: "default" },
+  { label: "OPEN", value: 1, color: "default" },
+  { label: "COMPLETED", value: 2, color: "info" },
+  { label: "VALIDATED", value: 3, color: "primary" },
+  { label: "CLOSED", value: 4, color: "success" },
+  { label: "CANCELLED", value: 5, color: "warning" },
+  { label: "DOCS-SENT", value: 6, color: "secondary" },
+  { label: "PAID", value: 7, color: "success" },
+];
+
+export let orderExportOptions: any = [
+  { label: "ALL", value: -1 },
+  { label: "EXPORT", value: true },
+  { label: "IMPORT", value: false },
+];
+
 export let incotermValues = ["FOB", "EXW", "FCA Warehouse", "CFR"];
 
 export let incotermDestinationValues = ["CFR", "Free On Truck destination", "FOB", "FCA", "FAS", "CPT", "CIP", "DPU", "DAP", "DDP"];

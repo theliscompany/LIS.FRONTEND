@@ -1,4 +1,4 @@
-import { Grid, Accordion, AccordionSummary, Typography, AccordionDetails, InputLabel, Autocomplete, TextField, Skeleton, Button, ListItem, IconButton, ListItemText, NativeSelect } from '@mui/material';
+import { Grid, Accordion, AccordionSummary, Typography, AccordionDetails, InputLabel, Autocomplete, TextField, Skeleton, Button, ListItem, IconButton, ListItemText, NativeSelect, Box } from '@mui/material';
 // import { t } from 'i18next';
 import { MuiTelInput } from 'mui-tel-input';
 import { inputLabelStyles, BootstrapInput, whiteButtonStyles, properties } from '../../utils/misc/styles';
@@ -13,7 +13,7 @@ import { useAccount, useMsal } from '@azure/msal-react';
 import { useAuthorizedBackendApi } from '../../api/api';
 
 function RequestForm(props: any) {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
     
     const { instance, accounts } = useMsal();
 	const account = useAccount(accounts[0] || {});
@@ -101,7 +101,7 @@ function RequestForm(props: any) {
                             <InputLabel htmlFor="request-email" sx={inputLabelStyles}>{t('emailAddress')}</InputLabel>
                             <BootstrapInput id="request-email" type="email" value={props.email} onChange={(e: React.ChangeEvent<HTMLInputElement>) => props.setEmail(e.target.value)} fullWidth disabled={!props.canEdit} />
                         </Grid>
-                        <Grid item xs={12} md={6}>
+                        {/* <Grid item xs={12} md={6}>
                             <InputLabel htmlFor="tags" sx={inputLabelStyles}>{t('specifics')}</InputLabel>
                             {
                                 props.products !== null ?
@@ -125,6 +125,83 @@ function RequestForm(props: any) {
                                     disabled={!props.canEdit}
                                 /> : <Skeleton />
                             }
+                        </Grid> */}
+                        <Grid item xs={12} md={6}>
+                            <InputLabel htmlFor="tags" sx={inputLabelStyles}>{t('specifics')}</InputLabel>
+                            {/* <FormControl>
+                                <RadioGroup 
+                                    row name="row-radio-buttons-group"
+                                    value={valueSpecifics} onChange={(e: any) => { 
+                                        setValueSpecifics(e.target.value);
+                                        setFormState({ ...formState, "tags": [] });
+                                    }}
+                                >
+                                    <FormControlLabel value="products" control={<Radio />} label="Products" />
+                                    <FormControlLabel value="hscodes" control={<Radio />} label="HS Codes" />
+                                </RadioGroup>
+                            </FormControl> */}
+                            <Box>
+                                {
+                                    props.valueSpecifics === "products" ? 
+                                    <Box>
+                                    {
+                                        props.products !== undefined && props.products !== null ?
+                                        <Autocomplete
+                                            multiple    
+                                            disablePortal
+                                            id="tags"
+                                            options={props.products}
+                                            getOptionLabel={(option: any) => { 
+                                                if (option !== null && option !== undefined) {
+                                                    return option.productName;
+                                                }
+                                                return ""; 
+                                            }}
+                                            disableCloseOnSelect
+                                            renderInput={(params: any) => <TextField placeholder="Machinery, Household goods, etc" {...params} sx={{ textTransform: "lowercase" }} />}
+                                            value={props.tags}
+                                            onChange={(e: any, value: any) => { props.setTags(value); }}
+                                            sx={{ mt: 1 }}
+                                            fullWidth
+                                            disabled={!props.canEdit}
+                                        /> : <Skeleton />
+                                    }
+                                    </Box> : 
+                                    <Box>
+                                    {
+                                        props.hscodes !== undefined && props.hscodes !== null ?
+                                        <Autocomplete
+                                            multiple    
+                                            disablePortal
+                                            id="tags"
+                                            options={props.hscodes}
+                                            getOptionLabel={(option: any) => { 
+                                                if (option !== null && option !== undefined) {
+                                                    if (i18n.language === "fr") {
+                                                        return option.product_description_Fr;
+                                                    }
+                                                    else if (i18n.language === "en") {
+                                                        return option.product_description_En;
+                                                    }
+                                                    else {
+                                                        return option.product_description_NL;
+                                                    }
+                                                    // return option._4_digit_categories;
+                                                }
+                                                return ""; 
+                                            }}
+                                            disableCloseOnSelect
+                                            renderInput={(params: any) => <TextField placeholder="Live animals, Cereals, etc" {...params} sx={{ textTransform: "lowercase" }} />}
+                                            value={props.tags}
+                                            onChange={(e: any, value: any) => { props.setTags(value); }}
+                                            sx={{ mt: 1 }}
+                                            fullWidth
+                                            disabled={!props.canEdit}
+                                        /> : <Skeleton />
+                                    }
+                                    </Box>
+                                }
+                            </Box>
                         </Grid>
                         
                         <Grid item xs={9} container direction="column" alignItems="flex-start">

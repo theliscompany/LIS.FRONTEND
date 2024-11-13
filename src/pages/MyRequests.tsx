@@ -19,6 +19,7 @@ import { useTranslation } from 'react-i18next';
 import RequestViewItem from '../components/requestsPage/RequestViewItem';
 import AutocompleteSearch from '../components/shared/AutocompleteSearch';
 import SearchZone from '../components/requestsPage/SearchZone';
+import { useSelector } from 'react-redux';
 
 function createGetRequestUrl(variable1: string, variable2: string, variable3: string, variable4: string, variable5: Dayjs|null, variable6: Dayjs|null, variable7: Dayjs|null, variable8: Dayjs|null, assigneeId: number) {
     let url = protectedResources.apiLisQuotes.endPoint+'/Request?';
@@ -57,6 +58,7 @@ function createGetRequestUrl(variable1: string, variable2: string, variable3: st
 function MyRequests() {
     const [notifications, setNotifications] = useState<any>(null);
     const [load, setLoad] = useState<boolean>(true);
+    const [assignees, setAssignees] = useState<any>(null);
     const [currentUser, setCurrentUser] = useState<any>();
     const [status, setStatus] = useState<string>("");
     const [packingType, setPackingType] = useState<string>("");
@@ -72,6 +74,8 @@ function MyRequests() {
     
     const context = useAuthorizedBackendApi();
     
+    var ourAssignees: any = useSelector((state: any) => state.masterdata.assignees);
+
     const handleChangePackingType = (event: { target: { value: string } }) => {
         setPackingType(event.target.value);
     };
@@ -86,26 +90,68 @@ function MyRequests() {
         getAssignees();
     }, [instance, account]);
 
+    useEffect(() => {
+        if (assignees !== null && assignees !== undefined) {
+            loadRequests(assignees)
+        }
+    }, [assignees]);
+
     const getAssignees = async () => {
         if (account && instance && context) {
-            const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisQuotes.endPoint+"/Assignee", context.tokenLogin);
-            if (response !== null && response.code !== undefined) {
-                if (response.code === 200) {
-                    setCurrentUser(response.data.find((elm: any) => elm.email === account?.username));
-                    // Then I can load requests
-                    loadRequests(response.data);
-                }
-                else {
-                    setLoad(false);
-                }
+            if (ourAssignees !== undefined) {
+                console.log(ourAssignees);
+                setAssignees(ourAssignees.data);
+                setLoad(false);
             }
+            else {
+                try {
+                    setLoad(true);
+                    const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisQuotes.endPoint+"/Assignee", context.tokenLogin);
+                    if (response !== null && response.code !== undefined) {
+                        if (response.code === 200) {
+                            setAssignees(response.data);
+                            // loadRequests(response.data);
+                            setLoad(false);
+                        }
+                        else {
+                            setLoad(false);
+                        }
+                    }
+                    else {
+                        setLoad(false);
+                    }   
+                }
+                catch (err: any) {
+                    setLoad(false);
+                    console.log(err);
+                }
+            }    
         }
     }
+    
+    // const getAssignees = async () => {
+    //     if (account && instance && context) {
+    //         const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisQuotes.endPoint+"/Assignee", context.tokenLogin);
+    //         if (response !== null && response.code !== undefined) {
+    //             if (response.code === 200) {
+    //                 setCurrentUser(response.data.find((elm: any) => elm.email === account?.username));
+    //                 // Then I can load requests
+    //                 loadRequests(response.data);
+    //             }
+    //             else {
+    //                 setLoad(false);
+    //             }
+    //         }
+    //     }
+    // }
 
     const loadRequests = async (assigneesList: any) => {
         if (account && instance && context) {
             //setLoad(true);
             var auxAssignee = assigneesList.find((elm: any) => elm.email === account?.username);
+            console.log("Acc", account);
+            console.log("Auxlist", assigneesList);
+            console.log("Auxass", auxAssignee);
             if (auxAssignee !== undefined) {
                 const response: RequestResponseDto = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisQuotes.endPoint+"/Request?AssigneeId="+auxAssignee.id, context.tokenLogin);
                 if (response !== null && response.code !== undefined && response.data !== undefined) {
@@ -190,7 +236,7 @@ function MyRequests() {
                         <List sx={{ mt: 3  }}>
                             {
                                 notifications.map((item: any, i: number) => {
-                                    return (<RequestViewItem item={item} i={i} />)
+                                    return (<RequestViewItem key={"dsd"+i} item={item} i={i} />)
                                 })
                             }
                         </List> : <Alert severity="warning" sx={{ mx: 5, mt: 3 }}>{t('noResults')}</Alert>

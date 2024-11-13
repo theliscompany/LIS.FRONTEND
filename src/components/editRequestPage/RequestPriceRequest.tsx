@@ -17,8 +17,7 @@ import StarterKit from '@tiptap/starter-kit';
 import { RichTextEditor, MenuControlsContainer, MenuSelectHeading, MenuDivider, MenuButtonBold, MenuButtonItalic, MenuButtonStrikethrough, MenuButtonOrderedList, MenuButtonBulletedList, MenuSelectTextAlign, MenuButtonEditLink, MenuButtonHorizontalRule, MenuButtonUndo, MenuButtonRedo, type RichTextEditorRef, } from 'mui-tiptap';
 import './../../App.css';
 import { Anchor } from '@mui/icons-material';
-import { AuthenticationResult } from '@azure/msal-browser';
-import { getAccessToken } from '../../utils/functions';
+import { validateObjectHSCODEFormat } from '../../utils/functions';
 
 function createGetRequestUrl(variable1: number, variable2: number) {
     let url = protectedResources.apiLisPricing.endPoint+"/SeaFreight/GetSeaFreights?";
@@ -43,7 +42,7 @@ function displayContainers(value: any) {
 const defaultTemplate = "658e880927587b09811c13cb";
 
 function RequestPriceRequest(props: any) {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
     
     const [subject, setSubject] = useState<string>(props.portLoading !== null && props.portDischarge !== null ? props.portLoading.portName+","+props.portLoading.country+" - "+props.portDischarge.portName+","+props.portDischarge.country+" / "+t("rateRequest") : "");
     const [recipients, setRecipients] = useState<any>([]);
@@ -51,15 +50,12 @@ function RequestPriceRequest(props: any) {
     const [portLoading, setPortLoading] = useState<any>(props.portLoading);
     const [portDischarge, setPortDischarge] = useState<any>(props.portDischarge);
     const [estimatedTimeDeparture, setEstimatedTimeDeparture] = useState<Dayjs | null>(null);
-    
     const [containerType, setContainerType] = useState<string>("20' Dry");
     const [quantity, setQuantity] = useState<number>(1);
     const [containersSelection, setContainersSelection] = useState<any>(props.containersSelection);
-
-    const [carriersData, setCarriersData] = useState<any>(null);
-    
+    const [valueSpecifics, setValueSpecifics] = useState<string>("");
+    const [carriersData, setCarriersData] = useState<any>(null);    
     const [templateBase, setTemplateBase] = useState<string>("");
-
     const [templates, setTemplates] = useState<any>([]);
     const [loadTemplates, setLoadTemplates] = useState<boolean>(false);
     const [selectedTemplate, setSelectedTemplate] = useState<string>(defaultTemplate);
@@ -69,11 +65,8 @@ function RequestPriceRequest(props: any) {
     const [loadTemplate, setLoadTemplate] = useState<boolean>(false);
 
     const rteRef = useRef<RichTextEditorRef>(null);
-    
-
     const { instance, accounts } = useMsal();
     const account = useAccount(accounts[0] || {});
-
     const context = useAuthorizedBackendApi();
     
     const postEmail = async(from: string, to: string, subject: string, htmlContent: string) => {
@@ -136,12 +129,11 @@ function RequestPriceRequest(props: any) {
 
     function getAllCarriers(data: any) {
         if (!Array.isArray(data)) {
-          // Handle invalid data
-          return [];
+            // Handle invalid data
+            return [];
         }
-      
+
         const carriersSet = new Set();
-      
         data.forEach((route) => {
             if (route.suppliers && Array.isArray(route.suppliers)) {
                 route.suppliers.forEach((supplier: any) => {
@@ -159,8 +151,6 @@ function RequestPriceRequest(props: any) {
 
     const getClients = async () => {
         if (account && instance && context) {
-            // const token = await getAccessToken(instance, crmRequest, account);
-            
             try {
                 const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisCrm.endPoint+"/Contact/GetContacts?category=5&pageSize=1000", context.tokenCrm);
                 if (response !== null && response !== undefined) {
@@ -236,7 +226,18 @@ function RequestPriceRequest(props: any) {
     function getDefaultContent(template: any) {
         var departurePort = portLoading !== null ? portLoading.portName+', '+portLoading.country.toUpperCase() : "";
         var destinationPort = portDischarge !== null ? portDischarge.portName+', '+portDischarge.country.toUpperCase() : "";
-        var commodities:any = commoditiesArr.map((elm: any) => elm.productName).join(',');
+        var commodities:any = valueSpecifics === "products" ? commoditiesArr.map((elm: any) => elm.productName).join(',') : 
+        commoditiesArr.map((elm: any) => {
+            if (i18n.language === "fr") {
+                return elm.product_description_Fr;
+            }
+            else if (i18n.language === "en") {
+                return elm.product_description_En;
+            }
+            else {
+                return elm.product_description_NL;
+            }
+        }).join('; ');
         var etd = estimatedTimeDeparture !== null ? estimatedTimeDeparture.toDate().toLocaleDateString().slice(0,10) : "";
         var containersQuantities = displayContainers(containersSelection);
 
@@ -251,13 +252,36 @@ function RequestPriceRequest(props: any) {
     useEffect(() => {
         var departurePort = portLoading !== null ? portLoading.portName : "";
         var destinationPort = portDischarge !== null ? portDischarge.portName : "";
-        var commodities:any = commoditiesArr.map((elm: any) => elm.productName).join(',');
+        var commodities:any = valueSpecifics === "products" ? commoditiesArr.map((elm: any) => elm.productName).join(',') : 
+        commoditiesArr.map((elm: any) => {
+            if (i18n.language === "fr") {
+                return elm.product_description_Fr;
+            }
+            else if (i18n.language === "en") {
+                return elm.product_description_En;
+            }
+            else {
+                return elm.product_description_NL;
+            }
+        }).join('; ');
         var etd = estimatedTimeDeparture !== null ? estimatedTimeDeparture.toDate().toLocaleDateString().slice(0,10) : "";
         var containersQuantities = displayContainers(containersSelection);
 
         const variables = { departurePort, destinationPort, commodities, etd, containersQuantities };
         rteRef.current?.editor?.commands.setContent(generateEmailContent(templateBase, variables));
     }, [commoditiesArr, portLoading, portDischarge, containersSelection, estimatedTimeDeparture]);
+
+    useEffect(() => {
+        console.log("Commm: ", props.commodities);
+        if (props.commodities !== null && props.commodities !== undefined && props.commodities.length > 0) {
+            if (validateObjectHSCODEFormat(props.commodities[0])) {
+                setValueSpecifics("hscodes");
+            }
+            else {
+                setValueSpecifics("products");
+            }    
+        } 
+    }, []);
 
     useEffect(() => {
         getClients();
@@ -317,7 +341,7 @@ function RequestPriceRequest(props: any) {
                                     </Grid>
                                     <Grid item xs={12} mt={0.5}>
                                         <InputLabel htmlFor="commodities" sx={inputLabelStyles}>{t('commodities')}</InputLabel>
-                                        {
+                                        {/* {
                                             props.products !== null ?
                                             <Autocomplete
                                                 multiple    
@@ -337,6 +361,64 @@ function RequestPriceRequest(props: any) {
                                                 onChange={(e: any, value: any) => { setCommoditiesArr(value); }}
                                                 fullWidth
                                             /> : <Skeleton />
+                                        } */}
+                                        {
+                                            valueSpecifics === "products" ? 
+                                            <Box>
+                                            {
+                                                props.products !== null ?
+                                                <Autocomplete
+                                                    multiple    
+                                                    disablePortal
+                                                    id="tags"
+                                                    options={props.products}
+                                                    getOptionLabel={(option: any) => { 
+                                                        if (option !== null && option !== undefined) {
+                                                            return option.productName;
+                                                        }
+                                                        return ""; 
+                                                    }}
+                                                    disableCloseOnSelect
+                                                    renderInput={(params: any) => <TextField placeholder="Machinery, Household goods, etc" {...params} sx={{ textTransform: "lowercase" }} />}
+                                                    value={commoditiesArr}
+                                                    onChange={(e: any, value: any) => { setCommoditiesArr(value); }}
+                                                    sx={{ mt: 1 }}
+                                                    fullWidth
+                                                /> : <Skeleton />
+                                            }
+                                            </Box> : 
+                                            <Box>
+                                            {
+                                                props.hscodes !== null ?
+                                                <Autocomplete
+                                                    multiple    
+                                                    disablePortal
+                                                    id="tags"
+                                                    options={props.hscodes}
+                                                    getOptionLabel={(option: any) => { 
+                                                        if (option !== null && option !== undefined) {
+                                                            if (i18n.language === "fr") {
+                                                                return option.product_description_Fr;
+                                                            }
+                                                            else if (i18n.language === "en") {
+                                                                return option.product_description_En;
+                                                            }
+                                                            else {
+                                                                return option.product_description_NL;
+                                                            }
+                                                            // return option._4_digit_categories;
+                                                        }
+                                                        return ""; 
+                                                    }}
+                                                    disableCloseOnSelect
+                                                    renderInput={(params: any) => <TextField placeholder="Live animals, Cereals, etc" {...params} sx={{ textTransform: "lowercase" }} />}
+                                                    value={commoditiesArr}
+                                                    onChange={(e: any, value: any) => { setCommoditiesArr(value); }}
+                                                    sx={{ mt: 1 }}
+                                                    fullWidth
+                                                /> : <Skeleton />
+                                            }
+                                            </Box>
                                         }
                                     </Grid>
                                     <Grid item xs={12} md={6} mt={0.5}>

@@ -519,7 +519,6 @@ function CompareOptions(props: any) {
                 </Grid>
             </DialogContent>
             <DialogActions>
-                {/* <Button variant="contained" color="primary" className="mr-3" onClick={() => {  }} sx={{ textTransform: "none" }}>Compare</Button> */}
                 <Button variant="contained" onClick={props.closeModal} sx={buttonCloseStyles}>{t('close')}</Button>
             </DialogActions>
         </>

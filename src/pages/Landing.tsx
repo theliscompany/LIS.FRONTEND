@@ -20,6 +20,22 @@ import { MailData } from '../utils/models/models';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
+var footer = `
+<div style="font-family: Verdana; padding-top: 35px;">
+    <div>Omnifreight System</div>
+    <div style="margin-top: 5px;"><a target="_blank" href="www.omnifreight.eu">www.omnifreight.eu</a></div>
+    <div style="padding-bottom: 10px;"><a target="_blank" href="http://www.facebook.com/omnifreight">http://www.facebook.com/omnifreight</a></div>
+    <div>Italiëlei 211</div>
+    <div>2000 Antwerpen</div>
+    <div>Belgium</div>
+    <div>E-mail: transport@omnifreight.eu</div>
+    <div>Tel +32.3.295.38.82</div>
+    <div>Fax +32.3.295.38.77</div>
+    <div>Whatsapp +32.494.40.24.25</div>
+    <img src="http://www.omnifreight.eu/Images/omnifreight_logo.jpg" style="max-width: 200px;">
+</div>
+`;
+
 const Landing = (props: any) => {
     const isAuthenticated = useIsAuthenticated();
     const { lang } = useParams();
@@ -121,7 +137,7 @@ const Landing = (props: any) => {
         try {
             const response = await fetch(protectedResources.apiLisTransport.endPoint+"/Product?pageSize=500");
             if (!response.ok) {
-              throw new Error('Network response was not ok');
+                throw new Error('Network response was not ok');
             }
             const data = await response.json();
             setProducts(data);
@@ -140,62 +156,61 @@ const Landing = (props: any) => {
         console.log(data);
         if (data?.status === 200) {
             enqueueSnackbar(t('messageSuccessSent'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
+            setLoad(false);
         }
         else {
             enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+            setLoad(false);
         }
     }
 
-    // async function testEmail() {
-    //     var footer = `
-    //     <body style="font-family: Verdana, sans-serif; font-size: 14px; color: #333;">
-    //         <div style="background-color: #f2f2f2; padding: 20px;">
-    //             <h1 style="color: #000; margin-bottom: 20px;">New request for quote</h1>
-    //             <p style="margin-bottom: 20px;">You have received a new request for quote in LIS Quotes.</p>
-    //             <a href="https://lis-quotes-ui-dev.azurewebsites.net/login" style="display: inline-block; background-color: #008089; color: #fff; padding: 10px 20px; text-decoration: none;">Login to LIS Quotes</a>
-    //             <p style="margin-top: 20px;">Please, click the button up to login to LIS Quotes and manage this quote.</p>
-    //             <div style="font-family: Verdana; padding-top: 60px;">
-    //                 <div><a target="_blank" href="www.omnifreight.eu">www.omnifreight.eu</a></div>
-    //                 <div style="padding-bottom: 10px;"><a target="_blank" href="http://www.facebook.com/omnifreight">http://www.facebook.com/omnifreight</a></div>
-    //                 <div>Italiëlei 211</div>
-    //                 <div>2000 Antwerpen</div>
-    //                 <div>Belgium</div>
-    //                 <div>E-mail: transport@omnifreight.eu</div>
-    //                 <div>Tel +32.3.295.38.82</div>
-    //                 <div>Fax +32.3.295.38.77</div>
-    //                 <div>Whatsapp +32.494.40.24.25</div>
-    //                 <img src="http://www.omnifreight.eu/Images/omnifreight_logo.jpg" style="max-width: 200px;">
-    //             </div>
-    //         </div>
-    //     </body>
-    //     `;
-    //     postEmail("cyrille.penaye@omnifreight.eu", "penayecyrille@gmail.com", mailSubject, mailContent+footer);
-    // }
-      
-    function sendContactFormRedirect() {
+    async function sendEmail(from: string, to: string, subject: string, htmlContent: string) {
+		const formData = new FormData();
+		// Append the other email data to the FormData object
+		formData.append('From', from);
+		formData.append('To', to);
+		formData.append('Subject', subject);
+		formData.append('HtmlContent', htmlContent);
+		
+		// // Send the email with fetch
+		fetch(protectedResources.apiLisQuotes.endPoint+'/Email', {
+			method: 'POST',
+			headers: {
+				'accept': '*/*',
+				// 'Content-Type': 'multipart/form-data'
+			},
+			body: formData
+		})
+		.then((response) => response.json())
+		.then((data) => {
+            enqueueSnackbar(t('messageSuccessSent'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
+            setLoad(false);
+            console.log(data);
+        })
+		.catch((error) => {
+            enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+            setLoad(false);
+            console.error(error);
+        });
+	}
+    
+    function sendQuotationForm() {
         if (captcha !== null) {
-            if (phone !== "" || email !== "") {
+            if ((phone !== "" && arrival !== null && departure !== null) || (email !== "" && arrival !== null && departure !== null)) {
                 if (email === "" || (email !== "" && validMail(email))) {
                     setLoad(true);
-                    var myHeaders = new Headers();
-                    myHeaders.append("Accept", "*/");
-                    myHeaders.append("Content-Type", "application/json");
-                    fetch("https://omnifreightinfo.azurewebsites.net/api/QuotationBasic", {
-                        method: "POST",
-                        body: JSON.stringify({ phoneNumber: phone, email: email, goodsType: "" }),
-                        headers: myHeaders
-                    }).then((data: any) => {
-                        setPhone("");
-                        setEmail("")
-                        setLoad(false);
-                        // download("/assets/omnifreight_flyer.pdf", "Flyer Omnifreight.pdf");
-                        // Here i should send the email to the file
-                        var content = "<body style=\"font-family: Arial, sans-serif; font-size: 14px; color: #333;\">\r\n\t<div style=\"background-color: #f2f2f2; padding: 20px;\">\r\n\t\t<h1 style=\"color: #000; margin-bottom: 20px;\">Download the flyer</h1>\r\n\t\t<p style=\"margin-bottom: 20px;\">We have sent you the flyer.</p>\r\n\t\t<a href=\"https://lis-quotes-ui-dev.azurewebsites.net/assets/omnifreight_flyer.pdf\" style=\"display: inline-block; background-color: #008089; color: #fff; padding: 10px 20px; text-decoration: none;\">Download</a>\r\n\t\t<p style=\"margin-top: 20px;\">Please, click the button up to download the document.</p>\r\n\t</div>\r\n</body>";
-                        postEmail("cyrille.penaye@omnifreight.eu", email, "You received the flyer", content);
-                    }).catch(error => { 
-                        setLoad(false);
-                        enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });    
-                    });
+                    var emailContent = `
+                    <div style="font-family: Verdana;">
+                    <div>Un nouveau client vous contacte depuis le site web. Ses informations sont les suivantes : </div>
+                    <div>Email : ${email}</div>
+                    <div>Whatsapp : ${phone}</div>
+                    <div>Lieu de chargement : ${departure?.city.toUpperCase()}</div>
+                    <div>Lieu de déchargement : ${arrival?.city.toUpperCase()}</div>
+                    <div>Type de cargaison et quantité : ${packingType} X ${quantity}</div>
+                    <div>Détails : ${message}</div>
+                    </div>
+                    ` + footer;
+                    sendEmail("pricing@omnifreight.eu", "pricing@omnifreight.eu", "Nouvelle demande du site web", emailContent);        
                 }
                 else {
                     enqueueSnackbar(t('emailNotValid'), { variant: "info", anchorOrigin: { horizontal: "right", vertical: "top"} });
@@ -214,27 +229,17 @@ const Landing = (props: any) => {
         if (captcha !== null) {
             if (phone !== "" || email !== "") {
                 if (email === "" || (email !== "" && validMail(email))) {
-                    var msg = "I want infos about : " + subjects.toString();
-                    console.log(msg);
                     setLoad(true);
-                    var myHeaders = new Headers();
-                    myHeaders.append("Accept", "*/");
-                    myHeaders.append("Content-Type", "application/json");
-                    fetch("https://omnifreightinfo.azurewebsites.net/api/QuotationBasic", {
-                        method: "POST",
-                        body: JSON.stringify({ phoneNumber: phone, email: email, goodsType: msg+message }),
-                        headers: myHeaders
-                    }).then((data: any) => {
-                        setLoad(false);
-                        setPhone("");
-                        setEmail("");
-                        setSubjects([]);
-                        setMessage("");
-                        enqueueSnackbar(t('informationReceived'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
-                    }).catch(error => { 
-                        setLoad(false);
-                        enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
-                    });        
+                    var emailContent = `
+                    <div style="font-family: Verdana;">
+                    <div>Un nouveau client souhaite contacter le directeur. Ses informations sont les suivantes : </div>
+                    <div>Email : ${email}</div>
+                    <div>Whatsapp : ${phone}</div>
+                    <div>Sujets d'intérêts : ${subjects.toString()}</div>
+                    <div>Détails : ${message}</div>
+                    </div>
+                    ` + footer;
+                    sendEmail("pricing@omnifreight.eu", "pricing@omnifreight.eu", "Nouveau contact du site web", emailContent);        
                 }
                 else {
                     enqueueSnackbar(t('emailNotValid'), { variant: "info", anchorOrigin: { horizontal: "right", vertical: "top"} });
@@ -249,56 +254,30 @@ const Landing = (props: any) => {
         }
     }
 
-    function sendQuotationForm() {
+    function sendContactFormRedirect() {
         if (captcha !== null) {
-                if ((phone !== "" && arrival !== null && departure !== null) || (email !== "" && arrival !== null && departure !== null)) {
-                    if (email === "" || (email !== "" && validMail(email))) {
-                        setLoad(true);
-                        var myHeaders = new Headers();
-                        myHeaders.append('Accept', '');
-                        myHeaders.append("Content-Type", "application/json");
-                        fetch(protectedResources.apiLisQuotes.endPoint+"/Request", {
-                            method: "POST",
-                            body: JSON.stringify({ 
-                                Whatsapp: phone, 
-                                Email: email !== "" ? email : "emailexample@gmail.com", 
-                                Departure: departure !== null && departure !== undefined ? departure.city.toUpperCase()+', '+departure.country+', '+departure.latitude+', '+departure.longitude : "",
-                                Arrival: arrival !== null && arrival !== undefined ? arrival.city.toUpperCase()+', '+arrival.country+', '+arrival.latitude+', '+arrival.longitude : "",
-                                CargoType: 0,
-                                PackingType: packingType,
-                                Quantity: quantity, 
-                                Detail: message, 
-                                Tags: tags.length !== 0 ? tags.map((elm: any) => elm.productName).join(',') : null 
-                            }),
-                            headers: myHeaders
-                        })
-                        .then((response: any) => response.json())
-                        .then((data: any) => {
-                            setLoad(false);
-                            if (data.code === 201) {
-                                enqueueSnackbar(t('requestSuccessSent'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
-                                setPhone("");
-                                setEmail("");
-                                setMessage("");
-                                setModal(false);
-                                setModal4(true);
-                            }
-                            else {
-                                enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
-                            }
-                        })
-                        .catch(error => { 
-                            setLoad(false);
-                            enqueueSnackbar(t('errorHappenedRequest'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
-                        });        
-                    }
-                    else {
-                        enqueueSnackbar(t('emailNotValid'), { variant: "info", anchorOrigin: { horizontal: "right", vertical: "top"} });
-                    }
+            if (phone !== "" || email !== "") {
+                if (email === "" || (email !== "" && validMail(email))) {
+                    setLoad(true);
+                    var emailContent = `
+                    <div style="font-family: Verdana;">
+                    <div>Un nouveau prospect vient de télécharger la brochure sur le site web. Ses informations sont les suivantes : </div>
+                    <div>Email : ${email}</div>
+                    <div>Whatsapp : ${phone}</div>
+                    </div>
+                    ` + footer;
+                    // Here i should send the email to the file
+                    var content = "<body style=\"font-family: Arial, sans-serif; font-size: 14px; color: #333;\">\r\n\t<div style=\"background-color: #f2f2f2; padding: 20px;\">\r\n\t\t<h1 style=\"color: #000; margin-bottom: 20px;\">Download the flyer</h1>\r\n\t\t<p style=\"margin-bottom: 20px;\">We have sent you the flyer.</p>\r\n\t\t<a href=\"https://lis-quotes-ui-dev.azurewebsites.net/assets/omnifreight_flyer.pdf\" style=\"display: inline-block; background-color: #008089; color: #fff; padding: 10px 20px; text-decoration: none;\">Download</a>\r\n\t\t<p style=\"margin-top: 20px;\">Please, click the button up to download the document.</p>\r\n\t</div>\r\n</body>"+footer;
+                    sendEmail("pricing@omnifreight.eu", email, "You received the flyer", content);
+                    sendEmail("pricing@omnifreight.eu", "pricing@omnifreight.eu", "Nouveau téléchargement du flyer", emailContent);        
                 }
                 else {
-                    enqueueSnackbar(t('fieldsEmpty'), { variant: "info", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                    enqueueSnackbar(t('emailNotValid'), { variant: "info", anchorOrigin: { horizontal: "right", vertical: "top"} });
                 }
+            }
+            else {
+                enqueueSnackbar(t('fieldsEmpty'), { variant: "info", anchorOrigin: { horizontal: "right", vertical: "top"} });
+            }
         }
         else {
             enqueueSnackbar(t('checkCaptcha'), { variant: "info", anchorOrigin: { horizontal: "right", vertical: "top"} });
@@ -433,6 +412,7 @@ const Landing = (props: any) => {
             <Testimonies />
             <Footer />
 
+            {/* Modal request */}
             <BootstrapDialog
                 onClose={() => setModal(false)}
                 aria-labelledby="custom-dialog-title"
@@ -453,7 +433,7 @@ const Landing = (props: any) => {
                             <MuiTelInput 
                                 id="whatsapp-phone-number" 
                                 value={phone} onChange={setPhone} 
-                                defaultCountry="CM" preferredCountries={["CM", "BE", "KE"]} 
+                                defaultCountry="TZ" preferredCountries={["TZ", "CM", "KE", "BE"]} 
                                 fullWidth sx={{ mt: 1 }}
                                 {...properties} 
                             />
@@ -464,11 +444,13 @@ const Landing = (props: any) => {
                         </Grid>
                         <Grid item xs={12} md={6}>
                             <InputLabel htmlFor="departure" sx={inputLabelStyles}>{t('cargoPickup')}</InputLabel>
-                            <AutocompleteSearch id="departure" value={departure} onChange={setDeparture} fullWidth />
+                            {/* <BootstrapInput id="departure" type="email" value={departure} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setDeparture(e.target.value)} fullWidth /> */}
+                            <AutocompleteSearch id="departure" placeholder="Ex : Douala, Cameroon" value={departure} onChange={setDeparture} fullWidth />
                         </Grid>
                         <Grid item xs={12} md={6}>
                             <InputLabel htmlFor="arrival" sx={inputLabelStyles}>{t('cargoDeliver')}</InputLabel>
-                            <AutocompleteSearch id="arrival" value={arrival} onChange={setArrival} fullWidth />
+                            {/* <BootstrapInput id="arrival" type="email" value={arrival} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setArrival(e.target.value)} fullWidth /> */}
+                            <AutocompleteSearch id="arrival" placeholder="Ex : Antwerp, Belgium" value={arrival} onChange={setArrival} fullWidth />
                         </Grid>
                         <Grid item xs={12} md={6}>
                             {/* <InputLabel htmlFor="packing-type" sx={inputLabelStyles}>In what type of packing do you want to transport your goods?</InputLabel> */}
@@ -489,7 +471,7 @@ const Landing = (props: any) => {
                             <InputLabel htmlFor="quantity" sx={inputLabelStyles}>{t('numberUnitsShip')}</InputLabel>
                             <BootstrapInput id="quantity" type="number" inputProps={{ min: 0, max: 100 }} value={quantity} onChange={(e: any) => {console.log(e); setQuantity(e.target.value)}} fullWidth />
                         </Grid>
-                        <Grid item xs={12} mt={1}>
+                        {/* <Grid item xs={12} mt={1}>
                             <InputLabel htmlFor="tags" sx={inputLabelStyles}>{t('specifics')}</InputLabel>
                             {
                                 products !== null ?
@@ -512,7 +494,7 @@ const Landing = (props: any) => {
                                     fullWidth
                                 /> : <Skeleton />
                             }
-                        </Grid>
+                        </Grid> */}
                         <Grid item xs={12} mt={1}>
                             <InputLabel htmlFor="request-message" sx={inputLabelStyles}>{t('shareOtherDetails')}</InputLabel>
                             <BootstrapInput id="request-message" type="text" multiline rows={3} value={message} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setMessage(e.target.value)} fullWidth />
@@ -531,6 +513,7 @@ const Landing = (props: any) => {
                 </DialogActions>
             </BootstrapDialog>
             
+            {/* Modal contact manager */}
             <BootstrapDialog
                 onClose={() => setModal2(false)}
                 aria-labelledby="custom-dialog-title2"
@@ -551,7 +534,7 @@ const Landing = (props: any) => {
                             <MuiTelInput 
                                 id="phone-number" 
                                 value={phone} onChange={setPhone} 
-                                defaultCountry="CM" preferredCountries={["CM", "BE", "KE"]} 
+                                defaultCountry="TZ" preferredCountries={["TZ", "CM", "KE", "BE"]} 
                                 fullWidth sx={{ mt: 1 }}
                                 {...properties} 
                             />
@@ -599,6 +582,7 @@ const Landing = (props: any) => {
                 </DialogActions>
             </BootstrapDialog>
             
+            {/* Modal brochure */}
             <BootstrapDialog
                 onClose={() => setModal3(false)}
                 aria-labelledby="custom-dialog-title3"
@@ -621,8 +605,8 @@ const Landing = (props: any) => {
                                 className="custom-phone-number" 
                                 value={phone} 
                                 onChange={setPhone} 
-                                defaultCountry="CM" 
-                                preferredCountries={["CM", "BE", "KE"]} 
+                                defaultCountry="TZ" 
+                                preferredCountries={["TZ", "CM", "KE", "BE"]} 
                                 fullWidth 
                                 sx={{ mt: 1 }}
                                 {...properties} 
@@ -654,6 +638,7 @@ const Landing = (props: any) => {
                 </DialogActions>
             </BootstrapDialog>         
 
+            {/* Modal congratulations */}
             <BootstrapDialog
                 onClose={() => setModal4(false)}
                 aria-labelledby="custom-dialog-title4"

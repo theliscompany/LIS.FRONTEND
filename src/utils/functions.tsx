@@ -876,13 +876,34 @@ export function parseDate(dateString: string) {
         return null;
     }
 }
-// export function parseDate(dateString: any) {
-//     const parts = dateString.split(/[/\/ :]+/);
-//     const isPM = parts[parts.length - 2] === 'PM';
-//     let hour = parseInt(parts[parts.length - 3]);
-//     if (isPM) {
-//         hour += 12;
-//     }
-//     const dateObj = new Date(parts[parts.length - 1], parts[0] - 1, parts[1], hour, parts[parts.length - 2]);
-//     return dateObj.toISOString();
-// }
+
+export const calculateTotalPrice = (type: string, data: any) => {
+    return data.filter((elm: any) => elm.transactionType === type).reduce((total: any, row: any) => total + row.unitPrice*row.quantity, 0);
+};
+
+export const calculateTotalVolume = (data:  any) => {
+    return data.reduce((total: any, row: any) => total + row.volume, 0);
+};
+
+export const calculateTotalWeight = (data:  any) => {
+    return data.reduce((total: any, row: any) => total + row.weight, 0);
+};
+
+export const calculateTotalQuantity = (data:  any) => {
+    return data.reduce((total: any, row: any) => total + row.quantity, 0);
+};
+
+export function validateObjectHSCODEFormat(obj: any) {
+    // Check if the object has the required properties with the correct types
+    if (
+        typeof obj.hS_Code === "number" &&
+        typeof obj._4_digit_categories === "string" &&
+        typeof obj.product_description_En === "string" &&
+        typeof obj.product_description_Fr === "string" &&
+        typeof obj.product_description_NL === "string"
+    ) {
+        return true;
+    } else {
+        return false;
+    }
+}
