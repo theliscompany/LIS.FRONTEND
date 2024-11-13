@@ -32,15 +32,10 @@ function AcceptOffer(props: any) {
     }  
         
     useEffect(() => {
-        // var mytext = "<p>Bonjour <strong>CYRILLE PENAYE</strong>,</p><p>Nous vous remercions pour votre demande.</p><p>En notre qualité de commissionnaire expéditeur nous pouvons organiser votre expédition de</p><ul><li><p><strong>1x20' Dry</strong></p></li></ul><p> conteneur(s) chargé(s) avec des <strong>BEER</strong>, sur camion depuis <strong>ANTWERPEN, 2000, BELGIUM</strong> à rendu port de <strong>DOUALA, CAMEROON</strong> suivant l'une de ces offres au choix :</p><p># OFFRE 1</p><p><strong>6525 EUR / 20' Dry / Tous les 2 jours / Délai de mer : 6 jours</strong><br>Chargement de 20 heures inclus pour chaque conteneur, ensuite de 45 EUR par heure indivisible.</p><p>- Express mail : 80.00 EUR supplémentaires</p><p></p><p># OFFRE 2</p><p><strong>3782 EUR / 20' Dry / Tous les 5 jours / Délai de mer : 15 jours</strong><br>Chargement de 2 heures inclus pour chaque conteneur, ensuite de 100 EUR par heure indivisible.</p><p>- Express mail : 60.00 EUR supplémentaires</p><p></p><p>Tarif valable ce jour. Tarifs à confirmer lors de votre réservation.</p><p>Ci-joint vous trouverez nos conditions de commande et de facturation qui, ensemble avec nos conditions générales, sont appliqués.</p><p></p><p>Cordialement</p>";
-        // var infos = getOfferContent(mytext, Number(currentOption)+1);
-        // console.log("Infos : ", infos);
-        
         acceptOffer();
     }, []);
 
     const acceptOffer = async () => {
-        // console.log(currentOption);
         var cOption = currentOption !== null && currentOption !== undefined ? Number(currentOption) : 0;
         const body: any = {
             id: id,
@@ -71,8 +66,8 @@ function AcceptOffer(props: any) {
     }
     
     const createOrder = async (option: any, offerData: any, currentOpt: number) => {
-        console.log(option);
-        console.log(offerData);
+        console.log("Option : ", option);
+        console.log("Data : ", offerData);
         // var dataSent = {
         //     // "orderId": Number(id),
         //     // "orderNumber": orderData.orderNumber,
@@ -130,19 +125,67 @@ function AcceptOffer(props: any) {
         //     // "operationsUserId": orderData.operationsUserId,
         //     // "oblOverview": orderData.oblOverview
         // };
+
+        // var dataSent = {
+        //     "orderDate": new Date().toISOString(),
+        //     "sellerId": seller.contactId,
+        //     "buyerId": buyer.contactId,
+        //     "customerId": customer.contactId,
+        //     "shippingAgent": carrierAgent.contactId,
+        //     "shipId": ship !== null ? ship.shipId : null,
+        //     "shipLineId": carrier.contactId,
+        //     "orderStatus": 1,
+        //     "departurePort": portLoading.portId,
+        //     "destinationPort": portDischarge.portId,
+        //     "estimatedDepartureDate": etd?.toISOString(),
+        //     "estimatedArrivalDate": eta?.toISOString(),
+        //     "incoTerm": incotermFrom,
+        //     "refClient": referenceCustomer,
+        //     "refSeller": referenceSeller,
+        //     "refBuyer": referenceBuyer,
+        //     "incotermDestination": incotermTo,
+        //     "fiscalYear": Number(new Date().getFullYear()),
+        //     "refShippingAgent": bookingRef,
+        //     "city": incotermFromCity.id,
+        //     "cityIncotermTo": incotermToCity.id,
+        // };
+
         const body: any = {
-            orderDate: new Date().toISOString(),
-            refClient: offerData.clientNumber,
-            refShippingAgent: option.selectedSeafreights[0].carrierAgentName,
-            freightShipmentType: option.selectedSeafreights[0].defaultContainer,
-            // Contact Id
-            customerId: 0,
-            // Contact Id
-            shippingAgent: 0,
-            orderStatus: 1,
-            departurePort: option.portDeparture.portId,
-            destinationPort: option.portDestination.portId,
-            fiscalYear: Number(new Date().getFullYear())
+            "orderNumber": "",
+            "orderDate": new Date().toISOString(),
+            "sellerId": 0,
+            "buyerId": 0,
+            "customerId": 0,
+            "shippingAgent": 0,
+            "shipId": null,
+            "shipLineId": 0,
+            "orderStatus": 1,
+            "departurePort": option.portDeparture.portId,
+            "destinationPort": option.portDestination.portId,
+            // "estimatedDepartureDate": etd?.toISOString(),
+            // "estimatedArrivalDate": eta?.toISOString(),
+            // "incoTerm": incotermFrom,
+            "refClient": offerData.clientNumber,
+            "refSeller": offerData.clientNumber,
+            "refBuyer": offerData.clientNumber,
+            // "incotermDestination": incotermTo,
+            "fiscalYear": Number(new Date().getFullYear()),
+            "refShippingAgent": option.selectedSeafreights[0].carrierAgentName,
+            // "city": incotermFromCity.id,
+            // "cityIncotermTo": incotermToCity.id
+            "freightShipmentType": option.selectedSeafreights[0].defaultContainer,
+            
+            // orderNumber: "",
+            // orderDate: new Date().toISOString(),
+            // refClient: offerData.clientNumber,
+            // refShippingAgent: option.selectedSeafreights[0].carrierAgentName,
+            // freightShipmentType: option.selectedSeafreights[0].defaultContainer,
+            // customerId: 0,
+            // shippingAgent: 0,
+            // orderStatus: 1,
+            // departurePort: option.portDeparture.portId,
+            // destinationPort: option.portDestination.portId,
+            // fiscalYear: Number(new Date().getFullYear())
         };
 
         fetch(protectedResources.apiLisShipments.endPoint+"/Orders", {

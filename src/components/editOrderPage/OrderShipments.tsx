@@ -175,7 +175,7 @@ const OrderShipments = (props: any) => {
                             enqueueSnackbar("The order has been created with success!", { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
                             loadOrder();
                         }
-                    }            
+                    }
                 }
                 else {
                     enqueueSnackbar("An error happened, please fill all the fields correctly.", { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });

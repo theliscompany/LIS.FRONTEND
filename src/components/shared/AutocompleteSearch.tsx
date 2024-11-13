@@ -8,6 +8,7 @@ import { HelpOutline } from "@mui/icons-material";
 interface LocationAutocompleteProps {
     id: string;
     value: string;
+    placeholder?: string;
     onChange: (value: any) => void;
     fullWidth?: boolean;
     disabled?: boolean;
@@ -27,7 +28,7 @@ function isCountryCodeFromAfrica(countryCode: string) {
     return africanCountryCodes.includes(countryCode.toUpperCase());
 }
 
-const AutocompleteSearch: React.FC<LocationAutocompleteProps> = ({ id, value, onChange, fullWidth, disabled, callBack }) => {
+const AutocompleteSearch: React.FC<LocationAutocompleteProps> = ({ id, value, placeholder="", onChange, fullWidth, disabled, callBack }) => {
     const [loading, setLoading] = useState(false);
     const [open, setOpen] = useState(false);
     const [options, setOptions] = useState<any[]>([]);
@@ -99,30 +100,6 @@ const AutocompleteSearch: React.FC<LocationAutocompleteProps> = ({ id, value, on
                     console.log("Choice 3 : ", result);
                     setOpen(true);
                     setOptions(result);
-                    // const response = await axios.get(
-                    //     `https://secure.geonames.org/postalCodeSearchJSON?formatted=true&placename_startsWith=${value}&maxRows=500&username=blackstarmc97`
-                    // );
-                    
-                    // if (response.data.postalCodes.length === 0) {
-                    //     const response2 = await axios.get(
-                    //         `https://secure.geonames.org/search?name_startsWith=${value}&formatted=true&type=json&maxRows=500&username=blackstarmc97`
-                    //     );
-                        
-                    //     var auxResponse = response2.data.geonames.map((elm: any) => { return { id: elm.geonameId, region: elm.adminName1||"", city: elm.name, country: elm.countryName, postalCode: null, latitude: elm.lat, longitude: elm.lng } });
-                    //     let result = auxResponse.filter((e: any, i: number) => {
-                    //         return auxResponse.findIndex((x: any) => {
-                    //         return x.city == e.city && x.country == e.country && x.region == e.region;}) == i;
-                    //     });
-                    //     console.log("Choice 3 : ", result);
-                    //     setOpen(true);
-                    //     setOptions(result);
-                    // }
-                    // else {
-                    //     console.log(response.data.postalCodes);
-                    //     var auxResponse = response.data.postalCodes.map((elm: any, i: number) => { return { id: 'psCode-'+i, city: elm.placeName, country: regionNames.of(elm.countryCode), postalCode: elm.postalCode, latitude: elm.lat, longitude: elm.lng, region: elm.adminName1||"" } });
-                    //     console.log("Choice 4 : ", auxResponse);
-                    //     setOptions(auxResponse)
-                    // }
                 }
             }            
         } catch (error) {
@@ -133,9 +110,9 @@ const AutocompleteSearch: React.FC<LocationAutocompleteProps> = ({ id, value, on
 
     return (
         <Box sx={{ position: "relative "}}>
-        {/* <IconButton onClick={handleClick} size="small" sx={!loading ? { position: "absolute", top: "-24px", right: "-4px" } : { position: "absolute", top: "-32px", right: "-4px" }}>
+        <IconButton onClick={handleClick} size="small" sx={!loading ? { position: "absolute", top: "-24px", right: "-4px" } : { position: "absolute", top: "-32px", right: "-4px" }}>
             <HelpOutline fontSize="small" />
-        </IconButton> */}
+        </IconButton>
         <Popover
             id={idPop}
             open={openPop}
@@ -198,6 +175,7 @@ const AutocompleteSearch: React.FC<LocationAutocompleteProps> = ({ id, value, on
                             debouncedSearch(event.target.value);
                         }}
                         sx={{ mt: 1 }}
+                        placeholder={placeholder}
                         InputProps={{
                             ...params.InputProps,
                             endAdornment: (

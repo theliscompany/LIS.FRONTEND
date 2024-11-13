@@ -17,8 +17,7 @@ function UsersAssignment(props: any) {
     const [showAlert, setShowAlert] = useState<boolean>(false);
     const [users, setUsers] = useState<any>(null);
     const [assignees, setAssignees] = useState<any>(null);
-    const [tempToken, setTempToken] = useState<string>("");
-
+    
     const { instance, accounts } = useMsal();
     const account = useAccount(accounts[0] || {});
     
@@ -64,9 +63,6 @@ function UsersAssignment(props: any) {
     
     const getAssignees = async () => {
         if (account && instance && context) {
-            // const token = await getAccessToken(instance, loginRequest, account);
-            // setTempToken(token);
-            
             try {
                 setLoad(true);
                 const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisQuotes.endPoint+"/Assignee", context.tokenLogin);
@@ -120,7 +116,7 @@ function UsersAssignment(props: any) {
     }
     
     const loadUsers = async () => {
-        if(account && instance) {
+        if (account && instance) {
             const token = await getAccessToken(instance, graphRequest, account);
             getUsersFromAAD(token);
         }
