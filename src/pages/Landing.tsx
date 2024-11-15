@@ -117,7 +117,7 @@ const Landing = (props: any) => {
             i18n.changeLanguage(lang);
         }
 
-        getProducts();
+        // getProducts();
     }, []);
     
     // const getPorts = async () => {
