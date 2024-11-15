@@ -200,7 +200,7 @@ const Landing = (props: any) => {
                 if (email === "" || (email !== "" && validMail(email))) {
                     setLoad(true);
                     var emailContent = `
-                    <div style="font-family: Verdana;">
+                    <div style="font-family: Verdana; line-height: 26px;">
                     <div>Un nouveau client vous contacte depuis le site web. Ses informations sont les suivantes : </div>
                     <div>Email : ${email}</div>
                     <div>Whatsapp : ${phone}</div>
@@ -231,7 +231,7 @@ const Landing = (props: any) => {
                 if (email === "" || (email !== "" && validMail(email))) {
                     setLoad(true);
                     var emailContent = `
-                    <div style="font-family: Verdana;">
+                    <div style="font-family: Verdana; line-height: 26px;">
                     <div>Un nouveau client souhaite contacter le directeur. Ses informations sont les suivantes : </div>
                     <div>Email : ${email}</div>
                     <div>Whatsapp : ${phone}</div>
@@ -260,7 +260,7 @@ const Landing = (props: any) => {
                 if (email === "" || (email !== "" && validMail(email))) {
                     setLoad(true);
                     var emailContent = `
-                    <div style="font-family: Verdana;">
+                    <div style="font-family: Verdana; line-height: 26px;">
                     <div>Un nouveau prospect vient de télécharger la brochure sur le site web. Ses informations sont les suivantes : </div>
                     <div>Email : ${email}</div>
                     <div>Whatsapp : ${phone}</div>
