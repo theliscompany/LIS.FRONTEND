@@ -402,7 +402,8 @@ const Landing = (props: any) => {
                                 </Typography>
                             </CardContent>
                             <CardActions sx={bottomStyles}>
-                                <Button size="medium" sx={buttonStyles} onClick={() => setModal3(true)}>{t('downloadBrochure')}</Button>
+                                {/* <Button size="medium" sx={buttonStyles} onClick={() => setModal3(true)}>{t('downloadBrochure')}</Button> */}
+                                <Button size="medium" sx={buttonStyles} onClick={() => setModal3(true)}>Download</Button>
                             </CardActions>
                         </Card>
                     </Grid>
