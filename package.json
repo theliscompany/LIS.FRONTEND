@@ -64,7 +64,8 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "build:prod": "env-cmd -f .env.prod react-scripts build",
-    "docs": "typedoc --out docs src"
+    "docs": "typedoc --out docs src",
+    "generate-client": "npx orval"
   },
   "eslintConfig": {
     "extends": [
@@ -88,6 +89,7 @@
     "@types/autosuggest-highlight": "^3.2.0",
     "@types/react-google-recaptcha": "^2.1.5",
     "@types/uuid": "^9.0.2",
+    "orval": "^7.3.0",
     "typedoc": "^0.25.13"
   },
   "homepage": "/"

@@ -19,6 +19,12 @@ export const loginRequest: PopupRequest = {
   ]
 };
 
+export const shipmentRequest: PopupRequest = {
+  scopes: [
+    process.env.REACT_APP_SHIPMENT_REQUEST_SCOPE !== undefined ? process.env.REACT_APP_SHIPMENT_REQUEST_SCOPE : ""
+  ]
+};
+
 export const graphRequest: PopupRequest = {
   scopes: [
     process.env.REACT_APP_GRAPH_REQUEST_SCOPE !== undefined ? process.env.REACT_APP_GRAPH_REQUEST_SCOPE : ""

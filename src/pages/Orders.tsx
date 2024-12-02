@@ -17,17 +17,22 @@ import CompanySearch from '../components/shared/CompanySearch';
 import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { Dayjs } from 'dayjs';
+import { getLISShipmentAPI } from '../api/client/shipmentService';
+import { AxiosError } from 'axios';
+import { getLISTransportAPI } from '../api/client/transportService';
+import { PortViewModel } from '../api/client/schemas/transport';
+import { ResponseOrdersListDto } from '../api/client/schemas/shipment';
 
 function Orders() {
     const [load, setLoad] = useState<boolean>(true);
     const [loadShips, setLoadShips] = useState<boolean>(true);
     const [loadFavorites, setLoadFavorites] = useState<boolean>(true);
     const [modalFavorites, setModalFavorites] = useState<boolean>(true);
-    const [orders, setOrders] = useState<any>(null);
+    const [orders, setOrders] = useState<ResponseOrdersListDto[]>([]);
     const [modal, setModal] = useState<boolean>(false);
     const [ships, setShips] = useState<any>(null);
     const [favorites, setFavorites] = useState<any>(null);
-    const [ports, setPorts] = useState<any>(null);
+    const [ports, setPorts] = useState<PortViewModel[]>([]);
     const [contacts, setContacts] = useState<any>(null);
     const [currentId, setCurrentId] = useState<string>("");
     
@@ -45,6 +50,9 @@ function Orders() {
     const { instance, accounts } = useMsal();
     const account = useAccount(accounts[0] || {});    
     const context = useAuthorizedBackendApi();
+
+    const {getOrders} = getLISShipmentAPI()
+    const {getPorts} = getLISTransportAPI()
     
     const navigate = useNavigate();
     const { t } = useTranslation();
@@ -158,8 +166,8 @@ function Orders() {
                         ports !== null && ports !== undefined && params.row.departurePort !== null ? 
                         <>
                             {
-                                ports.find((elm: any) => elm.portId === params.row.departurePort) !== undefined ? 
-                                ports.find((elm: any) => elm.portId === params.row.departurePort).portName : "N/A"
+                                //ports.find((elm: any) => elm.portId === params.row.departurePort) !== undefined ? 
+                                //ports.find(x => x.portId === params.row.departurePort).portName : "N/A"
                             }
                         </> : <span>N/A</span>
                     }
@@ -174,8 +182,8 @@ function Orders() {
                         ports !== null && ports !== undefined && params.row.destinationPort !== null ? 
                         <>
                             {
-                                ports.find((elm: any) => elm.portId === params.row.destinationPort) !== undefined ? 
-                                ports.find((elm: any) => elm.portId === params.row.destinationPort).portName : "N/A"
+                                //ports.find((elm: any) => elm.portId === params.row.destinationPort) !== undefined ? 
+                                //ports.find((elm: any) => elm.portId === params.row.destinationPort).portName : "N/A"
                             }
                         </> : <span>N/A</span>
                     }
@@ -238,41 +246,81 @@ function Orders() {
             );
         }, minWidth: 120 }
     ];
+
+    const getOrdersService = async () => {
+        try
+        {
+            const _orders = await getOrders({
+                Fiscal: 2024
+            })
+            setOrders(_orders.data)
+        }
+        catch(err:unknown)
+        {
+            if(err instanceof AxiosError){
+                console.log(err.response?.data)
+            }
+            console.log("An error occured")
+        }
+        finally{
+            setLoad(false);
+        }
+    }
+
+    const getPortsService = async () => {
+        try
+        {
+            const ports = await getPorts()
+            setPorts(ports.data)
+        }
+        catch(err:unknown)
+        {
+            if(err instanceof AxiosError){
+                console.log(err.response?.data)
+            }
+            console.log("An error occured")
+        }
+    }
     
     useEffect(() => {
-        getPorts();
+        getPortsService()
+        getOrdersService()
+    }, [])
+
+    useEffect(() => {
+       // getPorts();
         getContacts();
         getShips();
         getFavorites();
     }, [account, instance, context]);
 
-    useEffect(() => {
-        // console.log("Orders : ", orders);
-        if (contacts !== null && ports !== null && ships !== null) {
-            getOrders();
-        }
-    }, [contacts, ports, ships]);
+    // useEffect(() => {
+    //     // console.log("Orders : ", orders);
+    //     if (contacts !== null && ports !== null && ships !== null) {
+    //         getOrders2();
+    //     }
+    // }, [contacts, ports, ships]);
     
-    const getPorts = async () => {
-        if (account && instance && context) {
-            try {
-                if (ourPorts !== null && ourPorts !== undefined && ourPorts.length !== 0) {
-                    // console.log(ourPorts);
-                    setPorts(ourPorts);
-                }
-                else {
-                    const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Port/Ports?pageSize=2000", context.tokenTransport);
-                    if (response !== null && response !== undefined) {
-                        console.log(response);
-                        setPorts(response);
-                    }
-                }
-            }
-            catch (err: any) {
-                console.log(err);
-            }
-        }
-    }
+    // const getPorts = async () => {
+    //     if (account && instance && context) {
+    //         try {
+    //             if (ourPorts !== null && ourPorts !== undefined && ourPorts.length !== 0) {
+    //                 // console.log(ourPorts);
+    //                 setPorts(ourPorts);
+    //             }
+    //             else {
+    //                 const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Port/Ports?pageSize=2000", context.tokenTransport);
+    //                 if (response !== null && response !== undefined) {
+    //                     console.log(response);
+    //                     setPorts(response);
+    //                 }
+    //             }
+    //         }
+    //         catch (err: any) {
+    //             console.log(err);
+    //         }
+    //     }
+    // }
     
     const getContacts = async () => {
         if (account && instance && context) {
@@ -335,20 +383,20 @@ function Orders() {
         }
     }
 
-    const getOrders = async () => {
-        if (account && instance && context) {
-            setLoad(true);
-            const response = await (context?.service as BackendService<any>).getSingle(protectedResources.apiLisShipments.endPoint+"/Orders");
-            if (response !== null && response !== undefined) {
-                console.log(response);
-                setOrders(response.$values.filter((elm: any) => elm.fiscalYear !== 2014));
-                setLoad(false);
-            }
-            else {
-                setLoad(false);
-            }
-        }
-    }
+    // const getOrders2 = async () => {
+    //     if (account && instance && context) {
+    //         setLoad(true);
+    //         const response = await (context?.service as BackendService<any>).getSingle(protectedResources.apiLisShipments.endPoint+"/Orders");
+    //         if (response !== null && response !== undefined) {
+    //             console.log(response);
+    //             setOrders(response.$values.filter((elm: any) => elm.fiscalYear !== 2014));
+    //             setLoad(false);
+    //         }
+    //         else {
+    //             setLoad(false);
+    //         }
+    //     }
+    // }
     
     const deleteOrder = async (id: string) => {
         if (account && instance && context) {
@@ -356,7 +404,7 @@ function Orders() {
                 const response = await (context?.service as any).delete(protectedResources.apiLisShipments.endPoint+"/Orders/"+id);
                 enqueueSnackbar(t('orderDeleted'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
                 setModal(false);
-                getOrders();
+                getOrdersService();
             }
             catch (err: any) {
                 enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
@@ -425,7 +473,7 @@ function Orders() {
                         >
                             {t('Add favorite')} <StarOutlineOutlined sx={{ ml: 0.5, pb: 0.45, justifyContent: "center", alignItems: "center" }} fontSize="small" />
                         </Button>
-                        <Button color="inherit" variant="contained" sx={whiteButtonStyles} style={{ float: "right", marginRight: "5px" }} onClick={() => { getOrders(); }}>
+                        <Button color="inherit" variant="contained" sx={whiteButtonStyles} style={{ float: "right", marginRight: "5px" }} onClick={() => { getOrdersService(); }}>
                             {t('reload')} <RestartAltOutlined sx={{ ml: 0.5, pb: 0.45, justifyContent: "center", alignItems: "center" }} fontSize="small" />
                         </Button>
                         <Button 
