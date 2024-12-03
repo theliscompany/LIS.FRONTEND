@@ -51,8 +51,8 @@ function Orders() {
     const account = useAccount(accounts[0] || {});    
     const context = useAuthorizedBackendApi();
 
-    const {getOrders} = getLISShipmentAPI()
-    const {getPorts} = getLISTransportAPI()
+    const { getOrders } = getLISShipmentAPI();
+    const { getPorts } = getLISTransportAPI();
     
     const navigate = useNavigate();
     const { t } = useTranslation();
@@ -283,9 +283,9 @@ function Orders() {
     }
     
     useEffect(() => {
-        getPortsService()
-        getOrdersService()
-    }, [])
+        getPortsService();
+        getOrdersService();
+    }, []);
 
     useEffect(() => {
        // getPorts();

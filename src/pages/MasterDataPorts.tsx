@@ -2,10 +2,10 @@ import * as React from 'react';
 import { useState, useEffect } from 'react';
 import Box from '@mui/material/Box';
 import { SnackbarProvider, enqueueSnackbar } from 'notistack';
-import { useMsal, useAccount } from '@azure/msal-react';
-import { useAuthorizedBackendApi } from '../api/api';
-import { protectedResources } from '../config/authConfig';
-import { BackendService } from '../utils/services/fetch';
+// import { useMsal, useAccount } from '@azure/msal-react';
+// import { useAuthorizedBackendApi } from '../api/api';
+// import { protectedResources } from '../config/authConfig';
+// import { BackendService } from '../utils/services/fetch';
 import { Alert, Button, DialogActions, DialogContent, Grid, IconButton, InputLabel, Skeleton, Typography } from '@mui/material';
 import { DataGrid, GridColDef, GridRenderCellParams, GridToolbar } from '@mui/x-data-grid';
 // import { t } from 'i18next';
@@ -14,8 +14,11 @@ import { Edit, Delete } from '@mui/icons-material';
 import CountrySelect from '../components/shared/CountrySelect';
 import { countries } from '../utils/constants';
 import { useTranslation } from 'react-i18next';
-import { useAppDispatch } from '../store';
-import { fetchPorts } from '../store/masterdata.slice';
+// import { useAppDispatch } from '../store';
+// import { fetchPorts } from '../store/masterdata.slice';
+import { getLISTransportAPI } from '../api/client/transportService';
+import { AxiosError } from 'axios';
+import { PortViewModel } from '../api/client/schemas/transport';
 
 const MasterDataPorts: any = (props: any) => {
     const { t } = useTranslation();
@@ -29,51 +32,14 @@ const MasterDataPorts: any = (props: any) => {
     const [country, setCountry] = useState<any>(null);
     const [currentId, setCurrentId] = useState<string>("");
     const [currentEditId, setCurrentEditId] = useState<string>("");
-    const [tempToken, setTempToken] = useState<string>("");
+    // const [tempToken, setTempToken] = useState<string>("");
+    // const { instance, accounts } = useMsal();
+    // const account = useAccount(accounts[0] || {});
+    // const context = useAuthorizedBackendApi();
+    // const dispatch = useAppDispatch();
     
-    const { instance, accounts } = useMsal();
-    const account = useAccount(accounts[0] || {});
-    const context = useAuthorizedBackendApi();
-
-    const dispatch = useAppDispatch();
+    const { getPorts, getPort, createPort, updatePort, deletePort } = getLISTransportAPI();
     
-    const getPorts = async () => {
-        if (account && instance && context) {
-            setLoadResults(true);
-            const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Port/Ports?pageSize=2000", context.tokenTransport);
-            if (response !== null && response !== undefined) {
-                setPorts(response);
-                setLoadResults(false);
-
-                // Bad method, must directly use the value in the store and work with it
-                dispatch(fetchPorts(context));
-            }
-            else {
-                setLoadResults(false);
-            }
-        }
-    }
-    
-    const deletePort = async (id: string) => {
-        if (account && instance && context) {
-            try {
-                const response = await (context?.service as BackendService<any>).deleteWithToken(protectedResources.apiLisTransport.endPoint+"/Port/DeletePort/"+id, context.tokenTransport);
-                console.log(response);
-                enqueueSnackbar(t('rowDeletedSuccess'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
-                setModal2(false);
-                getPorts();
-            }
-            catch (e: any) {
-                console.log(e);
-                enqueueSnackbar(t('rowDeletedError'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
-            }
-        }
-    }
-    
-    useEffect(() => {
-        getPorts();
-    }, [account, instance, account]);
-
     const columnsPorts: GridColDef[] = [
         { field: 'portId', headerName: t('id'), flex: 1 },
         { field: 'portName', headerName: t('portName'), flex: 3 },
@@ -81,7 +47,7 @@ const MasterDataPorts: any = (props: any) => {
         { field: 'xxx', headerName: t('Actions'), renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box sx={{ my: 1, mr: 1 }}>
-                    <IconButton size="small" title={t('editRowPort')} sx={{ mr: 0.5 }} onClick={() => { setCurrentEditId(params.row.portId); resetForm(); getPort(params.row.portId); setModal(true); }}>
+                    <IconButton size="small" title={t('editRowPort')} sx={{ mr: 0.5 }} onClick={() => { setCurrentEditId(params.row.portId); resetForm(); getPortService(params.row.portId); setModal(true); }}>
                         <Edit fontSize="small" />
                     </IconButton>
                     <IconButton size="small" title={t('deleteRowPort')} onClick={() => { setCurrentId(params.row.portId); setModal2(true); }}>
@@ -92,35 +58,102 @@ const MasterDataPorts: any = (props: any) => {
         }, minWidth: 120, flex: 1 },
     ];
     
-    const createNewPort = async () => {
+    useEffect(() => {
+        getPortsService();
+    }, []);
+
+    const getPortsService = async () => {
+        setLoadResults(true);
+        try {
+            const ports = await getPorts({ pageSize: 2000 });
+            setPorts(ports.data);
+            setLoadResults(false);
+        }
+        catch (err: unknown) {
+            if(err instanceof AxiosError) {
+                console.log(err.response?.data);
+            }
+            console.log("An error occured");
+            setLoadResults(false);
+        }
+    }
+    
+    // const getPorts = async () => {
+    //     if (account && instance && context) {
+    //         setLoadResults(true);
+    //         const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Port/Ports?pageSize=2000", context.tokenTransport);
+    //         if (response !== null && response !== undefined) {
+    //             setPorts(response);
+    //             setLoadResults(false);
+
+    //             // Bad method, must directly use the value in the store and work with it
+    //             dispatch(fetchPorts(context));
+    //         }
+    //         else {
+    //             setLoadResults(false);
+    //         }
+    //     }
+    // }
+    
+    const deletePortService = async (id: number) => {
+        try {
+            await deletePort(id);
+            // const response = await (context?.service as BackendService<any>).deleteWithToken(protectedResources.apiLisTransport.endPoint+"/Port/DeletePort/"+id, context.tokenTransport);
+            enqueueSnackbar(t('rowDeletedSuccess'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
+            setModal2(false);
+            getPortsService();
+        }
+        catch (e: any) {
+            console.log(e);
+            enqueueSnackbar(t('rowDeletedError'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+        }
+    }
+    
+    // const deletePort = async (id: string) => {
+    //     if (account && instance && context) {
+    //         try {
+    //             const response = await (context?.service as BackendService<any>).deleteWithToken(protectedResources.apiLisTransport.endPoint+"/Port/DeletePort/"+id, context.tokenTransport);
+    //             console.log(response);
+    //             enqueueSnackbar(t('rowDeletedSuccess'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
+    //             setModal2(false);
+    //             getPorts();
+    //         }
+    //         catch (e: any) {
+    //             console.log(e);
+    //             enqueueSnackbar(t('rowDeletedError'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+    //         }
+    //     }
+    // }
+    
+    const createUpdatePortService = async () => {
         if (testName !== "" && country !== null) {
-            if (account && instance && context) {
-                try {
-                    var dataSent = null;
-                    var response = null;
-                    if (currentEditId !== "") {
-                        dataSent = {
-                            "portId": currentEditId,
-                            "portName": testName.toUpperCase(),
-                            "country": country.label.toUpperCase(),
-                        };
-                        response = await (context?.service as BackendService<any>).putWithToken(protectedResources.apiLisTransport.endPoint+"/Port/UpdatePort/"+currentEditId, dataSent, context.tokenTransport);
-                    }
-                    else {
-                        dataSent = {
-                            "portName": testName.toUpperCase(),
-                            "country": country.label.toUpperCase(),
-                        };
-                        response = await (context?.service as BackendService<any>).postWithToken(protectedResources.apiLisTransport.endPoint+"/Port/CreatePort", dataSent, context.tokenTransport);
-                    }
-                    enqueueSnackbar(currentEditId === "" ? "The port has been added with success!" : "The port has been edited with success!", { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
-                    getPorts();
-                    setModal(false);    
+            try {
+                var dataSent: PortViewModel;
+                var response = null;
+                if (currentEditId !== "") {
+                    dataSent = {
+                        "portId": Number(currentEditId),
+                        "portName": testName.toUpperCase() || null,
+                        "country": String(country.label.toUpperCase()) || null,
+                    };
+                    response = await updatePort(Number(currentEditId), dataSent);
+                    // response = await (context?.service as BackendService<any>).putWithToken(protectedResources.apiLisTransport.endPoint+"/Port/UpdatePort/"+currentEditId, dataSent, context.tokenTransport);
                 }
-                catch (err: any) {
-                    console.log(err);
-                    enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                else {
+                    dataSent = {
+                        "portName": testName.toUpperCase() || null,
+                        "country": String(country.label.toUpperCase()) || null,
+                    };
+                    response = await createPort(dataSent);
+                    // response = await (context?.service as BackendService<any>).postWithToken(protectedResources.apiLisTransport.endPoint+"/Port/CreatePort", dataSent, context.tokenTransport);
                 }
+                enqueueSnackbar(currentEditId === "" ? "The port has been added with success!" : "The port has been edited with success!", { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                getPortsService();
+                setModal(false);    
+            }
+            catch (err: any) {
+                console.log(err);
+                enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
             }
         }
         else {
@@ -128,21 +161,40 @@ const MasterDataPorts: any = (props: any) => {
         }
     }
     
-    const getPort = async (id: string) => {
-        setLoadEdit(true)
-        if (account && instance && context) {
-            const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Port/GetPort/"+id, context.tokenTransport);
-            if (response !== null && response !== undefined) {
-                console.log(response);
-                setTestName(response.portName);
-                setCountry(countries.find((elm: any) => elm.label.toUpperCase() === response.country));
-                setLoadEdit(false);
+    const getPortService = async (id: number) => {
+        setLoadEdit(true);
+        try {
+            const port = await getPort(id);
+            var result = port.data;
+            // console.log("Port : ", port.data);
+            setTestName(result.portName ?? "");
+            setCountry(countries.find((elm: any) => elm.label.toUpperCase() === result.country));
+            setLoadEdit(false);
+        }
+        catch(err: unknown) {
+            if(err instanceof AxiosError) {
+                console.log(err.response?.data);
             }
-            else {
-                setLoadEdit(false);
-            }
+            console.log("An error occured");
+            setLoadEdit(false);
         }
     }
+    
+    // const getPort = async (id: string) => {
+    //     setLoadEdit(true)
+    //     if (account && instance && context) {
+    //         const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Port/GetPort/"+id, context.tokenTransport);
+    //         if (response !== null && response !== undefined) {
+    //             console.log(response);
+    //             setTestName(response.portName);
+    //             setCountry(countries.find((elm: any) => elm.label.toUpperCase() === response.country));
+    //             setLoadEdit(false);
+    //         }
+    //         else {
+    //             setLoadEdit(false);
+    //         }
+    //     }
+    // }
     
     const resetForm = () => {
         setTestName("");
@@ -161,7 +213,7 @@ const MasterDataPorts: any = (props: any) => {
                         <Button 
                             variant="contained" color="inherit" 
                             sx={{ float: "right", backgroundColor: "#fff", textTransform: "none", ml: 2 }} 
-                            onClick={() => { getPorts(); }} 
+                            onClick={() => { getPortsService(); }} 
                         >
                             {t('reload')}
                         </Button>
@@ -239,7 +291,7 @@ const MasterDataPorts: any = (props: any) => {
                     }
                 </DialogContent>
                 <DialogActions>
-                    <Button variant="contained" onClick={() => { createNewPort(); }} sx={actionButtonStyles}>{t('validate')}</Button>
+                    <Button variant="contained" onClick={() => { createUpdatePortService(); }} sx={actionButtonStyles}>{t('validate')}</Button>
                     <Button variant="contained" onClick={() => setModal(false)} sx={buttonCloseStyles}>{t('close')}</Button>
                 </DialogActions>
             </BootstrapDialog>
@@ -250,7 +302,7 @@ const MasterDataPorts: any = (props: any) => {
                 </BootstrapDialogTitle>
                 <DialogContent dividers>{t('areYouSureDeleteRow')}</DialogContent>
                 <DialogActions>
-                    <Button variant="contained" color={"primary"} onClick={() => { deletePort(currentId); }} sx={{ mr: 1.5, textTransform: "none" }}>{t('accept')}</Button>
+                    <Button variant="contained" color={"primary"} onClick={() => { deletePortService(Number(currentId)); }} sx={{ mr: 1.5, textTransform: "none" }}>{t('accept')}</Button>
                     <Button variant="contained" onClick={() => setModal2(false)} sx={buttonCloseStyles}>{t('close')}</Button>
                 </DialogActions>
             </BootstrapDialog>
