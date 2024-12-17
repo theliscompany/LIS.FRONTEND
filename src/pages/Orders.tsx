@@ -248,37 +248,33 @@ function Orders() {
     ];
 
     const getOrdersService = async () => {
-        try
-        {
+        try {
             const _orders = await getOrders({
                 Fiscal: 2024
-            })
-            setOrders(_orders.data)
+            });
+            setOrders(_orders.data);
         }
-        catch(err:unknown)
-        {
-            if(err instanceof AxiosError){
-                console.log(err.response?.data)
+        catch (err: unknown) {
+            if (err instanceof AxiosError) {
+                console.log(err.response?.data);
             }
-            console.log("An error occured")
+            console.log("An error occured");
         }
-        finally{
+        finally {
             setLoad(false);
         }
     }
 
     const getPortsService = async () => {
-        try
-        {
-            const ports = await getPorts()
-            setPorts(ports.data)
+        try {
+            const ports = await getPorts();
+            setPorts(ports.data);
         }
-        catch(err:unknown)
-        {
-            if(err instanceof AxiosError){
-                console.log(err.response?.data)
+        catch (err: unknown) {
+            if (err instanceof AxiosError) {
+                console.log(err.response?.data);
             }
-            console.log("An error occured")
+            console.log("An error occured");
         }
     }
     
