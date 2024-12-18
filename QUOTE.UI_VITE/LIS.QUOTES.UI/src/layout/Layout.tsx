@@ -530,7 +530,7 @@ const Layout = () : React.ReactNode => {
                                                 <ListItemIcon className="cs-listitemicon">
                                                     <InventoryOutlinedIcon fontSize="small" />
                                                 </ListItemIcon>
-                                                <ListItemText primary={t('hscodes')} primaryTypographyProps={{ fontSize: 13 }} />
+                                                <ListItemText primary={t('hscodes')} slotProps={{primary:{fontSize: 13}}} />
                                             </ListItemButton>
                                         </DarkTooltip>
                                         </ListItem>
@@ -542,7 +542,7 @@ const Layout = () : React.ReactNode => {
                                                 <ListItemIcon className="cs-listitemicon">
                                                     <AnchorOutlinedIcon fontSize="small" />
                                                 </ListItemIcon>
-                                                <ListItemText primary={t('ports')} primaryTypographyProps={{ fontSize: 13 }} />
+                                                <ListItemText primary={t('ports')} slotProps={{primary:{fontSize: 13}}} />
                                             </ListItemButton>
                                         </DarkTooltip>
                                         </ListItem>
@@ -554,7 +554,7 @@ const Layout = () : React.ReactNode => {
                                                 <ListItemIcon className="cs-listitemicon">
                                                     <ContactsOutlinedIcon fontSize="small" />
                                                 </ListItemIcon>
-                                                <ListItemText primary={t('contacts')} primaryTypographyProps={{ fontSize: 13 }} />
+                                                <ListItemText primary={t('contacts')} slotProps={{primary:{fontSize: 13}}} />
                                             </ListItemButton>
                                         </DarkTooltip>
                                         </ListItem>

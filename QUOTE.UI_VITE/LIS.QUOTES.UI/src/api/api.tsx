@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 import { getAccessToken } from "../utils/functions";
 import { useAccount, useMsal } from "@azure/msal-react";
-import { shipmentRequest, transportRequest } from "../config/msalConfig";
+import { documentRequest, shipmentRequest, transportRequest } from "../config/msalConfig";
 import { client as shipmentClient } from "./client/shipment";
 import { client as shipmentTransport } from "./client/transport";
+import { client as shipmentDocument } from "./client/document";
 
 const BackendServiceProvider = ({children}:{children:React.ReactNode}) => {
 
@@ -15,6 +16,7 @@ const BackendServiceProvider = ({children}:{children:React.ReactNode}) => {
     useEffect(() => {
       const getTokens = async () => {
         const _tokenTransport = await getAccessToken(instance, transportRequest, account);
+        const _tokenDocument = await getAccessToken(instance, documentRequest, account);
         const _tokenShipment = await getAccessToken(instance, shipmentRequest, account);
         
         shipmentClient.setConfig({
@@ -25,11 +27,18 @@ const BackendServiceProvider = ({children}:{children:React.ReactNode}) => {
         })
 
         shipmentTransport.setConfig({
-            baseURL: import.meta.env.VITE_API_LIS_TRANSPORT_ENDPOINT,
-            headers: {
-              Authorization: `Bearer ${_tokenTransport}`
-            }
-          })
+          baseURL: import.meta.env.VITE_API_LIS_TRANSPORT_ENDPOINT,
+          headers: {
+            Authorization: `Bearer ${_tokenTransport}`
+          }
+        })
+
+        shipmentDocument.setConfig({
+          baseURL: import.meta.env.VITE_API_LIS_DOCUMENT_ENDPOINT,
+          headers: {
+            Authorization: `Bearer ${_tokenDocument}`
+          }
+        })
 
           setTokensLoading(false)
       }

@@ -29,3 +29,9 @@ export const msalConfig: Configuration = {
       import.meta.env.VITE_TRANSPORT_REQUEST_SCOPE !== undefined ? import.meta.env.VITE_TRANSPORT_REQUEST_SCOPE : ""
     ]
   }
+
+  export const documentRequest: PopupRequest = {
+    scopes: [
+      import.meta.env.VITE_TRANSPORT_REQUEST_SCOPE !== undefined ? import.meta.env.VITE_TRANSPORT_REQUEST_SCOPE : ""
+    ]
+  }
