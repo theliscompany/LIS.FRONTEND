@@ -1,56 +1,47 @@
 import { useState } from 'react';
 import { BootstrapDialogTitle, BootstrapInput, actionButtonStyles, buttonCloseStyles, inputLabelStyles } from '../../utils/misc/styles';
 import { Button, DialogActions, DialogContent, Grid, InputLabel, MenuItem, Select, Typography } from '@mui/material';
-import { useAuthorizedBackendApi } from '../../api/api';
 import { useTranslation } from 'react-i18next';
 import { enqueueSnackbar } from 'notistack';
-import { BackendService } from '../../utils/services/fetch';
-import { protectedResources } from '../../config/authConfig';
-import { useAccount, useMsal } from '@azure/msal-react';
 import CountrySelect from './CountrySelect';
+import { getLISTransportAPI } from '../../api/client/transportService';
+import { PortViewModel } from '../../api/client/schemas/transport';
 
 function NewPort(props: any) {
     const [testName, setTestName] = useState<string>("");
     const [country, setCountry] = useState<any>(null);
     
-    const { instance, accounts } = useMsal();
-    const account = useAccount(accounts[0] || {});
-
-    const context = useAuthorizedBackendApi();
+    const { createPort } = getLISTransportAPI();
     const { t } = useTranslation();
     
     const createNewPort = async () => {
         if (testName !== "" && country !== null) {
-            if (account && instance && context) {
-                // const token = await getAccessToken(instance, transportRequest, account);
-    
-                var dataSent = {
-                    "portName": testName,
-                    "country": country.label
-                };
-                
-                try {
-                    const response = await (context?.service as BackendService<any>).postWithToken(protectedResources.apiLisTransport.endPoint+"/Port/CreatePort", dataSent, context.tokenTransport);
-                    if (response !== null) {
-                        enqueueSnackbar("The port has been added with success!", { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
-                        
-                        if (props.callBack !== undefined && props.callBack !== null) {
-                            props.callBack();
-                        }
-                        props.closeModal();
+            var dataSent: PortViewModel = {
+                "portName": testName,
+                "country": country.label
+            };
+            
+            try {
+                const response = await createPort(dataSent);
+                if (response !== null) {
+                    enqueueSnackbar("The port has been added with success!", { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                    
+                    if (props.callBack !== undefined && props.callBack !== null) {
+                        props.callBack();
                     }
-                    else {
-                        enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
-                    }
+                    props.closeModal();
                 }
-                catch (err: any) {
-                    console.log(err);
+                else {
                     enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
                 }
             }
+            catch (err: any) {
+                console.log(err);
+                enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+            }
         }
         else {
-            enqueueSnackbar("One or many the fields are empty, please verify the form and fill everything.", { variant: "warning", anchorOrigin: { horizontal: "right", vertical: "top"} });
+            enqueueSnackbar(t('verifyMessage'), { variant: "warning", anchorOrigin: { horizontal: "right", vertical: "top"} });
         }
     }
     

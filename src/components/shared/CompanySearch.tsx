@@ -1,14 +1,8 @@
 import { useState } from "react";
 import { Autocomplete, CircularProgress, Skeleton, TextField } from "@mui/material";
 import { debounce } from "@mui/material/utils";
-import axios from "axios";
 import { useTranslation } from "react-i18next";
-import { AuthenticationResult } from "@azure/msal-browser";
-import { useMsal, useAccount } from "@azure/msal-react";
-import { useAuthorizedBackendApi } from "../../api/api";
-import { crmRequest, protectedResources } from "../../config/authConfig";
-import { BackendService } from "../../utils/services/fetch";
-import { getAccessToken } from "../../utils/functions";
+import { getLisCrmApi } from "../../api/client/crmService";
 
 interface CompanyAutocompleteProps {
     id: string;
@@ -24,25 +18,20 @@ const CompanySearch: React.FC<CompanyAutocompleteProps> = ({ id, value, onChange
     const [loading, setLoading] = useState(false);
     const [options, setOptions] = useState<any[]>([]);
 
-    const { instance, accounts } = useMsal();
-    const context = useAuthorizedBackendApi();
-    const account = useAccount(accounts[0] || {});
+    const { getContactGetContacts } = getLisCrmApi();
 
     const debouncedSearch = debounce(async (search: string) => {
-        if (account && instance && context) {
-            setLoading(true);
-            // const token = await getAccessToken(instance, crmRequest, account);
-            
-            var requestString = protectedResources.apiLisCrm.endPoint+"/Contact/GetContacts?contactName="+search+"&category="+category;
-            if (category === 0) {
-                requestString = protectedResources.apiLisCrm.endPoint+"/Contact/GetContacts?contactName="+search;
-            }
-            
-            const response = await (context?.service as BackendService<any>).getWithToken(requestString, context.tokenCrm);
-            if (response !== null && response !== undefined && response.length !== 0) {
+        setLoading(true);
+        try {
+            const response = await getContactGetContacts(category === 0 ? { contactName: search } : { contactName: search, category: category });
+            if (response !== null && response !== undefined) {
                 console.log(response);
-                setOptions(response.data);
+                setOptions(response.data?.data || []);
             }  
+            setLoading(false);
+        }
+        catch (err: any) {
+            console.log(err);
             setLoading(false);
         }
     }, 1000);

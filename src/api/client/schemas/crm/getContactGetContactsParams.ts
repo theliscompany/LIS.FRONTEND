@@ -8,7 +8,7 @@ import type { GetContactGetContactsCategory } from './getContactGetContactsCateg
 
 export type GetContactGetContactsParams = {
 contactName?: string;
-category?: GetContactGetContactsCategory;
+category?: number;
 contactNumber?: string;
 pageNumber?: number;
 pageSize?: number;

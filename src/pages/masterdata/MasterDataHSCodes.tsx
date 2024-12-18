@@ -3,14 +3,14 @@ import { useState, useEffect } from 'react';
 import { SnackbarProvider, enqueueSnackbar } from 'notistack';
 import { useMsal, useAccount } from '@azure/msal-react';
 import { useAuthorizedBackendApi } from '../../api/api';
-import { protectedResources } from '../../config/authConfig';
-import { BackendService } from '../../utils/services/fetch';
 import { Alert, Box, Button, DialogActions, DialogContent, Grid, IconButton, InputLabel, Skeleton, Typography } from '@mui/material';
 import { DataGrid, GridColDef, GridRenderCellParams, GridToolbar } from '@mui/x-data-grid';
 // import { t } from 'i18next';
 import { sizingStyles, gridStyles, BootstrapDialog, BootstrapDialogTitle, buttonCloseStyles, BootstrapInput, actionButtonStyles, inputLabelStyles } from '../../utils/misc/styles';
-import { Edit, Delete } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
+import { getRequestQuote } from '../../api/client/quoteService';
+import { AxiosError } from 'axios';
+import { HSCodeLIS } from '../../api/client/schemas/quote';
 
 const MasterDataHSCodes: any = (props: any) => {
     const { t } = useTranslation();
@@ -32,39 +32,27 @@ const MasterDataHSCodes: any = (props: any) => {
     const account = useAccount(accounts[0] || {});
     const context = useAuthorizedBackendApi();
 
-    const getHSCodes = async () => {
-        if (account && instance && context) {
-            setLoadResults(true);
-            const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisQuotes.endPoint+"/HSCodeLIS", context.tokenLogin);
-            if (response !== null && response !== undefined) {
-                setHSCodes(response);
-                setLoadResults(false);
+    const { getApiHSCodeLIS, postApiHSCodeLIS, putApiHSCodeLISId } = getRequestQuote();
+
+    const getHSCodesService = async () => {
+        setLoadResults(true);
+        try {
+            const codes = await getApiHSCodeLIS();
+            setHSCodes(codes.data);
+            setLoadResults(false);
+        }
+        catch (err: unknown) {
+            if (err instanceof AxiosError) {
+                console.log(err.response?.data);
             }
-            else {
-                setLoadResults(false);
-            }
+            console.log("An error occured");
+            setLoadResults(false);
         }
     }
-    
-    const deleteHSCodePrice = async (id: string) => {
-        if (account && instance && context) {
-            try {
-                const response = await (context?.service as BackendService<any>).deleteWithToken(protectedResources.apiLisQuotes.endPoint+"/HSCodeLIS/"+id, context.tokenLogin);
-                console.log(response);
-                enqueueSnackbar(t('rowDeletedSuccess'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
-                setModal2(false);
-                getHSCodes();
-            }
-            catch (e: any) {
-                console.log(e);
-                enqueueSnackbar(t('rowDeletedError'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
-            }
-        }
-    }
-    
+
     useEffect(() => {
-        getHSCodes();
-    }, [account, instance, account]);
+        getHSCodesService();
+    }, []);
 
     const columnsHSCodes: GridColDef[] = [
         { field: 'hS_Code', headerName: t('id'), flex: 1 },
@@ -98,62 +86,43 @@ const MasterDataHSCodes: any = (props: any) => {
     
     const createNewHSCode = async () => {
         if (category !== "" && descriptionFr !== "" && descriptionEn !== "" && descriptionNl !== "") {
-            if (account && instance && context) {
-                try {
-                    var dataSent = null;
-                    var response = null;
-                    if (currentEditId !== "") {
-                        dataSent = {
-                            "hS_Code": currentEditId,
-                            "_4_digit_categories": category,
-                            "product_description_Fr": descriptionFr,
-                            "product_description_En": descriptionEn,
-                            "product_description_NL": descriptionNl,
-                        };
-                        response = await (context?.service as BackendService<any>).putWithToken(protectedResources.apiLisQuotes.endPoint+"/HSCodeLIS/"+currentEditId, dataSent, context.tokenLogin);
-                    }
-                    else {
-                        dataSent = {
-                            "_4_digit_categories": category,
-                            "product_description_Fr": descriptionFr,
-                            "product_description_En": descriptionEn,
-                            "product_description_NL": descriptionNl,
-                        };
-                        response = await (context?.service as BackendService<any>).postWithToken(protectedResources.apiLisQuotes.endPoint+"/HSCodeLIS", dataSent, context.tokenLogin);
-                    }
-                    enqueueSnackbar(currentEditId === "" ? "The product has been added with success!" : "The product has been edited with success!", { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
-                    getHSCodes();
-                    setModal(false);    
+            try {
+                var dataSent: HSCodeLIS;
+                var response = null;
+                if (currentEditId !== "") {
+                    dataSent = {
+                        "hS_Code": Number(currentEditId),
+                        "_4_digit_categories": category,
+                        "product_description_Fr": descriptionFr,
+                        "product_description_En": descriptionEn,
+                        "product_description_NL": descriptionNl,
+                    };
+                    // response = await (context?.service as BackendService<any>).putWithToken(protectedResources.apiLisQuotes.endPoint+"/HSCodeLIS/"+currentEditId, dataSent, context.tokenLogin);
+                    response = await putApiHSCodeLISId(Number(currentEditId), dataSent);
                 }
-                catch (err: any) {
-                    console.log(err);
-                    enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                else {
+                    dataSent = {
+                        "_4_digit_categories": category,
+                        "product_description_Fr": descriptionFr,
+                        "product_description_En": descriptionEn,
+                        "product_description_NL": descriptionNl,
+                    };
+                    // response = await (context?.service as BackendService<any>).postWithToken(protectedResources.apiLisQuotes.endPoint+"/HSCodeLIS", dataSent, context.tokenLogin);
+                    response = await postApiHSCodeLIS(dataSent);
                 }
+                enqueueSnackbar(currentEditId === "" ? "The hs-code has been added with success!" : "The hs-code has been edited with success!", { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                getHSCodesService();
+                setModal(false);    
+            }
+            catch (err: any) {
+                console.log(err);
+                enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
             }
         }
         else {
-            enqueueSnackbar("One or many the fields are empty, please verify the form and fill everything.", { variant: "warning", anchorOrigin: { horizontal: "right", vertical: "top"} });
+            enqueueSnackbar(t('verifyMessage'), { variant: "warning", anchorOrigin: { horizontal: "right", vertical: "top"} });
         }
     }
-    
-    // const getHSCode = async (id: string) => {
-    //     setLoadEdit(true)
-    //     if (account && instance && context) {
-    //         const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisQuotes.endPoint+"/HSCodeLIS/"+id, context.tokenLogin);
-    //         if (response !== null && response !== undefined) {
-    //             console.log(response);
-    //             // setTestName(response.productName);
-    //             setCategory(response._4_digit_categories);
-    //             setDescriptionFr(response.product_description_Fr);
-    //             setDescriptionEn(response.product_description_En);
-    //             setDescriptionNl(response.product_description_NL);
-    //             setLoadEdit(false);
-    //         }
-    //         else {
-    //             setLoadEdit(false);
-    //         }
-    //     }
-    // }
     
     const resetForm = () => {
         setTestName("");
@@ -175,7 +144,7 @@ const MasterDataHSCodes: any = (props: any) => {
                         <Button 
                             variant="contained" color="inherit" 
                             sx={{ float: "right", backgroundColor: "#fff", textTransform: "none", ml: 2 }} 
-                            onClick={() => { getHSCodes(); }} 
+                            onClick={() => { getHSCodesService(); }} 
                         >
                             {t('reload')}
                         </Button>
@@ -270,7 +239,7 @@ const MasterDataHSCodes: any = (props: any) => {
                 </DialogActions>
             </BootstrapDialog>
 
-            <BootstrapDialog
+            {/* <BootstrapDialog
                 onClose={() => setModal2(false)}
                 aria-labelledby="custom-dialog-title"
                 open={modal2}
@@ -285,7 +254,7 @@ const MasterDataHSCodes: any = (props: any) => {
                     <Button variant="contained" color={"primary"} onClick={() => { deleteHSCodePrice(currentId); }} sx={{ mr: 1.5, textTransform: "none" }}>{t('accept')}</Button>
                     <Button variant="contained" onClick={() => setModal2(false)} sx={buttonCloseStyles}>{t('close')}</Button>
                 </DialogActions>
-            </BootstrapDialog>
+            </BootstrapDialog> */}
         </div>
     );
 }

@@ -56,10 +56,10 @@ export const crmRequest: PopupRequest = {
 
 export const protectedResources = {
   apiLisQuotes: {
-    endPoint: process.env.REACT_APP_API_LIS_QUOTES_ENDPOINT
+    endPoint: process.env.REACT_APP_API_LIS_QUOTES_ENDPOINT+"/api"
   },
   apiLisPricing: {
-    endPoint: process.env.REACT_APP_API_LIS_PRICING_ENDPOINT
+    endPoint: process.env.REACT_APP_API_LIS_PRICING_ENDPOINT+"/api"
   },
   apiLisTransport: {
     endPoint: process.env.REACT_APP_API_LIS_TRANSPORT_ENDPOINT

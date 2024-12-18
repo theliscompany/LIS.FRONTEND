@@ -15,6 +15,7 @@ import NewContact from '../../components/editRequestPage/NewContact';
 import { containerPackages } from '../../utils/constants';
 import useProcessStatePersistence from '../../utils/processes/useProcessStatePersistence';
 import { useSelector } from 'react-redux';
+import { getLISTransportAPI } from '../../api/client/transportService';
 
 function validMail(mail: string) {
     return /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/.test(mail);
@@ -42,9 +43,10 @@ function NewRequest(props: any) {
     const [modal10, setModal10] = useState<boolean>(false);
 
     const { instance, accounts } = useMsal();
-    const account = useAccount(accounts[0] || {});
-    
+    const account = useAccount(accounts[0] || {});    
     const context = useAuthorizedBackendApi();
+
+    const { getProduct } = getLISTransportAPI();
 
     var ourHSCodes: any = useSelector((state: any) => state.masterdata.hscodes);
     var ourProducts: any = useSelector((state: any) => state.masterdata.products);
@@ -70,16 +72,16 @@ function NewRequest(props: any) {
     
     const { t, i18n } = useTranslation();
     
-    const getProducts = async () => {
+    const getProductsService = async () => {
         if (account && instance && context) {
             if (ourProducts.length !== 0) {
                 console.log(ourProducts);
                 setProducts(ourProducts);    
             }
             else {
-                const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Product?pageSize=500", context.tokenTransport);
+                const response = await getProduct({ pageSize: 500 });
                 if (response !== null && response !== undefined) {
-                    setProducts(response);
+                    setProducts(response.data);
                 }      
             }    
         }
@@ -117,7 +119,7 @@ function NewRequest(props: any) {
     
     useEffect(() => {
         getContainers();
-        getProducts(); 
+        getProductsService(); 
         getHSCodes(); 
         getAssignees();
     }, [instance, account, context]);

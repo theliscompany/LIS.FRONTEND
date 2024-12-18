@@ -18,6 +18,7 @@ import RequestForm from '../../components/editRequestPage/RequestForm';
 import AddContainer from '../../components/editRequestPage/AddContainer';
 import RequestFormHeader from '../../components/editRequestPage/RequestFormHeader';
 import { useSelector } from 'react-redux';
+import { getLISTransportAPI } from '../../api/client/transportService';
 // @ts-ignore
 
 // let packingOptions = ["Unit", "Bundle", "Bag", "Pallet", "Carton", "Lot", "Crate"];
@@ -64,9 +65,12 @@ function Request() {
     
     let { id } = useParams();
     const navigate = useNavigate();
+    
     const { instance, accounts } = useMsal();
     const account = useAccount(accounts[0] || {});
     const context = useAuthorizedBackendApi();
+    
+    const { getPorts, getProduct } = getLISTransportAPI();
     const { t } = useTranslation();
     
     var ourPorts: any = useSelector((state: any) => state.masterdata.ports);
@@ -110,8 +114,8 @@ function Request() {
     useEffect(() => {
         getContainers();
         getAssignees();
-        getPorts();
-        getProducts();
+        getPortsService();
+        getProductsService();
         getHSCodes();
         // loadRequest();
     }, [account, instance, context]);
@@ -170,38 +174,32 @@ function Request() {
         setContainers(containerPackages);
     }
     
-    const getPorts = async () => {
-        if (account && instance && context) {
-            if (ourPorts !== undefined && ourPorts.length !== 0) {
-                // console.log(ourPorts);
-                var addedCoordinatesPorts = addedCoordinatesToPorts(ourPorts);
+    const getPortsService = async () => {
+        if (ourPorts !== undefined && ourPorts.length !== 0) {
+            var addedCoordinatesPorts = addedCoordinatesToPorts(ourPorts);
+            setPorts(addedCoordinatesPorts);
+        }
+        else {
+            const response = await getPorts({ pageSize: 2000 });
+            if (response !== null && response !== undefined) {
+                var addedCoordinatesPorts = addedCoordinatesToPorts(response.data);
                 setPorts(addedCoordinatesPorts);
-            }
-            else {
-                const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Port/Ports?pageSize=2000", context.tokenTransport);
-                if (response !== null && response !== undefined) {
-                    var addedCoordinatesPorts = addedCoordinatesToPorts(response);
-                    setPorts(addedCoordinatesPorts);
-                    // console.log(response);
-                    // console.log(addedCoordinatesPorts);
-                }
+                // console.log(addedCoordinatesPorts);
             }
         }
     }
     
-    const getProducts = async () => {
-        if (account && instance && context) {
-            if (ourProducts !== undefined && ourProducts.length !== 0) {
-                // console.log(ourProducts);
-                setProducts(ourProducts);    
-            }
-            else {
-                const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Product?pageSize=500", context.tokenTransport);
-                if (response !== null && response !== undefined) {
-                    setProducts(response);
-                }      
-            }    
+    const getProductsService = async () => {
+        if (ourProducts !== undefined && ourProducts.length !== 0) {
+            // console.log(ourProducts);
+            setProducts(ourProducts);    
         }
+        else {
+            const response = await getProduct({ pageSize: 500 });
+            if (response !== null && response !== undefined) {
+                setProducts(response.data);
+            }      
+        }    
     }
 
     const getHSCodes = async () => {
@@ -372,7 +370,7 @@ function Request() {
                         <RequestFormHeader 
                             id={id} email={email} status={status}
                             trackingNumber={trackingNumber} editRequest={editRequest}
-                            getPorts={getPorts} getProducts={getProducts}
+                            getPorts={getPortsService} getProducts={getProductsService}
                         /> 
                         
                         {/* Request Form COMPONENT */}

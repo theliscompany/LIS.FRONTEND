@@ -9,7 +9,6 @@ import { crmRequest, protectedResources } from '../../config/authConfig';
 import { useAccount, useMsal } from '@azure/msal-react';
 import { MuiChipsInputChip } from 'mui-chips-input';
 import { Dayjs } from 'dayjs';
-import AutocompleteSearch from '../shared/AutocompleteSearch';
 import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -18,6 +17,7 @@ import { RichTextEditor, MenuControlsContainer, MenuSelectHeading, MenuDivider, 
 import './../../App.css';
 import { Anchor } from '@mui/icons-material';
 import { validateObjectHSCODEFormat } from '../../utils/functions';
+import { getLisCrmApi } from '../../api/client/crmService';
 
 function createGetRequestUrl(variable1: number, variable2: number) {
     let url = protectedResources.apiLisPricing.endPoint+"/SeaFreight/GetSeaFreights?";
@@ -43,6 +43,7 @@ const defaultTemplate = "658e880927587b09811c13cb";
 
 function RequestPriceRequest(props: any) {
     const { t, i18n } = useTranslation();
+    const { getContactGetContacts } = getLisCrmApi();
     
     const [subject, setSubject] = useState<string>(props.portLoading !== null && props.portDischarge !== null ? props.portLoading.portName+","+props.portLoading.country+" - "+props.portDischarge.portName+","+props.portDischarge.country+" / "+t("rateRequest") : "");
     const [recipients, setRecipients] = useState<any>([]);
@@ -150,17 +151,15 @@ function RequestPriceRequest(props: any) {
     }
 
     const getClients = async () => {
-        if (account && instance && context) {
-            try {
-                const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisCrm.endPoint+"/Contact/GetContacts?category=5&pageSize=1000", context.tokenCrm);
-                if (response !== null && response !== undefined) {
-                    // Removing duplicates from client array
-                    setCarriersData(response.data.filter((obj: any, index: number, self: any) => index === self.findIndex((o: any) => o.contactName === obj.contactName)));
-                }
+        try {
+            const response = await getContactGetContacts({ category: 5, pageSize: 1000 });
+            if (response !== null && response !== undefined) {
+                // Removing duplicates from client array
+                setCarriersData(response.data.data?.filter((obj: any, index: number, self: any) => index === self.findIndex((o: any) => o.contactName === obj.contactName)));
             }
-            catch (err: any) {
-                console.log(err);
-            }
+        }
+        catch (err: any) {
+            console.log(err);
         }
     }
     

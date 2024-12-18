@@ -3,12 +3,8 @@ import List from '@mui/material/List';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import { Dayjs } from 'dayjs';
-// import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-// import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-// import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
-import { Alert, Button, Grid, InputLabel, NativeSelect, Skeleton } from '@mui/material';
+import { Alert, Button, Grid, Skeleton } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
-// import { BootstrapInput, datetimeStyles, inputLabelStyles } from '../../utils/misc/styles';
 import { protectedResources } from '../../config/authConfig';
 import { enqueueSnackbar, SnackbarProvider } from 'notistack';
 import { useAuthorizedBackendApi } from '../../api/api';
@@ -17,9 +13,9 @@ import { RequestResponseDto } from '../../utils/models/models';
 import { useAccount, useMsal } from '@azure/msal-react';
 import { useTranslation } from 'react-i18next';
 import RequestViewItem from '../../components/requestsPage/RequestViewItem';
-// import AutocompleteSearch from '../../components/shared/AutocompleteSearch';
 import SearchZone from '../../components/requestsPage/SearchZone';
 import { useSelector } from 'react-redux';
+import { getRequestQuote } from '../../api/client/quoteService';
 
 function createGetRequestUrl(variable1: string, variable2: string, variable3: string, variable4: string, variable5: Dayjs|null, variable6: Dayjs|null, variable7: Dayjs|null, variable8: Dayjs|null, assigneeId: number) {
     let url = protectedResources.apiLisQuotes.endPoint+'/Request?';
@@ -68,12 +64,11 @@ function MyRequests() {
     const [createdDateEnd, setCreatedDateEnd] = useState<Dayjs | null>(null);
     const [updatedDateStart, setUpdatedDateStart] = useState<Dayjs | null>(null);
     const [updatedDateEnd, setUpdatedDateEnd] = useState<Dayjs | null>(null);
-    //let { search } = useParams();
+
     const { instance, accounts } = useMsal();
-    const account = useAccount(accounts[0] || {});
-    
+    const account = useAccount(accounts[0] || {});    
     const context = useAuthorizedBackendApi();
-    
+
     var ourAssignees: any = useSelector((state: any) => state.masterdata.assignees);
 
     const handleChangePackingType = (event: { target: { value: string } }) => {
@@ -110,7 +105,6 @@ function MyRequests() {
                     if (response !== null && response.code !== undefined) {
                         if (response.code === 200) {
                             setAssignees(response.data);
-                            // loadRequests(response.data);
                             setLoad(false);
                         }
                         else {
@@ -129,25 +123,8 @@ function MyRequests() {
         }
     }
     
-    // const getAssignees = async () => {
-    //     if (account && instance && context) {
-    //         const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisQuotes.endPoint+"/Assignee", context.tokenLogin);
-    //         if (response !== null && response.code !== undefined) {
-    //             if (response.code === 200) {
-    //                 setCurrentUser(response.data.find((elm: any) => elm.email === account?.username));
-    //                 // Then I can load requests
-    //                 loadRequests(response.data);
-    //             }
-    //             else {
-    //                 setLoad(false);
-    //             }
-    //         }
-    //     }
-    // }
-
     const loadRequests = async (assigneesList: any) => {
         if (account && instance && context) {
-            //setLoad(true);
             var auxAssignee = assigneesList.find((elm: any) => elm.email === account?.username);
             console.log("Acc", account);
             console.log("Auxlist", assigneesList);

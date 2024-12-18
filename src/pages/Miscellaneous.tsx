@@ -25,6 +25,7 @@ import { Anchor } from '@mui/icons-material';
 import NewService from '../components/shared/NewService';
 import NewPort from '../components/shared/NewPort';
 import { compareServices } from '../utils/functions';
+import { getLISTransportAPI } from '../api/client/transportService';
 
 function createGetRequestUrl(variable1: number, variable2: number, variable3: number) {
     let url = protectedResources.apiLisPricing.endPoint+"/Miscellaneous/Miscellaneous?";
@@ -81,6 +82,8 @@ function Miscellaneous() {
     const { instance, accounts } = useMsal();
     const account = useAccount(accounts[0] || {});
     const context = useAuthorizedBackendApi();
+
+    const { getPorts, getService } = getLISTransportAPI();
     
     const CustomPopper = React.forwardRef(function CustomPopper(props: any, ref: any) {
         return <Popper {...props} ref={ref} placement="top-start" />;
@@ -184,7 +187,7 @@ function Miscellaneous() {
     ];
     
     useEffect(() => {
-        getPorts();
+        getPortsService();
         getProtectedData(); // Services and Containers
     }, [account, instance, account]);
 
@@ -206,32 +209,28 @@ function Miscellaneous() {
         }
     }, [showHaulages, ports]);
     
-    const getPorts = async () => {
-        if (account && instance && context) {
-            const response = await (context?.service as BackendService<any>).getSingle(protectedResources.apiLisTransport.endPoint+"/Port/Ports?pageSize=2000");
-            if (response !== null && response !== undefined) {
-                setPorts(response);
-            }  
+    const getPortsService = async () => {
+        const response = await getPorts({ pageSize: 2000 });
+        if (response !== null && response !== undefined) {
+            setPorts(response.data);
         }
     }
     
     const getProtectedData = async () => {
         if (account && instance && context) {
-            getServices("");
-            getContainers("");
+            getServices();
+            getContainers();
         }
     }
 
-    const getServices = async (token: string) => {
-        if (account && instance && context) {
-            const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Service?pageSize=500", context.tokenTransport);
-            if (response !== null && response !== undefined) {
-                setServices(response.sort((a: any, b: any) => compareServices(a, b)).filter((obj: any) => obj.servicesTypeId.includes(5))); // Filter the services for miscellaneous (MISCELLANEOUS = 5)
-            }  
+    const getServices = async () => {
+        const response = await getService({ pageSize: 500 });
+        if (response !== null && response !== undefined) {
+            setServices(response.data.sort((a: any, b: any) => compareServices(a, b)).filter((obj: any) => obj.servicesTypeId.includes(5))); // Filter the services for miscellaneous (MISCELLANEOUS = 5)
         }
     }
     
-    const getContainers = async (token: string) => {
+    const getContainers = async () => {
         setContainers(containerPackages);
     }
     
@@ -632,7 +631,7 @@ function Miscellaneous() {
                         loadEdit === false ?
                         <Grid container spacing={2}>
                             <Grid item xs={12} md={8}>
-                                <Typography sx={{ fontSize: 18 }}><b>Miscellaneous price information</b></Typography>
+                                <Typography sx={{ fontSize: 18 }}><b>{t('miscPriceInfo')}</b></Typography>
                             </Grid>
                             <Grid item xs={12} md={4}>
                                 <Button variant="contained" color="inherit" sx={{ float: "right", backgroundColor: "#fff", textTransform: "none" }} onClick={() => { setModal7(true); }} >Create new supplier</Button>

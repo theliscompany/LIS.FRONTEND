@@ -22,6 +22,7 @@ import { AxiosError } from 'axios';
 import { getLISTransportAPI } from '../api/client/transportService';
 import { PortViewModel } from '../api/client/schemas/transport';
 import { ResponseOrdersListDto } from '../api/client/schemas/shipment';
+import { getLisCrmApi } from '../api/client/crmService';
 
 function Orders() {
     const [load, setLoad] = useState<boolean>(true);
@@ -53,6 +54,7 @@ function Orders() {
 
     const { getOrders } = getLISShipmentAPI();
     const { getPorts } = getLISTransportAPI();
+    const { getContactGetContacts } = getLisCrmApi();
     
     const navigate = useNavigate();
     const { t } = useTranslation();
@@ -290,52 +292,21 @@ function Orders() {
         getFavorites();
     }, [account, instance, context]);
 
-    // useEffect(() => {
-    //     // console.log("Orders : ", orders);
-    //     if (contacts !== null && ports !== null && ships !== null) {
-    //         getOrders2();
-    //     }
-    // }, [contacts, ports, ships]);
-    
-    // const getPorts = async () => {
-    //     if (account && instance && context) {
-    //         try {
-    //             if (ourPorts !== null && ourPorts !== undefined && ourPorts.length !== 0) {
-    //                 // console.log(ourPorts);
-    //                 setPorts(ourPorts);
-    //             }
-    //             else {
-    //                 const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Port/Ports?pageSize=2000", context.tokenTransport);
-    //                 if (response !== null && response !== undefined) {
-    //                     console.log(response);
-    //                     setPorts(response);
-    //                 }
-    //             }
-    //         }
-    //         catch (err: any) {
-    //             console.log(err);
-    //         }
-    //     }
-    // }
-    
     const getContacts = async () => {
-        if (account && instance && context) {
-            try {
-                if (ourContacts !== null && ourContacts !== undefined && ourContacts.length !== 0) {
-                    // console.log(ourContacts);
-                    setContacts(ourContacts);
-                }
-                else {
-                    const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisCrm.endPoint+"/Contact/GetContacts?pageSize=4000", context.tokenCrm);
-                    if (response !== null && response !== undefined) {
-                        console.log(response.data);
-                        setContacts(response.data);
-                    }
+        try {
+            if (ourContacts !== null && ourContacts !== undefined && ourContacts.length !== 0) {
+                setContacts(ourContacts);
+            }
+            else {
+                const response = await getContactGetContacts({ pageSize: 4000 });
+                if (response !== null && response !== undefined) {
+                    console.log(response.data);
+                    setContacts(response.data);
                 }
             }
-            catch (err: any) {
-                console.log(err);
-            }
+        }
+        catch (err: any) {
+            console.log(err);
         }
     }
     

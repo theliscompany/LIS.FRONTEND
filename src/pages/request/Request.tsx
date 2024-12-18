@@ -18,9 +18,9 @@ import RequestForm from '../../components/editRequestPage/RequestForm';
 import AddContainer from '../../components/editRequestPage/AddContainer';
 import RequestFormHeader from '../../components/editRequestPage/RequestFormHeader';
 import { useSelector } from 'react-redux';
+import { getLISTransportAPI } from '../../api/client/transportService';
 // @ts-ignore
 
-// let packingOptions = ["Unit", "Bundle", "Bag", "Pallet", "Carton", "Lot", "Crate"];
 
 function Request() {
     const [load, setLoad] = useState<boolean>(false);
@@ -67,6 +67,8 @@ function Request() {
     const { instance, accounts } = useMsal();
     const account = useAccount(accounts[0] || {});
     const context = useAuthorizedBackendApi();
+
+    const { getPorts, getProduct } = getLISTransportAPI();
     const { t } = useTranslation();
     
     var ourPorts: any = useSelector((state: any) => state.masterdata.ports);
@@ -110,10 +112,9 @@ function Request() {
     useEffect(() => {
         getContainers();
         getAssignees();
-        getPorts();
-        getProducts();
+        getPortsService();
+        getProductsService();
         getHSCodes();
-        // loadRequest();
     }, [account, instance, context]);
     
     useEffect(() => {
@@ -124,7 +125,6 @@ function Request() {
 
     useEffect(() => {
         if (ports !== null && products !== null && requestData !== null) {
-            // setTags(requestData.tags !== null ? products.filter((elm: any) => requestData.tags.includes(elm.productName)) : []);
             const closestDeparturePort = findClosestSeaPort(parseLocation(requestData.departure), ports);
             const closestArrivalPort = findClosestSeaPort(parseLocation(requestData.arrival), ports);
             setPortDeparture(closestDeparturePort);
@@ -137,7 +137,6 @@ function Request() {
     const getAssignees = async () => {
         if (account && instance && context) {
             if (ourAssignees !== undefined) {
-                // console.log(ourAssignees);
                 setAssignees(ourAssignees.data);
                 setLoadAssignees(false);
             }
@@ -170,33 +169,27 @@ function Request() {
         setContainers(containerPackages);
     }
     
-    const getPorts = async () => {
-        if (account && instance && context) {
-            if (ourPorts !== undefined && ourPorts.length !== 0) {
-                // console.log(ourPorts);
-                var addedCoordinatesPorts = addedCoordinatesToPorts(ourPorts);
+    const getPortsService = async () => {
+        if (ourPorts !== undefined && ourPorts.length !== 0) {
+            var addedCoordinatesPorts = addedCoordinatesToPorts(ourPorts);
+            setPorts(addedCoordinatesPorts);
+        }
+        else {
+            const response = await getPorts({ pageSize: 2000 });
+            if (response !== null && response !== undefined) {
+                var addedCoordinatesPorts = addedCoordinatesToPorts(response);
                 setPorts(addedCoordinatesPorts);
-            }
-            else {
-                const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Port/Ports?pageSize=2000", context.tokenTransport);
-                if (response !== null && response !== undefined) {
-                    var addedCoordinatesPorts = addedCoordinatesToPorts(response);
-                    setPorts(addedCoordinatesPorts);
-                    // console.log(response);
-                    // console.log(addedCoordinatesPorts);
-                }
             }
         }
     }
     
-    const getProducts = async () => {
+    const getProductsService = async () => {
         if (account && instance && context) {
             if (ourProducts !== undefined && ourProducts.length !== 0) {
-                // console.log(ourProducts);
                 setProducts(ourProducts);    
             }
             else {
-                const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Product?pageSize=500", context.tokenTransport);
+                const response = await getProduct({ pageSize: 500 });
                 if (response !== null && response !== undefined) {
                     setProducts(response);
                 }      
@@ -208,7 +201,6 @@ function Request() {
         if (account && instance && context) {
             console.log(ourHSCodes);
             if (ourHSCodes !== undefined && ourHSCodes.length !== 0) {
-                // console.log(ourHSCodes);
                 setHSCodes(ourHSCodes);    
             }
             else {
@@ -325,8 +317,6 @@ function Request() {
                 quantity: quantity,
                 detail: message,
                 clientNumber: clientNumber !== null ? String(clientNumber.contactNumber)+", "+clientNumber.contactName : null,
-                // tags: tags.length !== 0 ? tags.map((elm: any) => elm.productName).join(',') : null,
-                // tags: tags1 !== "," ? tags1 : tags2 !== "," ? tags2 : null,
                 tags: valueSpecifics !== "hscodes" ? tags1 : tags2,
                 assigneeId: Number(assignedManager)
             };
@@ -372,7 +362,7 @@ function Request() {
                         <RequestFormHeader 
                             id={id} email={email} status={status}
                             trackingNumber={trackingNumber} editRequest={editRequest}
-                            getPorts={getPorts} getProducts={getProducts}
+                            getPorts={getPortsService} getProducts={getProductsService}
                         /> 
                         
                         {/* Request Form COMPONENT */}

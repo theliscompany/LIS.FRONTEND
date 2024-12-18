@@ -14,9 +14,7 @@ import { useTranslation } from 'react-i18next';
 import { getLisCrmApi } from '../../api/client/crmService';
 import { AxiosError } from 'axios';
 import { ContactViewModel, CreateContactViewModel, UpdateContactViewModel } from '../../api/client/schemas/crm';
-// import { axiosInstanceShipment } from '../../../src/api/client/axiosInstanceShipment';
 
-// console.log(typeof axiosInstanceShipment); // Should output 'function'
 
 const MasterDataContacts: any = (props: any) => {
     const { t } = useTranslation();
@@ -133,8 +131,6 @@ const MasterDataContacts: any = (props: any) => {
                         "categories": selectedCategories,
                         // "categories": getCategoryNames(selectedCategories)
                     };
-                    // console.log("Datasent : ", selectedCategories);
-                    // response = await (context?.service as BackendService<any>).putWithToken(protectedResources.apiLisCrm.endPoint+"/Contact/UpdateContact/"+currentEditId, dataSent, context.tokenCrm);
                     response = await putContactUpdateContactId(Number(currentEditId), dataSent);
                 }
                 else {
@@ -148,8 +144,6 @@ const MasterDataContacts: any = (props: any) => {
                         "categories": selectedCategories,
                         // "categories": getCategoryNames(selectedCategories)
                     };
-                    // console.log("Datasent : ", dataSent2);
-                    // response = await (context?.service as BackendService<any>).postWithToken(protectedResources.apiLisCrm.endPoint+"/Contact/CreateContact", dataSent, context.tokenCrm);
                     response = await postContactCreateContact(dataSent2);
                 }
                 enqueueSnackbar(currentEditId === "" ? "The contact has been added with success!" : "The contact has been edited with success!", { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
@@ -162,7 +156,7 @@ const MasterDataContacts: any = (props: any) => {
             }
         }
         else {
-            enqueueSnackbar("One or many the fields are empty, please verify the form and fill everything.", { variant: "warning", anchorOrigin: { horizontal: "right", vertical: "top"} });
+            enqueueSnackbar(t('verifyMessage'), { variant: "warning", anchorOrigin: { horizontal: "right", vertical: "top"} });
         }
     }
     

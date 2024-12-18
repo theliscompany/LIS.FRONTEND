@@ -25,6 +25,9 @@ import NewContact from '../components/editRequestPage/NewContact';
 import { compareServices, extractCityAndPostalCode, parseLocation2, sortHauliersByName } from '../utils/functions';
 import NewService from '../components/shared/NewService';
 import NewPort from '../components/shared/NewPort';
+import { getLISTransportAPI } from '../api/client/transportService';
+import { cp } from 'fs';
+import { getLisCrmApi } from '../api/client/crmService';
 
 function createGetRequestUrl(variable1: number, variable2: number, variable3: string) {
     let url = protectedResources.apiLisPricing.endPoint+"/Haulage/Haulages?";
@@ -93,6 +96,9 @@ function Haulages() {
     const account = useAccount(accounts[0] || {});
     const context = useAuthorizedBackendApi();
     
+    const { getPorts, getService } = getLISTransportAPI();
+    const { getContactGetContacts } = getLisCrmApi();
+
     const columnsHaulages: GridColDef[] = [
         { field: 'haulierName', headerName: t('haulier'), minWidth: 125, flex: 1.4 },
         { field: 'unitTariff', headerName: t('unitTariff'), valueGetter: (params: GridValueGetterParams) => `${params.row.unitTariff || ''} ${t(params.row.currency)}`, renderHeader: (params: GridColumnHeaderParams) => (<>Haulage <br />per unit</>), minWidth: 100, flex: 0.75 },
@@ -134,65 +140,52 @@ function Haulages() {
     
     useEffect(() => {
         // getClients();
-        getPorts();
+        getPortsService();
         getHaulages();
         getProtectedData();
     }, [account, instance, account]);
     
     const getClients = async () => {
-        if (account && instance && context) {
-            // const token = await getAccessToken(instance, crmRequest, account);
-            
-            try {
-                const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisCrm.endPoint+"/Contact/GetContacts?category=2&pageSize=1000", context.tokenCrm);
-                if (response !== null && response !== undefined) {
-                    // Removing duplicates from client array
-                    setClients(response.data.filter((obj: any, index: number, self: any) => index === self.findIndex((o: any) => o.contactName === obj.contactName)));
-                }
+        try {
+            const response = await getContactGetContacts({ category: 2, pageSize: 1000 });
+            if (response !== null && response !== undefined) {
+                // Removing duplicates from client array
+                setClients(response.data.data?.filter((obj: any, index: number, self: any) => index === self.findIndex((o: any) => o.contactName === obj.contactName)));
             }
-            catch (err: any) {
-                console.log(err);
-            }  
+        }
+        catch (err: any) {
+            console.log(err);
         }
     }
     
-    const getPorts = async () => {
-        if (account && instance && context) {
-            const response = await (context?.service as BackendService<any>).getSingle(protectedResources.apiLisTransport.endPoint+"/Port/Ports?pageSize=2000");
-            if (response !== null && response !== undefined) {
-                setPorts(response);
-            }  
+    const getPortsService = async () => {
+        const response = await getPorts({ pageSize: 2000 });
+        if (response !== null && response !== undefined) {
+            setPorts(response.data);
         }
     }
     
     const getProtectedData = async () => {
         if (account && instance && context) {
-            // const token = await getAccessToken(instance, transportRequest, account);
-            
-            getServices("");
-            getContainers("");
+            getServices();
+            getContainers();
         }
     }
     
-    const getServices = async (token: string) => {
-        if (account && instance && context) {
-            const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Service?pageSize=500", context.tokenTransport);
-            if (response !== null && response !== undefined) {
-                setAllServices(response);
-                setServices(response.sort((a: any, b: any) => compareServices(a, b)).filter((obj: any) => obj.servicesTypeId.includes(2))); // Filter the services for haulages (HAULAGE = 2)
-            }  
+    const getServices = async () => {
+        const response = await getService({ pageSize: 500 });
+        if (response !== null && response !== undefined) {
+            setAllServices(response);
+            setServices(response.data.sort((a: any, b: any) => compareServices(a, b)).filter((obj: any) => obj.servicesTypeId.includes(2))); // Filter the services for haulages (HAULAGE = 2)
         }
     }
     
-    const getContainers = async (token: string) => {
+    const getContainers = async () => {
         setContainers(containerPackages);
     }
     
     const getHaulages = async () => {
         if (account && instance && context) {
-            // const token = await getAccessToken(instance, pricingRequest, account);
-            // setTempToken(token);
-
             const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisPricing.endPoint+"/Haulage/Haulages", context.tokenPricing);
             if (response !== null && response !== undefined) {
                 setHaulages(sortHauliersByName(response));
@@ -681,7 +674,7 @@ function Haulages() {
             <BootstrapDialog onClose={() => setModal9(false)} open={modal9} maxWidth="md" fullWidth>
                 <NewPort 
                     closeModal={() => setModal9(false)}
-                    callBack={getPorts}
+                    callBack={getPortsService}
                 />
             </BootstrapDialog>
         </div>

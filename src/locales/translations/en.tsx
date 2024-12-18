@@ -543,4 +543,9 @@ export const en = {
   createRowShip: "Create a ship",
   shipName: "Ship name",
   listShips: "List of ships",
+  createNewService: "Create new service",
+  verifyMessage: "One or many the fields are empty, please verify the form and fill everything.",
+  serviceAddedSuccess: "The service has been added with success!",
+  seafreightPriceInfo: "Seafreight price information",
+  miscPriceInfo: "Miscellaneous price information"
 };

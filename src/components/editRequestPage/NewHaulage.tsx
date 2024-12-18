@@ -15,6 +15,7 @@ import AutocompleteSearch from '../shared/AutocompleteSearch';
 import CompanySearch from '../shared/CompanySearch';
 import { Dayjs } from 'dayjs';
 import NewContact from './NewContact';
+import { getLisPricingApi } from '../../api/client/pricingService';
 
 function NewHaulage(props: any) {
     const [load, setLoad] = useState<boolean>(false);
@@ -35,8 +36,9 @@ function NewHaulage(props: any) {
 
     const { instance, accounts } = useMsal();
     const account = useAccount(accounts[0] || {});
-
     const context = useAuthorizedBackendApi();
+
+    const { postApiHaulageHaulage } = getLisPricingApi();
     const { t } = useTranslation();
     
     const createHaulage = async () => {
@@ -75,7 +77,7 @@ function NewHaulage(props: any) {
                     "containers": containerTypes,
                 };
 
-                const response = await (context?.service as BackendService<any>).postWithToken(protectedResources.apiLisPricing.endPoint+"/Haulage/Haulage", dataSent, props.token);
+                const response = await postApiHaulageHaulage(dataSent);
                 if (response !== null && response !== undefined) {
                     enqueueSnackbar(t('successCreated'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
                     props.closeModal();

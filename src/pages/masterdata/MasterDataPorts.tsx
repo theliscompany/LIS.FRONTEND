@@ -114,7 +114,7 @@ const MasterDataPorts: any = (props: any) => {
             }
         }
         else {
-            enqueueSnackbar("One or many the fields are empty, please verify the form and fill everything.", { variant: "warning", anchorOrigin: { horizontal: "right", vertical: "top"} });
+            enqueueSnackbar(t('verifyMessage'), { variant: "warning", anchorOrigin: { horizontal: "right", vertical: "top"} });
         }
     }
     
