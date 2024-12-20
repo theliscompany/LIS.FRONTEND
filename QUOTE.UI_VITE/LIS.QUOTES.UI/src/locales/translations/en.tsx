@@ -543,4 +543,11 @@ export const en = {
   createRowShip: "Create a ship",
   shipName: "Ship name",
   listShips: "List of ships",
+  serviceAdded: "The service has been added with success!",
+  serviceEdited: "The service has been edited with success!",
+  productAdded: "The product has been added with success!",
+  productEdited: "The product has been edited with success!",
+  portAdded: "The port has been added with success!",
+  portEdited: "The port has been edited with success!",
+  servicesTypeId: "Service type"
 };

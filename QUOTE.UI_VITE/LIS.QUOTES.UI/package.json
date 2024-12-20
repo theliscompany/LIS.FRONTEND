@@ -10,7 +10,8 @@
     "preview": "vite preview",
     "generate-client-shipment": "npx @hey-api/openapi-ts -i https://lis-shipment-svc-staging.azurewebsites.net/swagger/v1/swagger.json -o src/api/client/shipment -c @hey-api/client-axios",
     "generate-client-transport": "npx @hey-api/openapi-ts -i https://lis-transport-svc-dev.azurewebsites.net/swagger/v1/swagger.json -o src/api/client/transport -c @hey-api/client-axios",
-    "generate-client-document": "npx @hey-api/openapi-ts -i https://lis-document-svc-staging.azurewebsites.net/swagger/v1/swagger.json -o src/api/client/document -c @hey-api/client-axios"
+    "generate-client-document": "npx @hey-api/openapi-ts -i https://lis-document-svc-staging.azurewebsites.net/swagger/v1/swagger.json -o src/api/client/document -c @hey-api/client-axios",
+    "generate-client-crm": "npx @hey-api/openapi-ts -i https://lis-crm-svc-dev.azurewebsites.net/swagger/v1/swagger.json -o src/api/client/crm -c @hey-api/client-axios"
   },
   "dependencies": {
     "@azure/msal-browser": "^3.28.0",

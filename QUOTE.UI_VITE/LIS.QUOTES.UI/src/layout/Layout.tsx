@@ -1,42 +1,53 @@
-import { AppBar, Avatar, Box, Button, Collapse, Container, Divider, Drawer, IconButton, InputAdornment, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Menu, MenuItem, Toolbar, Typography } from "@mui/material";
+import { AppBar, Avatar, Box, Button, Collapse, Container, Divider, Drawer as MuiDrawer, IconButton, InputAdornment, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Menu, MenuItem, Toolbar, Typography, CSSObject, styled, Theme } from "@mui/material";
 import Grid from "@mui/material/Grid2";
 import React, { useState } from "react";
-import { Link, NavLink, Outlet, useNavigate } from "react-router-dom";
+import { Link, Outlet, useNavigate } from "react-router-dom";
 import { BootstrapInput, DarkTooltip } from "../utils/misc/styles";
 import { useTranslation } from "react-i18next";
-import AddIcon from '@mui/icons-material/Add';
-import AnchorOutlinedIcon from '@mui/icons-material/AnchorOutlined';
-import AssignmentOutlinedIcon from '@mui/icons-material/AssignmentOutlined';
-import AttachFileOutlinedIcon from '@mui/icons-material/AttachFileOutlined';
-import AutoFixHighIcon from '@mui/icons-material/AutoFixHigh';
-import ContactsOutlinedIcon from '@mui/icons-material/ContactsOutlined';
-import DirectionsBoatIcon from '@mui/icons-material/DirectionsBoat';
-import DirectionsBoatOutlinedIcon from '@mui/icons-material/DirectionsBoatOutlined';
-import ExpandLessIcon from '@mui/icons-material/ExpandLess';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import FirstPageIcon from '@mui/icons-material/FirstPage';
-import FolderOutlinedIcon from '@mui/icons-material/FolderOutlined';
-import GroupsIcon from '@mui/icons-material/Groups';
-import HomeIcon from '@mui/icons-material/Home';
-import Inventory2Icon from '@mui/icons-material/Inventory2';
-import InventoryOutlinedIcon from '@mui/icons-material/InventoryOutlined';
-import LastPageIcon from '@mui/icons-material/LastPage';
-import LocalShippingIcon from '@mui/icons-material/LocalShipping';
-import LogoutIcon from '@mui/icons-material/Logout';
-import MenuIcon from '@mui/icons-material/Menu';
-import NotificationsIcon from '@mui/icons-material/Notifications';
-import RequestQuoteOutlinedIcon from '@mui/icons-material/RequestQuoteOutlined';
-import PeopleIcon from '@mui/icons-material/People';
-import PortraitIcon from '@mui/icons-material/Portrait';
-import RoomServiceOutlinedIcon from '@mui/icons-material/RoomServiceOutlined';
-import SearchIcon from '@mui/icons-material/Search';
-import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined';
-import TaskAltOutlinedIcon from '@mui/icons-material/TaskAltOutlined';
-import TextSnippetOutlinedIcon from '@mui/icons-material/TextSnippetOutlined';
 import { useAccount, useMsal } from "@azure/msal-react";
 import { stringAvatar } from "../utils/functions";
+import NavigationLink from "../components/shared/NavigationLink";
+import { Add, AnchorOutlined, AssignmentOutlined, AttachFileOutlined, AutoFixHigh, ChevronLeft, ChevronRight, ContactsOutlined, DirectionsBoat, DirectionsBoatOutlined, ExpandLess, ExpandMore, FirstPage, FolderOutlined, Groups, Home, Inventory2, InventoryOutlined, LastPage, LocalShipping, Logout, MenuOutlined, Notifications, People, Portrait, RequestQuoteOutlined, RoomServiceOutlined, Search, SettingsOutlined, TaskAltOutlined, TextSnippetOutlined } from "@mui/icons-material";
 
 const drawerWidth = 220;
+
+const openedMixin = (theme: Theme): CSSObject => ({
+    width: drawerWidth,
+    transition: theme.transitions.create('width', {
+      easing: theme.transitions.easing.sharp,
+      duration: theme.transitions.duration.enteringScreen,
+    }),
+    overflowX: 'hidden',
+});
+
+const closedMixin = (theme: Theme): CSSObject => ({
+    transition: theme.transitions.create('width', {
+        easing: theme.transitions.easing.sharp,
+        duration: theme.transitions.duration.leavingScreen,
+    }),
+    overflowX: 'hidden',
+    width: `calc(${theme.spacing(7)} + 1px)`,
+    [theme.breakpoints.up('sm')]: {
+        width: `calc(${theme.spacing(7)} + 1px)`,
+    },
+});
+
+const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' })(
+({ theme, open }) => ({
+    width: drawerWidth,
+    flexShrink: 0,
+    whiteSpace: 'nowrap',
+    boxSizing: 'border-box',
+    ...(open && {
+    ...openedMixin(theme),
+    '& .MuiDrawer-paper': openedMixin(theme),
+    }),
+    ...(!open && {
+    ...closedMixin(theme),
+    '& .MuiDrawer-paper': closedMixin(theme),
+    }),
+}),
+);
 
 const Layout = () : React.ReactNode => {
 
@@ -96,7 +107,9 @@ const Layout = () : React.ReactNode => {
     return (
         <>
             <Container component="div" sx={{ 
-                display: 'flex', maxWidth: "100vw !important", padding: "0px !important", m: 0, marginTop: { xs: "0px !important", md: "60px !important;", lg: "60px !important" }}}>
+                display: 'flex', maxWidth: "100vw !important", padding: "0px !important", m: 0, 
+                marginTop: { xs: "0px !important", md: "60px !important;", lg: "60px !important" }
+            }}>
                     {/* App bar for mobile version */}
                 <AppBar position="fixed" sx={{ 
                     zIndex: (theme) => theme.zIndex.drawer + 1, backgroundColor: "#fff", 
@@ -116,7 +129,7 @@ const Layout = () : React.ReactNode => {
                                     onClick={handleOpenNavMenu}
                                     sx={{ color: "#333", alignItems: "center", justifyContent: "end", height: "100%", float: "right", mr: 5 }}
                                 >
-                                    <MenuIcon />
+                                    <MenuOutlined />
                                 </IconButton>
                                 <Menu
                                     anchorEl={anchorElNav}
@@ -126,7 +139,7 @@ const Layout = () : React.ReactNode => {
                                     open={Boolean(anchorElNav)}
                                     onClose={handleCloseNavMenu}
                                     sx={{ display: { xs: 'block', md: 'none' } }}
-                                    PaperProps={{ sx: { width: "200px" } }}
+                                    slotProps={{paper: {sx: { width: "200px" }}}}
                                 >
                                     <MenuItem onClick={() => { navigate('/admin/'); handleCloseNavMenu(); }}>
                                         <Typography textAlign="center">{t('overview')}</Typography>
@@ -165,7 +178,7 @@ const Layout = () : React.ReactNode => {
                                     sx={{ ml: 5, pb: 1, minWidth: { xs: "calc(100vw - 90px)", md: "400px" } }} 
                                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchText(e.target.value)} endAdornment={
                                         <InputAdornment position="end">
-                                            <IconButton component={Link} to={"/admin/search/"+searchText} edge="end"><SearchIcon /></IconButton>
+                                            <IconButton component={Link} to={"/admin/search/"+searchText} edge="end"><Search /></IconButton>
                                         </InputAdornment>
                                     } 
                                     onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -198,7 +211,7 @@ const Layout = () : React.ReactNode => {
                                 sx={{ ml: 5, minWidth: { md: "400px" } }} 
                                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchText(e.target.value)} endAdornment={
                                     <InputAdornment position="end">
-                                        <IconButton component={Link} to={"/admin/search/"+searchText} edge="end"><SearchIcon /></IconButton>
+                                        <IconButton component={Link} to={"/admin/search/"+searchText} edge="end"><Search /></IconButton>
                                     </InputAdornment>
                                 } 
                                 onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -221,7 +234,7 @@ const Layout = () : React.ReactNode => {
                                 </DarkTooltip>
                                 <Menu
                                     sx={{ mt: '45px' }}
-                                    PaperProps={{ sx: { width: "160px" } }}
+                                    slotProps={{paper: {sx: { width: "160px"}}}}
                                     MenuListProps={{ sx: { paddingTop: "0px", paddingBottom: "0px" } }}
                                     anchorEl={anchorElLang}
                                     anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
@@ -247,7 +260,7 @@ const Layout = () : React.ReactNode => {
                                 </DarkTooltip>
                                 <Menu
                                     sx={{ mt: '45px' }}
-                                    PaperProps={{ sx: { width: "300px" } }}
+                                    slotProps={{paper: { sx: { width: "300px" }}}}
                                     MenuListProps={{ sx: { paddingTop: "0px", paddingBottom: "0px" } }}
                                     anchorEl={anchorElUser}
                                     anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
@@ -263,32 +276,26 @@ const Layout = () : React.ReactNode => {
                                     </div>
                                     <MenuItem dense key={"x1-View Profile"} title={t('viewProfile')} onClick={handleCloseUserMenu}>
                                         <ListItemIcon className="cs-listitemicon">
-                                            <PortraitIcon fontSize="small" />
+                                            <Portrait fontSize="small" />
                                         </ListItemIcon>
-                                        <ListItemText primary={t('viewProfile')} slotProps={{primary:{
-                                            fontSize: 13
-                                        }}}  />
+                                        <ListItemText primary={t('viewProfile')} slotProps={{primary:{ fontSize: 13 }}}  />
                                     </MenuItem>
                                     <MenuItem dense key={"x1-My Requests"} title={t('myRequests')} component="a" href="/admin/my-requests">
                                         <ListItemIcon className="cs-listitemicon">
-                                            <AutoFixHighIcon fontSize="small" />
+                                            <AutoFixHigh fontSize="small" />
                                         </ListItemIcon>
-                                        <ListItemText primary={t('myRequests')} slotProps={{primary:{
-                                            fontSize: 13
-                                        }}} />
+                                        <ListItemText primary={t('myRequests')} slotProps={{primary:{ fontSize: 13 }}} />
                                     </MenuItem>
                                     <MenuItem dense key={"x1-Invite Members"} title={t('inviteMembers')} onClick={handleCloseUserMenu}>
                                         <ListItemIcon className="cs-listitemicon">
-                                            <GroupsIcon fontSize="small" />
+                                            <Groups fontSize="small" />
                                         </ListItemIcon>
-                                        <ListItemText primary={t('inviteMembers')} slotProps={{primary:{
-                                            fontSize: 13
-                                        }}} />
+                                        <ListItemText primary={t('inviteMembers')} slotProps={{primary:{ fontSize: 13 }}} />
                                     </MenuItem>
                                     <Divider />
                                     <MenuItem dense key={"x1-Logout"} title="Logout" onClick={handleLogout}>
                                         <ListItemIcon className="cs-listitemicon">
-                                            <LogoutIcon fontSize="small" />
+                                            <Logout fontSize="small" />
                                         </ListItemIcon>
                                         <ListItemText primary={"Logout"} />
                                     </MenuItem>
@@ -306,301 +313,106 @@ const Layout = () : React.ReactNode => {
                         width: drawerWidth,
                         flexShrink: 0,
                         boxSizing: 'border-box',
-                        display: { xs: 'none', md: 'flex' }
+                        display: { xs: 'none', md: 'flex' },
                     }}
-                    PaperProps={{ sx: { borderRight: open ? "1px solid rgb(241, 242, 246)" : 0 } }}
+                    PaperProps={{ sx: { 
+                        borderRight: open ? "1px solid rgb(241, 242, 246)" : 0,
+                        '&::-webkit-scrollbar': {
+                            width: '6px', // Thin scrollbar width
+                        },
+                        '&::-webkit-scrollbar-track': {
+                            backgroundColor: '#f1f1f1', // Background color of the track
+                        },
+                        '&::-webkit-scrollbar-thumb': {
+                            backgroundColor: '#888', // Thumb color
+                            borderRadius: '10px', // Rounded corners for thumb
+                        },
+                        '&::-webkit-scrollbar-thumb:hover': {
+                            backgroundColor: '#555', // Thumb color on hover
+                        },
+                        // '&::-webkit-scrollbar-container': {
+                        //     position: 'relative',
+                        // },
+                    } }}
                 >
                     <Toolbar />
-                    <Box sx={{ overflow: 'none', margin: "0 10px", marginTop: "8px" }}>
-                        <List dense>
-                            <NavLink to="/admin/" className={({ isActive }) => isActive ? "cs-navlink-active" : "cs-navlink"}>
-                                <ListItem className="cs-listitem" key={"Overview"} disablePadding disableGutters>
-                                <DarkTooltip title={t('overview')} placement="right" arrow>
-                                    <ListItemButton className="cs-listitembutton">
-                                        <ListItemIcon className="cs-listitemicon">
-                                            <HomeIcon fontSize="small" />
-                                        </ListItemIcon>
-                                        <ListItemText primary={t('overview')} primaryTypographyProps={{ fontSize: 13 }} />
-                                    </ListItemButton>
-                                </DarkTooltip>
-                                </ListItem>
-                            </NavLink>
-                            <NavLink to="/admin/users" className={({ isActive }) => isActive ? "cs-navlink-active" : "cs-navlink"}>
-                                <ListItem className="cs-listitem" key={"Users"} disablePadding disableGutters>
-                                <DarkTooltip title={t('users')} placement="right" arrow>
-                                    <ListItemButton className="cs-listitembutton">
-                                        <ListItemIcon className="cs-listitemicon">
-                                            <PeopleIcon fontSize="small" />
-                                        </ListItemIcon>
-                                        <ListItemText primary={t('users')} primaryTypographyProps={{ fontSize: 13 }} />
-                                    </ListItemButton>
-                                </DarkTooltip>
-                                </ListItem>
-                            </NavLink>
+                    <Box sx={{ minWidth: drawerWidth, margin: "0 0px", marginTop: "8px" }}>
+                        <List dense style={{ minHeight: "480px" }}>
+                            <NavigationLink url="/" title={t('overview')} icon={<Home fontSize="small" />} />
+                            <NavigationLink url="/users" title={t('users')} icon={<People fontSize="small" />} />
                             <ListItem className="cs-listitem" key={"Requests part"} disablePadding disableGutters>
                                 <ListItemButton className="cs-listitembutton" onClick={() => { setOpenRequests(!openRequests); }}>
                                     <ListItemIcon className="cs-listitemicon">
-                                        <AssignmentOutlinedIcon fontSize="small" />
+                                        <AssignmentOutlined fontSize="small" />
                                     </ListItemIcon>
-                                    <ListItemText primary={t('requests')} primaryTypographyProps={{ fontSize: 13 }} />
-                                    {openRequests ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+                                    <ListItemText primary={t('requests')} slotProps={{primary: { fontSize: 13 }}} />
+                                    {openRequests ? <ExpandMore fontSize="small" /> : <ChevronRight fontSize="small" />}
                                 </ListItemButton>
                             </ListItem>
                             <Collapse in={openRequests} timeout="auto" unmountOnExit>
                                 <List component="div" disablePadding>
-                                    <NavLink to="/admin/new-request" className={({ isActive }) => isActive ? "cs-navlink-active" : "cs-navlink"}>
-                                        <ListItem className="cs-listitem" key={"New request"} disablePadding disableGutters sx={{ pl: 2 }}>
-                                        <DarkTooltip title={t('newRequest')} placement="right" arrow>
-                                            <ListItemButton className="cs-listitembutton">
-                                                <ListItemIcon className="cs-listitemicon">
-                                                    <AddIcon fontSize="small" />
-                                                </ListItemIcon>
-                                                <ListItemText primary={t('newRequest')} primaryTypographyProps={{ fontSize: 13 }} />
-                                            </ListItemButton>
-                                        </DarkTooltip>
-                                        </ListItem>
-                                    </NavLink>
-                                    <NavLink to="/admin/my-requests" className={({ isActive }) => isActive ? "cs-navlink-active" : "cs-navlink"}>
-                                        <ListItem className="cs-listitem" key={"My requests"} disablePadding disableGutters sx={{ pl: 2 }}>
-                                        <DarkTooltip title={t('myRequests')} placement="right" arrow>
-                                            <ListItemButton className="cs-listitembutton">
-                                                <ListItemIcon className="cs-listitemicon">
-                                                    <AutoFixHighIcon fontSize="small" />
-                                                </ListItemIcon>
-                                                <ListItemText primary={t('myRequests')} primaryTypographyProps={{ fontSize: 13 }} />
-                                            </ListItemButton>
-                                        </DarkTooltip>
-                                        </ListItem>
-                                    </NavLink>
-                                    <NavLink to="/admin/requests" className={({ isActive }) => isActive ? "cs-navlink-active" : "cs-navlink"}>
-                                        <ListItem className="cs-listitem" key={"Requests"} disablePadding disableGutters sx={{ pl: 2 }}>
-                                        <DarkTooltip title={t('requests')} placement="right" arrow>
-                                            <ListItemButton className="cs-listitembutton">
-                                                <ListItemIcon className="cs-listitemicon">
-                                                    <NotificationsIcon fontSize="small" />
-                                                </ListItemIcon>
-                                                <ListItemText primary={t('requests')} primaryTypographyProps={{ fontSize: 13 }} />
-                                            </ListItemButton>
-                                        </DarkTooltip>
-                                        </ListItem>
-                                    </NavLink>
-                                    <NavLink to="/admin/pending-requests" className={({ isActive }) => isActive ? "cs-navlink-active" : "cs-navlink"}>
-                                        <ListItem className="cs-listitem" key={"Pending requests"} disablePadding disableGutters sx={{ pl: 2 }}>
-                                        <DarkTooltip title={t('pendingRequests')} placement="right" arrow>
-                                            <ListItemButton className="cs-listitembutton">
-                                                <ListItemIcon className="cs-listitemicon">
-                                                    <TaskAltOutlinedIcon fontSize="small" />
-                                                </ListItemIcon>
-                                                <ListItemText primary={t('pendingRequests')} primaryTypographyProps={{ fontSize: 13 }} />
-                                            </ListItemButton>
-                                        </DarkTooltip>
-                                        </ListItem>
-                                    </NavLink>
+                                    <NavigationLink url="/new-request" title={t('newRequest')} icon={<Add fontSize="small" />} nested />
+                                    <NavigationLink url="/my-requests" title={t('myRequests')} icon={<AutoFixHigh fontSize="small" />} nested />
+                                    <NavigationLink url="/requests" title={t('requests')} icon={<Notifications fontSize="small" />} nested />
+                                    <NavigationLink url="/pending-requests" title={t('pendingRequests')} icon={<TaskAltOutlined fontSize="small" />} nested />
                                 </List>
-                            </Collapse>
-                            
+                            </Collapse>                            
                             <ListItem className="cs-listitem" key={"Prices part"} disablePadding disableGutters>
                                 <ListItemButton className="cs-listitembutton" onClick={() => { setOpenPrices(!openPrices); }}>
                                     <ListItemIcon className="cs-listitemicon">
-                                        <RequestQuoteOutlinedIcon fontSize="small" />
+                                        <RequestQuoteOutlined fontSize="small" />
                                     </ListItemIcon>
-                                    <ListItemText primary={t('pricing')} primaryTypographyProps={{ fontSize: 13 }} />
-                                    {openPrices ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+                                    <ListItemText primary={t('pricing')} slotProps={{primary: { fontSize: 13 }}} />
+                                    {openPrices ? <ExpandMore fontSize="small" /> : <ChevronRight fontSize="small" />}
                                 </ListItemButton>
                             </ListItem>
                             <Collapse in={openPrices} timeout="auto" unmountOnExit>
                                 <List component="div" disablePadding>
-                                    <NavLink to="/admin/haulages" className={({ isActive }) => isActive ? "cs-navlink-active" : "cs-navlink"}>
-                                        <ListItem className="cs-listitem" key={"Haulages"} disablePadding disableGutters sx={{ pl: 2 }}>
-                                        <DarkTooltip title={t('haulages')} placement="right" arrow>
-                                            <ListItemButton className="cs-listitembutton">
-                                                <ListItemIcon className="cs-listitemicon">
-                                                    <LocalShippingIcon fontSize="small" />
-                                                </ListItemIcon>
-                                                <ListItemText primary={t('haulages')} primaryTypographyProps={{ fontSize: 13 }} />
-                                            </ListItemButton>
-                                        </DarkTooltip>
-                                        </ListItem>
-                                    </NavLink>
-                                    <NavLink to="/admin/seafreights" className={({ isActive }) => isActive ? "cs-navlink-active" : "cs-navlink"}>
-                                        <ListItem className="cs-listitem" key={"Seafreights"} disablePadding disableGutters sx={{ pl: 2 }}>
-                                        <DarkTooltip title={t('seafreights')} placement="right" arrow>
-                                            <ListItemButton className="cs-listitembutton">
-                                                <ListItemIcon className="cs-listitemicon">
-                                                    <DirectionsBoatIcon fontSize="small" />
-                                                </ListItemIcon>
-                                                <ListItemText primary={t('seafreights')} primaryTypographyProps={{ fontSize: 13 }} />
-                                            </ListItemButton>
-                                        </DarkTooltip>
-                                        </ListItem>
-                                    </NavLink>
-                                    <NavLink to="/admin/miscellaneous" className={({ isActive }) => isActive ? "cs-navlink-active" : "cs-navlink"}>
-                                        <ListItem className="cs-listitem" key={"Miscellaneous"} disablePadding disableGutters sx={{ pl: 2 }}>
-                                        <DarkTooltip title={t('miscellaneous')} placement="right" arrow>
-                                            <ListItemButton className="cs-listitembutton">
-                                                <ListItemIcon className="cs-listitemicon">
-                                                    <Inventory2Icon fontSize="small" />
-                                                </ListItemIcon>
-                                                <ListItemText primary={t('miscellaneous')} primaryTypographyProps={{ fontSize: 13 }} />
-                                            </ListItemButton>
-                                        </DarkTooltip>
-                                        </ListItem>
-                                    </NavLink>
+                                    <NavigationLink url="/haulages" title={t('haulages')} icon={<LocalShipping fontSize="small" />} nested />
+                                    <NavigationLink url="/seafreights" title={t('seafreights')} icon={<DirectionsBoat fontSize="small" />} nested />
+                                    <NavigationLink url="/miscellaneous" title={t('miscellaneous')} icon={<Inventory2 fontSize="small" />} nested />
                                 </List>
                             </Collapse>
-
-                            <NavLink to="/admin/quote-offers" className={({ isActive }) => isActive ? "cs-navlink-active" : "cs-navlink"}>
-                                <ListItem className="cs-listitem" key={"Price offers"} disablePadding disableGutters>
-                                <DarkTooltip title={t('priceOffers')} placement="right" arrow>
-                                    <ListItemButton className="cs-listitembutton">
-                                        <ListItemIcon className="cs-listitemicon">
-                                            <PortraitIcon fontSize="small" />
-                                        </ListItemIcon>
-                                        <ListItemText primary={t('priceOffers')} primaryTypographyProps={{ fontSize: 13 }} />
-                                    </ListItemButton>
-                                </DarkTooltip>
-                                </ListItem>
-                            </NavLink>
                             
-                            <NavLink to="/admin/orders" className={({ isActive }) => isActive ? "cs-navlink-active" : "cs-navlink"}>
-                                <ListItem className="cs-listitem" key={"Orders"} disablePadding disableGutters>
-                                <DarkTooltip title={t('orders')} placement="right" arrow>
-                                    <ListItemButton className="cs-listitembutton">
-                                        <ListItemIcon className="cs-listitemicon">
-                                            <FolderOutlinedIcon fontSize="small" />
-                                        </ListItemIcon>
-                                        <ListItemText primary={t('orders')} primaryTypographyProps={{ fontSize: 13 }} />
-                                    </ListItemButton>
-                                </DarkTooltip>
-                                </ListItem>
-                            </NavLink>
-                            
-                            <NavLink to="/admin/templates" className={({ isActive }) => isActive ? "cs-navlink-active" : "cs-navlink"}>
-                                <ListItem className="cs-listitem" key={"Templates"} disablePadding disableGutters>
-                                <DarkTooltip title={t('templates')} placement="right" arrow>
-                                    <ListItemButton className="cs-listitembutton">
-                                        <ListItemIcon className="cs-listitemicon">
-                                            <TextSnippetOutlinedIcon fontSize="small" />
-                                        </ListItemIcon>
-                                        <ListItemText primary={t('templates')} primaryTypographyProps={{ fontSize: 13 }} />
-                                    </ListItemButton>
-                                </DarkTooltip>
-                                </ListItem>
-                            </NavLink>
+                            <NavigationLink url="/quote-offers" title={t('priceOffers')} icon={<Portrait fontSize="small" />} />
+                            <NavigationLink url="/orders" title={t('orders')} icon={<FolderOutlined fontSize="small" />} />
+                            <NavigationLink url="/templates" title={t('templates')} icon={<TextSnippetOutlined fontSize="small" />} />
                             
                             <ListItem className="cs-listitem" key={"Masterdata part"} disablePadding disableGutters>
                                 <ListItemButton className="cs-listitembutton" onClick={() => { setOpenMasterdata(!openMasterdata); }}>
                                     <ListItemIcon className="cs-listitemicon">
-                                        <SettingsOutlinedIcon fontSize="small" />
+                                        <SettingsOutlined fontSize="small" />
                                     </ListItemIcon>
-                                    <ListItemText primary={t('masterdata')} primaryTypographyProps={{ fontSize: 13 }} />
-                                    {openMasterdata ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+                                    <ListItemText primary={t('masterdata')} slotProps={{primary: { fontSize: 13 }}} />
+                                    {openMasterdata ? <ExpandMore fontSize="small" /> : <ChevronRight fontSize="small" />}
                                 </ListItemButton>
                             </ListItem>
                             <Collapse in={openMasterdata} timeout="auto" unmountOnExit>
                                 <List component="div" disablePadding>
-                                    <NavLink to="/admin/services" className={({ isActive }) => isActive ? "cs-navlink-active" : "cs-navlink"}>
-                                        <ListItem className="cs-listitem" key={"Services"} disablePadding disableGutters sx={{ pl: 2 }}>
-                                        <DarkTooltip title={t('services')} placement="right" arrow>
-                                            <ListItemButton className="cs-listitembutton">
-                                                <ListItemIcon className="cs-listitemicon">
-                                                    <RoomServiceOutlinedIcon fontSize="small" />
-                                                </ListItemIcon>
-                                                <ListItemText primary={t('services')} primaryTypographyProps={{ fontSize: 13 }} />
-                                            </ListItemButton>
-                                        </DarkTooltip>
-                                        </ListItem>
-                                    </NavLink>
-                                    {/* <NavLink to="/admin/products" className={({ isActive }) => isActive ? "cs-navlink-active" : "cs-navlink"}>
-                                        <ListItem className="cs-listitem" key={"Products"} disablePadding disableGutters sx={{ pl: 2 }}>
-                                        <DarkTooltip title={t('products')} placement="right" arrow>
-                                            <ListItemButton className="cs-listitembutton">
-                                                <ListItemIcon className="cs-listitemicon">
-                                                    <InventoryOutlined fontSize="small" />
-                                                </ListItemIcon>
-                                                <ListItemText primary={t('products')} primaryTypographyProps={{ fontSize: 13 }} />
-                                            </ListItemButton>
-                                        </DarkTooltip>
-                                        </ListItem>
-                                    </NavLink> */}
-                                    <NavLink to="/admin/hscodes" className={({ isActive }) => isActive ? "cs-navlink-active" : "cs-navlink"}>
-                                        <ListItem className="cs-listitem" key={"HS Codes"} disablePadding disableGutters sx={{ pl: 2 }}>
-                                        <DarkTooltip title={t('hscodes')} placement="right" arrow>
-                                            <ListItemButton className="cs-listitembutton">
-                                                <ListItemIcon className="cs-listitemicon">
-                                                    <InventoryOutlinedIcon fontSize="small" />
-                                                </ListItemIcon>
-                                                <ListItemText primary={t('hscodes')} slotProps={{primary:{fontSize: 13}}} />
-                                            </ListItemButton>
-                                        </DarkTooltip>
-                                        </ListItem>
-                                    </NavLink>
-                                    <NavLink to="/admin/ports" className={({ isActive }) => isActive ? "cs-navlink-active" : "cs-navlink"}>
-                                        <ListItem className="cs-listitem" key={"Ports"} disablePadding disableGutters sx={{ pl: 2 }}>
-                                        <DarkTooltip title={t('ports')} placement="right" arrow>
-                                            <ListItemButton className="cs-listitembutton">
-                                                <ListItemIcon className="cs-listitemicon">
-                                                    <AnchorOutlinedIcon fontSize="small" />
-                                                </ListItemIcon>
-                                                <ListItemText primary={t('ports')} slotProps={{primary:{fontSize: 13}}} />
-                                            </ListItemButton>
-                                        </DarkTooltip>
-                                        </ListItem>
-                                    </NavLink>
-                                    <NavLink to="/admin/contacts" className={({ isActive }) => isActive ? "cs-navlink-active" : "cs-navlink"}>
-                                        <ListItem className="cs-listitem" key={"Contacts"} disablePadding disableGutters sx={{ pl: 2 }}>
-                                        <DarkTooltip title={t('contacts')} placement="right" arrow>
-                                            <ListItemButton className="cs-listitembutton">
-                                                <ListItemIcon className="cs-listitemicon">
-                                                    <ContactsOutlinedIcon fontSize="small" />
-                                                </ListItemIcon>
-                                                <ListItemText primary={t('contacts')} slotProps={{primary:{fontSize: 13}}} />
-                                            </ListItemButton>
-                                        </DarkTooltip>
-                                        </ListItem>
-                                    </NavLink>
-                                    <NavLink to="/admin/ships" className={({ isActive }) => isActive ? "cs-navlink-active" : "cs-navlink"}>
-                                        <ListItem className="cs-listitem" key={"Ships"} disablePadding disableGutters sx={{ pl: 2 }}>
-                                        <DarkTooltip title={t('ships')} placement="right" arrow>
-                                            <ListItemButton className="cs-listitembutton">
-                                                <ListItemIcon className="cs-listitemicon">
-                                                    <DirectionsBoatOutlinedIcon fontSize="small" />
-                                                </ListItemIcon>
-                                                <ListItemText primary={t('ships')} primaryTypographyProps={{ fontSize: 13 }} />
-                                            </ListItemButton>
-                                        </DarkTooltip>
-                                        </ListItem>
-                                    </NavLink>
-                                    <NavLink to="/admin/files" className={({ isActive }) => isActive ? "cs-navlink-active" : "cs-navlink"}>
-                                        <ListItem className="cs-listitem" key={"Files"} disablePadding disableGutters sx={{ pl: 2 }}>
-                                        <DarkTooltip title={t('files')} placement="right" arrow>
-                                            <ListItemButton className="cs-listitembutton">
-                                                <ListItemIcon className="cs-listitemicon">
-                                                    <AttachFileOutlinedIcon fontSize="small" />
-                                                </ListItemIcon>
-                                                <ListItemText primary={t('files')} slotProps={{primary:{fontSize: 13} }} />
-                                            </ListItemButton>
-                                        </DarkTooltip>
-                                        </ListItem>
-                                    </NavLink>
+                                    <NavigationLink url="/services" title={t('services')} icon={<RoomServiceOutlined fontSize="small" />} nested />
+                                    <NavigationLink url="/products" title={t('products')} icon={<InventoryOutlined fontSize="small" />} nested />
+                                    <NavigationLink url="/hscodes" title={t('hscodes')} icon={<InventoryOutlined fontSize="small" />} nested />
+                                    <NavigationLink url="/ports" title={t('ports')} icon={<AnchorOutlined fontSize="small" />} nested />
+                                    <NavigationLink url="/contacts" title={t('contacts')} icon={<ContactsOutlined fontSize="small" />} nested />
+                                    <NavigationLink url="/ships" title={t('ships')} icon={<DirectionsBoatOutlined fontSize="small" />} nested />
+                                    <NavigationLink url="/files" title={t('files')} icon={<AttachFileOutlined fontSize="small" />} nested />
                                 </List>
                             </Collapse>
-
-                            <List dense sx={{ position: "fixed", bottom: "0px", left: "10px", right: "10px", maxWidth: open ? "200px" : "40px" }}>
-                                <ListItem className="cs-listitem" key={"Collapse"} disablePadding disableGutters>
-                                    <DarkTooltip title={t('collapse')} placement="right" arrow>
-                                        <ListItemButton className="cs-listitembutton" onClick={open ? handleDrawerClose : handleDrawerOpen}>
-                                            <ListItemIcon className="cs-listitemicon">
-                                                {open ? <FirstPageIcon fontSize="small" /> : <LastPageIcon fontSize="small" />}
-                                            </ListItemIcon>
-                                            <ListItemText primary={open ? t('collapse') : ""} slotProps={{primary:{fontSize: 13 }}} />
-                                        </ListItemButton>
-                                    </DarkTooltip>
-                                </ListItem>
-                            </List>
                         </List>
-                        
-                        
+                    </Box>
+                    <Box>
+                    <List dense sx={{  marginTop: "10px", maxWidth: open ? "200px" : "40px" }}>
+                        <ListItem className="cs-listitem" key={"Collapse"} disablePadding disableGutters>
+                            <DarkTooltip title={t('collapse')} placement="right" arrow>
+                                <ListItemButton className="cs-listitembutton" onClick={open ? handleDrawerClose : handleDrawerOpen}>
+                                    <ListItemIcon className="cs-listitemicon">
+                                        {open ? <FirstPage fontSize="small" /> : <LastPage fontSize="small" />}
+                                    </ListItemIcon>
+                                    <ListItemText primary={open ? t('collapse') : ""} slotProps={{primary:{fontSize: 13 }}} />
+                                </ListItemButton>
+                            </DarkTooltip>
+                        </ListItem>
+                    </List>
                     </Box>
                 </Drawer>
 
