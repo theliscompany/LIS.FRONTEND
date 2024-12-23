@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Accordion, AccordionDetails, AccordionSummary, Alert, Autocomplete, Box, Button, Chip, DialogActions, DialogContent, Grid, IconButton, InputLabel, NativeSelect, Skeleton, TextField, Typography } from '@mui/material';
+import { Accordion, AccordionDetails, AccordionSummary, Alert, Autocomplete, Box, Button, Chip, DialogActions, DialogContent, IconButton, InputLabel, NativeSelect, Skeleton, TextField, Typography } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import AddCircleOutlinedIcon from '@mui/icons-material/AddCircleOutlined';
 import SearchIcon from '@mui/icons-material/Search';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -7,47 +8,26 @@ import EditIcon from '@mui/icons-material/Edit';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { SnackbarProvider, enqueueSnackbar } from 'notistack';
 import { useTranslation } from 'react-i18next';
-import { useAuthorizedBackendApi } from '../api/api';
-import { protectedResources } from '../config/authConfig';
-import { BackendService } from '../utils/services/fetch';
 import { GridColDef, GridValueFormatterParams, GridRenderCellParams, DataGrid, GridValueGetterParams, GridColumnHeaderParams } from '@mui/x-data-grid';
-import { BootstrapDialog, BootstrapDialogTitle, BootstrapInput, actionButtonStyles, buttonCloseStyles, datetimeStyles, gridStyles, inputIconStyles, inputLabelStyles } from '../utils/misc/styles';
-import CompanySearch from '../components/shared/CompanySearch';
+import { BootstrapDialog, BootstrapDialogTitle, BootstrapInput, actionButtonStyles, buttonCloseStyles, datetimeStyles, gridStyles, inputIconStyles, inputLabelStyles } from '../../utils/misc/styles';
+import CompanySearch from '../../components/shared/CompanySearch';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import dayjs, { Dayjs } from 'dayjs';
-import { useMsal, useAccount } from '@azure/msal-react';
-import { CategoryEnum, containerPackages, currencyOptions, haulageTypeOptions } from '../utils/constants';
-import AutocompleteSearch from '../components/shared/AutocompleteSearch';
-import RequestPriceHaulage from '../components/editRequestPage/RequestPriceHaulage';
+import { CategoryEnum, containerPackages, currencyOptions, haulageTypeOptions } from '../../utils/constants';
+import AutocompleteSearch from '../../components/shared/AutocompleteSearch';
+import RequestPriceHaulage from '../../components/pricing/RequestPriceHaulage';
 import { Anchor, Mail } from '@mui/icons-material';
-import NewContact from '../components/editRequestPage/NewContact';
-import { compareServices, extractCityAndPostalCode, parseLocation2, sortHauliersByName } from '../utils/functions';
-import NewService from '../components/shared/NewService';
-import NewPort from '../components/shared/NewPort';
-import { getLISTransportAPI } from '../api/client/transportService';
-import { getLisCrmApi } from '../api/client/crmService';
+import { compareServices, extractCityAndPostalCode, parseLocation2, sortHauliersByName } from '../../utils/functions';
+import NewContact from '../../components/shared/NewContact';
+import NewService from '../../components/shared/NewService';
+import NewPort from '../../components/shared/NewPort';
+import { AxiosError } from 'axios';
+import { deleteApiHaulageDeleteHaulage, getApiHaulageHaulage, getApiHaulageHaulages, postApiHaulageHaulage } from '../../api/client/pricing';
+import { getContactGetContacts } from '../../api/client/crm';
+import { getPorts, getService } from '../../api/client/transport';
+import PortAutocomplete from '../../components/shared/PortAutocomplete';
 
-function createGetRequestUrl(variable1: number, variable2: number, variable3: string) {
-    let url = protectedResources.apiLisPricing.endPoint+"/Haulage/Haulages?";
-    if (variable1) {
-      url += 'LoadingPortId=' + encodeURIComponent(variable1) + '&';
-    }
-    if (variable2) {
-      url += 'HaulierId=' + encodeURIComponent(variable2) + '&';
-    }
-    if (variable3) {
-        url += 'LoadingCity=' + encodeURIComponent(variable3) + '&';
-    }
-    // if (variable3) {
-    //   url += 'CarrierAgentId=' + encodeURIComponent(variable3) + '&';
-    // }
-    
-    if (url.slice(-1) === '&') {
-      url = url.slice(0, -1);
-    }
-    return url;
-}
 
 function Haulages() {
     const [load, setLoad] = useState<boolean>(true);
@@ -91,18 +71,11 @@ function Haulages() {
 
     const { t } = useTranslation();
     
-    const { instance, accounts } = useMsal();
-    const account = useAccount(accounts[0] || {});
-    const context = useAuthorizedBackendApi();
-    
-    const { getPorts, getService } = getLISTransportAPI();
-    const { getContactGetContacts } = getLisCrmApi();
-
     const columnsHaulages: GridColDef[] = [
         { field: 'haulierName', headerName: t('haulier'), minWidth: 125, flex: 1.4 },
-        { field: 'unitTariff', headerName: t('unitTariff'), valueGetter: (params: GridValueGetterParams) => `${params.row.unitTariff || ''} ${t(params.row.currency)}`, renderHeader: (params: GridColumnHeaderParams) => (<>Haulage <br />per unit</>), minWidth: 100, flex: 0.75 },
+        { field: 'unitTariff', headerName: t('unitTariff'), valueGetter: (params: GridValueGetterParams) => `${params.row.unitTariff || ''} ${t(params.row.currency)}`, renderHeader: (params: GridColumnHeaderParams) => (<>{t('unitTariff')}</>), minWidth: 100, flex: 0.75 },
         { field: 'freeTime', headerName: t('freeTime'), valueFormatter: (params: GridValueFormatterParams) => `${params.value || ''} ${t('hours')}`, minWidth: 100, flex: 0.75 },
-        { field: 'overtimeTariff', headerName: t('overtimeTariff'), valueGetter: (params: GridValueGetterParams) => `${params.row.overtimeTariff || ''} ${t(params.row.currency)} / ${t('hour')}`, renderHeader: (params: GridColumnHeaderParams) => (<>Overtime <br />tariff</>), minWidth: 100, flex: 1 },
+        { field: 'overtimeTariff', headerName: t('overtimeTariff'), valueGetter: (params: GridValueGetterParams) => `${params.row.overtimeTariff || ''} ${t(params.row.currency)} / ${t('hour')}`, renderHeader: (params: GridColumnHeaderParams) => (<>{t('overtimeTariff')}</>), minWidth: 100, flex: 1 },
         { field: 'multiStop', headerName: t('multiStop'), valueGetter: (params: GridValueGetterParams) => `${params.row.multiStop || ''} ${t(params.row.currency)}`, minWidth: 100, flex: 0.75 },
         { field: 'containersType', headerName: t('containers'), renderCell: (params: GridRenderCellParams) => {
             return (
@@ -138,18 +111,18 @@ function Haulages() {
     ];
     
     useEffect(() => {
-        // getClients();
         getPortsService();
         getHaulages();
-        getProtectedData();
-    }, [account, instance, account]);
+        getServices();
+        getContainers();
+    }, []);
     
     const getClients = async () => {
         try {
-            const response = await getContactGetContacts({ category: 2, pageSize: 1000 });
+            const response = await getContactGetContacts({query: { category: "SUPPLIERS", pageSize: 1000 }});
             if (response !== null && response !== undefined) {
                 // Removing duplicates from client array
-                setClients(response.data.data?.filter((obj: any, index: number, self: any) => index === self.findIndex((o: any) => o.contactName === obj.contactName)));
+                setClients(response.data?.data?.filter((obj: any, index: number, self: any) => index === self.findIndex((o: any) => o.contactName === obj.contactName)));
             }
         }
         catch (err: any) {
@@ -158,24 +131,27 @@ function Haulages() {
     }
     
     const getPortsService = async () => {
-        const response = await getPorts({ pageSize: 2000 });
-        if (response !== null && response !== undefined) {
-            setPorts(response.data);
+        try {
+            const response = await getPorts({query: { pageSize: 2000 }});
+            if (response !== null && response !== undefined) {
+                setPorts(response.data);
+            }
         }
-    }
-    
-    const getProtectedData = async () => {
-        if (account && instance && context) {
-            getServices();
-            getContainers();
+        catch (err: any) {
+            console.log(err);
         }
     }
     
     const getServices = async () => {
-        const response = await getService({ pageSize: 500 });
-        if (response !== null && response !== undefined) {
-            setAllServices(response);
-            setServices(response.data.sort((a: any, b: any) => compareServices(a, b)).filter((obj: any) => obj.servicesTypeId.includes(2))); // Filter the services for haulages (HAULAGE = 2)
+        try {
+            const response = await getService({query: { pageSize: 500 }});
+            if (response !== null && response !== undefined) {
+                setAllServices(response.data);
+                setServices(response.data?.sort((a: any, b: any) => compareServices(a, b)).filter((obj: any) => obj.servicesTypeId.includes(2))); // Filter the services for haulages (HAULAGE = 2)
+            }
+        }
+        catch (err: any) {
+            console.log(err);
         }
     }
     
@@ -184,16 +160,24 @@ function Haulages() {
     }
     
     const getHaulages = async () => {
-        if (account && instance && context) {
-            const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisPricing.endPoint+"/Haulage/Haulages", context.tokenPricing);
+        setLoad(true);
+        try {
+            const response = await getApiHaulageHaulages();
             if (response !== null && response !== undefined) {
-                setHaulages(sortHauliersByName(response));
+                setHaulages(sortHauliersByName(response.data));
                 setLoad(false);
             }
             else {
                 setLoad(false);
             }
             console.log(response);
+        }
+        catch (err: unknown) {
+            if (err instanceof AxiosError) {
+                console.log(err.response?.data);
+            }
+            console.log("An error occured");
+            setLoad(false);
         }
     }
     
@@ -217,59 +201,72 @@ function Haulages() {
     
     const getHaulage = async (id: string) => {
         setLoadEdit(true)
-        if (account && instance && context) {
-            const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisPricing.endPoint+"/Haulage/Haulage?offerId="+id, context.tokenPricing);
+        try {
+            const response = await getApiHaulageHaulage({query: { offerId: id }});
+            var result = response.data;
             if (response !== null && response !== undefined) {
-                var auxHaulier = {contactId: response.haulierId, contactName: response.haulierName};
-                var auxValidUntil = dayjs(response.validUntil);
-                var auxCity = parseLocation2(response.loadingCity);
-                var auxPort = ports.find((elm: any) => elm.portId === response.loadingPortId);
+                var auxHaulier = {contactId: result?.haulierId, contactName: result?.haulierName};
+                // var auxValidUntil = dayjs(result?.validUntil);
+                var auxCity = parseLocation2(result?.loadingCity || "");
+                var auxPort = ports.find((elm: any) => elm.portId === result?.loadingPortId);
 
                 setHaulier(auxHaulier);
                 setLoadingCity(auxCity);
                 setLoadingPort(auxPort);
-                setCurrency(response.currency);
-                setValidUntil(dayjs(response.validUntil));
-                setFreeTime(response.freeTime);
-                setMultiStop(response.multiStop);
-                setUnitTariff(response.unitTariff);
-                setOvertimeTariff(response.overtimeTariff);
-                setHaulageType(response.haulageType);
-                setEmptyPickupDepot(response.emptyPickupDepot);
-                setComment(response.comment);
-                setContainerTypes(response.containers);
+                setCurrency(result?.currency || "");
+                setValidUntil(dayjs(result?.validUntil));
+                setFreeTime(result?.freeTime || 0);
+                setMultiStop(result?.multiStop || 0);
+                setUnitTariff(result?.unitTariff || 0);
+                setOvertimeTariff(result?.overtimeTariff || 0);
+                setHaulageType(result?.haulageType || "");
+                setEmptyPickupDepot(result?.emptyPickupDepot || "");
+                setComment(result?.comment || "");
+                setContainerTypes(result?.containers);
                 setLoadEdit(false);
-
-                // Now i get the miscs
-                // getMiscellaneouses(auxHaulier, auxCity, auxPort, auxValidUntil, response.containers[0], false);
             }
             else {
                 setLoadEdit(false);
             }
-            // console.log(response);
+        }
+        catch (err: unknown) {
+            if (err instanceof AxiosError) {
+                console.log(err.response?.data);
+            }
+            console.log("An error occured");
+            setLoadEdit(false);
         }
     }
     
     const searchHaulages = async () => {
-        if (account && instance && context) {
+        try {
             setLoad(true);
-            var requestFormatted = createGetRequestUrl(searchedLoadingPort?.portId, searchedHaulier?.contactId, searchedLoadingCity?.city.toUpperCase());
-            const response = await (context?.service as BackendService<any>).getWithToken(requestFormatted, context.tokenPricing);
+            const response = await getApiHaulageHaulages({query: { 
+                HaulierId: searchedHaulier?.contactId, 
+                LoadingPortId: searchedLoadingPort?.portId, 
+                LoadingCity: searchedLoadingCity?.city.toUpperCase() }
+            });
             if (response !== null && response !== undefined) {
-                setHaulages(response);
+                setHaulages(response.data);
                 setLoad(false);
             }
             else {
                 setLoad(false);
             }
+        }
+        catch (err: unknown) {
+            if (err instanceof AxiosError) {
+                console.log(err.response?.data);
+            }
+            console.log("An error occured");
+            setLoad(false);
         }
     }
 
     const createUpdateHaulage = async () => {
         if (haulier !== null && loadingCity !== null && loadingPort !== null && freeTime > 0 && unitTariff > 0 && overtimeTariff > 0 && multiStop > 0 && validUntil !== null && containerTypes.length > 0) {
-            if (account && instance && context) {
+            try {
                 var dataSent = null;
-                
                 var postalCode = loadingCity !== null ? loadingCity.postalCode !== undefined ? loadingCity.postalCode : "" : ""; 
                 var city = loadingCity !== null ? loadingCity.city.toUpperCase()+', '+loadingCity.country.toUpperCase() : "";
                 if (postalCode !== "") {
@@ -283,7 +280,7 @@ function Haulages() {
 
                 if (currentEditId !== "") {
                     dataSent = {
-                        "offerId": currentEditId,
+                        "id": currentEditId,
                         "haulierId": haulier.contactId,
                         "haulierName": haulier.contactName,
                         "currency": currency,
@@ -323,7 +320,7 @@ function Haulages() {
                         "containers": containerTypes,
                     };    
                 }
-                const response = await (context?.service as BackendService<any>).postWithToken(protectedResources.apiLisPricing.endPoint+"/Haulage/Haulage", dataSent, context.tokenPricing);
+                const response = await postApiHaulageHaulage({body: dataSent});
                 if (response !== null && response !== undefined) {
                     setModal2(false);
                     enqueueSnackbar(t('successCreated'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
@@ -333,6 +330,13 @@ function Haulages() {
                     enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
                 }
             }
+            catch (err: unknown) {
+                if (err instanceof AxiosError) {
+                    console.log(err.response?.data);
+                }
+                console.log("An error occured");
+                setLoad(false);
+            }
         }
         else {
             enqueueSnackbar(t('fieldsEmptyHaulage'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
@@ -340,9 +344,8 @@ function Haulages() {
     }
 
     const deleteHaulagePrice = async (id: string) => {
-        if (account && instance && context) {
-            // alert("Function not available yet!");
-            const response = await (context?.service as BackendService<any>).deleteWithToken(protectedResources.apiLisPricing.endPoint+"/Haulage/DeleteHaulage?offerId="+id, context.tokenPricing);
+        try {
+            const response = await deleteApiHaulageDeleteHaulage({query: { offerId: id }})
             if (response !== null && response !== undefined) {
                 enqueueSnackbar(t('rowDeletedSuccess'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
                 setModal(false);
@@ -352,6 +355,13 @@ function Haulages() {
                 enqueueSnackbar(t('rowDeletedError'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
             }
         }
+        catch (err: unknown) {
+            if (err instanceof AxiosError) {
+                console.log(err.response?.data);
+            }
+            console.log("An error occured");
+            setLoad(false);
+        }
     }
     
     return (
@@ -360,7 +370,7 @@ function Haulages() {
             <Box sx={{ py: 2.5 }}>
                 <Typography variant="h5" sx={{mt: {xs: 4, md: 1.5, lg: 1.5 }}} mx={5}><b>{t('listHaulages')}</b></Typography>
                 <Grid container spacing={2} mt={0} px={5}>
-                    <Grid item xs={12}>
+                    <Grid size={{ xs: 12 }}>
                         <Button variant="contained" sx={actionButtonStyles} onClick={() => { setCurrentEditId(""); resetForm(); setModal2(true); }}>
                             {t('newHaulagePrice')} <AddCircleOutlinedIcon sx={{ ml: 0.5, pb: 0.25, justifyContent: "center", alignItems: "center" }} fontSize="small" />
                         </Button>
@@ -369,44 +379,22 @@ function Haulages() {
                         </Button>
                         <Button variant="contained" color="inherit" sx={{ float: "right", backgroundColor: "#fff", textTransform: "none" }} onClick={() => { setModal7(true); }} >{t('createNewHaulier')}</Button>
                     </Grid>
-                    <Grid item xs={12} md={4} mt={1}>
+                    <Grid size={{ xs: 12, md: 4 }} mt={1}>
                         <InputLabel htmlFor="company-name" sx={inputLabelStyles}>{t('haulier')}</InputLabel>
                         <CompanySearch id="company-name" value={searchedHaulier} onChange={setSearchedHaulier} category={CategoryEnum.SUPPLIERS} fullWidth />
                     </Grid>
-                    <Grid item xs={12} md={3} mt={1}>
+                    <Grid size={{ xs: 12, md: 3 }} mt={1}>
                         <InputLabel htmlFor="loading-city-searched" sx={inputLabelStyles}>{t('loadingCity')}</InputLabel>
                         <AutocompleteSearch id="loading-city-searched" value={searchedLoadingCity} onChange={setSearchedLoadingCity} fullWidth />
                     </Grid>
-                    <Grid item xs={12} md={3} mt={1}>
+                    <Grid size={{ xs: 12, md: 3 }} mt={1}>
                         <InputLabel htmlFor="loading-port-searched" sx={inputLabelStyles}><Anchor fontSize="small" sx={inputIconStyles} /> {t('deliveryPort')}</InputLabel>
                         {
                             ports !== null ?
-                            <Autocomplete
-                                disablePortal
-                                id="loading-port-searched"
-                                options={ports}
-                                renderOption={(props, option, i) => {
-                                    return (
-                                        <li {...props} key={option.portId}>
-                                            {option.portName+", "+option.country}
-                                        </li>
-                                    );
-                                }}
-                                getOptionLabel={(option: any) => { 
-                                    if (option !== null && option !== undefined) {
-                                        return option.portName+', '+option.country;
-                                    }
-                                    return ""; 
-                                }}
-                                value={searchedLoadingPort}
-                                sx={{ mt: 1 }}
-                                renderInput={(params: any) => <TextField {...params} />}
-                                onChange={(e: any, value: any) => { setSearchedLoadingPort(value); }}
-                                fullWidth
-                            /> : <Skeleton />
+                            <PortAutocomplete id="portLoading" options={ports} value={searchedLoadingPort} onChange={setSearchedLoadingPort} fullWidth /> : <Skeleton />
                         }
                     </Grid>
-                    <Grid item xs={12} md={2} mt={1} sx={{ display: "flex", alignItems: "end" }}>
+                    <Grid size={{ xs: 12, md: 2 }} mt={1} sx={{ display: "flex", alignItems: "end" }}>
                         <Button 
                             variant="contained" 
                             color="inherit"
@@ -423,7 +411,7 @@ function Haulages() {
                 {
                     !load ? 
                     <Grid container spacing={2} mt={1} px={5}>
-                        <Grid item xs={12}>
+                        <Grid size={{ xs: 12 }}>
                             {
                                 haulages !== null && haulages.length !== 0 ?
                                 <Box sx={{ overflow: "auto", width: { xs: "calc(100vw - 80px)", md: "100%" } }}>
@@ -477,10 +465,10 @@ function Haulages() {
                     {
                         loadEdit === false ?
                         <Grid container spacing={2}>
-                            <Grid item xs={12} md={8}>
-                                <Typography sx={{ fontSize: 18, mb: 1 }}><b>Haulage price information</b></Typography>
+                            <Grid size={{ xs: 12, md: 8 }}>
+                                <Typography sx={{ fontSize: 18, mb: 1 }}><b>{t('haulagePriceInformation')}</b></Typography>
                             </Grid>
-                            <Grid item xs={12} md={4}>
+                            <Grid size={{ xs: 12, md: 4 }}>
                                 <Button 
                                     variant="contained" color="inherit" 
                                     sx={{ float: "right", backgroundColor: "#fff", textTransform: "none", ml: 1 }} 
@@ -496,60 +484,38 @@ function Haulages() {
                                     {t('createNewHaulier')}
                                 </Button>
                             </Grid>
-                            <Grid item xs={12} md={8}>
+                            <Grid size={{ xs: 12, md: 8 }}>
                                 <Grid container spacing={2}>
-                                    <Grid item xs={12} md={6} mt={0.25}>
+                                    <Grid size={{ xs: 12, md: 6 }} mt={0.25}>
                                         <InputLabel htmlFor="haulier" sx={inputLabelStyles}>{t('haulier')}</InputLabel>
                                         <CompanySearch id="haulier" value={haulier} onChange={setHaulier} category={CategoryEnum.SUPPLIERS} fullWidth />
                                     </Grid>
-                                    <Grid item xs={12} md={6} mt={0.25}>
+                                    <Grid size={{ xs: 12, md: 6 }} mt={0.25}>
                                         <InputLabel htmlFor="loading-city" sx={inputLabelStyles}>{t('loadingCity')}</InputLabel>
                                         <AutocompleteSearch id="loading-city" value={loadingCity} onChange={setLoadingCity} fullWidth />
                                     </Grid>
-                                    <Grid item xs={12} md={6} mt={0.25}>
+                                    <Grid size={{ xs: 12, md: 6 }} mt={0.25}>
                                         <InputLabel htmlFor="loading-port" sx={inputLabelStyles}><Anchor fontSize="small" sx={inputIconStyles} /> {t('deliveryPort')}</InputLabel>
                                         {
                                             ports !== null ?
-                                            <Autocomplete
-                                                disablePortal
-                                                id="loading-port"
-                                                options={ports}
-                                                renderOption={(props, option, i) => {
-                                                    return (
-                                                        <li {...props} key={option.portId}>
-                                                            {option.portName+", "+option.country}
-                                                        </li>
-                                                    );
-                                                }}
-                                                getOptionLabel={(option: any) => { 
-                                                    if (option !== null && option !== undefined) {
-                                                        return option.portName+', '+option.country;
-                                                    }
-                                                    return ""; 
-                                                }}
-                                                value={loadingPort}
-                                                sx={{ mt: 1 }}
-                                                renderInput={(params: any) => <TextField {...params} />}
-                                                onChange={(e: any, value: any) => { setLoadingPort(value); }}
-                                                fullWidth
-                                            /> : <Skeleton />
+                                            <PortAutocomplete id="portLoading" options={ports} value={loadingPort} onChange={setLoadingPort} fullWidth /> : <Skeleton />
                                         }
                                     </Grid>
-                                    <Grid item xs={12} md={6} mt={0.25}>
+                                    <Grid size={{ xs: 12, md: 6 }} mt={0.25}>
                                         <InputLabel htmlFor="emptyPickupDepot" sx={inputLabelStyles}>{t('emptyPickupDepot')}</InputLabel>
                                         <BootstrapInput id="emptyPickupDepot" type="text" value={emptyPickupDepot} onChange={(e: any) => setEmptyPickupDepot(e.target.value)} fullWidth />
                                     </Grid>
                                 </Grid>
                             </Grid>
-                            <Grid item xs={12} md={4}>
+                            <Grid size={{ xs: 12, md: 4 }}>
                                 <Grid container spacing={2}>
-                                    <Grid item xs={12} md={12} mt={0}>
+                                    <Grid size={{ xs: 12, md: 12 }} mt={0}>
                                         <InputLabel htmlFor="comment" sx={inputLabelStyles}>{t('comment')}</InputLabel>
                                         <BootstrapInput id="comment" type="text" multiline rows={4.875} value={comment} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setComment(e.target.value)} fullWidth />
                                     </Grid>
                                 </Grid>
                             </Grid>
-                            <Grid item xs={12} md={3}>
+                            <Grid size={{ xs: 12, md: 3 }}>
                                 <InputLabel htmlFor="valid-until" sx={inputLabelStyles}>{t('validUntil')}</InputLabel>
                                 <LocalizationProvider dateAdapter={AdapterDayjs}>
                                     <DatePicker 
@@ -560,7 +526,7 @@ function Haulages() {
                                     />
                                 </LocalizationProvider>
                             </Grid>
-                            <Grid item xs={12} md={3}>
+                            <Grid size={{ xs: 12, md: 3 }}>
                                 <InputLabel htmlFor="currency" sx={inputLabelStyles}>{t('currency')}</InputLabel>
                                 <NativeSelect
                                     id="currency"
@@ -574,7 +540,7 @@ function Haulages() {
                                     ))}
                                 </NativeSelect>
                             </Grid>
-                            <Grid item xs={12} md={6}>
+                            <Grid size={{ xs: 12, md: 6 }}>
                                 <InputLabel htmlFor="haulageType" sx={inputLabelStyles}>{t('haulageType')}</InputLabel>
                                 <NativeSelect
                                     id="haulageType"
@@ -588,7 +554,7 @@ function Haulages() {
                                     ))}
                                 </NativeSelect>
                             </Grid>
-                            <Grid item xs={12} md={4}>
+                            <Grid size={{ xs: 12, md: 4 }}>
                                 <InputLabel htmlFor="container-types" sx={inputLabelStyles}>{t('containers')}</InputLabel>
                                 {
                                     containers !== null ? 
@@ -599,7 +565,7 @@ function Haulages() {
                                         options={containers}
                                         getOptionLabel={(option: any) => option.packageName}
                                         value={containerTypes}
-                                        onChange={(event: any, newValue: any) => {
+                                        onChange={(e: any, newValue: any) => {
                                             setContainerTypes(newValue);
                                         }}
                                         renderInput={(params: any) => <TextField {...params} sx={{ mt: 1, textTransform: "lowercase" }} />}
@@ -607,19 +573,19 @@ function Haulages() {
                                     /> : <Skeleton />
                                 }
                             </Grid>
-                            <Grid item xs={12} md={2}>
+                            <Grid size={{ xs: 12, md: 2 }}>
                                 <InputLabel htmlFor="free-time" sx={inputLabelStyles}>{t('freeTime')} ({t('hours')})</InputLabel>
                                 <BootstrapInput id="free-time" type="number" value={freeTime} onChange={(e: any) => setFreeTime(e.target.value)} fullWidth />
                             </Grid>
-                            <Grid item xs={12} md={2}>
+                            <Grid size={{ xs: 12, md: 2 }}>
                                 <InputLabel htmlFor="unitTariff-cs" sx={inputLabelStyles}>{t('unitTariff2')}</InputLabel>
                                 <BootstrapInput id="unitTariff-cs" type="number" value={unitTariff} onChange={(e: any) => setUnitTariff(e.target.value)} fullWidth />
                             </Grid>
-                            <Grid item xs={12} md={2}>
+                            <Grid size={{ xs: 12, md: 2 }}>
                                 <InputLabel htmlFor="overtimeTariff-cs" sx={inputLabelStyles}>{t('overtimeTariff')} (/{t('hour')})</InputLabel>
                                 <BootstrapInput id="overtimeTariff-cs" type="number" value={overtimeTariff} onChange={(e: any) => setOvertimeTariff(e.target.value)} fullWidth />
                             </Grid>
-                            <Grid item xs={12} md={2}>
+                            <Grid size={{ xs: 12, md: 2 }}>
                                 <InputLabel htmlFor="multiStop" sx={inputLabelStyles}>{t('multiStop')}</InputLabel>
                                 <BootstrapInput id="multiStop" type="number" value={multiStop} onChange={(e: any) => setMultiStop(e.target.value)} fullWidth />
                             </Grid>
@@ -640,16 +606,12 @@ function Haulages() {
 
             {/* Price request haulage  */}
             <BootstrapDialog onClose={() => setModal5(false)} open={modal5} maxWidth="lg" fullWidth>
-                {
-                    context ? 
-                    <RequestPriceHaulage
-                        token={context.tokenPricing} 
-                        ports={ports}
-                        loadingCity={null}
-                        loadingPort={null}
-                        closeModal={() => setModal5(false)}
-                    /> : null
-                }
+                <RequestPriceHaulage
+                    ports={ports}
+                    loadingCity={null}
+                    loadingPort={null}
+                    closeModal={() => setModal5(false)}
+                />
             </BootstrapDialog>
 
             {/* Add a new contact */}

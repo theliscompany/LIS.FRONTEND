@@ -549,5 +549,11 @@ export const fr = {
   productEdited: "Le produit a été édité avec succès!",
   portAdded: "Le port a été ajouté avec succès!",
   portEdited: "Le port a été édité avec succès!",
-  servicesTypeId: "Type de service"
+  servicesTypeId: "Type de service",
+  contactAdded: "Le contact a été ajouté avec succès!",
+  contactEdited: "Le contact a été édité avec succès!",
+  pleaseRespect: "Veuillez respecter le format suivant",
+  typeName: "Entrez le nom de la ville et le code du pays suivi d'une virgule.",
+  ex: "Exple", 
+  haulagePriceInformation: "Information sur le prix du transport routier"
 };

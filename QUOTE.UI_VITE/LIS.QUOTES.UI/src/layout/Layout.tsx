@@ -376,7 +376,6 @@ const Layout = () : React.ReactNode => {
                             
                             <NavigationLink url="/quote-offers" title={t('priceOffers')} icon={<Portrait fontSize="small" />} />
                             <NavigationLink url="/orders" title={t('orders')} icon={<FolderOutlined fontSize="small" />} />
-                            <NavigationLink url="/templates" title={t('templates')} icon={<TextSnippetOutlined fontSize="small" />} />
                             
                             <ListItem className="cs-listitem" key={"Masterdata part"} disablePadding disableGutters>
                                 <ListItemButton className="cs-listitembutton" onClick={() => { setOpenMasterdata(!openMasterdata); }}>
@@ -390,6 +389,7 @@ const Layout = () : React.ReactNode => {
                             <Collapse in={openMasterdata} timeout="auto" unmountOnExit>
                                 <List component="div" disablePadding>
                                     <NavigationLink url="/services" title={t('services')} icon={<RoomServiceOutlined fontSize="small" />} nested />
+                                    <NavigationLink url="/templates" title={t('templates')} icon={<TextSnippetOutlined fontSize="small" />} nested />
                                     <NavigationLink url="/products" title={t('products')} icon={<InventoryOutlined fontSize="small" />} nested />
                                     <NavigationLink url="/hscodes" title={t('hscodes')} icon={<InventoryOutlined fontSize="small" />} nested />
                                     <NavigationLink url="/ports" title={t('ports')} icon={<AnchorOutlined fontSize="small" />} nested />

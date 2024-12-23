@@ -41,3 +41,15 @@ export const msalConfig: Configuration = {
       import.meta.env.VITE_CRM_REQUEST_SCOPE !== undefined ? import.meta.env.VITE_CRM_REQUEST_SCOPE : ""
     ]
   }
+
+  export const pricingRequest: PopupRequest = {
+    scopes: [
+      import.meta.env.VITE_PRICING_REQUEST_SCOPE !== undefined ? import.meta.env.VITE_PRICING_REQUEST_SCOPE : ""
+    ]
+  }
+
+  export const templateRequest: PopupRequest = {
+    scopes: [
+      import.meta.env.VITE_TEMPLATE_REQUEST_SCOPE !== undefined ? import.meta.env.VITE_TEMPLATE_REQUEST_SCOPE : ""
+    ]
+  }
