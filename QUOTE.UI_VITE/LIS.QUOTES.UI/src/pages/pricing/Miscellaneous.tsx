@@ -1,49 +1,30 @@
 import React from 'react';
 import { useState, useEffect } from 'react';
-import { Accordion, AccordionDetails, AccordionSummary, Alert, Autocomplete, Box, Button, Chip, DialogActions, DialogContent, FormControlLabel, Grid, IconButton, InputLabel, ListItem, ListItemText, NativeSelect, Skeleton, Switch, TextField, Typography } from '@mui/material';
+import { Accordion, AccordionDetails, AccordionSummary, Alert, Autocomplete, Box, Button, Chip, DialogActions, DialogContent, FormControlLabel, IconButton, InputLabel, ListItem, ListItemText, NativeSelect, Skeleton, Switch, TextField, Typography } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import AddCircleOutlinedIcon from '@mui/icons-material/AddCircleOutlined';
 import SearchIcon from '@mui/icons-material/Search';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import Popper from '@mui/material/Popper';
+import { Anchor } from '@mui/icons-material';
 import { SnackbarProvider, enqueueSnackbar } from 'notistack';
 import { useTranslation } from 'react-i18next';
-import { useAuthorizedBackendApi } from '../api/api';
-import { protectedResources } from '../config/authConfig';
-import { BackendService } from '../utils/services/fetch';
 import { GridColDef, GridRenderCellParams, DataGrid } from '@mui/x-data-grid';
-import { BootstrapDialog, BootstrapDialogTitle, BootstrapInput, actionButtonStyles, buttonCloseStyles, datetimeStyles, gridStyles, inputIconStyles, inputLabelStyles, whiteButtonStyles } from '../utils/misc/styles';
-import CompanySearch from '../components/shared/CompanySearch';
+import { BootstrapDialog, BootstrapDialogTitle, BootstrapInput, actionButtonStyles, buttonCloseStyles, datetimeStyles, gridStyles, inputIconStyles, inputLabelStyles, whiteButtonStyles } from '../../utils/misc/styles';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import dayjs, { Dayjs } from 'dayjs';
-import { useMsal, useAccount } from '@azure/msal-react';
-import { containerPackages, currencyOptions } from '../utils/constants';
-import NewContact from '../components/editRequestPage/NewContact';
-import { Anchor } from '@mui/icons-material';
-import NewService from '../components/shared/NewService';
-import NewPort from '../components/shared/NewPort';
-import { compareServices } from '../utils/functions';
-import { getLISTransportAPI } from '../api/client/transportService';
-
-function createGetRequestUrl(variable1: number, variable2: number, variable3: number) {
-    let url = protectedResources.apiLisPricing.endPoint+"/Miscellaneous/Miscellaneous?";
-    if (variable1) {
-      url += 'DeparturePortId=' + encodeURIComponent(variable1) + '&';
-    }
-    if (variable2) {
-      url += 'DestinationPortId=' + encodeURIComponent(variable2) + '&';
-    }
-    if (variable3) {
-      url += 'SupplierId=' + encodeURIComponent(variable3) + '&';
-    }
-    
-    if (url.slice(-1) === '&') {
-      url = url.slice(0, -1);
-    }
-    return url;
-}
+import { containerPackages, currencyOptions } from '../../utils/constants';
+import { compareServices } from '../../utils/functions';
+import NewContact from '../../components/shared/NewContact';
+import NewService from '../../components/shared/NewService';
+import NewPort from '../../components/shared/NewPort';
+import CompanySearch from '../../components/shared/CompanySearch';
+import PortAutocomplete from '../../components/shared/PortAutocomplete';
+import { getPorts, getService } from '../../api/client/transport';
+import { deleteApiMiscellaneousDeleteMiscellaneousById, getApiMiscellaneousMiscellaneous, postApiMiscellaneousMiscellaneous } from '../../api/client/pricing';
 
 function Miscellaneous() {
     const [load, setLoad] = useState<boolean>(true);
@@ -79,11 +60,6 @@ function Miscellaneous() {
     const [showHaulages, setShowHaulages] = useState<boolean>(false);
 
     const { t } = useTranslation();    
-    const { instance, accounts } = useMsal();
-    const account = useAccount(accounts[0] || {});
-    const context = useAuthorizedBackendApi();
-
-    const { getPorts, getService } = getLISTransportAPI();
     
     const CustomPopper = React.forwardRef(function CustomPopper(props: any, ref: any) {
         return <Popper {...props} ref={ref} placement="top-start" />;
@@ -188,14 +164,15 @@ function Miscellaneous() {
     
     useEffect(() => {
         getPortsService();
-        getProtectedData(); // Services and Containers
-    }, [account, instance, account]);
+        getServices();
+        getContainers();
+    }, []);
 
     useEffect(() => {
         if (ports !== null) {
             getMiscellaneouses();
         }
-    }, [withShipment, ports, account, instance, account]);
+    }, [withShipment, ports]);
     
     useEffect(() => {
         if (ports !== null && allMiscs !== null) {
@@ -210,23 +187,26 @@ function Miscellaneous() {
     }, [showHaulages, ports]);
     
     const getPortsService = async () => {
-        const response = await getPorts({ pageSize: 2000 });
-        if (response !== null && response !== undefined) {
-            setPorts(response.data);
+        try {
+            const response = await getPorts({query: { pageSize: 2000 }});
+            if (response !== null && response !== undefined) {
+                setPorts(response.data);
+            }
+        }
+        catch (err: any) {
+            console.log(err);
         }
     }
     
-    const getProtectedData = async () => {
-        if (account && instance && context) {
-            getServices();
-            getContainers();
-        }
-    }
-
     const getServices = async () => {
-        const response = await getService({ pageSize: 500 });
-        if (response !== null && response !== undefined) {
-            setServices(response.data.sort((a: any, b: any) => compareServices(a, b)).filter((obj: any) => obj.servicesTypeId.includes(5))); // Filter the services for miscellaneous (MISCELLANEOUS = 5)
+        try {
+            const response = await getService({query: { pageSize: 500 }});
+            if (response !== null && response !== undefined) {
+                setServices(response.data?.sort((a: any, b: any) => compareServices(a, b)).filter((obj: any) => obj.servicesTypeId.includes(5))); // Filter the services for miscellaneous (MISCELLANEOUS = 5)
+            }
+        }
+        catch (err: any) {
+            console.log(err);
         }
     }
     
@@ -235,22 +215,21 @@ function Miscellaneous() {
     }
     
     const getMiscellaneouses = async () => {
-        if (account && instance && context) {
+        try {
             setLoad(true);
-            var token = null;
-            const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisPricing.endPoint+"/Miscellaneous/Miscellaneous?withShipment="+withShipment, token !== null ? token : context.tokenPricing);
+            const response: any = await getApiMiscellaneousMiscellaneous({query: {withShipment: withShipment}});
             if (response !== null && response !== undefined) {
-                setAllMiscs(response);
+                setAllMiscs(response.data);
                 var portsIds = ports.map((elm: any) => elm.portName);
                 if (!showHaulages) {
-                    setMiscs(response.filter((elm: any) => portsIds.includes(elm.departurePortName)));
+                    setMiscs(response.data?.filter((elm: any) => portsIds.includes(elm.departurePortName)));
                 }
                 else {
-                    setMiscs(response.filter((elm: any) => !portsIds.includes(elm.departurePortName)));
+                    setMiscs(response.data?.filter((elm: any) => !portsIds.includes(elm.departurePortName)));
                 }
                 
                 if (withShipment === false) {
-                    setMiscsWithoutShipment(response);
+                    setMiscsWithoutShipment(response.data);
                 }
                 setLoad(false);
             }
@@ -258,6 +237,10 @@ function Miscellaneous() {
                 setLoad(false);
             }
             console.log(response);
+        }
+        catch (err: any) {
+            console.log(err);
+            setLoad(false);
         }
     }
     
@@ -275,18 +258,18 @@ function Miscellaneous() {
     
     const getMiscellaneous = async (id: string) => {
         setLoadEdit(true)
-        if (account && instance && context) {
-            const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisPricing.endPoint+"/Miscellaneous/Miscellaneous?id="+id+"&withShipment="+withShipment, context.tokenPricing);
+        try {
+            const response: any = await getApiMiscellaneousMiscellaneous({query: {id: id, withShipment: withShipment}});
             if (response !== null && response !== undefined) {
-                console.log(response.services);
-                setSupplier({contactId: response.supplierId, contactName: response.supplierName});
-                setPortLoading(ports.find((elm: any) => elm.portId === response.departurePortId));
-                setPortDischarge(ports.find((elm: any) => elm.portId === response.destinationPortId));
-                setCurrency(response.currency);
-                setValidUntil(dayjs(response.validUntil));
-                setComment(response.comment);
-                setServicesSelection(response.services);
-                setContainerTypes(response.services.length !== 0 ? response.services[0].containers[0].packageId !== 0 ? response.services[0].containers[0] : null : null);
+                // console.log(response.data?.services);
+                setSupplier({contactId: response.data?.supplierId, contactName: response.data?.supplierName});
+                setPortLoading(ports.find((elm: any) => elm.portId === response.data?.departurePortId));
+                setPortDischarge(ports.find((elm: any) => elm.portId === response.data?.destinationPortId));
+                setCurrency(response.data?.currency);
+                setValidUntil(dayjs(response.data?.validUntil));
+                setComment(response.data?.comment);
+                setServicesSelection(response.data?.services);
+                setContainerTypes(response.data?.services.length !== 0 ? response.data?.services[0].containers[0].packageId !== 0 ? response.data?.services[0].containers[0] : null : null);
                 setLoadEdit(false);
             }
             else {
@@ -294,35 +277,40 @@ function Miscellaneous() {
             }
             console.log(response);
         }
+        catch (err: any) {
+            console.log(err);
+            setLoadEdit(false);
+        }
     }
     
     const searchMiscellaneous = async () => {
-        if (account && instance && context) {
+        try {
             setLoad(true);
-            var requestFormatted = createGetRequestUrl(portDeparture?.portId, portDestination?.portId, searchedSupplier?.contactId);
-            const response = await (context?.service as BackendService<any>).getWithToken(requestFormatted+"&withShipment="+withShipment, context.tokenPricing);
+            const response: any = await getApiMiscellaneousMiscellaneous({query: {departurePortId: portDeparture?.portId, destinationPortId: portDestination?.portId, supplierId: searchedSupplier?.contactId, withShipment: withShipment}});
             if (response !== null && response !== undefined) {
                 var portsIds = ports.map((elm: any) => elm.portName);
-                setMiscs(response.filter((elm: any) => portsIds.includes(elm.departurePortName)));
+                setMiscs(response.data?.filter((elm: any) => portsIds.includes(elm.departurePortName)));
                 setLoad(false);
             }
             else {
                 setLoad(false);
             }
             console.log(response);
+        }
+        catch (err: any) {
+            console.log(err);
+            setLoad(false);
         }
     }
 
     const createMiscellaneous = async () => {
         if (servicesSelection !== null && validUntil !== null) {
-            if (account && instance && context) {
+            try {
                 var dataSent = null;
-                var urlString = "";
-
                 if (currentEditId !== "") {
                     if (portLoading !== null && portDischarge !== null && portLoading !== undefined && portDischarge !== undefined) {
                         dataSent = {
-                            "miscellaneousId": currentEditId,
+                            // "miscellaneousId": currentEditId,
                             "id": currentEditId,
                             "departurePortId": portLoading.portId,
                             "destinationPortId": portDischarge.portId,
@@ -340,7 +328,7 @@ function Miscellaneous() {
                     }
                     else {
                         dataSent = {
-                            "miscellaneousId": currentEditId,
+                            // "miscellaneousId": currentEditId,
                             "id": currentEditId,
                             "supplierId": supplier.contactId,
                             "supplierName": supplier.contactName,
@@ -386,7 +374,7 @@ function Miscellaneous() {
                     }
                 }
                 console.log(dataSent);
-                const response = await (context?.service as BackendService<any>).postWithToken(protectedResources.apiLisPricing.endPoint+"/Miscellaneous/Miscellaneous", dataSent, context.tokenPricing);
+                const response = await postApiMiscellaneousMiscellaneous({body: dataSent});
                 if (response !== null && response !== undefined) {
                     setModal2(false);
                     enqueueSnackbar(t('successCreated'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
@@ -396,6 +384,9 @@ function Miscellaneous() {
                     enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
                 }
             }
+            catch (err: any) {
+                console.log(err);
+            }
         }
         else {
             enqueueSnackbar(t('fieldsEmptySeafreight'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
@@ -403,9 +394,9 @@ function Miscellaneous() {
     }
 
     const deleteMiscellaneous = async (id: string) => {
-        if (account && instance && context) {
+        try {
             // alert("Function not available yet!");
-            const response = await (context?.service as BackendService<any>).deleteWithToken(protectedResources.apiLisPricing.endPoint+"/Miscellaneous/DeleteMiscellaneous/"+id, context.tokenPricing);
+            const response = await deleteApiMiscellaneousDeleteMiscellaneousById({path: {id: id}});
             if (response !== null && response !== undefined) {
                 enqueueSnackbar(t('rowDeletedSuccess'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
                 setModal(false);
@@ -414,6 +405,9 @@ function Miscellaneous() {
             else {
                 enqueueSnackbar(t('rowDeletedError'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
             }
+        }
+        catch (err: any) {
+            console.log(err);
         }
     }
     
@@ -436,7 +430,7 @@ function Miscellaneous() {
             <Box sx={{ py: 2.5 }}>
                 <Typography variant="h5" sx={{mt: {xs: 4, md: 1.5, lg: 1.5 }}} mx={5}><b>{t('listMiscellaneous')}</b></Typography>
                 <Grid container spacing={2} mt={0} px={5}>
-                    <Grid item xs={12} md={7.5}>
+                    <Grid size={{ xs: 12, md: 6 }}>
                         <FormControlLabel 
                             control={
                             <Switch
@@ -462,76 +456,32 @@ function Miscellaneous() {
                             sx={{ float: "right" }}
                         />
                     </Grid>
-                    <Grid item xs={12} md={4.5}>
+                    <Grid size={{ xs: 12, md: 6 }}>
                         <Button variant="contained" sx={actionButtonStyles} onClick={() => { setCurrentEditId(""); resetForm(); setModal2(true); }}>
                             {t('newMiscellaneousPrice')} <AddCircleOutlinedIcon sx={{ ml: 0.5, pb: 0.25, justifyContent: "center", alignItems: "center" }} fontSize="small" />
                         </Button>
                         <Button variant="contained" color="inherit" sx={{ float: "right", backgroundColor: "#fff", textTransform: "none" }} onClick={() => { setModal7(true); }} >Create new supplier</Button>
                     </Grid>
                     
-                    <Grid item xs={12} md={4} mt={1}>
+                    <Grid size={{ xs: 12, md: 4 }} mt={1}>
                         <InputLabel htmlFor="company-name" sx={inputLabelStyles}>{t('supplier')}</InputLabel>
                         <CompanySearch id="company-name" value={searchedSupplier} onChange={setSearchedSupplier} category={0} callBack={() => console.log(searchedSupplier)} fullWidth />
                     </Grid>
-                    <Grid item xs={12} md={3} mt={1}>
+                    <Grid size={{ xs: 12, md: 3 }} mt={1}>
                         <InputLabel htmlFor="port-departure" sx={inputLabelStyles}><Anchor fontSize="small" sx={inputIconStyles} /> {t('departurePort')}</InputLabel>
                         {
                             ports !== null ?
-                            <Autocomplete
-                                disablePortal
-                                id="port-departure"
-                                options={ports}
-                                renderOption={(props, option, i) => {
-                                    return (
-                                        <li {...props} key={option.portId}>
-                                            {option.portName+", "+option.country}
-                                        </li>
-                                    );
-                                }}
-                                getOptionLabel={(option: any) => { 
-                                    if (option !== null && option !== undefined) {
-                                        return option.portName+', '+option.country;
-                                    }
-                                    return ""; 
-                                }}
-                                value={portDeparture}
-                                sx={{ mt: 1 }}
-                                renderInput={(params: any) => <TextField {...params} />}
-                                onChange={(e: any, value: any) => { setPortDeparture(value); }}
-                                fullWidth
-                            /> : <Skeleton />
+                            <PortAutocomplete id="port-departure" options={ports} value={portDeparture} onChange={setPortDeparture} fullWidth /> : <Skeleton />
                         }
                     </Grid>
-                    <Grid item xs={12} md={3} mt={1}>
+                    <Grid size={{ xs: 12, md: 3 }} mt={1}>
                         <InputLabel htmlFor="destination-port" sx={inputLabelStyles}><Anchor fontSize="small" sx={inputIconStyles} /> {t('arrivalPort')}</InputLabel>
                         {
                             ports !== null ?
-                            <Autocomplete
-                                disablePortal
-                                id="destination-port"
-                                options={ports}
-                                renderOption={(props, option, i) => {
-                                    return (
-                                        <li {...props} key={option.portId}>
-                                            {option.portName+", "+option.country}
-                                        </li>
-                                    );
-                                }}
-                                getOptionLabel={(option: any) => { 
-                                    if (option !== null && option !== undefined) {
-                                        return option.portName+', '+option.country;
-                                    }
-                                    return ""; 
-                                }}
-                                value={portDestination}
-                                sx={{ mt: 1 }}
-                                renderInput={(params: any) => <TextField {...params} />}
-                                onChange={(e: any, value: any) => { setPortDestination(value); }}
-                                fullWidth
-                            /> : <Skeleton />
+                            <PortAutocomplete id="destination-port" options={ports} value={portDestination} onChange={setPortDestination} fullWidth /> : <Skeleton />
                         }
                     </Grid>
-                    <Grid item xs={12} md={2} mt={1} sx={{ display: "flex", alignItems: "end" }}>
+                    <Grid size={{ xs: 12, md: 2 }} mt={1} sx={{ display: "flex", alignItems: "end" }}>
                         <Button 
                             variant="contained" 
                             color="inherit"
@@ -550,7 +500,7 @@ function Miscellaneous() {
                 {
                     withShipment === true ?
                     !load ? 
-                    <Grid item xs={12}>
+                    <Grid size={{ xs: 12 }}>
                         {
                             miscs !== null && miscs.length !== 0 ?
                                 <Box sx={{ overflow: "auto", width: { xs: "calc(100vw - 80px)", md: "100%" } }}>
@@ -584,22 +534,22 @@ function Miscellaneous() {
                 {
                     withShipment === false ?
                     !load ? 
-                    <Grid item xs={12}>
+                    <Grid size={{ xs: 12 }}>
                         {
                             miscsWithoutShipment !== null && miscsWithoutShipment.length !== 0 ?
-                                <Box sx={{ overflow: "auto", width: { xs: "calc(100vw - 80px)", md: "100%" } }}>
-                                {
-                                    miscsWithoutShipment !== null && miscsWithoutShipment.length !== 0 ?
-                                    <DataGrid
-                                        rows={miscsWithoutShipment}
-                                        columns={columnsMiscs}
-                                        hideFooter
-                                        getRowId={(row: any) => row?.miscellaneousId}
-                                        getRowHeight={() => "auto" }
-                                        sx={gridStyles}
-                                        disableRowSelectionOnClick
-                                    /> : <Skeleton />
-                                }
+                            <Box sx={{ overflow: "auto", width: { xs: "calc(100vw - 80px)", md: "100%" } }}>
+                            {
+                                miscsWithoutShipment !== null && miscsWithoutShipment.length !== 0 ?
+                                <DataGrid
+                                    rows={miscsWithoutShipment}
+                                    columns={columnsMiscs}
+                                    hideFooter
+                                    getRowId={(row: any) => row?.miscellaneousId}
+                                    getRowHeight={() => "auto" }
+                                    sx={gridStyles}
+                                    disableRowSelectionOnClick
+                                /> : <Skeleton />
+                            }
                             </Box> : <Alert severity="warning">{t('noResults')}</Alert>
                         }
                     </Grid> : <Skeleton sx={{ mx: 1, mt: 3, width: "100%" }} /> : null
@@ -630,94 +580,49 @@ function Miscellaneous() {
                     {
                         loadEdit === false ?
                         <Grid container spacing={2}>
-                            <Grid item xs={12} md={8}>
+                            <Grid size={{ xs: 12, md: 8 }}>
                                 <Typography sx={{ fontSize: 18 }}><b>{t('miscPriceInfo')}</b></Typography>
                             </Grid>
-                            <Grid item xs={12} md={4}>
+                            <Grid size={{ xs: 12, md: 4 }}>
                                 <Button variant="contained" color="inherit" sx={{ float: "right", backgroundColor: "#fff", textTransform: "none" }} onClick={() => { setModal7(true); }} >Create new supplier</Button>
                             </Grid>
-                            <Grid item xs={12} md={9}>
+                            <Grid size={{ xs: 12, md: 9 }}>
                                 <Grid container spacing={2}>
-                                    <Grid item xs={12} md={6} mt={0.25}>
+                                    <Grid size={{ xs: 12, md: 6 }} mt={0.25}>
                                         <InputLabel htmlFor="supplier" sx={inputLabelStyles}>{t('supplier')}</InputLabel>
                                         <CompanySearch id="supplier" value={supplier} onChange={setSupplier} category={0} callBack={() => console.log(supplier)} fullWidth />
                                     </Grid>
-                                    <Grid item xs={12} md={6} mt={0.25}>
+                                    <Grid size={{ xs: 12, md: 6 }} mt={0.25}>
                                         <InputLabel htmlFor="port-loading" sx={inputLabelStyles}><Anchor fontSize="small" sx={inputIconStyles} /> {t('departurePort')}</InputLabel>
                                         {
                                             ports !== null ?
-                                            <Autocomplete
-                                                disablePortal
-                                                id="port-loading"
-                                                options={ports}
-                                                renderOption={(props, option, i) => {
-                                                    return (
-                                                        <li {...props} key={option.portId}>
-                                                            {option.portName+", "+option.country}
-                                                        </li>
-                                                    );
-                                                }}
-                                                getOptionLabel={(option: any) => { 
-                                                    if (option !== null && option !== undefined) {
-                                                        return option.portName+', '+option.country;
-                                                    }
-                                                    return ""; 
-                                                }}
-                                                value={portLoading}
-                                                disabled={!withShipment}
-                                                sx={{ mt: 1 }}
-                                                renderInput={(params: any) => <TextField {...params} />}
-                                                onChange={(e: any, value: any) => { setPortLoading(value); }}
-                                                fullWidth
-                                            /> : <Skeleton />
+                                            <PortAutocomplete id="port-loading" options={ports} value={portLoading} onChange={setPortLoading} fullWidth disabled={!withShipment} /> : <Skeleton />
                                         }
                                     </Grid>
-                                    <Grid item xs={12} md={6} mt={0.25}>
+                                    <Grid size={{ xs: 12, md: 6 }} mt={0.25}>
                                         <InputLabel htmlFor="discharge-port" sx={inputLabelStyles}><Anchor fontSize="small" sx={inputIconStyles} /> {t('arrivalPort')}</InputLabel>
                                         {
                                             ports !== null ?
-                                            <Autocomplete
-                                                disablePortal
-                                                id="discharge-port"
-                                                options={ports}
-                                                renderOption={(props, option, i) => {
-                                                    return (
-                                                        <li {...props} key={option.portId}>
-                                                            {option.portName+", "+option.country}
-                                                        </li>
-                                                    );
-                                                }}
-                                                getOptionLabel={(option: any) => { 
-                                                    if (option !== null && option !== undefined) {
-                                                        return option.portName+', '+option.country;
-                                                    }
-                                                    return ""; 
-                                                }}
-                                                value={portDischarge}
-                                                disabled={!withShipment}
-                                                sx={{ mt: 1 }}
-                                                renderInput={(params: any) => <TextField {...params} />}
-                                                onChange={(e: any, value: any) => { setPortDischarge(value); }}
-                                                fullWidth
-                                            /> : <Skeleton />
+                                            <PortAutocomplete id="discharge-port" options={ports} value={portDischarge} onChange={setPortDischarge} fullWidth disabled={!withShipment} /> : <Skeleton />
                                         }
                                     </Grid>
-                                    <Grid item xs={12} md={2}>
+                                    <Grid size={{ xs: 12, md: 2 }}>
                                         <InputLabel htmlFor="valid-until" sx={inputLabelStyles}>{t('validUntil')}</InputLabel>
                                         <LocalizationProvider dateAdapter={AdapterDayjs}>
                                             <DatePicker 
                                                 value={validUntil}
                                                 format="DD/MM/YYYY" 
                                                 onChange={(value: any) => { setValidUntil(value) }}
-                                                slotProps={{ textField: { id: "valid-until", fullWidth: true, sx: datetimeStyles }, inputAdornment: { sx: { position: "relative", right: "11.5px" } } }}
+                                                slotProps={{ textField: { id: "valid-until", size: "small", fullWidth: true, sx: datetimeStyles }, inputAdornment: { sx: { position: "relative", right: "11.5px" } } }}
                                             />
                                         </LocalizationProvider>
                                     </Grid>
-                                    <Grid item xs={12} md={2}>
+                                    <Grid size={{ xs: 12, md: 2 }}>
                                         <InputLabel htmlFor="currency" sx={inputLabelStyles}>{t('currency')}</InputLabel>
                                         <NativeSelect
                                             id="currency"
                                             value={currency}
+                                            size="small"
                                             onChange={(e: any) => { setCurrency(e.target.value) }}
                                             input={<BootstrapInput />}
                                             fullWidth
@@ -727,7 +632,7 @@ function Miscellaneous() {
                                             ))}
                                         </NativeSelect>
                                     </Grid>
-                                    <Grid item xs={12} md={2}>
+                                    <Grid size={{ xs: 12, md: 2 }}>
                                         <InputLabel htmlFor="container-types" sx={inputLabelStyles}>{t('container')}</InputLabel>
                                         {
                                             containers !== null ? 
@@ -736,6 +641,7 @@ function Miscellaneous() {
                                                 options={containers || []}
                                                 getOptionLabel={(option: any) => option.packageName}
                                                 value={containerTypes}
+                                                size="small"
                                                 disabled={servicesSelection.length !== 0 ? true : false}
                                                 onChange={(event: any, newValue: any) => {
                                                     setContainerTypes(newValue);
@@ -749,34 +655,34 @@ function Miscellaneous() {
                                 </Grid>
                             </Grid>
                             
-                            <Grid item xs={12} md={3}>
+                            <Grid size={{ xs: 12, md: 3 }}>
                                 <Grid container spacing={2}>
-                                    <Grid item xs={12} md={12} mt={0}>
+                                    <Grid size={{ xs: 12, md: 12 }} mt={0}>
                                         <InputLabel htmlFor="comment" sx={inputLabelStyles}>{t('comment')}</InputLabel>
                                         <BootstrapInput id="comment" type="text" multiline rows={4.875} value={comment} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setComment(e.target.value)} fullWidth />
                                     </Grid>
                                 </Grid>
                             </Grid>
-                            <Grid item xs={12} md={8}>
+                            <Grid size={{ xs: 12, md: 8 }}>
                                 <Typography sx={{ fontSize: 18, mb: 1 }}><b>{t('listServices')}</b></Typography>
                             </Grid>
-                            <Grid item xs={12} md={4}>
+                            <Grid size={{ xs: 12, md: 4 }}>
                                 <Button 
                                     variant="contained" color="inherit" 
                                     sx={{ float: "right", backgroundColor: "#fff", textTransform: "none" }} 
                                     onClick={() => { setModal8(true); }}
                                 >
-                                    Create new service
+                                    {t('newService')}
                                 </Button>
                                 <Button 
                                     variant="contained" color="inherit" 
                                     sx={{ float: "right", backgroundColor: "#fff", textTransform: "none", mr: 1 }} 
                                     onClick={() => { setModal9(true); }}
                                 >
-                                    Create new port
+                                    {t('newPort')}
                                 </Button>
                             </Grid> 
-                            <Grid item xs={12} md={8}>
+                            <Grid size={{ xs: 12, md: 8 }}>
                                 <InputLabel htmlFor="service-name" sx={inputLabelStyles}>{t('serviceName')}</InputLabel>
                                 {
                                     services !== null ?
@@ -798,19 +704,20 @@ function Miscellaneous() {
                                             return ""; 
                                         }}
                                         value={serviceName}
+                                        size="small"
                                         sx={{ mt: 1 }}
-                                        PopperComponent={CustomPopper}
+                                        slots={{popper: CustomPopper}}
                                         renderInput={(params: any) => <TextField {...params} />}
                                         onChange={(e: any, value: any) => { setServiceName(value); }}
                                         fullWidth
                                     /> : <Skeleton />
                                 }
                             </Grid>
-                            <Grid item xs={12} md={2}>
+                            <Grid size={{ xs: 12, md: 2 }}>
                                 <InputLabel htmlFor="price-cs" sx={inputLabelStyles}>{t('price')}</InputLabel>
                                 <BootstrapInput id="price-cs" type="number" value={price} onChange={(e: any) => setPrice(e.target.value)} fullWidth />
                             </Grid>
-                            <Grid item xs={12} md={2}>
+                            <Grid size={{ xs: 12, md: 2 }}>
                                 <Button
                                     variant="contained" color="inherit" fullWidth sx={whiteButtonStyles} 
                                     style={{ marginTop: "30px", height: "42px", float: "right" }} 
@@ -830,34 +737,33 @@ function Miscellaneous() {
                                     {t('add')}
                                 </Button>
                             </Grid>
-                            <Grid item xs={12}>
+                            <Grid size={{ xs: 12 }}>
                                 {
                                     servicesSelection !== undefined && servicesSelection !== null && servicesSelection.length !== 0 ? 
-                                        <Grid container spacing={2}>
-                                            {
-                                                servicesSelection.map((item: any, index: number) => (
-                                                    <Grid key={"serviceitem1-"+index} item xs={12} md={6}>
-                                                        <ListItem
-                                                            sx={{ border: "1px solid #e5e5e5" }}
-                                                            secondaryAction={
-                                                                <IconButton edge="end" onClick={() => {
-                                                                    setServicesSelection((prevItems: any) => prevItems.filter((item: any, i: number) => i !== index));
-                                                                }}>
-                                                                    <DeleteIcon />
-                                                                </IconButton>
-                                                            }
-                                                        >
-                                                            <ListItemText primary={
-                                                                item.containers[0] !== null && item.containers[0] !== undefined ?
-                                                                t('serviceName')+" : "+item.service.serviceName+" | "+t('container')+" : "+item.containers[0].packageName+" | "+t('price')+" : "+item.service.price+" "+currency : 
-                                                                t('serviceName')+" : "+item.service.serviceName+" | "+t('price')+" : "+item.service.price+" "+currency
-                                                            } />
-                                                        </ListItem>
-                                                    </Grid>
-                                                ))
-                                            }
-                                        </Grid>
-                                    : null  
+                                    <Grid container spacing={2}>
+                                        {
+                                            servicesSelection.map((item: any, index: number) => (
+                                                <Grid key={"serviceitem1-"+index} size={{ xs: 12, md: 6 }}>
+                                                    <ListItem
+                                                        sx={{ border: "1px solid #e5e5e5" }}
+                                                        secondaryAction={
+                                                            <IconButton edge="end" onClick={() => {
+                                                                setServicesSelection((prevItems: any) => prevItems.filter((item: any, i: number) => i !== index));
+                                                            }}>
+                                                                <DeleteIcon />
+                                                            </IconButton>
+                                                        }
+                                                    >
+                                                        <ListItemText primary={
+                                                            item.containers[0] !== null && item.containers[0] !== undefined ?
+                                                            t('serviceName')+" : "+item.service.serviceName+" | "+t('container')+" : "+item.containers[0].packageName+" | "+t('price')+" : "+item.service.price+" "+currency : 
+                                                            t('serviceName')+" : "+item.service.serviceName+" | "+t('price')+" : "+item.service.price+" "+currency
+                                                        } />
+                                                    </ListItem>
+                                                </Grid>
+                                            ))
+                                        }
+                                    </Grid> : null  
                                 }
                             </Grid>
                         </Grid> : <Skeleton />

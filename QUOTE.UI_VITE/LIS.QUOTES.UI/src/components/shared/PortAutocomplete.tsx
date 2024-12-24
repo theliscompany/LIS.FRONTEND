@@ -7,9 +7,10 @@ interface PortAutocompleteProps {
     onChange: (value: any) => void;
     fullWidth?: boolean;
     options: any;
+    disabled?: boolean;
 }
 
-const PortAutocomplete: React.FC<PortAutocompleteProps> = ({id, value, onChange, fullWidth, options}) => {
+const PortAutocomplete: React.FC<PortAutocompleteProps> = ({id, value, onChange, fullWidth, options, disabled}) => {
     return (
         <Autocomplete
             disablePortal
@@ -31,6 +32,7 @@ const PortAutocomplete: React.FC<PortAutocompleteProps> = ({id, value, onChange,
             }}
             value={value}
             sx={{ mt: 1 }}
+            disabled={disabled}
             renderInput={(params: any) => <TextField {...params} />}
             onChange={(e: any, newValue: any) => { 
                 onChange(newValue);

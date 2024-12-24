@@ -1,18 +1,20 @@
+import './../../App.css';
 import { useEffect, useRef, useState } from 'react';
 import { BootstrapDialogTitle, BootstrapInput, buttonCloseStyles, inputIconStyles, inputLabelStyles } from '../../utils/misc/styles';
-import { Autocomplete, Box, Button, DialogActions, DialogContent, Grid, InputLabel, NativeSelect, Skeleton, TextField } from '@mui/material';
+import { Autocomplete, Box, Button, DialogActions, DialogContent, InputLabel, NativeSelect, Skeleton, TextField } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { useTranslation } from 'react-i18next';
 import { enqueueSnackbar } from 'notistack';
 import { useAccount, useMsal } from '@azure/msal-react';
 import StarterKit from '@tiptap/starter-kit';
 import { RichTextEditor, MenuControlsContainer, MenuSelectHeading, MenuDivider, MenuButtonBold, MenuButtonItalic, MenuButtonStrikethrough, MenuButtonOrderedList, MenuButtonBulletedList, MenuSelectTextAlign, MenuButtonEditLink, MenuButtonHorizontalRule, MenuButtonUndo, MenuButtonRedo, type RichTextEditorRef, } from 'mui-tiptap';
-import './../../App.css';
 import AutocompleteSearch from '../shared/AutocompleteSearch';
 import { Anchor } from '@mui/icons-material';
 import { haulageTypeOptions } from '../../utils/constants';
 import { getContactGetContacts } from '../../api/client/crm';
 import { getApiHaulageHaulages } from '../../api/client/pricing';
 import { getApiTemplate, getApiTemplateById } from '../../api/client/template';
+import PortAutocomplete from '../shared/PortAutocomplete';
 
 const defaultTemplate = "658e7e0d27587b09811c13ca";
 
@@ -41,7 +43,7 @@ function RequestPriceHaulage(props: any) {
 
     const rteRef = useRef<RichTextEditorRef>(null);
     
-    const { instance, accounts } = useMsal();
+    const { accounts } = useMsal();
     const account = useAccount(accounts[0] || {});
     
     // const postEmail = async(from: string, to: string, subject: string, htmlContent: string) => {
@@ -157,16 +159,15 @@ function RequestPriceHaulage(props: any) {
 
     const getTemplates = async () => {
         try {
-            const response = await getApiTemplate({query: { Tags: ["haulage"] }});
+            const response: any = await getApiTemplate({query: { Tags: ["haulage"] }});
             if (response !== null && response.data !== undefined) {
-                setTemplates(response.data);
+                setTemplates(response.data?.data);
                 console.log(response);
                 setLoadTemplates(false);
             }
             else {
                 setLoadTemplates(false);
             }
-            console.log(response);
         }
         catch (err: any) {
             console.log(err);
@@ -184,7 +185,6 @@ function RequestPriceHaulage(props: any) {
             else {
                 setLoadTemplate(false);
             }
-            console.log(response);
         }
         catch (err: any) {
             console.log(err);
@@ -234,7 +234,7 @@ function RequestPriceHaulage(props: any) {
 
     useEffect(() => {
         getTemplate(selectedTemplate);
-    }, [selectedTemplate, account, instance, account]);
+    }, [selectedTemplate]);
 
     useEffect(() => {
         var postalCode = loadingCityObj !== null ? loadingCityObj.postalCode !== undefined ? loadingCityObj.postalCode : "" : ""; 
@@ -252,13 +252,13 @@ function RequestPriceHaulage(props: any) {
     useEffect(() => {
         getClients();
         getTemplates();
-    }, [account, instance, account]);
+    }, []);
 
     useEffect(() => {
         if (hauliersData !== null) {
             searchHaulages();
         }
-    }, [deliveryPort, hauliersData, account, instance, account]);
+    }, [deliveryPort, hauliersData]);
 
     return (
         <>
@@ -270,9 +270,9 @@ function RequestPriceHaulage(props: any) {
                     </BootstrapDialogTitle>
                     <DialogContent dividers>
                         <Grid container spacing={2} px={2}>
-                            <Grid item xs={12} md={6}>
+                            <Grid size={{ xs: 12, md: 6 }}>
                                 <Grid container spacing={1}>
-                                    <Grid item xs={12} mt={0.5}>
+                                    <Grid size={{ xs: 12 }} mt={0.5}>
                                         {
                                             hauliersData !== null && recipients !== null && load !== true ? 
                                             <>
@@ -301,15 +301,15 @@ function RequestPriceHaulage(props: any) {
                                             </> : <Skeleton />
                                         }
                                     </Grid>
-                                    <Grid item xs={12} mt={0.5}>
+                                    <Grid size={{ xs: 12 }} mt={0.5}>
                                         <InputLabel htmlFor="subject" sx={inputLabelStyles}>{t('subject')}</InputLabel>
                                         <BootstrapInput id="subject" value={subject} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSubject(e.target.value)} fullWidth />
                                     </Grid>
-                                    <Grid item xs={12} md={12} mt={0.5}>
+                                    <Grid size={{ xs: 12, md: 12 }} mt={0.5}>
                                         <InputLabel htmlFor="emptyPickupDepot" sx={inputLabelStyles}>{t('emptyPickupDepot')}</InputLabel>
                                         <BootstrapInput id="emptyPickupDepot" type="text" value={emptyPickupDepot} onChange={(e: any) => setEmptyPickupDepot(e.target.value)} fullWidth />
                                     </Grid>
-                                    <Grid item xs={12} md={12}>
+                                    <Grid size={{ xs: 12, md: 12 }}>
                                         <InputLabel htmlFor="haulageType" sx={inputLabelStyles}>{t('haulageType')}</InputLabel>
                                         <NativeSelect
                                             id="haulageType"
@@ -323,48 +323,23 @@ function RequestPriceHaulage(props: any) {
                                             ))}
                                         </NativeSelect>
                                     </Grid>
-                                    <Grid item xs={12} md={12} mt={0.5}>
+                                    <Grid size={{ xs: 12, md: 12 }} mt={0.5}>
                                         <InputLabel htmlFor="loading-city" sx={inputLabelStyles}>{t('loadingCity')}</InputLabel>
                                         <AutocompleteSearch id="loading-city" value={loadingCityObj} onChange={setLoadingCityObj} fullWidth  />
                                     </Grid>
-                                    <Grid item xs={12} md={12} mt={0.5}>
+                                    <Grid size={{ xs: 12, md: 12 }} mt={0.5}>
                                         <InputLabel htmlFor="deliveryPort" sx={inputLabelStyles}><Anchor fontSize="small" sx={inputIconStyles} /> {t('destinationPort')}</InputLabel>
                                         {
                                             props.ports !== null ?
-                                            <Autocomplete
-                                                disablePortal
-                                                id="deliveryPort"
-                                                options={props.ports}
-                                                renderOption={(props, option) => {
-                                                    return (
-                                                        <li {...props} key={option.portId}>
-                                                            {option.portName+", "+option.country}
-                                                        </li>
-                                                    );
-                                                }}
-                                                getOptionLabel={(option: any) => { 
-                                                    if (option !== null && option !== undefined) {
-                                                        return option.portName+', '+option.country;
-                                                    }
-                                                    return ""; 
-                                                }}
-                                                value={deliveryPort}
-                                                // disabled={true}
-                                                sx={{ mt: 1 }}
-                                                renderInput={(params: any) => <TextField {...params} />}
-                                                onChange={(e: any, value: any) => { 
-                                                    setDeliveryPort(value);
-                                                }}
-                                                fullWidth
-                                            /> : <Skeleton />
+                                            <PortAutocomplete id="port-departure" options={props.ports} value={deliveryPort} onChange={setDeliveryPort} fullWidth /> : <Skeleton />
                                         }
                                     </Grid>
                                 </Grid>
                             </Grid>
 
-                            <Grid item xs={12} md={6} mt={0.5}>
+                            <Grid size={{ xs: 12, md: 6 }} mt={0.5}>
                                 <Grid container>
-                                    <Grid item xs={12}>
+                                    <Grid size={{ xs: 12 }}>
                                         <InputLabel htmlFor="selectedTemplate" sx={inputLabelStyles}>{t('selectedTemplate')}</InputLabel>
                                         {
                                             loadTemplates !== true ?
@@ -382,7 +357,7 @@ function RequestPriceHaulage(props: any) {
                                         }
                                     </Grid>
 
-                                    {/* <Grid item xs={12}>
+                                    {/* <Grid size={{ xs: 12 }}
                                         <InputLabel htmlFor="mailLanguage" sx={inputLabelStyles}>{t('mailLanguage')}</InputLabel>
                                         <ToggleButtonGroup
                                             color="primary"
@@ -406,7 +381,7 @@ function RequestPriceHaulage(props: any) {
                                             <ToggleButton value="en"><img src="/assets/img/flags/flag-en.png" style={{ width: "12px", marginRight: "6px" }} alt="flag english" /> English</ToggleButton>
                                         </ToggleButtonGroup>
                                     </Grid> */}
-                                    <Grid item xs={12} mt={1.5}>
+                                    <Grid size={{ xs: 12 }} mt={1.5}>
                                         <InputLabel htmlFor="details" sx={inputLabelStyles}>{t('detailsOffer')}</InputLabel>
                                         <Box sx={{ mt: 1 }}>
                                             {

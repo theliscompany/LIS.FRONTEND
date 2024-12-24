@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Accordion, AccordionDetails, AccordionSummary, Alert, Autocomplete, Box, Button, DialogActions, DialogContent, FormControlLabel, Grid, IconButton, InputLabel, ListItem, ListItemText, NativeSelect, Skeleton, Switch, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Typography } from '@mui/material';
+import { Accordion, AccordionDetails, AccordionSummary, Alert, Autocomplete, Box, Button, DialogActions, DialogContent, IconButton, InputLabel, NativeSelect, Skeleton, TextField, Typography } from '@mui/material';
 import Chip from '@mui/material/Chip';
+import Grid from '@mui/material/Grid2';
 import AddCircleOutlinedIcon from '@mui/icons-material/AddCircleOutlined';
 import SearchIcon from '@mui/icons-material/Search';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -8,45 +9,24 @@ import EditIcon from '@mui/icons-material/Edit';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { SnackbarProvider, enqueueSnackbar } from 'notistack';
 import { useTranslation } from 'react-i18next';
-import { useAuthorizedBackendApi } from '../api/api';
-import { crmRequest, pricingRequest, protectedResources, transportRequest } from '../config/authConfig';
-import { BackendService } from '../utils/services/fetch';
 import { GridColDef, GridValueFormatterParams, GridRenderCellParams, DataGrid } from '@mui/x-data-grid';
-import { BootstrapDialog, BootstrapDialogTitle, BootstrapInput, actionButtonStyles, buttonCloseStyles, datetimeStyles, gridStyles, inputIconStyles, inputLabelStyles, whiteButtonStyles } from '../utils/misc/styles';
-import CompanySearch from '../components/shared/CompanySearch';
+import { BootstrapDialog, BootstrapDialogTitle, BootstrapInput, actionButtonStyles, buttonCloseStyles, datetimeStyles, gridStyles, inputIconStyles, inputLabelStyles } from '../../utils/misc/styles';
+import { Anchor, FileCopy, Mail } from '@mui/icons-material';
+import CompanySearch from '../../components/shared/CompanySearch';
+import PortAutocomplete from '../../components/shared/PortAutocomplete';
+import RequestPriceSeafreight from '../../components/pricing/RequestPriceSeafreight';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import dayjs, { Dayjs } from 'dayjs';
-import { AuthenticationResult } from '@azure/msal-browser';
-import { useMsal, useAccount } from '@azure/msal-react';
-import { CategoryEnum, containerPackages, currencyOptions } from '../utils/constants';
-import RequestPriceRequest from '../components/editRequestPage/RequestPriceRequest';
-import { Anchor, FileCopy, Mail } from '@mui/icons-material';
-import NewContact from '../components/editRequestPage/NewContact';
-import ServicesTable from '../components/seafreightPage/ServicesTable';
-import { transformArray, reverseTransformArray, flattenData, flattenData2, compareServices, sortSuppliersByCarrierAgentName, getAccessToken } from '../utils/functions';
-import NewService from '../components/shared/NewService';
-import NewPort from '../components/shared/NewPort';
-import { getLISTransportAPI } from '../api/client/transportService';
-import { getLisCrmApi } from '../api/client/crmService';
-
-function createGetRequestUrl(variable1: number, variable2: number, variable3: number) {
-    let url = protectedResources.apiLisPricing.endPoint+"/SeaFreight/GetSeaFreights?";
-    if (variable1) {
-      url += 'DeparturePortId=' + encodeURIComponent(variable1) + '&';
-    }
-    if (variable2) {
-      url += 'DestinationPortId=' + encodeURIComponent(variable2) + '&';
-    }
-    if (variable3) {
-      url += 'CarrierAgentId=' + encodeURIComponent(variable3) + '&';
-    }
-    
-    if (url.slice(-1) === '&') {
-      url = url.slice(0, -1);
-    }
-    return url;
-}
+import { CategoryEnum, containerPackages, currencyOptions } from '../../utils/constants';
+import ServicesTable from '../../components/pricing/ServicesTable';
+import { transformArray, reverseTransformArray, flattenData, flattenData2, compareServices, sortSuppliersByCarrierAgentName } from '../../utils/functions';
+import NewContact from '../../components/shared/NewContact';
+import NewService from '../../components/shared/NewService';
+import NewPort from '../../components/shared/NewPort';
+import { getPorts, getProduct, getService } from '../../api/client/transport';
+import { getContactGetContacts } from '../../api/client/crm';
+import { deleteApiSeaFreightDeleteSeaFreightPrice, getApiMiscellaneousMiscellaneous, getApiSeaFreightGetSeaFreights, getApiSeaFreightSeaFreight, postApiSeaFreightSeaFreight } from '../../api/client/pricing';
 
 function Seafreights() {
     const [load, setLoad] = useState<boolean>(true);
@@ -80,19 +60,9 @@ function Seafreights() {
     const [currency, setCurrency] = useState<string>("EUR");
     const [comment, setComment] = useState<string>("");
     const [containerTypes, setContainerTypes] = useState<any>(null);
-    // const [containerTypes, setContainerTypes] = useState<any>({packageId: 8, packageName: "20' Dry"});
     const [servicesData, setServicesData] = useState<any>([]);
-    // const [servicesData2, setServicesData2] = useState<any>([]);
-    // const [miscellaneousId, setMiscellaneousId] = useState<string>("");
     
     const { t } = useTranslation();
-    
-    const { instance, accounts } = useMsal();
-    const account = useAccount(accounts[0] || {});
-    const context = useAuthorizedBackendApi();
-
-    const { getPorts, getProduct, getService } = getLISTransportAPI();
-    const { getContactGetContacts } = getLisCrmApi();
     
     const columnsSeafreights: GridColDef[] = [
         { field: 'carrierAgentName', headerName: t('carrierAgent'), minWidth: 125, flex: 1.4 },
@@ -145,22 +115,28 @@ function Seafreights() {
         getProductsService();
         getPortsService();
         getSeafreights();
-        getProtectedData(); // Services and Containers
-    }, [account, instance, account]);
+        getServices();
+        getContainers();
+    }, []);
 
     const getProductsService = async () => {
-        const response = await getProduct({ pageSize: 500 });
-        if (response !== null && response !== undefined) {
-            setProducts(response.data);
+        try {
+            const response = await getProduct({query: { pageSize: 500 }});
+            if (response !== null && response !== undefined) {
+                setProducts(response.data);
+            }
+        }
+        catch (err: any) {
+            console.log(err);
         }
     }
     
     const getClients = async () => {
         try {
-            const response = await getContactGetContacts({ category: 5, pageSize: 1000 });
+            const response = await getContactGetContacts({query: { category: "SHIPPING_LINES", pageSize: 1000 }});
             if (response !== null && response !== undefined) {
                 // Removing duplicates from client array
-                setClients(response.data.data?.filter((obj: any, index: number, self: any) => index === self.findIndex((o: any) => o.contactName === obj.contactName)));
+                setClients(response.data?.data?.filter((obj: any, index: number, self: any) => index === self.findIndex((o: any) => o.contactName === obj.contactName)));
             }
         }
         catch (err: any) {
@@ -169,14 +145,8 @@ function Seafreights() {
     }
     
     const getPortsService = async () => {
-        // try {
-
-        // }
-        // catch (err: any) {
-        //     console.log(err);
-        // }
         try {
-            const response = await getPorts({ pageSize: 2000 });
+            const response = await getPorts({query: { pageSize: 2000 }});
             if (response !== null && response !== undefined) {
                 setPorts(response.data);
             }
@@ -186,20 +156,13 @@ function Seafreights() {
         }
     }
     
-    const getProtectedData = async () => {
-        if (account && instance && context) {
-            getServices();
-            getContainers();
-        }
-    }
-
     const getServices = async () => {
         try {
-            const response = await getService({ pageSize: 500 });
+            const response = await getService({query: { pageSize: 500 }});
             if (response !== null && response !== undefined) {
-                console.log(response.data.sort((a: any, b: any) => b.serviceName - a.serviceName));
+                console.log(response.data?.sort((a: any, b: any) => b.serviceName - a.serviceName));
                 setAllServices(response.data);
-                setServices(response.data.sort((a: any, b: any) => compareServices(a, b)).filter((obj: any) => obj.servicesTypeId.includes(1))); // Filter the services for seafreights (SEAFREIGHT = 1)
+                setServices(response.data?.sort((a: any, b: any) => compareServices(a, b)).filter((obj: any) => obj.servicesTypeId.includes(1))); // Filter the services for seafreights (SEAFREIGHT = 1)
             }
         }
         catch (err: any) {
@@ -212,15 +175,18 @@ function Seafreights() {
     }
     
     const getSeafreights = async () => {
-        if (account && instance && context) {
-            const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisPricing.endPoint+"/SeaFreight/GetSeaFreights", context.tokenPricing);
+        try {
+            const response = await getApiSeaFreightGetSeaFreights();
             if (response !== null && response !== undefined) {
-                setSeafreights(sortSuppliersByCarrierAgentName(response));
+                setSeafreights(sortSuppliersByCarrierAgentName(response.data));
                 setLoad(false);
             }
             else {
                 setLoad(false);
             }
+        }
+        catch (err: any) {
+            console.log(err);
         }
     }
     
@@ -254,48 +220,53 @@ function Seafreights() {
     
     const getSeafreight = async (id: string, isCopy: boolean) => {
         setLoadEdit(true)
-        if (account && instance && context) {
-            const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisPricing.endPoint+"/SeaFreight/SeaFreight?seaFreightId="+id, context.tokenPricing);
+        try {
+            const response = await getApiSeaFreightSeaFreight({query: { seaFreightId: id }});
             if (response !== null && response !== undefined) {
-                var auxCarrier = {contactId: response.carrierId, contactName: response.carrierName};
-                var auxLoading = ports.find((elm: any) => elm.portId === response.departurePortId);
-                var auxDischarge = ports.find((elm: any) => elm.portId === response.destinationPortId);
-                var auxValidUntil = dayjs(response.validUntil);
+                var auxCarrier = {contactId: response.data?.carrierId, contactName: response.data?.carrierName};
+                var auxLoading = ports.find((elm: any) => elm.portId === response.data?.departurePortId);
+                var auxDischarge = ports.find((elm: any) => elm.portId === response.data?.destinationPortId);
+                var auxValidUntil = dayjs(response.data?.validUntil);
                 
                 setCarrier(auxCarrier);
-                setCarrierAgent({contactId: response.carrierAgentId, contactName: response.carrierAgentName});
+                setCarrierAgent({contactId: response.data?.carrierAgentId, contactName: response.data?.carrierAgentName});
                 setPortLoading(auxLoading);
                 setPortDischarge(auxDischarge);
-                setCurrency(response.currency);
+                setCurrency(response.data?.currency || "EUR");
                 setValidUntil(auxValidUntil);
-                setTransitTime(response.transitTime);
-                setFrequency(response.frequency);
-                setComment(response.comment);
-                // setServicesSelection(response.services);
+                setTransitTime(response.data?.transitTime || 0);
+                setFrequency(response.data?.frequency || 0);
+                setComment(response.data?.comment || "");
+                // setServicesSelection(response.data?.services);
                 setLoadEdit(false);
 
                 // To edit later, bad coding practice
-                setServicesData(flattenData(response.services));
+                setServicesData(flattenData(response.data?.services));
                 
                 // Initialize the container
-                if (response.services.length !== 0 && isCopy === false) {
-                    setContainerTypes(response.services[0].containers[0]);
+                // var auxContainerTypes = response.data?.services[0].containers[0];
+                var auxContainerTypes = response.data?.services?.[0]?.containers?.[0] ?? null;
+                if (response.data?.services?.length !== 0 && isCopy === false) {
+                    setContainerTypes(auxContainerTypes);
                 }
 
                 // Now i get the miscs
-                getMiscellaneouses(auxCarrier, auxLoading, auxDischarge, auxValidUntil, response.services[0].containers[0], isCopy);
+                getMiscellaneouses(auxCarrier, auxLoading, auxDischarge, auxValidUntil, auxContainerTypes, isCopy);
             }
             else {
                 setLoadEdit(false);
             }
         }
+        catch (err: any) {
+            console.log(err);
+            setLoadEdit(false);
+        }
     }
     
     const searchSeafreights = async () => {
-        if (account && instance && context) {
+        try {
             setLoad(true);
-            var requestFormatted = createGetRequestUrl(portDeparture?.portId, portDestination?.portId, searchedCarrier?.contactId);
-            const response = await (context?.service as BackendService<any>).getWithToken(requestFormatted, context.tokenPricing);
+            const response = await getApiSeaFreightGetSeaFreights({query: { DeparturePortId: portDeparture?.portId, DestinationPortId: portDestination?.portId, CarrierAgentId: searchedCarrier?.contactId }});
             if (response !== null && response !== undefined) {
                 setSeafreights(response);
                 setLoad(false);
@@ -304,11 +275,15 @@ function Seafreights() {
                 setLoad(false);
             }
         }
+        catch (err: any) {
+            console.log(err);
+            setLoad(false);
+        }
     }
 
     const createUpdateSeafreight = async () => {
         if (servicesData.length !== 0 && portLoading !== null && portDischarge !== null && carrier !== null && carrierAgent !== null && frequency !== 0 && transitTime !== 0 && validUntil !== null) {
-            if (account && instance && context) {
+            try {
                 var dataSent = null;
                 if (currentEditId !== "") {
                     dataSent = {
@@ -326,9 +301,9 @@ function Seafreights() {
                         "transitTime": transitTime,
                         "frequency": frequency,
                         "comment": comment,
-                        "containers": transformArray(deflattenData(servicesData)),
+                        // "containers": transformArray(deflattenData(servicesData)),
                         "services": deflattenData(servicesData),
-                        "updated": (new Date()).toISOString()
+                        // "updated": (new Date()).toISOString()
                     };    
                 }
                 else {
@@ -347,13 +322,13 @@ function Seafreights() {
                         "transitTime": transitTime,
                         "frequency": frequency,
                         "comment": comment,
-                        "containers": transformArray(deflattenData(servicesData)),
+                        // "containers": transformArray(deflattenData(servicesData)),
                         "services": deflattenData(servicesData),
-                        "updated": (new Date()).toISOString()
+                        // "updated": (new Date()).toISOString()
                     };    
                 }
                 console.log(dataSent);
-                const response = await (context?.service as BackendService<any>).postWithToken(protectedResources.apiLisPricing.endPoint+"/SeaFreight/SeaFreight", dataSent, context.tokenPricing);
+                const response = await postApiSeaFreightSeaFreight({body: dataSent});
                 if (response !== null && response !== undefined) {
                     setModal2(false);
                     enqueueSnackbar(t('successCreated'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
@@ -363,6 +338,9 @@ function Seafreights() {
                     enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
                 }
             }
+            catch (err: any) {
+                console.log(err);
+            }
         }
         else {
             enqueueSnackbar(t('fieldsEmptySeafreight'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
@@ -370,8 +348,8 @@ function Seafreights() {
     }
 
     const deleteSeafreightPrice = async (id: string) => {
-        if (account && instance && context) {
-            const response = await (context?.service as BackendService<any>).deleteWithToken(protectedResources.apiLisPricing.endPoint+"/SeaFreight/DeleteSeaFreightPrice?id="+id, context.tokenPricing);
+        try {
+            const response = await deleteApiSeaFreightDeleteSeaFreightPrice({query: {id: id}});
             if (response !== null && response !== undefined) {
                 enqueueSnackbar(t('rowDeletedSuccess'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
                 setModal(false);
@@ -381,25 +359,30 @@ function Seafreights() {
                 enqueueSnackbar(t('rowDeletedError'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
             }
         }
+        catch (err: any) {
+            console.log(err);
+        }
     }
 
     const getMiscellaneouses = async (carrier1: any, portLoading1: any, portDischarge1: any, validUntil1: any, container: any, isCopy: boolean) => {
-        if (account && instance && context) {
+        try {
             setLoadMiscs(true);
-            
-            var token = null;
-            // if (tempToken === "") {
-            //     token = await getAccessToken(instance, pricingRequest, account);
-            //     setTempToken(token);    
-            // }
-
             if (carrier1 !== null && portLoading1 !== null && portDischarge1 !== null) {
-                const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisPricing.endPoint+"/Miscellaneous/Miscellaneous?SupplierId="+carrier1.contactId+"&DeparturePortId="+portLoading1.portId+"&DestinationPortId="+portDischarge1.portId+"&withShipment=true", context.tokenPricing);
-                if (response !== null && response !== undefined && response.length !== 0) {
+                const response = await getApiMiscellaneousMiscellaneous({query: { supplierId: carrier1.contactId, departurePortId: portLoading1.portId, destinationPortId: portDischarge1.portId, withShipment: true }})
+                if (response !== null && response !== undefined) {
                     // Here i check if the result is good
                     // console.log(container);
-                    var selectedElement = response[0].suppliers.find((elm: any) => elm.containers.length !== 0 ? elm.containers[0].container.packageName === container.packageName : null);
-                    if (response.length !== 0 && selectedElement !== undefined) {
+                    // var selectedElement = response.data?[0].suppliers.find((elm: any) => elm.containers.length !== 0 ? elm.containers[0].container.packageName === container.packageName : null);
+                    var selectedElement = null;
+                    if ('data' in response && Array.isArray(response.data)) {
+                        selectedElement = response.data?.[0]?.suppliers?.find((elm: any) =>
+                            elm?.containers?.length &&
+                            elm.containers[0]?.container?.packageName === container.packageName
+                        );
+                    } else {
+                        console.error('Error fetching data:', response);
+                    }
+                    if (response.data !== null && selectedElement !== undefined) {
                         setLoadMiscs(false);
                         
                         // Dont update the miscellaneousId is it's a new price
@@ -417,8 +400,9 @@ function Seafreights() {
                 }
             }
         }
-        else {
-            setLoadMiscs(false)
+        catch (err: any) {
+            console.log(err);
+            setLoadMiscs(false);
         }
     }
     
@@ -457,7 +441,7 @@ function Seafreights() {
             <Box sx={{ py: 2.5 }}>
                 <Typography variant="h5" sx={{mt: {xs: 4, md: 1.5, lg: 1.5 }}} mx={5}><b>{t('listSeafreights')}</b></Typography>
                 <Grid container spacing={2} mt={0} px={5}>
-                    <Grid item xs={12}>
+                    <Grid size={{ xs: 12 }}>
                         <Button variant="contained" sx={actionButtonStyles} onClick={() => { setCurrentEditId(""); resetForm(); setModal2(true); }}>
                             {t('newSeafreightPrice')} <AddCircleOutlinedIcon sx={{ ml: 0.5, pb: 0.25, justifyContent: "center", alignItems: "center" }} fontSize="small" />
                         </Button>
@@ -466,69 +450,25 @@ function Seafreights() {
                         </Button>
                         <Button variant="contained" color="inherit" sx={{ float: "right", backgroundColor: "#fff", textTransform: "none" }} onClick={() => { setModal7(true); }} >{t('createNewCarrier')}</Button>
                     </Grid>
-                    <Grid item xs={12} md={4} mt={1}>
+                    <Grid size={{ xs: 12, md: 4 }} mt={1}>
                         <InputLabel htmlFor="company-name" sx={inputLabelStyles}>{t('carrier')}</InputLabel>
                         <CompanySearch id="company-name" value={searchedCarrier} onChange={setSearchedCarrier} category={CategoryEnum.SHIPPING_LINES} fullWidth />
                     </Grid>
-                    <Grid item xs={12} md={3} mt={1}>
+                    <Grid size={{ xs: 12, md: 3 }} mt={1}>
                         <InputLabel htmlFor="port-departure" sx={inputLabelStyles}><Anchor fontSize="small" sx={inputIconStyles} /> {t('departurePort')}</InputLabel>
                         {
                             ports !== null ?
-                            <Autocomplete
-                                disablePortal
-                                id="port-departure"
-                                options={ports}
-                                renderOption={(props, option, i) => {
-                                    return (
-                                        <li {...props} key={option.portId}>
-                                            {option.portName+", "+option.country}
-                                        </li>
-                                    );
-                                }}
-                                getOptionLabel={(option: any) => { 
-                                    if (option !== null && option !== undefined) {
-                                        return option.portName+', '+option.country;
-                                    }
-                                    return ""; 
-                                }}
-                                value={portDeparture}
-                                sx={{ mt: 1 }}
-                                renderInput={(params: any) => <TextField {...params} />}
-                                onChange={(e: any, value: any) => { setPortDeparture(value); }}
-                                fullWidth
-                            /> : <Skeleton />
+                            <PortAutocomplete id="port-departure" options={ports} value={portDeparture} onChange={setPortDeparture} fullWidth /> : <Skeleton />
                         }
                     </Grid>
-                    <Grid item xs={12} md={3} mt={1}>
+                    <Grid size={{ xs: 12, md: 3 }} mt={1}>
                         <InputLabel htmlFor="destination-port" sx={inputLabelStyles}><Anchor fontSize="small" sx={inputIconStyles} /> {t('arrivalPort')}</InputLabel>
                         {
                             ports !== null ?
-                            <Autocomplete
-                                disablePortal
-                                id="destination-port"
-                                options={ports}
-                                renderOption={(props, option, i) => {
-                                    return (
-                                        <li {...props} key={option.portId}>
-                                            {option.portName+", "+option.country}
-                                        </li>
-                                    );
-                                }}
-                                getOptionLabel={(option: any) => { 
-                                    if (option !== null && option !== undefined) {
-                                        return option.portName+', '+option.country;
-                                    }
-                                    return ""; 
-                                }}
-                                value={portDestination}
-                                sx={{ mt: 1 }}
-                                renderInput={(params: any) => <TextField {...params} />}
-                                onChange={(e: any, value: any) => { setPortDestination(value); }}
-                                fullWidth
-                            /> : <Skeleton />
+                            <PortAutocomplete id="destination-port" options={ports} value={portDestination} onChange={setPortDestination} fullWidth /> : <Skeleton />
                         }
                     </Grid>
-                    <Grid item xs={12} md={2} mt={1} sx={{ display: "flex", alignItems: "end" }}>
+                    <Grid size={{ xs: 12, md: 2 }} mt={1} sx={{ display: "flex", alignItems: "end" }}>
                         <Button 
                             variant="contained" 
                             color="inherit"
@@ -545,7 +485,7 @@ function Seafreights() {
                 {
                     !load ? 
                     <Grid container spacing={2} mt={1} px={5} sx={{ maxWidth: "xs" }}>
-                        <Grid item xs={12}>
+                        <Grid size={{ xs: 12 }}>
                             {
                                 seafreights !== null && seafreights.length !== 0 ?
                                 <Box sx={{ overflow: "auto", width: { xs: "calc(100vw - 80px)", md: "100%" } }}>
@@ -597,91 +537,47 @@ function Seafreights() {
                     {
                         loadEdit === false ?
                         <Grid container spacing={2}>
-                            <Grid item xs={12} md={8}>
+                            <Grid size={{ xs: 12, md: 8 }}>
                                 <Typography sx={{ fontSize: 18, mb: 1 }}><b>Seafreight price information</b></Typography>
                             </Grid>
-                            <Grid item xs={12} md={4}>
+                            <Grid size={{ xs: 12, md: 4 }}>
                                 <Button variant="contained" color="inherit" sx={{ float: "right", backgroundColor: "#fff", textTransform: "none" }} onClick={() => { setModal7(true); }} >{t('createNewCarrier')}</Button>
                             </Grid> 
-                            <Grid item xs={12} md={8}>
+                            <Grid size={{ xs: 12, md: 8 }}>
                                 <Grid container spacing={2}>
-                                    <Grid item xs={12} md={6} mt={0.25}>
+                                    <Grid size={{ xs: 12, md: 6 }} mt={0.25}>
                                         <InputLabel htmlFor="carrier" sx={inputLabelStyles}>{t('carrier')}</InputLabel>
                                         <CompanySearch id="carrier" value={carrier} onChange={setCarrier} category={CategoryEnum.SHIPPING_LINES} fullWidth />
                                     </Grid>
-                                    <Grid item xs={12} md={6} mt={0.25}>
+                                    <Grid size={{ xs: 12, md: 6 }} mt={0.25}>
                                         <InputLabel htmlFor="carrier-agent" sx={inputLabelStyles}>{t('carrierAgent')}</InputLabel>
                                         <CompanySearch id="carrier-agent" value={carrierAgent} onChange={setCarrierAgent} category={CategoryEnum.SHIPPING_LINES} fullWidth />
                                     </Grid>
-                                    <Grid item xs={12} md={6} mt={0.25}>
+                                    <Grid size={{ xs: 12, md: 6 }} mt={0.25}>
                                         <InputLabel htmlFor="port-loading" sx={inputLabelStyles}><Anchor fontSize="small" sx={inputIconStyles} /> {t('departurePort')}</InputLabel>
                                         {
                                             ports !== null ?
-                                            <Autocomplete
-                                                disablePortal
-                                                id="port-loading"
-                                                options={ports}
-                                                renderOption={(props, option, i) => {
-                                                    return (
-                                                        <li {...props} key={option.portId}>
-                                                            {option.portName+", "+option.country}
-                                                        </li>
-                                                    );
-                                                }}
-                                                getOptionLabel={(option: any) => { 
-                                                    if (option !== null && option !== undefined) {
-                                                        return option.portName+', '+option.country;
-                                                    }
-                                                    return ""; 
-                                                }}
-                                                value={portLoading}
-                                                sx={{ mt: 1 }}
-                                                renderInput={(params: any) => <TextField {...params} />}
-                                                onChange={(e: any, value: any) => { setPortLoading(value); }}
-                                                fullWidth
-                                            /> : <Skeleton />
+                                            <PortAutocomplete id="port-loading" options={ports} value={portLoading} onChange={setPortLoading} fullWidth /> : <Skeleton />
                                         }
                                     </Grid>
-                                    <Grid item xs={12} md={6} mt={0.25}>
+                                    <Grid size={{ xs: 12, md: 6 }} mt={0.25}>
                                         <InputLabel htmlFor="discharge-port" sx={inputLabelStyles}><Anchor fontSize="small" sx={inputIconStyles} /> {t('arrivalPort')}</InputLabel>
                                         {
                                             ports !== null ?
-                                            <Autocomplete
-                                                disablePortal
-                                                id="discharge-port"
-                                                options={ports}
-                                                renderOption={(props, option, i) => {
-                                                    return (
-                                                        <li {...props} key={option.portId}>
-                                                            {option.portName+", "+option.country}
-                                                        </li>
-                                                    );
-                                                }}
-                                                getOptionLabel={(option: any) => { 
-                                                    if (option !== null && option !== undefined) {
-                                                        return option.portName+', '+option.country;
-                                                    }
-                                                    return ""; 
-                                                }}
-                                                value={portDischarge}
-                                                sx={{ mt: 1 }}
-                                                renderInput={(params: any) => <TextField {...params} />}
-                                                onChange={(e: any, value: any) => { setPortDischarge(value); }}
-                                                fullWidth
-                                            /> : <Skeleton />
+                                            <PortAutocomplete id="discharge-port" options={ports} value={portDischarge} onChange={setPortDischarge} fullWidth /> : <Skeleton />
                                         }
                                     </Grid>
                                 </Grid>
                             </Grid>
-                            <Grid item xs={12} md={4}>
+                            <Grid size={{ xs: 12, md: 4 }}>
                                 <Grid container spacing={2}>
-                                    <Grid item xs={12} md={12} mt={0}>
+                                    <Grid size={{ xs: 12, md: 12 }} mt={0}>
                                         <InputLabel htmlFor="comment" sx={inputLabelStyles}>{t('comment')}</InputLabel>
                                         <BootstrapInput id="comment" type="text" multiline rows={4.875} value={comment} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setComment(e.target.value)} fullWidth />
                                     </Grid>
                                 </Grid>
                             </Grid>
-                            <Grid item xs={12} md={3}>
+                            <Grid size={{ xs: 12, md: 3 }}>
                                 <InputLabel htmlFor="valid-until" sx={inputLabelStyles}>{t('validUntil')}</InputLabel>
                                 <LocalizationProvider dateAdapter={AdapterDayjs}>
                                     <DatePicker 
@@ -692,7 +588,7 @@ function Seafreights() {
                                     />
                                 </LocalizationProvider>
                             </Grid>
-                            <Grid item xs={12} md={2}>
+                            <Grid size={{ xs: 12, md: 2 }}>
                                 <InputLabel htmlFor="currency" sx={inputLabelStyles}>{t('currency')}</InputLabel>
                                 <NativeSelect
                                     id="currency"
@@ -706,15 +602,15 @@ function Seafreights() {
                                     ))}
                                 </NativeSelect>
                             </Grid>
-                            <Grid item xs={12} md={2}>
+                            <Grid size={{ xs: 12, md: 2 }}>
                                 <InputLabel htmlFor="transit-time" sx={inputLabelStyles}>{t('transitTime')} ({t('inDays')})</InputLabel>
                                 <BootstrapInput id="transit-time" type="number" value={transitTime} onChange={(e: any) => setTransitTime(e.target.value)} fullWidth />
                             </Grid>
-                            <Grid item xs={12} md={2}>
+                            <Grid size={{ xs: 12, md: 2 }}>
                                 <InputLabel htmlFor="frequency" sx={inputLabelStyles}>{t('frequency')} ({t('everyxDays')})</InputLabel>
                                 <BootstrapInput id="frequency" type="number" value={frequency} onChange={(e: any) => setFrequency(e.target.value)} fullWidth />
                             </Grid>
-                            <Grid item xs={12} md={3}>
+                            <Grid size={{ xs: 12, md: 3 }}>
                                 <InputLabel htmlFor="container-types" sx={inputLabelStyles}>{t('container')}</InputLabel>
                                 {
                                     containers !== null ? 
@@ -733,10 +629,10 @@ function Seafreights() {
                                     /> : <Skeleton />
                                 }
                             </Grid>
-                            <Grid item xs={12} md={8}>
+                            <Grid size={{ xs: 12, md: 8 }}>
                                 <Typography sx={{ fontSize: 18, mb: 1 }}><b>{t('listServices')} - {t('seafreights')}</b></Typography>
                             </Grid>
-                            <Grid item xs={12} md={4}>
+                            <Grid size={{ xs: 12, md: 4 }}>
                                 <Button 
                                     variant="contained" color="inherit" 
                                     sx={{ float: "right", backgroundColor: "#fff", textTransform: "none" }} 
@@ -752,7 +648,7 @@ function Seafreights() {
                                     {t('createNewPort')}
                                 </Button>
                             </Grid> 
-                            <Grid item xs={12}>
+                            <Grid size={{ xs: 12 }}>
                                 {
                                     allServices !== null && allServices !== undefined && allServices.length !== 0 ?
                                     <ServicesTable 
@@ -805,9 +701,8 @@ function Seafreights() {
             {/* Price request seafreight FCL */}
             <BootstrapDialog open={modal6} onClose={() => setModal6(false)} maxWidth="lg" fullWidth>
                 {
-                    products !== null && context ?
-                    <RequestPriceRequest 
-                        token={context.tokenPricing} 
+                    products !== null ?
+                    <RequestPriceSeafreight 
                         products={products} 
                         commodities={[]}
                         ports={ports}

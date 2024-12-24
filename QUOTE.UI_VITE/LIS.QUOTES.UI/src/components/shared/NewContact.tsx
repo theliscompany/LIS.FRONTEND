@@ -81,7 +81,7 @@ function NewContact(props: any) {
     return (
         <>
             <BootstrapDialogTitle id="custom-dialog-title7" onClose={props.closeModal}>
-                <b>Create new {getFirstMatchingName(namesArray, props.categories)}</b>
+                <b>{t('createNew')} {getFirstMatchingName(namesArray, props.categories)}</b>
             </BootstrapDialogTitle>
             <DialogContent dividers>
                 <Grid container spacing={2}>

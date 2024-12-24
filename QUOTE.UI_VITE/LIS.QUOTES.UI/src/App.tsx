@@ -15,6 +15,8 @@ import { Login } from '@mui/icons-material';
 import Privacy from './pages/Privacy';
 import MasterDataTemplates from './pages/masterdata/MasterDataTemplates';
 import Haulages from './pages/pricing/Haulages';
+import Seafreights from './pages/pricing/Seafreights';
+import Miscellaneous from './pages/pricing/Miscellaneous';
 
 function App() {
 
@@ -31,6 +33,8 @@ function App() {
                 <Route path='contacts' element={<MasterDataContacts />} />
                 <Route path='templates' element={<MasterDataTemplates />} />
                 <Route path='haulages' element={<Haulages />} />
+                <Route path='seafreights' element={<Seafreights />} />
+                <Route path='miscellaneous' element={<Miscellaneous />} />
                 <Route path='*' element={<NotFound />} />
               </Route>
             </Routes>

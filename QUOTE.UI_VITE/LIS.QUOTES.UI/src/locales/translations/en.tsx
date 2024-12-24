@@ -555,5 +555,9 @@ export const en = {
   pleaseRespect: "Please respect the following format",
   typeName: "Type the name of the city and the country code with a comma.",
   ex: "Eg",
-  haulagePriceInformation: "Haulage price information"
+  haulagePriceInformation: "Haulage price information",
+  noContainersSelected: "No containers selected, please select one",
+  addService: "Add service",
+  createNew: "Create new",
+  createNewService: "Create new service"
 };

@@ -53,3 +53,9 @@ export const msalConfig: Configuration = {
       import.meta.env.VITE_TEMPLATE_REQUEST_SCOPE !== undefined ? import.meta.env.VITE_TEMPLATE_REQUEST_SCOPE : ""
     ]
   }
+
+  export const offerRequest: PopupRequest = {
+    scopes: [
+      import.meta.env.VITE_OFFER_REQUEST_SCOPE !== undefined ? import.meta.env.VITE_OFFER_REQUEST_SCOPE : ""
+    ]
+  }

@@ -555,5 +555,9 @@ export const fr = {
   pleaseRespect: "Veuillez respecter le format suivant",
   typeName: "Entrez le nom de la ville et le code du pays suivi d'une virgule.",
   ex: "Exple", 
-  haulagePriceInformation: "Information sur le prix du transport routier"
+  haulagePriceInformation: "Information sur le prix du transport routier",
+  noContainersSelected: "Aucun conteneur sélectionner, veuillez sélectionner un type",
+  addService: "Ajouter un service",
+  createNew: "Créer un nouveau",
+  createNewService: "Créer un nouveau service"
 };

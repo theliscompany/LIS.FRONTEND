@@ -22,30 +22,36 @@ const CountrySelect: React.FC<CountryAutocompleteProps> = ({id, value, onChange,
             onChange={(event: any, newValue: any) => {
                 onChange(newValue);
             }}
-            renderOption={(props: any, option: any) => (
-                <Box component="li" sx={{ '& > img': { mr: 2, flexShrink: 0 } }} {...props}>
-                    <img
-                        loading="lazy"
-                        width="20"
-                        srcSet={`https://flagcdn.com/w40/${option.code.toLowerCase()}.png 2x`}
-                        src={`https://flagcdn.com/w20/${option.code.toLowerCase()}.png`}
-                        alt=""
-                    />
-                    {
-                        option !== null ?
-                        option.label+" ("+option.code+")" : null
-                    }
-                </Box>
-            )}
+            renderOption={(props: any, option: any) => {
+                const { key, ...otherProps } = props; // Extract the key prop
+                return (
+                    <Box
+                        key={"keyflag-"+option.code}
+                        component="li"
+                        sx={{ '& > img': { mr: 2, flexShrink: 0 } }}
+                        {...otherProps} // Spread the remaining props without the key
+                    >
+                        <img
+                            loading="lazy"
+                            width="20"
+                            srcSet={`https://flagcdn.com/w40/${option.code.toLowerCase()}.png 2x`}
+                            src={`https://flagcdn.com/w20/${option.code.toLowerCase()}.png`}
+                            alt=""
+                        />
+                        {option !== null ? `${option.label} (${option.code})` : null}
+                    </Box>
+                );
+            }}
             renderInput={(params) => (
                 <TextField
                     {...params}
                     // label="Choose a country"
                     sx={{ mt: 1 }}
-                    inputProps={{
-                        ...params.inputProps,
-                        autoComplete: 'new-password', // disable autocomplete and autofill
-                    }}
+                    size='small'
+                    slotProps={{ htmlInput: {
+                      ...params.inputProps,
+                      autoComplete: 'new-password', // disable autocomplete and autofill
+                    }}}
                 />
             )}
         />

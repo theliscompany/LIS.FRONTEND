@@ -12,7 +12,7 @@ import { categoriesOptions } from '../../utils/constants';
 import { MuiTelInput } from 'mui-tel-input';
 import { useTranslation } from 'react-i18next';
 import { AxiosError } from 'axios';
-import { CreateContactViewModel, deleteContactDeleteContactById, getContactGetContactByIdById, getContactGetContacts, postContactCreateContact, putContactUpdateContactById, UpdateContactViewModel } from '../../api/client/crm';
+import { CreateContactViewModel, getContactGetContactByIdById, getContactGetContacts, postContactCreateContact, putContactUpdateContactById, UpdateContactViewModel } from '../../api/client/crm';
 import { getCategoryNames } from '../../utils/functions';
 
 
@@ -23,14 +23,14 @@ const MasterDataContacts: any = () => {
     const [loadResults, setLoadResults] = useState<boolean>(true);
     const [loadEdit, setLoadEdit] = useState<boolean>(false);
     const [modal, setModal] = useState<boolean>(false);
-    const [modal2, setModal2] = useState<boolean>(false);
+    // const [modal2, setModal2] = useState<boolean>(false);
     const [testName, setTestName] = useState<string>("");
     const [country, setCountry] = useState<any>(null);
     const [addressCountry, setAddressCountry] = useState<string>("");
     const [testPhone, setTestPhone] = useState<string>("");
     const [testEmail, setTestEmail] = useState<string>("");
     const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-    const [currentId, setCurrentId] = useState<string>("");
+    // const [currentId, setCurrentId] = useState<string>("");
     const [currentEditId, setCurrentEditId] = useState<string>("");
     
     const columnsContacts: GridColDef[] = [
@@ -151,18 +151,18 @@ const MasterDataContacts: any = () => {
         }
     }
     
-    const deleteContactService = async (id: number) => {
-        try {
-            await deleteContactDeleteContactById({path: {id: id}});
-            enqueueSnackbar(t('rowDeletedSuccess'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
-            setModal2(false);
-            getContactsService();
-        }
-        catch (e: any) {
-            console.log(e);
-            enqueueSnackbar(t('rowDeletedError'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
-        }
-    }
+    // const deleteContactService = async (id: number) => {
+    //     try {
+    //         await deleteContactDeleteContactById({path: {id: id}});
+    //         enqueueSnackbar(t('rowDeletedSuccess'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
+    //         setModal2(false);
+    //         getContactsService();
+    //     }
+    //     catch (e: any) {
+    //         console.log(e);
+    //         enqueueSnackbar(t('rowDeletedError'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+    //     }
+    // }
 
     const resetForm = () => {
         setTestName("");
@@ -308,7 +308,7 @@ const MasterDataContacts: any = () => {
                 </DialogActions>
             </BootstrapDialog>
 
-            <BootstrapDialog open={modal2} onClose={() => setModal2(false)} maxWidth="sm" fullWidth>
+            {/* <BootstrapDialog open={modal2} onClose={() => setModal2(false)} maxWidth="sm" fullWidth>
                 <BootstrapDialogTitle id="custom-dialog-title" onClose={() => setModal2(false)}>
                     <b>{t('deleteRowContact')}</b>
                 </BootstrapDialogTitle>
@@ -317,7 +317,7 @@ const MasterDataContacts: any = () => {
                     <Button variant="contained" color={"primary"} onClick={() => { deleteContactService(Number(currentId)); }} sx={{ mr: 1.5, textTransform: "none" }}>{t('accept')}</Button>
                     <Button variant="contained" onClick={() => setModal2(false)} sx={buttonCloseStyles}>{t('close')}</Button>
                 </DialogActions>
-            </BootstrapDialog>
+            </BootstrapDialog> */}
         </div>
     );
 }
