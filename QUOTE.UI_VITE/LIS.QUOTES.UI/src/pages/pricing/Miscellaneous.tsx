@@ -441,7 +441,7 @@ function Miscellaneous() {
                                 inputProps={{ 'aria-label': 'controlled' }}
                             />}
                             label={"Show haulage miscs"} 
-                            sx={{ float: "right" }}
+                            sx={{ mt: 2 }}
                         />
                         <FormControlLabel 
                             control={
@@ -453,7 +453,7 @@ function Miscellaneous() {
                                 inputProps={{ 'aria-label': 'controlled' }}
                             />}
                             label={t('withShipment')} 
-                            sx={{ float: "right" }}
+                            sx={{ mt: 2 }}
                         />
                     </Grid>
                     <Grid size={{ xs: 12, md: 6 }}>
