@@ -7,6 +7,8 @@ import { enqueueSnackbar } from 'notistack';
 import { BackendService } from '../../utils/services/fetch';
 import { protectedResources } from '../../config/authConfig';
 import { useAccount, useMsal } from '@azure/msal-react';
+import { getLISTransportAPI } from '../../api/client/transportService';
+import { CreatedServiceViewModel } from '../../api/client/schemas/transport';
 
 function NewService(props: any) {
     const [testName, setTestName] = useState<string>("");
@@ -15,8 +17,9 @@ function NewService(props: any) {
     
     const { instance, accounts } = useMsal();
     const account = useAccount(accounts[0] || {});
-
     const context = useAuthorizedBackendApi();
+    
+    const { postService } = getLISTransportAPI();
     const { t } = useTranslation();
     
     var serviceTypes: any = [
@@ -34,49 +37,46 @@ function NewService(props: any) {
 
     const createNewService = async () => {
         if (testName !== "" && selectedServiceTypes.length !== 0) {
-            if (account && instance && context) {
-                // const token = await getAccessToken(instance, transportRequest, account);
-                var dataSent = {
-                    "serviceName": testName,
-                    "serviceDescription": testDescription,
-                    "servicesTypeId": selectedServiceTypes
-                };
-                
-                try {
-                    const response = await (context?.service as BackendService<any>).postWithToken(protectedResources.apiLisTransport.endPoint+"/Service", dataSent, context.tokenTransport);
-                    if (response !== null) {
-                        enqueueSnackbar("The service has been added with success!", { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
-                        
-                        if (props.callBack !== undefined && props.callBack !== null) {
-                            props.callBack();
-                        }
-                        props.closeModal();
+            var dataSent: CreatedServiceViewModel = {
+                "serviceName": testName,
+                "serviceDescription": testDescription,
+                "servicesTypeId": selectedServiceTypes
+            };
+            
+            try {
+                const response = await postService(dataSent);
+                if (response !== null) {
+                    enqueueSnackbar(t('serviceAddedSuccess'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                    
+                    if (props.callBack !== undefined && props.callBack !== null) {
+                        props.callBack();
                     }
-                    else {
-                        enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
-                    }
+                    props.closeModal();
                 }
-                catch (err: any) {
-                    console.log(err);
+                else {
                     enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
                 }
             }
+            catch (err: any) {
+                console.log(err);
+                enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+            }
         }
         else {
-            enqueueSnackbar("One or many the fields are empty, please verify the form and fill everything.", { variant: "warning", anchorOrigin: { horizontal: "right", vertical: "top"} });
+            enqueueSnackbar(t('verifyMessage'), { variant: "warning", anchorOrigin: { horizontal: "right", vertical: "top"} });
         }
     }
     
     return (
         <>
             <BootstrapDialogTitle id="custom-dialog-title7" onClose={props.closeModal}>
-                <b>Create new service</b>
+                <b>{t('createNewService')}</b>
             </BootstrapDialogTitle>
             <DialogContent dividers>
                 <Grid container spacing={2}>
                     <Grid item xs={12}>
                         <InputLabel htmlFor="test-name" sx={inputLabelStyles}>
-                            Service name
+                            {t('serviceName')}
                         </InputLabel>
                         <BootstrapInput id="test-name" type="text" value={testName} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTestName(e.target.value)} fullWidth />
                     </Grid>

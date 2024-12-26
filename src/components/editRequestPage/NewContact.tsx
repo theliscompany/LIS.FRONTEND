@@ -1,22 +1,12 @@
 import { useState } from 'react';
 import { BootstrapDialogTitle, BootstrapInput, actionButtonStyles, buttonCloseStyles, inputLabelStyles, myTextFieldClasses, properties } from '../../utils/misc/styles';
 import { Button, DialogActions, DialogContent, Grid, InputLabel, Typography } from '@mui/material';
-import { useAuthorizedBackendApi } from '../../api/api';
 import { useTranslation } from 'react-i18next';
 import { enqueueSnackbar } from 'notistack';
-import { BackendService } from '../../utils/services/fetch';
-import { crmRequest, protectedResources } from '../../config/authConfig';
-import { useAccount, useMsal } from '@azure/msal-react';
 import { MuiTelInput, MuiTelInputProps } from 'mui-tel-input';
 import CountrySelect from '../shared/CountrySelect';
-// import styled from '@emotion/styled';
+import { getLisCrmApi } from '../../api/client/crmService';
 
-// type MyTelInputProps = Omit<MuiTelInputProps, 'error' | 'variant' | 'children' | 'classes' | 'defaultChecked' | 'suppressContentEditableWarning' | 'suppressHydrationWarning'> & {
-//     id: string;
-//     sx: object;
-// };
-
-// const WithStyledFlag = styled(MuiTelInput)``;
 
 function NewContact(props: any) {
     const [testName, setTestName] = useState<string>("");
@@ -25,10 +15,8 @@ function NewContact(props: any) {
     const [testPhone, setTestPhone] = useState<string>("");
     const [testEmail, setTestEmail] = useState<string>("");
     
-    const { instance, accounts } = useMsal();
-    const account = useAccount(accounts[0] || {});
+    const { postContactCreateContact } = getLisCrmApi();
 
-    const context = useAuthorizedBackendApi();
     const { t } = useTranslation();
     
     const handleChange = (newPhone: string) => {
@@ -36,10 +24,10 @@ function NewContact(props: any) {
     }
 
     var namesArray = [
-        {type: "", name: t('client')},
-        {type: "OTHERS", name: t('supplier')},
-        {type: "SUPPLIERS", name: t('haulier')},
-        {type: "SHIPPING_LINES", name: t('carrier')}
+        { type: "", name: t('client')} ,
+        { type: "OTHERS", name: t('supplier')} ,
+        { type: "SUPPLIERS", name: t('haulier')} ,
+        { type: "SHIPPING_LINES", name: t('carrier') }
     ];
     
     const getFirstMatchingName = (array: any, selectedTypes: any) => {
@@ -50,46 +38,44 @@ function NewContact(props: any) {
     const createNewContact = async () => {
         console.log(country);
         if (country !== null && testName !== "" && testPhone !== "" && testEmail !== "" && addressCountry !== "") {
-            if (account && instance && context) {
-                // const token = await getAccessToken(instance, crmRequest, account);
-    
-                var dataSent = {
-                    "contactName": testName,
-                    "addressCountry": addressCountry,
-                    "createdBy": 5,
-                    "countryCode": country.code,
-                    "phone": testPhone,
-                    "email": testEmail
-                }
-                
-                var categoriesText = props.categories.length !== 0 ? "?"+ props.categories.map((category: any) => category !== "OTHERS" ? `categories=${category}`  : "").join('&') : "";
-                if (categoriesText === "?categories=") {
-                    categoriesText = "";
-                }
-                console.log(categoriesText);
-    
-                try {
-                    const response = await (context?.service as BackendService<any>).postWithToken(protectedResources.apiLisCrm.endPoint+"/Contact/CreateContact"+categoriesText, dataSent, context.tokenCrm);
-                    if (response !== null) {
-                        enqueueSnackbar("The contact has been added with success!", { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
-                        
-                        if (props.callBack !== undefined && props.callBack !== null) {
-                            props.callBack();
-                        }
-                        props.closeModal();
+            var dataSent = {
+                "contactName": testName,
+                "addressCountry": addressCountry,
+                "createdBy": 5,
+                "countryCode": country.code,
+                "phone": testPhone,
+                "email": testEmail,
+                // Check if different from empty string first
+                "categories": !(Array.isArray(props.categories) && props.categories.length === 1 && props.categories[0] === "") ? props.categories : []
+            }
+            
+            var categoriesText = props.categories.length !== 0 ? "?"+ props.categories.map((category: any) => category !== "OTHERS" ? `categories=${category}`  : "").join('&') : "";
+            if (categoriesText === "?categories=") {
+                categoriesText = "";
+            }
+            console.log(categoriesText);
+
+            try {
+                const response = await postContactCreateContact(dataSent);
+                if (response !== null) {
+                    enqueueSnackbar("The contact has been added with success!", { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                    
+                    if (props.callBack !== undefined && props.callBack !== null) {
+                        props.callBack();
                     }
-                    else {
-                        enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
-                    }
+                    props.closeModal();
                 }
-                catch (err: any) {
-                    console.log(err);
+                else {
                     enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
                 }
             }
+            catch (err: any) {
+                console.log(err);
+                enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+            }
         }
         else {
-            enqueueSnackbar("One or many the fields are empty, please verify the form and fill everything.", { variant: "warning", anchorOrigin: { horizontal: "right", vertical: "top"} });
+            enqueueSnackbar(t('verifyMessage'), { variant: "warning", anchorOrigin: { horizontal: "right", vertical: "top"} });
         }
     }
     

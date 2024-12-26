@@ -7,25 +7,28 @@ import { enqueueSnackbar } from 'notistack';
 import { BackendService } from '../../utils/services/fetch';
 import { protectedResources } from '../../config/authConfig';
 import { useAccount, useMsal } from '@azure/msal-react';
+import { getLISTransportAPI } from '../../api/client/transportService';
+import { ProductViewModel } from '../../api/client/schemas/transport';
 
 function NewProduct(props: any) {
     const [testName, setTestName] = useState<string>("");
     
     const { instance, accounts } = useMsal();
     const account = useAccount(accounts[0] || {});
-
     const context = useAuthorizedBackendApi();
+
+    const { postProduct } = getLISTransportAPI();
     const { t } = useTranslation();
     
     const createNewProduct = async () => {
         if (testName !== "") {
             if (account && instance && context) {
-                var dataSent = {
+                var dataSent: ProductViewModel = {
                     "productName": testName,
                 };
                 
                 try {
-                    const response = await (context?.service as BackendService<any>).postWithToken(protectedResources.apiLisTransport.endPoint+"/Product", dataSent, context.tokenTransport);
+                    const response = await postProduct(dataSent);
                     if (response !== null) {
                         enqueueSnackbar("The product has been added with success!", { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
                         
@@ -45,7 +48,7 @@ function NewProduct(props: any) {
             }
         }
         else {
-            enqueueSnackbar("One or many the fields are empty, please verify the form and fill everything.", { variant: "warning", anchorOrigin: { horizontal: "right", vertical: "top"} });
+            enqueueSnackbar(t('verifyMessage'), { variant: "warning", anchorOrigin: { horizontal: "right", vertical: "top"} });
         }
     }
     

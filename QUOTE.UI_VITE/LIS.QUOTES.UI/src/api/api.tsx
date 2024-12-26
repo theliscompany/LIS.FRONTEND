@@ -1,59 +1,95 @@
 import { useEffect, useState } from "react";
 import { getAccessToken } from "../utils/functions";
 import { useAccount, useMsal } from "@azure/msal-react";
-import { documentRequest, shipmentRequest, transportRequest } from "../config/msalConfig";
+import { crmRequest, documentRequest, offerRequest, pricingRequest, shipmentRequest, templateRequest, transportRequest } from "../config/msalConfig";
 import { client as shipmentClient } from "./client/shipment";
-import { client as shipmentTransport } from "./client/transport";
-import { client as shipmentDocument } from "./client/document";
+import { client as transportClient } from "./client/transport";
+import { client as documentClient } from "./client/document";
+import { client as crmClient } from "./client/crm";
+import { client as pricingClient } from "./client/pricing";
+import { client as templateClient } from "./client/template";
+import { client as offerClient } from "./client/offer";
 
 const BackendServiceProvider = ({children}:{children:React.ReactNode}) => {
-
     const { instance, accounts } = useMsal();
     const account = useAccount(accounts[0] || {});
 
-    const [tokensLoading, setTokensLoading] = useState<boolean>(true)
+    const [tokensLoading, setTokensLoading] = useState<boolean>(true);
     
     useEffect(() => {
       const getTokens = async () => {
         const _tokenTransport = await getAccessToken(instance, transportRequest, account);
         const _tokenDocument = await getAccessToken(instance, documentRequest, account);
         const _tokenShipment = await getAccessToken(instance, shipmentRequest, account);
+        const _tokenCrm = await getAccessToken(instance, crmRequest, account);
+        const _tokenPricing = await getAccessToken(instance, pricingRequest, account);
+        const _tokenTemplate = await getAccessToken(instance, templateRequest, account);
+        const _tokenOffer = await getAccessToken(instance, offerRequest, account);
         
         shipmentClient.setConfig({
           baseURL: import.meta.env.VITE_API_LIS_SHIPMENT_ENDPOINT,
           headers: {
             Authorization: `Bearer ${_tokenShipment}`
           }
-        })
+        });
 
-        shipmentTransport.setConfig({
+        transportClient.setConfig({
           baseURL: import.meta.env.VITE_API_LIS_TRANSPORT_ENDPOINT,
           headers: {
             Authorization: `Bearer ${_tokenTransport}`
           }
-        })
+        });
 
-        shipmentDocument.setConfig({
+        documentClient.setConfig({
           baseURL: import.meta.env.VITE_API_LIS_DOCUMENT_ENDPOINT,
           headers: {
             Authorization: `Bearer ${_tokenDocument}`
           }
-        })
+        });
 
-          setTokensLoading(false)
+        crmClient.setConfig({
+          baseURL: import.meta.env.VITE_API_LIS_CRM_ENDPOINT,
+          headers: {
+            Authorization: `Bearer ${_tokenCrm}`
+          },
+          
+          withCredentials: true
+        });
+
+        pricingClient.setConfig({
+          baseURL: import.meta.env.VITE_API_LIS_PRICING_ENDPOINT,
+          headers: {
+            Authorization: `Bearer ${_tokenPricing}`
+          },
+        });
+
+        templateClient.setConfig({
+          baseURL: import.meta.env.VITE_API_LIS_TEMPLATE_ENDPOINT,
+          headers: {
+            Authorization: `Bearer ${_tokenTemplate}`
+          },
+        });
+
+        offerClient.setConfig({
+          baseURL: import.meta.env.VITE_API_LIS_OFFER_ENDPOINT,
+          headers: {
+            Authorization: `Bearer ${_tokenOffer}`
+          },
+        });
+
+          setTokensLoading(false);
       }
 
       if (account && instance){
-        getTokens()
+        getTokens();
       }
-    }, [account,instance])
+    }, [account,instance]);
     
-    if(!tokensLoading){
+    if (!tokensLoading){
         return (
             <>{children}</>
         )
     }
-    
 }
 
 export default BackendServiceProvider;

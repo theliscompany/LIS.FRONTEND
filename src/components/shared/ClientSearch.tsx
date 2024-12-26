@@ -1,14 +1,10 @@
 import { useState } from "react";
 import { Autocomplete, CircularProgress, Skeleton, TextField } from "@mui/material";
 import { debounce } from "@mui/material/utils";
-import axios from "axios";
 import { useTranslation } from "react-i18next";
-import { BackendService } from "../../utils/services/fetch";
 import { useAuthorizedBackendApi } from "../../api/api";
 import { useAccount, useMsal } from "@azure/msal-react";
-import { crmRequest, protectedResources } from "../../config/authConfig";
-import { AuthenticationResult } from "@azure/msal-browser";
-import { getAccessToken } from "../../utils/functions";
+import { getLisCrmApi } from "../../api/client/crmService";
 
 interface LocationAutocompleteProps {
     id: string;
@@ -42,26 +38,28 @@ const ClientSearch: React.FC<LocationAutocompleteProps> = ({ id, name, value, on
     const context = useAuthorizedBackendApi();
     const account = useAccount(accounts[0] || {});
 
+    const { getContactGetContacts } = getLisCrmApi();
+
     const debouncedSearch = debounce(async (search: string) => {
         if (account && instance && context) {
             setLoading(true);
             
             if (checkFormatCode(search)) {
                 // First i search by contact number
-                const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisCrm.endPoint+"/Contact/GetContacts?contactNumber="+search+"&category=1", context.tokenCrm);
-                if (response !== null && response !== undefined && response.length !== 0) {
+                const response = await getContactGetContacts({ contactNumber: search, category: 1 });
+                if (response !== null && response !== undefined) {
                     console.log(response);
                     // Removing duplicates from result before rendering
-                    setOptions(response.data.filter((obj: any, index: number, self: any) => index === self.findIndex((o: any) => o.contactName === obj.contactName)));
+                    setOptions(response.data.data?.filter((obj: any, index: number, self: any) => index === self.findIndex((o: any) => o.contactName === obj.contactName)) || []);
                 }
             } 
             else {
                 // If i dont find i search by contact name
-                const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisCrm.endPoint+"/Contact/GetContacts?contactName="+search+"&category=1", context.tokenCrm);
+                const response = await getContactGetContacts({ contactName: search, category: 1 });
                 if (response !== null && response !== undefined) {
                     console.log(response);
                     // Removing duplicates from result before rendering
-                    setOptions(response.data.filter((obj: any, index: number, self: any) => index === self.findIndex((o: any) => o.contactName === obj.contactName)));
+                    setOptions(response.data.data?.filter((obj: any, index: number, self: any) => index === self.findIndex((o: any) => o.contactName === obj.contactName)) || []);
                 }   
             }
             setLoading(false);

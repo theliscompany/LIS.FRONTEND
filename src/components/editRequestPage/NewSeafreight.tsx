@@ -7,7 +7,6 @@ import { enqueueSnackbar } from 'notistack';
 import { BackendService } from '../../utils/services/fetch';
 import { crmRequest, pricingRequest, protectedResources } from '../../config/authConfig';
 import { useAccount, useMsal } from '@azure/msal-react';
-import { AuthenticationResult } from '@azure/msal-browser';
 import { Anchor } from '@mui/icons-material';
 import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
@@ -19,6 +18,9 @@ import { compareServices, getServices, transformArray } from '../../utils/functi
 import ServicesTable from '../seafreightPage/ServicesTable';
 import NewPort from '../shared/NewPort';
 import NewService from '../shared/NewService';
+import { getLISTransportAPI } from '../../api/client/transportService';
+import { getLisCrmApi } from '../../api/client/crmService';
+import { getLisPricingApi } from '../../api/client/pricingService';
 
 function NewSeafreight(props: any) {
     const [services, setServices] = useState<any>(null);
@@ -42,12 +44,14 @@ function NewSeafreight(props: any) {
 
     const { instance, accounts } = useMsal();
     const account = useAccount(accounts[0] || {});
-
     const context = useAuthorizedBackendApi();
     const { t } = useTranslation();
+
+    const { getService } = getLISTransportAPI();
+    const { postApiSeaFreightSeaFreight } = getLisPricingApi();
     
     useEffect(() => {
-        getServices(props.token);
+        getServices();
     }, [account, instance, account]);
 
     const deflattenData = (flattenedData: any) => {
@@ -63,20 +67,18 @@ function NewSeafreight(props: any) {
         }));
     };
 
-    const getServices = async (token: string) => {
-        if (account && instance && context) {
-            const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Service?pageSize=500", context.tokenTransport);
-            if (response !== null && response !== undefined) {
-                console.log(response.sort((a: any, b: any) => b.serviceName - a.serviceName));
-                setAllServices(response);
-                setServices(response.sort((a: any, b: any) => compareServices(a, b)).filter((obj: any) => obj.servicesTypeId.includes(1))); // Filter the services for seafreights (SEAFREIGHT = 1)
-            }  
+    const getServices = async () => {
+        const response = await getService({ pageSize: 500 });
+        if (response !== null && response !== undefined) {
+            console.log(response.data.sort((a: any, b: any) => b.serviceName - a.serviceName));
+            setAllServices(response);
+            setServices(response.data.sort((a: any, b: any) => compareServices(a, b)).filter((obj: any) => obj.servicesTypeId.includes(1))); // Filter the services for seafreights (SEAFREIGHT = 1)
         }
     }
     
     const createSeafreight = async () => {
         if (servicesData.length !== 0 && portLoading !== null && portDischarge !== null && carrier !== null && carrierAgent !== null && frequency !== 0 && transitTime !== 0 && validUntil !== null) {
-            if (account && instance && context) {
+            try {
                 setLoadSeafreight(true);
                 var dataSent = null;
                 dataSent = {
@@ -94,13 +96,13 @@ function NewSeafreight(props: any) {
                     "transitTime": transitTime,
                     "frequency": frequency,
                     "comment": comment,
-                    "containers": transformArray(deflattenData(servicesData)),
+                    // "containers": transformArray(deflattenData(servicesData)),
                     "services": deflattenData(servicesData),
-                    "updated": (new Date()).toISOString()
+                    // "updated": (new Date()).toISOString()
                 };
 
                 console.log(dataSent);
-                const response = await (context?.service as BackendService<any>).postWithToken(protectedResources.apiLisPricing.endPoint+"/SeaFreight/SeaFreight", dataSent, context.tokenPricing);
+                const response = await postApiSeaFreightSeaFreight(dataSent);
                 if (response !== null && response !== undefined) {
                     props.closeModal();
                     enqueueSnackbar(t('successCreated'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
@@ -111,6 +113,9 @@ function NewSeafreight(props: any) {
                     setLoadSeafreight(false);
                     enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
                 }
+            }
+            catch (err: any) {
+                console.log(err);
             }
         }
         else {
@@ -127,7 +132,7 @@ function NewSeafreight(props: any) {
             <DialogContent dividers>
                 <Grid container spacing={2}>
                     <Grid item xs={12} md={8}>
-                        <Typography sx={{ fontSize: 18, mb: 1 }}><b>Seafreight price information</b></Typography>
+                        <Typography sx={{ fontSize: 18, mb: 1 }}><b>{t('seafreightPriceInfo')}</b></Typography>
                     </Grid>
                     <Grid item xs={12} md={4}>
                         <Button variant="contained" color="inherit" sx={{ float: "right", backgroundColor: "#fff", textTransform: "none" }} onClick={() => { setModalNewCarrier(true); }} >{t('createNewCarrier')}</Button>
@@ -270,14 +275,14 @@ function NewSeafreight(props: any) {
                             sx={{ float: "right", backgroundColor: "#fff", textTransform: "none" }} 
                             onClick={() => { setModalNewService(true); }}
                         >
-                            Create new service
+                            {t('createNewService')}
                         </Button>
                         <Button 
                             variant="contained" color="inherit" 
                             sx={{ float: "right", backgroundColor: "#fff", textTransform: "none", mr: 1 }} 
                             onClick={() => { setModalNewPort(true); }}
                         >
-                            Create new port
+                            {t('createNewPort')}
                         </Button>
                     </Grid> 
                     <Grid item xs={12}>

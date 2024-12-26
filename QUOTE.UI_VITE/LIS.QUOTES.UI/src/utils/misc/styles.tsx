@@ -189,11 +189,11 @@ export const BootstrapInput = styled(InputBase)(({ theme }) => ({
     '& .MuiInputBase-input': {
       borderRadius: 4,
       position: 'relative',
-      backgroundColor: theme.palette.mode === 'light' ? '#fcfcfb' : '#2b2b2b',
-      border: '1px solid #ced4da',
+      // backgroundColor: theme.palette.mode === 'light' ? '#fcfcfb' : '#2b2b2b',
+      border: '1px solid #bdbebe',
       fontSize: 16,
       //width: 'auto',
-      padding: '10px 12px',
+      padding: '7.75px 12px',
       transition: theme.transitions.create([
         'border-color',
         'background-color',
@@ -213,8 +213,9 @@ export const BootstrapInput = styled(InputBase)(({ theme }) => ({
         '"Segoe UI Symbol"',
       ].join(','),
       '&:focus': {
-        boxShadow: `${alpha(theme.palette.primary.main, 0.25)} 0 0 0 0.2rem`,
+        // boxShadow: `${alpha(theme.palette.primary.main, 0.25)} 0 0 0 0.2rem`,
         borderColor: theme.palette.primary.main,
+        borderWidth: "2px"
       },
     },
 }));

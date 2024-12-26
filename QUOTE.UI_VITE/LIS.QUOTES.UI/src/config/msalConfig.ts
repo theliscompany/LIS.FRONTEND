@@ -1,4 +1,4 @@
-import {Configuration, PopupRequest} from "@azure/msal-browser"
+import {Configuration, PopupRequest} from "@azure/msal-browser";
 
 export const msalConfig: Configuration = {
     auth: {
@@ -32,6 +32,30 @@ export const msalConfig: Configuration = {
 
   export const documentRequest: PopupRequest = {
     scopes: [
-      import.meta.env.VITE_TRANSPORT_REQUEST_SCOPE !== undefined ? import.meta.env.VITE_TRANSPORT_REQUEST_SCOPE : ""
+      import.meta.env.VITE_DOCUMENT_REQUEST_SCOPE !== undefined ? import.meta.env.VITE_DOCUMENT_REQUEST_SCOPE : ""
+    ]
+  }
+
+  export const crmRequest: PopupRequest = {
+    scopes: [
+      import.meta.env.VITE_CRM_REQUEST_SCOPE !== undefined ? import.meta.env.VITE_CRM_REQUEST_SCOPE : ""
+    ]
+  }
+
+  export const pricingRequest: PopupRequest = {
+    scopes: [
+      import.meta.env.VITE_PRICING_REQUEST_SCOPE !== undefined ? import.meta.env.VITE_PRICING_REQUEST_SCOPE : ""
+    ]
+  }
+
+  export const templateRequest: PopupRequest = {
+    scopes: [
+      import.meta.env.VITE_TEMPLATE_REQUEST_SCOPE !== undefined ? import.meta.env.VITE_TEMPLATE_REQUEST_SCOPE : ""
+    ]
+  }
+
+  export const offerRequest: PopupRequest = {
+    scopes: [
+      import.meta.env.VITE_OFFER_REQUEST_SCOPE !== undefined ? import.meta.env.VITE_OFFER_REQUEST_SCOPE : ""
     ]
   }

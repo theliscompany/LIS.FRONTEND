@@ -13,6 +13,7 @@ import './../../App.css';
 import AutocompleteSearch from '../shared/AutocompleteSearch';
 import { Anchor } from '@mui/icons-material';
 import { haulageTypeOptions } from '../../utils/constants';
+import { getLisCrmApi } from '../../api/client/crmService';
 
 function createGetRequestUrl(variable1: number, variable2: number) {
     let url = protectedResources.apiLisPricing.endPoint+"/Haulage/Haulages?";
@@ -58,8 +59,9 @@ function RequestPriceHaulage(props: any) {
     
     const { instance, accounts } = useMsal();
     const account = useAccount(accounts[0] || {});
-
     const context = useAuthorizedBackendApi();
+
+    const { getContactGetContacts } = getLisCrmApi();
     
     const postEmail = async(from: string, to: string, subject: string, htmlContent: string) => {
         const form = new FormData();
@@ -120,19 +122,15 @@ function RequestPriceHaulage(props: any) {
     }
 
     const getClients = async () => {
-        if (account && instance && context) {
-            // const token = await getAccessToken(instance, crmRequest, account);
-            
-            try {
-                const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisCrm.endPoint+"/Contact/GetContacts?category=2&pageSize=1000", context.tokenCrm);
-                if (response !== null && response !== undefined) {
-                    // Removing duplicates from client array
-                    setHauliersData(response.data.filter((obj: any, index: number, self: any) => index === self.findIndex((o: any) => o.contactName === obj.contactName)));
-                }
+        try {
+            const response = await getContactGetContacts({ category: 2, pageSize: 1000 });
+            if (response !== null && response !== undefined) {
+                // Removing duplicates from client array
+                setHauliersData(response.data.data?.filter((obj: any, index: number, self: any) => index === self.findIndex((o: any) => o.contactName === obj.contactName)));
             }
-            catch (err: any) {
-                console.log(err);
-            }  
+        }
+        catch (err: any) {
+            console.log(err);
         }
     }
     
@@ -141,9 +139,7 @@ function RequestPriceHaulage(props: any) {
             // Handle invalid data
             return [];
         }
-      
-        const hauliersSet = new Set();
-      
+        const hauliersSet = new Set();      
         data.forEach((route) => {
             if (route.hauliers && Array.isArray(route.hauliers)) {
                 route.hauliers.forEach((supplier: any) => {

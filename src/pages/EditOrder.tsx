@@ -13,6 +13,8 @@ import { useSelector } from 'react-redux';
 import { orderStatusOptions } from '../utils/constants';
 import OrderShipments from '../components/editOrderPage/OrderShipments';
 import NoteShipments from '../components/editOrderPage/NoteShipments';
+import { getLISTransportAPI } from '../api/client/transportService';
+import { getLisCrmApi } from '../api/client/crmService';
 
 function EditOrder() {
     const [load, setLoad] = useState<boolean>(true);
@@ -47,6 +49,9 @@ function EditOrder() {
     let { id } = useParams();
     const { t } = useTranslation();
     
+    const { getPorts, getProduct, getService, getCityCities } = getLISTransportAPI();
+    const { getContactGetContacts } = getLisCrmApi();
+
     var ourCities: any = useSelector((state: any) => state.masterdata.cities);
     var ourPorts: any = useSelector((state: any) => state.masterdata.ports);
     var ourProducts: any = useSelector((state: any) => state.masterdata.products);
@@ -58,7 +63,7 @@ function EditOrder() {
     }, [contacts, ports, cities, ships]);
     
     useEffect(() => {
-        getPorts();
+        getPortsService();
         getProducts();
         getServices();
         getContacts();
@@ -67,82 +72,62 @@ function EditOrder() {
         // getNotes();
     }, [account, instance, context]);
 
-    const getPorts = async () => {
-        if (account && instance && context) {
-            if (ourPorts !== undefined && ourPorts.length !== 0) {
-                // console.log(ourPorts);
-                setPorts(ourPorts);
-            }
-            else {
-                const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Port/Ports?pageSize=2000", context.tokenTransport);
-                if (response !== null && response !== undefined) {
-                    // console.log(response);
-                    setPorts(response);
-                }
+    const getPortsService = async () => {
+        if (ourPorts !== undefined && ourPorts.length !== 0) {
+            setPorts(ourPorts);
+        }
+        else {
+            const response = await getPorts({ pageSize: 2000 });
+            if (response !== null && response !== undefined) {
+                setPorts(response.data);
             }
         }
     }
 
     const getProducts = async () => {
-        if (account && instance && context) {
-            if (ourProducts !== undefined && ourProducts.length !== 0) {
-                // console.log(ourProducts);
-                setProducts(ourProducts);
-            }
-            else {
-                const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Service?pageSize=1000", context.tokenTransport);
-                if (response !== null && response !== undefined) {
-                    // console.log(response);
-                    setProducts(response);
-                }
+        if (ourProducts !== undefined && ourProducts.length !== 0) {
+            setProducts(ourProducts);
+        }
+        else {
+            const response = await getProduct({ pageSize: 500 });
+            if (response !== null && response !== undefined) {
+                setProducts(response.data);
             }
         }
     }
 
     const getServices = async () => {
-        if (account && instance && context) {
-            if (ourServices !== undefined && ourServices.length !== 0) {
-                // console.log(ourServices);
-                setServices(ourServices);
-            }
-            else {
-                const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/Product?pageSize=500", context.tokenTransport);
-                if (response !== null && response !== undefined) {
-                    // console.log(response);
-                    setServices(response);
-                }
+        if (ourServices !== undefined && ourServices.length !== 0) {
+            setServices(ourServices);
+        }
+        else {
+            const response = await getProduct({ pageSize: 500 });
+            if (response !== null && response !== undefined) {
+                setServices(response.data);
             }
         }
     }
 
     const getCities = async () => {
-        if (account && instance && context) {
-            if (ourCities !== undefined && ourCities.length !== 0) {
-                // console.log(ourCities);
-                setCities(ourCities);
-            }
-            else {
-                const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisTransport.endPoint+"/City/Cities", context.tokenTransport);
-                if (response !== null && response !== undefined) {
-                    // console.log(response);
-                    setCities(response);
-                }
+        if (ourCities !== undefined && ourCities.length !== 0) {
+            setCities(ourCities);
+        }
+        else {
+            const response = await getCityCities();
+            if (response !== null && response !== undefined) {
+                setCities(response.data);
             }
         }
     }
 
     const getContacts = async () => {
-        if (account && instance && context) {
-            if (ourContacts !== undefined && ourContacts.length !== 0) {
-                // console.log(ourContacts);
-                setContacts(ourContacts);
-            }
-            else {
-                const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisCrm.endPoint+"/Contact/GetContacts?pageSize=4000", context.tokenCrm);
-                if (response !== null && response !== undefined) {
-                    // console.log(response);
-                    setContacts(response.data);
-                }
+        if (ourContacts !== undefined && ourContacts.length !== 0) {
+            setContacts(ourContacts);
+        }
+        else {
+            const response = await getContactGetContacts({ pageSize: 4000 });
+            if (response !== null && response !== undefined) {
+                setContacts(response.data.data);
             }
         }
     }

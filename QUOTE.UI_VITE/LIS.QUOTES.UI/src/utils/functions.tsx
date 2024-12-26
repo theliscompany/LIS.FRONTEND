@@ -1,5 +1,6 @@
 import React from "react";
 import { AuthenticationResult } from "@azure/msal-browser";
+import { categoriesOptions } from "./constants";
 //import { t } from "i18next";
 
 function removeAccents(input: string) {
@@ -903,3 +904,12 @@ export function validateObjectHSCODEFormat(obj: any) {
         return false;
     }
 }
+
+export function getCategoryNames(inputArray: any) {
+    return inputArray.map((id: any) => {
+        const category = categoriesOptions.find((category: any) => category.value === id);
+        return category ? category.name : null;
+    }).filter((name: any) => name !== null);
+}
+      
+    
