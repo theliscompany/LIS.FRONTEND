@@ -375,7 +375,7 @@ const Layout = () : React.ReactNode => {
                             </Collapse>
                             
                             <NavigationLink url="/quote-offers" title={t('priceOffers')} icon={<Portrait fontSize="small" />} />
-                            <NavigationLink url="/orders" title={t('orders')} icon={<FolderOutlined fontSize="small" />} />
+                            <NavigationLink url="/shipments" title={t('orders')} icon={<FolderOutlined fontSize="small" />} />
                             
                             <ListItem className="cs-listitem" key={"Masterdata part"} disablePadding disableGutters>
                                 <ListItemButton className="cs-listitembutton" onClick={() => { setOpenMasterdata(!openMasterdata); }}>
@@ -394,8 +394,8 @@ const Layout = () : React.ReactNode => {
                                     <NavigationLink url="/hscodes" title={t('hscodes')} icon={<InventoryOutlined fontSize="small" />} nested />
                                     <NavigationLink url="/ports" title={t('ports')} icon={<AnchorOutlined fontSize="small" />} nested />
                                     <NavigationLink url="/contacts" title={t('contacts')} icon={<ContactsOutlined fontSize="small" />} nested />
-                                    <NavigationLink url="/ships" title={t('ships')} icon={<DirectionsBoatOutlined fontSize="small" />} nested />
-                                    <NavigationLink url="/files" title={t('files')} icon={<AttachFileOutlined fontSize="small" />} nested />
+                                    {/* <NavigationLink url="/ships" title={t('ships')} icon={<DirectionsBoatOutlined fontSize="small" />} nested /> */}
+                                    {/* <NavigationLink url="/files" title={t('files')} icon={<AttachFileOutlined fontSize="small" />} nested /> */}
                                 </List>
                             </Collapse>
                         </List>

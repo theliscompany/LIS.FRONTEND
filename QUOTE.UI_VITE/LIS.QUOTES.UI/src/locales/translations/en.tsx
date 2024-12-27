@@ -569,5 +569,8 @@ export const en = {
   misc: "Misc",
   youNeedToSave: "You need to save some options to send",
   perUnit: "per unit",
-  toEditOffer: "to edit offer"
+  toEditOffer: "to edit offer",
+  hscodeAdded: "The hs-code has been added with success!",
+  hscodeEdited: "The hs-code has been edited with success!",
+  digitCategories: "4 Digit Categories"
 };

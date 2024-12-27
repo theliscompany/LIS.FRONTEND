@@ -29,6 +29,7 @@ import ValidatedRequests from './pages/request/ValidatedRequests';
 import Request from './pages/request/Request';
 import Histories from './pages/Histories';
 import UsersAssignment from './pages/UsersAssignment';
+import MasterDataHSCodes from './pages/masterdata/MasterDataHSCodes';
 
 function App() {
 
@@ -53,6 +54,7 @@ function App() {
                 <Route path='services' element={<MasterDataServices />} />
                 <Route path='contacts' element={<MasterDataContacts />} />
                 <Route path='templates' element={<MasterDataTemplates />} />
+                <Route path='hscodes' element={<MasterDataHSCodes />} />
                 <Route path='haulages' element={<Haulages />} />
                 <Route path='seafreights' element={<Seafreights />} />
                 <Route path='miscellaneous' element={<Miscellaneous />} />

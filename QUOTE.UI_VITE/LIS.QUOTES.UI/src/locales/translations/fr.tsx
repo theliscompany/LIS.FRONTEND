@@ -569,5 +569,8 @@ export const fr = {
   misc: "Service",
   youNeedToSave: "Vous devez enregistrer des options à envoyer",
   perUnit: "par unité",
-  toEditOffer: "pour modifier l'offre"
+  toEditOffer: "pour modifier l'offre",
+  hscodeAdded: "Le hs-code a été ajouté avec succès!",
+  hscodeEdited: "Le hs-code a été édité avec succès!",
+  digitCategories: "Catégories à 4 chiffres"
 };
