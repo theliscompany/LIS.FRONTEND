@@ -17,6 +17,10 @@ import MasterDataTemplates from './pages/masterdata/MasterDataTemplates';
 import Haulages from './pages/pricing/Haulages';
 import Seafreights from './pages/pricing/Seafreights';
 import Miscellaneous from './pages/pricing/Miscellaneous';
+import AcceptOffer from './pages/offer/AcceptOffer';
+import ManagePriceOffer from './pages/offer/ManagePriceOffer';
+import PriceOffers from './pages/offer/PriceOffers';
+import RefuseOffer from './pages/offer/RefuseOffer';
 
 function App() {
 
@@ -35,7 +39,9 @@ function App() {
                 <Route path='haulages' element={<Haulages />} />
                 <Route path='seafreights' element={<Seafreights />} />
                 <Route path='miscellaneous' element={<Miscellaneous />} />
-                <Route path='*' element={<NotFound />} />
+                <Route path="quote-offers" element={<PriceOffers />} />
+								<Route path="quote-offers/:id" element={<ManagePriceOffer />} />
+								<Route path='*' element={<NotFound />} />
               </Route>
             </Routes>
           </BackendServiceProvider>
@@ -46,7 +52,9 @@ function App() {
             <Route path='/' element={<Landing />} />
             <Route path="login" element={<Login />} />
 					  <Route path="privacy-policy" element={<Privacy />} />
-					  <Route path='*' element={<NotFound />} />
+					  <Route path="acceptOffer/:id" element={<AcceptOffer />} />
+            <Route path="refuseOffer/:id" element={<RefuseOffer />} />
+            <Route path='*' element={<NotFound />} />
           </Routes>
         </UnauthenticatedTemplate>
       

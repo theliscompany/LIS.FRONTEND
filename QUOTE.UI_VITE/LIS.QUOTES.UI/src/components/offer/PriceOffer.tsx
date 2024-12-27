@@ -35,7 +35,7 @@ const PriceOffer = (props: any) => {
 		<div>Tel +32.3.295.38.82</div>
 		<div>Fax +32.3.295.38.77</div>
 		<div>Whatsapp +32.494.40.24.25</div>
-		<img src="http://www.omnifreight.eu/Images/omnifreight_logo.jpg" style="max-width: 200px;">
+		<img src="https://omnifreight.eu/wp-content/uploads/2023/06/logo.jpg" style="max-width: 200px;">
 	</div>
 	`;
 	
@@ -146,7 +146,7 @@ const PriceOffer = (props: any) => {
 					<div>Tel +32.3.295.38.82</div>
 					<div>Fax +32.3.295.38.77</div>
 					<div>Whatsapp +32.494.40.24.25</div>
-					<img src="http://www.omnifreight.eu/Images/omnifreight_logo.jpg" style="max-width: 200px;">
+					<img src="https://omnifreight.eu/wp-content/uploads/2023/06/logo.jpg" style="max-width: 200px;">
 				</div>
 				`;
 				sendEmailWithAttachments("pricing@omnifreight.eu", props.offer.emailUser, subject, props.offer.comment+footer, props.files);

@@ -8,7 +8,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import { SnackbarProvider, enqueueSnackbar } from 'notistack';
 import { useTranslation } from 'react-i18next';
 import { GridColDef, GridRenderCellParams, DataGrid } from '@mui/x-data-grid';
-import { BootstrapDialog, BootstrapDialogTitle, BootstrapInput, actionButtonStyles, buttonCloseStyles, datetimeStyles, gridStyles, inputLabelStyles } from '../../utils/misc/styles';
+import { BootstrapDialog, BootstrapDialogTitle, BootstrapInput, actionButtonStyles, buttonCloseStyles, datetimeStyles, gridStyles, inputLabelStyles, sizingStyles } from '../../utils/misc/styles';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { Dayjs } from 'dayjs';
@@ -284,7 +284,90 @@ const MasterDataTemplates: any = () => {
     return (
         <div style={{ background: "#fff", borderTopLeftRadius: 20, borderTopRightRadius: 20 }}>
             <SnackbarProvider />
-            <Box sx={{ py: 2.5 }}>
+            <Box py={2.5}>
+                <Grid container spacing={2} mt={0} px={5}>
+                    <Grid size={{ xs: 12, md: 8 }}>
+                        <Typography sx={{ fontSize: 18, mb: 1 }}><b>{t('listTemplates')}</b></Typography>
+                    </Grid>
+                    <Grid size={{ xs: 12, md: 4 }}>
+                        <Button 
+                            variant="contained" color="inherit" 
+                            sx={{ float: "right", backgroundColor: "#fff", textTransform: "none", ml: 2 }} 
+                            onClick={() => { getTemplates(); }} 
+                        >
+                            {t('reload')}
+                        </Button>
+                        <Button 
+                            variant="contained" color="inherit" 
+                            sx={{ float: "right", backgroundColor: "#fff", textTransform: "none" }} 
+                            onClick={() => { setCurrentEditId(""); resetForm(); setModal2(true); }} 
+                        >
+                            {t('newTemplate')}
+                        </Button>
+                    </Grid>
+                    <Grid size={{ xs: 12, md: 4 }}>
+                        <InputLabel htmlFor="template-name" sx={inputLabelStyles}>{t('name')}</InputLabel>
+                        <BootstrapInput id="template-name" type="text" value={searchedName} onChange={(e: any) => setSearchedName(e.target.value)} fullWidth />
+                    </Grid>
+                    <Grid size={{ xs: 12, md: 3 }}>
+                        <InputLabel htmlFor="createdBefore" sx={inputLabelStyles}>{t('createdBefore')}</InputLabel>
+                        <LocalizationProvider dateAdapter={AdapterDayjs}>
+                            <DatePicker 
+                                value={createdBefore}
+                                format="DD/MM/YYYY" 
+                                onChange={(value: any) => { setCreatedBefore(value) }}
+                                slotProps={{ textField: { id: "createdBefore", size: "small", fullWidth: true, sx: datetimeStyles }, inputAdornment: { sx: { position: "relative", right: "11.5px" } } }}
+                            />
+                        </LocalizationProvider>
+                    </Grid>
+                    <Grid size={{ xs: 12, md: 3 }}>
+                        <InputLabel htmlFor="createdAfter" sx={inputLabelStyles}>{t('createdAfter')}</InputLabel>
+                        <LocalizationProvider dateAdapter={AdapterDayjs}>
+                            <DatePicker 
+                                value={createdAfter}
+                                format="DD/MM/YYYY" 
+                                onChange={(value: any) => { setCreatedAfter(value) }}
+                                slotProps={{ textField: { id: "createdAfter", size: "small", fullWidth: true, sx: datetimeStyles }, inputAdornment: { sx: { position: "relative", right: "11.5px" } } }}
+                            />
+                        </LocalizationProvider>
+                    </Grid>
+                    <Grid size={{ xs: 12, md: 2 }} mt={1} sx={{ display: "flex", alignItems: "end" }}>
+                        <Button 
+                            variant="contained" 
+                            color="inherit"
+                            startIcon={<SearchIcon />} 
+                            size="large"
+                            sx={{ backgroundColor: "#fff", color: "#333", textTransform: "none", mb: 0.15 }}
+                            onClick={searchTemplates}
+                            fullWidth
+                        >
+                            {t('search')}
+                        </Button>
+                    </Grid>
+                    <Grid size={{ xs: 12 }}>
+                        {
+                            !load ?
+                            templates !== null && templates.length !== 0 ?
+                            <Box sx={{ overflow: "hidden" }}>
+                                <DataGrid
+                                    rows={templates}
+                                    columns={columnsTemplates}
+                                    getRowId={(row: any) => row?.id}
+                                    getRowHeight={() => "auto" }
+                                    sx={sizingStyles}
+                                    disableRowSelectionOnClick
+                                />
+                            </Box> : 
+                            <Box>
+                                <Alert severity="warning">{t('noResults')}</Alert>
+                            </Box> : <Skeleton />
+                        }
+                    </Grid>
+                </Grid>
+            </Box>
+            
+            
+            {/* <Box sx={{ py: 2.5 }}>
                 <Typography variant="h5" sx={{mt: {xs: 4, md: 1.5, lg: 1.5 }}} mx={5}><b>{t('listTemplates')}</b></Typography>
                 <Grid container spacing={2} mt={0} px={5}>
                     <Grid size={{ xs: 12 }}>
@@ -364,7 +447,7 @@ const MasterDataTemplates: any = () => {
                         </Grid>
                     </Grid> : <Skeleton sx={{ mx: 5, mt: 3 }} />
                 }
-            </Box>
+            </Box> */}
             <BootstrapDialog
                 onClose={() => setModal(false)}
                 aria-labelledby="custom-dialog-title"

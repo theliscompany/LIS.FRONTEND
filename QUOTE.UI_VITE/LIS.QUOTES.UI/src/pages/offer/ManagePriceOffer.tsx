@@ -27,12 +27,12 @@ const ManagePriceOffer = (props: any) => {
 		try {
 			const response: any = await getQuoteOffer({path: {id: id || ""}});
 			if (response !== null && response !== undefined) {
-				console.log(response.data);
-				var objTotal = response.data;
+				console.log(response.data.data);
+				var objTotal = response.data.data;
 				setFiles(objTotal.files);
 				setOptions(objTotal.options);
-				setOffer(response.data);
-				setOfferNumber(response.data.quoteOfferNumber);
+				setOffer(response.data.data);
+				setOfferNumber(response.data.data.quoteOfferNumber);
 				
 				var optionsButtons = response.data.options.map((elm: any, index: number) => {
 					return `<a href="#" style="display:inline-block;background-color:#008089;color:#fff;padding:10px 20px;text-decoration:none" target="_blank">${t('selectOptionOffer')} #${Number(index+1)}</a>`;
@@ -51,7 +51,7 @@ const ManagePriceOffer = (props: any) => {
 					<div>Tel +32.3.295.38.82</div>
 					<div>Fax +32.3.295.38.77</div>
 					<div>Whatsapp +32.494.40.24.25</div>
-					<img src="http://www.omnifreight.eu/Images/omnifreight_logo.jpg" style="max-width: 200px;">
+					<img src="https://omnifreight.eu/wp-content/uploads/2023/06/logo.jpg" style="max-width: 200px;">
 				</div>
 				`;
 				setContent(response.data.comment);

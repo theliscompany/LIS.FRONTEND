@@ -14,7 +14,8 @@
     "generate-client-crm": "npx @hey-api/openapi-ts -i https://lis-crm-svc-dev.azurewebsites.net/swagger/v1/swagger.json -o src/api/client/crm -c @hey-api/client-axios",
     "generate-client-pricing": "npx @hey-api/openapi-ts -i https://lis-pricing-svc-dev.azurewebsites.net/swagger/v1/swagger.json -o src/api/client/pricing -c @hey-api/client-axios",
     "generate-client-template": "npx @hey-api/openapi-ts -i https://lis-template-svc-dev.azurewebsites.net/swagger/v1/swagger.json -o src/api/client/template -c @hey-api/client-axios",
-    "generate-client-offer": "npx @hey-api/openapi-ts -i https://lis-offer-svc-dev.azurewebsites.net/swagger/v1/swagger.json -o src/api/client/offer -c @hey-api/client-axios"
+    "generate-client-offer": "npx @hey-api/openapi-ts -i https://lis-offer-svc-dev.azurewebsites.net/swagger/v1/swagger.json -o src/api/client/offer -c @hey-api/client-axios",
+    "generate-client-quote": "npx @hey-api/openapi-ts -i https://lis-quotes-svc-dev.azurewebsites.net/swagger/v1/swagger.json -o src/api/client/quote -c @hey-api/client-axios"
   },
   "dependencies": {
     "@azure/msal-browser": "^3.28.0",

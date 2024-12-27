@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { getAccessToken } from "../utils/functions";
 import { useAccount, useMsal } from "@azure/msal-react";
-import { crmRequest, documentRequest, offerRequest, pricingRequest, shipmentRequest, templateRequest, transportRequest } from "../config/msalConfig";
+import { crmRequest, documentRequest, offerRequest, pricingRequest, quoteRequest, shipmentRequest, templateRequest, transportRequest } from "../config/msalConfig";
 import { client as shipmentClient } from "./client/shipment";
 import { client as transportClient } from "./client/transport";
 import { client as documentClient } from "./client/document";
@@ -9,6 +9,7 @@ import { client as crmClient } from "./client/crm";
 import { client as pricingClient } from "./client/pricing";
 import { client as templateClient } from "./client/template";
 import { client as offerClient } from "./client/offer";
+import { client as quoteClient } from "./client/quote";
 
 const BackendServiceProvider = ({children}:{children:React.ReactNode}) => {
     const { instance, accounts } = useMsal();
@@ -25,6 +26,7 @@ const BackendServiceProvider = ({children}:{children:React.ReactNode}) => {
         const _tokenPricing = await getAccessToken(instance, pricingRequest, account);
         const _tokenTemplate = await getAccessToken(instance, templateRequest, account);
         const _tokenOffer = await getAccessToken(instance, offerRequest, account);
+        const _tokenQuote = await getAccessToken(instance, quoteRequest, account);
         
         shipmentClient.setConfig({
           baseURL: import.meta.env.VITE_API_LIS_SHIPMENT_ENDPOINT,
@@ -77,7 +79,14 @@ const BackendServiceProvider = ({children}:{children:React.ReactNode}) => {
           },
         });
 
-          setTokensLoading(false);
+        quoteClient.setConfig({
+          baseURL: import.meta.env.VITE_API_LIS_QUOTE_ENDPOINT,
+          headers: {
+            Authorization: `Bearer ${_tokenQuote}`
+          },
+        });
+
+        setTokensLoading(false);
       }
 
       if (account && instance){
