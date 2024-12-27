@@ -16,7 +16,7 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import dayjs, { Dayjs } from 'dayjs';
 import { CategoryEnum, containerPackages, currencyOptions, haulageTypeOptions } from '../../utils/constants';
-import { compareServices, extractCityAndPostalCode, parseLocation2, sortHauliersByName } from '../../utils/functions';
+import { extractCityAndPostalCode, parseLocation2, sortHauliersByName } from '../../utils/functions';
 import RequestPriceHaulage from '../../components/pricing/RequestPriceHaulage';
 import CompanySearch from '../../components/shared/CompanySearch';
 import AutocompleteSearch from '../../components/shared/AutocompleteSearch';
@@ -39,7 +39,7 @@ function Haulages() {
     const [modal8, setModal8] = useState<boolean>(false);
     const [modal9, setModal9] = useState<boolean>(false);
     const [ports, setPorts] = useState<any>(null);
-    const [clients, setClients] = useState<any>(null);
+    //const [clients, setClients] = useState<any>(null);
     const [containers, setContainers] = useState<any>(null);
 
     const [currentId, setCurrentId] = useState<string>("");
@@ -64,18 +64,18 @@ function Haulages() {
     const [containerTypes, setContainerTypes] = useState<any>([]);
     const [comment, setComment] = useState<string>("");
 
-    const [servicesData2, setServicesData2] = useState<any>([]);
-    const [miscellaneousId, setMiscellaneousId] = useState<string>("");
-    const [allServices, setAllServices] = useState<any>(null);
-    const [services, setServices] = useState<any>(null);
+    // const [servicesData2, setServicesData2] = useState<any>([]);
+    // const [miscellaneousId, setMiscellaneousId] = useState<string>("");
+    // const [allServices, setAllServices] = useState<any>(null);
+    // const [services, setServices] = useState<any>(null);
 
     const { t } = useTranslation();
     
     const columnsHaulages: GridColDef[] = [
         { field: 'haulierName', headerName: t('haulier'), minWidth: 125, flex: 1.4 },
-        { field: 'unitTariff', headerName: t('unitTariff'), valueGetter: (params: GridValueGetterParams) => `${params.row.unitTariff || ''} ${t(params.row.currency)}`, renderHeader: (params: GridColumnHeaderParams) => (<>{t('unitTariff')}</>), minWidth: 100, flex: 0.75 },
+        { field: 'unitTariff', headerName: t('unitTariff'), valueGetter: (params: GridValueGetterParams) => `${params.row.unitTariff || ''} ${t(params.row.currency)}`, renderHeader: (_: GridColumnHeaderParams) => (<>{t('unitTariff')}</>), minWidth: 100, flex: 0.75 },
         { field: 'freeTime', headerName: t('freeTime'), valueFormatter: (params: GridValueFormatterParams) => `${params.value || ''} ${t('hours')}`, minWidth: 100, flex: 0.75 },
-        { field: 'overtimeTariff', headerName: t('overtimeTariff'), valueGetter: (params: GridValueGetterParams) => `${params.row.overtimeTariff || ''} ${t(params.row.currency)} / ${t('hour')}`, renderHeader: (params: GridColumnHeaderParams) => (<>{t('overtimeTariff')}</>), minWidth: 100, flex: 1 },
+        { field: 'overtimeTariff', headerName: t('overtimeTariff'), valueGetter: (params: GridValueGetterParams) => `${params.row.overtimeTariff || ''} ${t(params.row.currency)} / ${t('hour')}`, renderHeader: (_: GridColumnHeaderParams) => (<>{t('overtimeTariff')}</>), minWidth: 100, flex: 1 },
         { field: 'multiStop', headerName: t('multiStop'), valueGetter: (params: GridValueGetterParams) => `${params.row.multiStop || ''} ${t(params.row.currency)}`, minWidth: 100, flex: 0.75 },
         { field: 'containersType', headerName: t('containers'), renderCell: (params: GridRenderCellParams) => {
             return (
@@ -122,7 +122,7 @@ function Haulages() {
             const response = await getContactGetContacts({query: { category: "SUPPLIERS", pageSize: 1000 }});
             if (response !== null && response !== undefined) {
                 // Removing duplicates from client array
-                setClients(response.data?.data?.filter((obj: any, index: number, self: any) => index === self.findIndex((o: any) => o.contactName === obj.contactName)));
+                //setClients(response.data?.data?.filter((obj: any, index: number, self: any) => index === self.findIndex((o: any) => o.contactName === obj.contactName)));
             }
         }
         catch (err: any) {
@@ -146,8 +146,8 @@ function Haulages() {
         try {
             const response = await getService({query: { pageSize: 500 }});
             if (response !== null && response !== undefined) {
-                setAllServices(response.data);
-                setServices(response.data?.sort((a: any, b: any) => compareServices(a, b)).filter((obj: any) => obj.servicesTypeId.includes(2))); // Filter the services for haulages (HAULAGE = 2)
+                // setAllServices(response.data);
+                // setServices(response.data?.sort((a: any, b: any) => compareServices(a, b)).filter((obj: any) => obj.servicesTypeId.includes(2))); // Filter the services for haulages (HAULAGE = 2)
             }
         }
         catch (err: any) {
@@ -195,8 +195,8 @@ function Haulages() {
         setEmptyPickupDepot("");
         setComment("");
         setContainerTypes([]);
-        setServicesData2([]);
-        setMiscellaneousId("");
+        // setServicesData2([]);
+        // setMiscellaneousId("");
     }
     
     const getHaulage = async (id: string) => {
@@ -565,7 +565,7 @@ function Haulages() {
                                         options={containers}
                                         getOptionLabel={(option: any) => option.packageName}
                                         value={containerTypes}
-                                        onChange={(e: any, newValue: any) => {
+                                        onChange={(_: any, newValue: any) => {
                                             setContainerTypes(newValue);
                                         }}
                                         renderInput={(params: any) => <TextField {...params} sx={{ mt: 1, textTransform: "lowercase" }} />}

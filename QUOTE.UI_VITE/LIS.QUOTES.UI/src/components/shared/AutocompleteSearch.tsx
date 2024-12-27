@@ -155,7 +155,7 @@ const AutocompleteSearch: React.FC<LocationAutocompleteProps> = ({ id, value, pl
                     return "";
                 }}
                 value={value}
-                onChange={(event: any, newValue: any) => {
+                onChange={(_: any, newValue: any) => {
                     onChange(newValue);
                     if (callBack) {
                         callBack(newValue);
