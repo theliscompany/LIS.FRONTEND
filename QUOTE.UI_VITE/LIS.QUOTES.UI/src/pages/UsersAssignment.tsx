@@ -12,7 +12,7 @@ import { getAccessToken } from '../utils/functions';
 import { deleteApiAssigneeById, getApiAssignee, postApiAssignee } from '../api/client/quote';
 
 const UsersAssignment = () => {
-    const [load, setLoad] = useState<boolean>(false);
+    // const [load, setLoad] = useState<boolean>(false);
     const [showAlert, setShowAlert] = useState<boolean>(false);
     const [users, setUsers] = useState<any>(null);
     const [assignees, setAssignees] = useState<any>(null);
@@ -60,20 +60,20 @@ const UsersAssignment = () => {
     
     const getAssignees = async () => {
         try {
-            setLoad(true);
+            // setLoad(true);
             const response = await getApiAssignee();
             if (response.data) {
                 setAssignees(response.data);
-                setLoad(false);
+                // setLoad(false);
                 // Then I can load users
                 loadUsers();
             }
-            else {
-                setLoad(false);
-            }
+            // else {
+            //     setLoad(false);
+            // }
         }
         catch (err: any) {
-            setLoad(false);
+            // setLoad(false);
             console.log(err);
         }
     }
@@ -94,12 +94,12 @@ const UsersAssignment = () => {
             }
             else {
                 setShowAlert(true);
-                setLoad(false);
+                // setLoad(false);
             }
         })
         .catch(() => { 
             setShowAlert(true);
-            setLoad(false);
+            // setLoad(false);
         });
     }
     
@@ -114,7 +114,7 @@ const UsersAssignment = () => {
         var assignee = assignees.find((user: any) => user.email === email);
         if (assignee) {
             try {
-                setLoad(true);
+                // setLoad(true);
                 const response = await deleteApiAssigneeById({path: {id: assignee.id}});
                 if (response !== null && response !== undefined) {
                     enqueueSnackbar(t('operationSuccess'), { variant: "info", anchorOrigin: { horizontal: "right", vertical: "top"} });
@@ -126,12 +126,12 @@ const UsersAssignment = () => {
                     // setLoad(false);
                 }  
                 else {
-                    setLoad(false);
+                    // setLoad(false);
                 }
             }
             catch (err: any) {
                 console.log(err);
-                setLoad(false);
+                // setLoad(false);
             }
         }
         else {

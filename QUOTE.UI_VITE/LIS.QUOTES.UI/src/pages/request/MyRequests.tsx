@@ -75,6 +75,7 @@ const MyRequests = () => {
             console.log("Auxlist", assigneesList);
             console.log("Auxass", auxAssignee);
             if (auxAssignee !== undefined) {
+                setCurrentUser(auxAssignee)
                 const response: any = await getApiRequest({query: {AssigneeId: auxAssignee.id}});
                 if (response !== null && response.code !== undefined && response.data !== undefined) {
                     setLoad(false);

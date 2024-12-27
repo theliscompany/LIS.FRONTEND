@@ -19,7 +19,7 @@ import { getPorts, getProduct } from '../../api/client/transport';
 // @ts-ignore
 
 const Request = () => {
-    const [load, setLoad] = useState<boolean>(false);
+    // const [load, setLoad] = useState<boolean>(false);
     const [loadAssignees, setLoadAssignees] = useState<boolean>(true);
     const [requestData, setRequestData] = useState<any>(null);
     const [email, setEmail] = useState<string>("");
@@ -39,9 +39,9 @@ const Request = () => {
     const [quantity, setQuantity] = useState<number>(1);
     const [containersSelection, setContainersSelection] = useState<any>([]);
     const [unitsSelection, setUnitsSelection] = useState<any>([]);
-    const [packagesSelection, setPackagesSelection] = useState<any>([]);    
+    // const [packagesSelection, setPackagesSelection] = useState<any>([]);    
     const [portDestination, setPortDestination] = useState<any>(null);
-    const [portDeparture, setPortDeparture] = useState<any>(null);
+    // const [portDeparture, setPortDeparture] = useState<any>(null);
     const [loadingCity, setLoadingCity] = useState<any>(null);
     const [products, setProducts] = useState<any>(null);
     const [hscodes, setHSCodes] = useState<any>(null);
@@ -62,7 +62,7 @@ const Request = () => {
     
     function initializeSeaPorts() {
         var auxArray = [];
-        for (const [key, value] of Object.entries(seaPorts)) {
+        for (const [value] of Object.entries(seaPorts)) {
             if (value) {
                 let result = value as any;
                 auxArray.push({
@@ -110,9 +110,9 @@ const Request = () => {
 
     useEffect(() => {
         if (ports !== null && products !== null && requestData !== null) {
-            const closestDeparturePort = findClosestSeaPort(parseLocation(requestData.departure), ports);
+            // const closestDeparturePort = findClosestSeaPort(parseLocation(requestData.departure), ports);
             const closestArrivalPort = findClosestSeaPort(parseLocation(requestData.arrival), ports);
-            setPortDeparture(closestDeparturePort);
+            // setPortDeparture(closestDeparturePort);
             setPortDestination(closestArrivalPort);
             setPorts1(sortByCloseness(parseLocation(requestData.departure), ports));
             setPorts2(sortByCloseness(parseLocation(requestData.arrival), ports));
@@ -224,15 +224,15 @@ const Request = () => {
                 setMessage(response.data.detail);
                 setAssignedManager(response.data.assigneeId !== null && response.data.assigneeId !== "" ? response.data.assigneeId : "");
                 setTrackingNumber(response.data.trackingNumber);                        
-                setLoad(false);
+                // setLoad(false);
             }
             else {
-                setLoad(false);
+                // setLoad(false);
             }
         }
         catch (e: any) {
             console.log(e);
-            setLoad(false);
+            // setLoad(false);
         }
     }
     
@@ -242,7 +242,7 @@ const Request = () => {
             
         var auxUnits = [];
         if (packingType === "Breakbulk/LCL") {
-            auxUnits = packagesSelection;
+            // auxUnits = packagesSelection;
         }
         else if (packingType === "Unit RoRo") {
             auxUnits = unitsSelection;
@@ -294,8 +294,8 @@ const Request = () => {
 
     function getClosestDeparture(value: any) {
         if (value !== null && value !== undefined) {
-            const closest = findClosestSeaPort(value, ports);
-            setPortDeparture(closest);
+            // const closest = findClosestSeaPort(value, ports);
+            // setPortDeparture(closest);
             setLoadingCity(value);
             setPorts1(sortByCloseness(value, ports));
         }

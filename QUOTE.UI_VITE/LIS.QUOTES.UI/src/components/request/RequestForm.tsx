@@ -159,7 +159,7 @@ const RequestForm = (props: any) => {
                                             renderInput={(params: any) => <TextField placeholder="Machinery, Household goods, etc" {...params} sx={{ textTransform: "lowercase" }} />}
                                             value={props.tags}
                                             size="small"
-                                            onChange={(e: any, value: any) => { props.setTags(value); }}
+                                            onChange={(_, value: any) => { props.setTags(value); }}
                                             sx={{ mt: 1 }}
                                             fullWidth
                                             disabled={!props.canEdit}
@@ -192,7 +192,7 @@ const RequestForm = (props: any) => {
                                             renderInput={(params: any) => <TextField placeholder="Live animals, Cereals, etc" {...params} sx={{ textTransform: "lowercase" }} />}
                                             value={props.tags}
                                             size="small"
-                                            onChange={(e: any, value: any) => { props.setTags(value); }}
+                                            onChange={(_, value: any) => { props.setTags(value); }}
                                             sx={{ mt: 1 }}
                                             fullWidth
                                             disabled={!props.canEdit}
@@ -232,7 +232,7 @@ const RequestForm = (props: any) => {
                                                             edge="end"
                                                             disabled={!props.canEdit}  
                                                             onClick={() => {
-                                                                props.setContainersSelection((prevItems: any) => prevItems.filter((item: any, i: number) => i !== index));
+                                                                props.setContainersSelection((prevItems: any) => prevItems.filter((_: any, i: number) => i !== index));
                                                             }}
                                                         >
                                                             <Delete />

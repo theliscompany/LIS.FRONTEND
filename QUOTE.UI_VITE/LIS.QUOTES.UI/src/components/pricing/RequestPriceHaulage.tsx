@@ -46,31 +46,31 @@ function RequestPriceHaulage(props: any) {
     const { accounts } = useMsal();
     const account = useAccount(accounts[0] || {});
     
-    // const postEmail = async(from: string, to: string, subject: string, htmlContent: string) => {
-    //     const form = new FormData();
-    //     form.append('From', from);
-    //     form.append('To', to);
-    //     form.append('Subject', subject);
-    //     form.append('HtmlContent', htmlContent);
+    const postEmail = async(from: string, to: string, subject: string, htmlContent: string) => {
+        const form = new FormData();
+        form.append('From', from);
+        form.append('To', to);
+        form.append('Subject', subject);
+        form.append('HtmlContent', htmlContent);
         
-    //     fetch(protectedResources.apiLisQuotes.endPoint+'/Email', {
-    //         method: 'POST',
-    //         headers: {
-    //             'accept': '*/*',
-    //             // 'Content-Type': 'multipart/form-data'
-    //         },
-    //         body: form
-    //     })
-    //     .then((response) => response.json())
-    //     .then((response: any) => {
-    //         if (response !== undefined && response !== null && response.code == 200) {
-    //             enqueueSnackbar(t('mailSentTo')+to, { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
-    //         }
-    //         else {
-    //             enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
-    //         }
-    //     });
-    // }
+        fetch(import.meta.env.VITE_API_LIS_QUOTE_ENDPOINT+'/Email', {
+            method: 'POST',
+            headers: {
+                'accept': '*/*',
+                // 'Content-Type': 'multipart/form-data'
+            },
+            body: form
+        })
+        .then((response) => response.json())
+        .then((response: any) => {
+            if (response !== undefined && response !== null && response.code == 200) {
+                enqueueSnackbar(t('mailSentTo')+to, { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
+            }
+            else {
+                enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+            }
+        });
+    }
 
     const sendPriceRequestHaulage = async () => {
         if (recipients.length !== 0) {
@@ -96,7 +96,7 @@ function RequestPriceHaulage(props: any) {
             for (var i=0; i < selectedMails.length; i++) {
                 console.log("Mail sent to : "+selectedMails[i]);
                 enqueueSnackbar(t('mailSentTo')+selectedMails[i], { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
-                // postEmail("pricing@omnifreight.eu", selectedMails.join(','), subject, "<div style='font-family: Verdana;'>"+rteRef.current?.editor?.getHTML()+"</div>"+footer);    
+                postEmail("pricing@omnifreight.eu", selectedMails.join(','), subject, "<div style='font-family: Verdana;'>"+rteRef.current?.editor?.getHTML()+"</div>"+footer);    
             }
         }
         else {

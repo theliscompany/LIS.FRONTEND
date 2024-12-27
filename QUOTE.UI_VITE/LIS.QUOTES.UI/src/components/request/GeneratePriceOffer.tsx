@@ -52,7 +52,7 @@ const GeneratePriceOffer = (props: any) => {
         
     const [haulages, setHaulages] = useState<any>(null);
     const [seafreights, setSeafreights] = useState<any>(null);
-    const [allSeafreights, setAllSeafreights] = useState<any>(null);
+    // const [allSeafreights, setAllSeafreights] = useState<any>(null);
     const [miscs, setMiscs] = useState<any>([]); // Seafreight Miscs
     const [miscsHaulage, setMiscsHaulage] = useState<any>([]);
     const [generalMiscs, setGeneralMiscs] = useState<any>(null);
@@ -73,7 +73,7 @@ const GeneratePriceOffer = (props: any) => {
     const [modalFile, setModalFile] = useState<boolean>(false);
     const [modalOffer, setModalOffer] = useState<boolean>(false);
     
-    const [loadCurrentOffer, setLoadCurrentOffer] = useState<boolean>(false);
+    // const [loadCurrentOffer, setLoadCurrentOffer] = useState<boolean>(false);
     const [currentOffer, setCurrentOffer] = useState<any>(null);
     const [files, setFiles] = useState<any>(null);
     const [fileValue, setFileValue] = useState<File[] | undefined>(undefined);    
@@ -229,6 +229,8 @@ const GeneratePriceOffer = (props: any) => {
     
     useEffect(() => {
         console.log("Commm: ", props.commodities);
+        setFiles([]);
+        setMailLanguage(mailLanguage);
         if (props.commodities !== null && props.commodities !== undefined && props.commodities.length > 0) {
             if (validateObjectHSCODEFormat(props.commodities[0])) {
                 setValueSpecifics("hscodes");
@@ -586,7 +588,7 @@ const GeneratePriceOffer = (props: any) => {
             if (auxPortDeparture !== undefined && auxPortDeparture !== null && formState.portDestination !== undefined && formState.portDestination !== null) {
                 const response: any = await getApiPricingSeaFreightsOffersRequest({query: {DeparturePortId: auxPortDeparture.portId, DestinationPortId: formState.portDestination.portId, ContainerTypesId: containersFormatted}});
                 var myContainers = containersSelection.map((elm: any) => elm.container);
-                setAllSeafreights(response.data);
+                // setAllSeafreights(response.data);
                 setSeafreights(response.data.filter((elm: any) => myContainers.includes(elm.containers[0].container.packageName)).map((elm: any) => { return {...elm, defaultContainer: elm.containers[0].container.packageName}}));
             }
             else {
@@ -741,7 +743,7 @@ const GeneratePriceOffer = (props: any) => {
                     changeStatus("Valider");
                     
                     setCurrentOffer(response.data);
-                    setLoadCurrentOffer(true);
+                    // setLoadCurrentOffer(true);
                     setModalOffer(true);
                 }
                 else {
@@ -1190,7 +1192,7 @@ const GeneratePriceOffer = (props: any) => {
                                                         disabled={true}
                                                         sx={{ mt: 1 }}
                                                         renderInput={(params: any) => <TextField {...params} />}
-                                                        onChange={(e: any, value: any) => { 
+                                                        onChange={(_, value: any) => { 
                                                             setFormState({...formState, portDeparture: value});
                                                         }}
                                                         fullWidth
@@ -1222,7 +1224,7 @@ const GeneratePriceOffer = (props: any) => {
                                                         size="small"
                                                         sx={{ mt: 1 }}
                                                         renderInput={(params: any) => <TextField {...params} />}
-                                                        onChange={(e: any, value: any) => {  
+                                                        onChange={(_, value: any) => {  
                                                             setFormState({...formState, portDestination: value});
                                                             // setPortDestination(value); 
                                                         }}
@@ -1563,7 +1565,7 @@ const GeneratePriceOffer = (props: any) => {
                                                                         <Button 
                                                                             variant="contained" color="inherit" sx={whiteButtonStyles} 
                                                                             style={{ marginBottom: 16 }}
-                                                                            onClick={() => { setFormState({...formState, options: formState.options.filter((opt: any, i: number) => i !== id)}); }}
+                                                                            onClick={() => { setFormState({...formState, options: formState.options.filter((_: any, i: number) => i !== id)}); }}
                                                                         >
                                                                             {t('deleteOption')}
                                                                         </Button>
@@ -1884,7 +1886,7 @@ const GeneratePriceOffer = (props: any) => {
                                                                 value={formState.files}
                                                                 options={files}
                                                                 fullWidth
-                                                                onChange={(e: any, value: any) => { 
+                                                                onChange={(_, value: any) => { 
                                                                     setFormState({...formState, files: value});
                                                                 }}
                                                                 renderInput={(params: any) => <TextField {...params} label="" />}

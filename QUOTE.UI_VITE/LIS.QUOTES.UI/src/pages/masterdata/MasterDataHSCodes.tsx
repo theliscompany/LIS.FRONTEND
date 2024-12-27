@@ -14,7 +14,7 @@ const MasterDataHSCodes: any = () => {
     
     const [products, setHSCodes] = useState<any>(null);
     const [loadResults, setLoadResults] = useState<boolean>(true);
-    const [loadEdit, setLoadEdit] = useState<boolean>(false);
+    // const [loadEdit, setLoadEdit] = useState<boolean>(false);
     const [modal, setModal] = useState<boolean>(false);
     // const [testName, setTestName] = useState<string>("");
     const [category, setCategory] = useState<string>("");
@@ -27,7 +27,7 @@ const MasterDataHSCodes: any = () => {
         setLoadResults(true);
         try {
             const codes: any = await getApiHsCodeLis();
-            setHSCodes(codes.data.data);
+            setHSCodes(codes.data);
             setLoadResults(false);
         }
         catch (err: unknown) {
@@ -77,7 +77,6 @@ const MasterDataHSCodes: any = () => {
         if (category !== "" && descriptionFr !== "" && descriptionEn !== "" && descriptionNl !== "") {
             try {
                 var dataSent: HSCodeLIS;
-                var response = null;
                 if (currentEditId !== "") {
                     dataSent = {
                         "hS_Code": Number(currentEditId),
@@ -86,7 +85,7 @@ const MasterDataHSCodes: any = () => {
                         "product_description_En": descriptionEn,
                         "product_description_NL": descriptionNl,
                     };
-                    response = await putApiHsCodeLisById({body: dataSent, path: {id: Number(currentEditId)}});
+                    await putApiHsCodeLisById({body: dataSent, path: {id: Number(currentEditId)}});
                 }
                 else {
                     dataSent = {
@@ -95,7 +94,7 @@ const MasterDataHSCodes: any = () => {
                         "product_description_En": descriptionEn,
                         "product_description_NL": descriptionNl,
                     };
-                    response = await postApiHsCodeLis({body: dataSent});
+                    await postApiHsCodeLis({body: dataSent});
                 }
                 enqueueSnackbar(currentEditId === "" ? t('hscodeAdded') : t('hscodeEdited'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
                 getHSCodesService();
@@ -193,7 +192,7 @@ const MasterDataHSCodes: any = () => {
                 </BootstrapDialogTitle>
                 <DialogContent dividers>
                     {
-                        loadEdit === false ?
+                        true ? // loadEdit === false ?
                         <Grid container spacing={2}>
                             {/* <Grid item xs={12}>
                                 <InputLabel htmlFor="test-name" sx={inputLabelStyles}>HSCode name</InputLabel>

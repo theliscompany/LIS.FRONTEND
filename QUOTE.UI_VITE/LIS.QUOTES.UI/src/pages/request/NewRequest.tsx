@@ -27,8 +27,8 @@ const NewRequest = () => {
     const [assignees, setAssignees] = useState<any>(null);
     const [containerType, setContainerType] = useState<string>("20' Dry");
     const [quantity, setQuantity] = useState<number>(1);
-    const [unitsSelection, setUnitsSelection] = useState<any>([]);
-    const [packagesSelection, setPackagesSelection] = useState<any>([]);
+    // const [unitsSelection, setUnitsSelection] = useState<any>([]);
+    // const [packagesSelection, setPackagesSelection] = useState<any>([]);
     const [containers, setContainers] = useState<any>(null);
     const [products, setProducts] = useState<any>(null);
     const [hscodes, setHSCodes] = useState<any>(null);
@@ -152,13 +152,13 @@ const NewRequest = () => {
         if (formState.phone !== "" && formState.email !== "" && formState.arrival !== null && formState.departure !== null && formState.containersSelection.length !== 0 && formState.clientNumber !== null) {
             if (validMail(formState.email)) {
                 setLoad(true);
-                var auxUnits = [];
-                if (formState.packingType === "Breakbulk/LCL") {
-                    auxUnits = packagesSelection;
-                }
-                else if (formState.packingType === "Unit RoRo") {
-                    auxUnits = unitsSelection;
-                }
+                // var auxUnits = [];
+                // if (formState.packingType === "Breakbulk/LCL") {
+                //     auxUnits = packagesSelection;
+                // }
+                // else if (formState.packingType === "Unit RoRo") {
+                //     auxUnits = unitsSelection;
+                // }
                 var postcode1 = formState.departure.postalCode !== null && formState.departure.postalCode !== undefined ? formState.departure.postalCode : "";
                 var postcode2 = formState.arrival.postalCode !== null && formState.arrival.postalCode !== undefined ? formState.arrival.postalCode : "";
                 var myHeaders = new Headers();
@@ -174,18 +174,18 @@ const NewRequest = () => {
                         cargoType: 0,
                         clientNumber: formState.clientNumber !== null ? String(formState.clientNumber.contactNumber)+", "+formState.clientNumber.contactName : null,
                         packingType: formState.packingType,
-                        containers: formState.containersSelection.map((elm: any, i: number) => { return { 
+                        containers: formState.containersSelection.map((elm: any) => { return { 
                             id: containers.find((item: any) => item.packageName === elm.container).packageId, 
                             containers: elm.container, 
                             quantity: elm.quantity, 
                         } }),
-                        units: auxUnits.map((elm: any, i: number) => { return { 
-                            id: i, 
-                            name: elm.name, 
-                            weight: elm.weight, 
-                            dimension: elm.dimensions, 
-                            quantity: elm.quantity, 
-                        } }),
+                        // units: auxUnits.map((elm: any, i: number) => { return { 
+                        //     id: i, 
+                        //     name: elm.name, 
+                        //     weight: elm.weight, 
+                        //     dimension: elm.dimensions, 
+                        //     quantity: elm.quantity, 
+                        // } }),
                         quantity: Number(quantity),
                         detail: formState.message,
                         // tags: formState.tags.length !== 0 ? formState.tags.map((elm: any) => elm.productName).join(',') : null,
@@ -211,7 +211,7 @@ const NewRequest = () => {
                         enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
                     }
                 })
-                .catch(error => { 
+                .catch(() => { 
                     setLoad(false);
                     enqueueSnackbar(t('errorHappenedRequest'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
                 });        
@@ -337,7 +337,7 @@ const NewRequest = () => {
                                                     sx={{ border: "1px solid #e5e5e5" }}
                                                     secondaryAction={
                                                         <IconButton edge="end" onClick={() => {
-                                                            handleChangeFormState(formState.containersSelection.filter((item: any, i: number) => i !== index), "containersSelection");
+                                                            handleChangeFormState(formState.containersSelection.filter((_: any, i: number) => i !== index), "containersSelection");
                                                         }}>
                                                             <DeleteIcon />
                                                         </IconButton>
@@ -390,7 +390,7 @@ const NewRequest = () => {
                                             disableCloseOnSelect
                                             renderInput={(params: any) => <TextField placeholder="Machinery, Household goods, etc" {...params} sx={{ textTransform: "lowercase" }} />}
                                             value={formState.tags}
-                                            onChange={(e: any, value: any) => { 
+                                            onChange={(_, value: any) => { 
                                                 setFormState({ ...formState, "tags": value });
                                             }}
                                             sx={{ mt: 1 }}
@@ -424,7 +424,7 @@ const NewRequest = () => {
                                             disableCloseOnSelect
                                             renderInput={(params: any) => <TextField placeholder="Live animals, Cereals, etc" {...params} sx={{ textTransform: "lowercase" }} />}
                                             value={formState.tags}
-                                            onChange={(e: any, value: any) => { 
+                                            onChange={(_, value: any) => { 
                                                 setFormState({ ...formState, "tags": value });
                                             }}
                                             sx={{ mt: 1 }}

@@ -153,7 +153,7 @@ const CompareOptions = (props: any) => {
                             options={props.options}
                             fullWidth
                             disabled
-                            onChange={(e: any, value: any) => { 
+                            onChange={(_, value: any) => { 
                                 console.log(value);
                                 setOption1(value); 
                             }}
@@ -174,7 +174,7 @@ const CompareOptions = (props: any) => {
                             options={props.options}
                             fullWidth
                             disabled
-                            onChange={(e: any, value: any) => { 
+                            onChange={(_, value: any) => { 
                                 console.log(value);
                                 setOption2(value); 
                             }}
@@ -195,7 +195,7 @@ const CompareOptions = (props: any) => {
                             options={props.options}
                             fullWidth
                             disabled
-                            onChange={(e: any, value: any) => { 
+                            onChange={(_, value: any) => { 
                                 console.log(value);
                                 setOption3(value); 
                             }}

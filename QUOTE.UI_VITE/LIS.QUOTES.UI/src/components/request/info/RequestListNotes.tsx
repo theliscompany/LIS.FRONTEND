@@ -75,7 +75,7 @@ const RequestListNotes = (props: any) => {
                                 </TableHead>
                                 <TableBody>
                                     {
-                                        notes.reverse().map((row: any, i: number) => (
+                                        notes.reverse().map((row: any) => (
                                             <TableRow key={"requestNote-"+row.id} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
                                                 <TableCell align="left">{row.id}</TableCell>
                                                 <TableCell align="left">{row.content}</TableCell>
