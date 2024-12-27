@@ -1,26 +1,23 @@
 import React, { useEffect } from 'react';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
-import { Alert, Button, Chip, Grid, IconButton, Skeleton } from '@mui/material';
+import { Alert, Button, Chip, IconButton, Skeleton } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { sizingStyles, whiteButtonStyles } from '../../utils/misc/styles';
-import { protectedResources } from '../../config/authConfig';
 import { enqueueSnackbar, SnackbarProvider } from 'notistack';
-import { useAuthorizedBackendApi } from '../../api/api';
-import { BackendService } from '../../utils/services/fetch';
 import { Link, NavLink } from 'react-router-dom';
-import { RequestResponseDto } from '../../utils/models/models';
 import { useTranslation } from 'react-i18next';
 import { useAccount, useMsal } from '@azure/msal-react';
 import { DataGrid, GridColDef, GridRenderCellParams, GridValueFormatterParams } from '@mui/x-data-grid';
 import { Edit, RestartAltOutlined } from '@mui/icons-material';
 import { colorsTypes, getCityCountry } from '../../utils/functions';
 import { statusTypes } from '../../utils/constants';
+import { getApiRequest } from '../../api/client/quote';
 
-function ValidatedRequests() {
+const ValidatedRequests = () => {
     const [requests, setRequests] = React.useState<any>(null);
     const [load, setLoad] = React.useState<boolean>(true);
     
-    const context = useAuthorizedBackendApi();
     const { instance, accounts } = useMsal();
     const account = useAccount(accounts[0] || {});
 
@@ -70,20 +67,21 @@ function ValidatedRequests() {
     }, [account, instance, account]);
 
     const loadRequests = async () => {
-        if (account && instance && account) {
+        try {
             setLoad(true);
-            
-            const response: RequestResponseDto = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisQuotes.endPoint+"/Request", context.tokenLogin);
-            if (response !== null && response.code !== undefined && response.data !== undefined) {
-                if (response.code === 200) {
-                    setLoad(false);
-                    setRequests(response.data.filter((elm: any) => elm.status === "EnCoursDeTraitement").reverse());
-                }
-                else {
-                    setLoad(false);
-                    enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
-                }
+            const response: any = await getApiRequest();
+            if (response !== null && response !== undefined) {
+                setLoad(false);
+                setRequests(response.data.data.filter((elm: any) => elm.status === "EnCoursDeTraitement").reverse());
             }
+            else {
+                setLoad(false);
+                enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+            }
+        }
+        catch (err: any) {
+            console.log(err);
+            setLoad(false);
         }
     }
 
@@ -93,7 +91,7 @@ function ValidatedRequests() {
             <Box py={2.5} sx={{ minWidth: { xs: "100vw", md: "100%" }}}>
                 <Typography variant="h5" sx={{mt: {xs: 4, md: 1.5, lg: 1.5 }}} px={5}><b>{t('pendingRequests')}</b></Typography>
                 <Grid container spacing={2} mt={0} px={5}>
-                    <Grid item xs={12}>
+                    <Grid size={{ xs: 12 }}>
                         <Button color="inherit" variant="contained" sx={whiteButtonStyles} style={{ float: "right" }} onClick={() => { loadRequests(); }}>
                             {t('reload')} <RestartAltOutlined sx={{ ml: 0.5, pb: 0.45, justifyContent: "center", alignItems: "center" }} fontSize="small" />
                         </Button>
@@ -103,7 +101,7 @@ function ValidatedRequests() {
                     {
                         !load ? 
                         <Grid container spacing={2} mt={0} px={5}>
-                            <Grid item xs={12}>
+                            <Grid size={{ xs: 12 }}>
                                 {
                                     requests !== null && requests.length !== 0 ?
                                     <Box sx={{ overflow: "hidden" }}>

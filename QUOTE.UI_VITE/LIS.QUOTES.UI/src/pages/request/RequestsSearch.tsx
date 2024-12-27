@@ -1,43 +1,20 @@
 import React, { useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 import List from '@mui/material/List';
+import { Dayjs } from 'dayjs';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
-import { Alert, Button, Grid, InputLabel, NativeSelect, Skeleton } from '@mui/material';
+import { Alert, Button, Skeleton } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import SearchIcon from '@mui/icons-material/Search';
-import { loginRequest, protectedResources } from '../../config/authConfig';
 import { enqueueSnackbar, SnackbarProvider } from 'notistack';
-import { useAuthorizedBackendApi } from '../../api/api';
-import { BackendService } from '../../utils/services/fetch';
-import { useParams } from 'react-router-dom';
-import { RequestResponseDto } from '../../utils/models/models';
 import { useTranslation } from 'react-i18next';
-import RequestViewItem from '../../components/requestsPage/RequestViewItem';
-import { useAccount, useMsal } from '@azure/msal-react';
-import SearchZone from '../../components/requestsPage/SearchZone';
-import { Dayjs } from 'dayjs';
+import RequestViewItem from '../../components/request/RequestViewItem';
+import SearchZone from '../../components/request/SearchZone';
+import { getApiRequest } from '../../api/client/quote';
 
-function createGetRequestUrl(variable1: string, variable2: string, variable3: string, variable4: string) {
-    let url = protectedResources.apiLisQuotes.endPoint+'/Request?';
-    if (variable1) {
-      url += 'departure=' + encodeURIComponent(variable1) + '&';
-    }
-    if (variable2) {
-      url += 'arrival=' + encodeURIComponent(variable2) + '&';
-    }
-    if (variable3) {
-      url += 'packingType=' + encodeURIComponent(variable3) + '&';
-    }
-    if (variable4) {
-      url += 'status=' + encodeURIComponent(variable4) + '&';
-    }
-    
-    if (url.slice(-1) === '&') {
-      url = url.slice(0, -1);
-    }
-    return url;
-}
 
-function RequestsSearch() {
+const RequestsSearch = () => {
     const [notifications, setNotifications] = React.useState<any>(null);
     const [load, setLoad] = React.useState<boolean>(true);
     const [status, setStatus] = React.useState<string>("");
@@ -49,11 +26,7 @@ function RequestsSearch() {
     const [updatedDateStart, setUpdatedDateStart] = React.useState<Dayjs | null>(null);
     const [updatedDateEnd, setUpdatedDateEnd] = React.useState<Dayjs | null>(null);
     let { search } = useParams();
-
-    const context = useAuthorizedBackendApi();
-    const { instance, accounts } = useMsal();
-    const account = useAccount(accounts[0] || {});
-
+    
     const { t } = useTranslation();
     
     const handleChangePackingType = (event: { target: { value: string } }) => {
@@ -66,50 +39,49 @@ function RequestsSearch() {
 
     useEffect(() => {
         loadRequests();
-    }, [account, instance, context]);
+    }, []);
 
     const loadRequests = async () => {
-        if (account && instance && context) {
+        try {
             setLoad(true);
-            // const token = await getAccessToken(instance, loginRequest, account);
-            // setTempToken(token);
-            
-            const response: RequestResponseDto = await (context?.service as BackendService<any>).getWithToken(search !== undefined ? protectedResources.apiLisQuotes.endPoint+"/Request?Search="+search : protectedResources.apiLisQuotes.endPoint+"/Request", context.tokenLogin);
-            if (response !== null && response.code !== undefined && response.data !== undefined) {
-                if (response.code === 200) {
-                    setLoad(false);
-                    setNotifications(response.data.reverse());
-                }
-                else {
-                    setLoad(false);
-                    enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
-                }
+            const response: any = await getApiRequest(search !== undefined ? {query: {Search: search}} : {});
+            if (response !== null && response !== undefined) {
+                setLoad(false);
+                setNotifications(response.data.reverse());
             }  
+            else {
+                setLoad(false);
+                enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+            }
+        }
+        catch (err: any) {
+            console.log(err);
+            setLoad(false);
         }
     }
 
     const searchRequests = async () => {
-        if (account && instance && context) {
+        try {
             setLoad(true);
-            
             var postcode1 = "";
             var postcode2 = "";
             var auxDeparture = departure !== null && departure !== undefined ? [departure.city.toUpperCase(),departure.country,departure.latitude,departure.longitude,postcode1].filter((val: any) => { return val !== "" }).join(', ') : "";
             var auxArrival = arrival !== null && arrival !== undefined ? [arrival.city.toUpperCase(),arrival.country,arrival.latitude,arrival.longitude,postcode2].filter((val: any) => { return val !== "" }).join(', ') : "";
             console.log(auxDeparture, auxArrival);
 
-            var requestFormatted = createGetRequestUrl(auxDeparture, auxArrival, packingType, status);
-            const response: RequestResponseDto = await (context?.service as BackendService<any>).getWithToken(requestFormatted, context.tokenLogin);
-            if (response !== null && response.code !== undefined && response.data !== undefined) {
-                if (response.code === 200) {
-                    setLoad(false);
-                    setNotifications(response.data.reverse());
-                }
-                else {
-                    setLoad(false);
-                    enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
-                }
+            const response: any = await getApiRequest({query: {Departure: auxDeparture, Arrival: auxArrival, PackingType: packingType, Status: status}});
+            if (response !== null && response !== undefined) {
+                setLoad(false);
+                setNotifications(response.data.data.reverse());
             }  
+            else {
+                setLoad(false);
+                enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+            }
+        }
+        catch (err: any) {
+            console.log(err);
+            setLoad(false);
         }
     }
 
@@ -130,13 +102,13 @@ function RequestsSearch() {
                         arrival={arrival} setArrival={setArrival}
                         packingType={packingType} handleChangePackingType={handleChangePackingType}
                         status={status} handleChangeStatus={handleChangeStatus}
-                        updatedDateStart={updatedDateStart} setUpdatedDateStart
+                        updatedDateStart={updatedDateStart} setUpdatedDateStart={setUpdatedDateStart}
                         updatedDateEnd={updatedDateEnd} setUpdatedDateEnd={setUpdatedDateEnd}
                         createdDateEnd={createdDateEnd} setCreatedDateEnd={setCreatedDateEnd}
                         createdDateStart={createdDateStart} setCreatedDateStart={setCreatedDateStart}
                     />
                     
-                    <Grid item xs={12} md={2} sx={{ display: "flex", alignItems: "end" }}>
+                    <Grid size={{ xs: 12, md: 2 }} sx={{ display: "flex", alignItems: "end" }}>
                         <Button 
                             variant="contained" 
                             color="inherit"

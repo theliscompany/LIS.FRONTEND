@@ -3,7 +3,6 @@ import './App.css'
 import { AuthenticatedTemplate, UnauthenticatedTemplate } from '@azure/msal-react'
 import Landing from './pages/Landing'
 import './locales/i18n';
-import Shipments from './pages/Shipments';
 import Layout from './layout/Layout';
 import BackendServiceProvider from './api/api';
 import MasterDataPorts from './pages/masterdata/MasterDataPorts';
@@ -21,6 +20,15 @@ import AcceptOffer from './pages/offer/AcceptOffer';
 import ManagePriceOffer from './pages/offer/ManagePriceOffer';
 import PriceOffers from './pages/offer/PriceOffers';
 import RefuseOffer from './pages/offer/RefuseOffer';
+import HandleRequest from './pages/request/HandleRequest';
+import MyRequests from './pages/request/MyRequests';
+import NewRequest from './pages/request/NewRequest';
+import Requests from './pages/request/Requests';
+import RequestsSearch from './pages/request/RequestsSearch';
+import ValidatedRequests from './pages/request/ValidatedRequests';
+import Request from './pages/request/Request';
+import Histories from './pages/Histories';
+import UsersAssignment from './pages/UsersAssignment';
 
 function App() {
 
@@ -30,8 +38,17 @@ function App() {
           <BackendServiceProvider>
             <Routes>
               <Route path='/*' element={<Layout />}>
-                <Route path='' element={<Shipments />} />
-                <Route path='ports' element={<MasterDataPorts />} />
+                <Route path='' element={<Histories />} />
+                <Route path="users" element={<UsersAssignment />} />
+								<Route path="requests" element={<Requests />} />
+								<Route path="search/:search" element={<RequestsSearch />} />
+								<Route path="search" element={<RequestsSearch />} />
+								<Route path="request/:id" element={<Request />} />
+								<Route path="handle-request/:id" element={<HandleRequest />} />
+								<Route path="new-request" element={<NewRequest />} />
+								<Route path="my-requests" element={<MyRequests />} />
+								<Route path="pending-requests" element={<ValidatedRequests />} />
+								<Route path='ports' element={<MasterDataPorts />} />
                 <Route path='products' element={<MasterDataProducts />} />
                 <Route path='services' element={<MasterDataServices />} />
                 <Route path='contacts' element={<MasterDataContacts />} />

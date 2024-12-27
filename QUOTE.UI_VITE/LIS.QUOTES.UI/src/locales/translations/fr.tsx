@@ -68,7 +68,7 @@ export const fr = {
   notAdministratorForAssign: "Vous ne pouvez pas gérer les utilisateurs car vous n'êtes pas administrateur. Veuillez contacter l'administrateur afin qu'il puisse vous accorder le rôle souhaité.",
   createRequest: "Créer la demande",
   requestNotAssignedCurrentUser: "Cette demande ne sera pas attribuée à l'utilisateur actuel, vous devez lui accorder l'autorisation dans",
-  addContainer: "Ajouter le conteneur",
+  addContainer: "Ajouter un conteneur",
   add: "Ajouter",
   generatePriceOffer: "Génerer une offre de prix",
   editRequest: "Sauvegarder la demande",
@@ -559,5 +559,15 @@ export const fr = {
   noContainersSelected: "Aucun conteneur sélectionner, veuillez sélectionner un type",
   addService: "Ajouter un service",
   createNew: "Créer un nouveau",
-  createNewService: "Créer un nouveau service"
+  createNewService: "Créer un nouveau service",
+  saveRequest: "Enregistrer la demande",
+  updateRequestStatus: "Mettre à jour le statut de la demande",
+  generalMiscs: "Services généraux",
+  selectAny: "sélectionner",
+  createMisc: "Créer un service",
+  freight: "Frêt",
+  misc: "Service",
+  youNeedToSave: "Vous devez enregistrer des options à envoyer",
+  perUnit: "par unité",
+  toEditOffer: "pour modifier l'offre"
 };

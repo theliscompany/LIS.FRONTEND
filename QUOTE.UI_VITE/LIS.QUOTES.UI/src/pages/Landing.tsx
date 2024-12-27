@@ -344,7 +344,7 @@ const Landing = () => {
                         <Grid size={{md:6, xs:12}}>
                             <InputLabel htmlFor="whatsapp-phone-number" sx={inputLabelStyles}>{t('whatsappNumber')}</InputLabel>
                             <MuiTelInput 
-                                id="whatsapp-phone-number" 
+                                id="whatsapp-phone-number" size="small" 
                                 value={phone} onChange={setPhone} 
                                 defaultCountry="TZ" preferredCountries={["TZ", "CM", "KE", "BE"]} 
                                 fullWidth sx={{ mt: 1 }}
@@ -422,7 +422,7 @@ const Landing = () => {
                         <Grid size={{xs:12, md:6}}>
                             <InputLabel htmlFor="phone-number" sx={inputLabelStyles}>{t('whatsappNumber')}</InputLabel>
                             <MuiTelInput 
-                                id="phone-number" 
+                                id="phone-number" size="small" 
                                 value={phone} onChange={setPhone} 
                                 defaultCountry="TZ" preferredCountries={["TZ", "CM", "KE", "BE"]} 
                                 fullWidth sx={{ mt: 1 }}
@@ -492,7 +492,8 @@ const Landing = () => {
                             <InputLabel htmlFor="whatsapp-number" sx={inputLabelStyles}>{t('whatsappNumber')}</InputLabel>
                             <MuiTelInput 
                                 id="whatsapp-number" 
-                                className="custom-phone-number" 
+                                className="custom-phone-number"
+                                size="small" 
                                 value={phone} 
                                 onChange={setPhone} 
                                 defaultCountry="TZ" 
