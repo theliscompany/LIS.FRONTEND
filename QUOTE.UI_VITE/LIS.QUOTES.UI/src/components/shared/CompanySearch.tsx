@@ -4,6 +4,7 @@ import { debounce } from "@mui/material/utils";
 import { useTranslation } from "react-i18next";
 import { getContactGetContacts } from "../../api/client/crm";
 import { getCategoryNames } from "../../utils/functions";
+import { CategoryEnum } from "../../api/client/shipment";
 
 interface CompanyAutocompleteProps {
     id: string;
@@ -11,7 +12,7 @@ interface CompanyAutocompleteProps {
     onChange: (value: any) => void;
     fullWidth?: boolean;
     disabled?: boolean;
-    category: number;
+    category?: CategoryEnum;
     callBack?: (value: any) => void;
 }
 
@@ -22,7 +23,7 @@ const CompanySearch: React.FC<CompanyAutocompleteProps> = ({ id, value, onChange
     const debouncedSearch = debounce(async (search: string) => {
         setLoading(true);
         try {
-            const response = await getContactGetContacts(category === 0 ? {query: {contactName: search}} : {query: {contactName: search, category: getCategoryNames(category)}});
+            const response = await getContactGetContacts(!category ? {query: {contactName: search}} : {query: {contactName: search, category: getCategoryNames(category)}});
             if (response !== null && response !== undefined) {
                 console.log(response);
                 setOptions(response.data?.data || []);

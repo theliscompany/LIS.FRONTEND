@@ -15,7 +15,7 @@ import { BootstrapDialog, BootstrapDialogTitle, BootstrapInput, actionButtonStyl
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import dayjs, { Dayjs } from 'dayjs';
-import { CategoryEnum, containerPackages, currencyOptions, haulageTypeOptions } from '../../utils/constants';
+import { containerPackages, currencyOptions, haulageTypeOptions } from '../../utils/constants';
 import { extractCityAndPostalCode, parseLocation2, sortHauliersByName } from '../../utils/functions';
 import RequestPriceHaulage from '../../components/pricing/RequestPriceHaulage';
 import CompanySearch from '../../components/shared/CompanySearch';
@@ -27,6 +27,7 @@ import { deleteApiHaulageDeleteHaulage, getApiHaulageHaulage, getApiHaulageHaula
 import { getContactGetContacts } from '../../api/client/crm';
 import { getPorts, getService } from '../../api/client/transport';
 import PortAutocomplete from '../../components/shared/PortAutocomplete';
+import { CategoryEnum } from '../../api/client/shipment';
 
 
 function Haulages() {

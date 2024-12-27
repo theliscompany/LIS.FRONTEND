@@ -336,7 +336,7 @@ function NewMiscellaneous(props: any) {
                             <Grid container spacing={2}>
                                 <Grid size={{xs:12, md:6}} mt={0.25}>
                                     <InputLabel htmlFor="supplier" sx={inputLabelStyles}>{t('supplier')}</InputLabel>
-                                    <CompanySearch id="supplier" value={supplier} onChange={setSupplier} category={0} callBack={() => console.log(supplier)} fullWidth />
+                                    <CompanySearch id="supplier" value={supplier} onChange={setSupplier} callBack={() => console.log(supplier)} fullWidth />
                                 </Grid>
                                 <Grid size={{xs:12, md:6}}>
                                     <InputLabel htmlFor="valid-until" sx={inputLabelStyles}>{t('validUntil')}</InputLabel>
