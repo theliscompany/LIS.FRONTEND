@@ -11,7 +11,7 @@ const ManagePriceOffer = () => {
 
 	const [offer, setOffer] = useState<any>(null);
 	const [offerNumber, setOfferNumber] = useState<string>("");
-	//const [content, setContent] = useState<string>("");
+	// const [content, setContent] = useState<string>("");
 	const [options, setOptions] = useState<any>(null);
 	const [files, setFiles] = useState<any>(null);
 	
@@ -34,7 +34,7 @@ const ManagePriceOffer = () => {
 				setOffer(response.data.data);
 				setOfferNumber(response.data.data.quoteOfferNumber);
 				
-				// var optionsButtons = response.data.options.map((elm: any, index: number) => {
+				// var optionsButtons = response.data.options.map((_: any, index: number) => {
 				// 	return `<a href="#" style="display:inline-block;background-color:#008089;color:#fff;padding:10px 20px;text-decoration:none" target="_blank">${t('selectOptionOffer')} #${Number(index+1)}</a>`;
 				// });
 				// var footer = `

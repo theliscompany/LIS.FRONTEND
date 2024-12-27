@@ -3,13 +3,15 @@ import { Button, Alert, DialogActions, DialogContent } from '@mui/material';
 import Skeleton from '@mui/material/Skeleton';
 import { BootstrapDialog, BootstrapDialogTitle, buttonCloseStyles } from '../../utils/misc/styles';
 import { useTranslation } from 'react-i18next';
+import { useParams } from 'react-router-dom';
+import { enqueueSnackbar } from 'notistack';
 
 const RefuseOffer = () => {
-    const [load] = useState<boolean>(true);
+    const [load, setLoad] = useState<boolean>(true);
     const [modal, setModal] = useState<boolean>(true);
-    const [isRejected] = useState<boolean>(false);
+    const [isRejected, setIsRejected] = useState<boolean>(false);
     
-    //let { id } = useParams();    
+    let { id } = useParams();    
     const { t } = useTranslation();
         
     useEffect(() => {
@@ -17,22 +19,22 @@ const RefuseOffer = () => {
     }, []);
 
     const refuseOffer = async () => {
-        // const body: any = {
-        //     id: id,
-        //     newStatus: "Rejected"
-        // };
+        const body: any = {
+            id: id,
+            newStatus: "Rejected"
+        };
 
-        // fetch(protectedResources.apiLisOffer.endPoint+"/QuoteOffer/"+id+"/approval?newStatus=Rejected", {
-        //     method: "PUT",
-        //     body: body,
-        // }).then((data: any) => {
-        //     setLoad(false);
-        //     setIsRejected(true);
-        //     enqueueSnackbar(t('priceOfferRejected'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
-        // }).catch(error => { 
-        //     setLoad(false);
-        //     enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
-        // });
+        fetch(import.meta.env.VITE_API_LIS_OFFER_ENDPOINT+"/QuoteOffer/"+id+"/approval?newStatus=Rejected", {
+            method: "PUT",
+            body: body,
+        }).then(() => {
+            setLoad(false);
+            setIsRejected(true);
+            enqueueSnackbar(t('priceOfferRejected'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
+        }).catch(() => { 
+            setLoad(false);
+            enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+        });
     }
     
     return (
