@@ -5,7 +5,6 @@ import { Autocomplete, Box, Button, DialogActions, DialogContent, InputLabel, Na
 import Grid from '@mui/material/Grid2';
 import { useTranslation } from 'react-i18next';
 import { enqueueSnackbar } from 'notistack';
-import { useAccount, useMsal } from '@azure/msal-react';
 import StarterKit from '@tiptap/starter-kit';
 import { RichTextEditor, MenuControlsContainer, MenuSelectHeading, MenuDivider, MenuButtonBold, MenuButtonItalic, MenuButtonStrikethrough, MenuButtonOrderedList, MenuButtonBulletedList, MenuSelectTextAlign, MenuButtonEditLink, MenuButtonHorizontalRule, MenuButtonUndo, MenuButtonRedo, type RichTextEditorRef, } from 'mui-tiptap';
 import AutocompleteSearch from '../shared/AutocompleteSearch';
@@ -30,21 +29,21 @@ function RequestPriceHaulage(props: any) {
     const [deliveryPort, setDeliveryPort] = useState<any>(props.loadingPort);
     
     const [hauliersData, setHauliersData] = useState<any>(null);
-    const [content, setContent] = useState<string>("");
+    // const [content, setContent] = useState<string>("");
     const [templateBase, setTemplateBase] = useState<string>("");
     
     const [templates, setTemplates] = useState<any>([]);
     const [loadTemplates, setLoadTemplates] = useState<boolean>(false);
     const [selectedTemplate, setSelectedTemplate] = useState<string>(defaultTemplate);
     
-    const [mailLanguage, setMailLanguage] = useState<string>("fr");
+    // const [mailLanguage, setMailLanguage] = useState<string>("fr");
     const [load, setLoad] = useState<boolean>(false);
     const [loadTemplate, setLoadTemplate] = useState<boolean>(false);
 
     const rteRef = useRef<RichTextEditorRef>(null);
     
-    const { accounts } = useMsal();
-    const account = useAccount(accounts[0] || {});
+    // const { accounts } = useMsal();
+    // const account = useAccount(accounts[0] || {});
     
     // const postEmail = async(from: string, to: string, subject: string, htmlContent: string) => {
     //     const form = new FormData();
@@ -74,25 +73,25 @@ function RequestPriceHaulage(props: any) {
 
     const sendPriceRequestHaulage = async () => {
         if (recipients.length !== 0) {
-            var myEmails = ["penayecyrille@gmail.com", "cyrille.penaye@omnifreight.eu"];
+            // var myEmails = ["penayecyrille@gmail.com", "cyrille.penaye@omnifreight.eu"];
             var selectedMails = recipients.map((elm: any) => elm.email);
             console.log(selectedMails);
 
-            var footer = `
-            <div style="font-family: Verdana; padding-top: 35px;">
-                <div>${account?.name}</div>
-                <div style="margin-top: 5px;"><a target="_blank" href="www.omnifreight.eu">www.omnifreight.eu</a></div>
-                <div style="padding-bottom: 10px;"><a target="_blank" href="http://www.facebook.com/omnifreight">http://www.facebook.com/omnifreight</a></div>
-                <div>Italiëlei 211</div>
-                <div>2000 Antwerpen</div>
-                <div>Belgium</div>
-                <div>E-mail: ${account?.username}</div>
-                <div>Tel +32.3.295.38.82</div>
-                <div>Fax +32.3.295.38.77</div>
-                <div>Whatsapp +32.494.40.24.25</div>
-                <img src="http://www.omnifreight.eu/Images/omnifreight_logo.jpg" style="max-width: 200px;">
-            </div>
-            `;
+            // var footer = `
+            // <div style="font-family: Verdana; padding-top: 35px;">
+            //     <div>${account?.name}</div>
+            //     <div style="margin-top: 5px;"><a target="_blank" href="www.omnifreight.eu">www.omnifreight.eu</a></div>
+            //     <div style="padding-bottom: 10px;"><a target="_blank" href="http://www.facebook.com/omnifreight">http://www.facebook.com/omnifreight</a></div>
+            //     <div>Italiëlei 211</div>
+            //     <div>2000 Antwerpen</div>
+            //     <div>Belgium</div>
+            //     <div>E-mail: ${account?.username}</div>
+            //     <div>Tel +32.3.295.38.82</div>
+            //     <div>Fax +32.3.295.38.77</div>
+            //     <div>Whatsapp +32.494.40.24.25</div>
+            //     <img src="http://www.omnifreight.eu/Images/omnifreight_logo.jpg" style="max-width: 200px;">
+            // </div>
+            // `;
             for (var i=0; i < selectedMails.length; i++) {
                 console.log("Mail sent to : "+selectedMails[i]);
                 enqueueSnackbar(t('mailSentTo')+selectedMails[i], { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
@@ -295,7 +294,7 @@ function RequestPriceHaulage(props: any) {
                                                     value={recipients}
                                                     sx={{ mt: 1 }}
                                                     renderInput={(params: any) => <TextField placeholder="Carriers recipients" {...params} sx={{ textTransform: "lowercase" }} />}
-                                                    onChange={(e: any, value: any) => { setRecipients(value); }}
+                                                    onChange={(_: any, value: any) => { setRecipients(value); }}
                                                     fullWidth
                                                 />
                                             </> : <Skeleton />

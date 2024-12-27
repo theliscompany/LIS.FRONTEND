@@ -79,19 +79,19 @@ const MasterDataProducts: any = () => {
         if (testName !== "") {
             try {
                 var dataSent: ProductViewModel;
-                var response = null;
+                //var response = null;
                 if (currentEditId !== "") {
                     dataSent = {
                         "productId": Number(currentEditId),
                         "productName": testName,
                     };
-                    response = await putProductById({body: dataSent, path: {id: Number(currentEditId)}});
+                     await putProductById({body: dataSent, path: {id: Number(currentEditId)}});
                 }
                 else {
                     dataSent = {
                         "productName": testName,
                     };
-                    response = await postProduct({ body: dataSent });
+                    await postProduct({ body: dataSent });
                 }
                 enqueueSnackbar(currentEditId === "" ? t('productAdded') : t('productEdited'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
                 getProductsService();

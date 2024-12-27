@@ -55,7 +55,7 @@ const CompanySearch: React.FC<CompanyAutocompleteProps> = ({ id, value, onChange
                     return "";
                 }}
                 value={value}
-                onChange={(event, newValue) => {
+                onChange={(_, newValue) => {
                     onChange(newValue);
                     if (callBack) {
                         callBack(newValue);

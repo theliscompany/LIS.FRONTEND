@@ -7,7 +7,7 @@ import { useTranslation } from "react-i18next";
 import { useAccount, useMsal } from "@azure/msal-react";
 import { stringAvatar } from "../utils/functions";
 import NavigationLink from "../components/shared/NavigationLink";
-import { Add, AnchorOutlined, AssignmentOutlined, AttachFileOutlined, AutoFixHigh, ChevronLeft, ChevronRight, ContactsOutlined, DirectionsBoat, DirectionsBoatOutlined, ExpandLess, ExpandMore, FirstPage, FolderOutlined, Groups, Home, Inventory2, InventoryOutlined, LastPage, LocalShipping, Logout, MenuOutlined, Notifications, People, Portrait, RequestQuoteOutlined, RoomServiceOutlined, Search, SettingsOutlined, TaskAltOutlined, TextSnippetOutlined } from "@mui/icons-material";
+import { Add, AnchorOutlined, AssignmentOutlined, AttachFileOutlined, AutoFixHigh, ChevronRight, ContactsOutlined, DirectionsBoat, DirectionsBoatOutlined, ExpandMore, FirstPage, FolderOutlined, Groups, Home, Inventory2, InventoryOutlined, LastPage, LocalShipping, Logout, MenuOutlined, Notifications, People, Portrait, RequestQuoteOutlined, RoomServiceOutlined, Search, SettingsOutlined, TaskAltOutlined, TextSnippetOutlined } from "@mui/icons-material";
 
 const drawerWidth = 220;
 

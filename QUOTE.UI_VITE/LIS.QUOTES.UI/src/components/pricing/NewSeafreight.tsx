@@ -10,7 +10,6 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { CategoryEnum, currencyOptions } from '../../utils/constants';
 import CompanySearch from '../shared/CompanySearch';
 import { Dayjs } from 'dayjs';
-import { compareServices } from '../../utils/functions';
 import ServicesTable from '../pricing/ServicesTable';
 import NewContact from '../shared/NewContact';
 import NewPort from '../shared/NewPort';
@@ -20,7 +19,7 @@ import { getService } from '../../api/client/transport';
 import PortAutocomplete from '../shared/PortAutocomplete';
 
 const NewSeafreight = (props: any) => {
-    const [services, setServices] = useState<any>(null);
+    //const [services, setServices] = useState<any>(null);
     const [allServices, setAllServices] = useState<any>(null);
     const [carrier, setCarrier] = useState<any>(null);
     const [carrierAgent, setCarrierAgent] = useState<any>(null);
@@ -64,7 +63,7 @@ const NewSeafreight = (props: any) => {
             if (response !== null && response !== undefined) {
                 console.log(response.data?.sort((a: any, b: any) => b.serviceName - a.serviceName));
                 setAllServices(response.data);
-                setServices(response.data?.sort((a: any, b: any) => compareServices(a, b)).filter((obj: any) => obj.servicesTypeId.includes(1))); // Filter the services for seafreights (SEAFREIGHT = 1)
+                //setServices(response.data?.sort((a: any, b: any) => compareServices(a, b)).filter((obj: any) => obj.servicesTypeId.includes(1))); // Filter the services for seafreights (SEAFREIGHT = 1)
             }
         }
         catch (err: any) {
@@ -209,7 +208,7 @@ const NewSeafreight = (props: any) => {
                                 options={props.containers}
                                 getOptionLabel={(option: any) => option.packageName ? option.packageName : ""}
                                 value={containerTypes}
-                                onChange={(event: any, newValue: any) => {
+                                onChange={(_: any, newValue: any) => {
                                     setContainerTypes(newValue);
                                 }}
                                 // disabled={currentEditId !== ""}

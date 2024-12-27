@@ -1,23 +1,23 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { useAccount, useMsal } from '@azure/msal-react';
+// import { useAccount, useMsal } from '@azure/msal-react';
 import { Typography, Box, Skeleton } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import PriceOffer from '../../components/offer/PriceOffer';
 import { getQuoteOffer } from '../../api/client/offer';
 
-const ManagePriceOffer = (props: any) => {
+const ManagePriceOffer = () => {
 	const { t } = useTranslation();
 
 	const [offer, setOffer] = useState<any>(null);
 	const [offerNumber, setOfferNumber] = useState<string>("");
-	const [content, setContent] = useState<string>("");
+	//const [content, setContent] = useState<string>("");
 	const [options, setOptions] = useState<any>(null);
 	const [files, setFiles] = useState<any>(null);
 	
 	let { id } = useParams();
-	const { accounts } = useMsal();
-	const account = useAccount(accounts[0] || {});
+	// const { accounts } = useMsal();
+	// const account = useAccount(accounts[0] || {});
 	
 	useEffect(() => {
 		loadOffer();
@@ -34,27 +34,27 @@ const ManagePriceOffer = (props: any) => {
 				setOffer(response.data);
 				setOfferNumber(response.data.quoteOfferNumber);
 				
-				var optionsButtons = response.data.options.map((elm: any, index: number) => {
-					return `<a href="#" style="display:inline-block;background-color:#008089;color:#fff;padding:10px 20px;text-decoration:none" target="_blank">${t('selectOptionOffer')} #${Number(index+1)}</a>`;
-				});
-				var footer = `
-				<div>${account?.name}</div>
-				<div style="font-family: Verdana; padding-top: 30px; padding-bottom: 20px;">
-					${optionsButtons}
-					<a href="${process.env.REACT_APP_ORIGIN_URL+"/refuseOffer/"+response.data.id}" style="display:inline-block;background-color:#F2F2F2;color:#008089;padding:10px 20px;text-decoration:none" target="_blank">${t('refuseOffers')}</a>
-					<div style="margin-top: 15px;"><a target="_blank" href="www.omnifreight.eu">www.omnifreight.eu</a></div>
-					<div style="padding-bottom: 10px;"><a target="_blank" href="http://www.facebook.com/omnifreight">http://www.facebook.com/omnifreight</a></div>
-					<div>Italiëlei 211</div>
-					<div>2000 Antwerpen</div>
-					<div>Belgium</div>
-					<div>E-mail: transport@omnifreight.eu</div>
-					<div>Tel +32.3.295.38.82</div>
-					<div>Fax +32.3.295.38.77</div>
-					<div>Whatsapp +32.494.40.24.25</div>
-					<img src="http://www.omnifreight.eu/Images/omnifreight_logo.jpg" style="max-width: 200px;">
-				</div>
-				`;
-				setContent(response.data.comment);
+				// var optionsButtons = response.data.options.map((elm: any, index: number) => {
+				// 	return `<a href="#" style="display:inline-block;background-color:#008089;color:#fff;padding:10px 20px;text-decoration:none" target="_blank">${t('selectOptionOffer')} #${Number(index+1)}</a>`;
+				// });
+				// var footer = `
+				// <div>${account?.name}</div>
+				// <div style="font-family: Verdana; padding-top: 30px; padding-bottom: 20px;">
+				// 	${optionsButtons}
+				// 	<a href="${process.env.REACT_APP_ORIGIN_URL+"/refuseOffer/"+response.data.id}" style="display:inline-block;background-color:#F2F2F2;color:#008089;padding:10px 20px;text-decoration:none" target="_blank">${t('refuseOffers')}</a>
+				// 	<div style="margin-top: 15px;"><a target="_blank" href="www.omnifreight.eu">www.omnifreight.eu</a></div>
+				// 	<div style="padding-bottom: 10px;"><a target="_blank" href="http://www.facebook.com/omnifreight">http://www.facebook.com/omnifreight</a></div>
+				// 	<div>Italiëlei 211</div>
+				// 	<div>2000 Antwerpen</div>
+				// 	<div>Belgium</div>
+				// 	<div>E-mail: transport@omnifreight.eu</div>
+				// 	<div>Tel +32.3.295.38.82</div>
+				// 	<div>Fax +32.3.295.38.77</div>
+				// 	<div>Whatsapp +32.494.40.24.25</div>
+				// 	<img src="http://www.omnifreight.eu/Images/omnifreight_logo.jpg" style="max-width: 200px;">
+				// </div>
+				// `;
+				// setContent(response.data.comment);
 				// setLoad(false);
 			}
 		}

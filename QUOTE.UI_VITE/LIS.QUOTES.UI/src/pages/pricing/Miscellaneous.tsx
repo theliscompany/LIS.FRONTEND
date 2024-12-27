@@ -643,7 +643,7 @@ function Miscellaneous() {
                                                 value={containerTypes}
                                                 size="small"
                                                 disabled={servicesSelection.length !== 0 ? true : false}
-                                                onChange={(event: any, newValue: any) => {
+                                                onChange={(_: any, newValue: any) => {
                                                     setContainerTypes(newValue);
                                                 }}
                                                 isOptionEqualToValue={(option, value) => option.packageId === value.packageId}
@@ -690,7 +690,7 @@ function Miscellaneous() {
                                         disablePortal
                                         id="service-name"
                                         options={services}
-                                        renderOption={(props, option, i) => {
+                                        renderOption={(props, option) => {
                                             return (
                                                 <li {...props} key={option.serviceId}>
                                                     {option.serviceName}
@@ -708,7 +708,7 @@ function Miscellaneous() {
                                         sx={{ mt: 1 }}
                                         slots={{popper: CustomPopper}}
                                         renderInput={(params: any) => <TextField {...params} />}
-                                        onChange={(e: any, value: any) => { setServiceName(value); }}
+                                        onChange={(_: any, value: any) => { setServiceName(value); }}
                                         fullWidth
                                     /> : <Skeleton />
                                 }
@@ -748,7 +748,7 @@ function Miscellaneous() {
                                                         sx={{ border: "1px solid #e5e5e5" }}
                                                         secondaryAction={
                                                             <IconButton edge="end" onClick={() => {
-                                                                setServicesSelection((prevItems: any) => prevItems.filter((item: any, i: number) => i !== index));
+                                                                setServicesSelection((prevItems: any) => prevItems.filter((_: any, i: number) => i !== index));
                                                             }}>
                                                                 <DeleteIcon />
                                                             </IconButton>

@@ -20,7 +20,7 @@ import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import dayjs, { Dayjs } from 'dayjs';
 import { CategoryEnum, containerPackages, currencyOptions } from '../../utils/constants';
 import ServicesTable from '../../components/pricing/ServicesTable';
-import { transformArray, reverseTransformArray, flattenData, flattenData2, compareServices, sortSuppliersByCarrierAgentName } from '../../utils/functions';
+import { flattenData, sortSuppliersByCarrierAgentName } from '../../utils/functions';
 import NewContact from '../../components/shared/NewContact';
 import NewService from '../../components/shared/NewService';
 import NewPort from '../../components/shared/NewPort';
@@ -31,7 +31,7 @@ import { deleteApiSeaFreightDeleteSeaFreightPrice, getApiMiscellaneousMiscellane
 function Seafreights() {
     const [load, setLoad] = useState<boolean>(true);
     const [loadEdit, setLoadEdit] = useState<boolean>(false);
-    const [loadMiscs, setLoadMiscs] = useState<boolean>(false);
+    //const [loadMiscs, setLoadMiscs] = useState<boolean>(false);
     const [modal, setModal] = useState<boolean>(false);
     const [modal2, setModal2] = useState<boolean>(false);
     const [modal6, setModal6] = useState<boolean>(false);
@@ -40,9 +40,9 @@ function Seafreights() {
     const [modal9, setModal9] = useState<boolean>(false);
     const [ports, setPorts] = useState<any>(null);
     const [products, setProducts] = useState<any>(null);
-    const [clients, setClients] = useState<any>(null);
+    //const [clients, setClients] = useState<any>(null);
     const [containers, setContainers] = useState<any>(null);
-    const [services, setServices] = useState<any>(null);
+    //const [services, setServices] = useState<any>(null);
     const [allServices, setAllServices] = useState<any>(null);
     const [currentId, setCurrentId] = useState<string>("");
     const [currentEditId, setCurrentEditId] = useState<string>("");
@@ -136,7 +136,7 @@ function Seafreights() {
             const response = await getContactGetContacts({query: { category: "SHIPPING_LINES", pageSize: 1000 }});
             if (response !== null && response !== undefined) {
                 // Removing duplicates from client array
-                setClients(response.data?.data?.filter((obj: any, index: number, self: any) => index === self.findIndex((o: any) => o.contactName === obj.contactName)));
+               // setClients(response.data?.data?.filter((obj: any, index: number, self: any) => index === self.findIndex((o: any) => o.contactName === obj.contactName)));
             }
         }
         catch (err: any) {
@@ -162,7 +162,7 @@ function Seafreights() {
             if (response !== null && response !== undefined) {
                 console.log(response.data?.sort((a: any, b: any) => b.serviceName - a.serviceName));
                 setAllServices(response.data);
-                setServices(response.data?.sort((a: any, b: any) => compareServices(a, b)).filter((obj: any) => obj.servicesTypeId.includes(1))); // Filter the services for seafreights (SEAFREIGHT = 1)
+                //setServices(response.data?.sort((a: any, b: any) => compareServices(a, b)).filter((obj: any) => obj.servicesTypeId.includes(1))); // Filter the services for seafreights (SEAFREIGHT = 1)
             }
         }
         catch (err: any) {
@@ -364,9 +364,9 @@ function Seafreights() {
         }
     }
 
-    const getMiscellaneouses = async (carrier1: any, portLoading1: any, portDischarge1: any, validUntil1: any, container: any, isCopy: boolean) => {
+    const getMiscellaneouses = async (carrier1: any, portLoading1: any, portDischarge1: any, _validUntil1: any, container: any, _isCopy: boolean) => {
         try {
-            setLoadMiscs(true);
+            //setLoadMiscs(true);
             if (carrier1 !== null && portLoading1 !== null && portDischarge1 !== null) {
                 const response = await getApiMiscellaneousMiscellaneous({query: { supplierId: carrier1.contactId, departurePortId: portLoading1.portId, destinationPortId: portDischarge1.portId, withShipment: true }})
                 if (response !== null && response !== undefined) {
@@ -383,7 +383,7 @@ function Seafreights() {
                         console.error('Error fetching data:', response);
                     }
                     if (response.data !== null && selectedElement !== undefined) {
-                        setLoadMiscs(false);
+                        //setLoadMiscs(false);
                         
                         // Dont update the miscellaneousId is it's a new price
                         // if (!isCopy) {
@@ -392,17 +392,17 @@ function Seafreights() {
                         // setServicesData2(flattenData2(reverseTransformArray(selectedElement.containers).filter((elm: any) => elm.containers[0].packageName === container.packageName)));
                     }
                     else {
-                        setLoadMiscs(false);
+                        //setLoadMiscs(false);
                     }
                 }
                 else {
-                    setLoadMiscs(false);
+                    //setLoadMiscs(false);
                 }
             }
         }
         catch (err: any) {
             console.log(err);
-            setLoadMiscs(false);
+            //setLoadMiscs(false);
         }
     }
     
@@ -619,7 +619,7 @@ function Seafreights() {
                                         options={containers}
                                         getOptionLabel={(option: any) => option.packageName}
                                         value={containerTypes}
-                                        onChange={(event: any, newValue: any) => {
+                                        onChange={(_: any, newValue: any) => {
                                             setContainerTypes(newValue);
                                         }}
                                         // isOptionEqualToValue={(option: any, value: any) => true}

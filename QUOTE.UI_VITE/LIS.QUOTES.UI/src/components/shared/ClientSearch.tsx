@@ -79,7 +79,7 @@ const ClientSearch: React.FC<LocationAutocompleteProps> = ({ id, name, value, on
                     return "";
                 }}
                 value={value}
-                onChange={(event, newValue) => {
+                onChange={(_, newValue) => {
                     onChange(newValue);
                     console.log(newValue);
                     if (newValue !== null) {
