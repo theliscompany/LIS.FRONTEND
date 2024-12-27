@@ -10,7 +10,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { Anchor, Mail } from '@mui/icons-material';
 import { SnackbarProvider, enqueueSnackbar } from 'notistack';
 import { useTranslation } from 'react-i18next';
-import { GridColDef, GridValueFormatterParams, GridRenderCellParams, DataGrid, GridValueGetterParams, GridColumnHeaderParams } from '@mui/x-data-grid';
+import { GridColDef, GridRenderCellParams, DataGrid, GridColumnHeaderParams, GridValueGetter } from '@mui/x-data-grid';
 import { BootstrapDialog, BootstrapDialogTitle, BootstrapInput, actionButtonStyles, buttonCloseStyles, datetimeStyles, gridStyles, inputIconStyles, inputLabelStyles } from '../../utils/misc/styles';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
@@ -70,13 +70,34 @@ function Haulages() {
     // const [services, setServices] = useState<any>(null);
 
     const { t } = useTranslation();
+
+    const getUnitTariff: GridValueGetter<(typeof haulages)[number], unknown> = (
+        _,
+        row,
+      ) => {
+        return `${row.unitTariff || ''} ${t(row.currency)}`;
+    };
+
+    const getMultiStop: GridValueGetter<(typeof haulages)[number], unknown> = (
+        _,
+        row,
+      ) => {
+        return `${row.multiStop || ''} ${t(row.currency)}`;
+    };
+
+    const getOvertimeTariff: GridValueGetter<(typeof haulages)[number], unknown> = (
+        _,
+        row,
+      ) => {
+        return `${row.overtimeTariff || ''} ${t(row.currency)} / ${t('hour')}`;
+    };
     
     const columnsHaulages: GridColDef[] = [
         { field: 'haulierName', headerName: t('haulier'), minWidth: 125, flex: 1.4 },
-        { field: 'unitTariff', headerName: t('unitTariff'), valueGetter: (params: GridValueGetterParams) => `${params.row.unitTariff || ''} ${t(params.row.currency)}`, renderHeader: (_: GridColumnHeaderParams) => (<>{t('unitTariff')}</>), minWidth: 100, flex: 0.75 },
-        { field: 'freeTime', headerName: t('freeTime'), valueFormatter: (params: GridValueFormatterParams) => `${params.value || ''} ${t('hours')}`, minWidth: 100, flex: 0.75 },
-        { field: 'overtimeTariff', headerName: t('overtimeTariff'), valueGetter: (params: GridValueGetterParams) => `${params.row.overtimeTariff || ''} ${t(params.row.currency)} / ${t('hour')}`, renderHeader: (_: GridColumnHeaderParams) => (<>{t('overtimeTariff')}</>), minWidth: 100, flex: 1 },
-        { field: 'multiStop', headerName: t('multiStop'), valueGetter: (params: GridValueGetterParams) => `${params.row.multiStop || ''} ${t(params.row.currency)}`, minWidth: 100, flex: 0.75 },
+        { field: 'unitTariff', headerName: t('unitTariff'), valueGetter: getUnitTariff, renderHeader: (_: GridColumnHeaderParams) => (<>{t('unitTariff')}</>), minWidth: 100, flex: 0.75 },
+        { field: 'freeTime', headerName: t('freeTime'), valueFormatter: (value?: number) => `${value || ''} ${t('hours')}`, minWidth: 100, flex: 0.75 },
+        { field: 'overtimeTariff', headerName: t('overtimeTariff'), valueGetter: getOvertimeTariff, renderHeader: (_: GridColumnHeaderParams) => (<>{t('overtimeTariff')}</>), minWidth: 100, flex: 1 },
+        { field: 'multiStop', headerName: t('multiStop'), valueGetter: getMultiStop, minWidth: 100, flex: 0.75 },
         { field: 'containersType', headerName: t('containers'), renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box sx={{ my: 2 }}>{params.row.containersType.join(", ")}</Box>
