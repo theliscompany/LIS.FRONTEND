@@ -8,7 +8,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import { BootstrapDialog, BootstrapDialogTitle, buttonCloseStyles, sizingStyles, whiteButtonStyles } from '../../utils/misc/styles';
 import { NavLink } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { DataGrid, GridColDef, GridRenderCellParams, GridValueFormatterParams } from '@mui/x-data-grid';
+import { DataGrid, GridColDef, GridRenderCellParams } from '@mui/x-data-grid';
 import { Edit, RestartAltOutlined, Visibility } from '@mui/icons-material';
 import { statusLabel, colorsTypes } from '../../utils/functions';
 import { deleteApiQuoteOfferById, getApiQuoteOffer } from '../../api/client/offer';
@@ -30,7 +30,7 @@ const PriceOffers = () => {
                 </Box>
             );
         }, minWidth: 200, flex: 1 },
-        { field: 'created', headerName: t('created'), valueFormatter: (params: GridValueFormatterParams) => `${(new Date(params.value)).toLocaleString().slice(0,10)}`, minWidth: 100, flex: 0.5 },
+        { field: 'created', headerName: t('created'), valueFormatter: (params: any) => `${(new Date(params.value)).toLocaleString().slice(0,10)}`, minWidth: 100, flex: 0.5 },
         // { field: 'haulageType', headerName: t('trip'), minWidth: 125, flex: 1.5 },
         { field: 'route', headerName: t('trip'), renderCell: (params: GridRenderCellParams) => {
             return (
