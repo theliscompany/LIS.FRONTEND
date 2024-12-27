@@ -10,7 +10,8 @@
     "preview": "vite preview",
     "generate-client-shipment": "npx @hey-api/openapi-ts -i https://lis-shipment-svc-staging.azurewebsites.net/swagger/v1/swagger.json -o src/api/client/shipment -c @hey-api/client-axios",
     "generate-client-transport": "npx @hey-api/openapi-ts -i https://lis-transport-svc-dev.azurewebsites.net/swagger/v1/swagger.json -o src/api/client/transport -c @hey-api/client-axios",
-    "generate-client-document": "npx @hey-api/openapi-ts -i https://lis-document-svc-staging.azurewebsites.net/swagger/v1/swagger.json -o src/api/client/document -c @hey-api/client-axios"
+    "generate-client-document": "npx @hey-api/openapi-ts -i https://lis-document-svc-staging.azurewebsites.net/swagger/v1/swagger.json -o src/api/client/document -c @hey-api/client-axios",
+    "generate:shipment": "openapi-ts"
   },
   "dependencies": {
     "@azure/msal-browser": "^3.28.0",
@@ -18,19 +19,24 @@
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
     "@hey-api/client-axios": "^0.3.3",
-    "@mui/icons-material": "^6.2.0",
+    "@mui/icons-material": "^6.2.1",
     "@mui/material": "^6.2.0",
+    "@mui/x-date-pickers": "^7.23.3",
+    "@tanstack/react-query": "^5.62.8",
     "axios": "^1.7.9",
+    "dayjs": "^1.11.13",
     "mui-tel-input": "^7.0.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-google-recaptcha": "^3.1.0",
     "react-i18next": "^15.2.0",
-    "react-router-dom": "^7.0.2"
+    "react-router-dom": "^7.0.2",
+    "react-virtuoso": "^4.12.3"
   },
   "devDependencies": {
     "@eslint/js": "^9.15.0",
     "@hey-api/openapi-ts": "^0.60.0",
+    "@tanstack/react-query-devtools": "^5.62.8",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
     "@types/react-google-recaptcha": "^2.1.9",
