@@ -1,47 +1,46 @@
 import { useEffect, useState } from 'react';
-import { useLocation, useParams } from 'react-router-dom';
+//import { useLocation } from 'react-router-dom';
 import { Button, Alert, DialogActions, DialogContent } from '@mui/material';
 import Skeleton from '@mui/material/Skeleton';
-import { enqueueSnackbar } from 'notistack';
 // import { protectedResources } from '../../config/authConfig';
 import { BootstrapDialog, BootstrapDialogTitle, buttonCloseStyles } from '../../utils/misc/styles';
 import { useTranslation } from 'react-i18next';
 
 const AcceptOffer = () => {
-    const [load, setLoad] = useState<boolean>(true);
+    const [load] = useState<boolean>(true);
     const [modal, setModal] = useState<boolean>(true);
-    const [isAccepted, setIsAccepted] = useState<boolean>(false);
+    const [isAccepted] = useState<boolean>(false);
     
-    let { id } = useParams();
+    //let { id } = useParams();
     const { t } = useTranslation();
 
-    const location = useLocation();
-    const searchParams = new URLSearchParams(location.search);
-    const currentOption = searchParams.get('option');
+    //const location = useLocation();
+    //const searchParams = new URLSearchParams(location.search);
+    //const currentOption = searchParams.get('option');
     
-    function getOfferContent(mail: string, offerNumber: number, language: string) {
-        const offerRegex = new RegExp(`# ${t('offer', {lng: language}).toUpperCase()} ${offerNumber}\\s*(.*?)\\s*(# ${t('offer', {lng: language}).toUpperCase()} \\d+|<p>\\s*${t('endMailWord', {lng: language})})`, 's');
-        const match = mail.match(offerRegex);
+    // function getOfferContent(mail: string, offerNumber: number, language: string) {
+    //     const offerRegex = new RegExp(`# ${t('offer', {lng: language}).toUpperCase()} ${offerNumber}\\s*(.*?)\\s*(# ${t('offer', {lng: language}).toUpperCase()} \\d+|<p>\\s*${t('endMailWord', {lng: language})})`, 's');
+    //     const match = mail.match(offerRegex);
       
-        if (match) {
-            return match[1].trim();
-        } 
-        else {
-            return "Aucune offre correspondante trouvée.";
-        }
-    }  
+    //     if (match) {
+    //         return match[1].trim();
+    //     } 
+    //     else {
+    //         return "Aucune offre correspondante trouvée.";
+    //     }
+    // }  
         
     useEffect(() => {
         acceptOffer();
     }, []);
 
     const acceptOffer = async () => {
-        var cOption = currentOption !== null && currentOption !== undefined ? Number(currentOption) : 0;
-        const body: any = {
-            id: id,
-            newStatus: "Accepted",
-            option: cOption
-        };
+        //var cOption = currentOption !== null && currentOption !== undefined ? Number(currentOption) : 0;
+        // const body: any = {
+        //     id: id,
+        //     newStatus: "Accepted",
+        //     option: cOption
+        // };
 
         // fetch(protectedResources.apiLisOffer.endPoint+"/QuoteOffer/"+id+"/approval?newStatus=Accepted", {
         //     method: "PUT",
@@ -244,27 +243,27 @@ const AcceptOffer = () => {
     //     });
     // }
     
-    async function sendEmail(from: string, to: string, subject: string, htmlContent: string) {
-		const formData = new FormData();
-		// Append the other email data to the FormData object
-		formData.append('From', from);
-		formData.append('To', to);
-		formData.append('Subject', subject);
-		formData.append('HtmlContent', htmlContent);
+    // async function sendEmail(from: string, to: string, subject: string, htmlContent: string) {
+	// 	const formData = new FormData();
+	// 	// Append the other email data to the FormData object
+	// 	formData.append('From', from);
+	// 	formData.append('To', to);
+	// 	formData.append('Subject', subject);
+	// 	formData.append('HtmlContent', htmlContent);
 		
-		// Send the email with fetch
-		// fetch(protectedResources.apiLisQuotes.endPoint+'/Email', {
-		// 	method: 'POST',
-		// 	headers: {
-		// 		'accept': '*/*',
-		// 		// 'Content-Type': 'multipart/form-data'
-		// 	},
-		// 	body: formData
-		// })
-		// .then((response) => response.json())
-		// .then((data) => console.log(data))
-		// .catch((error) => console.error(error));
-	}
+	// 	// Send the email with fetch
+	// 	// fetch(protectedResources.apiLisQuotes.endPoint+'/Email', {
+	// 	// 	method: 'POST',
+	// 	// 	headers: {
+	// 	// 		'accept': '*/*',
+	// 	// 		// 'Content-Type': 'multipart/form-data'
+	// 	// 	},
+	// 	// 	body: formData
+	// 	// })
+	// 	// .then((response) => response.json())
+	// 	// .then((data) => console.log(data))
+	// 	// .catch((error) => console.error(error));
+	// }
 
 	return (
         <div className="App">

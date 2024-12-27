@@ -1,16 +1,15 @@
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
 import { Button, Alert, DialogActions, DialogContent } from '@mui/material';
 import Skeleton from '@mui/material/Skeleton';
 import { BootstrapDialog, BootstrapDialogTitle, buttonCloseStyles } from '../../utils/misc/styles';
 import { useTranslation } from 'react-i18next';
 
-const RefuseOffer = (props: any) => {
-    const [load, setLoad] = useState<boolean>(true);
+const RefuseOffer = () => {
+    const [load] = useState<boolean>(true);
     const [modal, setModal] = useState<boolean>(true);
-    const [isRejected, setIsRejected] = useState<boolean>(false);
+    const [isRejected] = useState<boolean>(false);
     
-    let { id } = useParams();    
+    //let { id } = useParams();    
     const { t } = useTranslation();
         
     useEffect(() => {
@@ -18,10 +17,10 @@ const RefuseOffer = (props: any) => {
     }, []);
 
     const refuseOffer = async () => {
-        const body: any = {
-            id: id,
-            newStatus: "Rejected"
-        };
+        // const body: any = {
+        //     id: id,
+        //     newStatus: "Rejected"
+        // };
 
         // fetch(protectedResources.apiLisOffer.endPoint+"/QuoteOffer/"+id+"/approval?newStatus=Rejected", {
         //     method: "PUT",

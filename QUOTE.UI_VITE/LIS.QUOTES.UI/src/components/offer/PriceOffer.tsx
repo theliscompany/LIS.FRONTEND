@@ -1,6 +1,6 @@
 import { Alert, Box, Button, DialogActions, DialogContent, Grid, InputLabel, NativeSelect, Skeleton } from '@mui/material';
 import { useTranslation } from 'react-i18next';
-import { getExtensionFromContentType, statusLabel } from '../../utils/functions';
+import { statusLabel } from '../../utils/functions';
 import { BootstrapInput, buttonCloseStyles, inputLabelStyles } from '../../utils/misc/styles';
 import { useMsal, useAccount } from '@azure/msal-react';
 import { SnackbarProvider, enqueueSnackbar } from 'notistack';
@@ -18,7 +18,7 @@ const PriceOffer = (props: any) => {
 	const account = useAccount(accounts[0] || {});
 	
 	console.log(props);
-	var optionsButtons = props.offer.options.map((elm: any, index: number) => {
+	var optionsButtons = props.offer.options.map((_: any, index: number) => {
 		return `<a href="#" onclick="return false;" style="display:inline-block;background-color:#008089;color:#fff;padding:10px 20px;text-decoration:none">${t('selectOptionOffer', {lng: language})} #${Number(index+1)}</a>`;
 	});
 	var myFooter = `
@@ -52,7 +52,7 @@ const PriceOffer = (props: any) => {
             });
 			
 			console.log(response);
-			var extension = getExtensionFromContentType(type);
+			//var extension = getExtensionFromContentType(type);
             var file = new File([response.data], name, { type });
 			return file;
         } 
@@ -63,11 +63,11 @@ const PriceOffer = (props: any) => {
     };
     
 	async function sendEmailWithAttachments(from: string, to: string, subject: string, htmlContent: string, attachments: any) {
-		var arrayIds: string[] = [];
+		//var arrayIds: string[] = [];
 		const formData = new FormData();
 		console.log("Attachments : ", attachments);
 		// Append the attachments to the FormData object
-		for (const { fileName, url, id, fileId, contentType } of attachments) {
+		for (const { fileName, id, fileId, contentType } of attachments) {
 			var auxId = id !== undefined ? id : fileId;
 			try {
 				var filePromise = await downloadFile(auxId, `${auxId}=${fileName}`, contentType);
@@ -129,7 +129,7 @@ const PriceOffer = (props: any) => {
 			const response = await putApiQuoteOfferByIdStatus({body: body, path: {id: props.id}, query: {newStatus: "Accepted"}});
 			if (response !== null && response !== undefined) {
 				enqueueSnackbar(t('priceOfferApproved'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top" } });
-				var optionsButtons = props.options.map((elm: any, index: number) => {
+				var optionsButtons = props.options.map((_: any, index: number) => {
 					return `<a href="${process.env.REACT_APP_ORIGIN_URL+"/acceptOffer/"+props.id}?option=${index}" style="display:inline-block;background-color:#008089;color:#fff;padding:10px 20px;text-decoration:none" target="_blank">${t('selectOptionOffer', {lng: language})} #${Number(index+1)}</a>`;
 				});
 				var footer = `

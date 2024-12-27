@@ -45,16 +45,16 @@ const MasterDataTemplates: any = () => {
     
     const [name, setName] = useState<string>("");
     const [content, setContent] = useState<string>("");
-    const [contentEn, setContentEn] = useState<string>("");
+    //const [contentEn, setContentEn] = useState<string>("");
     const [currentVersion, setCurrentVersion] = useState<string>("");
     const [createdAfter, setCreatedAfter] = useState<Dayjs | null>(null);
     const [createdBefore, setCreatedBefore] = useState<Dayjs | null>(null);
     const [tags, setTags] = useState<any[]>([]);
     
-    const [mailLanguage, setMailLanguage] = useState<string>("fr");
+    const [mailLanguage] = useState<string>("fr");
     
     const rteRef = useRef<RichTextEditorRef>(null);
-    const rteRef2 = useRef<RichTextEditorRef>(null);
+    //const rteRef2 = useRef<RichTextEditorRef>(null);
     
     const { t } = useTranslation();
     
@@ -149,7 +149,7 @@ const MasterDataTemplates: any = () => {
                 setCurrentVersion(result.data?.currentVersion);
                 setContent(result.data?.content);
                 setTags(result.data?.tags);
-                setContentEn("response.data.contentEn");
+                //setContentEn("response.data.contentEn");
                 setLoadEdit(false);
             }
             else {
@@ -505,7 +505,7 @@ const MasterDataTemplates: any = () => {
                                             value={tags}
                                             sx={{ mt: 1 }}
                                             renderInput={(params: any) => <TextField {...params} sx={{ textTransform: "lowercase" }} />}
-                                            onChange={(e: any, value: any) => { setTags(value); }}
+                                            onChange={(_: any, value: any) => { setTags(value); }}
                                             fullWidth
                                         />
                                     </Grid>

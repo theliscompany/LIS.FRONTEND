@@ -5,7 +5,6 @@ import { Autocomplete, Box, Button, DialogActions, DialogContent, InputLabel, Na
 import Grid from '@mui/material/Grid2';
 import { useTranslation } from 'react-i18next';
 import { enqueueSnackbar } from 'notistack';
-import { useAccount, useMsal } from '@azure/msal-react';
 import StarterKit from '@tiptap/starter-kit';
 import { RichTextEditor, MenuControlsContainer, MenuSelectHeading, MenuDivider, MenuButtonBold, MenuButtonItalic, MenuButtonStrikethrough, MenuButtonOrderedList, MenuButtonBulletedList, MenuSelectTextAlign, MenuButtonEditLink, MenuButtonHorizontalRule, MenuButtonUndo, MenuButtonRedo, type RichTextEditorRef, } from 'mui-tiptap';
 import AutocompleteSearch from '../shared/AutocompleteSearch';
@@ -15,6 +14,7 @@ import { getContactGetContacts } from '../../api/client/crm';
 import { getApiHaulageHaulages } from '../../api/client/pricing';
 import { getApiTemplate, getApiTemplateById } from '../../api/client/template';
 import PortAutocomplete from '../shared/PortAutocomplete';
+import { useAccount, useMsal } from '@azure/msal-react';
 
 const defaultTemplate = "658e7e0d27587b09811c13ca";
 
@@ -30,14 +30,14 @@ function RequestPriceHaulage(props: any) {
     const [deliveryPort, setDeliveryPort] = useState<any>(props.loadingPort);
     
     const [hauliersData, setHauliersData] = useState<any>(null);
-    const [content, setContent] = useState<string>("");
+    // const [content, setContent] = useState<string>("");
     const [templateBase, setTemplateBase] = useState<string>("");
     
     const [templates, setTemplates] = useState<any>([]);
     const [loadTemplates, setLoadTemplates] = useState<boolean>(false);
     const [selectedTemplate, setSelectedTemplate] = useState<string>(defaultTemplate);
     
-    const [mailLanguage, setMailLanguage] = useState<string>("fr");
+    // const [mailLanguage, setMailLanguage] = useState<string>("fr");
     const [load, setLoad] = useState<boolean>(false);
     const [loadTemplate, setLoadTemplate] = useState<boolean>(false);
 
@@ -74,7 +74,7 @@ function RequestPriceHaulage(props: any) {
 
     const sendPriceRequestHaulage = async () => {
         if (recipients.length !== 0) {
-            var myEmails = ["penayecyrille@gmail.com", "cyrille.penaye@omnifreight.eu"];
+            // var myEmails = ["penayecyrille@gmail.com", "cyrille.penaye@omnifreight.eu"];
             var selectedMails = recipients.map((elm: any) => elm.email);
             console.log(selectedMails);
 
@@ -295,7 +295,7 @@ function RequestPriceHaulage(props: any) {
                                                     value={recipients}
                                                     sx={{ mt: 1 }}
                                                     renderInput={(params: any) => <TextField placeholder="Carriers recipients" {...params} sx={{ textTransform: "lowercase" }} />}
-                                                    onChange={(e: any, value: any) => { setRecipients(value); }}
+                                                    onChange={(_: any, value: any) => { setRecipients(value); }}
                                                     fullWidth
                                                 />
                                             </> : <Skeleton />

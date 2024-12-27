@@ -99,7 +99,7 @@ const MasterDataServices: any = () => {
     const createNewService = async () => {
         if (testName !== "" && selectedServiceTypes.length !== 0) {
             try {
-                var response = null;
+                //var response = null;
                 if (currentEditId !== "") {
                     var dataSent: ServiceViewModel;
                     dataSent = {
@@ -108,7 +108,7 @@ const MasterDataServices: any = () => {
                         // "serviceDescription": testDescription,
                         "servicesTypeId": selectedServiceTypes
                     };
-                    response = await putServiceByServiceId({body: dataSent, path: {serviceId: Number(currentEditId)}});
+                    await putServiceByServiceId({body: dataSent, path: {serviceId: Number(currentEditId)}});
                 }
                 else {
                     var dataSent2: CreatedServiceViewModel;
@@ -117,7 +117,7 @@ const MasterDataServices: any = () => {
                         "serviceDescription": testDescription,
                         "servicesTypeId": selectedServiceTypes
                     };
-                    response = await postService({query: dataSent2});
+                    await postService({query: dataSent2});
                 }
                 enqueueSnackbar(currentEditId === "" ? t('serviceAdded') : t('serviceEdited'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
                 getServicesSvc();

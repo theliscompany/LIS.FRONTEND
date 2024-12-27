@@ -19,7 +19,7 @@ const CountrySelect: React.FC<CountryAutocompleteProps> = ({id, value, onChange,
             getOptionLabel={(option: any) => option.label}
             fullWidth={fullWidth}
             value={value}
-            onChange={(event: any, newValue: any) => {
+            onChange={(_: any, newValue: any) => {
                 onChange(newValue);
             }}
             renderOption={(props: any, option: any) => {

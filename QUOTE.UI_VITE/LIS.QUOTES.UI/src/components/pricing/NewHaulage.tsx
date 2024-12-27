@@ -196,7 +196,7 @@ function NewHaulage(props: any) {
                                 getOptionLabel={(option: any) => option.packageName}
                                 size="small"
                                 value={containerTypes}
-                                onChange={(event: any, newValue: any) => {
+                                onChange={(_: any, newValue: any) => {
                                     setContainerTypes(newValue);
                                 }}
                                 renderInput={(params: any) => <TextField {...params} sx={{ mt: 1, textTransform: "lowercase" }} />}

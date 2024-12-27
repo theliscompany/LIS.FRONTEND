@@ -5,7 +5,6 @@ import { Alert, Autocomplete, Box, Button, DialogActions, DialogContent, IconBut
 import Grid from '@mui/material/Grid2';
 import { useTranslation } from 'react-i18next';
 import { enqueueSnackbar } from 'notistack';
-import { useAccount, useMsal } from '@azure/msal-react';
 import { Dayjs } from 'dayjs';
 import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
@@ -18,6 +17,7 @@ import { getContactGetContacts } from '../../api/client/crm';
 import { getApiSeaFreightGetSeaFreights } from '../../api/client/pricing';
 import { getApiTemplate, getApiTemplateById } from '../../api/client/template';
 import PortAutocomplete from '../shared/PortAutocomplete';
+import { useAccount, useMsal } from '@azure/msal-react';
 
 function displayContainers(value: any) {
     var aux = value.map((elm: any) => '<li>'+elm.quantity+"x"+elm.container+'</li>').join('');
@@ -45,7 +45,7 @@ const RequestPriceSeafreight = (props: any) => {
     const [loadTemplates, setLoadTemplates] = useState<boolean>(false);
     const [selectedTemplate, setSelectedTemplate] = useState<string>(defaultTemplate);
     
-    const [mailLanguage, setMailLanguage] = useState<string>("fr");
+    // const [mailLanguage, setMailLanguage] = useState<string>("fr");
     const [load, setLoad] = useState<boolean>(false);
     const [loadTemplate, setLoadTemplate] = useState<boolean>(false);
 
@@ -81,7 +81,7 @@ const RequestPriceSeafreight = (props: any) => {
 
     const sendPriceRequestFCL = async () => {
         if (recipients.length !== 0) {
-            var myEmails = ["penayecyrille@gmail.com", "cyrille.penaye@omnifreight.eu"];
+            // var myEmails = ["penayecyrille@gmail.com", "cyrille.penaye@omnifreight.eu"];
             var selectedMails = recipients.map((elm: any) => elm.email);
             console.log(selectedMails);
 
@@ -321,7 +321,7 @@ const RequestPriceSeafreight = (props: any) => {
                                                     value={recipients}
                                                     sx={{ mt: 1 }}
                                                     renderInput={(params: any) => <TextField placeholder="Carriers recipients" {...params} sx={{ textTransform: "lowercase" }} />}
-                                                    onChange={(e: any, value: any) => { setRecipients(value); }}
+                                                    onChange={(_: any, value: any) => { setRecipients(value); }}
                                                     fullWidth
                                                 />
                                             </> : <Skeleton />
@@ -374,7 +374,7 @@ const RequestPriceSeafreight = (props: any) => {
                                                     size='small'
                                                     renderInput={(params: any) => <TextField placeholder="Machinery, Household goods, etc" {...params} sx={{ textTransform: "lowercase" }} />}
                                                     value={commoditiesArr}
-                                                    onChange={(e: any, value: any) => { setCommoditiesArr(value); }}
+                                                    onChange={(_: any, value: any) => { setCommoditiesArr(value); }}
                                                     sx={{ mt: 1 }}
                                                     fullWidth
                                                 /> : <Skeleton />
@@ -407,7 +407,7 @@ const RequestPriceSeafreight = (props: any) => {
                                                     size='small'
                                                     renderInput={(params: any) => <TextField placeholder="Live animals, Cereals, etc" {...params} sx={{ textTransform: "lowercase" }} />}
                                                     value={commoditiesArr}
-                                                    onChange={(e: any, value: any) => { setCommoditiesArr(value); }}
+                                                    onChange={(_: any, value: any) => { setCommoditiesArr(value); }}
                                                     sx={{ mt: 1 }}
                                                     fullWidth
                                                 /> : <Skeleton />
@@ -607,7 +607,7 @@ const RequestPriceSeafreight = (props: any) => {
                                                                             sx={{ border: "1px solid #e5e5e5" }}
                                                                             secondaryAction={
                                                                                 <IconButton edge="end" onClick={() => {
-                                                                                    setContainersSelection((prevItems: any) => prevItems.filter((item: any, i: number) => i !== index));
+                                                                                    setContainersSelection((prevItems: any) => prevItems.filter((_: any, i: number) => i !== index));
                                                                                 }}>
                                                                                     <DeleteIcon />
                                                                                 </IconButton>

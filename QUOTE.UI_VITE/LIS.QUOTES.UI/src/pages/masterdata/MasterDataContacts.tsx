@@ -109,7 +109,7 @@ const MasterDataContacts: any = () => {
     const createNewContact = async () => {
         if (country !== null && testName !== "" && testPhone !== "" && testEmail !== "" && addressCountry !== "") {
             try {
-                var response = null;
+                //var response = null;
                 if (currentEditId !== "") {
                     var dataSent: UpdateContactViewModel = {
                         // "contactId": Number(currentEditId),
@@ -122,7 +122,7 @@ const MasterDataContacts: any = () => {
                         // "categories": selectedCategories,
                         "categories": getCategoryNames(selectedCategories)
                     };
-                    response = await putContactUpdateContactById({body: dataSent, path: {id: Number(currentEditId)}});
+                    await putContactUpdateContactById({body: dataSent, path: {id: Number(currentEditId)}});
                 }
                 else {
                     var dataSent2: CreateContactViewModel = {
@@ -135,7 +135,7 @@ const MasterDataContacts: any = () => {
                         "categories": selectedCategories,
                         // "categories": getCategoryNames(selectedCategories)
                     };
-                    response = await postContactCreateContact({body: dataSent2});
+                    postContactCreateContact({body: dataSent2});
                 }
                 enqueueSnackbar(currentEditId === "" ? t('contactAdded') : t('contactEdited'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
                 getContactsService();

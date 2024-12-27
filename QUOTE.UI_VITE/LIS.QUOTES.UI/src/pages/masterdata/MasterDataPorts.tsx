@@ -85,21 +85,21 @@ const MasterDataPorts: any = () => {
         if (testName !== "" && country !== null) {
             try {
                 var dataSent: PortViewModel;
-                var response: any = null;
+                //var response: any = null;
                 if (currentEditId !== "") {
                     dataSent = {
                         "portId": Number(currentEditId),
                         "portName": testName.toUpperCase() || null,
                         "country": String(country.label.toUpperCase()) || null,
                     };
-                    response = await updatePort({ body: dataSent, path: {id: Number(currentEditId)} });
+                    await updatePort({ body: dataSent, path: {id: Number(currentEditId)} });
                 }
                 else {
                     dataSent = {
                         "portName": testName.toUpperCase() || null,
                         "country": String(country.label.toUpperCase()) || null,
                     };
-                    response = await createPort({ body: dataSent });
+                    await createPort({ body: dataSent });
                 }
                 enqueueSnackbar(currentEditId === "" ? t('portAdded') : t('portEdited'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
                 getPortsService();

@@ -6,12 +6,12 @@ import { useTranslation } from 'react-i18next';
 import PriceOffer from '../../components/offer/PriceOffer';
 import { getQuoteOffer } from '../../api/client/offer';
 
-const ManagePriceOffer = (props: any) => {
+const ManagePriceOffer = () => {
 	const { t } = useTranslation();
 
 	const [offer, setOffer] = useState<any>(null);
 	const [offerNumber, setOfferNumber] = useState<string>("");
-	const [content, setContent] = useState<string>("");
+	//const [content, setContent] = useState<string>("");
 	const [options, setOptions] = useState<any>(null);
 	const [files, setFiles] = useState<any>(null);
 	
@@ -54,7 +54,7 @@ const ManagePriceOffer = (props: any) => {
 					<img src="https://omnifreight.eu/wp-content/uploads/2023/06/logo.jpg" style="max-width: 200px;">
 				</div>
 				`;
-				setContent(response.data.comment);
+				// setContent(response.data.comment);
 				// setLoad(false);
 			}
 		}

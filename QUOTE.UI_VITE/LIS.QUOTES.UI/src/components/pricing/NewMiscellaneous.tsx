@@ -1,13 +1,13 @@
 import React from 'react';
 import { useState, useEffect } from 'react';
-import { Autocomplete, Button, DialogActions, DialogContent, Grid, IconButton, InputLabel, ListItem, ListItemText, NativeSelect, Skeleton, TextField, Typography } from '@mui/material';
+import { Autocomplete, Button, DialogActions, DialogContent, IconButton, InputLabel, ListItem, ListItemText, NativeSelect, Skeleton, TextField, Typography } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import Popper from '@mui/material/Popper';
 import { SnackbarProvider, enqueueSnackbar } from 'notistack';
 import { useTranslation } from 'react-i18next';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
-import dayjs, { Dayjs } from 'dayjs';
+import { Dayjs } from 'dayjs';
 import CompanySearch from '../shared/CompanySearch';
 import NewContact from '../shared/NewContact';
 import { inputLabelStyles, BootstrapDialog, buttonCloseStyles, datetimeStyles, BootstrapInput, whiteButtonStyles } from '../../utils/misc/styles';
@@ -15,26 +15,27 @@ import NewService from '../shared/NewService';
 import { containerPackages, currencyOptions } from '../../utils/constants';
 import { compareServices } from '../../utils/functions';
 import { getPorts, getService } from '../../api/client/transport';
-import { deleteApiMiscellaneousDeleteMiscellaneousById, getApiMiscellaneousMiscellaneous, postApiMiscellaneousMiscellaneous } from '../../api/client/pricing';
+import { getApiMiscellaneousMiscellaneous, postApiMiscellaneousMiscellaneous } from '../../api/client/pricing';
+import Grid from '@mui/material/Grid2';
 
 function NewMiscellaneous(props: any) {
-    const [load, setLoad] = useState<boolean>(true);
-    const [loadEdit, setLoadEdit] = useState<boolean>(false);
-    const [modal, setModal] = useState<boolean>(false);
-    const [modal2, setModal2] = useState<boolean>(false);
+    //const [load, setLoad] = useState<boolean>(true);
+    const [loadEdit] = useState<boolean>(false);
+    //const [modal, setModal] = useState<boolean>(false);
+    const [modal2] = useState<boolean>(false);
     const [modal7, setModal7] = useState<boolean>(false);
     const [modal8, setModal8] = useState<boolean>(false);
     const [ports, setPorts] = useState<any>(null);
     const [containers, setContainers] = useState<any>(null);
     const [services, setServices] = useState<any>(null);
-    const [currentId, setCurrentId] = useState<string>("");
-    const [currentEditId, setCurrentEditId] = useState<string>("");
+    //const [currentId, setCurrentId] = useState<string>("");
+    const [currentEditId] = useState<string>("");
     const [miscs, setMiscs] = useState<any>(null);
     const [allMiscs, setAllMiscs] = useState<any>(null);
-    const [miscsWithoutShipment, setMiscsWithoutShipment] = useState<any>(null);
-    const [searchedSupplier, setSearchedSupplier] = useState<any>(null);
-    const [portDeparture, setPortDeparture] = useState<any>(null);
-    const [portDestination, setPortDestination] = useState<any>(null);
+    //const [miscsWithoutShipment, setMiscsWithoutShipment] = useState<any>(null);
+    // const [searchedSupplier] = useState<any>(null);
+    // const [portDeparture] = useState<any>(null);
+    // const [portDestination] = useState<any>(null);
     
     const [supplier, setSupplier] = useState<any>(null);
     const [portLoading, setPortLoading] = useState<any>(null);
@@ -46,8 +47,8 @@ function NewMiscellaneous(props: any) {
     const [containerTypes, setContainerTypes] = useState<any>(null);
     const [price, setPrice] = useState<number>(0);
     const [servicesSelection, setServicesSelection] = useState<any>([]);
-    const [withShipment, setWithShipment] = useState<boolean>(true);
-    const [showHaulages, setShowHaulages] = useState<boolean>(false);
+    const [withShipment] = useState<boolean>(true);
+    const [showHaulages] = useState<boolean>(false);
 
     const { t } = useTranslation();
     
@@ -109,7 +110,7 @@ function NewMiscellaneous(props: any) {
     
     const getMiscellaneouses = async () => {
         try {
-            setLoad(true);
+            //setLoad(true);
             const response: any = await getApiMiscellaneousMiscellaneous({query: { withShipment: withShipment }});
             if (response !== null && response !== undefined) {
                 setAllMiscs(response.data);
@@ -122,18 +123,18 @@ function NewMiscellaneous(props: any) {
                 }
                 
                 if (withShipment === false) {
-                    setMiscsWithoutShipment(response.data);
+                    //setMiscsWithoutShipment(response.data);
                 }
-                setLoad(false);
+                //setLoad(false);
             }
             else {
-                setLoad(false);
+                //setLoad(false);
             }
             console.log(response);
         }
         catch (err: any) {
             console.log(err);
-            setLoad(false);
+            //setLoad(false);
         }
     }
     
@@ -149,52 +150,52 @@ function NewMiscellaneous(props: any) {
         setContainerTypes(null);
     }
     
-    const getMiscellaneous = async (id: string) => {
-        setLoadEdit(true)
-        try {
-            const response: any = await getApiMiscellaneousMiscellaneous({query: {id: id, withShipment: withShipment}});
-            if (response !== null && response !== undefined) {
-                console.log(response.data?.services);
-                setSupplier({contactId: response.data?.supplierId, contactName: response.data?.supplierName});
-                setPortLoading(ports.find((elm: any) => elm.portId === response.data?.departurePortId));
-                setPortDischarge(ports.find((elm: any) => elm.portId === response.data?.destinationPortId));
-                setCurrency(response.data?.currency);
-                setValidUntil(dayjs(response.data?.validUntil));
-                setComment(response.data?.comment);
-                setServicesSelection(response.data?.services);
-                setContainerTypes(response.data?.services.length !== 0 ? response.data?.services[0].containers[0].packageId !== 0 ? response.data?.services[0].containers[0] : null : null);
-                setLoadEdit(false);
-            }
-            else {
-                setLoadEdit(false);
-            }
-            console.log(response);
-        }
-        catch (err: any) {
-            console.log(err);
-            setLoadEdit(false);
-        }
-    }
+    // const getMiscellaneous = async (id: string) => {
+    //     setLoadEdit(true)
+    //     try {
+    //         const response: any = await getApiMiscellaneousMiscellaneous({query: {id: id, withShipment: withShipment}});
+    //         if (response !== null && response !== undefined) {
+    //             console.log(response.data?.services);
+    //             setSupplier({contactId: response.data?.supplierId, contactName: response.data?.supplierName});
+    //             setPortLoading(ports.find((elm: any) => elm.portId === response.data?.departurePortId));
+    //             setPortDischarge(ports.find((elm: any) => elm.portId === response.data?.destinationPortId));
+    //             setCurrency(response.data?.currency);
+    //             setValidUntil(dayjs(response.data?.validUntil));
+    //             setComment(response.data?.comment);
+    //             setServicesSelection(response.data?.services);
+    //             setContainerTypes(response.data?.services.length !== 0 ? response.data?.services[0].containers[0].packageId !== 0 ? response.data?.services[0].containers[0] : null : null);
+    //             setLoadEdit(false);
+    //         }
+    //         else {
+    //             setLoadEdit(false);
+    //         }
+    //         console.log(response);
+    //     }
+    //     catch (err: any) {
+    //         console.log(err);
+    //         setLoadEdit(false);
+    //     }
+    // }
     
-    const searchMiscellaneous = async () => {
-        try {
-            setLoad(true);
-            const response: any = await getApiMiscellaneousMiscellaneous({query: { withShipment: withShipment, departurePortId: portDeparture?.portId, destinationPortId: portDestination?.portId, supplierId: searchedSupplier?.contactId }});
-            if (response !== null && response !== undefined) {
-                var portsIds = ports.map((elm: any) => elm.portName);
-                setMiscs(response.data?.filter((elm: any) => portsIds.includes(elm.departurePortName)));
-                setLoad(false);
-            }
-            else {
-                setLoad(false);
-            }
-            console.log(response);
-        }
-        catch (err: any) {
-            console.log(err);
-            setLoad(false);
-        }
-    }
+    // const searchMiscellaneous = async () => {
+    //     try {
+    //         setLoad(true);
+    //         const response: any = await getApiMiscellaneousMiscellaneous({query: { withShipment: withShipment, departurePortId: portDeparture?.portId, destinationPortId: portDestination?.portId, supplierId: searchedSupplier?.contactId }});
+    //         if (response !== null && response !== undefined) {
+    //             var portsIds = ports.map((elm: any) => elm.portName);
+    //             setMiscs(response.data?.filter((elm: any) => portsIds.includes(elm.departurePortName)));
+    //             setLoad(false);
+    //         }
+    //         else {
+    //             setLoad(false);
+    //         }
+    //         console.log(response);
+    //     }
+    //     catch (err: any) {
+    //         console.log(err);
+    //         setLoad(false);
+    //     }
+    // }
 
     const createMiscellaneous = async () => {
         if (servicesSelection !== null && validUntil !== null && supplier !== null && servicesSelection.length !== 0) {
@@ -288,23 +289,23 @@ function NewMiscellaneous(props: any) {
         }
     }
 
-    const deleteMiscellaneous = async (id: string) => {
-        try {
-            // alert("Function not available yet!");
-            const response = await deleteApiMiscellaneousDeleteMiscellaneousById({path: {id: id}});
-            if (response !== null && response !== undefined) {
-                enqueueSnackbar(t('rowDeletedSuccess'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
-                setModal(false);
-                getMiscellaneouses();
-            }
-            else {
-                enqueueSnackbar(t('rowDeletedError'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
-            }
-        }
-        catch (err: any) {
-            console.log(err);
-        }
-    }
+    // const deleteMiscellaneous = async (id: string) => {
+    //     try {
+    //         // alert("Function not available yet!");
+    //         const response = await deleteApiMiscellaneousDeleteMiscellaneousById({path: {id: id}});
+    //         if (response !== null && response !== undefined) {
+    //             enqueueSnackbar(t('rowDeletedSuccess'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
+    //             setModal(false);
+    //             getMiscellaneouses();
+    //         }
+    //         else {
+    //             enqueueSnackbar(t('rowDeletedError'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
+    //         }
+    //     }
+    //     catch (err: any) {
+    //         console.log(err);
+    //     }
+    // }
     
     function findMiscellaneous(supplierName: string, packageName: string, data: any) {
         console.log(data);
@@ -325,19 +326,19 @@ function NewMiscellaneous(props: any) {
                 {
                     loadEdit === false ?
                     <Grid container spacing={2}>
-                        <Grid item xs={12} md={8}>
+                        <Grid size={{xs:12, md:8}}>
                             <Typography sx={{ fontSize: 18 }}><b>{t('miscPriceInfo')}</b></Typography>
                         </Grid>
-                        <Grid item xs={12} md={4}>
+                        <Grid size={{xs:12, md:4}}>
                             <Button variant="contained" color="inherit" sx={{ float: "right", backgroundColor: "#fff", textTransform: "none" }} onClick={() => { setModal7(true); }} >Create new supplier</Button>
                         </Grid>
-                        <Grid item xs={12} md={8}>
+                        <Grid size={{xs:12, md:8}}>
                             <Grid container spacing={2}>
-                                <Grid item xs={12} md={6} mt={0.25}>
+                                <Grid size={{xs:12, md:6}} mt={0.25}>
                                     <InputLabel htmlFor="supplier" sx={inputLabelStyles}>{t('supplier')}</InputLabel>
                                     <CompanySearch id="supplier" value={supplier} onChange={setSupplier} category={0} callBack={() => console.log(supplier)} fullWidth />
                                 </Grid>
-                                <Grid item xs={12} md={6}>
+                                <Grid size={{xs:12, md:6}}>
                                     <InputLabel htmlFor="valid-until" sx={inputLabelStyles}>{t('validUntil')}</InputLabel>
                                     <LocalizationProvider dateAdapter={AdapterDayjs}>
                                         <DatePicker 
@@ -348,7 +349,7 @@ function NewMiscellaneous(props: any) {
                                         />
                                     </LocalizationProvider>
                                 </Grid>
-                                <Grid item xs={12} md={6}>
+                                <Grid size={{xs:12, md:6}}>
                                     <InputLabel htmlFor="currency" sx={inputLabelStyles}>{t('currency')}</InputLabel>
                                     <NativeSelect
                                         id="currency"
@@ -362,7 +363,7 @@ function NewMiscellaneous(props: any) {
                                         ))}
                                     </NativeSelect>
                                 </Grid>
-                                <Grid item xs={12} md={6}>
+                                <Grid size={{xs:12, md:6}}>
                                     <InputLabel htmlFor="container-types" sx={inputLabelStyles}>{t('container')}</InputLabel>
                                     {
                                         containers !== null ? 
@@ -373,7 +374,7 @@ function NewMiscellaneous(props: any) {
                                             value={containerTypes}
                                             size="small"
                                             disabled={servicesSelection.length !== 0 ? true : false}
-                                            onChange={(event: any, newValue: any) => {
+                                            onChange={(_: any, newValue: any) => {
                                                 setContainerTypes(newValue);
                                             }}
                                             isOptionEqualToValue={(option, value) => option.packageId === value.packageId}
@@ -385,18 +386,18 @@ function NewMiscellaneous(props: any) {
                             </Grid>
                         </Grid>
                         
-                        <Grid item xs={12} md={4}>
+                        <Grid size={{xs:12, md:4}}>
                             <Grid container spacing={2}>
-                                <Grid item xs={12} md={12} mt={-0.75}>
+                                <Grid size={{xs:12, md:12}} mt={-0.75}>
                                     <InputLabel htmlFor="comment" sx={inputLabelStyles}>{t('comment')}</InputLabel>
                                     <BootstrapInput id="comment" type="text" multiline rows={4.875} value={comment} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setComment(e.target.value)} fullWidth />
                                 </Grid>
                             </Grid>
                         </Grid>
-                        <Grid item xs={12} md={8}>
+                        <Grid size={{xs:12, md:8}}>
                             <Typography sx={{ fontSize: 18, mb: 1 }}><b>{t('listServices')}</b></Typography>
                         </Grid>
-                        <Grid item xs={12} md={4}>
+                        <Grid size={{xs:12, md:4}}>
                             <Button 
                                 variant="contained" color="inherit" 
                                 sx={{ float: "right", backgroundColor: "#fff", textTransform: "none" }} 
@@ -405,7 +406,7 @@ function NewMiscellaneous(props: any) {
                                 {t('createNewService')}
                             </Button>
                         </Grid>
-                        <Grid item xs={12} md={8}>
+                        <Grid size={{xs:12, md:8}}>
                             <InputLabel htmlFor="service-name" sx={inputLabelStyles}>{t('serviceName')}</InputLabel>
                             {
                                 services !== null ?
@@ -413,7 +414,7 @@ function NewMiscellaneous(props: any) {
                                     disablePortal
                                     id="service-name"
                                     options={services}
-                                    renderOption={(props, option, i) => {
+                                    renderOption={(props, option) => {
                                         return (
                                             <li {...props} key={option.serviceId}>
                                                 {option.serviceName}
@@ -431,16 +432,16 @@ function NewMiscellaneous(props: any) {
                                     sx={{ mt: 1 }}
                                     slots={{popper: CustomPopper}}
                                     renderInput={(params: any) => <TextField {...params} />}
-                                    onChange={(e: any, value: any) => { setServiceName(value); }}
+                                    onChange={(_: any, value: any) => { setServiceName(value); }}
                                     fullWidth
                                 /> : <Skeleton />
                             }
                         </Grid>
-                        <Grid item xs={12} md={2}>
+                        <Grid size={{xs:12, md:2}}>
                             <InputLabel htmlFor="price-cs" sx={inputLabelStyles}>{t('price')}</InputLabel>
                             <BootstrapInput id="price-cs" type="number" value={price} onChange={(e: any) => setPrice(e.target.value)} fullWidth />
                         </Grid>
-                        <Grid item xs={12} md={2}>
+                        <Grid size={{xs:12, md:2}}>
                             <Button
                                 variant="contained" color="inherit" fullWidth sx={whiteButtonStyles} 
                                 style={{ marginTop: "30px", height: "42px", float: "right" }} 
@@ -460,18 +461,18 @@ function NewMiscellaneous(props: any) {
                                 {t('add')}
                             </Button>
                         </Grid>
-                        <Grid item xs={12}>
+                        <Grid>
                             {
                                 servicesSelection !== undefined && servicesSelection !== null && servicesSelection.length !== 0 ? 
                                     <Grid container spacing={2}>
                                         {
                                             servicesSelection.map((item: any, index: number) => (
-                                                <Grid key={"serviceitem1-"+index} item xs={12} md={6}>
+                                                <Grid key={"serviceitem1-"+index} size={{xs:12, md:6}}>
                                                     <ListItem
                                                         sx={{ border: "1px solid #e5e5e5" }}
                                                         secondaryAction={
                                                             <IconButton edge="end" onClick={() => {
-                                                                setServicesSelection((prevItems: any) => prevItems.filter((item: any, i: number) => i !== index));
+                                                                setServicesSelection((prevItems: any) => prevItems.filter((_: any, i: number) => i !== index));
                                                             }}>
                                                                 <DeleteIcon />
                                                             </IconButton>

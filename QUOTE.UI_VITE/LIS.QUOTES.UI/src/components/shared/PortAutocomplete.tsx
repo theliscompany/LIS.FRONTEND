@@ -34,7 +34,7 @@ const PortAutocomplete: React.FC<PortAutocompleteProps> = ({id, value, onChange,
             sx={{ mt: 1 }}
             disabled={disabled}
             renderInput={(params: any) => <TextField {...params} />}
-            onChange={(e: any, newValue: any) => { 
+            onChange={(_: any, newValue: any) => { 
                 onChange(newValue);
             }}
             fullWidth={fullWidth}
