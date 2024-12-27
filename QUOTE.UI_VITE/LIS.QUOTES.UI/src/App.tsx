@@ -6,6 +6,8 @@ import './locales/i18n';
 import Shipments from './pages/Shipments';
 import Layout from './layout/Layout';
 import BackendServiceProvider from './api/api';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import MasterDataPorts from './pages/masterdata/MasterDataPorts';
 import MasterDataProducts from './pages/masterdata/MasterDataProducts';
 import MasterDataServices from './pages/masterdata/MasterDataServices';
@@ -18,28 +20,32 @@ import Haulages from './pages/pricing/Haulages';
 import Seafreights from './pages/pricing/Seafreights';
 import Miscellaneous from './pages/pricing/Miscellaneous';
 
+const queryClient = new QueryClient();
+
 function App() {
 
   return (
     <BrowserRouter>
         <AuthenticatedTemplate>
-          <BackendServiceProvider>
-            <Routes>
-              <Route path='/*' element={<Layout />}>
-                <Route path='' element={<Shipments />} />
-                <Route path='ports' element={<MasterDataPorts />} />
-                <Route path='products' element={<MasterDataProducts />} />
-                <Route path='services' element={<MasterDataServices />} />
-                <Route path='contacts' element={<MasterDataContacts />} />
-                <Route path='templates' element={<MasterDataTemplates />} />
-                <Route path='haulages' element={<Haulages />} />
-                <Route path='seafreights' element={<Seafreights />} />
-                <Route path='miscellaneous' element={<Miscellaneous />} />
-                <Route path='*' element={<NotFound />} />
-              </Route>
-            </Routes>
-          </BackendServiceProvider>
-          
+          <QueryClientProvider client={queryClient}>
+            <BackendServiceProvider>
+              <Routes>
+                <Route path='/*' element={<Layout />}>
+                  <Route path='' element={<Shipments />} />
+                  <Route path='ports' element={<MasterDataPorts />} />
+                  <Route path='products' element={<MasterDataProducts />} />
+                  <Route path='services' element={<MasterDataServices />} />
+                  <Route path='contacts' element={<MasterDataContacts />} />
+                  <Route path='templates' element={<MasterDataTemplates />} />
+                  <Route path='haulages' element={<Haulages />} />
+                  <Route path='seafreights' element={<Seafreights />} />
+                  <Route path='miscellaneous' element={<Miscellaneous />} />
+                  <Route path='*' element={<NotFound />} />
+                </Route>
+              </Routes>
+            </BackendServiceProvider>
+            <ReactQueryDevtools />
+          </QueryClientProvider>
         </AuthenticatedTemplate>
         <UnauthenticatedTemplate>
           <Routes>

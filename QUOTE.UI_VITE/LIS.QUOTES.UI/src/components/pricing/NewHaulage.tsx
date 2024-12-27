@@ -7,13 +7,14 @@ import { enqueueSnackbar } from 'notistack';
 import { Anchor } from '@mui/icons-material';
 import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import { CategoryEnum, currencyOptions, haulageTypeOptions } from '../../utils/constants';
+import { currencyOptions, haulageTypeOptions } from '../../utils/constants';
 import NewContact from '../shared/NewContact';
 import AutocompleteSearch from '../shared/AutocompleteSearch';
 import CompanySearch from '../shared/CompanySearch';
 import PortAutocomplete from '../shared/PortAutocomplete';
 import { Dayjs } from 'dayjs';
 import { postApiHaulageHaulage } from '../../api/client/pricing';
+import { CategoryEnum } from '../../api/client/shipment';
 
 function NewHaulage(props: any) {
     const [load, setLoad] = useState<boolean>(false);
