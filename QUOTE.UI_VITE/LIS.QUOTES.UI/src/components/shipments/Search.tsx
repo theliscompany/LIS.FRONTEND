@@ -80,16 +80,16 @@ const months = [
     value:12
   },
 ]
-  
+
 const Search = ({open,drawerWidth, closeDrawer, reloadShipmentsGrid}:{open:boolean,drawerWidth:number, closeDrawer:()=>void,
-    reloadShipmentsGrid: (params: GetOrdersData) => void }) => {
+    reloadShipmentsGrid: (params: GetOrdersData, fiscalYearChecked: boolean, monthChecked: boolean, statusChecked: boolean) => void }) => {
 
     const theme = useTheme();
     
     const [fiscalYearDisabled, setFiscalYearDisabled] = useState<boolean>(false)
     const [monthDisabled, setMonthDisabled] = useState<boolean>(false)
     const [statusDisabled, setStatusDisabled] = useState<boolean>(true)
-    const [orderParams, setOrderParams] = useState<GetOrdersData>({query:{
+    const [params, setParams] = useState<GetOrdersData>({query:{
         Fiscal: (new Date(Date.now()).getFullYear()),
         Month: new Date(Date.now()).getMonth() + 1,
         Status: OrderStatusEnum.OPEN
@@ -119,8 +119,8 @@ const Search = ({open,drawerWidth, closeDrawer, reloadShipmentsGrid}:{open:boole
         <Stack spacing={1} m={2}>
            <FormControl fullWidth>
             <InputLabel id="userRole">User role</InputLabel>
-            <Select size="small" labelId="userRole" label="User role" value={orderParams.query?.OrderRole ?? ""}
-             onChange={(e: SelectChangeEvent<OrderRoleEnum>)=> setOrderParams(prev=> ({
+            <Select size="small" labelId="userRole" label="User role" value={params.query?.OrderRole ?? ""}
+             onChange={(e: SelectChangeEvent<OrderRoleEnum>)=> setParams(prev=> ({
               query: {
                 ...prev.query,
                 OrderRole: e.target.value as OrderRoleEnum
@@ -138,8 +138,8 @@ const Search = ({open,drawerWidth, closeDrawer, reloadShipmentsGrid}:{open:boole
 
           <FormControl fullWidth>
             <InputLabel id="object">Object</InputLabel>
-            <Select size="small" labelId="object" label="Object" value={orderParams.query?.ContactType ?? CategoryEnum.CUSTOMERS}
-            onChange={(e: SelectChangeEvent<CategoryEnum>)=> setOrderParams(prev=> ({
+            <Select size="small" labelId="object" label="Object" value={params.query?.ContactType ?? CategoryEnum.CUSTOMERS}
+            onChange={(e: SelectChangeEvent<CategoryEnum>)=> setParams(prev=> ({
               query: {
                 ...prev.query,
                 ContactType: e.target.value as CategoryEnum
@@ -153,8 +153,8 @@ const Search = ({open,drawerWidth, closeDrawer, reloadShipmentsGrid}:{open:boole
           <Grid container spacing={1}> 
             <Grid size={10}>
               <TextField type="number" size="small" label="Fiscal" variant="outlined" disabled={fiscalYearDisabled}
-              value={orderParams.query?.Fiscal} onChange={(e?:React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>)=>
-                setOrderParams(prev=>({
+              value={params.query?.Fiscal} onChange={(e?:React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>)=>
+                setParams(prev=>({
                   query:{
                     ...prev.query,
                     Fiscal: e?.target.value as number | undefined
@@ -168,8 +168,8 @@ const Search = ({open,drawerWidth, closeDrawer, reloadShipmentsGrid}:{open:boole
             <Grid size={10}>
               <FormControl fullWidth disabled={monthDisabled}>
                 <InputLabel id="month">Month</InputLabel>
-                <Select size="small" labelId="month" label="Month" value={orderParams.query?.Month}
-                 onChange={(e:SelectChangeEvent<number>)=>setOrderParams(prev=>({
+                <Select size="small" labelId="month" label="Month" value={params.query?.Month}
+                 onChange={(e:SelectChangeEvent<number>)=>setParams(prev=>({
                   query:{
                     ...prev.query,
                     Month: e?.target.value as number | undefined
@@ -190,11 +190,11 @@ const Search = ({open,drawerWidth, closeDrawer, reloadShipmentsGrid}:{open:boole
             <Grid size={10}>
               <FormControl fullWidth disabled={statusDisabled}>
                 <InputLabel id="status">Status</InputLabel>
-                <Select size="small" labelId="status" label="Status" value={orderParams.query?.Status} 
-                onChange={(e:SelectChangeEvent<OrderStatusEnum>)=>setOrderParams(prev=>({
+                <Select defaultValue={OrderStatusEnum.OPEN} size="small" labelId="status" label="Status" value={params.query?.Status} 
+                onChange={(e:SelectChangeEvent<OrderStatusEnum>)=>setParams(prev=>({
                   query:{
                     ...prev.query,
-                    Status: e?.target.value as OrderStatusEnum | undefined
+                    Status: e?.target.value as OrderStatusEnum 
                   }
                 }))}>
                 {
@@ -215,8 +215,8 @@ const Search = ({open,drawerWidth, closeDrawer, reloadShipmentsGrid}:{open:boole
 
           <FormControl fullWidth>
             <InputLabel id="type">Type</InputLabel>
-            <Select size="small" labelId="type" label="Type" value={orderParams.query?.Export} 
-            onChange={(e: SelectChangeEvent<boolean>)=>setOrderParams(prev=>({
+            <Select size="small" labelId="type" label="Type" value={params.query?.Export} 
+            onChange={(e: SelectChangeEvent<boolean>)=>setParams(prev=>({
               query:{
                 ...prev.query,
                 Export: e?.target.value as boolean | undefined
@@ -247,7 +247,7 @@ const Search = ({open,drawerWidth, closeDrawer, reloadShipmentsGrid}:{open:boole
 
         <Stack justifyContent="flex-end">
           <Button style={{marginLeft:20, marginRight:20, marginBottom:20}} variant="contained" size="small" 
-          onClick={()=>reloadShipmentsGrid(orderParams)}>
+          onClick={()=>reloadShipmentsGrid({...params}, !fiscalYearDisabled, !monthDisabled, !statusDisabled)}>
             <SearchIcon /> Search
           </Button>
         </Stack>
