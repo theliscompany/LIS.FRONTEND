@@ -1,30 +1,25 @@
-import { TableVirtuoso, TableComponents } from 'react-virtuoso';
 import FlagIcon from '@mui/icons-material/Flag';
 import AddCircleIcon from '@mui/icons-material/AddCircle'
 import EditIcon from '@mui/icons-material/Edit'
 import SyncIcon from '@mui/icons-material/Sync'
 import ContentCopyIcon from '@mui/icons-material/ContentCopy'
 import { styled } from '@mui/material/styles';
-import { useEffect, useState } from "react";
+import {  useEffect, useMemo, useState } from "react";
 import Paper from "@mui/material/Paper";
 import Typography from "@mui/material/Typography";
 import IconButton from "@mui/material/IconButton";
 import LensIcon from "@mui/icons-material/Lens"
 import SearchIcon from "@mui/icons-material/Search"
-import React from "react";
-import { GetOrdersData, OrderStatusEnum, ResponseOrdersListDto } from "../api/client/shipment";
-import TableContainer from "@mui/material/TableContainer";
-import Table from "@mui/material/Table";
-import TableHead from "@mui/material/TableHead";
-import TableBody from "@mui/material/TableBody";
-import TableRow from "@mui/material/TableRow";
-import TableCell from "@mui/material/TableCell";
+import { GetOrdersData, OrdersListDto, OrderStatusEnum } from "../api/client/shipment";
 import Badge from "@mui/material/Badge";
 import { useQuery } from "@tanstack/react-query";
 import { getOrdersOptions } from "../api/client/shipment/@tanstack/react-query.gen";
 import Tooltip from "@mui/material/Tooltip";
 import Stack from "@mui/material/Stack";
 import Search from '../components/shipments/Search';
+import { DataGrid } from '@mui/x-data-grid/DataGrid';
+import { GridColDef } from '@mui/x-data-grid/models/colDef/gridColDef';
+import { GridRenderCellParams } from '@mui/x-data-grid/models/params/gridCellParams';
 
 const drawerWidth = 240;
 
@@ -60,173 +55,132 @@ const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' })<{
 }));
 
 
-
-const dateFormatted = (dateString?: string) => {
-
-  if(!dateString) return ''
-
-  const date = new Date(dateString);
-
-    // Get day, month, and year
-  const day = String(date.getDate()).padStart(2, '0');  // Ensures day is two digits
-  const month = String(date.getMonth() + 1).padStart(2, '0');  // Months are zero-based, add 1
-  const year = date.getFullYear();
-
-  // Format as dd/mm/YYYY
-  return `${day}/${month}/${year}`;
-}
-
 const getStatusColor = (orderStatus?: OrderStatusEnum) => {
+  let color, title;
   switch (orderStatus){
     case OrderStatusEnum.CANCELLED:
-      return "red";
+      color = "red";
+      title = "CANCELLED"
+      break;
     case OrderStatusEnum.CLOSED:
-      return "gray";
+      color = "gray";
+      title = "CLOSED"
+      break;
     case OrderStatusEnum.COMPLETED:
-      return "orange";
+      color = "orange";
+      title = "COMPLETED"
+      break;
     case OrderStatusEnum.DOCS_SENT:
-      return "purple";
+      color = "purple";
+      title = "DOCS SENT"
+      break;
     case OrderStatusEnum.VALIDATED:
-      return "blue"
+      color = "blue";
+      title = "VALIDATED"
+      break;
     default:
-      return "black"
+      color = "green";
+      title = "OPENED"
+      break;
   }
+
+  return <Tooltip title={title}>
+    <LensIcon fontSize="small" sx={{color:color, width:'0.75em', pt:"10px"}}/>
+  </Tooltip>
 }
 
-interface ColumnData {
-  dataKey: keyof ResponseOrdersListDto;
-  label: string;
-  width?: number | string;
-  type?: 'numeric' | 'Date'
+const dateFormatted = (value?: string) => {
+
+  if(!value) return "";
+
+      var date = new Date(value)
+
+      return new Intl.DateTimeFormat('en-GB', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+      }).format(date);
 }
 
-const columns: ColumnData[] = [
+const columns: GridColDef<OrdersListDto>[] = [
   {
-    width: 80,
-    label: 'Number',
-    dataKey: 'orderNumber',
+    width: 40,
+    headerName: "",
+    field: "exportation",
+    renderCell: ({value}: GridRenderCellParams<any, boolean | null>) => {
+        const isExport = value === null || value === undefined || value === true
+        return (
+          <Tooltip title={isExport ? "Export" : "Import"}>
+            <Badge badgeContent={isExport ? "E" : "I"} color={isExport ? "success" : "warning"} sx={{ml:"20px"}}  /> 
+          </Tooltip> )
+        
+    }
   },
   {
-    width: 50,
-    label: 'Date',
-    dataKey: 'orderDate',
-    type: 'Date'
+    width: 30,
+    headerName: '',
+    field: 'orderStatus',
+    renderCell: ({value}: GridRenderCellParams<any, OrderStatusEnum>) => {
+      return getStatusColor(value)
+    }
   },
   {
-    width: 50,
-    label: 'Fiscal',
-    dataKey: 'fiscalYear',
-    type: 'numeric',
+    headerName: 'Number',
+    field: 'orderNumber',
   },
   {
-    width: 150,
-    label: 'Seller',
-    dataKey: 'sellerName',
+    headerName: 'Date',
+    field: 'orderDate',
+    valueFormatter: (value?: string) => dateFormatted(value)
   },
   {
-    width: 150,
-    label: 'Buyer',
-    dataKey: 'buyerName',
+    headerName: 'Fiscal',
+    field: 'fiscalYear',
   },
   {
-    width: 150,
-    label: 'Customer',
-    dataKey: 'customerName',
+    headerName: 'Seller',
+    field: 'sellerName',
   },
   {
-    width: 230,
-    label: 'Loading port',
-    dataKey: 'loadingPort',
+    headerName: 'Buyer',
+    field: 'buyerName',
   },
   {
-    width: 50,
-    label: 'ETD',
-    dataKey: 'estimatedDepartureDate',
-    type: 'Date'
+    headerName: 'Customer',
+    field: 'customerName',
   },
   {
-    width: 130,
-    label: 'Discharge port',
-    dataKey: 'dischargePort',
+    headerName: 'Loading port',
+    field: 'loadingPort',
   },
   {
-    width: 50,
-    label: 'ETA',
-    dataKey: 'estimatedArrivalDate',
-    type: 'Date'
+    headerName: 'ETD',
+    field: 'estimatedDepartureDate',
+    valueFormatter: (value?: string) => dateFormatted(value)
   },
   {
-    width: 130,
-    label: 'Ship',
-    dataKey: 'shipName',
+    headerName: 'Discharge port',
+    field: 'dischargePort',
   },
   {
-    width: 130,
-    label: 'Shipping Line',
-    dataKey: 'shippingLine',
+    headerName: 'ETA',
+    field: 'estimatedArrivalDate',
+    valueFormatter: (value?: string) => dateFormatted(value)
+  },
+  {
+    headerName: 'Ship',
+    field: 'shipName',
+  },
+  {
+    headerName: 'Shipping Line',
+    field: 'shippingLine',
   },
 ];
 
-const VirtuosoTableComponents: TableComponents<ResponseOrdersListDto> = {
-  Scroller: React.forwardRef<HTMLDivElement>((props, ref) => (
-    <TableContainer component={Paper} {...props} ref={ref} />
-  )),
-  Table: (props) => (
-    <Table size="small" {...props} sx={{ borderCollapse: 'separate', tableLayout: 'fixed' }} />
-  ),
-  TableHead: React.forwardRef<HTMLTableSectionElement>((props, ref) => (
-    <TableHead {...props} ref={ref} />
-  )),
-  TableRow,
-  TableBody: React.forwardRef<HTMLTableSectionElement>((props, ref) => (
-    <TableBody {...props} ref={ref} />
-  )),
-};
 
-const fixedHeaderContent = () => {
-  return (
-    <TableRow>
-      <TableCell width={30} sx={{backgroundColor: 'background.paper'}} variant="head" />
-      <TableCell width={20} sx={{backgroundColor: 'background.paper'}} variant="head" />
-      {columns.map((column) => (
-        <TableCell
-          key={column.dataKey}
-          variant="head"
-          align={column.type === 'numeric' || false ? 'right' : 'left'}
-          width={ column.width }
-          sx={{ backgroundColor: 'background.paper' }}
-        >
-          {column.label}
-        </TableCell>
-      ))}
-    </TableRow>
-  );
-}
-
-const rowContent = (_index: number, row: ResponseOrdersListDto) => {
-  const color = getStatusColor(row.orderStatus)
-  return (
-    <React.Fragment>
-      <TableCell align="center">
-        {row.exportation === null || row.exportation === undefined ||row.exportation ? 
-        <Badge badgeContent="E" color="success" sx={{mr:"13px", mb:"10px"}} /> : 
-        <Badge badgeContent="I" color="warning" sx={{mr:"13px", mb:"10px"}} /> }
-        <LensIcon fontSize="small" sx={{color:color, width:'0.75em'}}/>
-      </TableCell>
-      <TableCell align="center" />
-      {columns.map((column) => (
-        <TableCell
-        style={{color:color}}
-          key={column.dataKey}
-          align={column.type === 'numeric' || false ? 'right' : 'left'}>
-          {
-            column.type === 'Date' ?
-            dateFormatted(row[column.dataKey]?.toString()) : row[column.dataKey]?.toString()
-          }
-        </TableCell>
-      ))}
-    </React.Fragment>
-  );
+export interface GridData {
+  columns: GridColDef[];
+  rows: OrdersListDto[];
 }
 
 
@@ -234,15 +188,22 @@ const rowContent = (_index: number, row: ResponseOrdersListDto) => {
 const Shipments = () => {
 
   const [open, setOpen] = useState(false);
-  const [orderParams, setOrderParams] = useState<GetOrdersData>({query:{
-    Fiscal: (new Date(Date.now()).getFullYear()),
-    Month: new Date(Date.now()).getMonth() + 1
+  const [displayBudgetDetails, setDisplayBudgetDetails] = useState(false)
+  const [orderParams, setOrderParams] = useState<GetOrdersData>({
+    query:{
+      Fiscal: (new Date(Date.now()).getFullYear()),
+      Month: new Date(Date.now()).getMonth() + 1
   }})
 
     const { data, refetch} = useQuery({
       ...getOrdersOptions(orderParams),
       enabled: false 
     })
+
+    const orders = useMemo(() => {
+      setDisplayBudgetDetails(data?.displayBudgetDetails ?? false)
+      return data?.orders ?? []
+    }, [data])
 
     useEffect(() => {
       refetch()
@@ -253,7 +214,21 @@ const Shipments = () => {
       setOpen(false);
     };
     
-    const refetchShipmentsGrid = (params:GetOrdersData) => {
+    const refetchShipmentsGrid = (params:GetOrdersData, fiscalYearChecked: boolean, 
+      monthChecked: boolean, statusChecked: boolean ) => {
+
+      if(!fiscalYearChecked && params.query){
+        params.query.Fiscal = undefined;
+      }
+
+      if(!monthChecked && params.query){
+        params.query.Month = undefined;
+      }
+
+      if(!statusChecked && params.query){
+        params.query.Status = undefined;
+      }
+       
       setOrderParams(params)
     }
     
@@ -261,16 +236,18 @@ const Shipments = () => {
       <Paper sx={{ display: 'flex', height:'100%' }}>
 
         <Main open={open}>
-          
+          {
+            displayBudgetDetails && 
           <Stack direction="row" p={2} justifyContent="space-between" border={1} borderRadius={4} borderColor="#bce8f1">
-            <Typography fontSize={13} color="#f8ac58">Total : 1 order(s)</Typography>
-            <Typography fontSize={13} color="#2386c7">Outgoing : € 6500.00</Typography>
-            <Typography fontSize={13} color="#ed5565">Incoming : € 5045.07</Typography>
-            <Typography fontSize={13} color="#31708f">Margin : € 1454.93</Typography>
-            <Typography fontSize={13} color="#31708f">Average Margin : € 1454.93</Typography>
-            <Typography fontSize={13} color="#24c6c8">Ratio : 22.38 %</Typography>
+            <Typography fontSize={13} color="#f8ac58">Total : {orders.length} order(s)</Typography>
+            <Typography fontSize={13} color="#2386c7">Outgoing : € {data?.outgoing ?? 0}</Typography>
+            <Typography fontSize={13} color="#ed5565">Incoming : € {data?.incoming ?? 0}</Typography>
+            <Typography fontSize={13} color="#31708f">Margin : € {data?.margin ?? 0}</Typography>
+            <Typography fontSize={13} color="#31708f">Average Margin : € {data?.averageMargin ?? 0}</Typography>
+            <Typography fontSize={13} color="#24c6c8">Ratio : {data?.ratio ?? 0} %</Typography>
             
           </Stack>
+          }
           <Stack p={1} direction="row" justifyContent="space-between">
             <div>
               <Tooltip title="Set order's flag">
@@ -310,12 +287,9 @@ const Shipments = () => {
               <SearchIcon />
             </IconButton>
           </Stack>
-          <TableVirtuoso
-            data={data}
-            components={VirtuosoTableComponents}
-            fixedHeaderContent={fixedHeaderContent}
-            itemContent={rowContent}
-          />
+
+        <DataGrid getRowId={(row: OrdersListDto) => row.orderId ?? 0} rows={orders} columns={columns} 
+          sx={{width:"100%", height:'95%'}} density='compact'  />
         </Main>
         
         <Search open={open} closeDrawer={handleDrawerClose} reloadShipmentsGrid={refetchShipmentsGrid} 

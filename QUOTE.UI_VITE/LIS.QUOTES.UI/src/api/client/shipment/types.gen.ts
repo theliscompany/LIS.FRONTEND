@@ -10,7 +10,7 @@ export enum CategoryEnum {
 }
 
 export type OrderDto = {
-    orderId?: number;
+    orderId?: (number) | null;
     orderNumber?: (string) | null;
     customerId?: number;
     sellerId?: (number) | null;
@@ -52,17 +52,7 @@ export enum OrderRoleEnum {
     OPERATIONS = 'OPERATIONS'
 }
 
-export enum OrderStatusEnum {
-    OPEN = 'OPEN',
-    COMPLETED = 'COMPLETED',
-    VALIDATED = 'VALIDATED',
-    CLOSED = 'CLOSED',
-    CANCELLED = 'CANCELLED',
-    DOCS_SENT = 'DOCS_SENT',
-    PAID = 'PAID'
-}
-
-export type ResponseOrdersListDto = {
+export type OrdersListDto = {
     orderId?: number;
     orderNumber?: (string) | null;
     orderDate?: Date;
@@ -78,7 +68,39 @@ export type ResponseOrdersListDto = {
     shippingLine?: (string) | null;
     exportation?: (boolean) | null;
     orderStatus?: OrderStatusEnum;
+    margin?: (number) | null;
+    ratio?: (number) | null;
+    incoming?: (number) | null;
+    outgoing?: (number) | null;
 };
+
+export enum OrderStatusEnum {
+    OPEN = 'OPEN',
+    COMPLETED = 'COMPLETED',
+    VALIDATED = 'VALIDATED',
+    CLOSED = 'CLOSED',
+    CANCELLED = 'CANCELLED',
+    DOCS_SENT = 'DOCS_SENT',
+    PAID = 'PAID'
+}
+
+export type ResponseOrdersListDto = {
+    orders?: Array<OrdersListDto> | null;
+    margin?: (number) | null;
+    ratio?: (number) | null;
+    incoming?: (number) | null;
+    outgoing?: (number) | null;
+    averageMargin?: (number) | null;
+    displayBudgetDetails?: boolean;
+};
+
+export type PostOrderData = {
+    body?: OrderDto;
+};
+
+export type PostOrderResponse = (boolean);
+
+export type PostOrderError = (unknown);
 
 export type GetOrdersData = {
     query?: {
@@ -99,7 +121,7 @@ export type GetOrdersData = {
     };
 };
 
-export type GetOrdersResponse = (Array<ResponseOrdersListDto>);
+export type GetOrdersResponse = (ResponseOrdersListDto);
 
 export type GetOrdersError = (unknown);
 
@@ -120,7 +142,9 @@ export type GetOrdersResponseTransformer = (data: any) => Promise<GetOrdersRespo
 
 export type ResponseOrdersListDtoModelResponseTransformer = (data: any) => ResponseOrdersListDto;
 
-export const ResponseOrdersListDtoModelResponseTransformer: ResponseOrdersListDtoModelResponseTransformer = data => {
+export type OrdersListDtoModelResponseTransformer = (data: any) => OrdersListDto;
+
+export const OrdersListDtoModelResponseTransformer: OrdersListDtoModelResponseTransformer = data => {
     if (data?.orderDate) {
         data.orderDate = new Date(data.orderDate);
     }
@@ -133,10 +157,15 @@ export const ResponseOrdersListDtoModelResponseTransformer: ResponseOrdersListDt
     return data;
 };
 
-export const GetOrdersResponseTransformer: GetOrdersResponseTransformer = async (data) => {
-    if (Array.isArray(data)) {
-        data.forEach(ResponseOrdersListDtoModelResponseTransformer);
+export const ResponseOrdersListDtoModelResponseTransformer: ResponseOrdersListDtoModelResponseTransformer = data => {
+    if (Array.isArray(data?.orders)) {
+        data.orders.forEach(OrdersListDtoModelResponseTransformer);
     }
+    return data;
+};
+
+export const GetOrdersResponseTransformer: GetOrdersResponseTransformer = async (data) => {
+    ResponseOrdersListDtoModelResponseTransformer(data);
     return data;
 };
 
