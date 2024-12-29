@@ -8,27 +8,26 @@ const useProcessStatePersistence = (userId: string, processName: string, initial
 
     useEffect(() => {
         const fetchPersistedState = async () => {
-        try {
-            const cachedState = localStorage.getItem(processName);
-            console.log("cache : ", cachedState);
-            if (cachedState) {
-                setState(JSON.parse(cachedState));
-            } 
-            else {
-                console.log("userId : ", userId);
-                console.log("processname : ", processName);
-                const response = await axios.get(`${API_BASE_URL}/ProcessState/${userId}/${processName}`);
-                // console.log("response : ", response);
-                if (response.data) {
-                    setState(JSON.parse(response.data.data.stateData));
-                    localStorage.setItem(processName, response.data.data.stateData);
+            try {
+                const cachedState = localStorage.getItem(processName);
+                // console.log("cache : ", cachedState);
+                if (cachedState) {
+                    setState(JSON.parse(cachedState));
+                } 
+                else {
+                    // console.log("userId : ", userId);
+                    // console.log("processname : ", processName);
+                    const response = await axios.get(`${API_BASE_URL}ProcessState/${userId}/${processName}`);
+                    // console.log("response : ", response);
+                    if (response.data) {
+                        setState(JSON.parse(response.data.data.stateData));
+                        localStorage.setItem(processName, response.data.data.stateData);
+                    }
                 }
+            } catch (error) {
+                console.error('Failed to fetch persisted state:', error);
             }
-        } catch (error) {
-            console.error('Failed to fetch persisted state:', error);
-        }
         };
-
         fetchPersistedState();
     }, [userId, processName]);
 
@@ -40,7 +39,7 @@ const useProcessStatePersistence = (userId: string, processName: string, initial
             console.log("processName : ", processName);
             console.log("API BASE : ", API_BASE_URL);
             if (enableAutoSave) {
-                await axios.post(`${API_BASE_URL}/ProcessState`, {
+                await axios.post(`${API_BASE_URL}ProcessState`, {
                     userId,
                     processName,
                     stateData: JSON.stringify(state),

@@ -7,7 +7,7 @@ import { enqueueSnackbar } from 'notistack';
 import { Anchor } from '@mui/icons-material';
 import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import { CategoryEnum, currencyOptions, haulageTypeOptions } from '../../utils/constants';
+import { currencyOptions, haulageTypeOptions } from '../../utils/constants';
 import NewContact from '../shared/NewContact';
 import AutocompleteSearch from '../shared/AutocompleteSearch';
 import CompanySearch from '../shared/CompanySearch';
@@ -117,7 +117,7 @@ function NewHaulage(props: any) {
                         <Grid container spacing={2}>
                             <Grid size={{ xs: 12, md: 6 }} mt={0.25}>
                                 <InputLabel htmlFor="haulier" sx={inputLabelStyles}>{t('haulier')}</InputLabel>
-                                <CompanySearch id="haulier" value={haulier} onChange={setHaulier} category={CategoryEnum.SUPPLIERS} fullWidth />
+                                <CompanySearch id="haulier" value={haulier} onChange={setHaulier} category={"SUPPLIERS"} fullWidth />
                             </Grid>
                             <Grid size={{ xs: 12, md: 6 }} mt={0.25}>
                                 <InputLabel htmlFor="loading-city" sx={inputLabelStyles}>{t('loadingCity')}</InputLabel>
@@ -160,6 +160,7 @@ function NewHaulage(props: any) {
                         <NativeSelect
                             id="currency"
                             value={currency}
+                            size="small"
                             onChange={(e: any) => { setCurrency(e.target.value) }}
                             input={<BootstrapInput />}
                             fullWidth

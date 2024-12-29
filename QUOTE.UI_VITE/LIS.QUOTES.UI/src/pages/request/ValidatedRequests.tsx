@@ -27,7 +27,7 @@ const ValidatedRequests = () => {
         { field: 'id', headerName: t('id'), flex: 0.5 },
         { field: 'email', headerName: t('email'), renderCell: (params: GridRenderCellParams) => {
             return (
-                <Box><Link to={"/admin/handle-request/"+params.row.id}>{params.row.email}</Link></Box>
+                <Box><Link to={"/handle-request/"+params.row.id}>{params.row.email}</Link></Box>
             );
         }, minWidth: 200, flex: 1.5 },
         { field: 'createdAt', headerName: t('created'), valueFormatter: (params: GridValueFormatterParams) => `${(new Date(params.value)).toLocaleString().slice(0,10)}`, minWidth: 100, flex: 0.75 },
@@ -48,10 +48,10 @@ const ValidatedRequests = () => {
         { field: 'www', headerName: t('Actions'), renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box sx={{ my: 1, mr: 1 }}>
-                    <IconButton component={NavLink} to={"/admin/handle-request/"+params.row.id} sx={{ mr: 1 }} title="Handle the request">
+                    <IconButton component={NavLink} to={"/handle-request/"+params.row.id} sx={{ mr: 1 }} title="Handle the request">
                         <Edit fontSize="small" />
                     </IconButton>
-                    {/* <IconButton component={NavLink} to={"/admin/request/"+params.row.requestQuoteId} title="View the request" sx={{ mr: 1 }}>
+                    {/* <IconButton component={NavLink} to={"/request/"+params.row.requestQuoteId} title="View the request" sx={{ mr: 1 }}>
                         <Edit fontSize="small" />
                     </IconButton> */}
                     {/* <IconButton onClick={() => { setCurrentId(params.row.id); setModal(true); }}>

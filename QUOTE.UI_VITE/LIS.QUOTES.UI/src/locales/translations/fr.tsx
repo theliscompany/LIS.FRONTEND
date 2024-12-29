@@ -572,5 +572,6 @@ export const fr = {
   toEditOffer: "pour modifier l'offre",
   hscodeAdded: "Le hs-code a été ajouté avec succès!",
   hscodeEdited: "Le hs-code a été édité avec succès!",
-  digitCategories: "Catégories à 4 chiffres"
+  digitCategories: "Catégories à 4 chiffres",
+  selectOne: "choisir un"
 };

@@ -61,9 +61,9 @@ const UsersAssignment = () => {
     const getAssignees = async () => {
         try {
             // setLoad(true);
-            const response = await getApiAssignee();
+            const response: any = await getApiAssignee();
             if (response.data) {
-                setAssignees(response.data);
+                setAssignees(response.data.data);
                 // setLoad(false);
                 // Then I can load users
                 loadUsers();

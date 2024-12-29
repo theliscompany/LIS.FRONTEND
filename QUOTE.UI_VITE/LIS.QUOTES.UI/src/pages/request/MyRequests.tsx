@@ -11,7 +11,7 @@ import { useAccount, useMsal } from '@azure/msal-react';
 import { useTranslation } from 'react-i18next';
 import RequestViewItem from '../../components/request/RequestViewItem';
 import SearchZone from '../../components/request/SearchZone';
-import { getApiRequest } from '../../api/client/quote';
+import { getApiAssignee, getApiRequest } from '../../api/client/quote';
 
 const MyRequests = () => {
     const [notifications, setNotifications] = useState<any>(null);
@@ -53,7 +53,7 @@ const MyRequests = () => {
     const getAssignees = async () => {
         try {
             setLoad(true);
-            const response: any = await getAssignees();
+            const response: any = await getApiAssignee();
             if (response !== null && response !== undefined) {
                 setAssignees(response.data.data);
                 setLoad(false);
@@ -71,15 +71,15 @@ const MyRequests = () => {
     const loadRequests = async (assigneesList: any) => {
         try {
             var auxAssignee = assigneesList.find((elm: any) => elm.email === account?.username);
-            console.log("Acc", account);
-            console.log("Auxlist", assigneesList);
-            console.log("Auxass", auxAssignee);
+            // console.log("Acc", account);
+            // console.log("Auxlist", assigneesList);
+            // console.log("Auxass", auxAssignee);
             if (auxAssignee !== undefined) {
                 setCurrentUser(auxAssignee)
                 const response: any = await getApiRequest({query: {AssigneeId: auxAssignee.id}});
-                if (response !== null && response.code !== undefined && response.data !== undefined) {
+                if (response !== null && response !== undefined) {
                     setLoad(false);
-                    setNotifications(response.data.reverse());
+                    setNotifications(response.data.data.reverse());
                 }  
                 else {
                     setLoad(false);

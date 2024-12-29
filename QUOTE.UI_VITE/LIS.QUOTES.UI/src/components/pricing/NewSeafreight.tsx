@@ -7,7 +7,7 @@ import { enqueueSnackbar } from 'notistack';
 import { Anchor } from '@mui/icons-material';
 import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import { CategoryEnum, currencyOptions } from '../../utils/constants';
+import { currencyOptions } from '../../utils/constants';
 import CompanySearch from '../shared/CompanySearch';
 import { Dayjs } from 'dayjs';
 import ServicesTable from '../pricing/ServicesTable';
@@ -136,11 +136,11 @@ const NewSeafreight = (props: any) => {
                         <Grid container spacing={2}>
                             <Grid size={{ xs: 12, md: 6 }} mt={0.25}>
                                 <InputLabel htmlFor="carrier" sx={inputLabelStyles}>{t('carrier')}</InputLabel>
-                                <CompanySearch id="carrier" value={carrier} onChange={setCarrier} category={CategoryEnum.SHIPPING_LINES} fullWidth />
+                                <CompanySearch id="carrier" value={carrier} onChange={setCarrier} category={"SHIPPING_LINES"} fullWidth />
                             </Grid>
                             <Grid size={{ xs: 12, md: 6 }} mt={0.25}>
                                 <InputLabel htmlFor="carrier-agent" sx={inputLabelStyles}>{t('carrierAgent')}</InputLabel>
-                                <CompanySearch id="carrier-agent" value={carrierAgent} onChange={setCarrierAgent} category={CategoryEnum.SHIPPING_LINES} fullWidth />
+                                <CompanySearch id="carrier-agent" value={carrierAgent} onChange={setCarrierAgent} category={"SHIPPING_LINES"} fullWidth />
                             </Grid>
                             <Grid size={{ xs: 12, md: 6 }} mt={0.25}>
                                 <InputLabel htmlFor="port-loading" sx={inputLabelStyles}><Anchor fontSize="small" sx={inputIconStyles} /> {t('departurePort')}</InputLabel>

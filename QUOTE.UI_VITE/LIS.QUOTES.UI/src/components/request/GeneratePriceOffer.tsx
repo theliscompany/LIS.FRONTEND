@@ -34,7 +34,6 @@ const defaultTemplate = "65b74024891f9de80722fc6d";
 
 const GeneratePriceOffer = (props: any) => {
     const { 
-        context, account, instance, 
         id, email, tags, clientNumber, 
         departure, setDeparture, containersSelection, 
         loadingCity, setLoadingCity,
@@ -82,7 +81,6 @@ const GeneratePriceOffer = (props: any) => {
     
     const [formState, setFormState] = useProcessStatePersistence(
         "allAccounts",
-        // account?.name,
         'generatePriceOfferTest'+id,
         { 
             haulageType: "", selectedTemplate: defaultTemplate, 
@@ -393,7 +391,7 @@ const GeneratePriceOffer = (props: any) => {
                 customMessage: ""
             };
             const data = await putApiRequestByIdChangeStatus({body: body, path: {id: props.id}});
-            if (data?.data === 200) {
+            if (data?.data) {
                 setLoadStatus(false);
                 enqueueSnackbar(t('requestStatusUpdated'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
             }
@@ -551,10 +549,7 @@ const GeneratePriceOffer = (props: any) => {
     }
 
     const getHaulagePriceOffers = async () => {
-        if (account && instance && context) {
-            // const token = await getAccessToken(instance, pricingRequest, account);
-            // setTempToken(token);
-            
+        try {
             setLoadResults(true);
             var postalCode = loadingCity !== null ? loadingCity.postalCode !== undefined ? loadingCity.postalCode : "" : ""; 
             var city = loadingCity !== null ? loadingCity.city.toUpperCase()+', '+loadingCity.country.toUpperCase() : "";
@@ -572,6 +567,10 @@ const GeneratePriceOffer = (props: any) => {
             const response = await getApiPricingHaulagesOfferRequest({query: {HaulageType: formState.haulageType, LoadingCity: city, ContainerIdsType: containersFormatted}});
             setLoadResults(false);
             setHaulages(removeDuplicatesWithLatestUpdated(response.data));
+        }
+        catch (err: any) {
+            console.log(err);
+            setLoadResults(false);
         }
     }
 
@@ -734,15 +733,15 @@ const GeneratePriceOffer = (props: any) => {
                     "files": formState.files.map((elm: any) => { return {...elm, url: ""}}),
                     "selectedOption": -1
                 };
-                const response = await postApiQuoteOffer({body: dataSent});
-
+                
+                const response: any = await postApiQuoteOffer({body: dataSent});
                 if (response !== null && response !== undefined) {
                     enqueueSnackbar(t('offerSuccessCreated'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
                     console.log(response);
                     setLoadNewOffer(false);
                     changeStatus("Valider");
                     
-                    setCurrentOffer(response.data);
+                    setCurrentOffer(response.data.data);
                     // setLoadCurrentOffer(true);
                     setModalOffer(true);
                 }
@@ -763,9 +762,9 @@ const GeneratePriceOffer = (props: any) => {
 
     const getTemplates = async () => {
         try {
-            const response = await getApiTemplate({query: {Tags: ["offer"]}});
+            const response: any = await getApiTemplate({query: {Tags: ["offer"]}});
             if (response !== null && response !== undefined) {
-                setTemplates(response.data);
+                setTemplates(response.data?.data);
                 setLoadTemplates(false);
             }
             else {
@@ -782,9 +781,9 @@ const GeneratePriceOffer = (props: any) => {
     const getTemplate = async (id: string) => {
         setLoadTemplate(true)
         try {
-            const response = await getApiTemplateById({path: {id: id}});
+            const response: any = await getApiTemplateById({path: {id: id}});
             if (response !== null && response !== undefined) {
-                setTemplateBase(response.data);
+                setTemplateBase(response.data?.data);
                 setLoadTemplate(false);
             }
             else {
@@ -981,7 +980,7 @@ const GeneratePriceOffer = (props: any) => {
                 auxPricesContainers.push("<p># "+t('offer', { lng: templateBase.currentVersion.includes("English") ? "en" : "fr" }).toUpperCase()+" "+Number(i+1)+"<p/>"+auxPricesTotal+auxPricesPrecisions+auxPricesServices);
             }
         }
-        var pricesContainers = templateBase !== null ? auxPricesContainers.join("<p>"+t('', { lng: templateBase.currentVersion.includes("English") ? "en" : "fr" })+"</p>") : "";    
+        var pricesContainers = templateBase !== null ? auxPricesContainers.join("<p>"+t('', { lng: templateBase.currentVersion.includes("English") ? "en" : "fr" })+"</p>") : "";
         
         // var pricesContainers = containersSelection !== null && formState.selectedSeafreight !== null && formState.selectedSeafreight !== undefined && seafreights !== null ? 
         // containersSelection.map((elm: any, index: number) => {
@@ -1092,7 +1091,7 @@ const GeneratePriceOffer = (props: any) => {
                                                     <Grid container>
                                                         <Grid size={{ xs: 7 }}>
                                                             <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>
-                                                                {t('listHaulagesPricingOffers')+t('fromDotted')+loadingCity.city} (select one)
+                                                                {t('listHaulagesPricingOffers')+t('fromDotted')+loadingCity.city} ({t('selectOne')})
                                                             </Typography>
                                                         </Grid>
                                                         <Grid size={{ xs: 5 }}>

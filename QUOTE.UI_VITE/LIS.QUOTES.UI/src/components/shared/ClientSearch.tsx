@@ -60,7 +60,7 @@ const ClientSearch: React.FC<LocationAutocompleteProps> = ({ id, name, value, on
             options !== null ? 
             <Autocomplete
                 id={id}
-                componentName={name}
+                // componentName={name}
                 fullWidth={fullWidth}
                 disablePortal
                 // freeSolo
@@ -69,7 +69,6 @@ const ClientSearch: React.FC<LocationAutocompleteProps> = ({ id, name, value, on
                 loading={loading}
                 noOptionsText={t('typeSomething')}
                 getOptionLabel={(option) => { 
-                    // console.log(option);
                     if (option !== undefined && option !== null && option !== "") {
                         if (option.contactName !== undefined && option.contactName !== null) {
                             return `${option.contactNumber === "" ? "0" : option.contactNumber}, ${option.contactName}`;
@@ -79,6 +78,7 @@ const ClientSearch: React.FC<LocationAutocompleteProps> = ({ id, name, value, on
                     return "";
                 }}
                 value={value}
+                size="small"
                 onChange={(_, newValue) => {
                     onChange(newValue);
                     console.log(newValue);
@@ -109,17 +109,6 @@ const ClientSearch: React.FC<LocationAutocompleteProps> = ({ id, name, value, on
                                 ),    
                             }
                         }}
-                        // InputProps={{
-                        //     ...params.InputProps,
-                        //     endAdornment: (
-                        //     <>
-                        //         {loading ? (
-                        //             <CircularProgress color="inherit" size={15} />
-                        //         ) : null}
-                        //         {params.InputProps.endAdornment}
-                        //     </>
-                        //     ),
-                        // }}
                     />
                 )}
             />

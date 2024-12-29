@@ -13,7 +13,7 @@ import { containerPackages } from '../../utils/constants';
 import useProcessStatePersistence from '../../utils/processes/useProcessStatePersistence';
 import { useMsal, useAccount } from '@azure/msal-react';
 import { getProduct } from '../../api/client/transport';
-import { getApiHsCodeLis, putApiAssigneeByRequestQuoteIdByAssigneeId } from '../../api/client/quote';
+import { getApiAssignee, getApiHsCodeLis, putApiAssigneeByRequestQuoteIdByAssigneeId } from '../../api/client/quote';
 
 function validMail(mail: string) {
     return /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/.test(mail);
@@ -24,7 +24,7 @@ const NewRequest = () => {
     const [loadUser, setLoadUser] = useState<boolean>(true);
     const [packingType, setPackingType] = useState<string>("FCL");
     const [currentUser, setCurrentUser] = useState<any>(null);
-    const [assignees, setAssignees] = useState<any>(null);
+    const [assignees, setAssignees] = useState<any>([]);
     const [containerType, setContainerType] = useState<string>("20' Dry");
     const [quantity, setQuantity] = useState<number>(1);
     // const [unitsSelection, setUnitsSelection] = useState<any>([]);
@@ -40,7 +40,7 @@ const NewRequest = () => {
     const account = useAccount(accounts[0] || {});
 
     const [formState, setFormState] = useProcessStatePersistence(
-        account?.name || "",
+        account?.username || "",
         'newRequestTest',
         { 
             message: "", tags: [], phone: "", 
@@ -75,7 +75,7 @@ const NewRequest = () => {
         try {
             const response = await getApiHsCodeLis();
             if (response !== null && response !== undefined) {
-                setHSCodes(response);
+                setHSCodes(response.data);
             }    
         }
         catch (err: any) {
@@ -108,7 +108,7 @@ const NewRequest = () => {
     const getAssignees = async () => {
         try {
             setLoadUser(true);
-            const response: any = await getAssignees();
+            const response: any = await getApiAssignee();
             if (response !== null && response !== undefined) {
                 var aux = response.data.data.find((elm: any) => elm.email === account?.username);
                 setAssignees(response.data.data);
@@ -257,6 +257,7 @@ const NewRequest = () => {
                                     <NativeSelect
                                         id="assigned-manager"
                                         value={formState.assignedManager}
+                                        size="small"
                                         onChange={(e: any) => { handleChangeFormState(e.target.value, "assignedManager"); }} 
                                         input={<BootstrapInput />}
                                         fullWidth
@@ -366,8 +367,8 @@ const NewRequest = () => {
                                         setFormState({ ...formState, "tags": [] });
                                     }}
                                 >
-                                    <FormControlLabel value="products" control={<Radio />} label="Products" />
-                                    <FormControlLabel value="hscodes" control={<Radio />} label="HS Codes" />
+                                    <FormControlLabel value="products" control={<Radio size="small" />} label="Products" />
+                                    <FormControlLabel value="hscodes" control={<Radio size="small" />} label="HS Codes" />
                                 </RadioGroup>
                             </FormControl>
                             <Box>
@@ -390,6 +391,7 @@ const NewRequest = () => {
                                             disableCloseOnSelect
                                             renderInput={(params: any) => <TextField placeholder="Machinery, Household goods, etc" {...params} sx={{ textTransform: "lowercase" }} />}
                                             value={formState.tags}
+                                            size="small"
                                             onChange={(_, value: any) => { 
                                                 setFormState({ ...formState, "tags": value });
                                             }}
@@ -424,6 +426,7 @@ const NewRequest = () => {
                                             disableCloseOnSelect
                                             renderInput={(params: any) => <TextField placeholder="Live animals, Cereals, etc" {...params} sx={{ textTransform: "lowercase" }} />}
                                             value={formState.tags}
+                                            size="small"
                                             onChange={(_, value: any) => { 
                                                 setFormState({ ...formState, "tags": value });
                                             }}

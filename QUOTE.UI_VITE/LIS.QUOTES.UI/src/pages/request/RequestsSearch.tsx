@@ -47,7 +47,7 @@ const RequestsSearch = () => {
             const response: any = await getApiRequest(search !== undefined ? {query: {Search: search}} : {});
             if (response !== null && response !== undefined) {
                 setLoad(false);
-                setNotifications(response.data.reverse());
+                setNotifications(response.data.data.reverse());
             }  
             else {
                 setLoad(false);

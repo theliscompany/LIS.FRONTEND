@@ -18,7 +18,7 @@ import RequestPriceSeafreight from '../../components/pricing/RequestPriceSeafrei
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import dayjs, { Dayjs } from 'dayjs';
-import { CategoryEnum, containerPackages, currencyOptions } from '../../utils/constants';
+import { containerPackages, currencyOptions } from '../../utils/constants';
 import ServicesTable from '../../components/pricing/ServicesTable';
 import { flattenData, sortSuppliersByCarrierAgentName } from '../../utils/functions';
 import NewContact from '../../components/shared/NewContact';
@@ -268,7 +268,7 @@ function Seafreights() {
             setLoad(true);
             const response = await getApiSeaFreightGetSeaFreights({query: { DeparturePortId: portDeparture?.portId, DestinationPortId: portDestination?.portId, CarrierAgentId: searchedCarrier?.contactId }});
             if (response !== null && response !== undefined) {
-                setSeafreights(response);
+                setSeafreights(response.data);
                 setLoad(false);
             }
             else {
@@ -452,7 +452,7 @@ function Seafreights() {
                     </Grid>
                     <Grid size={{ xs: 12, md: 4 }} mt={1}>
                         <InputLabel htmlFor="company-name" sx={inputLabelStyles}>{t('carrier')}</InputLabel>
-                        <CompanySearch id="company-name" value={searchedCarrier} onChange={setSearchedCarrier} category={CategoryEnum.SHIPPING_LINES} fullWidth />
+                        <CompanySearch id="company-name" value={searchedCarrier} onChange={setSearchedCarrier} category={"SHIPPING_LINES"} fullWidth />
                     </Grid>
                     <Grid size={{ xs: 12, md: 3 }} mt={1}>
                         <InputLabel htmlFor="port-departure" sx={inputLabelStyles}><Anchor fontSize="small" sx={inputIconStyles} /> {t('departurePort')}</InputLabel>
@@ -547,11 +547,11 @@ function Seafreights() {
                                 <Grid container spacing={2}>
                                     <Grid size={{ xs: 12, md: 6 }} mt={0.25}>
                                         <InputLabel htmlFor="carrier" sx={inputLabelStyles}>{t('carrier')}</InputLabel>
-                                        <CompanySearch id="carrier" value={carrier} onChange={setCarrier} category={CategoryEnum.SHIPPING_LINES} fullWidth />
+                                        <CompanySearch id="carrier" value={carrier} onChange={setCarrier} category={"SHIPPING_LINES"} fullWidth />
                                     </Grid>
                                     <Grid size={{ xs: 12, md: 6 }} mt={0.25}>
                                         <InputLabel htmlFor="carrier-agent" sx={inputLabelStyles}>{t('carrierAgent')}</InputLabel>
-                                        <CompanySearch id="carrier-agent" value={carrierAgent} onChange={setCarrierAgent} category={CategoryEnum.SHIPPING_LINES} fullWidth />
+                                        <CompanySearch id="carrier-agent" value={carrierAgent} onChange={setCarrierAgent} category={"SHIPPING_LINES"} fullWidth />
                                     </Grid>
                                     <Grid size={{ xs: 12, md: 6 }} mt={0.25}>
                                         <InputLabel htmlFor="port-loading" sx={inputLabelStyles}><Anchor fontSize="small" sx={inputIconStyles} /> {t('departurePort')}</InputLabel>

@@ -37,7 +37,7 @@ const Histories = () => {
 		{ field: "id", headerName: t("id"), minWidth: 100, flex: 0.5 },
 		{
 			field: "requestQuoteId", headerName: t("requestQuoteId"),
-			renderCell: (params: GridRenderCellParams) => { return (<Box><Link to={"/admin/request/" + params.row.id}>{params.row.id}</Link></Box>); },
+			renderCell: (params: GridRenderCellParams) => { return (<Box><Link to={"/request/" + params.row.id}>{params.row.id}</Link></Box>); },
 			minWidth: 100, flex: 0.5,
 		},
 		{
@@ -83,7 +83,7 @@ const Histories = () => {
 			if (response !== null && response !== undefined) {
 				if (response.code === 200 && response.data) {
 					console.log("Requests fetched", response.data);
-					setHistories(response.data.reverse());
+					setHistories(response.data.data.reverse());
 					setLoad(false);
 				} 
 				else {
@@ -105,7 +105,7 @@ const Histories = () => {
 				if (response.code === 200 && response.data) {
 					console.log("Histories fetched", response.data);
 					setLoad(false);
-					setHistories(response.data);
+					setHistories(response.data.data);
 				} 
 				else {
 					setLoad(false);
@@ -130,7 +130,7 @@ const Histories = () => {
 				if (response.code === 200 && response.data) {
 					console.log("Search Histories fetched", response.data);
 					setLoad(false);
-					setHistories(response.data);
+					setHistories(response.data.data);
 				} 
 				else {
 					setLoad(false);

@@ -15,7 +15,7 @@ import { BootstrapDialog, BootstrapDialogTitle, BootstrapInput, actionButtonStyl
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import dayjs, { Dayjs } from 'dayjs';
-import { CategoryEnum, containerPackages, currencyOptions, haulageTypeOptions } from '../../utils/constants';
+import { containerPackages, currencyOptions, haulageTypeOptions } from '../../utils/constants';
 import { extractCityAndPostalCode, parseLocation2, sortHauliersByName } from '../../utils/functions';
 import RequestPriceHaulage from '../../components/pricing/RequestPriceHaulage';
 import CompanySearch from '../../components/shared/CompanySearch';
@@ -280,7 +280,7 @@ function Haulages() {
 
                 if (currentEditId !== "") {
                     dataSent = {
-                        "id": currentEditId,
+                        // "id": currentEditId,
                         "haulierId": haulier.contactId,
                         "haulierName": haulier.contactName,
                         "currency": currency,
@@ -320,6 +320,7 @@ function Haulages() {
                         "containers": containerTypes,
                     };    
                 }
+                
                 const response = await postApiHaulageHaulage({body: dataSent});
                 if (response !== null && response !== undefined) {
                     setModal2(false);
@@ -381,7 +382,7 @@ function Haulages() {
                     </Grid>
                     <Grid size={{ xs: 12, md: 4 }} mt={1}>
                         <InputLabel htmlFor="company-name" sx={inputLabelStyles}>{t('haulier')}</InputLabel>
-                        <CompanySearch id="company-name" value={searchedHaulier} onChange={setSearchedHaulier} category={CategoryEnum.SUPPLIERS} fullWidth />
+                        <CompanySearch id="company-name" value={searchedHaulier} onChange={setSearchedHaulier} category={"SUPPLIERS"} fullWidth />
                     </Grid>
                     <Grid size={{ xs: 12, md: 3 }} mt={1}>
                         <InputLabel htmlFor="loading-city-searched" sx={inputLabelStyles}>{t('loadingCity')}</InputLabel>
@@ -488,7 +489,7 @@ function Haulages() {
                                 <Grid container spacing={2}>
                                     <Grid size={{ xs: 12, md: 6 }} mt={0.25}>
                                         <InputLabel htmlFor="haulier" sx={inputLabelStyles}>{t('haulier')}</InputLabel>
-                                        <CompanySearch id="haulier" value={haulier} onChange={setHaulier} category={CategoryEnum.SUPPLIERS} fullWidth />
+                                        <CompanySearch id="haulier" value={haulier} onChange={setHaulier} category="SUPPLIERS" fullWidth />
                                     </Grid>
                                     <Grid size={{ xs: 12, md: 6 }} mt={0.25}>
                                         <InputLabel htmlFor="loading-city" sx={inputLabelStyles}>{t('loadingCity')}</InputLabel>

@@ -221,7 +221,7 @@ const Landing = () => {
                     variant="contained"
                     color="inherit" 
                     size="large"
-                    // to={!isAuthenticated ? undefined : "/admin/"}
+                    // to={!isAuthenticated ? undefined : "/"}
                     hidden={!isAuthenticated}
                     sx={{ 
                         textTransform: "inherit",
@@ -231,7 +231,7 @@ const Landing = () => {
                         top: { xs: "20px", md: "25px"},
                         right: { xs: "30px", md: "230px"}
                     }}
-                    onClick={!isAuthenticated ? handleLogin : () => { navigate('/admin/'); }}
+                    onClick={!isAuthenticated ? handleLogin : () => { navigate('/'); }}
                 >
                     <FaceIcon sx={{ mr: 1 }} /> {!isAuthenticated ? t('login') : "Admin"}
                 </Button>

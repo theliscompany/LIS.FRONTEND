@@ -33,24 +33,23 @@ const closedMixin = (theme: Theme): CSSObject => ({
 });
 
 const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' })(
-({ theme, open }) => ({
-    width: drawerWidth,
-    flexShrink: 0,
-    whiteSpace: 'nowrap',
-    boxSizing: 'border-box',
-    ...(open && {
-    ...openedMixin(theme),
-    '& .MuiDrawer-paper': openedMixin(theme),
+    ({ theme, open }) => ({
+        width: drawerWidth,
+        flexShrink: 0,
+        whiteSpace: 'nowrap',
+        boxSizing: 'border-box',
+        ...(open && {
+        ...openedMixin(theme),
+        '& .MuiDrawer-paper': openedMixin(theme),
+        }),
+        ...(!open && {
+        ...closedMixin(theme),
+        '& .MuiDrawer-paper': closedMixin(theme),
+        }),
     }),
-    ...(!open && {
-    ...closedMixin(theme),
-    '& .MuiDrawer-paper': closedMixin(theme),
-    }),
-}),
 );
 
 const Layout = () : React.ReactNode => {
-
     const { instance, accounts } = useMsal();
     const { t, i18n } = useTranslation();
     const navigate = useNavigate();
@@ -141,31 +140,31 @@ const Layout = () : React.ReactNode => {
                                     sx={{ display: { xs: 'block', md: 'none' } }}
                                     slotProps={{paper: {sx: { width: "200px" }}}}
                                 >
-                                    <MenuItem onClick={() => { navigate('/admin/'); handleCloseNavMenu(); }}>
+                                    <MenuItem onClick={() => { navigate('/'); handleCloseNavMenu(); }}>
                                         <Typography textAlign="center">{t('overview')}</Typography>
                                     </MenuItem>
-                                    <MenuItem onClick={() => { navigate('/admin/users'); handleCloseNavMenu(); }}>
+                                    <MenuItem onClick={() => { navigate('/users'); handleCloseNavMenu(); }}>
                                         <Typography textAlign="center">{t('users')}</Typography>
                                     </MenuItem>
-                                    <MenuItem onClick={() => { navigate('/admin/new-request'); handleCloseNavMenu(); }}>
+                                    <MenuItem onClick={() => { navigate('/new-request'); handleCloseNavMenu(); }}>
                                         <Typography textAlign="center">{t('newRequest')}</Typography>
                                     </MenuItem>
-                                    <MenuItem onClick={() => { navigate('/admin/my-requests'); handleCloseNavMenu(); }}>
+                                    <MenuItem onClick={() => { navigate('/my-requests'); handleCloseNavMenu(); }}>
                                         <Typography textAlign="center">{t('myRequests')}</Typography>
                                     </MenuItem>
-                                    <MenuItem onClick={() => { navigate('/admin/requests'); handleCloseNavMenu(); }}>
+                                    <MenuItem onClick={() => { navigate('/requests'); handleCloseNavMenu(); }}>
                                         <Typography textAlign="center">{t('requests')}</Typography>
                                     </MenuItem>
-                                    <MenuItem onClick={() => { navigate('/admin/quote-offers'); handleCloseNavMenu(); }}>
+                                    <MenuItem onClick={() => { navigate('/quote-offers'); handleCloseNavMenu(); }}>
                                         <Typography textAlign="center">{t('priceOffers')}</Typography>
                                     </MenuItem>
-                                    <MenuItem onClick={() => { navigate('/admin/seafreights'); handleCloseNavMenu(); }}>
+                                    <MenuItem onClick={() => { navigate('/seafreights'); handleCloseNavMenu(); }}>
                                         <Typography textAlign="center">{t('seafreights')}</Typography>
                                     </MenuItem>
-                                    <MenuItem onClick={() => { navigate('/admin/haulages'); handleCloseNavMenu(); }}>
+                                    <MenuItem onClick={() => { navigate('/haulages'); handleCloseNavMenu(); }}>
                                         <Typography textAlign="center">{t('haulages')}</Typography>
                                     </MenuItem>
-                                    <MenuItem onClick={() => { navigate('/admin/miscellaneous'); handleCloseNavMenu(); }}>
+                                    <MenuItem onClick={() => { navigate('/miscellaneous'); handleCloseNavMenu(); }}>
                                         <Typography textAlign="center">{t('miscellaneous')}</Typography>
                                     </MenuItem>
                                 </Menu>
@@ -178,12 +177,12 @@ const Layout = () : React.ReactNode => {
                                     sx={{ ml: 5, pb: 1, minWidth: { xs: "calc(100vw - 90px)", md: "400px" } }} 
                                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchText(e.target.value)} endAdornment={
                                         <InputAdornment position="end">
-                                            <IconButton component={Link} to={"/admin/search/"+searchText} edge="end"><Search /></IconButton>
+                                            <IconButton component={Link} to={"/search/"+searchText} edge="end"><Search /></IconButton>
                                         </InputAdornment>
                                     } 
                                     onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
                                         if (e.key === "Enter") {
-                                            navigate("/admin/search/"+searchText);
+                                            navigate("/search/"+searchText);
                                             e.preventDefault();
                                         }
                                     }}
@@ -200,7 +199,7 @@ const Layout = () : React.ReactNode => {
                 >
                     <Container style={{ maxWidth: "2000px" }}>
                         <Toolbar disableGutters>
-                            <Typography variant="h6" noWrap component="a" href="/admin/">
+                            <Typography variant="h6" noWrap component="a" href="/">
                                 <img src="/img/logolisquotes.png" className="img-fluid" style={{ maxHeight: "50px", marginTop: "10px" }} alt="lisquotes" />
                             </Typography>
                             <BootstrapInput 
@@ -211,12 +210,12 @@ const Layout = () : React.ReactNode => {
                                 sx={{ ml: 5, minWidth: { md: "400px" } }} 
                                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchText(e.target.value)} endAdornment={
                                     <InputAdornment position="end">
-                                        <IconButton component={Link} to={"/admin/search/"+searchText} edge="end"><Search /></IconButton>
+                                        <IconButton component={Link} to={"/search/"+searchText} edge="end"><Search /></IconButton>
                                     </InputAdornment>
                                 } 
                                 onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
                                     if (e.key === "Enter") {
-                                        navigate("/admin/search/"+searchText);
+                                        navigate("/search/"+searchText);
                                         e.preventDefault();
                                     }
                                 }}
@@ -280,7 +279,7 @@ const Layout = () : React.ReactNode => {
                                         </ListItemIcon>
                                         <ListItemText primary={t('viewProfile')} slotProps={{primary:{ fontSize: 13 }}}  />
                                     </MenuItem>
-                                    <MenuItem dense key={"x1-My Requests"} title={t('myRequests')} component="a" href="/admin/my-requests">
+                                    <MenuItem dense key={"x1-My Requests"} title={t('myRequests')} component="a" href="/my-requests">
                                         <ListItemIcon className="cs-listitemicon">
                                             <AutoFixHigh fontSize="small" />
                                         </ListItemIcon>

@@ -4,7 +4,6 @@ import { Box, Button, Skeleton, Typography } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import { BootstrapDialog, whiteButtonStyles } from '../../utils/misc/styles';
 import { enqueueSnackbar, SnackbarProvider } from 'notistack';
-import { useAccount, useMsal } from '@azure/msal-react';
 import { useTranslation } from 'react-i18next';
 import { arePhoneticallyClose, complexEquality, findClosestSeaPort, parseContact, parseLocation, similar, sortByCloseness } from '../../utils/functions';
 import { containerPackages } from '../../utils/constants';
@@ -16,7 +15,6 @@ import AddContainer from '../../components/request/AddContainer';
 import RequestFormHeader from '../../components/request/RequestFormHeader';
 import { getApiAssignee, getApiHsCodeLis, getApiRequestById, putApiRequestById } from '../../api/client/quote';
 import { getPorts, getProduct } from '../../api/client/transport';
-// @ts-ignore
 
 const Request = () => {
     // const [load, setLoad] = useState<boolean>(false);
@@ -54,15 +52,11 @@ const Request = () => {
     
     let { id } = useParams();
     const navigate = useNavigate();
-    
-    const { instance, accounts } = useMsal();
-    const account = useAccount(accounts[0] || {});
-    
     const { t } = useTranslation();
     
     function initializeSeaPorts() {
         var auxArray = [];
-        for (const [value] of Object.entries(seaPorts)) {
+        for (const [_, value] of Object.entries(seaPorts)) {
             if (value) {
                 let result = value as any;
                 auxArray.push({
@@ -80,7 +74,9 @@ const Request = () => {
     
     function addedCoordinatesToPorts(selectedPorts: any) {
         var allMySeaPorts = initializeSeaPorts();
+        // console.log(allMySeaPorts);
         const updatedLisPorts = selectedPorts.map((lisPort: any) => {
+            // console.log(lisPort);
             const matchingSeaPort = allMySeaPorts.find((seaPort: any) => 
                 (complexEquality(seaPort.name.toUpperCase(), lisPort.portName.toUpperCase()) || similar(seaPort.name, lisPort.portName) 
                 || (arePhoneticallyClose(seaPort.name.toUpperCase(), lisPort.portName.toUpperCase()) && complexEquality(seaPort.country.toUpperCase(), lisPort.country.toUpperCase()))));
@@ -172,7 +168,7 @@ const Request = () => {
         try {
             const response = await getApiHsCodeLis();
             if (response !== null && response !== undefined) {
-                setHSCodes(response);
+                setHSCodes(response.data);
             }
         }
         catch (err: any) {
@@ -185,8 +181,9 @@ const Request = () => {
         try {
             const response: any = await getApiRequestById({path: {id: Number(id)}});
             if (response !== null && response !== undefined) {
+                console.log("Saved : ", response.data.data);
                 // Parse the saved data string into an array of IDs
-                const savedDataArray = response.data.tags !== null ? response.data.tags.split(',').map(Number) : [];
+                const savedDataArray = response.data.data.tags !== null ? response.data.data.tags.split(',').map(Number) : [];
                 // Filter the possibleObjects array to only include objects with matching hS_Code
                 const filteredObjects = hscodes.filter((obj: any) => savedDataArray.includes(obj.hS_Code));
                 console.log("Array of objs : ", filteredObjects);
@@ -197,33 +194,33 @@ const Request = () => {
                 }
                 else {
                     console.log("PRODUCTS!!!!");
-                    setTags(response.data.tags !== null ? products.filter((elm: any) => response.data.tags.includes(elm.productName)) : []);
+                    setTags(response.data.data.tags !== null ? products.filter((elm: any) => response.data.data.tags.includes(elm.productName)) : []);
                 }
                 
-                setRequestData(response.data);
-                setEmail(response.data.email);
-                setPhone(response.data.whatsapp);
-                setDeparture(parseLocation(response.data.departure));
-                setArrival(parseLocation(response.data.arrival));
-                setLoadingCity(parseLocation(response.data.departure));
-                setStatus(response.data.status);
-                setPackingType(response.data.packingType !== null ? response.data.packingType : "FCL");
-                setClientNumber(response.data.clientNumber !== null && response.data.clientNumber !== "" ? parseContact(response.data.clientNumber) : "");
-                setContainersSelection(response.data.containers.map((elm: any) => { return {
+                setRequestData(response.data.data);
+                setEmail(response.data.data.email);
+                setPhone(response.data.data.whatsapp);
+                setDeparture(parseLocation(response.data.data.departure));
+                setArrival(parseLocation(response.data.data.arrival));
+                setLoadingCity(parseLocation(response.data.data.departure));
+                setStatus(response.data.data.status);
+                setPackingType(response.data.data.packingType !== null ? response.data.data.packingType : "FCL");
+                setClientNumber(response.data.data.clientNumber !== null && response.data.data.clientNumber !== "" ? parseContact(response.data.data.clientNumber) : "");
+                setContainersSelection(response.data.data.containers.map((elm: any) => { return {
                     id: elm.id,
                     container: elm.containers, 
                     quantity: elm.quantity 
                 } }) || []);
-                setUnitsSelection(response.data.units.map((elm: any) => { return {
+                setUnitsSelection(response.data.data.units.map((elm: any) => { return {
                     name: elm.name,
                     weight: elm.weight,
                     dimensions: elm.dimension,
                     quantity: elm.quantity
                 }}) || []);
-                setQuantity(response.data.quantity);
-                setMessage(response.data.detail);
-                setAssignedManager(response.data.assigneeId !== null && response.data.assigneeId !== "" ? response.data.assigneeId : "");
-                setTrackingNumber(response.data.trackingNumber);                        
+                setQuantity(response.data.data.quantity);
+                setMessage(response.data.data.detail);
+                setAssignedManager(response.data.data.assigneeId !== null && response.data.data.assigneeId !== "" ? response.data.data.assigneeId : "");
+                setTrackingNumber(response.data.data.trackingNumber);                        
                 // setLoad(false);
             }
             else {
@@ -328,8 +325,7 @@ const Request = () => {
                         
                         {/* Request Form COMPONENT */}
                         <RequestForm 
-                            account={account} instance={instance} id={id}
-                            assignedManager={assignedManager} setAssignedManager={setAssignedManager}
+                            id={id} assignedManager={assignedManager} setAssignedManager={setAssignedManager}
                             assignees={assignees} loadAssignees={loadAssignees}
                             message={message} setMessage={setMessage}
                             phone={phone} setPhone={setPhone}
@@ -363,7 +359,7 @@ const Request = () => {
                         }
 
                         <Grid size={{ xs: 12 }}>
-                            <Button variant="contained" color="inherit" sx={whiteButtonStyles} onClick={() => { navigate("/admin/requests"); }} >Save and close</Button>
+                            <Button variant="contained" color="inherit" sx={whiteButtonStyles} onClick={() => { navigate("/requests"); }} >Save and close</Button>
                         </Grid>
                     </Grid> : null
                     : <Skeleton sx={{ mx: 5, mt: 3 }} />

@@ -46,7 +46,7 @@ const RequestViewItem = (props: any) => {
         <ListItem
             key={"request-"+props.i}
             component={NavLink}
-            to={"/admin/request/" + props.item.id}
+            to={"/request/" + props.item.id}
             sx={{ 
                 '&:hover': { backgroundColor: "#fbfbfb" },
                 borderTop: "1px solid #e6e6e6", 

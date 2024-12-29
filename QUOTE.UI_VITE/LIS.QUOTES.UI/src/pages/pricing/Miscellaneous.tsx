@@ -465,7 +465,7 @@ function Miscellaneous() {
                     
                     <Grid size={{ xs: 12, md: 4 }} mt={1}>
                         <InputLabel htmlFor="company-name" sx={inputLabelStyles}>{t('supplier')}</InputLabel>
-                        <CompanySearch id="company-name" value={searchedSupplier} onChange={setSearchedSupplier} category={0} callBack={() => console.log(searchedSupplier)} fullWidth />
+                        <CompanySearch id="company-name" value={searchedSupplier} onChange={setSearchedSupplier} category={undefined} callBack={() => console.log(searchedSupplier)} fullWidth />
                     </Grid>
                     <Grid size={{ xs: 12, md: 3 }} mt={1}>
                         <InputLabel htmlFor="port-departure" sx={inputLabelStyles}><Anchor fontSize="small" sx={inputIconStyles} /> {t('departurePort')}</InputLabel>
@@ -590,7 +590,7 @@ function Miscellaneous() {
                                 <Grid container spacing={2}>
                                     <Grid size={{ xs: 12, md: 6 }} mt={0.25}>
                                         <InputLabel htmlFor="supplier" sx={inputLabelStyles}>{t('supplier')}</InputLabel>
-                                        <CompanySearch id="supplier" value={supplier} onChange={setSupplier} category={0} callBack={() => console.log(supplier)} fullWidth />
+                                        <CompanySearch id="supplier" value={supplier} onChange={setSupplier} category={undefined} callBack={() => console.log(supplier)} fullWidth />
                                     </Grid>
                                     <Grid size={{ xs: 12, md: 6 }} mt={0.25}>
                                         <InputLabel htmlFor="port-loading" sx={inputLabelStyles}><Anchor fontSize="small" sx={inputIconStyles} /> {t('departurePort')}</InputLabel>

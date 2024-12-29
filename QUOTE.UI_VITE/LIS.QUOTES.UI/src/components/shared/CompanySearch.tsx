@@ -3,7 +3,6 @@ import { Autocomplete, CircularProgress, Skeleton, TextField } from "@mui/materi
 import { debounce } from "@mui/material/utils";
 import { useTranslation } from "react-i18next";
 import { getContactGetContacts } from "../../api/client/crm";
-import { getCategoryNames } from "../../utils/functions";
 
 interface CompanyAutocompleteProps {
     id: string;
@@ -11,7 +10,7 @@ interface CompanyAutocompleteProps {
     onChange: (value: any) => void;
     fullWidth?: boolean;
     disabled?: boolean;
-    category: number;
+    category: 'CUSTOMERS' | 'SUPPLIERS' | 'CHARGEUR' | 'RECEIVER' | 'SHIPPING_LINES' | 'BANK' | 'SHIPPING_AGENCY11' | undefined;
     callBack?: (value: any) => void;
 }
 
@@ -22,7 +21,8 @@ const CompanySearch: React.FC<CompanyAutocompleteProps> = ({ id, value, onChange
     const debouncedSearch = debounce(async (search: string) => {
         setLoading(true);
         try {
-            const response = await getContactGetContacts(category === 0 ? {query: {contactName: search}} : {query: {contactName: search, category: getCategoryNames(category)}});
+            console.log(category);
+            const response = await getContactGetContacts(category === undefined ? {query: {contactName: search}} : {query: {contactName: search, category: category}});
             if (response !== null && response !== undefined) {
                 console.log(response);
                 setOptions(response.data?.data || []);
@@ -55,6 +55,7 @@ const CompanySearch: React.FC<CompanyAutocompleteProps> = ({ id, value, onChange
                     return "";
                 }}
                 value={value}
+                size="small"
                 onChange={(_, newValue) => {
                     onChange(newValue);
                     if (callBack) {
@@ -62,7 +63,6 @@ const CompanySearch: React.FC<CompanyAutocompleteProps> = ({ id, value, onChange
                     }
                 }}
                 disabled={disabled}
-                size="small"
                 renderInput={(params: any) => (
                     <TextField
                         {...params}

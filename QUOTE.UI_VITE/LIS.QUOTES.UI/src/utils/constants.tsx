@@ -9,6 +9,17 @@ export enum CategoryEnum
     SHIPPING_AGENCY = 11
 }
 
+export enum EnumCategory
+{
+    CUSTOMERS = 1,
+    SUPPLIERS = 2,
+    CHARGEUR = 3,
+    RECEIVER = 4,
+    SHIPPING_LINES = 5,
+    BANK = 10,
+    SHIPPING_AGENCY = 11
+}
+
 export let categoriesOptions: any = [
   { value: 1, name: "CUSTOMERS" },
   { value: 2, name: "SUPPLIERS" },
