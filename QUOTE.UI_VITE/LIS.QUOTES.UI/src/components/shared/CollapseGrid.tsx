@@ -13,6 +13,7 @@ const CollapsibleDataGrid = () => {
       budget: 100000, 
       status: 'Active',
       tasks: ["Task 1", "Task 2"],
+      details: "Lorem ipsum dolor sit amet",
       isGroup: true,
     },
     { 
@@ -21,27 +22,36 @@ const CollapsibleDataGrid = () => {
       budget: 150000, 
       status: 'On Hold',
       tasks: ["Task 3", "Task 4", "Task 5"],
+      details: "Lorem ipsoum sit adm sdaed",
       isGroup: true,
     },
   ];
 
   // Create rows including tasks when expanded
-  const rows = projects.flatMap(project => {
+  const rows = projects.flatMap((project, i) => {
     const projectRow = { ...project };
     
     if (!expandedGroups.has(project.id)) {
       return [projectRow];
     }
 
-    const taskRows = project.tasks.map((task, index) => ({
-      id: `${project.id}-${index}`,
-      name: task,
+    // const taskRows = project.tasks.map((task, index) => ({
+    //   id: `${project.id}-${index}`,
+    //   name: task,
+    //   budget: '-',
+    //   status: '-',
+    //   isTask: true
+    // }));
+    const taskRow = [{
+      id: `${project.id}-${i}`,
+      name: project.tasks,
       budget: '-',
       status: '-',
       isTask: true
-    }));
+    }];
 
-    return [projectRow, ...taskRows];
+    return [projectRow, ...taskRow];
+    // return [projectRow];
   });
 
   const columns = [
@@ -73,7 +83,8 @@ const CollapsibleDataGrid = () => {
         // This is where you can customize how individual tasks look
         return (
           <div style={{ marginLeft: '32px' }}>
-            📋 {params.value}
+            
+            📋 {params.value.join(', ')}
           </div>
         );
       }
