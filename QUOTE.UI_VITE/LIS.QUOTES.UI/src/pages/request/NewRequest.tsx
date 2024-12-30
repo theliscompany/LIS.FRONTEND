@@ -451,7 +451,7 @@ const NewRequest = () => {
 
             {/* Add a new contact */}
             <BootstrapDialog open={modal7} onClose={() => setModal7(false)} maxWidth="md" fullWidth>
-                <NewContact categories={[""]} closeModal={() => setModal7(false)} />
+                <NewContact categories={["CUSTOMERS"]} closeModal={() => setModal7(false)} />
             </BootstrapDialog>
 
             {/* New container type */}
