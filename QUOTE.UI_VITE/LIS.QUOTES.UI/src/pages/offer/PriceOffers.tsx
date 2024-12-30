@@ -5,11 +5,11 @@ import Grid from '@mui/material/Grid2';
 import Skeleton from '@mui/material/Skeleton';
 import { SnackbarProvider, enqueueSnackbar } from 'notistack';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { BootstrapDialog, BootstrapDialogTitle, buttonCloseStyles, sizingStyles, whiteButtonStyles } from '../../utils/misc/styles';
+import { BootstrapDialog, BootstrapDialogTitle, buttonCloseStyles, sizingStyles } from '../../utils/misc/styles';
 import { NavLink } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { DataGrid, GridColDef, GridRenderCellParams } from '@mui/x-data-grid';
-import { Edit, RestartAltOutlined, Visibility } from '@mui/icons-material';
+import { Edit, Visibility } from '@mui/icons-material';
 import { statusLabel, colorsTypes } from '../../utils/functions';
 import { deleteApiQuoteOfferById, getApiQuoteOffer } from '../../api/client/offer';
 
@@ -26,7 +26,7 @@ const PriceOffers = () => {
         { field: 'emailUser', headerName: t('email'), renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box>
-                    <Link to={"/admin/handle-request/"+params.row.requestQuoteId}>{params.row.emailUser}</Link>
+                    <Link to={"/handle-request/"+params.row.requestQuoteId}>{params.row.emailUser}</Link>
                 </Box>
             );
         }, minWidth: 200, flex: 1 },
@@ -48,10 +48,10 @@ const PriceOffers = () => {
         { field: 'www', headerName: t('Actions'), renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box sx={{ my: 1, mr: 1 }}>
-                    <IconButton component={NavLink} to={"/admin/quote-offers/"+params.row.id} sx={{ mr: 1 }} title="Handle the offer">
+                    <IconButton component={NavLink} to={"/quote-offers/"+params.row.id} sx={{ mr: 1 }} title="Handle the offer">
                         <Visibility fontSize="small" />
                     </IconButton>
-                    <IconButton component={NavLink} to={"/admin/handle-request/"+params.row.requestQuoteId} title="View the request" sx={{ mr: 1 }}>
+                    <IconButton component={NavLink} to={"/handle-request/"+params.row.requestQuoteId} title="View the request" sx={{ mr: 1 }}>
                         <Edit fontSize="small" />
                     </IconButton>
                     <IconButton onClick={() => { setCurrentId(params.row.id); setModal(true); }}>
@@ -71,14 +71,9 @@ const PriceOffers = () => {
             setLoad(true);
             const response: any = await getApiQuoteOffer();
             if (response !== null && response !== undefined) {
-                if (response.data?.code === 200) {
-                    console.log(response.data.data);
-                    setOffers(response.data.data?.reverse());
-                    setLoad(false);
-                }
-                else {
-                    setLoad(false);
-                }
+                console.log("Offers : "+response.data.data);
+                setOffers(response.data.data?.reverse());
+                setLoad(false);
             }
             else {
                 setLoad(false);
@@ -110,37 +105,40 @@ const PriceOffers = () => {
     return (
         <div style={{ background: "#fff", borderTopLeftRadius: 20, borderTopRightRadius: 20 }}>
             <SnackbarProvider />
-            <Box py={2.5} sx={{ minWidth: { xs: "100vw", md: "100%" }}}>
-                <Typography variant="h5" sx={{mt: {xs: 4, md: 1.5, lg: 1.5 }}} px={5}><b>{t('generatedPriceOffers')}</b></Typography>
+            <Box py={2.5}>
                 <Grid container spacing={2} mt={0} px={5}>
-                    <Grid size={{ xs: 12 }}>
-                        <Button color="inherit" variant="contained" sx={whiteButtonStyles} style={{ float: "right" }} onClick={() => { getPriceOffers(); }}>
-                            {t('reload')} <RestartAltOutlined sx={{ ml: 0.5, pb: 0.45, justifyContent: "center", alignItems: "center" }} fontSize="small" />
+                    <Grid size={{ xs: 12, md: 8 }}>
+                        <Typography sx={{ fontSize: 18, mb: 1 }}><b>{t('generatedPriceOffers')}</b></Typography>
+                    </Grid>
+                    <Grid size={{ xs: 12, md: 4 }}>
+                        <Button 
+                            variant="contained" color="inherit" 
+                            sx={{ float: "right", backgroundColor: "#fff", textTransform: "none", ml: 2 }} 
+                            onClick={() => { getPriceOffers(); }} 
+                        >
+                            {t('reload')}
                         </Button>
                     </Grid>
+                    <Grid size={{ xs: 12 }}>
+                        {
+                            !load ?
+                            offers !== null && offers.length !== 0 ?
+                            <Box sx={{ overflow: "hidden" }}>
+                                <DataGrid
+                                    rows={offers}
+                                    columns={columnsOffers}
+                                    getRowId={(row: any) => row?.id}
+                                    getRowHeight={() => "auto" }
+                                    sx={sizingStyles}
+                                    disableRowSelectionOnClick
+                                />
+                            </Box> : 
+                            <Box>
+                                <Alert severity="warning">{t('noResults')}</Alert>
+                            </Box> : <Skeleton />
+                        }
+                    </Grid>
                 </Grid>
-                <Box>
-                    {
-                        !load ? 
-                        <Grid container spacing={2} mt={0} px={5}>
-                            <Grid size={{ xs: 12 }}>
-                                {
-                                    offers !== null && offers.length !== 0 ?
-                                    <Box sx={{ overflow: "hidden" }}>
-                                        <DataGrid
-                                            rows={offers}
-                                            columns={columnsOffers}
-                                            getRowId={(row: any) => row?.id}
-                                            getRowHeight={() => "auto" }
-                                            sx={sizingStyles}
-                                            disableRowSelectionOnClick
-                                        />
-                                    </Box> : <Alert severity="warning">{t('noResults')}</Alert>
-                                }
-                            </Grid>
-                        </Grid> : <Skeleton sx={{ mx: 5, mt: 3 }} />
-                    }
-                </Box>
             </Box>
             <BootstrapDialog open={modal} onClose={() => setModal(false)} maxWidth="sm" fullWidth>
                 <BootstrapDialogTitle id="custom-dialog-title" onClose={() => setModal(false)}>

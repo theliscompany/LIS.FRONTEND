@@ -19,7 +19,7 @@ const NavigationLink: React.FC<NavigationLinkProps> = ({url, title, icon, nested
                     <ListItemIcon className="cs-listitemicon">
                         {icon}
                     </ListItemIcon>
-                    <ListItemText primary={title} slotProps={{ primary: { fontSize: 13 }}} />
+                    <ListItemText primary={title} slotProps={{ primary: { fontSize: 13, color: "#000" }}} />
                 </ListItemButton>
             </DarkTooltip>
             </ListItem>

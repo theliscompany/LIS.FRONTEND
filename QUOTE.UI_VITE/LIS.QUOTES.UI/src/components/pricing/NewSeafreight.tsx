@@ -17,7 +17,6 @@ import NewService from '../shared/NewService';
 import { postApiSeaFreightSeaFreight } from '../../api/client/pricing';
 import { getService } from '../../api/client/transport';
 import PortAutocomplete from '../shared/PortAutocomplete';
-import { CategoryEnum } from '../../api/client/shipment';
 
 const NewSeafreight = (props: any) => {
     //const [services, setServices] = useState<any>(null);
@@ -137,11 +136,11 @@ const NewSeafreight = (props: any) => {
                         <Grid container spacing={2}>
                             <Grid size={{ xs: 12, md: 6 }} mt={0.25}>
                                 <InputLabel htmlFor="carrier" sx={inputLabelStyles}>{t('carrier')}</InputLabel>
-                                <CompanySearch id="carrier" value={carrier} onChange={setCarrier} category={CategoryEnum.SHIPPING_LINE} fullWidth />
+                                <CompanySearch id="carrier" value={carrier} onChange={setCarrier} category={"SHIPPING_LINES"} fullWidth />
                             </Grid>
                             <Grid size={{ xs: 12, md: 6 }} mt={0.25}>
                                 <InputLabel htmlFor="carrier-agent" sx={inputLabelStyles}>{t('carrierAgent')}</InputLabel>
-                                <CompanySearch id="carrier-agent" value={carrierAgent} onChange={setCarrierAgent} category={CategoryEnum.SHIPPING_LINE} fullWidth />
+                                <CompanySearch id="carrier-agent" value={carrierAgent} onChange={setCarrierAgent} category={"SHIPPING_LINES"} fullWidth />
                             </Grid>
                             <Grid size={{ xs: 12, md: 6 }} mt={0.25}>
                                 <InputLabel htmlFor="port-loading" sx={inputLabelStyles}><Anchor fontSize="small" sx={inputIconStyles} /> {t('departurePort')}</InputLabel>

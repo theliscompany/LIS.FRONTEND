@@ -24,7 +24,7 @@ var footer = `
     <div>Tel +32.3.295.38.82</div>
     <div>Fax +32.3.295.38.77</div>
     <div>Whatsapp +32.494.40.24.25</div>
-    <img src="http://www.omnifreight.eu/Images/omnifreight_logo.jpg" style="max-width: 200px;">
+    <img src="https://omnifreight.eu/wp-content/uploads/2023/06/logo.jpg" style="max-width: 200px;">
 </div>
 `;
 
@@ -221,7 +221,7 @@ const Landing = () => {
                     variant="contained"
                     color="inherit" 
                     size="large"
-                    // to={!isAuthenticated ? undefined : "/admin/"}
+                    // to={!isAuthenticated ? undefined : "/"}
                     hidden={!isAuthenticated}
                     sx={{ 
                         textTransform: "inherit",
@@ -231,7 +231,7 @@ const Landing = () => {
                         top: { xs: "20px", md: "25px"},
                         right: { xs: "30px", md: "230px"}
                     }}
-                    onClick={!isAuthenticated ? handleLogin : () => { navigate('/admin/'); }}
+                    onClick={!isAuthenticated ? handleLogin : () => { navigate('/'); }}
                 >
                     <FaceIcon sx={{ mr: 1 }} /> {!isAuthenticated ? t('login') : "Admin"}
                 </Button>
@@ -344,7 +344,7 @@ const Landing = () => {
                         <Grid size={{md:6, xs:12}}>
                             <InputLabel htmlFor="whatsapp-phone-number" sx={inputLabelStyles}>{t('whatsappNumber')}</InputLabel>
                             <MuiTelInput 
-                                id="whatsapp-phone-number" 
+                                id="whatsapp-phone-number" size="small" 
                                 value={phone} onChange={setPhone} 
                                 defaultCountry="TZ" preferredCountries={["TZ", "CM", "KE", "BE"]} 
                                 fullWidth sx={{ mt: 1 }}
@@ -422,7 +422,7 @@ const Landing = () => {
                         <Grid size={{xs:12, md:6}}>
                             <InputLabel htmlFor="phone-number" sx={inputLabelStyles}>{t('whatsappNumber')}</InputLabel>
                             <MuiTelInput 
-                                id="phone-number" 
+                                id="phone-number" size="small" 
                                 value={phone} onChange={setPhone} 
                                 defaultCountry="TZ" preferredCountries={["TZ", "CM", "KE", "BE"]} 
                                 fullWidth sx={{ mt: 1 }}
@@ -492,7 +492,8 @@ const Landing = () => {
                             <InputLabel htmlFor="whatsapp-number" sx={inputLabelStyles}>{t('whatsappNumber')}</InputLabel>
                             <MuiTelInput 
                                 id="whatsapp-number" 
-                                className="custom-phone-number" 
+                                className="custom-phone-number"
+                                size="small" 
                                 value={phone} 
                                 onChange={setPhone} 
                                 defaultCountry="TZ" 

@@ -14,7 +14,6 @@ import CompanySearch from '../shared/CompanySearch';
 import PortAutocomplete from '../shared/PortAutocomplete';
 import { Dayjs } from 'dayjs';
 import { postApiHaulageHaulage } from '../../api/client/pricing';
-import { CategoryEnum } from '../../api/client/shipment';
 
 function NewHaulage(props: any) {
     const [load, setLoad] = useState<boolean>(false);
@@ -118,7 +117,7 @@ function NewHaulage(props: any) {
                         <Grid container spacing={2}>
                             <Grid size={{ xs: 12, md: 6 }} mt={0.25}>
                                 <InputLabel htmlFor="haulier" sx={inputLabelStyles}>{t('haulier')}</InputLabel>
-                                <CompanySearch id="haulier" value={haulier} onChange={setHaulier} category={CategoryEnum.SUPPLIERS} fullWidth />
+                                <CompanySearch id="haulier" value={haulier} onChange={setHaulier} category={"SUPPLIERS"} fullWidth />
                             </Grid>
                             <Grid size={{ xs: 12, md: 6 }} mt={0.25}>
                                 <InputLabel htmlFor="loading-city" sx={inputLabelStyles}>{t('loadingCity')}</InputLabel>
@@ -161,6 +160,7 @@ function NewHaulage(props: any) {
                         <NativeSelect
                             id="currency"
                             value={currency}
+                            size="small"
                             onChange={(e: any) => { setCurrency(e.target.value) }}
                             input={<BootstrapInput />}
                             fullWidth

@@ -107,6 +107,7 @@ function NewContact(props: any) {
                         <InputLabel htmlFor="phone-number" sx={inputLabelStyles}>{t('whatsappNumber')}</InputLabel>
                         <MuiTelInput 
                             id="phone-number" 
+                            size="small"
                             value={testPhone} 
                             onChange={handleChange} 
                             defaultCountry="CM" 

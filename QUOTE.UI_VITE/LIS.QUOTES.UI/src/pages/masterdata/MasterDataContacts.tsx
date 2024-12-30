@@ -272,6 +272,7 @@ const MasterDataContacts: any = () => {
                                 <MuiTelInput 
                                     id="phone-number" 
                                     value={testPhone} 
+                                    size="small"
                                     onChange={setTestPhone} 
                                     defaultCountry="CM" 
                                     preferredCountries={["CM", "BE", "KE"]} 

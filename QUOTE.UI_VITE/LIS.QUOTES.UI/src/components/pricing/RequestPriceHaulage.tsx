@@ -14,6 +14,7 @@ import { getContactGetContacts } from '../../api/client/crm';
 import { getApiHaulageHaulages } from '../../api/client/pricing';
 import { getApiTemplate, getApiTemplateById } from '../../api/client/template';
 import PortAutocomplete from '../shared/PortAutocomplete';
+import { useAccount, useMsal } from '@azure/msal-react';
 
 const defaultTemplate = "658e7e0d27587b09811c13ca";
 
@@ -42,34 +43,34 @@ function RequestPriceHaulage(props: any) {
 
     const rteRef = useRef<RichTextEditorRef>(null);
     
-    // const { accounts } = useMsal();
-    // const account = useAccount(accounts[0] || {});
+    const { accounts } = useMsal();
+    const account = useAccount(accounts[0] || {});
     
-    // const postEmail = async(from: string, to: string, subject: string, htmlContent: string) => {
-    //     const form = new FormData();
-    //     form.append('From', from);
-    //     form.append('To', to);
-    //     form.append('Subject', subject);
-    //     form.append('HtmlContent', htmlContent);
+    const postEmail = async(from: string, to: string, subject: string, htmlContent: string) => {
+        const form = new FormData();
+        form.append('From', from);
+        form.append('To', to);
+        form.append('Subject', subject);
+        form.append('HtmlContent', htmlContent);
         
-    //     fetch(protectedResources.apiLisQuotes.endPoint+'/Email', {
-    //         method: 'POST',
-    //         headers: {
-    //             'accept': '*/*',
-    //             // 'Content-Type': 'multipart/form-data'
-    //         },
-    //         body: form
-    //     })
-    //     .then((response) => response.json())
-    //     .then((response: any) => {
-    //         if (response !== undefined && response !== null && response.code == 200) {
-    //             enqueueSnackbar(t('mailSentTo')+to, { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
-    //         }
-    //         else {
-    //             enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
-    //         }
-    //     });
-    // }
+        fetch(import.meta.env.VITE_API_LIS_QUOTE_ENDPOINT+'/Email', {
+            method: 'POST',
+            headers: {
+                'accept': '*/*',
+                // 'Content-Type': 'multipart/form-data'
+            },
+            body: form
+        })
+        .then((response) => response.json())
+        .then((response: any) => {
+            if (response !== undefined && response !== null && response.code == 200) {
+                enqueueSnackbar(t('mailSentTo')+to, { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
+            }
+            else {
+                enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+            }
+        });
+    }
 
     const sendPriceRequestHaulage = async () => {
         if (recipients.length !== 0) {
@@ -77,25 +78,25 @@ function RequestPriceHaulage(props: any) {
             var selectedMails = recipients.map((elm: any) => elm.email);
             console.log(selectedMails);
 
-            // var footer = `
-            // <div style="font-family: Verdana; padding-top: 35px;">
-            //     <div>${account?.name}</div>
-            //     <div style="margin-top: 5px;"><a target="_blank" href="www.omnifreight.eu">www.omnifreight.eu</a></div>
-            //     <div style="padding-bottom: 10px;"><a target="_blank" href="http://www.facebook.com/omnifreight">http://www.facebook.com/omnifreight</a></div>
-            //     <div>Italiëlei 211</div>
-            //     <div>2000 Antwerpen</div>
-            //     <div>Belgium</div>
-            //     <div>E-mail: ${account?.username}</div>
-            //     <div>Tel +32.3.295.38.82</div>
-            //     <div>Fax +32.3.295.38.77</div>
-            //     <div>Whatsapp +32.494.40.24.25</div>
-            //     <img src="http://www.omnifreight.eu/Images/omnifreight_logo.jpg" style="max-width: 200px;">
-            // </div>
-            // `;
+            var footer = `
+            <div style="font-family: Verdana; padding-top: 35px;">
+                <div>${account?.name}</div>
+                <div style="margin-top: 5px;"><a target="_blank" href="www.omnifreight.eu">www.omnifreight.eu</a></div>
+                <div style="padding-bottom: 10px;"><a target="_blank" href="http://www.facebook.com/omnifreight">http://www.facebook.com/omnifreight</a></div>
+                <div>Italiëlei 211</div>
+                <div>2000 Antwerpen</div>
+                <div>Belgium</div>
+                <div>E-mail: ${account?.username}</div>
+                <div>Tel +32.3.295.38.82</div>
+                <div>Fax +32.3.295.38.77</div>
+                <div>Whatsapp +32.494.40.24.25</div>
+                <img src="https://omnifreight.eu/wp-content/uploads/2023/06/logo.jpg" style="max-width: 200px;">
+            </div>
+            `;
             for (var i=0; i < selectedMails.length; i++) {
                 console.log("Mail sent to : "+selectedMails[i]);
                 enqueueSnackbar(t('mailSentTo')+selectedMails[i], { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
-                // postEmail("pricing@omnifreight.eu", selectedMails.join(','), subject, "<div style='font-family: Verdana;'>"+rteRef.current?.editor?.getHTML()+"</div>"+footer);    
+                postEmail("pricing@omnifreight.eu", selectedMails.join(','), subject, "<div style='font-family: Verdana;'>"+rteRef.current?.editor?.getHTML()+"</div>"+footer);    
             }
         }
         else {

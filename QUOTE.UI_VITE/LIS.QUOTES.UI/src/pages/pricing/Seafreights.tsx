@@ -27,7 +27,6 @@ import NewPort from '../../components/shared/NewPort';
 import { getPorts, getProduct, getService } from '../../api/client/transport';
 import { getContactGetContacts } from '../../api/client/crm';
 import { deleteApiSeaFreightDeleteSeaFreightPrice, getApiMiscellaneousMiscellaneous, getApiSeaFreightGetSeaFreights, getApiSeaFreightSeaFreight, postApiSeaFreightSeaFreight } from '../../api/client/pricing';
-import { CategoryEnum } from '../../api/client/shipment';
 
 function Seafreights() {
     const [load, setLoad] = useState<boolean>(true);
@@ -67,8 +66,8 @@ function Seafreights() {
     
     const columnsSeafreights: GridColDef[] = [
         { field: 'carrierAgentName', headerName: t('carrierAgent'), minWidth: 125, flex: 1.4 },
-        { field: 'frequency', headerName: t('frequency'), valueFormatter: (value?: number | null) => `${t('every')} ${value || ''} `+t('days'), minWidth: 100, flex: 1 },
-        { field: 'transitTime', headerName: t('transitTime'), valueFormatter: (value?: number | null) => `${value || ''} `+t('days'), minWidth: 100, flex: 1 },
+        { field: 'frequency', headerName: t('frequency'), valueFormatter: (params: any) => `${t('every')} ${params.value || ''} `+t('days'), minWidth: 100, flex: 1 },
+        { field: 'transitTime', headerName: t('transitTime'), valueFormatter: (params: any) => `${params.value || ''} `+t('days'), minWidth: 100, flex: 1 },
         { field: 'currency', headerName: t('prices'), renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box sx={{ my: 1, mr: 1 }}>
@@ -269,7 +268,7 @@ function Seafreights() {
             setLoad(true);
             const response = await getApiSeaFreightGetSeaFreights({query: { DeparturePortId: portDeparture?.portId, DestinationPortId: portDestination?.portId, CarrierAgentId: searchedCarrier?.contactId }});
             if (response !== null && response !== undefined) {
-                setSeafreights(response);
+                setSeafreights(response.data);
                 setLoad(false);
             }
             else {
@@ -453,7 +452,7 @@ function Seafreights() {
                     </Grid>
                     <Grid size={{ xs: 12, md: 4 }} mt={1}>
                         <InputLabel htmlFor="company-name" sx={inputLabelStyles}>{t('carrier')}</InputLabel>
-                        <CompanySearch id="company-name" value={searchedCarrier} onChange={setSearchedCarrier} category={CategoryEnum.SHIPPING_LINE} fullWidth />
+                        <CompanySearch id="company-name" value={searchedCarrier} onChange={setSearchedCarrier} category={"SHIPPING_LINES"} fullWidth />
                     </Grid>
                     <Grid size={{ xs: 12, md: 3 }} mt={1}>
                         <InputLabel htmlFor="port-departure" sx={inputLabelStyles}><Anchor fontSize="small" sx={inputIconStyles} /> {t('departurePort')}</InputLabel>
@@ -548,11 +547,11 @@ function Seafreights() {
                                 <Grid container spacing={2}>
                                     <Grid size={{ xs: 12, md: 6 }} mt={0.25}>
                                         <InputLabel htmlFor="carrier" sx={inputLabelStyles}>{t('carrier')}</InputLabel>
-                                        <CompanySearch id="carrier" value={carrier} onChange={setCarrier} category={CategoryEnum.SHIPPING_LINE} fullWidth />
+                                        <CompanySearch id="carrier" value={carrier} onChange={setCarrier} category={"SHIPPING_LINES"} fullWidth />
                                     </Grid>
                                     <Grid size={{ xs: 12, md: 6 }} mt={0.25}>
                                         <InputLabel htmlFor="carrier-agent" sx={inputLabelStyles}>{t('carrierAgent')}</InputLabel>
-                                        <CompanySearch id="carrier-agent" value={carrierAgent} onChange={setCarrierAgent} category={CategoryEnum.SHIPPING_LINE} fullWidth />
+                                        <CompanySearch id="carrier-agent" value={carrierAgent} onChange={setCarrierAgent} category={"SHIPPING_LINES"} fullWidth />
                                     </Grid>
                                     <Grid size={{ xs: 12, md: 6 }} mt={0.25}>
                                         <InputLabel htmlFor="port-loading" sx={inputLabelStyles}><Anchor fontSize="small" sx={inputIconStyles} /> {t('departurePort')}</InputLabel>

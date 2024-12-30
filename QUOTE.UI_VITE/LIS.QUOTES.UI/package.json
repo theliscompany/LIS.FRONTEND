@@ -15,6 +15,7 @@
     "generate-client-pricing": "npx @hey-api/openapi-ts -i https://lis-pricing-svc-dev.azurewebsites.net/swagger/v1/swagger.json -o src/api/client/pricing -c @hey-api/client-axios",
     "generate-client-template": "npx @hey-api/openapi-ts -i https://lis-template-svc-dev.azurewebsites.net/swagger/v1/swagger.json -o src/api/client/template -c @hey-api/client-axios",
     "generate-client-offer": "npx @hey-api/openapi-ts -i https://lis-offer-svc-dev.azurewebsites.net/swagger/v1/swagger.json -o src/api/client/offer -c @hey-api/client-axios",
+    "generate-client-quote": "npx @hey-api/openapi-ts -i https://lis-quotes-svc-dev.azurewebsites.net/swagger/v1/swagger.json -o src/api/client/quote -c @hey-api/client-axios",
     "generate:shipment": "openapi-ts"
   },
   "dependencies": {
@@ -28,7 +29,7 @@
     "@mui/x-data-grid": "^7.23.5",
     "@mui/x-data-grid-generator": "^7.23.5",
     "@mui/x-date-pickers": "^7.23.3",
-    "@tanstack/react-query": "^5.62.8",
+    "@tanstack/react-query": "^5.62.11",
     "@tiptap/starter-kit": "^2.10.4",
     "axios": "^1.7.9",
     "dayjs": "^1.11.13",
@@ -44,7 +45,7 @@
   "devDependencies": {
     "@eslint/js": "^9.15.0",
     "@hey-api/openapi-ts": "^0.60.0",
-    "@tanstack/react-query-devtools": "^5.62.8",
+    "@tanstack/react-query-devtools": "^5.62.11",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
     "@types/react-google-recaptcha": "^2.1.9",
