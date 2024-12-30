@@ -71,7 +71,7 @@ const MasterDataContacts: any = () => {
     const getContactsService = async () => {
         setLoadResults(true);
         try {
-            const conts = await getContactGetContacts();
+            const conts = await getContactGetContacts({query: {pageSize: 4000}});
             setContacts(conts.data?.data);
             setLoadResults(false);
         }

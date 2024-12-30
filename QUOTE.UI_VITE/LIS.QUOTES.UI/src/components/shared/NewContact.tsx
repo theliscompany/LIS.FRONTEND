@@ -25,6 +25,7 @@ function NewContact(props: any) {
     var namesArray = [
         { type: "", name: t('client')} ,
         { type: "OTHERS", name: t('supplier')} ,
+        { type: "CUSTOMERS", name: t('customer')} ,
         { type: "SUPPLIERS", name: t('haulier')} ,
         { type: "SHIPPING_LINES", name: t('carrier') }
     ];
