@@ -211,7 +211,7 @@ function AcceptOffer(props: any) {
             var nOption = currentOpt !== null ? currentOpt : 0;
             var messageText = `
             <div style="font-family: Verdana;">
-                <p>${t('hello', {lng: lang})} CYRILLE PENAYE,</p>
+                <p>${t('hello', {lng: lang})} ${extractName(offerData.comment)},</p>
                 <p>${t('confirmationOfferThanks', {lng: lang})}</p>
                 <p>${t('confirmationOfferText', {lng: lang})}</p>
                 <p>${t('loadingCity', {lng: lang})} : ${offerData.options[nOption].selectedHaulage.loadingCityName}</p>

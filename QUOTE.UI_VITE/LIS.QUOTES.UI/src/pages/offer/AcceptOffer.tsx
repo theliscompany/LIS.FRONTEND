@@ -62,16 +62,16 @@ const AcceptOffer = () => {
         });
     }
 
-    // const extractName = (html: string): string | null => {
-    //     console.log("Html : ", html);
-    //     if (typeof html !== 'string') {
-    //         console.error('Le contenu fourni nest pas une chaîne.');
-    //         return null;
-    //     }
-    //     const regex = /<strong>([^<]+)<\/strong>/i; // Expression régulière
-    //     const match = html.match(regex); // Cherche la première correspondance
-    //     return match ? match[1] : null;
-    // };
+    const extractName = (html: string): string | null => {
+        console.log("Html : ", html);
+        if (typeof html !== 'string') {
+            console.error('Le contenu fourni nest pas une chaîne.');
+            return null;
+        }
+        const regex = /<strong>([^<]+)<\/strong>/i; // Expression régulière
+        const match = html.match(regex); // Cherche la première correspondance
+        return match ? match[1] : null;
+    };
     
     const createOrder = async (option: any, offerData: any, currentOpt: number) => {
         console.log("Option : ", option);
@@ -155,8 +155,11 @@ const AcceptOffer = () => {
             "orderId": 0,
             "customerId": Number(offerData.clientNumber),
             "exportation": true,
+            "loadingPort": option.portDeparture.portName,
+            "dischargePort": option.portDestination.portName,
             "departurePort": option.portDeparture.portId,
-            "destinationPort": option.portDestination.portId
+            "destinationPort": option.portDestination.portId,
+            "shippingLine": option.selectedSeafreight.carrierName,
         }
 
         postOrder({body: body})
@@ -168,7 +171,7 @@ const AcceptOffer = () => {
             var nOption = currentOpt !== null ? currentOpt : 0;
             var messageText = `
             <div style="font-family: Verdana;">
-                <p>${t('hello', {lng: lang})} CYRILLE PENAYE,</p>
+                <p>${t('hello', {lng: lang})} ${extractName(offerData.comment)},</p>
                 <p>${t('confirmationOfferThanks', {lng: lang})}</p>
                 <p>${t('confirmationOfferText', {lng: lang})}</p>
                 <p>${t('loadingCity', {lng: lang})} : ${offerData.options[nOption].selectedHaulage.loadingCityName}</p>
