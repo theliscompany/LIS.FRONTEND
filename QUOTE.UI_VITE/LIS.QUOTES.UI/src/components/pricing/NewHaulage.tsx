@@ -14,7 +14,6 @@ import CompanySearch from '../shared/CompanySearch';
 import PortAutocomplete from '../shared/PortAutocomplete';
 import { Dayjs } from 'dayjs';
 import { postApiHaulageHaulage } from '../../api/client/pricing';
-import { CategoryEnum } from '../../api/client/shipment';
 
 function NewHaulage(props: any) {
     const [load, setLoad] = useState<boolean>(false);

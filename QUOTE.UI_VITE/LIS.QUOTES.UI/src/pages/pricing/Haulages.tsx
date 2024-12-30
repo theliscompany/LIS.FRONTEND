@@ -27,7 +27,6 @@ import { deleteApiHaulageDeleteHaulage, getApiHaulageHaulage, getApiHaulageHaula
 import { getContactGetContacts } from '../../api/client/crm';
 import { getPorts, getService } from '../../api/client/transport';
 import PortAutocomplete from '../../components/shared/PortAutocomplete';
-import { CategoryEnum } from '../../api/client/shipment';
 
 
 function Haulages() {

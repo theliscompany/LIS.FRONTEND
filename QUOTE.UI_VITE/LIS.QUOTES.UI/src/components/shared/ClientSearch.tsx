@@ -95,6 +95,7 @@ const ClientSearch: React.FC<LocationAutocompleteProps> = ({ id, name, value, on
                         onChange={(event) => {
                             debouncedSearch(event.target.value);
                         }}
+                        name={name}
                         sx={{ mt: 1 }}
                         slotProps={{
                             input: {

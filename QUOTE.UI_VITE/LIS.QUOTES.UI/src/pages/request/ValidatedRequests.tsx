@@ -8,7 +8,7 @@ import { enqueueSnackbar, SnackbarProvider } from 'notistack';
 import { Link, NavLink } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAccount, useMsal } from '@azure/msal-react';
-import { DataGrid, GridColDef, GridRenderCellParams, GridValueFormatterParams } from '@mui/x-data-grid';
+import { DataGrid, GridColDef, GridRenderCellParams } from '@mui/x-data-grid';
 import { Edit, RestartAltOutlined } from '@mui/icons-material';
 import { colorsTypes, getCityCountry } from '../../utils/functions';
 import { statusTypes } from '../../utils/constants';
@@ -30,7 +30,7 @@ const ValidatedRequests = () => {
                 <Box><Link to={"/handle-request/"+params.row.id}>{params.row.email}</Link></Box>
             );
         }, minWidth: 200, flex: 1.5 },
-        { field: 'createdAt', headerName: t('created'), valueFormatter: (params: GridValueFormatterParams) => `${(new Date(params.value)).toLocaleString().slice(0,10)}`, minWidth: 100, flex: 0.75 },
+        { field: 'createdAt', headerName: t('created'), valueFormatter: (params: any) => `${(new Date(params.value)).toLocaleString().slice(0,10)}`, minWidth: 100, flex: 0.75 },
         { field: 'departure', headerName: t('from'), renderCell: (params: GridRenderCellParams) => {
             return (<Box>{getCityCountry(params.row.departure)}</Box>);
         }, minWidth: 100, flex: 1 },

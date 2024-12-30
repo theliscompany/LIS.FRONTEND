@@ -5,7 +5,7 @@ import Grid from '@mui/material/Grid2';
 import { Accordion, AccordionDetails, AccordionSummary, Alert, Autocomplete, Box, Button, Chip, DialogActions, DialogContent, InputLabel, ListItem, ListItemText, NativeSelect, Paper, Skeleton, Step, StepLabel, Stepper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Typography } from '@mui/material';
 import { enqueueSnackbar } from 'notistack';
 import { Anchor, ExpandMore, RestartAlt } from '@mui/icons-material';
-import { DataGrid, GridColDef, GridRenderCellParams, GridToolbar, GridValueFormatterParams, GridValueGetterParams } from '@mui/x-data-grid';
+import { DataGrid, GridColDef, GridRenderCellParams, GridToolbar } from '@mui/x-data-grid';
 import StarterKit from '@tiptap/starter-kit';
 import { calculateTotal, checkCarrierConsistency, checkDifferentDefaultContainer, formatObject, formatServices, generateRandomNumber, getCity, getServices, getServicesTotal, getServicesTotal2, getTotalNumber, getTotalPrice, getTotalPrices, hashCode, myServices, parseDate, removeDuplicatesWithLatestUpdated, validateObjectHSCODEFormat } from '../../utils/functions';
 import AutocompleteSearch from '../shared/AutocompleteSearch';
@@ -28,7 +28,6 @@ import ContainerElement from './ContainerElement';
 import ContainerPrice from './ContainerPrice';
 import { putApiRequestByIdChangeStatus } from '../../api/client/quote';
 import { getApiMiscellaneousMiscellaneous, getApiPricingHaulagesOfferRequest, getApiPricingSeaFreightsOffersRequest } from '../../api/client/pricing';
-
 
 const defaultTemplate = "65b74024891f9de80722fc6d";
 
@@ -101,8 +100,8 @@ const GeneratePriceOffer = (props: any) => {
     const columnsSeafreights: GridColDef[] = [
         { field: 'carrierName', headerName: t('carrier'), flex: 1.25 },
         { field: 'carrierAgentName', headerName: t('carrierAgent'), flex: 1.25 },
-        { field: 'frequency', headerName: t('frequency'), valueFormatter: (params: GridValueFormatterParams) => `${t('every')} ${params.value || ''} `+t('days'), flex: 0.75 },
-        { field: 'transitTime', headerName: t('transitTime'), valueFormatter: (params: GridValueFormatterParams) => `${params.value || ''} `+t('days'), flex: 0.5 },
+        { field: 'frequency', headerName: t('frequency'), valueFormatter: (params: any) => `${t('every')} ${params.value || ''} `+t('days'), flex: 0.75 },
+        { field: 'transitTime', headerName: t('transitTime'), valueFormatter: (params: any) => `${params.value || ''} `+t('days'), flex: 0.5 },
         { field: 'defaultContainer', headerName: t('prices'), renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box sx={{ my: 1, mr: 1 }}>
@@ -146,10 +145,10 @@ const GeneratePriceOffer = (props: any) => {
                 <Box sx={{ my: 2 }}>{params.row.containerNames.join(", ")}</Box>
             );
         }, minWidth: 100, flex: 0.75 },
-        { field: 'unitTariff', valueGetter: (params: GridValueGetterParams) => `${params.row.unitTariff || ''} ${t(params.row.currency)}`, renderHeader: () => (<>{t('unitTariff')}</>), flex: 0.75 },
-        { field: 'freeTime', headerName: t('freeTime'), valueFormatter: (params: GridValueFormatterParams) => `${params.value || ''} ${t('hours')}`, flex: 0.5 },
-        { field: 'overtimeTariff', headerName: t('overtimeTariff'), valueGetter: (params: GridValueGetterParams) => `${params.row.overtimeTariff || ''} ${t(params.row.currency)} / ${t('hour')}`, renderHeader: () => (<>{t('overtimeTariff')}</>), flex: 0.75 },
-        { field: 'multiStop', headerName: t('multiStop'), valueGetter: (params: GridValueGetterParams) => `${params.row.multiStop || ''} ${t(params.row.currency)}`, flex: 0.5 },
+        { field: 'unitTariff', valueGetter: (params: any) => `${params.row.unitTariff || ''} ${t(params.row.currency)}`, renderHeader: () => (<>{t('unitTariff')}</>), flex: 0.75 },
+        { field: 'freeTime', headerName: t('freeTime'), valueFormatter: (params: any) => `${params.value || ''} ${t('hours')}`, flex: 0.5 },
+        { field: 'overtimeTariff', headerName: t('overtimeTariff'), valueGetter: (params: any) => `${params.row.overtimeTariff || ''} ${t(params.row.currency)} / ${t('hour')}`, renderHeader: () => (<>{t('overtimeTariff')}</>), flex: 0.75 },
+        { field: 'multiStop', headerName: t('multiStop'), valueGetter: (params: any) => `${params.row.multiStop || ''} ${t(params.row.currency)}`, flex: 0.5 },
         { field: 'validUntil', headerName: t('validUntil'), renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box sx={{ my: 1, mr: 1 }}>

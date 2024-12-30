@@ -14,7 +14,6 @@ function AcceptOffer(props: any) {
     
     let { id } = useParams();
     const { t } = useTranslation();
-
     const location = useLocation();
     const searchParams = new URLSearchParams(location.search);
     const currentOption = searchParams.get('option');

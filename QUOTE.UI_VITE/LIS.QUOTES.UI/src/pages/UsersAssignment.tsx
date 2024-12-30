@@ -26,7 +26,6 @@ const UsersAssignment = () => {
         { field: 'id', headerName: t('id'), minWidth: 100, flex: 1.6 },
         { field: 'displayName', headerName: t('name'), minWidth: 100, flex: 1.2 },
         { field: 'mail', headerName: t('email'), minWidth: 250, flex: 1.2 },
-        // { field: 'assignee', headerName: t('assignee'), valueFormatter: (params: GridValueFormatterParams) => `${params.value !== null ? params.value.name+" (#"+params.value.id+")" : "Not defined"}`, minWidth: 100, flex: 1 },
         { field: 'xxx', headerName: t('status'), renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box>
