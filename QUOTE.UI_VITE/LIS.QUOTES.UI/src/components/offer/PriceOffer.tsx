@@ -7,6 +7,7 @@ import { SnackbarProvider, enqueueSnackbar } from 'notistack';
 import axios from 'axios';
 import { useState } from 'react';
 import { getQuoteOffer, putApiQuoteOfferByIdStatus } from '../../api/client/offer';
+import { postApiEmail } from '../../api/client/quote';
 
 const PriceOffer = (props: any) => {
     const [subject, setSubject] = useState<string>("Nouveau devis pour client");
@@ -87,17 +88,12 @@ const PriceOffer = (props: any) => {
 		
 		console.log("Formdata : ", Array.from(formData));
 		// Send the email with fetch
-		fetch("protectedResources.apiLisQuotes.endPoint"+'/Email', {
-			method: 'POST',
-			headers: {
-				'accept': '*/*',
-				// 'Content-Type': 'multipart/form-data'
-			},
-			body: formData
-		})
-		.then((response) => response.json())
-		.then((data) => console.log(data))
-		.catch((error) => console.error(error));
+		postApiEmail({body: {
+			From: from,
+			To: to,
+			Subject: subject,
+			HtmlContent: htmlContent
+		}});
 	}
 
 	const loadOffer = async () => {

@@ -5,6 +5,7 @@ import { BootstrapDialog, BootstrapDialogTitle, buttonCloseStyles } from '../../
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { enqueueSnackbar } from 'notistack';
+import { putApiQuoteOfferByIdApproval } from '../../api/client/offer';
 
 const RefuseOffer = () => {
     const [load, setLoad] = useState<boolean>(true);
@@ -24,10 +25,8 @@ const RefuseOffer = () => {
             newStatus: "Rejected"
         };
 
-        fetch(import.meta.env.VITE_API_LIS_OFFER_ENDPOINT+"/QuoteOffer/"+id+"/approval?newStatus=Rejected", {
-            method: "PUT",
-            body: body,
-        }).then(() => {
+        putApiQuoteOfferByIdApproval({path: {id: String(id)}, query: {NewStatus: "Rejected"}, body: body})
+        .then(() => {
             setLoad(false);
             setIsRejected(true);
             enqueueSnackbar(t('priceOfferRejected'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });

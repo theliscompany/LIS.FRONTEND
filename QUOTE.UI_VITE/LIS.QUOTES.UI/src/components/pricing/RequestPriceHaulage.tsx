@@ -15,6 +15,7 @@ import { getApiHaulageHaulages } from '../../api/client/pricing';
 import { getApiTemplate, getApiTemplateById } from '../../api/client/template';
 import PortAutocomplete from '../shared/PortAutocomplete';
 import { useAccount, useMsal } from '@azure/msal-react';
+import { postApiEmail } from '../../api/client/quote';
 
 const defaultTemplate = "658e7e0d27587b09811c13ca";
 
@@ -53,15 +54,13 @@ function RequestPriceHaulage(props: any) {
         form.append('Subject', subject);
         form.append('HtmlContent', htmlContent);
         
-        fetch(import.meta.env.VITE_API_LIS_QUOTE_ENDPOINT+'/Email', {
-            method: 'POST',
-            headers: {
-                'accept': '*/*',
-                // 'Content-Type': 'multipart/form-data'
-            },
-            body: form
-        })
-        .then((response) => response.json())
+        postApiEmail({body: {
+			From: from,
+			To: to,
+			Subject: subject,
+			HtmlContent: htmlContent
+		}})
+        .then((response: any) => response.json())
         .then((response: any) => {
             if (response !== undefined && response !== null && response.code == 200) {
                 enqueueSnackbar(t('mailSentTo')+to, { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });

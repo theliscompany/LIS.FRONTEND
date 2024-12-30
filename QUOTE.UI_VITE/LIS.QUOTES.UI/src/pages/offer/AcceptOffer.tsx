@@ -6,6 +6,9 @@ import { BootstrapDialog, BootstrapDialogTitle, buttonCloseStyles } from '../../
 import { useTranslation } from 'react-i18next';
 import { useLocation, useParams } from 'react-router-dom';
 import { enqueueSnackbar } from 'notistack';
+import { putApiQuoteOfferByIdApproval } from '../../api/client/offer';
+import { postOrder } from '../../api/client/shipment';
+import { postApiEmail } from '../../api/client/quote';
 
 const AcceptOffer = () => {
     const [load, setLoad] = useState<boolean>(true);
@@ -43,10 +46,8 @@ const AcceptOffer = () => {
             option: cOption
         };
 
-        fetch(import.meta.env.VITE_API_LIS_OFFER_ENDPOINT+"/QuoteOffer/"+id+"/approval?newStatus=Accepted", {
-            method: "PUT",
-            body: body,
-        }).then((response: any) => {
+        putApiQuoteOfferByIdApproval({path: {id: String(id)}, query: {NewStatus: "Accepted"}, body: body})
+        .then((response: any) => {
             if (response.ok) {
                 return response.json();
             }
@@ -188,15 +189,8 @@ const AcceptOffer = () => {
             // fiscalYear: Number(new Date().getFullYear())
         };
 
-        fetch(import.meta.env.VITE_API_LIS_SHIPMENT_ENDPOINT+"/Orders", {
-            method: "POST",
-            // mode: "cors",
-            headers: {
-				'accept': '*/*',
-            	'Content-Type': 'application/json'
-			},
-			body: JSON.stringify(body),
-        }).then((response: any) => {
+        postOrder({body: body})
+        .then((response: any) => {
             if (response.ok) {
                 return response.json();
             }
@@ -252,15 +246,13 @@ const AcceptOffer = () => {
 		formData.append('HtmlContent', htmlContent);
 		
 		// Send the email with fetch
-		fetch(import.meta.env.VITE_API_LIS_QUOTE_ENDPOINT+'/Email', {
-			method: 'POST',
-			headers: {
-				'accept': '*/*',
-				// 'Content-Type': 'multipart/form-data'
-			},
-			body: formData
-		})
-		.then((response) => response.json())
+		postApiEmail({body: {
+            From: from,
+            To: to,
+            Subject: subject,
+            HtmlContent: htmlContent
+        }})
+		.then((response: any) => response.json())
 		.then((data) => console.log(data))
 		.catch((error) => console.error(error));
 	}

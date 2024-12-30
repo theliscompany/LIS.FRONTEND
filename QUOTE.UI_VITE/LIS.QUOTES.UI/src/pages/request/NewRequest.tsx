@@ -13,7 +13,7 @@ import { containerPackages } from '../../utils/constants';
 import useProcessStatePersistence from '../../utils/processes/useProcessStatePersistence';
 import { useMsal, useAccount } from '@azure/msal-react';
 import { getProduct } from '../../api/client/transport';
-import { getApiAssignee, getApiHsCodeLis, putApiAssigneeByRequestQuoteIdByAssigneeId } from '../../api/client/quote';
+import { getApiAssignee, getApiHsCodeLis, getApiRequest, putApiAssigneeByRequestQuoteIdByAssigneeId } from '../../api/client/quote';
 
 function validMail(mail: string) {
     return /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/.test(mail);
@@ -164,36 +164,24 @@ const NewRequest = () => {
                 var myHeaders = new Headers();
                 myHeaders.append('Accept', '');
                 myHeaders.append("Content-Type", "application/json");
-                fetch(import.meta.env.VITE_API_LIS_QUOTE_ENDPOINT+"/Request", {
-                    method: "POST",
-                    body: JSON.stringify({ 
-                        email: formState.email,
-                        whatsapp: formState.phone,
-                        departure: formState.departure !== null && formState.departure !== undefined ? [formState.departure.city.toUpperCase(),formState.departure.country,formState.departure.latitude,formState.departure.longitude,postcode1].filter((val: any) => { return val !== "" }).join(', ') : "",
-                        arrival: formState.arrival !== null && formState.arrival !== undefined ? [formState.arrival.city.toUpperCase(),formState.arrival.country,formState.arrival.latitude,formState.arrival.longitude,postcode2].filter((val: any) => { return val !== "" }).join(', ') : "",
-                        cargoType: 0,
-                        clientNumber: formState.clientNumber !== null ? String(formState.clientNumber.contactNumber)+", "+formState.clientNumber.contactName : null,
-                        packingType: formState.packingType,
-                        containers: formState.containersSelection.map((elm: any) => { return { 
-                            id: containers.find((item: any) => item.packageName === elm.container).packageId, 
-                            containers: elm.container, 
-                            quantity: elm.quantity, 
-                        } }),
-                        // units: auxUnits.map((elm: any, i: number) => { return { 
-                        //     id: i, 
-                        //     name: elm.name, 
-                        //     weight: elm.weight, 
-                        //     dimension: elm.dimensions, 
-                        //     quantity: elm.quantity, 
-                        // } }),
-                        quantity: Number(quantity),
-                        detail: formState.message,
-                        // tags: formState.tags.length !== 0 ? formState.tags.map((elm: any) => elm.productName).join(',') : null,
-                        // tags: tags1 !== "," ? tags1 : tags2 !== "," ? tags2 : null
-                        tags: valueSpecifics !== "hscodes" ? tags1 : tags2
-                    }),
-                    headers: myHeaders
-                })
+                
+                getApiRequest({body: {
+                    email: formState.email,
+                    whatsapp: formState.phone,
+                    departure: formState.departure !== null && formState.departure !== undefined ? [formState.departure.city.toUpperCase(),formState.departure.country,formState.departure.latitude,formState.departure.longitude,postcode1].filter((val: any) => { return val !== "" }).join(', ') : "",
+                    arrival: formState.arrival !== null && formState.arrival !== undefined ? [formState.arrival.city.toUpperCase(),formState.arrival.country,formState.arrival.latitude,formState.arrival.longitude,postcode2].filter((val: any) => { return val !== "" }).join(', ') : "",
+                    cargoType: 0,
+                    clientNumber: formState.clientNumber !== null ? String(formState.clientNumber.contactNumber)+", "+formState.clientNumber.contactName : null,
+                    packingType: formState.packingType,
+                    containers: formState.containersSelection.map((elm: any) => { return { 
+                        id: containers.find((item: any) => item.packageName === elm.container).packageId, 
+                        containers: elm.container, 
+                        quantity: elm.quantity, 
+                    } }),
+                    quantity: Number(quantity),
+                    detail: formState.message,
+                    tags: valueSpecifics !== "hscodes" ? tags1 : tags2
+                }})
                 .then((response: any) => response.json())
                 .then((data: any) => {
                     if (data.code === 201) {
@@ -214,7 +202,59 @@ const NewRequest = () => {
                 .catch(() => { 
                     setLoad(false);
                     enqueueSnackbar(t('errorHappenedRequest'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
-                });        
+                });
+
+                // fetch(import.meta.env.VITE_API_LIS_QUOTE_ENDPOINT+"/Request", {
+                //     method: "POST",
+                //     body: JSON.stringify({ 
+                //         email: formState.email,
+                //         whatsapp: formState.phone,
+                //         departure: formState.departure !== null && formState.departure !== undefined ? [formState.departure.city.toUpperCase(),formState.departure.country,formState.departure.latitude,formState.departure.longitude,postcode1].filter((val: any) => { return val !== "" }).join(', ') : "",
+                //         arrival: formState.arrival !== null && formState.arrival !== undefined ? [formState.arrival.city.toUpperCase(),formState.arrival.country,formState.arrival.latitude,formState.arrival.longitude,postcode2].filter((val: any) => { return val !== "" }).join(', ') : "",
+                //         cargoType: 0,
+                //         clientNumber: formState.clientNumber !== null ? String(formState.clientNumber.contactNumber)+", "+formState.clientNumber.contactName : null,
+                //         packingType: formState.packingType,
+                //         containers: formState.containersSelection.map((elm: any) => { return { 
+                //             id: containers.find((item: any) => item.packageName === elm.container).packageId, 
+                //             containers: elm.container, 
+                //             quantity: elm.quantity, 
+                //         } }),
+                //         // units: auxUnits.map((elm: any, i: number) => { return { 
+                //         //     id: i, 
+                //         //     name: elm.name, 
+                //         //     weight: elm.weight, 
+                //         //     dimension: elm.dimensions, 
+                //         //     quantity: elm.quantity, 
+                //         // } }),
+                //         quantity: Number(quantity),
+                //         detail: formState.message,
+                //         // tags: formState.tags.length !== 0 ? formState.tags.map((elm: any) => elm.productName).join(',') : null,
+                //         // tags: tags1 !== "," ? tags1 : tags2 !== "," ? tags2 : null
+                //         tags: valueSpecifics !== "hscodes" ? tags1 : tags2
+                //     }),
+                //     headers: myHeaders
+                // })
+                // .then((response: any) => response.json())
+                // .then((data: any) => {
+                //     if (data.code === 201) {
+                //         resetForm();
+                //         enqueueSnackbar(t('requestCreatedAssigned'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                //         if (formState.assignedManager !== null && formState.assignedManager !== "null" && formState.assignedManager !== undefined && formState.assignedManager !== "") {
+                //             assignManager(data.data.id);
+                //         }
+                //         else {
+                //             setLoad(false);
+                //         }
+                //     }
+                //     else {
+                //         setLoad(false);
+                //         enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                //     }
+                // })
+                // .catch(() => { 
+                //     setLoad(false);
+                //     enqueueSnackbar(t('errorHappenedRequest'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                // });        
             }
             else {
                 enqueueSnackbar(t('emailNotValid'), { variant: "info", anchorOrigin: { horizontal: "right", vertical: "top"} });
