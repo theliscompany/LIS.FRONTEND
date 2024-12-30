@@ -1,4 +1,5 @@
-import { Alert, Box, Button, DialogActions, DialogContent, Grid, InputLabel, NativeSelect, Skeleton } from '@mui/material';
+import { Alert, Box, Button, DialogActions, DialogContent, InputLabel, NativeSelect, Skeleton } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { useTranslation } from 'react-i18next';
 import { statusLabel } from '../../utils/functions';
 import { BootstrapInput, buttonCloseStyles, inputLabelStyles } from '../../utils/misc/styles';
@@ -98,11 +99,11 @@ const PriceOffer = (props: any) => {
 
 	const loadOffer = async () => {
 		try {
-			const response = await getQuoteOffer({path: {id: props.id}});
+			const response: any = await getQuoteOffer({path: {id: props.id}});
 			if (response !== null && response !== undefined) {
 				console.log(response.data);
 				// var objTotal = JSON.parse(response.data.createdBy);
-				props.setOffer(response.data);
+				props.setOffer(response.data.data);
 				setLoad(false);
 			}
 			else {
@@ -126,13 +127,13 @@ const PriceOffer = (props: any) => {
 			if (response !== null && response !== undefined) {
 				enqueueSnackbar(t('priceOfferApproved'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top" } });
 				var optionsButtons = props.options.map((_: any, index: number) => {
-					return `<a href="${process.env.REACT_APP_ORIGIN_URL+"/acceptOffer/"+props.id}?option=${index}" style="display:inline-block;background-color:#008089;color:#fff;padding:10px 20px;text-decoration:none" target="_blank">${t('selectOptionOffer', {lng: language})} #${Number(index+1)}</a>`;
+					return `<a href="${import.meta.env.VITE_ORIGIN_URL+"/acceptOffer/"+props.id}?option=${index}" style="display:inline-block;background-color:#008089;color:#fff;padding:10px 20px;text-decoration:none" target="_blank">${t('selectOptionOffer', {lng: language})} #${Number(index+1)}</a>`;
 				});
 				var footer = `
 				<div>${account?.name}</div>
                 <div style="font-family: Verdana; padding-top: 30px; padding-bottom: 20px;">
 					${optionsButtons}
-					<a href="${process.env.REACT_APP_ORIGIN_URL+"/refuseOffer/"+props.id}" style="display:inline-block;background-color:#F2F2F2;color:#008089;padding:10px 20px;text-decoration:none" target="_blank">${t('refuseOffers', {lng: language})}</a>
+					<a href="${import.meta.env.VITE_ORIGIN_URL+"/refuseOffer/"+props.id}" style="display:inline-block;background-color:#F2F2F2;color:#008089;padding:10px 20px;text-decoration:none" target="_blank">${t('refuseOffers', {lng: language})}</a>
 					<div style="margin-top: 15px;"><a target="_blank" href="www.omnifreight.eu">www.omnifreight.eu</a></div>
 					<div style="padding-bottom: 10px;"><a target="_blank" href="http://www.facebook.com/omnifreight">http://www.facebook.com/omnifreight</a></div>
 					<div>Italiëlei 211</div>
@@ -187,10 +188,10 @@ const PriceOffer = (props: any) => {
 			{
 				!load && props.offer !== null ?
 				<Grid container spacing={2} mt={1} px={5}>
-					<Grid item xs={12}>
+					<Grid size={{ xs: 12 }}>
 						<Alert severity='info'>{t('yourAttachments')} : {props.files.length !== 0 ? props.files.map((elm: any) => { return elm.fileName }).join(", ") : t('noAttachments')}</Alert>
 					</Grid>
-					<Grid item xs={12} md={8}>
+					<Grid size={{ xs: 12, md: 8 }}>
 						<InputLabel htmlFor="subject" sx={inputLabelStyles}>{t('subject')}</InputLabel>
 						<BootstrapInput 
 							id="subject" 
@@ -200,7 +201,7 @@ const PriceOffer = (props: any) => {
 							fullWidth 
 						/>
 					</Grid>
-					<Grid item xs={12} md={4}>
+					<Grid size={{ xs: 12, md: 4 }}>
 						<InputLabel htmlFor="sysLanguage" sx={inputLabelStyles}>{t('systemLanguage')}</InputLabel>
 						<NativeSelect
 							id="sysLanguage"
@@ -217,7 +218,7 @@ const PriceOffer = (props: any) => {
 							}
 						</NativeSelect>
 					</Grid>
-					<Grid item xs={12}>
+					<Grid size={{ xs: 12 }}>
 						<InputLabel htmlFor="details" sx={inputLabelStyles}>{t('messageSentCustomer')}</InputLabel>
 						<Box sx={{ mt: 2, p: 2, border: "1px solid #ced4da" }}>
 							<div dangerouslySetInnerHTML={{__html: props.offer.comment+myFooter}} />
@@ -228,13 +229,13 @@ const PriceOffer = (props: any) => {
 							/> */}
 						</Box>
 					</Grid>
-					<Grid item xs={12} md={6}>
+					<Grid size={{ xs: 12, md: 6 }}>
 						<Alert severity="info">
 							{t('statusIs')} : <div>- <strong>{statusLabel(props.offer.status)}</strong> {t('byOmnifreight')}</div>
 							{props.offer.status === "Accepted" ? <div>- <strong>{props.offer.clientApproval}</strong> {t('byClient')}</div> : null}
 						</Alert>
 					</Grid>
-					<Grid item xs={12} md={6} sx={{ pt: 1.5, display: props.type === "modal" ? "none" : "flex", alignItems: "center", justifyContent: "end" }}>
+					<Grid size={{ xs: 12, md: 6 }} sx={{ pt: 1.5, display: props.type === "modal" ? "none" : "flex", alignItems: "center", justifyContent: "end" }}>
 						{/* <Button 
 							variant="contained" 
 							color="primary" 

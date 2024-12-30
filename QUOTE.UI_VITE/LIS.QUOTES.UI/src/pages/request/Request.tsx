@@ -5,7 +5,7 @@ import Grid from '@mui/material/Grid2';
 import { BootstrapDialog, whiteButtonStyles } from '../../utils/misc/styles';
 import { enqueueSnackbar, SnackbarProvider } from 'notistack';
 import { useTranslation } from 'react-i18next';
-import { arePhoneticallyClose, complexEquality, findClosestSeaPort, parseContact, parseLocation, similar, sortByCloseness } from '../../utils/functions';
+import { arePhoneticallyClose, complexEquality, findClosestSeaPort, parseContact2, parseLocation, similar, sortByCloseness } from '../../utils/functions';
 import { containerPackages } from '../../utils/constants';
 // @ts-ignore
 import { JSON as seaPorts } from 'sea-ports';
@@ -181,6 +181,7 @@ const Request = () => {
         try {
             const response: any = await getApiRequestById({path: {id: Number(id)}});
             if (response !== null && response !== undefined) {
+                console.log("Saved : ", response.data.data);
                 // Parse the saved data string into an array of IDs
                 const savedDataArray = response.data.data.tags !== null ? response.data.data.tags.split(',').map(Number) : [];
                 // Filter the possibleObjects array to only include objects with matching hS_Code
@@ -204,7 +205,7 @@ const Request = () => {
                 setLoadingCity(parseLocation(response.data.data.departure));
                 setStatus(response.data.data.status);
                 setPackingType(response.data.data.packingType !== null ? response.data.data.packingType : "FCL");
-                setClientNumber(response.data.data.clientNumber !== null && response.data.data.clientNumber !== "" ? parseContact(response.data.data.clientNumber) : "");
+                setClientNumber(response.data.data.clientNumber !== null && response.data.data.clientNumber !== "" ? parseContact2(response.data.data.clientNumber) : "");
                 setContainersSelection(response.data.data.containers.map((elm: any) => { return {
                     id: elm.id,
                     container: elm.containers, 
@@ -356,6 +357,7 @@ const Request = () => {
                                 containers={containers} status={status}
                                 canEdit={canEdit} setCanEdit={setCanEdit}
                                 requestData={requestData} type="standard"
+                                commodities={valueSpecifics === "products" ? products : hscodes}
                             /> : <Grid size={{ xs: 12 }}><Skeleton /></Grid>
                         }
 

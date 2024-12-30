@@ -15,93 +15,221 @@ import { client as sessionstorageClient } from "./client/sessionstorage";
 const BackendServiceProvider = ({children}:{children:React.ReactNode}) => {
     const { instance, accounts } = useMsal();
     const account = useAccount(accounts[0] || {});
-
+    
     const [tokensLoading, setTokensLoading] = useState<boolean>(true);
     
-    useEffect(() => {
-      const getTokens = async () => {
-        const _tokenTransport = await getAccessToken(instance, transportRequest, account);
-        const _tokenDocument = await getAccessToken(instance, documentRequest, account);
-        const _tokenShipment = await getAccessToken(instance, shipmentRequest, account);
-        const _tokenCrm = await getAccessToken(instance, crmRequest, account);
-        const _tokenPricing = await getAccessToken(instance, pricingRequest, account);
-        const _tokenTemplate = await getAccessToken(instance, templateRequest, account);
-        const _tokenOffer = await getAccessToken(instance, offerRequest, account);
-        const _tokenQuote = await getAccessToken(instance, quoteRequest, account);
-        const _tokenSessionstorage = await getAccessToken(instance, sessionstorageRequest, account);
+    // useEffect(() => {
+    //   const getTokens = async () => {
+    //     const _tokenTransport = await getAccessToken(instance, transportRequest, account);
+    //     const _tokenDocument = await getAccessToken(instance, documentRequest, account);
+    //     const _tokenShipment = await getAccessToken(instance, shipmentRequest, account);
+    //     const _tokenCrm = await getAccessToken(instance, crmRequest, account);
+    //     const _tokenPricing = await getAccessToken(instance, pricingRequest, account);
+    //     const _tokenTemplate = await getAccessToken(instance, templateRequest, account);
+    //     const _tokenOffer = await getAccessToken(instance, offerRequest, account);
+    //     const _tokenQuote = await getAccessToken(instance, quoteRequest, account);
+    //     const _tokenSessionstorage = await getAccessToken(instance, sessionstorageRequest, account);
         
-        shipmentClient.setConfig({
-          baseURL: import.meta.env.VITE_API_LIS_SHIPMENT_ENDPOINT,
-          headers: {
-            Authorization: `Bearer ${_tokenShipment}`
-          }
-        });
+    //     shipmentClient.setConfig({
+    //       baseURL: import.meta.env.VITE_API_LIS_SHIPMENT_ENDPOINT,
+    //       headers: {
+    //         Authorization: `Bearer ${_tokenShipment}`
+    //       }
+    //     });
 
-        transportClient.setConfig({
-          baseURL: import.meta.env.VITE_API_LIS_TRANSPORT_ENDPOINT,
-          headers: {
-            Authorization: `Bearer ${_tokenTransport}`
-          }
-        });
+    //     transportClient.setConfig({
+    //       baseURL: import.meta.env.VITE_API_LIS_TRANSPORT_ENDPOINT,
+    //       headers: {
+    //         Authorization: `Bearer ${_tokenTransport}`
+    //       }
+    //     });
 
-        documentClient.setConfig({
-          baseURL: import.meta.env.VITE_API_LIS_DOCUMENT_ENDPOINT,
-          headers: {
-            Authorization: `Bearer ${_tokenDocument}`
-          }
-        });
+    //     documentClient.setConfig({
+    //       baseURL: import.meta.env.VITE_API_LIS_DOCUMENT_ENDPOINT,
+    //       headers: {
+    //         Authorization: `Bearer ${_tokenDocument}`
+    //       }
+    //     });
 
-        crmClient.setConfig({
-          baseURL: import.meta.env.VITE_API_LIS_CRM_ENDPOINT,
-          headers: {
-            Authorization: `Bearer ${_tokenCrm}`
-          },
+    //     crmClient.setConfig({
+    //       baseURL: import.meta.env.VITE_API_LIS_CRM_ENDPOINT,
+    //       headers: {
+    //         Authorization: `Bearer ${_tokenCrm}`
+    //       },
           
-          withCredentials: true
-        });
+    //       withCredentials: true
+    //     });
 
-        pricingClient.setConfig({
-          baseURL: import.meta.env.VITE_API_LIS_PRICING_ENDPOINT,
-          headers: {
-            Authorization: `Bearer ${_tokenPricing}`
-          },
-        });
+    //     pricingClient.setConfig({
+    //       baseURL: import.meta.env.VITE_API_LIS_PRICING_ENDPOINT,
+    //       headers: {
+    //         Authorization: `Bearer ${_tokenPricing}`
+    //       },
+    //     });
 
-        templateClient.setConfig({
-          baseURL: import.meta.env.VITE_API_LIS_TEMPLATE_ENDPOINT,
-          headers: {
-            Authorization: `Bearer ${_tokenTemplate}`
-          },
-        });
+    //     templateClient.setConfig({
+    //       baseURL: import.meta.env.VITE_API_LIS_TEMPLATE_ENDPOINT,
+    //       headers: {
+    //         Authorization: `Bearer ${_tokenTemplate}`
+    //       },
+    //     });
 
-        offerClient.setConfig({
-          baseURL: import.meta.env.VITE_API_LIS_OFFER_ENDPOINT,
-          headers: {
-            Authorization: `Bearer ${_tokenOffer}`
-          },
-        });
+    //     offerClient.setConfig({
+    //       baseURL: import.meta.env.VITE_API_LIS_OFFER_ENDPOINT,
+    //       headers: {
+    //         Authorization: `Bearer ${_tokenOffer}`
+    //       },
+    //     });
 
-        quoteClient.setConfig({
-          baseURL: import.meta.env.VITE_API_LIS_QUOTE_ENDPOINT,
-          headers: {
-            Authorization: `Bearer ${_tokenQuote}`
-          },
-        });
+    //     quoteClient.setConfig({
+    //       baseURL: import.meta.env.VITE_API_LIS_QUOTE_ENDPOINT,
+    //       headers: {
+    //         Authorization: `Bearer ${_tokenQuote}`
+    //       },
+    //     });
 
-        sessionstorageClient.setConfig({
-          baseURL: import.meta.env.VITE_API_LIS_SESSIONSTORAGE_ENDPOINT,
-          headers: {
-            Authorization: `Bearer ${_tokenSessionstorage}`
-          },
-        });
+    //     sessionstorageClient.setConfig({
+    //       baseURL: import.meta.env.VITE_API_LIS_SESSIONSTORAGE_ENDPOINT,
+    //       headers: {
+    //         Authorization: `Bearer ${_tokenSessionstorage}`
+    //       },
+    //     });
 
+    //     setTokensLoading(false);
+    //   }
+
+    //   if (account && instance){
+    //     getTokens();
+    //   }
+    // }, [account,instance]);
+    
+    useEffect(() => {
+      const configureClients = async () => {
+        if (account && instance) {
+          // alert("Superss");
+          // Obtenez les tokens uniquement si l'utilisateur est connecté
+          const _tokenTransport = await getAccessToken(instance, transportRequest, account);
+          const _tokenDocument = await getAccessToken(instance, documentRequest, account);
+          const _tokenShipment = await getAccessToken(instance, shipmentRequest, account);
+          const _tokenCrm = await getAccessToken(instance, crmRequest, account);
+          const _tokenPricing = await getAccessToken(instance, pricingRequest, account);
+          const _tokenTemplate = await getAccessToken(instance, templateRequest, account);
+          const _tokenOffer = await getAccessToken(instance, offerRequest, account);
+          const _tokenQuote = await getAccessToken(instance, quoteRequest, account);
+          const _tokenSessionstorage = await getAccessToken(instance, sessionstorageRequest, account);
+    
+          // Configurez les clients avec les tokens
+          shipmentClient.setConfig({
+            baseURL: import.meta.env.VITE_API_LIS_SHIPMENT_ENDPOINT,
+            headers: {
+              Authorization: `Bearer ${_tokenShipment}`,
+            },
+          });
+    
+          transportClient.setConfig({
+            baseURL: import.meta.env.VITE_API_LIS_TRANSPORT_ENDPOINT,
+            headers: {
+              Authorization: `Bearer ${_tokenTransport}`,
+            },
+          });
+
+          documentClient.setConfig({
+            baseURL: import.meta.env.VITE_API_LIS_DOCUMENT_ENDPOINT,
+            headers: {
+              Authorization: `Bearer ${_tokenDocument}`
+            }
+          });
+
+          crmClient.setConfig({
+            baseURL: import.meta.env.VITE_API_LIS_CRM_ENDPOINT,
+            headers: {
+              Authorization: `Bearer ${_tokenCrm}`
+            },
+            
+            withCredentials: true
+          });
+
+          pricingClient.setConfig({
+            baseURL: import.meta.env.VITE_API_LIS_PRICING_ENDPOINT,
+            headers: {
+              Authorization: `Bearer ${_tokenPricing}`
+            },
+          });
+
+          templateClient.setConfig({
+            baseURL: import.meta.env.VITE_API_LIS_TEMPLATE_ENDPOINT,
+            headers: {
+              Authorization: `Bearer ${_tokenTemplate}`
+            },
+          });
+
+          offerClient.setConfig({
+            baseURL: import.meta.env.VITE_API_LIS_OFFER_ENDPOINT,
+            headers: {
+              Authorization: `Bearer ${_tokenOffer}`
+            },
+          });
+
+          quoteClient.setConfig({
+            baseURL: import.meta.env.VITE_API_LIS_QUOTE_ENDPOINT,
+            headers: {
+              Authorization: `Bearer ${_tokenQuote}`
+            },
+          });
+
+          sessionstorageClient.setConfig({
+            baseURL: import.meta.env.VITE_API_LIS_SESSIONSTORAGE_ENDPOINT,
+            headers: {
+              Authorization: `Bearer ${_tokenSessionstorage}`
+            },
+          });
+        } 
+        else {
+          // Si l'utilisateur n'est pas connecté, configurez les clients sans en-têtes d'authentification
+          // alert("Cheese");
+          shipmentClient.setConfig({
+            baseURL: import.meta.env.VITE_API_LIS_SHIPMENT_ENDPOINT,
+          });
+    
+          transportClient.setConfig({
+            baseURL: import.meta.env.VITE_API_LIS_TRANSPORT_ENDPOINT,
+          });
+    
+          documentClient.setConfig({
+            baseURL: import.meta.env.VITE_API_LIS_DOCUMENT_ENDPOINT,
+          });
+    
+          crmClient.setConfig({
+            baseURL: import.meta.env.VITE_API_LIS_CRM_ENDPOINT,
+            withCredentials: true,
+          });
+    
+          pricingClient.setConfig({
+            baseURL: import.meta.env.VITE_API_LIS_PRICING_ENDPOINT,
+          });
+    
+          templateClient.setConfig({
+            baseURL: import.meta.env.VITE_API_LIS_TEMPLATE_ENDPOINT,
+          });
+    
+          offerClient.setConfig({
+            baseURL: import.meta.env.VITE_API_LIS_OFFER_ENDPOINT,
+          });
+    
+          quoteClient.setConfig({
+            baseURL: import.meta.env.VITE_API_LIS_QUOTE_ENDPOINT,
+          });
+    
+          sessionstorageClient.setConfig({
+            baseURL: import.meta.env.VITE_API_LIS_SESSIONSTORAGE_ENDPOINT,
+          });
+        }
+    
         setTokensLoading(false);
-      }
-
-      if (account && instance){
-        getTokens();
-      }
-    }, [account,instance]);
+      };
+    
+      configureClients();
+    }, [account, instance]);
     
     if (!tokensLoading){
         return (

@@ -1009,8 +1009,8 @@ const GeneratePriceOffer = (props: any) => {
         var containersQuantities = displayContainers(containersSelection);
 
         const variables = { loadingCity, destinationPort, commodities, clientName, freeTime, overtimeTariff, frequency, transitTime, containersQuantities, listServices, pricesContainers };
-        console.log("rterEF : ", rteRef);
-        console.log("vars : ", variables);
+        // console.log("rterEF : ", rteRef);
+        // console.log("vars : ", variables);
         rteRef.current?.editor?.commands.setContent(generateEmailContent(mailLanguage !== "en" ? templateBase.content : templateBase.contentEn, variables));
     }, [tags, departure, clientNumber, formState.portDestination, formState.selectedSeafreight, formState.selectedHaulage, formState.selectedMisc, containersSelection, formState.margins, formState.addings, formState.marginsMiscs, seafreights, formState.options]);
 
@@ -1309,8 +1309,8 @@ const GeneratePriceOffer = (props: any) => {
                                                                 if (newRowSelectionModel.length <= containersSelection.length) {
                                                                     var myFreights = newRowSelectionModel.length !== 0 ? seafreights.filter((elm: any) => newRowSelectionModel.includes(elm.seaFreightId)) : [];
                                                                     if (checkDifferentDefaultContainer(myFreights)) {
-                                                                        var selSf = newRowSelectionModel.length !== 0 ? seafreights.filter((sfreight: any) => newRowSelectionModel.includes(sfreight.seaFreightId)) : null;
-                                                                        console.log("Sfreights : ", selSf);
+                                                                        // var selSf = newRowSelectionModel.length !== 0 ? seafreights.filter((sfreight: any) => newRowSelectionModel.includes(sfreight.seaFreightId)) : null;
+                                                                        // console.log("Sfreights : ", selSf);
                                                                         setFormState({
                                                                             ...formState, 
                                                                             rowSelectionModel: newRowSelectionModel, 

@@ -171,7 +171,7 @@ const NewRequest = () => {
                     departure: formState.departure !== null && formState.departure !== undefined ? [formState.departure.city.toUpperCase(),formState.departure.country,formState.departure.latitude,formState.departure.longitude,postcode1].filter((val: any) => { return val !== "" }).join(', ') : "",
                     arrival: formState.arrival !== null && formState.arrival !== undefined ? [formState.arrival.city.toUpperCase(),formState.arrival.country,formState.arrival.latitude,formState.arrival.longitude,postcode2].filter((val: any) => { return val !== "" }).join(', ') : "",
                     cargoType: "Container",
-                    clientNumber: formState.clientNumber !== null ? String(formState.clientNumber.contactNumber)+", "+formState.clientNumber.contactName : null,
+                    clientNumber: formState.clientNumber !== null ? String(formState.clientNumber.contactNumber)+", "+formState.clientNumber.contactName+", "+formState.clientNumber.contactId : null,
                     packingType: formState.packingType,
                     containers: formState.containersSelection.map((elm: any) => { return { 
                         id: containers.find((item: any) => item.packageName === elm.container).packageId, 
