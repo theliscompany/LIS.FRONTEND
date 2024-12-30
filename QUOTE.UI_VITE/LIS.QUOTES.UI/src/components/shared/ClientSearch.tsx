@@ -33,7 +33,7 @@ const ClientSearch: React.FC<LocationAutocompleteProps> = ({ id, name, value, on
         setLoading(true);
         if (checkFormatCode(search)) {
             // First i search by contact number
-            const response = await getContactGetContacts({query: { contactNumber: search, category: "CUSTOMERS", pageSize: 4000 }});
+            const response = await getContactGetContacts({query: { contactNumber: search, category: "CUSTOMERS" }});
             if (response !== null && response !== undefined) {
                 console.log(response);
                 // Removing duplicates from result before rendering
@@ -42,7 +42,7 @@ const ClientSearch: React.FC<LocationAutocompleteProps> = ({ id, name, value, on
         } 
         else {
             // If i dont find i search by contact name
-            const response = await getContactGetContacts({query: { contactName: search, category: "CUSTOMERS", pageSize: 4000 }});
+            const response = await getContactGetContacts({query: { contactName: search, category: "CUSTOMERS" }});
             if (response !== null && response !== undefined) {
                 console.log(response);
                 // Removing duplicates from result before rendering
