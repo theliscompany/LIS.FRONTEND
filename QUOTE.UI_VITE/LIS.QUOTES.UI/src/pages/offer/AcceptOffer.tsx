@@ -151,18 +151,14 @@ const AcceptOffer = () => {
         //     // "estimatedDepartureDate": "2024-12-30T13:03:44.563Z",
         //     // "estimatedArrivalDate": "2024-12-30T13:03:44.563Z"
         // };
-        const body = {
-            "orderId": 0,
-            "customerId": Number(offerData.clientNumber),
-            "exportation": true,
-            "loadingPort": option.portDeparture.portName,
-            "dischargePort": option.portDestination.portName,
-            "departurePort": option.portDeparture.portId,
-            "destinationPort": option.portDestination.portId,
-            "shippingLine": option.selectedSeafreight.carrierName,
-        }
 
-        postOrder({body: body})
+        postOrder({body: {
+            orderId: 0,
+            customerId: Number(offerData.clientNumber),
+            exportation: true,
+            departurePortId: option.portDeparture.portId,
+            destinationPortId: option.portDestination.portId
+        }})
         .then((data: any) => {
             console.log("All : ", data.data);            
             var lang = offerData.comment.startsWith("<p>Bonjour") ? "fr" : "en";
