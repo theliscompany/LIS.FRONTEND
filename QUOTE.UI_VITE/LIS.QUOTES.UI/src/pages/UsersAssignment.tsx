@@ -85,11 +85,11 @@ const UsersAssignment = () => {
                 "Authorization": token
             }
         })
-        .then((response: any) => response.json())
+        // .then((response: any) => response.json())
         .then((data: any) => {
             if (data.error === undefined) {
                 console.log(data);
-                setUsers(data.value);
+                setUsers(data.data.value);
             }
             else {
                 setShowAlert(true);

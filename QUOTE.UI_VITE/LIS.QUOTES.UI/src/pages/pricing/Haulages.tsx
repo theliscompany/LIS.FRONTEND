@@ -71,24 +71,15 @@ function Haulages() {
 
     const { t } = useTranslation();
 
-    const getUnitTariff: GridValueGetter<(typeof haulages)[number], unknown> = (
-        _,
-        row,
-      ) => {
+    const getUnitTariff: GridValueGetter<(typeof haulages)[number], unknown> = (_,row,) => {
         return `${row.unitTariff || ''} ${t(row.currency)}`;
     };
 
-    const getMultiStop: GridValueGetter<(typeof haulages)[number], unknown> = (
-        _,
-        row,
-      ) => {
+    const getMultiStop: GridValueGetter<(typeof haulages)[number], unknown> = (_, row,) => {
         return `${row.multiStop || ''} ${t(row.currency)}`;
     };
 
-    const getOvertimeTariff: GridValueGetter<(typeof haulages)[number], unknown> = (
-        _,
-        row,
-      ) => {
+    const getOvertimeTariff: GridValueGetter<(typeof haulages)[number], unknown> = (_,row,) => {
         return `${row.overtimeTariff || ''} ${t(row.currency)} / ${t('hour')}`;
     };
     
@@ -105,11 +96,11 @@ function Haulages() {
         }, minWidth: 100, flex: 1 },
         { field: 'validUntil', headerName: t('validUntil'), renderCell: (params: GridRenderCellParams) => {
             return (
-                <Box sx={{ my: 1, mr: 1 }}>
+                <Box sx={{ my: 1 }}>
                     <Chip label={(new Date(params.row.validUntil)).toLocaleDateString().slice(0,10)} color={(new Date()).getTime() - (new Date(params.row.validUntil)).getTime() > 0 ? "warning" : "success"}></Chip>
                 </Box>
             );
-        }, minWidth: 100, flex: 0.75 },
+        }, minWidth: 105, flex: 0.75 },
         { field: 'created', headerName: t('created'), renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box sx={{ my: 1, mr: 1 }}>

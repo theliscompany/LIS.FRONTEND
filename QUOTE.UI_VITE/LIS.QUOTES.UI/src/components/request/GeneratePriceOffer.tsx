@@ -5,7 +5,7 @@ import Grid from '@mui/material/Grid2';
 import { Accordion, AccordionDetails, AccordionSummary, Alert, Autocomplete, Box, Button, Chip, DialogActions, DialogContent, InputLabel, ListItem, ListItemText, NativeSelect, Paper, Skeleton, Step, StepLabel, Stepper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Typography } from '@mui/material';
 import { enqueueSnackbar } from 'notistack';
 import { Anchor, ExpandMore, RestartAlt } from '@mui/icons-material';
-import { DataGrid, GridColDef, GridRenderCellParams, GridToolbar } from '@mui/x-data-grid';
+import { DataGrid, GridColDef, GridColumnHeaderParams, GridRenderCellParams, GridToolbar, GridValueGetter } from '@mui/x-data-grid';
 import StarterKit from '@tiptap/starter-kit';
 import { calculateTotal, checkCarrierConsistency, checkDifferentDefaultContainer, formatObject, formatServices, generateRandomNumber, getCity, getServices, getServicesTotal, getServicesTotal2, getTotalNumber, getTotalPrice, getTotalPrices, hashCode, myServices, parseDate, removeDuplicatesWithLatestUpdated, validateObjectHSCODEFormat } from '../../utils/functions';
 import AutocompleteSearch from '../shared/AutocompleteSearch';
@@ -100,8 +100,8 @@ const GeneratePriceOffer = (props: any) => {
     const columnsSeafreights: GridColDef[] = [
         { field: 'carrierName', headerName: t('carrier'), flex: 1.25 },
         { field: 'carrierAgentName', headerName: t('carrierAgent'), flex: 1.25 },
-        { field: 'frequency', headerName: t('frequency'), valueFormatter: (params: any) => `${t('every')} ${params.value || ''} `+t('days'), flex: 0.75 },
-        { field: 'transitTime', headerName: t('transitTime'), valueFormatter: (params: any) => `${params.value || ''} `+t('days'), flex: 0.5 },
+        { field: 'frequency', headerName: t('frequency'), valueFormatter: (value?: number) => `${t('every')} ${value || ''} `+t('days'), flex: 0.75 },
+        { field: 'transitTime', headerName: t('transitTime'), valueFormatter: (value?: number) => `${value || ''} `+t('days'), flex: 0.5 },
         { field: 'defaultContainer', headerName: t('prices'), renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box sx={{ my: 1, mr: 1 }}>
@@ -117,9 +117,9 @@ const GeneratePriceOffer = (props: any) => {
                 </Box>
             );
         }, renderHeader: () => t('prices'), flex: 1 },
-        { field: 'validUntil', headerName: t('validUntil'), renderCell: (params: GridRenderCellParams) => {
+        { field: 'validUntil', headerName: t('validUntil'), minWidth: 105, renderCell: (params: GridRenderCellParams) => {
             return (
-                <Box sx={{ my: 1, mr: 1 }}>
+                <Box sx={{ my: 1 }}>
                     <Chip label={(new Date(params.row.validUntil)).toLocaleDateString().slice(0,10)} color={(new Date()).getTime() - (new Date(params.row.validUntil)).getTime() > 0 ? "warning" : "success"}></Chip>
                 </Box>
             );
@@ -133,6 +133,18 @@ const GeneratePriceOffer = (props: any) => {
         }, flex: 1.25 },
     ];
 
+    const getUnitTariff: GridValueGetter<(typeof haulages)[number], unknown> = (_,row,) => {
+        return `${row.unitTariff || ''} ${t(row.currency)}`;
+    };
+
+    const getMultiStop: GridValueGetter<(typeof haulages)[number], unknown> = (_, row,) => {
+        return `${row.multiStop || ''} ${t(row.currency)}`;
+    };
+
+    const getOvertimeTariff: GridValueGetter<(typeof haulages)[number], unknown> = (_,row,) => {
+        return `${row.overtimeTariff || ''} ${t(row.currency)} / ${t('hour')}`;
+    };
+    
     const columnsHaulages: GridColDef[] = [
         { field: 'haulierName', headerName: t('haulier'), flex: 1.3 },
         { field: 'loadingPort', headerName: t('loadingPort'), renderCell: (params: GridRenderCellParams) => {
@@ -145,13 +157,13 @@ const GeneratePriceOffer = (props: any) => {
                 <Box sx={{ my: 2 }}>{params.row.containerNames.join(", ")}</Box>
             );
         }, minWidth: 100, flex: 0.75 },
-        { field: 'unitTariff', valueGetter: (params: any) => `${params.row.unitTariff || ''} ${t(params.row.currency)}`, renderHeader: () => (<>{t('unitTariff')}</>), flex: 0.75 },
-        { field: 'freeTime', headerName: t('freeTime'), valueFormatter: (params: any) => `${params.value || ''} ${t('hours')}`, flex: 0.5 },
-        { field: 'overtimeTariff', headerName: t('overtimeTariff'), valueGetter: (params: any) => `${params.row.overtimeTariff || ''} ${t(params.row.currency)} / ${t('hour')}`, renderHeader: () => (<>{t('overtimeTariff')}</>), flex: 0.75 },
-        { field: 'multiStop', headerName: t('multiStop'), valueGetter: (params: any) => `${params.row.multiStop || ''} ${t(params.row.currency)}`, flex: 0.5 },
-        { field: 'validUntil', headerName: t('validUntil'), renderCell: (params: GridRenderCellParams) => {
+        { field: 'unitTariff', headerName: t('unitTariff'), valueGetter: getUnitTariff, renderHeader: (_: GridColumnHeaderParams) => (<>{t('unitTariff')}</>), minWidth: 100, flex: 0.75 },
+        { field: 'freeTime', headerName: t('freeTime'), valueFormatter: (value?: number) => `${value || ''} ${t('hours')}`, minWidth: 100, flex: 0.75 },
+        { field: 'overtimeTariff', headerName: t('overtimeTariff'), valueGetter: getOvertimeTariff, renderHeader: (_: GridColumnHeaderParams) => (<>{t('overtimeTariff')}</>), minWidth: 100, flex: 1 },
+        { field: 'multiStop', headerName: t('multiStop'), valueGetter: getMultiStop, minWidth: 100, flex: 0.75 },
+        { field: 'validUntil', headerName: t('validUntil'), minWidth: 105, renderCell: (params: GridRenderCellParams) => {
             return (
-                <Box sx={{ my: 1, mr: 1 }}>
+                <Box sx={{ my: 1 }}>
                     <Chip label={(new Date(params.row.validUntil)).toLocaleDateString().slice(0,10)} color={(new Date()).getTime() - (new Date(params.row.validUntil)).getTime() > 0 ? "warning" : "success"}></Chip>
                 </Box>
             );
@@ -190,9 +202,9 @@ const GeneratePriceOffer = (props: any) => {
             );
         }, flex: 4 },
         // { field: 'textServices', headerName: t('costPrices'), flex: 2 },
-        { field: 'validUntil', headerName: t('validUntil'), renderCell: (params: GridRenderCellParams) => {
+        { field: 'validUntil', headerName: t('validUntil'), minWidth: 105, renderCell: (params: GridRenderCellParams) => {
             return (
-                <Box sx={{ my: 1, mr: 1 }}>
+                <Box sx={{ my: 1 }}>
                     <Chip label={(new Date(params.row.validUntil)).toLocaleDateString().slice(0,10)} color={(new Date()).getTime() - (new Date(params.row.validUntil)).getTime() > 0 ? "warning" : "success"}></Chip>
                 </Box>
             );
@@ -208,19 +220,19 @@ const GeneratePriceOffer = (props: any) => {
         
     const handleMarginChange = (index: number, value: any) => {
         const updatedMargins: any = [...formState.margins];
-        updatedMargins[index] = value;
+        updatedMargins[index] = Number(value);
         setFormState({...formState, margins: updatedMargins});
     };
     
     const handleAddingChange = (index: number, value: any) => {
         const updatedAddings: any = [...formState.addings];
-        updatedAddings[index] = value;
+        updatedAddings[index] = Number(value);
         setFormState({...formState, addings: updatedAddings});
     };
     
     const handleMarginMiscChange = (index: number, value: any) => {
         const updatedMarginMiscs: any = [...formState.marginsMiscs];
-        updatedMarginMiscs[index] = value;
+        updatedMarginMiscs[index] = Number(value);
         setFormState({...formState, marginsMiscs: updatedMarginMiscs});
     };
     
@@ -493,6 +505,10 @@ const GeneratePriceOffer = (props: any) => {
             }
         }
         
+        console.log("Haulage : ", haulagePrices);
+        console.log("Seafreight : ", seafreightPrices);
+        console.log("Miscs : ", miscPrices);
+
         var finalValue = ((seafreightPrices+haulagePrices+miscPrices)*(option.margins[index]/100)+seafreightPrices+haulagePrices+miscPrices).toFixed(2);
         return Number(finalValue)+Number(option.addings[index]);
     }
@@ -562,8 +578,10 @@ const GeneratePriceOffer = (props: any) => {
             }
 
             // I removed the loadingDate
-            var containersFormatted = (containersSelection.map((elm: any) => elm.id)).join("&ContainerTypesId="); 
+            var containersFormatted = (containersSelection.map((elm: any) => elm.id)); 
             const response = await getApiPricingHaulagesOfferRequest({query: {HaulageType: formState.haulageType, LoadingCity: city, ContainerIdsType: containersFormatted}});
+            // console.log("Resp : ", response.data);
+            // console.log("Removed : ", removeDuplicatesWithLatestUpdated(response.data));
             setLoadResults(false);
             setHaulages(removeDuplicatesWithLatestUpdated(response.data));
         }
@@ -576,7 +594,8 @@ const GeneratePriceOffer = (props: any) => {
     const getSeaFreightPriceOffers = async () => {
         try {
             setLoadResults(true);
-            var containersFormatted = (containersSelection.map((elm: any) => elm.id)).join("&ContainerTypesId=");
+            // var containersFormatted = (containersSelection.map((elm: any) => elm.id)).join("&ContainerTypesId=");
+            var containersFormatted = (containersSelection.map((elm: any) => elm.id));
             
             var auxPortDeparture = formState.portDeparture;
             if (formState.selectedHaulage !== null && formState.selectedHaulage !== undefined) {
@@ -844,6 +863,7 @@ const GeneratePriceOffer = (props: any) => {
         if (templateBase !== null && formState.options !== undefined && formState.options !== null) {
             for (var i = 0; i < formState.options.length; i++) {
                 var option: any = formState.options[i];
+                // console.log("Option : ", option);
                 var auxPricesTotal = containersSelection !== null && option.selectedSeafreight !== null && option.selectedSeafreight !== undefined && seafreights !== null ? 
                 containersSelection.map((elm: any, index: number) => {
                     var auxFrequency = 0;
@@ -981,27 +1001,6 @@ const GeneratePriceOffer = (props: any) => {
         }
         var pricesContainers = templateBase !== null ? auxPricesContainers.join("<p>"+t('', { lng: templateBase.currentVersion.includes("English") ? "en" : "fr" })+"</p>") : "";
         
-        // var pricesContainers = containersSelection !== null && formState.selectedSeafreight !== null && formState.selectedSeafreight !== undefined && seafreights !== null ? 
-        // containersSelection.map((elm: any, index: number) => {
-        //     var auxFrequency = 0;
-        //     var auxTransitTime = "";
-        //     var aux1 = formState.selectedSeafreights.find((val: any) => val.defaultContainer === elm.container);
-        //     if (calculateSeafreightPrice(elm.container, elm.quantity, index) !== 0 && templateBase !== null) {
-        //         if (aux1 !== undefined) {
-        //             auxFrequency = aux1.frequency;
-        //             auxTransitTime = aux1.transitTime;
-        //         }
-        //         return "<p><strong>"+calculateContainerPrice(elm.container, elm.quantity, index)+" "
-        //         +formState.selectedSeafreight.currency+" / "+elm.container
-        //         +" / "+t('every', { lng: templateBase.currentVersion.includes("English") ? "en" : "fr" })+" "+auxFrequency
-        //         +" "+t('days', { lng: templateBase.currentVersion.includes("English") ? "en" : "fr" })+" / "+t('transitTime', { lng: templateBase.currentVersion.includes("English") ? "en" : "fr" })+" : "+auxTransitTime
-        //         +" "+t('days', { lng: templateBase.currentVersion.includes("English") ? "en" : "fr" })+"</strong></p>"
-        //     }
-        //     else {
-        //         return null;
-        //     }
-        // }).join("") : "";
-        
         var clientName = clientNumber !== null ? clientNumber.contactName : null;
         var freeTime = formState.selectedHaulage !== null && formState.selectedHaulage !== undefined ? formState.selectedHaulage.freeTime : "";
         var overtimeTariff = formState.selectedHaulage !== null && formState.selectedHaulage !== undefined ? formState.selectedHaulage.overtimeTariff : "";
@@ -1010,9 +1009,10 @@ const GeneratePriceOffer = (props: any) => {
         var containersQuantities = displayContainers(containersSelection);
 
         const variables = { loadingCity, destinationPort, commodities, clientName, freeTime, overtimeTariff, frequency, transitTime, containersQuantities, listServices, pricesContainers };
+        console.log("rterEF : ", rteRef);
+        console.log("vars : ", variables);
         rteRef.current?.editor?.commands.setContent(generateEmailContent(mailLanguage !== "en" ? templateBase.content : templateBase.contentEn, variables));
     }, [tags, departure, clientNumber, formState.portDestination, formState.selectedSeafreight, formState.selectedHaulage, formState.selectedMisc, containersSelection, formState.margins, formState.addings, formState.marginsMiscs, seafreights, formState.options]);
-
 
 
     
@@ -1088,12 +1088,12 @@ const GeneratePriceOffer = (props: any) => {
                                             <Grid size={{ xs: 12 }}>
                                                 <Box sx={{ overflow: "auto" }}>
                                                     <Grid container>
-                                                        <Grid size={{ xs: 7 }}>
-                                                            <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>
+                                                        <Grid size={{ xs: 6 }}>
+                                                            <Typography variant="h5" sx={{ my: 2, fontSize: 18, fontWeight: "bold" }}>
                                                                 {t('listHaulagesPricingOffers')+t('fromDotted')+loadingCity.city} ({t('selectOne')})
                                                             </Typography>
                                                         </Grid>
-                                                        <Grid size={{ xs: 5 }}>
+                                                        <Grid size={{ xs: 6 }}>
                                                             <Button 
                                                                 variant="contained" 
                                                                 color="inherit" 
@@ -1232,8 +1232,8 @@ const GeneratePriceOffer = (props: any) => {
                                             </Grid>
                                             <Grid size={{ xs: 12 }}>
                                                 <Grid container>
-                                                    <Grid size={{ xs: 7 }}>
-                                                        <Typography variant="h5" sx={{ my: 2, fontSize: 19, fontWeight: "bold" }}>
+                                                    <Grid size={{ xs: 6 }}>
+                                                        <Typography variant="h5" sx={{ my: 2, fontSize: 18, fontWeight: "bold" }}>
                                                             {
                                                                 formState.portDeparture !== undefined && formState.portDeparture !== null && formState.portDestination !== undefined && formState.portDestination !== null ?
                                                                 t('listSeaFreightsPricingOffers')+t('fromDotted')+formState.portDeparture.portName+"-"+formState.portDestination.portName : 
@@ -1241,7 +1241,7 @@ const GeneratePriceOffer = (props: any) => {
                                                             }
                                                         </Typography>
                                                     </Grid>
-                                                    <Grid size={{ xs: 5 }}>
+                                                    <Grid size={{ xs: 6 }}>
                                                         <Button 
                                                             variant="contained" 
                                                             color="inherit" 
@@ -1534,8 +1534,7 @@ const GeneratePriceOffer = (props: any) => {
                                                                                         };
                                                                                         return {...prevState, options};
                                                                                     });
-
-                                                                                    enqueueSnackbar("Option updated with success!", { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                                                                                    enqueueSnackbar(t('optionUpdated'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
                                                                                 }}
                                                                             >
                                                                                 {t('updateOption')}
@@ -1574,7 +1573,7 @@ const GeneratePriceOffer = (props: any) => {
                                                                     sx={{ mt: 0 }}
                                                                     primary={
                                                                         <div>
-                                                                            <span style={{ display: "inline-block", minWidth: "450px" }}>
+                                                                            <span style={{ display: "inline-block", minWidth: "400px" }}>
                                                                                 {
                                                                                     elm.selectedSeafreight !== undefined && elm.selectedSeafreight !== null ? 
                                                                                     Number(id+1)+"# "+elm.selectedSeafreight.departurePortName+" - "+elm.selectedSeafreight.destinationPortName+" | "+elm.selectedSeafreight.carrierName 
@@ -1584,17 +1583,17 @@ const GeneratePriceOffer = (props: any) => {
                                                                             {
                                                                                 elm.selectedHaulage !== null ? 
                                                                                 <span style={formState.currentOption !== id ? { color: "teal", marginLeft: "20px" } : { color: "white", marginLeft: "20px"}}>
-                                                                                    {t('haulage')} : {elm.selectedHaulage.unitTariff} €
+                                                                                    {t('H')} : {elm.selectedHaulage.unitTariff} €
                                                                                 </span> : null
                                                                             }
                                                                             {
                                                                                 <span style={formState.currentOption !== id ? { color: "teal", marginLeft: "20px" } : { color: "white", marginLeft: "20px"}}>
-                                                                                    {t('freight')} : {getTotalPrices(elm.selectedSeafreights)} €
+                                                                                    {t('F')} : {getTotalPrices(elm.selectedSeafreights)} €
                                                                                 </span>
                                                                             }
                                                                             {
                                                                                 <span style={formState.currentOption !== id ? { color: "teal", marginLeft: "20px" } : { color: "white", marginLeft: "20px"}}>
-                                                                                    {t('misc')} : {getTotalPrices(elm.myMiscs)} €
+                                                                                    {t('M')} : {getTotalPrices(elm.myMiscs)} €
                                                                                 </span>
                                                                             }
                                                                         </div>
@@ -1882,6 +1881,7 @@ const GeneratePriceOffer = (props: any) => {
                                                                     return option.fileName;
                                                                 }}
                                                                 value={formState.files}
+                                                                size="small"
                                                                 options={files}
                                                                 fullWidth
                                                                 onChange={(_, value: any) => { 
@@ -1914,23 +1914,22 @@ const GeneratePriceOffer = (props: any) => {
                                                                         extensions={[StarterKit]}
                                                                         content={getDefaultContent(mailLanguage !== "en" ? templateBase.content : templateBase.contentEn)}
                                                                         renderControls={() => (
-                                                                        <MenuControlsContainer>
-                                                                            <MenuSelectHeading />
-                                                                            <MenuDivider />
-                                                                            <MenuButtonBold />
-                                                                            <MenuButtonItalic />
-                                                                            <MenuButtonStrikethrough />
-                                                                            <MenuButtonOrderedList />
-                                                                            <MenuButtonBulletedList />
-                                                                            <MenuSelectTextAlign />
-                                                                            <MenuButtonEditLink />
-                                                                            <MenuButtonHorizontalRule />
-                                                                            <MenuButtonUndo />
-                                                                            <MenuButtonRedo />
-                                                                        </MenuControlsContainer>
+                                                                            <MenuControlsContainer>
+                                                                                <MenuSelectHeading />
+                                                                                <MenuDivider />
+                                                                                <MenuButtonBold />
+                                                                                <MenuButtonItalic />
+                                                                                <MenuButtonStrikethrough />
+                                                                                <MenuButtonOrderedList />
+                                                                                <MenuButtonBulletedList />
+                                                                                <MenuSelectTextAlign />
+                                                                                <MenuButtonEditLink />
+                                                                                <MenuButtonHorizontalRule />
+                                                                                <MenuButtonUndo />
+                                                                                <MenuButtonRedo />
+                                                                            </MenuControlsContainer>
                                                                         )}
-                                                                    />
-                                                                    : <Skeleton />
+                                                                    /> : <Skeleton />
                                                                 }
                                                             </Box>   
                                                             : null

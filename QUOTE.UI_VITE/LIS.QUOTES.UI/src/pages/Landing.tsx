@@ -100,11 +100,11 @@ const Landing = () => {
             Subject: subject,
             HtmlContent: htmlContent
         }})
-        .then((response: any) => response.json())
+        // .then((response: any) => response.json())
 		.then((data) => {
             enqueueSnackbar(t('messageSuccessSent'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
             setLoad(false);
-            console.log(data);
+            console.log(data.data);
         })
 		.catch((error) => {
             enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });

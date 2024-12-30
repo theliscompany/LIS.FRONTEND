@@ -60,9 +60,9 @@ function RequestPriceHaulage(props: any) {
 			Subject: subject,
 			HtmlContent: htmlContent
 		}})
-        .then((response: any) => response.json())
+        // .then((response: any) => response.json())
         .then((response: any) => {
-            if (response !== undefined && response !== null && response.code == 200) {
+            if (response !== undefined && response !== null && response.status == 200) {
                 enqueueSnackbar(t('mailSentTo')+to, { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
             }
             else {

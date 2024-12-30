@@ -47,19 +47,21 @@ const AcceptOffer = () => {
         };
 
         putApiQuoteOfferByIdApproval({path: {id: String(id)}, query: {NewStatus: "Accepted"}, body: body})
-        .then((response: any) => {
-            if (response.ok) {
-                return response.json();
-            }
-            else {
-                throw new Error('Network response was not ok.');
-            }
-        }).then((data: any) => {
-            createOrder(data.data.options[cOption], data.data, cOption);
+        // .then((response: any) => {
+        //     if (response.ok) {
+        //         return response.json();
+        //     }
+        //     else {
+        //         throw new Error('Network response was not ok.');
+        //     }
+        // })
+        .then((data: any) => {
+            createOrder(data.data.data.options[cOption], data.data.data, cOption);
             setLoad(false);
             setIsAccepted(true);
             enqueueSnackbar(t('priceOfferApproved'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top" } });
-        }).catch(error => { 
+        })
+        .catch(error => { 
             setLoad(false);
             console.log(error);
             enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top" } });
@@ -190,15 +192,16 @@ const AcceptOffer = () => {
         };
 
         postOrder({body: body})
-        .then((response: any) => {
-            if (response.ok) {
-                return response.json();
-            }
-            else {
-                throw new Error('Network response was not ok.');
-            }
-        }).then((data: any) => {
-            console.log("All : ", data);            
+        // .then((response: any) => {
+        //     if (response.ok) {
+        //         return response.json();
+        //     }
+        //     else {
+        //         throw new Error('Network response was not ok.');
+        //     }
+        // })
+        .then((data: any) => {
+            console.log("All : ", data.data);            
             var lang = offerData.comment.startsWith("<p>Bonjour") ? "fr" : "en";
             var infos = getOfferContent(offerData.comment, Number(currentOpt)+1, lang);
             console.log("Infos : ", infos);
@@ -212,7 +215,7 @@ const AcceptOffer = () => {
                 <p>${t('destinationPort', {lng: lang})} : ${offerData.options[nOption].selectedSeafreights[0].destinationPortName}</p>
                 <p>${infos}</p>
                 <br>
-                <p>${t('trackingOptions', {lng: lang})} : ${data.orderNumber}</p>
+                <p>${t('trackingOptions', {lng: lang})} : ${data.data.orderNumber}</p>
                 <br>
                 <p>${t('endMailWord', {lng: lang})}</p>
             </div>
@@ -231,7 +234,8 @@ const AcceptOffer = () => {
             `;
             
             sendEmail("pricing@omnifreight.eu", offerData.emailUser, t('confirmationOffer', {lng: lang}), messageText);
-        }).catch(error => { 
+        })
+        .catch(error => { 
             setLoad(false);
             console.log(error);
         });
@@ -252,7 +256,7 @@ const AcceptOffer = () => {
             Subject: subject,
             HtmlContent: htmlContent
         }})
-		.then((response: any) => response.json())
+		// .then((response: any) => response.json())
 		.then((data) => console.log(data))
 		.catch((error) => console.error(error));
 	}

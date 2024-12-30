@@ -27,10 +27,10 @@ const Tracking = () => {
         var myHeaders = new Headers();
         myHeaders.append("Accept", "*/");
         getApiTrackingByTrackingNumber({path: {trackingNumber: trackingNumber}})
-        .then((response: any) => response.json())
+        // .then((response: any) => response.json())
         .then((data: any) => {
-            if (data.code === 200) {
-                setTrackingData(data.data);
+            if (data.status === 200) {
+                setTrackingData(data.data.data);
                 setLoad(false);
                 console.log(data);
             }

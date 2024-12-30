@@ -7,7 +7,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import { SnackbarProvider, enqueueSnackbar } from 'notistack';
 import { useTranslation } from 'react-i18next';
 import { GridColDef, GridRenderCellParams, DataGrid } from '@mui/x-data-grid';
-import { BootstrapDialog, BootstrapDialogTitle, BootstrapInput, buttonCloseStyles, datetimeStyles, inputLabelStyles, sizingStyles } from '../../utils/misc/styles';
+import { BootstrapDialog, BootstrapDialogTitle, BootstrapInput, buttonCloseStyles, datetimeStyles, gridStyles, inputLabelStyles, sizingStyles } from '../../utils/misc/styles';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { Dayjs } from 'dayjs';
@@ -353,7 +353,8 @@ const MasterDataTemplates: any = () => {
                                     columns={columnsTemplates}
                                     getRowId={(row: any) => row?.id}
                                     getRowHeight={() => "auto" }
-                                    sx={sizingStyles}
+                                    style={sizingStyles}
+                                    sx={gridStyles}
                                     disableRowSelectionOnClick
                                 />
                             </Box> : 

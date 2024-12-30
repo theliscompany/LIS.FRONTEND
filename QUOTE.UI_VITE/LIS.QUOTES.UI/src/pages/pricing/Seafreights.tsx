@@ -66,8 +66,8 @@ function Seafreights() {
     
     const columnsSeafreights: GridColDef[] = [
         { field: 'carrierAgentName', headerName: t('carrierAgent'), minWidth: 125, flex: 1.4 },
-        { field: 'frequency', headerName: t('frequency'), valueFormatter: (params: any) => `${t('every')} ${params.value || ''} `+t('days'), minWidth: 100, flex: 1 },
-        { field: 'transitTime', headerName: t('transitTime'), valueFormatter: (params: any) => `${params.value || ''} `+t('days'), minWidth: 100, flex: 1 },
+        { field: 'frequency', headerName: t('frequency'), valueFormatter: (value?: number) => `${t('every')} ${value || ''} `+t('days'), minWidth: 100, flex: 1 },
+        { field: 'transitTime', headerName: t('transitTime'), valueFormatter: (value?: number) => `${value || ''} `+t('days'), minWidth: 100, flex: 1 },
         { field: 'currency', headerName: t('prices'), renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box sx={{ my: 1, mr: 1 }}>
@@ -85,7 +85,7 @@ function Seafreights() {
                     <Chip label={(new Date(params.row.validUntil)).toLocaleDateString().slice(0,10)} color={(new Date()).getTime() - (new Date(params.row.validUntil)).getTime() > 0 ? "warning" : "success"}></Chip>
                 </Box>
             );
-        }, minWidth: 100, flex: 1 },
+        }, minWidth: 105, flex: 1 },
         { field: 'created', headerName: t('created'), renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box sx={{ my: 1, mr: 1 }}>

@@ -13,7 +13,7 @@ import { containerPackages } from '../../utils/constants';
 import useProcessStatePersistence from '../../utils/processes/useProcessStatePersistence';
 import { useMsal, useAccount } from '@azure/msal-react';
 import { getProduct } from '../../api/client/transport';
-import { getApiAssignee, getApiHsCodeLis, getApiRequest, putApiAssigneeByRequestQuoteIdByAssigneeId } from '../../api/client/quote';
+import { getApiAssignee, getApiHsCodeLis, postApiRequest, putApiAssigneeByRequestQuoteIdByAssigneeId } from '../../api/client/quote';
 
 function validMail(mail: string) {
     return /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/.test(mail);
@@ -165,12 +165,12 @@ const NewRequest = () => {
                 myHeaders.append('Accept', '');
                 myHeaders.append("Content-Type", "application/json");
                 
-                getApiRequest({body: {
+                postApiRequest({body: {
                     email: formState.email,
                     whatsapp: formState.phone,
                     departure: formState.departure !== null && formState.departure !== undefined ? [formState.departure.city.toUpperCase(),formState.departure.country,formState.departure.latitude,formState.departure.longitude,postcode1].filter((val: any) => { return val !== "" }).join(', ') : "",
                     arrival: formState.arrival !== null && formState.arrival !== undefined ? [formState.arrival.city.toUpperCase(),formState.arrival.country,formState.arrival.latitude,formState.arrival.longitude,postcode2].filter((val: any) => { return val !== "" }).join(', ') : "",
-                    cargoType: 0,
+                    cargoType: "Container",
                     clientNumber: formState.clientNumber !== null ? String(formState.clientNumber.contactNumber)+", "+formState.clientNumber.contactName : null,
                     packingType: formState.packingType,
                     containers: formState.containersSelection.map((elm: any) => { return { 
@@ -182,13 +182,13 @@ const NewRequest = () => {
                     detail: formState.message,
                     tags: valueSpecifics !== "hscodes" ? tags1 : tags2
                 }})
-                .then((response: any) => response.json())
                 .then((data: any) => {
-                    if (data.code === 201) {
+                    console.log(data);
+                    if (data.data.code === 201) {
                         resetForm();
                         enqueueSnackbar(t('requestCreatedAssigned'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
                         if (formState.assignedManager !== null && formState.assignedManager !== "null" && formState.assignedManager !== undefined && formState.assignedManager !== "") {
-                            assignManager(data.data.id);
+                            assignManager(data.data.data.id);
                         }
                         else {
                             setLoad(false);

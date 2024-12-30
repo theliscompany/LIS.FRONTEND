@@ -144,9 +144,9 @@ export const en = {
   dischargePort: "Discharge port",
   freeTime: "Free time",
   multiStop: "Multi stop",
-  overtimeTariff: "Overtime tariff",
-  overtimeTariff2: "Overtime tariff",
-  unitTariff: "Haulage per unit",
+  overtimeTariff: "Overtime",
+  overtimeTariff2: "Overtime",
+  unitTariff: "Per unit",
   validUntil: "Valid until",
   destinationPort: "Destination port",
   supplier: "Supplier",
@@ -573,5 +573,6 @@ export const en = {
   hscodeAdded: "The hs-code has been added with success!",
   hscodeEdited: "The hs-code has been edited with success!",
   digitCategories: "4 Digit Categories",
-  selectOne: "select one"
+  selectOne: "select one",
+  optionUpdated: "Option updated with success!"
 };
