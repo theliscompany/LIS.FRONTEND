@@ -9,7 +9,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { SnackbarProvider, enqueueSnackbar } from 'notistack';
 import { useTranslation } from 'react-i18next';
-import { GridColDef, GridValueFormatterParams, GridRenderCellParams, DataGrid } from '@mui/x-data-grid';
+import { GridColDef, GridRenderCellParams, DataGrid } from '@mui/x-data-grid';
 import { BootstrapDialog, BootstrapDialogTitle, BootstrapInput, actionButtonStyles, buttonCloseStyles, datetimeStyles, gridStyles, inputIconStyles, inputLabelStyles } from '../../utils/misc/styles';
 import { Anchor, FileCopy, Mail } from '@mui/icons-material';
 import CompanySearch from '../../components/shared/CompanySearch';
@@ -66,8 +66,8 @@ function Seafreights() {
     
     const columnsSeafreights: GridColDef[] = [
         { field: 'carrierAgentName', headerName: t('carrierAgent'), minWidth: 125, flex: 1.4 },
-        { field: 'frequency', headerName: t('frequency'), valueFormatter: (params: GridValueFormatterParams) => `${t('every')} ${params.value || ''} `+t('days'), minWidth: 100, flex: 1 },
-        { field: 'transitTime', headerName: t('transitTime'), valueFormatter: (params: GridValueFormatterParams) => `${params.value || ''} `+t('days'), minWidth: 100, flex: 1 },
+        { field: 'frequency', headerName: t('frequency'), valueFormatter: (params: any) => `${t('every')} ${params.value || ''} `+t('days'), minWidth: 100, flex: 1 },
+        { field: 'transitTime', headerName: t('transitTime'), valueFormatter: (params: any) => `${params.value || ''} `+t('days'), minWidth: 100, flex: 1 },
         { field: 'currency', headerName: t('prices'), renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box sx={{ my: 1, mr: 1 }}>

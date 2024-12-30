@@ -374,7 +374,7 @@ const Layout = () : React.ReactNode => {
                             </Collapse>
                             
                             <NavigationLink url="/quote-offers" title={t('priceOffers')} icon={<Portrait fontSize="small" />} />
-                            <NavigationLink url="/shipments" title={t('orders')} icon={<FolderOutlined fontSize="small" />} />
+                            <NavigationLink url="/" title={t('orders')} icon={<FolderOutlined fontSize="small" />} />
                             
                             <ListItem className="cs-listitem" key={"Masterdata part"} disablePadding disableGutters>
                                 <ListItemButton className="cs-listitembutton" onClick={() => { setOpenMasterdata(!openMasterdata); }}>
