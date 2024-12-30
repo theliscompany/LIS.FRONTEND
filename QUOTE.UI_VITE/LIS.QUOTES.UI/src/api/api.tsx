@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { getAccessToken } from "../utils/functions";
 import { useAccount, useMsal } from "@azure/msal-react";
-import { crmRequest, documentRequest, offerRequest, pricingRequest, quoteRequest, shipmentRequest, templateRequest, transportRequest } from "../config/msalConfig";
+import { crmRequest, documentRequest, offerRequest, pricingRequest, quoteRequest, sessionstorageRequest, shipmentRequest, templateRequest, transportRequest } from "../config/msalConfig";
 import { client as shipmentClient } from "./client/shipment";
 import { client as transportClient } from "./client/transport";
 import { client as documentClient } from "./client/document";
@@ -10,6 +10,7 @@ import { client as pricingClient } from "./client/pricing";
 import { client as templateClient } from "./client/template";
 import { client as offerClient } from "./client/offer";
 import { client as quoteClient } from "./client/quote";
+import { client as sessionstorageClient } from "./client/sessionstorage";
 
 const BackendServiceProvider = ({children}:{children:React.ReactNode}) => {
     const { instance, accounts } = useMsal();
@@ -27,6 +28,7 @@ const BackendServiceProvider = ({children}:{children:React.ReactNode}) => {
         const _tokenTemplate = await getAccessToken(instance, templateRequest, account);
         const _tokenOffer = await getAccessToken(instance, offerRequest, account);
         const _tokenQuote = await getAccessToken(instance, quoteRequest, account);
+        const _tokenSessionstorage = await getAccessToken(instance, sessionstorageRequest, account);
         
         shipmentClient.setConfig({
           baseURL: import.meta.env.VITE_API_LIS_SHIPMENT_ENDPOINT,
@@ -83,6 +85,13 @@ const BackendServiceProvider = ({children}:{children:React.ReactNode}) => {
           baseURL: import.meta.env.VITE_API_LIS_QUOTE_ENDPOINT,
           headers: {
             Authorization: `Bearer ${_tokenQuote}`
+          },
+        });
+
+        sessionstorageClient.setConfig({
+          baseURL: import.meta.env.VITE_API_LIS_SESSIONSTORAGE_ENDPOINT,
+          headers: {
+            Authorization: `Bearer ${_tokenSessionstorage}`
           },
         });
 
