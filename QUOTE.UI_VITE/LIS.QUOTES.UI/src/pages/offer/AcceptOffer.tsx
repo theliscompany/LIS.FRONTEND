@@ -155,8 +155,11 @@ const AcceptOffer = () => {
             "orderId": 0,
             "customerId": Number(offerData.clientNumber),
             "exportation": true,
+            "loadingPort": option.portDeparture.portName,
+            "dischargePort": option.portDestination.portName,
             "departurePort": option.portDeparture.portId,
-            "destinationPort": option.portDestination.portId
+            "destinationPort": option.portDestination.portId,
+            "shippingLine": option.selectedSeafreight.carrierName,
         }
 
         postOrder({body: body})
