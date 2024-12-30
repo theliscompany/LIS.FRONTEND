@@ -16,6 +16,7 @@
     "generate-client-template": "npx @hey-api/openapi-ts -i https://lis-template-svc-dev.azurewebsites.net/swagger/v1/swagger.json -o src/api/client/template -c @hey-api/client-axios",
     "generate-client-offer": "npx @hey-api/openapi-ts -i https://lis-offer-svc-dev.azurewebsites.net/swagger/v1/swagger.json -o src/api/client/offer -c @hey-api/client-axios",
     "generate-client-quote": "npx @hey-api/openapi-ts -i https://lis-quotes-svc-dev.azurewebsites.net/swagger/v1/swagger.json -o src/api/client/quote -c @hey-api/client-axios",
+    "generate-client-sessionstorage": "npx @hey-api/openapi-ts -i https://lis-sessionstorage-svc-staging.azurewebsites.net/swagger/v1/swagger.json -o src/api/client/sessionstorage -c @hey-api/client-axios",
     "generate:shipment": "openapi-ts"
   },
   "dependencies": {
@@ -32,11 +33,14 @@
     "@tanstack/react-query": "^5.62.11",
     "@tiptap/starter-kit": "^2.10.4",
     "axios": "^1.7.9",
+    "chart.js": "^4.4.7",
     "dayjs": "^1.11.13",
+    "mui-file-input": "^6.0.0",
     "mui-tel-input": "^7.0.0",
     "mui-tiptap": "^1.16.0",
     "notistack": "^3.0.1",
     "react": "^18.3.1",
+    "react-chartjs-2": "^5.2.0",
     "react-dom": "^18.3.1",
     "react-google-recaptcha": "^3.1.0",
     "react-i18next": "^15.2.0",

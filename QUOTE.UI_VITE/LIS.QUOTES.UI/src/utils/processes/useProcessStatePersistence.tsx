@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import { getApiProcessStateByUserIdByProcessName, postApiProcessState } from '../../api/client/sessionstorage';
 
-const API_BASE_URL = import.meta.env.VITE_API_LIS_SESSIONSTORAGE_ENDPOINT;
+// const API_BASE_URL = import.meta.env.VITE_API_LIS_SESSIONSTORAGE_ENDPOINT;
 
 const useProcessStatePersistence = (userId: string, processName: string, initialState: any, expiresIn = null, enableAutoSave = true) => {
     const [state, setState] = useState(initialState);
@@ -17,11 +17,12 @@ const useProcessStatePersistence = (userId: string, processName: string, initial
                 else {
                     // console.log("userId : ", userId);
                     // console.log("processname : ", processName);
-                    const response = await axios.get(`${API_BASE_URL}ProcessState/${userId}/${processName}`);
+                    // const response = await axios.get(`${API_BASE_URL}ProcessState/${userId}/${processName}`);
+                    const response = await getApiProcessStateByUserIdByProcessName({path: {userId: userId, processName: processName}});
                     // console.log("response : ", response);
-                    if (response.data) {
-                        setState(JSON.parse(response.data.data.stateData));
-                        localStorage.setItem(processName, response.data.data.stateData);
+                    if (response.data && response.data.stateData) {
+                        setState(JSON.parse(response.data.stateData));
+                        localStorage.setItem(processName, response.data.stateData);
                     }
                 }
             } catch (error) {
@@ -35,16 +36,17 @@ const useProcessStatePersistence = (userId: string, processName: string, initial
         const persistState = async () => {
         try {
             localStorage.setItem(processName, JSON.stringify(state));
-            console.log("userId : ", userId);
-            console.log("processName : ", processName);
-            console.log("API BASE : ", API_BASE_URL);
+            // console.log("userId : ", userId);
+            // console.log("processName : ", processName);
+            // console.log("API BASE : ", API_BASE_URL);
             if (enableAutoSave) {
-                await axios.post(`${API_BASE_URL}ProcessState`, {
-                    userId,
-                    processName,
-                    stateData: JSON.stringify(state),
-                    expiresIn,
-                });
+                // await axios.post(`${API_BASE_URL}ProcessState`, {
+                //     userId,
+                //     processName,
+                //     stateData: JSON.stringify(state),
+                //     expiresIn,
+                // });
+                await postApiProcessState({body: { userId: userId, processName: processName, stateData: JSON.stringify(state), expiresIn: expiresIn }});
             }
         } 
         catch (error) {

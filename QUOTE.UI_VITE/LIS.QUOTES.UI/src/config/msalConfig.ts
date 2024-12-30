@@ -65,3 +65,9 @@ export const msalConfig: Configuration = {
       import.meta.env.VITE_QUOTE_REQUEST_SCOPE !== undefined ? import.meta.env.VITE_QUOTE_REQUEST_SCOPE : ""
     ]
   }
+
+  export const sessionstorageRequest: PopupRequest = {
+    scopes: [
+      import.meta.env.VITE_QUOTE_SESSIONSTORAGE_SCOPE !== undefined ? import.meta.env.VITE_QUOTE_SESSIONSTORAGE_SCOPE : ""
+    ]
+  }
