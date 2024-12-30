@@ -24,4 +24,4 @@ yarn-error.log*
 
 /.vscode
 
-open-api.json
+openapi-ts.json
