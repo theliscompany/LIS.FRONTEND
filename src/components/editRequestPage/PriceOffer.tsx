@@ -99,7 +99,7 @@ function PriceOffer(props: any) {
 			},
 			body: formData
 		})
-		.then((response) => response.json())
+		// .then((response) => response.json())
 		.then((data) => console.log(data))
 		.catch((error) => console.error(error));
 	}

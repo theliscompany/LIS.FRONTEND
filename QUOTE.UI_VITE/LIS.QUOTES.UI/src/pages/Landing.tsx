@@ -11,6 +11,8 @@ import Footer from "../components/landingPage/Footer";
 import { loginRequest } from "../config/msalConfig";
 import ReCAPTCHA from "react-google-recaptcha";
 import { MuiTelInput } from 'mui-tel-input';
+import { postApiEmail } from "../api/client/quote";
+import { enqueueSnackbar } from "notistack";
 
 var footer = `
 <div style="font-family: Verdana; padding-top: 35px;">
@@ -91,26 +93,24 @@ const Landing = () => {
 		formData.append('Subject', subject);
 		formData.append('HtmlContent', htmlContent);
 		
-		// // Send the email with fetch
-		// fetch(protectedResources.apiLisQuotes.endPoint+'/Email', {
-		// 	method: 'POST',
-		// 	headers: {
-		// 		'accept': '*/*',
-		// 		// 'Content-Type': 'multipart/form-data'
-		// 	},
-		// 	body: formData
-		// })
-		// .then((response) => response.json())
-		// .then((data) => {
-        //     enqueueSnackbar(t('messageSuccessSent'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
-        //     setLoad(false);
-        //     console.log(data);
-        // })
-		// .catch((error) => {
-        //     enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
-        //     setLoad(false);
-        //     console.error(error);
-        // });
+		// Send the email with fetch
+		postApiEmail({body: {
+            From: from,
+            To: to,
+            Subject: subject,
+            HtmlContent: htmlContent
+        }})
+        // .then((response: any) => response.json())
+		.then((data) => {
+            enqueueSnackbar(t('messageSuccessSent'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
+            setLoad(false);
+            console.log(data.data);
+        })
+		.catch((error) => {
+            enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+            setLoad(false);
+            console.error(error);
+        });
 	}
 
     const sendQuotationForm = () => {

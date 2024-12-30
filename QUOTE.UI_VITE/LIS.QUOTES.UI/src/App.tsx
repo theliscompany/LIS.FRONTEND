@@ -66,6 +66,7 @@ function App() {
                   <Route path='miscellaneous' element={<Miscellaneous />} />
                   <Route path="quote-offers" element={<PriceOffers />} />
                   <Route path="quote-offers/:id" element={<ManagePriceOffer />} />
+                  <Route path="acceptOffer/:id" element={<AcceptOffer />} />
                   <Route path='*' element={<NotFound />} />
                 </Route>
               </Routes>
@@ -74,14 +75,16 @@ function App() {
           </QueryClientProvider>
         </AuthenticatedTemplate>
         <UnauthenticatedTemplate>
-          <Routes>
-            <Route path='/' element={<Landing />} />
-            <Route path="login" element={<Login />} />
-					  <Route path="privacy-policy" element={<Privacy />} />
-					  <Route path="acceptOffer/:id" element={<AcceptOffer />} />
-            <Route path="refuseOffer/:id" element={<RefuseOffer />} />
-            <Route path='*' element={<NotFound />} />
-          </Routes>
+          <BackendServiceProvider>
+            <Routes>
+              <Route path='/' element={<Landing />} />
+              <Route path="login" element={<Login />} />
+              <Route path="privacy-policy" element={<Privacy />} />
+              <Route path="acceptOffer/:id" element={<AcceptOffer />} />
+              <Route path="refuseOffer/:id" element={<RefuseOffer />} />
+              <Route path='*' element={<NotFound />} />
+            </Routes>
+            </BackendServiceProvider>
         </UnauthenticatedTemplate>
       
     </BrowserRouter>

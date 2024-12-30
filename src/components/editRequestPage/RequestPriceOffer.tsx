@@ -94,7 +94,7 @@ function RequestPriceOffer(props: any) {
             },
             body: form
         })
-        .then((response) => response.json())
+        // .then((response) => response.json())
         .then((response: any) => {
             if (response !== undefined && response !== null && response.code == 200) {
                 enqueueSnackbar(t('messageSuccessSent'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });

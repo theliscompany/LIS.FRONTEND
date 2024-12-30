@@ -132,11 +132,11 @@ function Miscellaneous() {
         }, flex: 2.5 },
         { field: 'validUntil', headerName: t('validUntil'), renderCell: (params: GridRenderCellParams) => {
             return (
-                <Box sx={{ my: 1, mr: 1 }}>
+                <Box sx={{ my: 1 }}>
                     <Chip label={(new Date(params.row.validUntil)).toLocaleDateString().slice(0,10)} color={(new Date()).getTime() - (new Date(params.row.validUntil)).getTime() > 0 ? "warning" : "success"}></Chip>
                 </Box>
             );
-        }, minWidth: 100, flex: 0.75 },
+        }, minWidth: 105, flex: 0.75 },
         { field: 'updated', headerName: t('created'), renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box sx={{ my: 1, mr: 1 }}>

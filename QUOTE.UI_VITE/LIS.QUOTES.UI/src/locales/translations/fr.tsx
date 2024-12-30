@@ -145,8 +145,8 @@ export const fr = {
   dischargePort: "Port de déchargement",
   freeTime: "Temps libre",
   multiStop: "Multi-arrêts",
-  overtimeTariff: "Tarif des <br />heures supplémentaires",
-  overtimeTariff2: "Tarif des heures supplémentaires",
+  overtimeTariff: "Overtime",
+  overtimeTariff2: "Overtime",
   unitTariff: "Transport <br />par unité",
   validUntil: "Valide jusqu'au",
   destinationPort: "Port de destination",
@@ -573,5 +573,6 @@ export const fr = {
   hscodeAdded: "Le hs-code a été ajouté avec succès!",
   hscodeEdited: "Le hs-code a été édité avec succès!",
   digitCategories: "Catégories à 4 chiffres",
-  selectOne: "choisir un"
+  selectOne: "choisir un",
+  optionUpdated: "Option mise à jour avec succès!"
 };

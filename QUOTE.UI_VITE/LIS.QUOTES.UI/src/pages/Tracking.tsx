@@ -5,6 +5,7 @@ import Skeleton from '@mui/material/Skeleton';
 import { BootstrapInput } from '../utils/misc/styles';
 import { useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { getApiTrackingByTrackingNumber } from '../api/client/quote';
 
 const Tracking = () => {
     const { id } = useParams();
@@ -25,14 +26,11 @@ const Tracking = () => {
         setTrackingData(null);
         var myHeaders = new Headers();
         myHeaders.append("Accept", "*/");
-        fetch(import.meta.env.VITE_API_LIS_QUOTE_ENDPOINT+"/Tracking/"+trackingNumber, {
-            method: "GET",
-            headers: myHeaders
-        })
-        .then((response: any) => response.json())
+        getApiTrackingByTrackingNumber({path: {trackingNumber: trackingNumber}})
+        // .then((response: any) => response.json())
         .then((data: any) => {
-            if (data.code === 200) {
-                setTrackingData(data.data);
+            if (data.status === 200) {
+                setTrackingData(data.data.data);
                 setLoad(false);
                 console.log(data);
             }

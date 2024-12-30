@@ -163,7 +163,11 @@ export const gridStyles = {
   height: "auto",
   fontSize: "13px",
   minHeight: "10px",
-  backgroundColor: "#fff"
+  backgroundColor: "#fff",
+  '& .MuiDataGrid-cell': {
+    display: 'flex',
+    alignItems: 'center', // Vertically center all cells
+  },
 }
 
 export const sizingStyles = { 

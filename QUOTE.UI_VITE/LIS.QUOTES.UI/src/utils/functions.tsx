@@ -370,6 +370,22 @@ export function parseContact(inputString: string) {
     return contactObject;
 }
 
+export function parseContact2(inputString: string) {
+    const parts = inputString.split(', ');
+    
+    const number = parts[0];
+    const name = parts[1];
+    const id = parts[2];
+    
+    const contactObject = {
+        contactNumber: number,
+        contactName: name,
+        contactId: id
+    };
+    
+    return contactObject;
+}
+
 // export function displayContainers(value: any) {
 //     var aux = value.map((elm: any) => '<li>'+elm.quantity+"x"+elm.container+'</li>').join('');
 //     return '<ul>'+aux+'</ul>';

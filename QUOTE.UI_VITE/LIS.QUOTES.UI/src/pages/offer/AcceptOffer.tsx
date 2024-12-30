@@ -5,7 +5,11 @@ import Skeleton from '@mui/material/Skeleton';
 import { BootstrapDialog, BootstrapDialogTitle, buttonCloseStyles } from '../../utils/misc/styles';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useParams } from 'react-router-dom';
-import { enqueueSnackbar } from 'notistack';
+// import { enqueueSnackbar } from 'notistack';
+import { putApiQuoteOfferByIdApproval } from '../../api/client/offer';
+import { postOrder } from '../../api/client/shipment';
+import { postApiEmail } from '../../api/client/quote';
+import { enqueueSnackbar, SnackbarProvider } from 'notistack';
 
 const AcceptOffer = () => {
     const [load, setLoad] = useState<boolean>(true);
@@ -37,174 +41,127 @@ const AcceptOffer = () => {
 
     const acceptOffer = async () => {
         var cOption = currentOption !== null && currentOption !== undefined ? Number(currentOption) : 0;
-        const body: any = {
-            id: id,
-            newStatus: "Accepted",
-            option: cOption
-        };
+        // const body: any = {
+        //     id: id,
+        //     newStatus: "Accepted",
+        //     option: cOption
+        // };
 
-        fetch(import.meta.env.VITE_API_LIS_OFFER_ENDPOINT+"/QuoteOffer/"+id+"/approval?newStatus=Accepted", {
-            method: "PUT",
-            body: body,
-        }).then((response: any) => {
-            if (response.ok) {
-                return response.json();
-            }
-            else {
-                throw new Error('Network response was not ok.');
-            }
-        }).then((data: any) => {
-            createOrder(data.data.options[cOption], data.data, cOption);
+        putApiQuoteOfferByIdApproval({path: {id: String(id)}, query: {NewStatus: "Accepted", option: cOption}})
+        .then((data: any) => {
+            console.log("Data: ", data.data.data);
+            createOrder(data.data.data.options[cOption], data.data.data, cOption);
             setLoad(false);
             setIsAccepted(true);
             enqueueSnackbar(t('priceOfferApproved'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top" } });
-        }).catch(error => { 
+        })
+        .catch(error => { 
             setLoad(false);
             console.log(error);
             enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top" } });
         });
     }
+
+    // const extractName = (html: string): string | null => {
+    //     console.log("Html : ", html);
+    //     if (typeof html !== 'string') {
+    //         console.error('Le contenu fourni nest pas une chaîne.');
+    //         return null;
+    //     }
+    //     const regex = /<strong>([^<]+)<\/strong>/i; // Expression régulière
+    //     const match = html.match(regex); // Cherche la première correspondance
+    //     return match ? match[1] : null;
+    // };
     
     const createOrder = async (option: any, offerData: any, currentOpt: number) => {
         console.log("Option : ", option);
         console.log("Data : ", offerData);
-        // var dataSent = {
-        //     // "orderId": Number(id),
-        //     // "orderNumber": orderData.orderNumber,
+        
+        // const body: any = {
+        //     "orderNumber": "",
         //     "orderDate": new Date().toISOString(),
-        //     // "closeDate": orderData.closeDate,
-        //     "sellerId": seller.contactId,
-        //     "buyerId": buyer.contactId,
-        //     "customerId": customer.contactId,
-        //     "shippingAgent": carrierAgent.contactId,
-        //     // "shipId": orderData.shipId,
-        //     "shipLineId": carrier.contactId,
-        //     "employeeId": orderData.employeeId,
-        //     // "paymentCondition": orderData.paymentCondition,
-        //     "orderStatus": 0,
-        //     // "lastEdited": orderData.lastEdited,
-        //     // "lastEditor": orderData.lastEditor,
-        //     "departurePort": portLoading.portId,
-        //     "destinationPort": portDischarge.portId,
+        //     "sellerId": 0,
+        //     "buyerId": 0,
+        //     "customerName": extractName(offerData.comment),
+        //     "customerId": 0,
+        //     "shippingAgent": 0,
+        //     "shipId": null,
+        //     "shipLineId": 0,
+        //     "orderStatus": 1,
+        //     "departurePort": option.portDeparture.portId,
+        //     "destinationPort": option.portDestination.portId,
         //     // "estimatedDepartureDate": etd?.toISOString(),
         //     // "estimatedArrivalDate": eta?.toISOString(),
-        //     "incoTerm": "",
-        //     "refClient": "",
-        //     "refSeller": "",
-        //     "refBuyer": "",
-        //     "incotermDestination": "",
-        //     // "executedInDate": orderData.executedInDate,
+        //     // "incoTerm": incotermFrom,
+        //     "refClient": offerData.clientNumber,
+        //     "refSeller": offerData.clientNumber,
+        //     "refBuyer": offerData.clientNumber,
+        //     // "incotermDestination": incotermTo,
         //     "fiscalYear": Number(new Date().getFullYear()),
-        //     // "fiscalYear": orderData.fiscalYear,
-        //     // "isVal1": orderData.isVal1,
-        //     // "isVal2": orderData.isVal2,
-        //     // "isVal3": orderData.isVal3,
-        //     // "isVal4": orderData.isVal4,
-        //     // "isVal5": orderData.isVal5,
-        //     // "refShippingAgent": bookingRef,
-        //     // "flag": orderData.flag,
-        //     // "docFlag": orderData.docFlag,
+        //     "refShippingAgent": option.selectedSeafreights[0].carrierAgentName,
         //     // "city": incotermFromCity.id,
-        //     // "freightCharges": orderData.freightCharges,
-        //     // "freightPayableAt": orderData.freightPayableAt,
-        //     // "freightMoveType": orderData.freightMoveType,
+        //     // "cityIncotermTo": incotermToCity.id
         //     "freightShipmentType": option.selectedSeafreights[0].defaultContainer,
-        //     // "freightShipmentType": orderData.freightShipmentType,
-        //     // "numberOfBlOriginal": orderData.numberOfBlOriginal,
-        //     // "numberOfBlCopy": orderData.numberOfBlCopy,
-        //     // "shipperAddress": orderData.shipperAddress,
-        //     // "consigneeAddress": orderData.consigneeAddress,
-        //     // "notifyParty": orderData.notifyParty,
-        //     // "notifyPartyRef": orderData.notifyPartyRef,
-        //     // "voyageNumber": orderData.voyageNumber,
-        //     // "lcl": orderData.lcl,
-        //     // "exportation": orderData.exportation,
-        //     // "cityIncotermTo": incotermToCity.id,
-        //     // "invoiceUserId": orderData.invoiceUserId,
-        //     // "documentationUserId": orderData.documentationUserId,
-        //     // "operationsUserId": orderData.operationsUserId,
-        //     // "oblOverview": orderData.oblOverview
-        // };
-
-        // var dataSent = {
-        //     "orderDate": new Date().toISOString(),
-        //     "sellerId": seller.contactId,
-        //     "buyerId": buyer.contactId,
-        //     "customerId": customer.contactId,
-        //     "shippingAgent": carrierAgent.contactId,
-        //     "shipId": ship !== null ? ship.shipId : null,
-        //     "shipLineId": carrier.contactId,
-        //     "orderStatus": 1,
-        //     "departurePort": portLoading.portId,
-        //     "destinationPort": portDischarge.portId,
-        //     "estimatedDepartureDate": etd?.toISOString(),
-        //     "estimatedArrivalDate": eta?.toISOString(),
-        //     "incoTerm": incotermFrom,
-        //     "refClient": referenceCustomer,
-        //     "refSeller": referenceSeller,
-        //     "refBuyer": referenceBuyer,
-        //     "incotermDestination": incotermTo,
-        //     "fiscalYear": Number(new Date().getFullYear()),
-        //     "refShippingAgent": bookingRef,
-        //     "city": incotermFromCity.id,
-        //     "cityIncotermTo": incotermToCity.id,
-        // };
-
-        const body: any = {
-            "orderNumber": "",
-            "orderDate": new Date().toISOString(),
-            "sellerId": 0,
-            "buyerId": 0,
-            "customerId": 0,
-            "shippingAgent": 0,
-            "shipId": null,
-            "shipLineId": 0,
-            "orderStatus": 1,
-            "departurePort": option.portDeparture.portId,
-            "destinationPort": option.portDestination.portId,
-            // "estimatedDepartureDate": etd?.toISOString(),
-            // "estimatedArrivalDate": eta?.toISOString(),
-            // "incoTerm": incotermFrom,
-            "refClient": offerData.clientNumber,
-            "refSeller": offerData.clientNumber,
-            "refBuyer": offerData.clientNumber,
-            // "incotermDestination": incotermTo,
-            "fiscalYear": Number(new Date().getFullYear()),
-            "refShippingAgent": option.selectedSeafreights[0].carrierAgentName,
-            // "city": incotermFromCity.id,
-            // "cityIncotermTo": incotermToCity.id
-            "freightShipmentType": option.selectedSeafreights[0].defaultContainer,
             
-            // orderNumber: "",
-            // orderDate: new Date().toISOString(),
-            // refClient: offerData.clientNumber,
-            // refShippingAgent: option.selectedSeafreights[0].carrierAgentName,
-            // freightShipmentType: option.selectedSeafreights[0].defaultContainer,
-            // customerId: 0,
-            // shippingAgent: 0,
-            // orderStatus: 1,
-            // departurePort: option.portDeparture.portId,
-            // destinationPort: option.portDestination.portId,
-            // fiscalYear: Number(new Date().getFullYear())
-        };
+        //     // orderNumber: "",
+        //     // orderDate: new Date().toISOString(),
+        //     // refClient: offerData.clientNumber,
+        //     // refShippingAgent: option.selectedSeafreights[0].carrierAgentName,
+        //     // freightShipmentType: option.selectedSeafreights[0].defaultContainer,
+        //     // customerId: 0,
+        //     // shippingAgent: 0,
+        //     // orderStatus: 1,
+        //     // departurePort: option.portDeparture.portId,
+        //     // destinationPort: option.portDestination.portId,
+        //     // fiscalYear: Number(new Date().getFullYear())
+        // };
+        
+        // const body = {
+        //     // "orderId": 0,
+        //     "orderNumber": "F-"+offerData.quoteOfferNumber+"-"+offerData.requestQuoteId,
+        //     "customerId": Number(offerData.clientNumber),
+        //     "sellerId": null,
+        //     "buyerId": null,
+        //     "customerName": extractName(offerData.comment),
+        //     // "sellerName": extractName(offerData.comment),
+        //     // "buyerName": extractName(offerData.comment),
+        //     // "refClient": "string",
+        //     // "refSeller": "string",
+        //     // "refBuyer": "string",
+        //     // "incoTerm": "string",
+        //     // "incotermDestination": "string",
+        //     // "fiscalYear": Number(new Date().getFullYear()),
+        //     "exportation": true,
+        //     // "city": 0,
+        //     // "cityName": "string",
+        //     // "cityIncotermTo": 0,
+        //     // "cityNameIncotermTo": "string",
+        //     "shippingLine": option.selectedSeafreight.carrierName,
+        //     "shipLineId": null,
+        //     "orderStatus": 1,
+        //     // "refShippingAgent": "string",
+        //     "shippingAgentName": option.selectedSeafreight.carrierAgentName,
+        //     "shippingAgent": null, // Mistake, should send the real one
+        //     // "shipName": "string",
+        //     // "shipId": 0,
+        //     "loadingPort": option.portDeparture.portName,
+        //     "departurePort": option.portDeparture.portId,
+        //     "dischargePort": option.portDestination.portName,
+        //     "destinationPort": option.portDestination.portId,
+        //     // "estimatedDepartureDate": "2024-12-30T13:03:44.563Z",
+        //     // "estimatedArrivalDate": "2024-12-30T13:03:44.563Z"
+        // };
+        const body = {
+            "orderId": 0,
+            "customerId": Number(offerData.clientNumber),
+            "exportation": true,
+            "departurePort": option.portDeparture.portId,
+            "destinationPort": option.portDestination.portId
+        }
 
-        fetch(import.meta.env.VITE_API_LIS_SHIPMENT_ENDPOINT+"/Orders", {
-            method: "POST",
-            // mode: "cors",
-            headers: {
-				'accept': '*/*',
-            	'Content-Type': 'application/json'
-			},
-			body: JSON.stringify(body),
-        }).then((response: any) => {
-            if (response.ok) {
-                return response.json();
-            }
-            else {
-                throw new Error('Network response was not ok.');
-            }
-        }).then((data: any) => {
-            console.log("All : ", data);            
+        postOrder({body: body})
+        .then((data: any) => {
+            console.log("All : ", data.data);            
             var lang = offerData.comment.startsWith("<p>Bonjour") ? "fr" : "en";
             var infos = getOfferContent(offerData.comment, Number(currentOpt)+1, lang);
             console.log("Infos : ", infos);
@@ -218,7 +175,7 @@ const AcceptOffer = () => {
                 <p>${t('destinationPort', {lng: lang})} : ${offerData.options[nOption].selectedSeafreights[0].destinationPortName}</p>
                 <p>${infos}</p>
                 <br>
-                <p>${t('trackingOptions', {lng: lang})} : ${data.orderNumber}</p>
+                <p>${t('trackingOptions', {lng: lang})} : ${data.data.orderNumber}</p>
                 <br>
                 <p>${t('endMailWord', {lng: lang})}</p>
             </div>
@@ -237,7 +194,8 @@ const AcceptOffer = () => {
             `;
             
             sendEmail("pricing@omnifreight.eu", offerData.emailUser, t('confirmationOffer', {lng: lang}), messageText);
-        }).catch(error => { 
+        })
+        .catch(error => { 
             setLoad(false);
             console.log(error);
         });
@@ -252,21 +210,20 @@ const AcceptOffer = () => {
 		formData.append('HtmlContent', htmlContent);
 		
 		// Send the email with fetch
-		fetch(import.meta.env.VITE_API_LIS_QUOTE_ENDPOINT+'/Email', {
-			method: 'POST',
-			headers: {
-				'accept': '*/*',
-				// 'Content-Type': 'multipart/form-data'
-			},
-			body: formData
-		})
-		.then((response) => response.json())
+		postApiEmail({body: {
+            From: from,
+            To: to,
+            Subject: subject,
+            HtmlContent: htmlContent
+        }})
+		// .then((response: any) => response.json())
 		.then((data) => console.log(data))
 		.catch((error) => console.error(error));
 	}
 
 	return (
         <div className="App">
+            <SnackbarProvider>
             <BootstrapDialog open={modal} onClose={() => setModal(false)} maxWidth="md" fullWidth>
                 <BootstrapDialogTitle id="custom-dialog-title" onClose={() => setModal(false)}>
                     <b>{t('messageModal')}</b>
@@ -282,6 +239,7 @@ const AcceptOffer = () => {
                     <Button variant="contained" onClick={() => setModal(false)} sx={buttonCloseStyles}>{t('close')}</Button>
                 </DialogActions>
             </BootstrapDialog>
+            </SnackbarProvider>
         </div>
     );
 }

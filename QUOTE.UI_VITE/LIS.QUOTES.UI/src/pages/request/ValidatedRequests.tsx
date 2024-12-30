@@ -3,13 +3,13 @@ import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import { Alert, Button, Chip, IconButton, Skeleton } from '@mui/material';
 import Grid from '@mui/material/Grid2';
-import { sizingStyles, whiteButtonStyles } from '../../utils/misc/styles';
+import { gridStyles, sizingStyles } from '../../utils/misc/styles';
 import { enqueueSnackbar, SnackbarProvider } from 'notistack';
 import { Link, NavLink } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAccount, useMsal } from '@azure/msal-react';
 import { DataGrid, GridColDef, GridRenderCellParams } from '@mui/x-data-grid';
-import { Edit, RestartAltOutlined } from '@mui/icons-material';
+import { Edit } from '@mui/icons-material';
 import { colorsTypes, getCityCountry } from '../../utils/functions';
 import { statusTypes } from '../../utils/constants';
 import { getApiRequest } from '../../api/client/quote';
@@ -30,7 +30,7 @@ const ValidatedRequests = () => {
                 <Box><Link to={"/handle-request/"+params.row.id}>{params.row.email}</Link></Box>
             );
         }, minWidth: 200, flex: 1.5 },
-        { field: 'createdAt', headerName: t('created'), valueFormatter: (params: any) => `${(new Date(params.value)).toLocaleString().slice(0,10)}`, minWidth: 100, flex: 0.75 },
+        { field: 'createdAt', headerName: t('created'), valueFormatter: (value: any) => `${(new Date(value)).toLocaleString().slice(0,10)}`, minWidth: 100, flex: 0.75 },
         { field: 'departure', headerName: t('from'), renderCell: (params: GridRenderCellParams) => {
             return (<Box>{getCityCountry(params.row.departure)}</Box>);
         }, minWidth: 100, flex: 1 },
@@ -88,37 +88,41 @@ const ValidatedRequests = () => {
     return (
         <div style={{ background: "#fff", borderTopLeftRadius: 20, borderTopRightRadius: 20 }}>
             <SnackbarProvider />
-            <Box py={2.5} sx={{ minWidth: { xs: "100vw", md: "100%" }}}>
-                <Typography variant="h5" sx={{mt: {xs: 4, md: 1.5, lg: 1.5 }}} px={5}><b>{t('pendingRequests')}</b></Typography>
+            <Box py={2.5}>
                 <Grid container spacing={2} mt={0} px={5}>
-                    <Grid size={{ xs: 12 }}>
-                        <Button color="inherit" variant="contained" sx={whiteButtonStyles} style={{ float: "right" }} onClick={() => { loadRequests(); }}>
-                            {t('reload')} <RestartAltOutlined sx={{ ml: 0.5, pb: 0.45, justifyContent: "center", alignItems: "center" }} fontSize="small" />
+                    <Grid size={{ xs: 12, md: 8 }}>
+                        <Typography sx={{ fontSize: 18, mb: 1 }}><b>{t('pendingRequests')}</b></Typography>
+                    </Grid>
+                    <Grid size={{ xs: 12, md: 4 }}>
+                        <Button 
+                            variant="contained" color="inherit" 
+                            sx={{ float: "right", backgroundColor: "#fff", textTransform: "none", ml: 2 }} 
+                            onClick={() => { loadRequests(); }} 
+                        >
+                            {t('reload')}
                         </Button>
                     </Grid>
+                    <Grid size={{ xs: 12 }}>
+                        {
+                            !load ?
+                            requests !== null && requests.length !== 0 ?
+                            <Box sx={{ overflow: "hidden" }}>
+                                <DataGrid
+                                    rows={requests}
+                                    columns={columnsRequests}
+                                    getRowId={(row: any) => row?.id}
+                                    getRowHeight={() => "auto" }
+                                    style={sizingStyles}
+                                    sx={gridStyles}
+                                    disableRowSelectionOnClick
+                                />
+                            </Box> : 
+                            <Box>
+                                <Alert severity="warning">{t('noResults')}</Alert>
+                            </Box> : <Skeleton />
+                        }
+                    </Grid>
                 </Grid>
-                <Box>
-                    {
-                        !load ? 
-                        <Grid container spacing={2} mt={0} px={5}>
-                            <Grid size={{ xs: 12 }}>
-                                {
-                                    requests !== null && requests.length !== 0 ?
-                                    <Box sx={{ overflow: "hidden" }}>
-                                        <DataGrid
-                                            rows={requests}
-                                            columns={columnsRequests}
-                                            getRowId={(row: any) => row?.id}
-                                            getRowHeight={() => "auto" }
-                                            sx={sizingStyles}
-                                            disableRowSelectionOnClick
-                                        />
-                                    </Box> : <Alert severity="warning">{t('noResults')}</Alert>
-                                }
-                            </Grid>
-                        </Grid> : <Skeleton sx={{ mx: 5, mt: 3 }} />
-                    }
-                </Box>
             </Box>
         </div>
     );
