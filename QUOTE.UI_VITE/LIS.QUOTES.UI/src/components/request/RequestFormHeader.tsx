@@ -142,7 +142,7 @@ const RequestFormHeader = (props: any) => {
             
             {/* Change request status */}
             <BootstrapDialog open={modalStatus} onClose={() => setModalStatus(false)} maxWidth="md" fullWidth>
-                <RequestChangeStatus id={props.id} closeModal={() => setModalStatus(false)} />
+                <RequestChangeStatus id={props.id} closeModal={() => setModalStatus(false)} updateStatus={() => props.updateStatus()} />
             </BootstrapDialog>
             
             {/* Add a comment/note */}
@@ -157,7 +157,7 @@ const RequestFormHeader = (props: any) => {
 
             {/* Add a new contact */}
             <BootstrapDialog open={modalNewContact} onClose={() => setModalNewContact(false)} maxWidth="md" fullWidth>
-                <NewContact categories={[""]} closeModal={() => setModalNewContact(false)} />
+                <NewContact categories={["CUSTOMERS"]} closeModal={() => setModalNewContact(false)} />
             </BootstrapDialog>
 
             {/* Create new port */}

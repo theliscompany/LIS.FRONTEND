@@ -71,7 +71,6 @@ const AcceptOffer = () => {
     const createOrder = async (option: any, offerData: any, currentOpt: number) => {
         console.log("Option : ", option);
         console.log("Data : ", offerData);
-        
 
         postOrder({body: {
             orderId: 0,
