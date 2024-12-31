@@ -5,6 +5,9 @@ import type { PostOrderData, PostOrderError, PostOrderResponse, GetOrdersData, G
 
 export const client = createClient(createConfig());
 
+/**
+ * Create new order
+ */
 export const postOrder = <ThrowOnError extends boolean = false>(options?: OptionsLegacyParser<PostOrderData, ThrowOnError>) => {
     return (options?.client ?? client).post<PostOrderResponse, PostOrderError, ThrowOnError>({
         ...options,

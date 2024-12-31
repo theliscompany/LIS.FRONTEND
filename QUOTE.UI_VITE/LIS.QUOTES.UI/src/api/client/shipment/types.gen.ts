@@ -10,37 +10,24 @@ export enum CategoryEnum {
 }
 
 export type OrderDto = {
-    orderId?: (number) | null;
-    orderNumber?: (string) | null;
+    orderId?: number;
     customerId?: number;
     sellerId?: (number) | null;
     buyerId?: (number) | null;
-    customerName?: (string) | null;
-    sellerName?: (string) | null;
-    buyerName?: (string) | null;
     refClient?: (string) | null;
     refSeller?: (string) | null;
     refBuyer?: (string) | null;
     incoTerm?: (string) | null;
     incotermDestination?: (string) | null;
-    fiscalYear?: number;
-    exportation?: boolean;
+    exportation?: (boolean) | null;
     city?: (number) | null;
-    cityName?: (string) | null;
     cityIncotermTo?: (number) | null;
-    cityNameIncotermTo?: (string) | null;
-    shippingLine?: (string) | null;
     shipLineId?: (number) | null;
-    orderStatus?: number;
     refShippingAgent?: (string) | null;
-    shippingAgentName?: (string) | null;
     shippingAgent?: (number) | null;
-    shipName?: (string) | null;
     shipId?: (number) | null;
-    loadingPort?: (string) | null;
-    departurePort?: (number) | null;
-    dischargePort?: (string) | null;
-    destinationPort?: (number) | null;
+    departurePortId?: (number) | null;
+    destinationPortId?: (number) | null;
     estimatedDepartureDate?: (Date) | null;
     estimatedArrivalDate?: (Date) | null;
 };
@@ -98,7 +85,7 @@ export type PostOrderData = {
     body?: OrderDto;
 };
 
-export type PostOrderResponse = (boolean);
+export type PostOrderResponse = (number);
 
 export type PostOrderError = (unknown);
 

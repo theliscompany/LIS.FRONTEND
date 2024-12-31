@@ -72,18 +72,14 @@ const AcceptOffer = () => {
         console.log("Option : ", option);
         console.log("Data : ", offerData);
         
-        const body = {
-            "orderId": 0,
-            "customerId": Number(parseInfos(offerData.clientNumber).id),
-            "exportation": true,
-            "loadingPort": option.portDeparture.portName,
-            "dischargePort": option.portDestination.portName,
-            "departurePort": option.portDeparture.portId,
-            "destinationPort": option.portDestination.portId,
-            "shippingLine": option.selectedSeafreight.carrierName,
-        }
 
-        postOrder({body: body})
+        postOrder({body: {
+            orderId: 0,
+            customerId: Number(parseInfos(offerData.clientNumber).id),
+            exportation: true,
+            departurePortId: option.portDeparture.portId,
+            destinationPortId: option.portDestination.portId
+        }})
         .then((data: any) => {
             console.log("All : ", data.data);            
             var lang = offerData.comment.startsWith("<p>Bonjour") ? "fr" : "en";
