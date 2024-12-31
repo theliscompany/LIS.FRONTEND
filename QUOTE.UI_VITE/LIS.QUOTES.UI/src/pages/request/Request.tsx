@@ -353,7 +353,7 @@ const Request = () => {
                                 portDestination={portDestination} setPortDestination={setPortDestination}
                                 containersSelection={containersSelection}
                                 ports={ports} products={products} hscodes={hscodes}
-                                ports1={ports1} ports2={ports2}
+                                ports1={ports1} ports2={ports2} trackingNumber={trackingNumber}
                                 containers={containers} status={status}
                                 canEdit={canEdit} setCanEdit={setCanEdit}
                                 requestData={requestData} type="standard"

@@ -10,6 +10,7 @@ import { putApiQuoteOfferByIdApproval } from '../../api/client/offer';
 import { postOrder } from '../../api/client/shipment';
 import { postApiEmail } from '../../api/client/quote';
 import { enqueueSnackbar, SnackbarProvider } from 'notistack';
+import { parseInfos } from '../../utils/functions';
 
 const AcceptOffer = () => {
     const [load, setLoad] = useState<boolean>(true);
@@ -41,12 +42,6 @@ const AcceptOffer = () => {
 
     const acceptOffer = async () => {
         var cOption = currentOption !== null && currentOption !== undefined ? Number(currentOption) : 0;
-        // const body: any = {
-        //     id: id,
-        //     newStatus: "Accepted",
-        //     option: cOption
-        // };
-
         putApiQuoteOfferByIdApproval({path: {id: String(id)}, query: {NewStatus: "Accepted", option: cOption}})
         .then((data: any) => {
             console.log("Data: ", data.data.data);
@@ -77,84 +72,10 @@ const AcceptOffer = () => {
         console.log("Option : ", option);
         console.log("Data : ", offerData);
         
-        // const body: any = {
-        //     "orderNumber": "",
-        //     "orderDate": new Date().toISOString(),
-        //     "sellerId": 0,
-        //     "buyerId": 0,
-        //     "customerName": extractName(offerData.comment),
-        //     "customerId": 0,
-        //     "shippingAgent": 0,
-        //     "shipId": null,
-        //     "shipLineId": 0,
-        //     "orderStatus": 1,
-        //     "departurePort": option.portDeparture.portId,
-        //     "destinationPort": option.portDestination.portId,
-        //     // "estimatedDepartureDate": etd?.toISOString(),
-        //     // "estimatedArrivalDate": eta?.toISOString(),
-        //     // "incoTerm": incotermFrom,
-        //     "refClient": offerData.clientNumber,
-        //     "refSeller": offerData.clientNumber,
-        //     "refBuyer": offerData.clientNumber,
-        //     // "incotermDestination": incotermTo,
-        //     "fiscalYear": Number(new Date().getFullYear()),
-        //     "refShippingAgent": option.selectedSeafreights[0].carrierAgentName,
-        //     // "city": incotermFromCity.id,
-        //     // "cityIncotermTo": incotermToCity.id
-        //     "freightShipmentType": option.selectedSeafreights[0].defaultContainer,
-            
-        //     // orderNumber: "",
-        //     // orderDate: new Date().toISOString(),
-        //     // refClient: offerData.clientNumber,
-        //     // refShippingAgent: option.selectedSeafreights[0].carrierAgentName,
-        //     // freightShipmentType: option.selectedSeafreights[0].defaultContainer,
-        //     // customerId: 0,
-        //     // shippingAgent: 0,
-        //     // orderStatus: 1,
-        //     // departurePort: option.portDeparture.portId,
-        //     // destinationPort: option.portDestination.portId,
-        //     // fiscalYear: Number(new Date().getFullYear())
-        // };
-        
-        // const body = {
-        //     // "orderId": 0,
-        //     "orderNumber": "F-"+offerData.quoteOfferNumber+"-"+offerData.requestQuoteId,
-        //     "customerId": Number(offerData.clientNumber),
-        //     "sellerId": null,
-        //     "buyerId": null,
-        //     "customerName": extractName(offerData.comment),
-        //     // "sellerName": extractName(offerData.comment),
-        //     // "buyerName": extractName(offerData.comment),
-        //     // "refClient": "string",
-        //     // "refSeller": "string",
-        //     // "refBuyer": "string",
-        //     // "incoTerm": "string",
-        //     // "incotermDestination": "string",
-        //     // "fiscalYear": Number(new Date().getFullYear()),
-        //     "exportation": true,
-        //     // "city": 0,
-        //     // "cityName": "string",
-        //     // "cityIncotermTo": 0,
-        //     // "cityNameIncotermTo": "string",
-        //     "shippingLine": option.selectedSeafreight.carrierName,
-        //     "shipLineId": null,
-        //     "orderStatus": 1,
-        //     // "refShippingAgent": "string",
-        //     "shippingAgentName": option.selectedSeafreight.carrierAgentName,
-        //     "shippingAgent": null, // Mistake, should send the real one
-        //     // "shipName": "string",
-        //     // "shipId": 0,
-        //     "loadingPort": option.portDeparture.portName,
-        //     "departurePort": option.portDeparture.portId,
-        //     "dischargePort": option.portDestination.portName,
-        //     "destinationPort": option.portDestination.portId,
-        //     // "estimatedDepartureDate": "2024-12-30T13:03:44.563Z",
-        //     // "estimatedArrivalDate": "2024-12-30T13:03:44.563Z"
-        // };
 
         postOrder({body: {
             orderId: 0,
-            customerId: Number(offerData.clientNumber),
+            customerId: Number(parseInfos(offerData.clientNumber).id),
             exportation: true,
             departurePortId: option.portDeparture.portId,
             destinationPortId: option.portDestination.portId
@@ -174,7 +95,9 @@ const AcceptOffer = () => {
                 <p>${t('destinationPort', {lng: lang})} : ${offerData.options[nOption].selectedSeafreights[0].destinationPortName}</p>
                 <p>${infos}</p>
                 <br>
-                <p>${t('trackingOptions', {lng: lang})} : ${data.data.orderNumber}</p>
+                <p>${t('trackingOptions', {lng: lang})} ${parseInfos(offerData.clientNumber).requestNumber}</p>
+                <br>
+                <p><a href='${import.meta.env.VITE_ORIGIN_URL}/tracking/${parseInfos(offerData.clientNumber).requestNumber}'>${t('trackingLink', {lng: lang})}</a></p>
                 <br>
                 <p>${t('endMailWord', {lng: lang})}</p>
             </div>
@@ -189,9 +112,7 @@ const AcceptOffer = () => {
                 <div>Fax +32.3.295.38.77</div>
                 <div>Whatsapp +32.494.40.24.25</div>
                 <img src="https://omnifreight.eu/wp-content/uploads/2023/06/logo.jpg" style="max-width: 200px;">
-            </div>
-            `;
-            
+            </div>`;            
             sendEmail("pricing@omnifreight.eu", offerData.emailUser, t('confirmationOffer', {lng: lang}), messageText);
         })
         .catch(error => { 
