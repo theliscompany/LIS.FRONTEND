@@ -161,10 +161,6 @@ const NewRequest = () => {
                 // }
                 var postcode1 = formState.departure.postalCode !== null && formState.departure.postalCode !== undefined ? formState.departure.postalCode : "";
                 var postcode2 = formState.arrival.postalCode !== null && formState.arrival.postalCode !== undefined ? formState.arrival.postalCode : "";
-                var myHeaders = new Headers();
-                myHeaders.append('Accept', '');
-                myHeaders.append("Content-Type", "application/json");
-                
                 postApiRequest({body: {
                     email: formState.email,
                     whatsapp: formState.phone,

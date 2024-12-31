@@ -11,8 +11,9 @@ import Footer from "../components/landingPage/Footer";
 import { loginRequest } from "../config/msalConfig";
 import ReCAPTCHA from "react-google-recaptcha";
 import { MuiTelInput } from 'mui-tel-input';
-import { postApiEmail } from "../api/client/quote";
-import { enqueueSnackbar } from "notistack";
+import { postApiEmail, postApiRequest } from "../api/client/quote";
+import { enqueueSnackbar, SnackbarProvider } from "notistack";
+import AutocompleteSearch from "../components/shared/AutocompleteSearch";
 
 var footer = `
 <div style="font-family: Verdana; padding-top: 35px;">
@@ -43,8 +44,8 @@ const Landing = () => {
     const [packingType, setPackingType] = useState<string>("FCL");
     const [quantity, setQuantity] = useState<number>(1);
     const [message, setMessage] = useState<string>("");
-    const [departure] = useState<any>(null);
-    const [arrival] = useState<any>(null);
+    const [departure, setDeparture] = useState<any>(null);
+    const [arrival, setArrival] = useState<any>(null);
     const [captcha, setCaptcha] = useState<string | null>(null);
     const [load, setLoad] = useState<boolean>(false);
     const [subjects, setSubjects] = useState<string[]>([]);
@@ -113,6 +114,55 @@ const Landing = () => {
         });
 	}
 
+    const createSystemQuote = () => {
+        // var tags1 = tags !== null && tags !== undefined && tags.length !== 0 ? tags.map((elm: any) => elm.productName).join(',') : null;
+        // var tags2 = tags !== null && tags !== undefined && tags.length !== 0 ? tags.map((elm: any) => elm.hS_Code).join(',') : null;
+        if (phone !== "" && email !== "" && arrival !== null && departure !== null) {
+            if (validMail(email)) {
+                // setLoad(true);
+                // var auxUnits = [];
+                // if (packingType === "Breakbulk/LCL") {
+                //     auxUnits = packagesSelection;
+                // }
+                // else if (packingType === "Unit RoRo") {
+                //     auxUnits = unitsSelection;
+                // }
+                var postcode1 = departure.postalCode !== null && departure.postalCode !== undefined ? departure.postalCode : "";
+                var postcode2 = arrival.postalCode !== null && arrival.postalCode !== undefined ? arrival.postalCode : "";
+                
+                try {
+                    postApiRequest({body: {
+                        email: email,
+                        whatsapp: phone,
+                        departure: departure !== null && departure !== undefined ? [departure.city.toUpperCase(),departure.country,departure.latitude,departure.longitude,postcode1].filter((val: any) => { return val !== "" }).join(', ') : "",
+                        arrival: arrival !== null && arrival !== undefined ? [arrival.city.toUpperCase(),arrival.country,arrival.latitude,arrival.longitude,postcode2].filter((val: any) => { return val !== "" }).join(', ') : "",
+                        cargoType: "Container",
+                        // clientNumber: clientNumber !== null ? String(clientNumber.contactNumber)+", "+clientNumber.contactName+", "+clientNumber.contactId : null,
+                        packingType: packingType,
+                        // containers: containersSelection.map((elm: any) => { return { 
+                        //     id: containers.find((item: any) => item.packageName === elm.container).packageId, 
+                        //     containers: elm.container, 
+                        //     quantity: elm.quantity, 
+                        // } }),
+                        quantity: Number(quantity),
+                        detail: message+" *** Additional details : "+packingType+", "+quantity+" units.",
+                        // tags: valueSpecifics !== "hscodes" ? tags1 : tags2
+                    }})
+                }
+                catch (err) {
+                    console.log(err);
+                    enqueueSnackbar(t('errorHappenedRequest'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                }
+            }
+            else {
+                enqueueSnackbar(t('emailNotValid'), { variant: "info", anchorOrigin: { horizontal: "right", vertical: "top"} });
+            }
+        }
+        else {
+            enqueueSnackbar(t('fieldsEmpty'), { variant: "info", anchorOrigin: { horizontal: "right", vertical: "top"} });
+        }
+    }
+
     const sendQuotationForm = () => {
         if (captcha !== null) {
             if ((phone !== "" && arrival !== null && departure !== null) || (email !== "" && arrival !== null && departure !== null)) {
@@ -129,18 +179,19 @@ const Landing = () => {
                     <div>Détails : ${message}</div>
                     </div>
                     ` + footer;
+                    createSystemQuote();
                     sendEmail("pricing@omnifreight.eu", "pricing@omnifreight.eu", "Nouvelle demande du site web", emailContent);        
                 }
                 else {
-                    //enqueueSnackbar(t('emailNotValid'), { variant: "info", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                    enqueueSnackbar(t('emailNotValid'), { variant: "info", anchorOrigin: { horizontal: "right", vertical: "top"} });
                 }
             }
             else {
-                //enqueueSnackbar(t('fieldsEmpty'), { variant: "info", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                enqueueSnackbar(t('fieldsEmpty'), { variant: "info", anchorOrigin: { horizontal: "right", vertical: "top"} });
             }
         }
         else {
-            //enqueueSnackbar(t('checkCaptcha'), { variant: "info", anchorOrigin: { horizontal: "right", vertical: "top"} });
+            enqueueSnackbar(t('checkCaptcha'), { variant: "info", anchorOrigin: { horizontal: "right", vertical: "top"} });
         }
     }
 
@@ -161,15 +212,15 @@ const Landing = () => {
                     sendEmail("pricing@omnifreight.eu", "pricing@omnifreight.eu", "Nouveau contact du site web", emailContent);        
                 }
                 else {
-                    //enqueueSnackbar(t('emailNotValid'), { variant: "info", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                    enqueueSnackbar(t('emailNotValid'), { variant: "info", anchorOrigin: { horizontal: "right", vertical: "top"} });
                 }
             }
             else {
-                //enqueueSnackbar(t('fieldsEmpty'), { variant: "info", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                enqueueSnackbar(t('fieldsEmpty'), { variant: "info", anchorOrigin: { horizontal: "right", vertical: "top"} });
             }
         }
         else {
-            //enqueueSnackbar(t('checkCaptcha'), { variant: "info", anchorOrigin: { horizontal: "right", vertical: "top"} });
+            enqueueSnackbar(t('checkCaptcha'), { variant: "info", anchorOrigin: { horizontal: "right", vertical: "top"} });
         }
     }
 
@@ -196,15 +247,15 @@ const Landing = () => {
                     sendEmail("pricing@omnifreight.eu", "pricing@omnifreight.eu", "Nouveau téléchargement du flyer", emailContent);        
                 }
                 else {
-                    //enqueueSnackbar(t('emailNotValid'), { variant: "info", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                    enqueueSnackbar(t('emailNotValid'), { variant: "info", anchorOrigin: { horizontal: "right", vertical: "top"} });
                 }
             }
             else {
-                //enqueueSnackbar(t('fieldsEmpty'), { variant: "info", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                enqueueSnackbar(t('fieldsEmpty'), { variant: "info", anchorOrigin: { horizontal: "right", vertical: "top"} });
             }
         }
         else {
-            //enqueueSnackbar(t('checkCaptcha'), { variant: "info", anchorOrigin: { horizontal: "right", vertical: "top"} });
+            enqueueSnackbar(t('checkCaptcha'), { variant: "info", anchorOrigin: { horizontal: "right", vertical: "top"} });
         }
     }
 
@@ -212,6 +263,7 @@ const Landing = () => {
 
     return (
         <div className="App" style={{ overflowX: "hidden" }}>
+            <SnackbarProvider />
             <Box sx={{ 
                 background: "url('/assets/img/backimage.png') center center / cover no-repeat", 
                 backgroundBlendMode: "overlay", backgroundColor: "rgba(0,0,0,0.75)", 
@@ -277,7 +329,7 @@ const Landing = () => {
                 </Grid>
                 <Grid container px={1} sx={{ mb: { xs: 3, md: 3 } }}>
                     <Grid sx={{ maxWidth: { md: "840px" }, mx: { md: "auto" } }}>
-                        <Typography variant="h3" color="#fff" sx={{ fontFamily: "PT Sans", fontSize: { xs: "1.35rem", md: "2.75rem" }, lineHeight: { xs: "30px", md: "60px" } }}>
+                        <Typography variant="h3" color="#fff" sx={{ fontFamily: "Segoe UI, Roboto", fontSize: { xs: "1.35rem", md: "2.75rem" }, lineHeight: { xs: "30px", md: "60px" } }}>
                             {t('bannerTitle')}
                         </Typography>
                     </Grid>    
@@ -337,9 +389,9 @@ const Landing = () => {
                     <b>{t('requestQuote')}</b>
                 </BootstrapDialogTitle>
                 <DialogContent dividers>
-                    <Typography variant="subtitle1" gutterBottom px={2}>
+                    {/* <Typography variant="subtitle1" gutterBottom px={2}>
                         {t('itsEaseFillForm')}
-                    </Typography>
+                    </Typography> */}
                     <Grid container spacing={2} mt={1} px={2}>
                         <Grid size={{md:6, xs:12}}>
                             <InputLabel htmlFor="whatsapp-phone-number" sx={inputLabelStyles}>{t('whatsappNumber')}</InputLabel>
@@ -358,12 +410,12 @@ const Landing = () => {
                         <Grid size={{xs:12, md:6}}>
                             <InputLabel htmlFor="departure" sx={inputLabelStyles}>{t('cargoPickup')}</InputLabel>
                             {/* <BootstrapInput id="departure" type="email" value={departure} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setDeparture(e.target.value)} fullWidth /> */}
-                            {/* <AutocompleteSearch id="departure" placeholder="Ex : Douala, Cameroon" value={departure} onChange={setDeparture} fullWidth /> */}
+                            <AutocompleteSearch id="departure" placeholder="Ex : Douala, Cameroon" value={departure} onChange={setDeparture} fullWidth />
                         </Grid>
                         <Grid size={{xs:12, md:6}}>
                             <InputLabel htmlFor="arrival" sx={inputLabelStyles}>{t('cargoDeliver')}</InputLabel>
                             {/* <BootstrapInput id="arrival" type="email" value={arrival} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setArrival(e.target.value)} fullWidth /> */}
-                            {/* <AutocompleteSearch id="arrival" placeholder="Ex : Antwerp, Belgium" value={arrival} onChange={setArrival} fullWidth /> */}
+                            <AutocompleteSearch id="arrival" placeholder="Ex : Antwerp, Belgium" value={arrival} onChange={setArrival} fullWidth />
                         </Grid>
                         <Grid size={{xs:12, md:6}}>
                             {/* <InputLabel htmlFor="packing-type" sx={inputLabelStyles}>In what type of packing do you want to transport your goods?</InputLabel> */}
@@ -387,7 +439,7 @@ const Landing = () => {
                         
                         <Grid size={{xs:12}} mt={1}>
                             <InputLabel htmlFor="request-message" sx={inputLabelStyles}>{t('shareOtherDetails')}</InputLabel>
-                            <BootstrapInput id="request-message" type="text" multiline rows={3} value={message} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setMessage(e.target.value)} fullWidth />
+                            <BootstrapInput id="request-message" type="text" multiline rows={2} value={message} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setMessage(e.target.value)} fullWidth />
                         </Grid>
                         <Grid size={{xs:12}}>
                             <ReCAPTCHA
