@@ -181,7 +181,7 @@ const Request = () => {
         try {
             const response: any = await getApiRequestById({path: {id: Number(id)}});
             if (response !== null && response !== undefined) {
-                console.log("Saved : ", response.data.data);
+                console.log("Saved : ", response.data);
                 // Parse the saved data string into an array of IDs
                 const savedDataArray = response.data.data.tags !== null ? response.data.data.tags.split(',').map(Number) : [];
                 // Filter the possibleObjects array to only include objects with matching hS_Code
@@ -321,7 +321,7 @@ const Request = () => {
                     <Grid container spacing={2} mt={1} px={5}>
                         {/* Form Header COMPONENT */}
                         <RequestFormHeader 
-                            id={id} email={email} status={status}
+                            id={id} email={email} status={status} updateStatus={setStatus}
                             trackingNumber={trackingNumber} editRequest={editRequest}
                             getPorts={getPortsService} getProducts={getProductsService}
                         /> 

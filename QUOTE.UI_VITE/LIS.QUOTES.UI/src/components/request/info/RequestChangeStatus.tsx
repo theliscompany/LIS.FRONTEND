@@ -2,12 +2,13 @@ import { useState } from 'react';
 import { BootstrapDialogTitle, BootstrapInput, DarkTooltip, buttonCloseStyles, inputLabelStyles } from '../../../utils/misc/styles';
 import { statusTypes } from '../../../utils/constants';
 import { Button, DialogActions, DialogContent, FormControl, FormControlLabel, FormLabel, InputLabel, Radio, RadioGroup, Typography } from '@mui/material';
-import Grid from '@mui/material/Grid2'
+import Grid from '@mui/material/Grid2';
 import { useTranslation } from 'react-i18next';
 import { enqueueSnackbar } from 'notistack';
 import { putApiRequestByIdChangeStatus } from '../../../api/client/quote';
 
-function RequestChangeStatus(props: any) {
+const RequestChangeStatus = (props: any) => {
+    const [load, setLoad] = useState<boolean>(false)
     const [statusMessage, setStatusMessage] = useState<string>("");
     const [selectedStatus, setSelectedStatus] = useState('EnAttente');
     
@@ -19,6 +20,7 @@ function RequestChangeStatus(props: any) {
 
     const changeStatusRequest = async () => {
         try {
+            setLoad(true);
             const body: any = {
                 newStatus: selectedStatus,
                 customMessage: statusMessage
@@ -26,15 +28,19 @@ function RequestChangeStatus(props: any) {
 
             const data = await putApiRequestByIdChangeStatus({path: {id: props.id}, body: body});
             if (data?.data) {
+                props.updateStatus(selectedStatus);
                 props.closeModal();
                 enqueueSnackbar(t('requestStatusUpdated'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                setLoad(false);
             }
             else {
                 enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                setLoad(false);
             }
         }
         catch (err: any) {
             console.log(err);
+            setLoad(false);
         }
     }
 
@@ -71,7 +77,7 @@ function RequestChangeStatus(props: any) {
                 </Grid>
             </DialogContent>
             <DialogActions>
-                <Button variant="contained" color="primary" className="mr-3" onClick={changeStatusRequest} sx={{ textTransform: "none" }}>{t('validate')}</Button>
+                <Button variant="contained" color={!load ? "primary" : "info"} className="mr-3" onClick={changeStatusRequest} sx={{ textTransform: "none" }} disabled={load === true}>{t('validate')}</Button>
                 <Button variant="contained" onClick={props.closeModal} sx={buttonCloseStyles}>{t('close')}</Button>
             </DialogActions>
         </>

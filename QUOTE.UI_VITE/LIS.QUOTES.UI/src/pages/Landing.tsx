@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { Alert, Box, Button, Card, CardActions, CardContent, Checkbox, DialogActions, DialogContent, InputLabel, ListItemText, Menu, MenuItem, NativeSelect, Select, SelectChangeEvent, Typography} from '@mui/material'
-import Grid from '@mui/material/Grid2'
+import { Alert, Box, Button, Card, CardActions, CardContent, Checkbox, DialogActions, DialogContent, InputLabel, ListItemText, Menu, MenuItem, NativeSelect, Select, SelectChangeEvent, Typography} from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { useIsAuthenticated, useMsal } from "@azure/msal-react";
 import FaceIcon from '@mui/icons-material/Face';
 import { useNavigate, useParams } from "react-router-dom";

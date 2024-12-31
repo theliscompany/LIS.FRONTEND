@@ -318,7 +318,7 @@ const Request = () => {
                     <Grid container spacing={2} mt={1} px={5}>
                         {/* Form Header COMPONENT */}
                         <RequestFormHeader 
-                            id={id} email={email} status={status}
+                            id={id} email={email} status={status} updateStatus={setStatus}
                             trackingNumber={trackingNumber} editRequest={editRequest}
                             getPorts={getPortsService} getProducts={getProductsService}
                         /> 
