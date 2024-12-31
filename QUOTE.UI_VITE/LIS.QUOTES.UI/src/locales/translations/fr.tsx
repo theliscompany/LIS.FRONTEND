@@ -574,5 +574,6 @@ export const fr = {
   hscodeEdited: "Le hs-code a été édité avec succès!",
   digitCategories: "Catégories à 4 chiffres",
   selectOne: "choisir un",
-  optionUpdated: "Option mise à jour avec succès!"
+  optionUpdated: "Option mise à jour avec succès!",
+  trackingLink: "Lien pour le tracking"
 };

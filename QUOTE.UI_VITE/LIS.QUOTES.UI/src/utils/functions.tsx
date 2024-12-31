@@ -320,6 +320,20 @@ export function checkDifferentDefaultContainer(array: any) {
     return true; // All elements have different defaultContainer
 }
 
+export function parseInfos(inputString: string) {
+    const parts = inputString.split(', ');
+    
+    const id = parts[0];
+    const requestNumber = parts[1];
+    
+    const locationObject = {
+        id: id,
+        requestNumber: requestNumber
+    };
+    
+    return locationObject;
+}
+
 export function parseLocation(inputString: string) {
     const parts = inputString.split(', ');
     
@@ -354,6 +368,26 @@ export function parseLocation2(inputString: string) {
     };
     
     return locationObject;
+}
+
+export function parseLocation3(inputString: string) {
+    const parts = inputString.split(', ');
+    
+    const city = parts[0];
+    const country = parts[1];
+    const latitude = parseFloat(parts[2]);
+    const longitude = parseFloat(parts[3]);
+    const postalCode = parts[4] || null; 
+    
+    const locationObject = {
+        city: city,
+        country: country,
+        latitude: latitude,
+        longitude: longitude,
+        postalCode: postalCode
+    };
+    
+    return locationObject.city+", "+locationObject.country;
 }
 
 export function parseContact(inputString: string) {

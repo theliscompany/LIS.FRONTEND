@@ -33,6 +33,8 @@ import Request from './pages/request/Request';
 import UsersAssignment from './pages/UsersAssignment';
 import MasterDataHSCodes from './pages/masterdata/MasterDataHSCodes';
 import Shipments from './pages/Shipments';
+import Tracking from './pages/Tracking';
+import ScrollToTop from './components/shared/ScrollToTop';
 
 const queryClient = new QueryClient();
 
@@ -43,6 +45,7 @@ function App() {
         <AuthenticatedTemplate>
           <QueryClientProvider client={queryClient}>
             <BackendServiceProvider>
+              <ScrollToTop />
               <Routes>
                 <Route path='/*' element={<Layout />}>
                   <Route path='' element={<Shipments />} />
@@ -67,6 +70,11 @@ function App() {
                   <Route path="quote-offers" element={<PriceOffers />} />
                   <Route path="quote-offers/:id" element={<ManagePriceOffer />} />
                   <Route path="acceptOffer/:id" element={<AcceptOffer />} />
+                  <Route path="quote/:lang" element={<Landing />} />
+                  <Route path="privacy-policy" element={<Privacy />} />
+                  <Route path="tracking" element={<Tracking />} />
+                  <Route path="tracking/:id" element={<Tracking />} />
+                  <Route path='landing' element={<Landing />} />
                   <Route path='*' element={<NotFound />} />
                 </Route>
               </Routes>
@@ -76,12 +84,16 @@ function App() {
         </AuthenticatedTemplate>
         <UnauthenticatedTemplate>
           <BackendServiceProvider>
+            <ScrollToTop />
             <Routes>
               <Route path='/' element={<Landing />} />
               <Route path="login" element={<Login />} />
               <Route path="privacy-policy" element={<Privacy />} />
               <Route path="acceptOffer/:id" element={<AcceptOffer />} />
               <Route path="refuseOffer/:id" element={<RefuseOffer />} />
+              <Route path="tracking" element={<Tracking />} />
+              <Route path="tracking/:id" element={<Tracking />} />
+              <Route path='landing' element={<Landing />} />
               <Route path='*' element={<NotFound />} />
             </Routes>
             </BackendServiceProvider>

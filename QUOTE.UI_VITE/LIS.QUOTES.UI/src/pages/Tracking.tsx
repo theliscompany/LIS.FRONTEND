@@ -6,6 +6,7 @@ import { BootstrapInput } from '../utils/misc/styles';
 import { useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { getApiTrackingByTrackingNumber } from '../api/client/quote';
+import { parseLocation3 } from '../utils/functions';
 
 const Tracking = () => {
     const { id } = useParams();
@@ -24,10 +25,7 @@ const Tracking = () => {
     const loadRequest = async () => {
         setLoad(true);
         setTrackingData(null);
-        var myHeaders = new Headers();
-        myHeaders.append("Accept", "*/");
         getApiTrackingByTrackingNumber({path: {trackingNumber: trackingNumber}})
-        // .then((response: any) => response.json())
         .then((data: any) => {
             if (data.status === 200) {
                 setTrackingData(data.data.data);
@@ -47,7 +45,7 @@ const Tracking = () => {
         <Box sx={{ maxWidth: "lg", margin: "0 auto" }}>
             <Grid container my={5} sx={{ px: { md: 0, xs: 2 } }}>
                 <Grid size={{ xs: 12 }} fontSize={16} my={3}>
-                    <Typography variant="h4" fontWeight="bold">{t('requestTracking')}</Typography>
+                    <Typography component="div" variant="h4" fontWeight="bold">{t('requestTracking')}</Typography>
                 </Grid>
                 <Grid size={{ xs: 12, md: 6 }} mt={2}>
                     <BootstrapInput id="tracking-number" type="text" placeholder={t('trackingNumber')} value={trackingNumber} onChange={(e: any) => { setTrackingNumber(e.target.value); }} fullWidth />
@@ -63,7 +61,7 @@ const Tracking = () => {
                             <Alert severity='info'>
                                 {t('weAreWorkingOnRequest')}
                             </Alert>
-                            <Typography sx={{ mt: 3 }}>{t('requestStatus')} : <Chip size="small" label={trackingData.status} color={trackingData.status === "EnAttente" ? "warning" : trackingData.status === "Valider" ? "success" : "error"} sx={{ ml: 1 }} /> </Typography>
+                            <Typography component="div" sx={{ mt: 3 }}>{t('requestStatus')} : <Chip size="small" label={trackingData.status} color={trackingData.status === "EnAttente" ? "warning" : trackingData.status === "Valider" ? "success" : "error"} sx={{ ml: 1 }} /> </Typography>
                             <List sx={{ my: 3, border: "1px #e2e2e2 solid" }} dense>
                                 <ListItem>
                                     <ListItemText primary={t(('WhatsappNumber'))} secondary={trackingData.requestQuoteData.whatsapp} />
@@ -74,11 +72,11 @@ const Tracking = () => {
                                 </ListItem>
                                 <Divider />
                                 <ListItem>
-                                    <ListItemText primary={t('departure')} secondary={trackingData.requestQuoteData.departure} />
+                                    <ListItemText primary={t('departure')} secondary={parseLocation3(trackingData.requestQuoteData.departure)} />
                                 </ListItem>
                                 <Divider />
                                 <ListItem>
-                                    <ListItemText primary={t('arrival')} secondary={trackingData.requestQuoteData.arrival} />
+                                    <ListItemText primary={t('arrival')} secondary={parseLocation3(trackingData.requestQuoteData.arrival)} />
                                 </ListItem>
                                 <Divider />
                                 <ListItem>
@@ -98,7 +96,7 @@ const Tracking = () => {
                                 </ListItem>
                             </List>
                         </Box> 
-                        : <Typography sx={{ mt: 3 }}>{t('trackingCodeNotDefined')}</Typography>
+                        : <Typography component="div" sx={{ mt: 3 }}>{t('trackingCodeNotDefined')}</Typography>
                     }
                 </Grid>
             </Grid>

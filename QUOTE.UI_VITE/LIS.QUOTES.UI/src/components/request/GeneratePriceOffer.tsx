@@ -35,7 +35,7 @@ const GeneratePriceOffer = (props: any) => {
     const { 
         id, email, tags, clientNumber, 
         departure, setDeparture, containersSelection, 
-        loadingCity, setLoadingCity,
+        loadingCity, setLoadingCity, trackingNumber, 
         portDestination, ports, products, hscodes, ports1, ports2, containers 
     } = props;
 
@@ -263,7 +263,7 @@ const GeneratePriceOffer = (props: any) => {
         else {
             props.setCanEdit(true);
         }
-        console.log("Form State : ", formState);
+        // console.log("Form State : ", formState);
     }, [formState]);
     
     useEffect(() => {
@@ -505,9 +505,9 @@ const GeneratePriceOffer = (props: any) => {
             }
         }
         
-        console.log("Haulage : ", haulagePrices);
-        console.log("Seafreight : ", seafreightPrices);
-        console.log("Miscs : ", miscPrices);
+        // console.log("Haulage : ", haulagePrices);
+        // console.log("Seafreight : ", seafreightPrices);
+        // console.log("Miscs : ", miscPrices);
 
         var finalValue = ((seafreightPrices+haulagePrices+miscPrices)*(option.margins[index]/100)+seafreightPrices+haulagePrices+miscPrices).toFixed(2);
         return Number(finalValue)+Number(option.addings[index]);
@@ -745,7 +745,7 @@ const GeneratePriceOffer = (props: any) => {
                     "comment": rteRef.current?.editor?.getHTML(),
                     "quoteOfferNumber": generateRandomNumber(),
                     "quoteOfferVm": 0,
-                    "clientNumber": clientNumber.contactId,
+                    "clientNumber": clientNumber.contactId+", "+trackingNumber,
                     "emailUser": email,
                     "options": sentOptions,
                     "files": formState.files.map((elm: any) => { return {...elm, url: ""}}),
