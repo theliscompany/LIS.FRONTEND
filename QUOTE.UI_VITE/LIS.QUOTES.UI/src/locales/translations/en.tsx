@@ -258,7 +258,7 @@ export const en = {
   noRequests: "No requests have been found.",
   operationSuccess: "Your operation has been done with success.",
   informationReceived: "Thanks, we have received your information.",
-  itsEaseFillForm: "It's ease, just fill in the form and click “continue” at the bottom right to send a request for a quote.",
+  itsEaseFillForm: "It's easy, just fill in the form and click “continue” at the bottom right to send a request for a quote.",
   requestSuccessSent: "Your request has been sent with success.",
   searchResultsFor: "Search results for",
   listRequestsQuote: "List of requests for quote",

@@ -65,7 +65,7 @@ export const buttonStyles = {
     textTransform: "none",
     fontSize: { xs: 15, md: 17 },
     fontWeight: 400,
-    fontFamily: "PT Sans"
+    fontFamily: "PT Sans, Segoe UI, Roboto"
 }
 
 export const cardStyles = { 
@@ -86,7 +86,7 @@ export const cardTextStyles = {
     lineHeight: 1.2,
     fontSize: { xs: 17, md: 19 },
     fontWeight: "bold",
-    fontFamily: "PT Sans",
+    fontFamily: "PT Sans, Segoe UI",
     minHeight: { xs: "55px", md: "75px" } 
 }
 
