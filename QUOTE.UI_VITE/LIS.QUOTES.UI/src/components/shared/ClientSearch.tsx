@@ -81,7 +81,7 @@ const ClientSearch: React.FC<LocationAutocompleteProps> = ({ id, name, value, on
                 size="small"
                 onChange={(_, newValue) => {
                     onChange(newValue);
-                    console.log(newValue);
+                    console.log("Newval : ", newValue);
                     if (newValue !== null) {
                         if (callBack) {
                             callBack(newValue);

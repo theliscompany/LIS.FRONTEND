@@ -69,9 +69,13 @@ const RequestForm = (props: any) => {
                                 onChange={props.setClientNumber}
                                 disabled={!props.canEdit} 
                                 callBack={(value: any) => {
-                                    props.setClientNumber(value);
-                                    if (props.clientNumber !== null) {
-                                        props.setPhone(props.clientNumber.phone !== null ? props.clientNumber.phone : "");
+                                    // props.setClientNumber(value);
+                                    // if (props.clientNumber !== null) {
+                                    //     props.setPhone(props.clientNumber.phone !== null ? props.clientNumber.phone : "");
+                                    // }
+                                    if (value !== null) {
+                                        props.setPhone(value.phone !== null ? value.phone : "");
+                                        props.setEmail(value.email !== null ? value.email : "");
                                     }
                                 }} 
                                 fullWidth 
@@ -87,7 +91,7 @@ const RequestForm = (props: any) => {
                                 id="whatsapp-phone-number" size="small" 
                                 value={props.phone} onChange={props.setPhone} 
                                 defaultCountry="CM" preferredCountries={["CM", "BE", "KE"]} 
-                                fullWidth sx={{ mt: 1 }} disabled={!props.canEdit} 
+                                fullWidth sx={{ mt: 1 }} disabled={true} 
                                 {...properties}
                             />
                         </Grid>
@@ -97,7 +101,7 @@ const RequestForm = (props: any) => {
                         </Grid>
                         <Grid size={{ xs: 12, md: 6 }}>
                             <InputLabel htmlFor="request-email" sx={inputLabelStyles}>{t('emailAddress')}</InputLabel>
-                            <BootstrapInput id="request-email" type="email" value={props.email} onChange={(e: React.ChangeEvent<HTMLInputElement>) => props.setEmail(e.target.value)} fullWidth disabled={!props.canEdit} />
+                            <BootstrapInput id="request-email" type="email" value={props.email} onChange={(e: React.ChangeEvent<HTMLInputElement>) => props.setEmail(e.target.value)} fullWidth disabled={true} />
                         </Grid>
                         {/* <Grid size={{ xs: 12, md: 6 }}>
                             <InputLabel htmlFor="tags" sx={inputLabelStyles}>{t('specifics')}</InputLabel>
