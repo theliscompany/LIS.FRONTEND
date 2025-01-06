@@ -104,7 +104,9 @@ const UsersAssignment = () => {
     
     const loadUsers = async () => {
         if (account && instance) {
-            const token = await getAccessToken(instance, "https://graph.microsoft.com/User.ReadBasic.All", account);
+            const token = await getAccessToken(instance, {
+                scopes: ["User.ReadBasic.All"]
+            }, account);
             getUsersFromAAD(token);
         }
     }
