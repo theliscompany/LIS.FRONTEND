@@ -575,5 +575,6 @@ export const fr = {
   digitCategories: "Catégories à 4 chiffres",
   selectOne: "choisir un",
   optionUpdated: "Option mise à jour avec succès!",
-  trackingLink: "Lien pour le tracking"
+  trackingLink: "Lien pour le tracking",
+  fileAdded: "Le fichier a été ajouté avec succès!"
 };

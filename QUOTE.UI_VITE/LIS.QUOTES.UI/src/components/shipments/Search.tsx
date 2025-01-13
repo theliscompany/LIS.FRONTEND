@@ -151,7 +151,7 @@ const Search = ({open,drawerWidth, closeDrawer, reloadShipmentsGrid}:{open:boole
           </FormControl>
           <TextField size="small" label="Value" variant="outlined" />
           <Grid container spacing={1}> 
-            <Grid size={10}>
+            <Grid size={{xs: 10}}>
               <TextField type="number" size="small" label="Fiscal" variant="outlined" disabled={fiscalYearDisabled}
               value={params.query?.Fiscal} onChange={(e?:React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>)=>
                 setParams(prev=>({
@@ -162,10 +162,10 @@ const Search = ({open,drawerWidth, closeDrawer, reloadShipmentsGrid}:{open:boole
                 }))
               } />
             </Grid>
-            <Grid size={2}>
+            <Grid size={{xs: 2}}>
               <Checkbox checked={!fiscalYearDisabled} onChange={(_:any, checked: boolean)=> setFiscalYearDisabled(!checked)} size="small" />
             </Grid>
-            <Grid size={10}>
+            <Grid size={{xs: 10}}>
               <FormControl fullWidth disabled={monthDisabled}>
                 <InputLabel id="month">Month</InputLabel>
                 <Select size="small" labelId="month" label="Month" value={params.query?.Month}
@@ -183,11 +183,11 @@ const Search = ({open,drawerWidth, closeDrawer, reloadShipmentsGrid}:{open:boole
                 </Select>
               </FormControl>
             </Grid>
-            <Grid size={2}>
+            <Grid size={{xs: 2}}>
               <Checkbox size="small" checked={!monthDisabled}
               onChange={(_:any, checked: boolean)=> setMonthDisabled(!checked)} />
             </Grid>
-            <Grid size={10}>
+            <Grid size={{xs: 10}}>
               <FormControl fullWidth disabled={statusDisabled}>
                 <InputLabel id="status">Status</InputLabel>
                 <Select defaultValue={OrderStatusEnum.OPEN} size="small" labelId="status" label="Status" value={params.query?.Status} 
@@ -207,7 +207,7 @@ const Search = ({open,drawerWidth, closeDrawer, reloadShipmentsGrid}:{open:boole
                 </Select>
               </FormControl>
             </Grid>
-            <Grid size={2}>
+            <Grid size={{xs: 2}}>
               <Checkbox size="small" checked={!statusDisabled} onChange={(_:any, checked: boolean)=> setStatusDisabled(!checked)} />
             </Grid>
           </Grid>

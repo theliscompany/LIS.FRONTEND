@@ -335,7 +335,7 @@ const Landing = () => {
                     </Grid>    
                 </Grid>
                 <Grid container sx={{ maxWidth: { md: "1300px" }, mx: { md: "auto" }, px: { xs: 1, md: 5 }, mt: { xs: 0, md: 3 }, pt: {xs: 0, md: 3} }}>
-                    <Grid sx={{ mb: { xs: 2 } }} size={4}>
+                    <Grid sx={{ mb: { xs: 2 } }} size={{xs: 12, md: 4}}>
                         <Card sx={cardStyles}>
                             <CardContent>
                                 <Typography sx={cardTextStyles} gutterBottom>
@@ -347,7 +347,7 @@ const Landing = () => {
                             </CardActions>
                         </Card>
                     </Grid>
-                    <Grid sx={{ mb: { xs: 2 } }} size={4}>
+                    <Grid sx={{ mb: { xs: 2 } }} size={{xs: 12, md: 4}}>
                         <Card sx={cardStyles}>
                             <CardContent>
                                 <Typography sx={cardTextStyles} gutterBottom>
@@ -359,7 +359,7 @@ const Landing = () => {
                             </CardActions>
                         </Card>
                     </Grid>
-                    <Grid sx={{ mb: { xs: 2 } }} size={4}>
+                    <Grid sx={{ mb: { xs: 2 } }} size={{xs: 12, md: 4}}>
                         <Card sx={cardStyles}>
                             <CardContent>
                                 <Typography sx={cardTextStyles} gutterBottom>

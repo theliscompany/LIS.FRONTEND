@@ -962,4 +962,21 @@ export function getCategoryNames(inputArray: any) {
     }).filter((name: any) => name !== null);
 }
       
+const isValidBase64 = (str: string) => {
+    const base64Regex = /^[A-Za-z0-9+/]+={0,2}$/;
+    return base64Regex.test(str);
+};
+    
+export const base64ToUint8Array = (base64: string) => {
+    if (!isValidBase64(base64)) {
+        throw new Error("Invalid Base64 string");
+    }
+    const binaryString = atob(base64);
+    const length = binaryString.length;
+    const bytes = new Uint8Array(length);
+    for (let i = 0; i < length; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+    }
+    return bytes;
+};
     

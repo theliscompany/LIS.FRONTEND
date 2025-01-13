@@ -35,6 +35,7 @@ import MasterDataHSCodes from './pages/masterdata/MasterDataHSCodes';
 import Shipments from './pages/Shipments';
 import Tracking from './pages/Tracking';
 import ScrollToTop from './components/shared/ScrollToTop';
+import MasterDataFiles from './pages/masterdata/MasterDataFiles';
 
 const queryClient = new QueryClient();
 
@@ -64,6 +65,7 @@ function App() {
                   <Route path='contacts' element={<MasterDataContacts />} />
                   <Route path='templates' element={<MasterDataTemplates />} />
                   <Route path='hscodes' element={<MasterDataHSCodes />} />
+                  <Route path='files' element={<MasterDataFiles />} />
                   <Route path='haulages' element={<Haulages />} />
                   <Route path='seafreights' element={<Seafreights />} />
                   <Route path='miscellaneous' element={<Miscellaneous />} />
