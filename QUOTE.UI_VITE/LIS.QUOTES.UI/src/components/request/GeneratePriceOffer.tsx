@@ -28,6 +28,7 @@ import ContainerElement from './ContainerElement';
 import ContainerPrice from './ContainerPrice';
 import { putApiRequestByIdChangeStatus } from '../../api/client/quote';
 import { getApiMiscellaneousMiscellaneous, getApiPricingHaulagesOfferRequest, getApiPricingSeaFreightsOffersRequest } from '../../api/client/pricing';
+import { getApiFileByFolder, postApiFileUpload } from '../../api/client/document';
 
 const defaultTemplate = "65b74024891f9de80722fc6d";
 
@@ -263,7 +264,7 @@ const GeneratePriceOffer = (props: any) => {
         else {
             props.setCanEdit(true);
         }
-        // console.log("Form State : ", formState);
+        console.log("Form State : ", formState);
     }, [formState]);
     
     useEffect(() => {
@@ -420,16 +421,16 @@ const GeneratePriceOffer = (props: any) => {
 
     const getFiles = async () => {
         try {
-            // setLoadResults(true);
-            // const response = await (context?.service as BackendService<any>).getSingle(protectedResources.apiLisFiles.endPoint+"/Files");
-            // const response = await 
-            // if (response !== null && response.data !== undefined && response !== undefined) {
-            //     setFiles(response.data);
-            //     setLoadResults(false);
-            // }
-            // else {
-            //     setLoadResults(false);
-            // }
+            setLoadResults(true);
+            const response: any = await getApiFileByFolder({path: {folder: "Standard"}});
+            if (response !== null && response !== undefined) {
+                console.log(response.data);
+                setFiles(response.data);
+                setLoadResults(false);
+            }
+            else {
+                setLoadResults(false);
+            }
         }
         catch (err: any) {
             console.log(err);
@@ -439,29 +440,18 @@ const GeneratePriceOffer = (props: any) => {
     
     const uploadFile = async () => {
         if (fileValue !== undefined && fileValue !== null) {
-            // try {
-            //     const formData = new FormData();
-            //     formData.append('file', fileValue[0]);
-            
-            //     const response: AxiosResponse = await axios({
-            //         url: protectedResources.apiLisFiles.endPoint+"/Files/upload",
-            //         method: 'POST',
-            //         data: formData,
-            //         headers: {
-            //             'Content-Type': 'multipart/form-data', 
-            //         },
-            //     });
-                
-            //     enqueueSnackbar("The file has been added with success!", { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
-            //     getFiles();
-            //     setModalFile(false);
-            //     // console.log(response.data.data);
-            //     setFormState({...formState, files: [...formState.files, response.data.data]});
-            // } 
-            // catch (error) {
-            //     enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
-            //     console.log(error);
-            // }
+            try {
+                const response: any = await postApiFileUpload({query: {folder: "Standard"}, body: {file: fileValue[0]}});
+                enqueueSnackbar(t('fileAdded'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                getFiles();
+                setModalFile(false);
+                console.log(response.data);
+                // setFormState({...formState, files: [...formState.files, response.data.data]});
+            }
+            catch (err: any) {
+                enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                console.log(err);
+            }
         }
         else {
             enqueueSnackbar("The file field is empty, please verify it and pick a file.", { variant: "warning", anchorOrigin: { horizontal: "right", vertical: "top"} });
@@ -508,9 +498,14 @@ const GeneratePriceOffer = (props: any) => {
         // console.log("Haulage : ", haulagePrices);
         // console.log("Seafreight : ", seafreightPrices);
         // console.log("Miscs : ", miscPrices);
+        // console.log("Index : ", index);
+        // console.log("Margins : ", option.margins);
+        // console.log("Addings : ", option.addings);
+
+        var allAddings = option.addings[index] !== undefined ? option.addings[index] : 0;
 
         var finalValue = ((seafreightPrices+haulagePrices+miscPrices)*(option.margins[index]/100)+seafreightPrices+haulagePrices+miscPrices).toFixed(2);
-        return Number(finalValue)+Number(option.addings[index]);
+        return Number(finalValue)+Number(allAddings);
     }
 
     function calculateContainerPrice(type: string, quantity: number, index: number) {
@@ -538,9 +533,12 @@ const GeneratePriceOffer = (props: any) => {
                 miscPrices =  miscPrices + getTotalNumber(miscsSelected[i].containers)*quantity;
             }
         }
+
+        // Calculate all addings prices
+        var allAddings = formState.addings[index] !== undefined ? formState.addings[index] : 0;
         
         var finalValue = ((seafreightPrices+haulagePrices+miscPrices)*(formState.margins[index]/100)+seafreightPrices+haulagePrices+miscPrices).toFixed(2);
-        return Number(finalValue)+Number(formState.addings[index]);
+        return Number(finalValue)+Number(allAddings);
     }
 
     function calculateSeafreightPrice(type: string, quantity: number, index: number) {
@@ -560,7 +558,11 @@ const GeneratePriceOffer = (props: any) => {
         var finalValue = formState.margins !== undefined && formState.margins !== null ? 
             ((seafreightPrices+haulagePrices+miscPrices)*(formState.margins[index]/100)+seafreightPrices+haulagePrices+miscPrices).toFixed(2) 
         : 0;
-        return formState.addings !== undefined && formState.addings !== null ? Number(finalValue)+Number(formState.addings[index]) : Number(finalValue);
+        // Calculate all addings prices
+        var allAddings = formState.addings[index] !== undefined ? formState.addings[index] : 0;
+        
+        
+        return Number(finalValue)+Number(allAddings);
     }
 
     const getHaulagePriceOffers = async () => {
@@ -710,8 +712,6 @@ const GeneratePriceOffer = (props: any) => {
         if (formState.selectedSeafreight !== null && formState.selectedSeafreight !== undefined) {
             try {
                 setLoadNewOffer(true);
-                // var haulage = null;
-                // var miscellaneous = null;
                 var sentOptions = formState.options.map((item: any) => {
                     return {
                         ...item,
@@ -748,7 +748,7 @@ const GeneratePriceOffer = (props: any) => {
                     "clientNumber": clientNumber.contactId+", "+trackingNumber,
                     "emailUser": email,
                     "options": sentOptions,
-                    "files": formState.files.map((elm: any) => { return {...elm, url: ""}}),
+                    "files": formState.files.map((elm: any) => { return {...elm, fileName: elm.blobName, url: ""}}),
                     "selectedOption": -1
                 };
                 
@@ -1655,7 +1655,7 @@ const GeneratePriceOffer = (props: any) => {
                                                                         </TableRow>
                                                                         <TableRow>
                                                                             <TableCell>{t('validUntil')}</TableCell>
-                                                                            <TableCell>{formState.selectedHaulage.validUntil.slice(0,10)}</TableCell>
+                                                                            <TableCell>{(new Date(formState.selectedHaulage.validUntil)).toISOString().slice(0,10)}</TableCell>
                                                                         </TableRow>
                                                                         <TableRow>
                                                                             <TableCell>{t('comment')}</TableCell>
@@ -1703,7 +1703,7 @@ const GeneratePriceOffer = (props: any) => {
                                                                         </TableRow>
                                                                         <TableRow>
                                                                             <TableCell>{t('validUntil')}</TableCell>
-                                                                            <TableCell>{formState.selectedSeafreight.validUntil.slice(0,10)}</TableCell>
+                                                                            <TableCell>{(new Date(formState.selectedSeafreight.validUntil)).toISOString().slice(0,10)}</TableCell>
                                                                         </TableRow>
                                                                         {/* <TableRow>
                                                                             <TableCell>{t('comment')}</TableCell>
@@ -1791,8 +1791,16 @@ const GeneratePriceOffer = (props: any) => {
                                                                                 margin={formState.margins[index]}
                                                                                 handleAddingChange={handleAddingChange}
                                                                                 handleMarginChange={handleMarginChange}
-                                                                                purchasePrice={Number(((calculateContainerPrice(containerElm.container, containerElm.quantity, index)-formState.addings[index])/(1+formState.margins[index]/100)).toFixed(2))+" "+t(element.currency)}
-                                                                                profit={Number((calculateContainerPrice(containerElm.container, containerElm.quantity, index) - ((calculateContainerPrice(containerElm.container, containerElm.quantity, index)-formState.addings[index])/(1+formState.margins[index]/100))).toFixed(2))+" "+t(element.currency)}
+                                                                                purchasePrice={
+                                                                                    formState.addings[index] !== undefined ?
+                                                                                    Number(((calculateContainerPrice(containerElm.container, containerElm.quantity, index)-formState.addings[index])/(1+formState.margins[index]/100)).toFixed(2))+" "+t(element.currency) : 
+                                                                                    Number(((calculateContainerPrice(containerElm.container, containerElm.quantity, index)-0)/(1+formState.margins[index]/100)).toFixed(2))+" "+t(element.currency)
+                                                                                }
+                                                                                profit={
+                                                                                    formState.addings[index] !== undefined ?
+                                                                                    Number((calculateContainerPrice(containerElm.container, containerElm.quantity, index) - ((calculateContainerPrice(containerElm.container, containerElm.quantity, index)-formState.addings[index])/(1+formState.margins[index]/100))).toFixed(2))+" "+t(element.currency) : 
+                                                                                    Number((calculateContainerPrice(containerElm.container, containerElm.quantity, index) - ((calculateContainerPrice(containerElm.container, containerElm.quantity, index)-0)/(1+formState.margins[index]/100))).toFixed(2))+" "+t(element.currency)
+                                                                                }
                                                                                 salePrice={calculateContainerPrice(containerElm.container, containerElm.quantity, index)+" "+t(element.currency)}
                                                                                 haulagePrice={formState.selectedHaulage !== null && formState.selectedHaulage !== undefined && formState.selectedHaulage.containerNames.includes(containerElm.container) ? containerElm.quantity+"x"+formState.selectedHaulage.unitTariff+" "+t(element.currency) : "N/A"}
                                                                                 seafreightPrice={formatServices(element.containers[0], t(element.currency), containerElm.container, containerElm.quantity) || "N/A"}
@@ -1878,7 +1886,7 @@ const GeneratePriceOffer = (props: any) => {
                                                                 multiple
                                                                 id="selectedFiles"
                                                                 getOptionLabel={(option: any) => { 
-                                                                    return option.fileName;
+                                                                    return option.blobName.replace("Standard/", "");
                                                                 }}
                                                                 value={formState.files}
                                                                 size="small"

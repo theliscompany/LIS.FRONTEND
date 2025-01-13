@@ -7,7 +7,7 @@ import { useTranslation } from "react-i18next";
 import { useAccount, useMsal } from "@azure/msal-react";
 import { stringAvatar } from "../utils/functions";
 import NavigationLink from "../components/shared/NavigationLink";
-import { Add, AnchorOutlined, AssignmentOutlined, AutoFixHigh, ChevronRight, ContactsOutlined, DirectionsBoat, ExpandMore, FirstPage, FolderOutlined, Groups, Home, Inventory2, InventoryOutlined, LastPage, LocalShipping, Logout, MenuOutlined, Notifications, People, Portrait, RequestQuoteOutlined, RoomServiceOutlined, Search, SettingsOutlined, TaskAltOutlined, TextSnippetOutlined } from "@mui/icons-material";
+import { Add, AnchorOutlined, AssignmentOutlined, AttachFileOutlined, AutoFixHigh, ChevronRight, ContactsOutlined, DirectionsBoat, ExpandMore, FirstPage, FolderOutlined, Groups, Home, Inventory2, InventoryOutlined, LastPage, LocalShipping, Logout, MenuOutlined, Notifications, People, Portrait, RequestQuoteOutlined, RoomServiceOutlined, Search, SettingsOutlined, TaskAltOutlined, TextSnippetOutlined } from "@mui/icons-material";
 
 const drawerWidth = 220;
 
@@ -117,12 +117,12 @@ const Layout = () : React.ReactNode => {
                 }}>
                     <Toolbar disableGutters>
                         <Grid container spacing={0}>
-                            <Grid size={6}>
+                            <Grid size={{xs: 6}}>
                                 <Typography variant="h6" noWrap component={Link} to="/" sx={{ ml: 5 }}>
                                     <img src="/img/logolisquotes.png" className="img-fluid" style={{ maxHeight: "50px", marginTop: "10px" }} alt="lisquotes" />
                                 </Typography>
                             </Grid>
-                            <Grid size={6}>
+                            <Grid size={{xs: 6}}>
                                 <IconButton
                                     size="large"
                                     onClick={handleOpenNavMenu}
@@ -169,7 +169,7 @@ const Layout = () : React.ReactNode => {
                                     </MenuItem>
                                 </Menu>
                             </Grid>
-                            <Grid size={12}>
+                            <Grid size={{xs: 12}}>
                                 <BootstrapInput 
                                     type="text" 
                                     value={searchText}
@@ -393,8 +393,8 @@ const Layout = () : React.ReactNode => {
                                     <NavigationLink url="/hscodes" title={t('hscodes')} icon={<InventoryOutlined fontSize="small" />} nested />
                                     <NavigationLink url="/ports" title={t('ports')} icon={<AnchorOutlined fontSize="small" />} nested />
                                     <NavigationLink url="/contacts" title={t('contacts')} icon={<ContactsOutlined fontSize="small" />} nested />
+                                    <NavigationLink url="/files" title={t('files')} icon={<AttachFileOutlined fontSize="small" />} nested />
                                     {/* <NavigationLink url="/ships" title={t('ships')} icon={<DirectionsBoatOutlined fontSize="small" />} nested /> */}
-                                    {/* <NavigationLink url="/files" title={t('files')} icon={<AttachFileOutlined fontSize="small" />} nested /> */}
                                 </List>
                             </Collapse>
                         </List>

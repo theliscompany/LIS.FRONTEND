@@ -71,3 +71,11 @@ button:focus-visible {
   width: 450px;
   border-radius: 5px;
 }
+
+@media only screen and (max-width: 600px) {
+  .logo-front {
+    width: 250px;
+    border-radius: 5px;
+    padding-top: 25px;
+  }
+}

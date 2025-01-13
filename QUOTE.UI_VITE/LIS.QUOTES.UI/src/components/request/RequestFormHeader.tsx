@@ -142,7 +142,7 @@ const RequestFormHeader = (props: any) => {
             
             {/* Change request status */}
             <BootstrapDialog open={modalStatus} onClose={() => setModalStatus(false)} maxWidth="md" fullWidth>
-                <RequestChangeStatus id={props.id} closeModal={() => setModalStatus(false)} updateStatus={() => props.updateStatus()} />
+                <RequestChangeStatus id={props.id} closeModal={() => setModalStatus(false)} updateStatus={props.updateStatus} />
             </BootstrapDialog>
             
             {/* Add a comment/note */}

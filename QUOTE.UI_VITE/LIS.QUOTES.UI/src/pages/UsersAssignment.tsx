@@ -85,11 +85,11 @@ const UsersAssignment = () => {
                 "Authorization": token
             }
         })
-        // .then((response: any) => response.json())
+        .then((response: any) => response.json())
         .then((data: any) => {
             if (data.error === undefined) {
-                console.log(data);
-                setUsers(data.data.value);
+                console.log("Data", data.value);
+                setUsers(data.value);
             }
             else {
                 setShowAlert(true);
@@ -104,9 +104,7 @@ const UsersAssignment = () => {
     
     const loadUsers = async () => {
         if (account && instance) {
-            const token = await getAccessToken(instance, {
-                scopes: ["User.ReadBasic.All"]
-            }, account);
+            const token = await getAccessToken(instance, {scopes: ["https://graph.microsoft.com/User.ReadBasic.All"]}, account);
             getUsersFromAAD(token);
         }
     }
@@ -120,9 +118,9 @@ const UsersAssignment = () => {
                 if (response !== null && response !== undefined) {
                     enqueueSnackbar(t('operationSuccess'), { variant: "info", anchorOrigin: { horizontal: "right", vertical: "top"} });
                     // Here i refresh the assignees (to do a lot cleaner)
-                    const response2 = await getApiAssignee();
+                    const response2: any = await getApiAssignee();
                     if (response2 !== null && response2 !== undefined) {
-                        setAssignees(response2.data);
+                        setAssignees(response2.data.data);
                     }
                     // setLoad(false);
                 }  
@@ -143,13 +141,15 @@ const UsersAssignment = () => {
     const assignAsManager = async (name: string, email: string, idUser: string) => {
         try {
             let content = { "name": name, "email": email, "idUser": idUser };
-            const response = await postApiAssignee({body: content});
-            if (response !== null && response !== undefined) {
+            const response: any = await postApiAssignee({body: content});
+            // console.log("Resp : ", response);
+            if (response !== null && response !== undefined && response.data.code === 201) {
                 enqueueSnackbar(t('assigneeCreatedSuccess'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
                 // Here i refresh the assignees (to do a lot cleaner)
-                const response2 = await getApiAssignee();
+                const response2: any = await getApiAssignee();
+                // console.log("Resp : ", response2);
                 if (response2 !== null && response2 !== undefined) {
-                    setAssignees(response2.data);
+                    setAssignees(response2.data.data);
                 }  
             }
             else {

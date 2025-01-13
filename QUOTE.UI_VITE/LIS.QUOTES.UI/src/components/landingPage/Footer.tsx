@@ -14,6 +14,7 @@ function Footer() {
                 <Grid size={{ xs: 12, md: 6 }} fontSize={17} sx={{ mt: {xs: 3, md: 3}, mb: {xs: 1, md: 3}, textAlign: "left" }}> 
                     <Typography variant="subtitle2" fontFamily="inherit" fontSize={16} sx={{ color: "#6c757d" }}>© OMNIFREIGHT 2006-{new Date().getFullYear()}. {t('allRightsReserved')}.</Typography>
                 </Grid>
+                
                 <Grid size={{ xs: 12, md: 6 }} fontSize={17} sx={{ mt: {xs: 2, md: 3}, mb: {xs: 2, md: 3}, textAlign: {xs: "center", md: "right"} }}>
                     <IconButton color="primary" href="https://www.facebook.com/omnifreight/" sx={{ borderRadius: "20px", color: "#000" }}>
                         <FacebookRoundedIcon fontSize="medium" sx={{ background: "#000", color: "#fff", fontSize: "30px" }} />

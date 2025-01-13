@@ -1,14 +1,14 @@
 import { Alert, Box, Button, DialogActions, DialogContent, InputLabel, NativeSelect, Skeleton } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import { useTranslation } from 'react-i18next';
-import { statusLabel } from '../../utils/functions';
+import { base64ToUint8Array, statusLabel } from '../../utils/functions';
 import { BootstrapInput, buttonCloseStyles, inputLabelStyles } from '../../utils/misc/styles';
 import { useMsal, useAccount } from '@azure/msal-react';
 import { SnackbarProvider, enqueueSnackbar } from 'notistack';
-import axios from 'axios';
 import { useState } from 'react';
 import { getQuoteOffer, putApiQuoteOfferByIdStatus } from '../../api/client/offer';
 import { postApiEmail } from '../../api/client/quote';
+import { getApiFileByFolderByFileName } from '../../api/client/document';
 
 const PriceOffer = (props: any) => {
     const [subject, setSubject] = useState<string>("Nouveau devis pour client");
@@ -41,59 +41,57 @@ const PriceOffer = (props: any) => {
 	</div>
 	`;
 	
+	// const downloadFile = async (id: string, name: string, type: string) => {
+    //     console.log("Id : ", id);
+	// 	try {
+    //         const response: any = await getApiFileByFolderByFileName({path: {folder: "Standard", fileName: name.replace("Standard", "")}});
+    //         console.log(response);
+	// 		var file = new File([response.data], name, { type });
+	// 		return file;
+    //     } 
+    //     catch (error) {
+    //         console.log(error);
+	// 		return null;
+    //     }
+    // };
+
 	const downloadFile = async (id: string, name: string, type: string) => {
-        console.log("Id : ", id);
 		try {
-            const response = await axios({
-                url: "protectedResources.apiLisFiles.endPoint"+"/Files/"+id+"?download=true", 
-                method: 'GET',
-                responseType: 'blob', // important for file download
-                headers: {
-                    'Content-Type': 'multipart/form-data', 
-                },
-            });
-			
-			console.log(response);
-			//var extension = getExtensionFromContentType(type);
-            var file = new File([response.data], name, { type });
+			const response: any = await getApiFileByFolderByFileName({path: {folder: "Standard", fileName: name.replace("Standard", "")}});
+			console.log("id", id);
+			const decodedData = base64ToUint8Array(response.data.fileBase64.replace(/^data:[^;]+;base64,/, ""));
+			const file = new File([decodedData], name, {type: type});
 			return file;
-        } 
-        catch (error) {
-            console.log(error);
+		} 
+		catch (error: any) {
+			console.log(error);
 			return null;
-        }
-    };
+		}
+	};
     
 	async function sendEmailWithAttachments(from: string, to: string, subject: string, htmlContent: string, attachments: any) {
-		//var arrayIds: string[] = [];
-		const formData = new FormData();
+		var myFiles: any = [];
+		// const formData = new FormData();
 		console.log("Attachments : ", attachments);
 		// Append the attachments to the FormData object
-		for (const { fileName, id, fileId, contentType } of attachments) {
-			var auxId = id !== undefined ? id : fileId;
+		for (const { fileName, contentType } of attachments) {
 			try {
-				var filePromise = await downloadFile(auxId, `${auxId}=${fileName}`, contentType);
-				formData.append('Attachments', filePromise !== null ? filePromise : "");
-				// formData.append('Identifiers', [...arrayIds, auxId].join(","));
+				var filePromise = await downloadFile(fileName, fileName, contentType);
+				myFiles = [...myFiles, filePromise !== null ? filePromise : ""];
 			}
 			catch (err: any) {
 				console.log(err);
 			}
 		}
 	  
-		// Append the other email data to the FormData object
-		formData.append('From', from);
-		formData.append('To', to);
-		formData.append('Subject', subject);
-		formData.append('HtmlContent', htmlContent);
-		
-		console.log("Formdata : ", Array.from(formData));
+		console.log("Files : ", myFiles);
 		// Send the email with fetch
 		postApiEmail({body: {
 			From: from,
 			To: to,
 			Subject: subject,
-			HtmlContent: htmlContent
+			HtmlContent: htmlContent,
+			Attachments: myFiles
 		}});
 	}
 
@@ -189,7 +187,9 @@ const PriceOffer = (props: any) => {
 				!load && props.offer !== null ?
 				<Grid container spacing={2} mt={1} px={5}>
 					<Grid size={{ xs: 12 }}>
-						<Alert severity='info'>{t('yourAttachments')} : {props.files.length !== 0 ? props.files.map((elm: any) => { return elm.fileName }).join(", ") : t('noAttachments')}</Alert>
+						<Alert severity='info'>
+							{t('yourAttachments')} : {props.files.length !== 0 ? props.files.map((elm: any) => { return elm.blobName !== undefined ? elm.blobName : elm.fileName }).join(", ") : t('noAttachments')}
+						</Alert>
 					</Grid>
 					<Grid size={{ xs: 12, md: 8 }}>
 						<InputLabel htmlFor="subject" sx={inputLabelStyles}>{t('subject')}</InputLabel>
