@@ -74,7 +74,7 @@ const PriceOffer = (props: any) => {
 		// const formData = new FormData();
 		console.log("Attachments : ", attachments);
 		// Append the attachments to the FormData object
-		for (const { fileName, contentType, blobName } of attachments) {
+		for (const { fileName, contentType } of attachments) {
 			try {
 				var filePromise = await downloadFile(fileName, fileName, contentType);
 				myFiles = [...myFiles, filePromise !== null ? filePromise : ""];
