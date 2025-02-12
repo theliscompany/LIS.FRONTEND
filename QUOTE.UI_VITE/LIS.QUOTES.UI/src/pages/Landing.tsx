@@ -14,6 +14,7 @@ import { MuiTelInput } from 'mui-tel-input';
 import { postApiEmail, postApiRequest } from "../api/client/quote";
 import { enqueueSnackbar, SnackbarProvider } from "notistack";
 import AutocompleteSearch from "../components/shared/AutocompleteSearch";
+import axios from "axios";
 
 var footer = `
 <div style="font-family: Verdana; padding-top: 35px;">
@@ -49,6 +50,7 @@ const Landing = () => {
     const [captcha, setCaptcha] = useState<string | null>(null);
     const [load, setLoad] = useState<boolean>(false);
     const [subjects, setSubjects] = useState<string[]>([]);
+    const [countryCode, setCountryCode] = useState<string>("");
 
     const isAuthenticated = useIsAuthenticated()
     const { instance } = useMsal()
@@ -60,8 +62,19 @@ const Landing = () => {
         if (lang !== undefined && lang !== null) {
             i18n.changeLanguage(lang);
         }
+
+        axios.get('https://ipinfo.io?token=e24db688f2034a') // Remplace 'YOUR_TOKEN' par ton propre token d'API
+        .then((response: any) => {
+            const country = response.data.country;
+            // Mettre à jour le code du pays en fonction du pays du visiteur
+            setCountryCode(country || 'BE');
+        })
+        .catch((error: any) => {
+            console.error('Erreur lors de la récupération du pays:', error);
+        });
     }, []);
 
+    
     const handleLogin = () => {
         instance.loginRedirect(loginRequest);
     }
@@ -398,7 +411,7 @@ const Landing = () => {
                             <MuiTelInput 
                                 id="whatsapp-phone-number" size="small" 
                                 value={phone} onChange={setPhone} 
-                                defaultCountry="TZ" preferredCountries={["TZ", "CM", "KE", "BE"]} 
+                                defaultCountry={countryCode} preferredCountries={["TZ", "CM", "KE", "BE"]} 
                                 fullWidth sx={{ mt: 1 }}
                                 {...properties} 
                             />
@@ -476,7 +489,7 @@ const Landing = () => {
                             <MuiTelInput 
                                 id="phone-number" size="small" 
                                 value={phone} onChange={setPhone} 
-                                defaultCountry="TZ" preferredCountries={["TZ", "CM", "KE", "BE"]} 
+                                defaultCountry={countryCode} preferredCountries={["TZ", "CM", "KE", "BE"]} 
                                 fullWidth sx={{ mt: 1 }}
                                 {...properties} 
                             />
@@ -548,7 +561,7 @@ const Landing = () => {
                                 size="small" 
                                 value={phone} 
                                 onChange={setPhone} 
-                                defaultCountry="TZ" 
+                                defaultCountry={countryCode} 
                                 preferredCountries={["TZ", "CM", "KE", "BE"]} 
                                 fullWidth 
                                 sx={{ mt: 1 }}
