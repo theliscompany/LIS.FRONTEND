@@ -13,7 +13,7 @@ import ReCAPTCHA from "react-google-recaptcha";
 import { MuiTelInput } from 'mui-tel-input';
 import { postApiEmail, postApiRequest } from "../api/client/quote";
 import { enqueueSnackbar, SnackbarProvider } from "notistack";
-import AutocompleteSearch from "../components/shared/AutocompleteSearch";
+import LocationSearch from "../components/shared/LocationSearch";
 import axios from "axios";
 
 var footer = `
@@ -63,7 +63,8 @@ const Landing = () => {
             i18n.changeLanguage(lang);
         }
 
-        axios.get('https://ipinfo.io?token=e24db688f2034a') // Remplace 'YOUR_TOKEN' par ton propre token d'API
+        // Remplace 'YOUR_TOKEN' par ton propre token d'API
+        axios.get('https://ipinfo.io?token=e24db688f2034a') 
         .then((response: any) => {
             const country = response.data.country;
             // Mettre à jour le code du pays en fonction du pays du visiteur
@@ -161,6 +162,10 @@ const Landing = () => {
                         detail: message+" *** Additional details : "+packingType+", "+quantity+" units.",
                         // tags: valueSpecifics !== "hscodes" ? tags1 : tags2
                     }})
+                    // .then((data: any) => {
+                    //     enqueueSnackbar(t('messageSuccessSent'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                    //     setLoad(false);
+                    // })                  
                 }
                 catch (err) {
                     console.log(err);
@@ -193,7 +198,7 @@ const Landing = () => {
                     </div>
                     ` + footer;
                     createSystemQuote();
-                    sendEmail("pricing@omnifreight.eu", "pricing@omnifreight.eu", "Nouvelle demande du site web", emailContent);        
+                    sendEmail("pricing@omnifreight.eu", "pricing@omnifreight.eu", "Nouvelle demande du site web", emailContent);
                 }
                 else {
                     enqueueSnackbar(t('emailNotValid'), { variant: "info", anchorOrigin: { horizontal: "right", vertical: "top"} });
@@ -423,12 +428,12 @@ const Landing = () => {
                         <Grid size={{xs:12, md:6}}>
                             <InputLabel htmlFor="departure" sx={inputLabelStyles}>{t('cargoPickup')}</InputLabel>
                             {/* <BootstrapInput id="departure" type="email" value={departure} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setDeparture(e.target.value)} fullWidth /> */}
-                            <AutocompleteSearch id="departure" placeholder="Ex : Douala, Cameroon" value={departure} onChange={setDeparture} fullWidth />
+                            <LocationSearch id="departure" placeholder="Ex : Douala, Cameroon" value={departure} onChange={setDeparture} fullWidth />
                         </Grid>
                         <Grid size={{xs:12, md:6}}>
                             <InputLabel htmlFor="arrival" sx={inputLabelStyles}>{t('cargoDeliver')}</InputLabel>
                             {/* <BootstrapInput id="arrival" type="email" value={arrival} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setArrival(e.target.value)} fullWidth /> */}
-                            <AutocompleteSearch id="arrival" placeholder="Ex : Antwerp, Belgium" value={arrival} onChange={setArrival} fullWidth />
+                            <LocationSearch id="arrival" placeholder="Ex : Antwerp, Belgium" value={arrival} onChange={setArrival} fullWidth />
                         </Grid>
                         <Grid size={{xs:12, md:6}}>
                             {/* <InputLabel htmlFor="packing-type" sx={inputLabelStyles}>In what type of packing do you want to transport your goods?</InputLabel> */}
