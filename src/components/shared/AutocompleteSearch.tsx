@@ -122,11 +122,10 @@ const AutocompleteSearch: React.FC<LocationAutocompleteProps> = ({ id, value, pl
                 vertical: 'top',
                 horizontal: 'right',
             }}
-            // sx={{ maxWidth: "250px" }}
         >
             <Typography sx={{ p: 2, fontSize: 12 }}>
-                Please respect the following format <br />
-                - Type the name of the city and the country code with a comma. <br /> Eg : "Dakar, SN"
+                {t('pleaseRespect')} <br />
+                - {t('typeName')} <br /> {t('eg')} : "Dakar, SN"
             </Typography>
         </Popover>
         {
@@ -140,12 +139,8 @@ const AutocompleteSearch: React.FC<LocationAutocompleteProps> = ({ id, value, pl
                 options={options}
                 loading={loading}
                 open={open}
-                onOpen={() => {
-                    setOpen(true);
-                }}
-                onClose={() => {
-                    setOpen(false);
-                }}
+                onOpen={() => { setOpen(true); }}
+                onClose={() => { setOpen(false); }}
                 // noOptionsText={t('typeSomething')}
                 getOptionLabel={(option) => { 
                     if (option !== undefined && option !== null && option.city !== "" && option.country !== "") {
@@ -160,7 +155,7 @@ const AutocompleteSearch: React.FC<LocationAutocompleteProps> = ({ id, value, pl
                     return "";
                 }}
                 value={value}
-                onChange={(event: any, newValue: any) => {
+                onChange={(_: any, newValue: any) => {
                     onChange(newValue);
                     if (callBack) {
                         callBack(newValue);
@@ -168,6 +163,7 @@ const AutocompleteSearch: React.FC<LocationAutocompleteProps> = ({ id, value, pl
                 }}
                 openOnFocus
                 disabled={disabled}
+                size="small"
                 renderInput={(params: any) => (
                     <TextField
                         {...params}
@@ -176,16 +172,18 @@ const AutocompleteSearch: React.FC<LocationAutocompleteProps> = ({ id, value, pl
                         }}
                         sx={{ mt: 1 }}
                         placeholder={placeholder}
-                        InputProps={{
-                            ...params.InputProps,
-                            endAdornment: (
-                            <>
-                                {loading ? (
-                                    <CircularProgress color="inherit" size={15} />
-                                ) : null}
-                                {params.InputProps.endAdornment}
-                            </>
-                            ),
+                        slotProps={{
+                            input: {
+                                ...params.InputProps,
+                                endAdornment: (
+                                <>
+                                    {loading ? (
+                                        <CircularProgress color="inherit" size={15} />
+                                    ) : null}
+                                    {params.InputProps.endAdornment}
+                                </>
+                                ),    
+                            }
                         }}
                     />
                 )}
@@ -195,9 +193,5 @@ const AutocompleteSearch: React.FC<LocationAutocompleteProps> = ({ id, value, pl
         </Box>
     );
 };
-
-AutocompleteSearch.defaultProps = {
-    disabled: false
-}
 
 export default AutocompleteSearch;

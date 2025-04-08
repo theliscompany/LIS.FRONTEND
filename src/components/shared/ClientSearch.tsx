@@ -1,14 +1,8 @@
 import { useState } from "react";
 import { Autocomplete, CircularProgress, Skeleton, TextField } from "@mui/material";
 import { debounce } from "@mui/material/utils";
-import axios from "axios";
 import { useTranslation } from "react-i18next";
-import { BackendService } from "../../utils/services/fetch";
-import { useAuthorizedBackendApi } from "../../api/api";
-import { useAccount, useMsal } from "@azure/msal-react";
-import { crmRequest, protectedResources } from "../../config/authConfig";
-import { AuthenticationResult } from "@azure/msal-browser";
-import { getAccessToken } from "../../utils/functions";
+import { getContactGetContacts } from "../../api/client/crm";
 
 interface LocationAutocompleteProps {
     id: string;
@@ -22,10 +16,7 @@ interface LocationAutocompleteProps {
 
 
 function checkFormatCode(code: string) {
-    // Définir une expression régulière pour le format attendu
     var regex = /^BE-\d{5}$/;
-  
-    // Utiliser la méthode test() pour vérifier si la chaîne de caractères correspond à l'expression régulière
     if (regex.test(code)) {
         return true; // La chaîne de caractères respecte le format
     } 
@@ -38,34 +29,27 @@ const ClientSearch: React.FC<LocationAutocompleteProps> = ({ id, name, value, on
     const [loading, setLoading] = useState(false);
     const [options, setOptions] = useState<any[]>([]);
 
-    const { instance, accounts } = useMsal();
-    const context = useAuthorizedBackendApi();
-    const account = useAccount(accounts[0] || {});
-
     const debouncedSearch = debounce(async (search: string) => {
-        if (account && instance && context) {
-            setLoading(true);
-            
-            if (checkFormatCode(search)) {
-                // First i search by contact number
-                const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisCrm.endPoint+"/Contact/GetContacts?contactNumber="+search+"&category=1", context.tokenCrm);
-                if (response !== null && response !== undefined && response.length !== 0) {
-                    console.log(response);
-                    // Removing duplicates from result before rendering
-                    setOptions(response.data.filter((obj: any, index: number, self: any) => index === self.findIndex((o: any) => o.contactName === obj.contactName)));
-                }
-            } 
-            else {
-                // If i dont find i search by contact name
-                const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisCrm.endPoint+"/Contact/GetContacts?contactName="+search+"&category=1", context.tokenCrm);
-                if (response !== null && response !== undefined) {
-                    console.log(response);
-                    // Removing duplicates from result before rendering
-                    setOptions(response.data.filter((obj: any, index: number, self: any) => index === self.findIndex((o: any) => o.contactName === obj.contactName)));
-                }   
+        setLoading(true);
+        if (checkFormatCode(search)) {
+            // First i search by contact number
+            const response = await getContactGetContacts({query: { contactNumber: search, category: "CUSTOMERS" }});
+            if (response !== null && response !== undefined) {
+                console.log(response);
+                // Removing duplicates from result before rendering
+                setOptions(response.data?.data?.filter((obj: any, index: number, self: any) => index === self.findIndex((o: any) => o.contactName === obj.contactName)) || []);
             }
-            setLoading(false);
+        } 
+        else {
+            // If i dont find i search by contact name
+            const response = await getContactGetContacts({query: { contactName: search, category: "CUSTOMERS" }});
+            if (response !== null && response !== undefined) {
+                console.log(response);
+                // Removing duplicates from result before rendering
+                setOptions(response.data?.data?.filter((obj: any, index: number, self: any) => index === self.findIndex((o: any) => o.contactName === obj.contactName)) || []);
+            }   
         }
+        setLoading(false);
     }, 1000);
 
     const { t } = useTranslation();
@@ -76,6 +60,7 @@ const ClientSearch: React.FC<LocationAutocompleteProps> = ({ id, name, value, on
             options !== null ? 
             <Autocomplete
                 id={id}
+                // componentName={name}
                 fullWidth={fullWidth}
                 disablePortal
                 // freeSolo
@@ -84,7 +69,6 @@ const ClientSearch: React.FC<LocationAutocompleteProps> = ({ id, name, value, on
                 loading={loading}
                 noOptionsText={t('typeSomething')}
                 getOptionLabel={(option) => { 
-                    // console.log(option);
                     if (option !== undefined && option !== null && option !== "") {
                         if (option.contactName !== undefined && option.contactName !== null) {
                             return `${option.contactNumber === "" ? "0" : option.contactNumber}, ${option.contactName}`;
@@ -94,9 +78,10 @@ const ClientSearch: React.FC<LocationAutocompleteProps> = ({ id, name, value, on
                     return "";
                 }}
                 value={value}
-                onChange={(event, newValue) => {
+                size="small"
+                onChange={(_, newValue) => {
                     onChange(newValue);
-                    console.log(newValue);
+                    console.log("Newval : ", newValue);
                     if (newValue !== null) {
                         if (callBack) {
                             callBack(newValue);
@@ -110,17 +95,20 @@ const ClientSearch: React.FC<LocationAutocompleteProps> = ({ id, name, value, on
                         onChange={(event) => {
                             debouncedSearch(event.target.value);
                         }}
+                        name={name}
                         sx={{ mt: 1 }}
-                        InputProps={{
-                            ...params.InputProps,
-                            endAdornment: (
-                            <>
-                                {loading ? (
-                                    <CircularProgress color="inherit" size={15} />
-                                ) : null}
-                                {params.InputProps.endAdornment}
-                            </>
-                            ),
+                        slotProps={{
+                            input: {
+                                ...params.InputProps,
+                                endAdornment: (
+                                <>
+                                    {loading ? (
+                                        <CircularProgress color="inherit" size={15} />
+                                    ) : null}
+                                    {params.InputProps.endAdornment}
+                                </>
+                                ),    
+                            }
                         }}
                     />
                 )}
@@ -130,9 +118,5 @@ const ClientSearch: React.FC<LocationAutocompleteProps> = ({ id, name, value, on
         </>
     );
 };
-
-ClientSearch.defaultProps = {
-    disabled: false
-}
 
 export default ClientSearch;

@@ -1,6 +1,6 @@
 import { Badge, BadgeProps, Box, Dialog, DialogTitle, IconButton, InputBase, TextFieldClasses, Tooltip, TooltipProps } from '@mui/material';
 import { tooltipClasses } from '@mui/material/Tooltip';
-import { alpha, styled } from '@mui/material/styles';
+import { styled } from '@mui/material/styles';
 import { DialogTitleProps } from '../models/models';
 import CloseIcon from '@mui/icons-material/Close';
 
@@ -65,7 +65,7 @@ export const buttonStyles = {
     textTransform: "none",
     fontSize: { xs: 15, md: 17 },
     fontWeight: 400,
-    fontFamily: "PT Sans"
+    fontFamily: "PT Sans, Segoe UI, Roboto"
 }
 
 export const cardStyles = { 
@@ -86,7 +86,7 @@ export const cardTextStyles = {
     lineHeight: 1.2,
     fontSize: { xs: 17, md: 19 },
     fontWeight: "bold",
-    fontFamily: "PT Sans",
+    fontFamily: "PT Sans, Segoe UI",
     minHeight: { xs: "55px", md: "75px" } 
 }
 
@@ -163,7 +163,11 @@ export const gridStyles = {
   height: "auto",
   fontSize: "13px",
   minHeight: "10px",
-  backgroundColor: "#fff"
+  backgroundColor: "#fff",
+  '& .MuiDataGrid-cell': {
+    display: 'flex',
+    alignItems: 'center', // Vertically center all cells
+  },
 }
 
 export const sizingStyles = { 
@@ -189,11 +193,11 @@ export const BootstrapInput = styled(InputBase)(({ theme }) => ({
     '& .MuiInputBase-input': {
       borderRadius: 4,
       position: 'relative',
-      backgroundColor: theme.palette.mode === 'light' ? '#fcfcfb' : '#2b2b2b',
-      border: '1px solid #ced4da',
+      // backgroundColor: theme.palette.mode === 'light' ? '#fcfcfb' : '#2b2b2b',
+      border: '1px solid #bdbebe',
       fontSize: 16,
       //width: 'auto',
-      padding: '10px 12px',
+      padding: '7.75px 12px',
       transition: theme.transitions.create([
         'border-color',
         'background-color',
@@ -213,8 +217,9 @@ export const BootstrapInput = styled(InputBase)(({ theme }) => ({
         '"Segoe UI Symbol"',
       ].join(','),
       '&:focus': {
-        boxShadow: `${alpha(theme.palette.primary.main, 0.25)} 0 0 0 0.2rem`,
+        // boxShadow: `${alpha(theme.palette.primary.main, 0.25)} 0 0 0 0.2rem`,
         borderColor: theme.palette.primary.main,
+        borderWidth: "2px"
       },
     },
 }));
@@ -275,7 +280,7 @@ export const BootstrapDialogTitle = (props: DialogTitleProps) => {
   );
 }
 
-export const StyledBadge = styled(Badge)<BadgeProps>(({ theme }) => ({
+export const StyledBadge = styled(Badge)<BadgeProps>(() => ({
   '& .MuiBadge-badge': {
     right: 0,
     top: 16,

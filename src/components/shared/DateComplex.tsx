@@ -17,7 +17,7 @@ const DateComplex: React.FC<DateComplexProps> = ({id, value, onChange, fullWidth
                 value={value}
                 format="DD/MM/YYYY"
                 onChange={(newValue: any) => { onChange(newValue); }}
-                slotProps={{ textField: { id: id, fullWidth: fullWidth, sx: datetimeStyles }, inputAdornment: { sx: { position: "relative", right: "11.5px" } } }}
+                slotProps={{ textField: { id: id, size: "small", fullWidth: fullWidth, sx: datetimeStyles }, inputAdornment: { sx: { position: "relative", right: "11.5px" } } }}
             />
         </LocalizationProvider>
     );

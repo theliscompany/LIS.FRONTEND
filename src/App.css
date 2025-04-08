@@ -1,35 +1,24 @@
-.App {
+/* #root {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
   text-align: center;
+} */
+
+.logo {
+  height: 6em;
+  padding: 1.5em;
+  will-change: filter;
+  transition: filter 300ms;
+}
+.logo:hover {
+  filter: drop-shadow(0 0 2em #646cffaa);
+}
+.logo.react:hover {
+  filter: drop-shadow(0 0 2em #61dafbaa);
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-header {
-  background-color: #282c34;
-  /* min-height: 100vh; */
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
-  /*border-bottom: 1px solid rgb(241, 242, 246)*/
-}
-
-.App-link {
-  color: #61dafb;
-}
-
-@keyframes App-logo-spin {
+@keyframes logo-spin {
   from {
     transform: rotate(0deg);
   }
@@ -38,137 +27,33 @@
   }
 }
 
-.cs-listitem {
-  margin-top: 2px;
-  margin-bottom: 6px;
-}
-.cs-listitem:hover {
-  border-radius: 10px !important;
-  background-color: rgb(235, 238, 249) !important;
-}
-.cs-listitembutton {
-  padding: 4px 6px !important;
-}
-.cs-listitemicon {
-  min-width: 42px !important;
-}
-.cs-navlink {
-  text-decoration: none;
-  color: initial;
-}
-.cs-navlink-active {
-  text-decoration: none;
-  color: initial;
-}
-.cs-navlink-active > .cs-listitem {
-  text-decoration: none;
-  color: initial;
-  background-color: rgb(235, 238, 249);
-  border-radius: 10px;
+@media (prefers-reduced-motion: no-preference) {
+  a:nth-of-type(2) .logo {
+    animation: logo-spin infinite 20s linear;
+  }
 }
 
-.full-header {
-  /* height: 100vh; */
-  position: relative;
-  background-color: #343a40;
-  background: url("../public/assets/img/backimage.png") no-repeat center center;
-  background-size: cover;
-  /*padding-top: 8rem;
-  padding-bottom: 8rem;*/
-  line-height: 60px !important;
-}
-.full-header:before {
-  content: "";
-  position: absolute;
-  background-color: #000;
-  height: 100%;
-  width: 100%;
-  top: 0;
-  left: 0;
-  opacity: 0.75;
-}
-.full-header h1, .masthead .h1 {
-  /*font-size: 2.25rem;*/
-  font-size: 1.5rem;
-  line-height: 60px;
+.card {
+  padding: 2em;
 }
 
-.react-cookie-law-container {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  max-width: 1260px !important;
-}
-.react-cookie-law-manage-btn {
-  display: none !important;
-}
-.react-cookie-law-msg {
-  display: flex !important;
-  align-items: center;
-  justify-content: center;
-}
-.react-cookie-law-accept-btn {
-  height: 30px;
-  padding-left: 15px !important;
-  padding-right: 15px !important;
-}
-.react-cookie-law-policy {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.react-cookie-law-button-wrapper {
-  margin-left: 20px;
+.read-the-docs {
+  color: #888;
 }
 
-input#whatsapp-phone-number, input#phone-number, input#whatsapp-number {
-  padding : 10.6px 14px !important;
-  background-color: #fcfcfb;
-  font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol" !important;
-}
-/* input#whatsapp-phone-number:focus, input#phone-number:focus, input#whatsapp-number:focus{
-  box-shadow: rgba(25, 118, 210, 0.25) 0 0 0 0.2rem;
-  border-color: #1976d2;
-} */
-.MuiInputBase-root.MuiOutlinedInput-root.MuiInputBase-colorPrimary.MuiInputBase-fullWidth.MuiInputBase-formControl.MuiInputBase-adornedEnd {
-  padding: 0px;
-  /* padding-right: 10px !important;
-  background-color: #fcfcfb;
-  font-family: 'PT Sans' !important; */
-}
-.MuiOutlinedInput-root .MuiAutocomplete-input {
-  padding: 10.5px 4px 10.5px 12px !important;
-  background-color: #fcfcfb;
-  border-color: #fcfcfb;
-  font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol" !important;
-}
-
-/* MUI TEL INPUT Style */
-.MuiInputBase-root.MuiOutlinedInput-root.MuiInputBase-colorPrimary.MuiInputBase-fullWidth.MuiInputBase-formControl.MuiInputBase-adornedStart {
-  padding-left: 4px;
-}
-.MuiAlert-action {
-  padding: 0px;
-}
-
-svg.MuiSvgIcon-root.MuiSvgIcon-fontSizeMedium.MuiNativeSelect-icon.MuiNativeSelect-iconStandard {
-  position: absolute;
-  right: 8.5px;
-}
-
-.tiptap.ProseMirror {
-  line-height: 30px;
+.App {
+  text-align: center;
   font-family: Verdana, Geneva, Tahoma, sans-serif;
-  font-size: 14px !important;
-  min-height: 170px;
-}
-/* .tiptap.ProseMirror > ul {
-  margin-bottom: -30px !important;
-} */
-.MuiDataGrid-columnHeaderTitleContainerContent {
-  line-height: normal;
 }
 
-.MuiAutocomplete-popup {
-  z-index: 999999 !important;
+#ordersTable thead th,  #ordersTable tbody td {
+  padding: 6px 10px;
+}
+
+#ordersTable thead th{
+  color: #fff;
+}
+
+#ordersTable thead tr {
+  background-color: #008089;
 }

@@ -1,4 +1,6 @@
-export enum CategoryEnum
+
+
+export enum EnumCategory
 {
     CUSTOMERS = 1,
     SUPPLIERS = 2,
@@ -8,6 +10,16 @@ export enum CategoryEnum
     BANK = 10,
     SHIPPING_AGENCY = 11
 }
+
+export let categoriesOptions: any = [
+  { value: 1, name: "CUSTOMERS" },
+  { value: 2, name: "SUPPLIERS" },
+  { value: 3, name: "CHARGEUR" },
+  { value: 4, name: "RECEIVER" },
+  { value: 5, name: "SHIPPING_LINES" },
+  { value: 6, name: "BANK" },
+  { value: 7, name: "SHIPPING_AGENCY11" },
+];
 
 export let prioritiesOptions: any = [
   { label: "NORMAL", value: "NORMAL" },

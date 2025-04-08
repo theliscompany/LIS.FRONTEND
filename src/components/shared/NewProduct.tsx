@@ -1,63 +1,55 @@
 import { useState } from 'react';
 import { BootstrapDialogTitle, BootstrapInput, actionButtonStyles, buttonCloseStyles, inputLabelStyles } from '../../utils/misc/styles';
-import { Button, DialogActions, DialogContent, Grid, InputLabel, MenuItem, Select, Typography } from '@mui/material';
-import { useAuthorizedBackendApi } from '../../api/api';
+import { Button, DialogActions, DialogContent, InputLabel } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { useTranslation } from 'react-i18next';
 import { enqueueSnackbar } from 'notistack';
-import { BackendService } from '../../utils/services/fetch';
-import { protectedResources } from '../../config/authConfig';
-import { useAccount, useMsal } from '@azure/msal-react';
+import { postProduct, ProductViewModel } from '../../api/client/transport';
 
 function NewProduct(props: any) {
     const [testName, setTestName] = useState<string>("");
     
-    const { instance, accounts } = useMsal();
-    const account = useAccount(accounts[0] || {});
-
-    const context = useAuthorizedBackendApi();
     const { t } = useTranslation();
     
     const createNewProduct = async () => {
         if (testName !== "") {
-            if (account && instance && context) {
-                var dataSent = {
-                    "productName": testName,
-                };
-                
-                try {
-                    const response = await (context?.service as BackendService<any>).postWithToken(protectedResources.apiLisTransport.endPoint+"/Product", dataSent, context.tokenTransport);
-                    if (response !== null) {
-                        enqueueSnackbar("The product has been added with success!", { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
-                        
-                        if (props.callBack !== undefined && props.callBack !== null) {
-                            props.callBack();
-                        }
-                        props.closeModal();
+            var dataSent: ProductViewModel = {
+                "productName": testName,
+            };
+            
+            try {
+                const response = await postProduct({body: dataSent});
+                if (response !== null) {
+                    enqueueSnackbar(t('productAdded'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                    
+                    if (props.callBack !== undefined && props.callBack !== null) {
+                        props.callBack();
                     }
-                    else {
-                        enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
-                    }
+                    props.closeModal();
                 }
-                catch (err: any) {
-                    console.log(err);
+                else {
                     enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
                 }
             }
+            catch (err: any) {
+                console.log(err);
+                enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+            }
         }
         else {
-            enqueueSnackbar("One or many the fields are empty, please verify the form and fill everything.", { variant: "warning", anchorOrigin: { horizontal: "right", vertical: "top"} });
+            enqueueSnackbar(t('verifyMessage'), { variant: "warning", anchorOrigin: { horizontal: "right", vertical: "top"} });
         }
     }
     
     return (
         <>
             <BootstrapDialogTitle id="custom-dialog-title77" onClose={props.closeModal}>
-                <b>Create new product</b>
+                <b>{t('createNewProduct')}</b>
             </BootstrapDialogTitle>
             <DialogContent dividers>
                 <Grid container spacing={2}>
-                    <Grid item xs={12}>
-                        <InputLabel htmlFor="test-name" sx={inputLabelStyles}>Product name</InputLabel>
+                    <Grid size={{ xs: 12 }}>
+                        <InputLabel htmlFor="test-name" sx={inputLabelStyles}>{t('productName')}</InputLabel>
                         <BootstrapInput id="test-name" type="text" value={testName} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTestName(e.target.value)} fullWidth />
                     </Grid>
                 </Grid>

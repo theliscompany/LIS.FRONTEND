@@ -1,24 +1,20 @@
-import React, { useEffect, useState } from 'react';
-import { Alert, Autocomplete, Box, Button, Card, CardActions, CardContent, Checkbox, DialogActions, DialogContent, Grid, InputLabel, ListItemText, MenuItem, NativeSelect, Select, SelectChangeEvent, Skeleton, TextField, Typography, Menu } from '@mui/material';
+import { useEffect, useState } from "react";
+import { Alert, Box, Button, Card, CardActions, CardContent, Checkbox, DialogActions, DialogContent, InputLabel, ListItemText, Menu, MenuItem, NativeSelect, Select, SelectChangeEvent, Typography} from '@mui/material';
+import Grid from '@mui/material/Grid2';
+import { useIsAuthenticated, useMsal } from "@azure/msal-react";
 import FaceIcon from '@mui/icons-material/Face';
-import { bottomStyles, cardStyles, buttonStyles, buttonCloseStyles, inputLabelStyles, cardTextStyles, BootstrapInput, BootstrapDialog, BootstrapDialogTitle, properties } from '../utils/misc/styles';
-// import '../../App.css';
-// @ts-ignore
-import { CookieBanner } from '@palmabit/react-cookie-law';
+import { useNavigate, useParams } from "react-router-dom";
+import { useTranslation } from 'react-i18next';
+import { BootstrapDialog, BootstrapDialogTitle, BootstrapInput, bottomStyles, buttonCloseStyles, buttonStyles, cardStyles, cardTextStyles, inputLabelStyles, properties } from "../utils/misc/styles";
+import Testimonies from "../components/landingPage/Testimonies";
+import Footer from "../components/landingPage/Footer";
+import { loginRequest } from "../config/msalConfig";
 import ReCAPTCHA from "react-google-recaptcha";
 import { MuiTelInput } from 'mui-tel-input';
-import { SnackbarProvider, enqueueSnackbar } from 'notistack';
-import AutocompleteSearch from '../components/shared/AutocompleteSearch';
-import { useIsAuthenticated, useMsal } from '@azure/msal-react';
-import Testimonies from '../components/landingPage/Testimonies';
-import Footer from '../components/landingPage/Footer';
-import { loginRequest, protectedResources } from '../config/authConfig';
-import { BackendService } from '../utils/services/fetch';
-import { useAuthorizedBackendApi } from '../api/api';
-import { MailData } from '../utils/models/models';
-// import { AuthenticationResult } from '@azure/msal-browser';
-import { useNavigate, useParams } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
+import { postApiEmail, postApiRequest } from "../api/client/quote";
+import { enqueueSnackbar, SnackbarProvider } from "notistack";
+import LocationSearch from "../components/shared/LocationSearch";
+import axios from "axios";
 
 var footer = `
 <div style="font-family: Verdana; padding-top: 35px;">
@@ -32,47 +28,58 @@ var footer = `
     <div>Tel +32.3.295.38.82</div>
     <div>Fax +32.3.295.38.77</div>
     <div>Whatsapp +32.494.40.24.25</div>
-    <img src="http://www.omnifreight.eu/Images/omnifreight_logo.jpg" style="max-width: 200px;">
+    <img src="https://omnifreight.eu/wp-content/uploads/2023/06/logo.jpg" style="max-width: 200px;">
 </div>
 `;
 
-const Landing = (props: any) => {
-    const isAuthenticated = useIsAuthenticated();
+const Landing = () => {
     const { lang } = useParams();
-    
+
+    const [anchorElLang, setAnchorElLang] = useState<null | HTMLElement>(null);
     const [modal, setModal] = useState<boolean>(lang !== undefined && lang !== null ? true : false);
     const [modal2, setModal2] = useState<boolean>(false);
     const [modal3, setModal3] = useState<boolean>(false);
     const [modal4, setModal4] = useState<boolean>(false);
-    const [load, setLoad] = useState<boolean>(false);
-    const [email, setEmail] = useState<string>("");
-    const [captcha, setCaptcha] = useState<string | null>(null);
     const [phone, setPhone] = useState<string>("");
-    const [message, setMessage] = useState<string>("");
-    const [subjects, setSubjects] = useState<string[]>([]);
-    const [quantity, setQuantity] = useState<number>(1);
-    // const [cargoType, setCargoType] = useState<string>("0");
+    const [email, setEmail] = useState<string>("");
     const [packingType, setPackingType] = useState<string>("FCL");
-    // const [departurePort, setDeparturePort] = useState<any>({portId: 1, portName: "ANTWERP", country: "Belgium"});
-    // const [arrivalPort, setArrivalPort] = useState<any>({portId: 2, portName: "DOUALA", country: "Cameroon"});
+    const [quantity, setQuantity] = useState<number>(1);
+    const [message, setMessage] = useState<string>("");
     const [departure, setDeparture] = useState<any>(null);
     const [arrival, setArrival] = useState<any>(null);
-    // const [tags, setTags] = useState<MuiChipsInputChip[]>([]);
-    const [tags, setTags] = useState<any>([]);
+    const [captcha, setCaptcha] = useState<string | null>(null);
+    const [load, setLoad] = useState<boolean>(false);
+    const [subjects, setSubjects] = useState<string[]>([]);
+    const [countryCode, setCountryCode] = useState<string>("");
+
+    const isAuthenticated = useIsAuthenticated()
+    const { instance } = useMsal()
+    const navigate = useNavigate();
+    const { i18n, t } = useTranslation();
     
-    // const [mailSubject, setMailSubject] = useState<string>("");
-    // const [mailContent, setMailContent] = useState<string>("");
+
+    useEffect(() => {
+        if (lang !== undefined && lang !== null) {
+            i18n.changeLanguage(lang);
+        }
+
+        // Remplace 'YOUR_TOKEN' par ton propre token d'API
+        axios.get('https://ipinfo.io?token=e24db688f2034a') 
+        .then((response: any) => {
+            const country = response.data.country;
+            // Mettre à jour le code du pays en fonction du pays du visiteur
+            setCountryCode(country || 'BE');
+        })
+        .catch((error: any) => {
+            console.error('Erreur lors de la récupération du pays:', error);
+        });
+    }, []);
+
     
-    // const [ports, setPorts] = useState<any>(null);
-    const [products, setProducts] = useState<any>(null);
-    // const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
-    
-    const { instance } = useMsal();
-    const context = useAuthorizedBackendApi();
-    // const account = useAccount(accounts[0] || {});
-    // const [accessToken, setAccessToken] = React.useState<string>();
-    const [anchorElLang, setAnchorElLang] = useState<null | HTMLElement>(null);
-    
+    const handleLogin = () => {
+        instance.loginRedirect(loginRequest);
+    }
+
     const handleOpenLangMenu = (event: React.MouseEvent<HTMLElement>) => {
         setAnchorElLang(event.currentTarget);
     };
@@ -81,90 +88,19 @@ const Landing = (props: any) => {
         setAnchorElLang(null);
     };
 
-    const handleLogin = () => {
-        instance.loginRedirect(loginRequest);
-    }
-    
-    // const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-    //     setAnchorEl(event.currentTarget);
-    // };
-
-    // const handleClose = () => {
-    //     setAnchorEl(null);
-    // };
-
-    // const open = Boolean(anchorEl);
-    // const id = open ? 'simple-popover' : undefined;
-    
-    const handleChangeSubject = (event: SelectChangeEvent<typeof subjects>) => {
-        const { target: { value },} = event;
-        setSubjects(typeof value === 'string' ? value.split(',') : value,);
-    };
-
     const handleChangePackingType = (event: { target: { value: string } }) => {
         setPackingType(event.target.value);
     };
-    
-    function onChangeCaptcha(value: any) {
+
+    const onChangeCaptcha = (value: any) =>{
         setCaptcha(value);
     }
 
-    const navigate = useNavigate();
-    const { i18n, t } = useTranslation();
-    
-    useEffect(() => {
-        if (lang !== undefined && lang !== null) {
-            i18n.changeLanguage(lang);
-        }
-
-        // getProducts();
-    }, []);
-    
-    // const getPorts = async () => {
-    //     try {
-    //         const response = await fetch(protectedResources.apiLisTransport.endPoint+"/Port/Ports?pageSize=2000");
-    //         if (!response.ok) {
-    //           throw new Error('Network response was not ok');
-    //         }
-    //         const data = await response.json();
-    //         setPorts(data);
-    //     } catch (error) {
-    //         console.error('Error fetching data:', error);
-    //     }
-    // }
-    
-    const getProducts = async () => {
-        try {
-            const response = await fetch(protectedResources.apiLisTransport.endPoint+"/Product?pageSize=500");
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            const data = await response.json();
-            setProducts(data);
-        } catch (error) {
-            console.error('Error fetching data:', error);
-        }
-    }
-    
-    function validMail(mail: string) {
+    const validMail = (mail: string) => {
         return /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/.test(mail);
     }
-  
-    const postEmail = async(from: string, to: string, subject: string, htmlContent: string) => {
-        const body: MailData = { from: from, to: to, subject: subject, htmlContent: htmlContent };
-        const data = await (context?.service as BackendService<any>).postForm(protectedResources.apiLisQuotes.endPoint+"/Email", body);
-        console.log(data);
-        if (data?.status === 200) {
-            enqueueSnackbar(t('messageSuccessSent'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
-            setLoad(false);
-        }
-        else {
-            enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
-            setLoad(false);
-        }
-    }
 
-    async function sendEmail(from: string, to: string, subject: string, htmlContent: string) {
+    const sendEmail = async (from: string, to: string, subject: string, htmlContent: string) => {
 		const formData = new FormData();
 		// Append the other email data to the FormData object
 		formData.append('From', from);
@@ -172,20 +108,18 @@ const Landing = (props: any) => {
 		formData.append('Subject', subject);
 		formData.append('HtmlContent', htmlContent);
 		
-		// // Send the email with fetch
-		fetch(protectedResources.apiLisQuotes.endPoint+'/Email', {
-			method: 'POST',
-			headers: {
-				'accept': '*/*',
-				// 'Content-Type': 'multipart/form-data'
-			},
-			body: formData
-		})
-		.then((response) => response.json())
+		// Send the email with fetch
+		postApiEmail({body: {
+            From: from,
+            To: to,
+            Subject: subject,
+            HtmlContent: htmlContent
+        }})
+        // .then((response: any) => response.json())
 		.then((data) => {
             enqueueSnackbar(t('messageSuccessSent'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
             setLoad(false);
-            console.log(data);
+            console.log(data.data);
         })
 		.catch((error) => {
             enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
@@ -193,8 +127,61 @@ const Landing = (props: any) => {
             console.error(error);
         });
 	}
-    
-    function sendQuotationForm() {
+
+    const createSystemQuote = () => {
+        // var tags1 = tags !== null && tags !== undefined && tags.length !== 0 ? tags.map((elm: any) => elm.productName).join(',') : null;
+        // var tags2 = tags !== null && tags !== undefined && tags.length !== 0 ? tags.map((elm: any) => elm.hS_Code).join(',') : null;
+        if (phone !== "" && email !== "" && arrival !== null && departure !== null) {
+            if (validMail(email)) {
+                // setLoad(true);
+                // var auxUnits = [];
+                // if (packingType === "Breakbulk/LCL") {
+                //     auxUnits = packagesSelection;
+                // }
+                // else if (packingType === "Unit RoRo") {
+                //     auxUnits = unitsSelection;
+                // }
+                var postcode1 = departure.postalCode !== null && departure.postalCode !== undefined ? departure.postalCode : "";
+                var postcode2 = arrival.postalCode !== null && arrival.postalCode !== undefined ? arrival.postalCode : "";
+                
+                try {
+                    postApiRequest({body: {
+                        email: email,
+                        whatsapp: phone,
+                        departure: departure !== null && departure !== undefined ? [departure.city.toUpperCase(),departure.country,departure.latitude,departure.longitude,postcode1].filter((val: any) => { return val !== "" }).join(', ') : "",
+                        arrival: arrival !== null && arrival !== undefined ? [arrival.city.toUpperCase(),arrival.country,arrival.latitude,arrival.longitude,postcode2].filter((val: any) => { return val !== "" }).join(', ') : "",
+                        cargoType: "Container",
+                        // clientNumber: clientNumber !== null ? String(clientNumber.contactNumber)+", "+clientNumber.contactName+", "+clientNumber.contactId : null,
+                        packingType: packingType,
+                        // containers: containersSelection.map((elm: any) => { return { 
+                        //     id: containers.find((item: any) => item.packageName === elm.container).packageId, 
+                        //     containers: elm.container, 
+                        //     quantity: elm.quantity, 
+                        // } }),
+                        quantity: Number(quantity),
+                        detail: message+" *** Additional details : "+packingType+", "+quantity+" units.",
+                        // tags: valueSpecifics !== "hscodes" ? tags1 : tags2
+                    }})
+                    // .then((data: any) => {
+                    //     enqueueSnackbar(t('messageSuccessSent'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                    //     setLoad(false);
+                    // })                  
+                }
+                catch (err) {
+                    console.log(err);
+                    enqueueSnackbar(t('errorHappenedRequest'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                }
+            }
+            else {
+                enqueueSnackbar(t('emailNotValid'), { variant: "info", anchorOrigin: { horizontal: "right", vertical: "top"} });
+            }
+        }
+        else {
+            enqueueSnackbar(t('fieldsEmpty'), { variant: "info", anchorOrigin: { horizontal: "right", vertical: "top"} });
+        }
+    }
+
+    const sendQuotationForm = () => {
         if (captcha !== null) {
             if ((phone !== "" && arrival !== null && departure !== null) || (email !== "" && arrival !== null && departure !== null)) {
                 if (email === "" || (email !== "" && validMail(email))) {
@@ -210,7 +197,8 @@ const Landing = (props: any) => {
                     <div>Détails : ${message}</div>
                     </div>
                     ` + footer;
-                    sendEmail("pricing@omnifreight.eu", "pricing@omnifreight.eu", "Nouvelle demande du site web", emailContent);        
+                    createSystemQuote();
+                    sendEmail("pricing@omnifreight.eu", "pricing@omnifreight.eu", "Nouvelle demande du site web", emailContent);
                 }
                 else {
                     enqueueSnackbar(t('emailNotValid'), { variant: "info", anchorOrigin: { horizontal: "right", vertical: "top"} });
@@ -225,7 +213,7 @@ const Landing = (props: any) => {
         }
     }
 
-    function sendContactForm() {
+    const sendContactForm = () => {
         if (captcha !== null) {
             if (phone !== "" || email !== "") {
                 if (email === "" || (email !== "" && validMail(email))) {
@@ -254,7 +242,12 @@ const Landing = (props: any) => {
         }
     }
 
-    function sendContactFormRedirect() {
+    const handleChangeSubject = (event: SelectChangeEvent<typeof subjects>) => {
+        const { target: { value },} = event;
+        setSubjects(typeof value === 'string' ? value.split(',') : value,);
+    }
+
+    const sendContactFormRedirect = () => {
         if (captcha !== null) {
             if (phone !== "" || email !== "") {
                 if (email === "" || (email !== "" && validMail(email))) {
@@ -285,18 +278,10 @@ const Landing = (props: any) => {
     }
 
     const defaultSubjects = [t('seaShipments'), t('airShipments'), t('becomeReseller'), t('jobOpportunities')];
-    
+
     return (
         <div className="App" style={{ overflowX: "hidden" }}>
-            <CookieBanner
-                message={t('websiteUsesCookies')}
-                policyLink="/privacy-policy"
-                wholeDomain={true}
-                acceptButtonText={t('iUnderstood')}
-                privacyPolicyLinkText={t('privacyPolicy').toLowerCase()}
-            />
             <SnackbarProvider />
-            
             <Box sx={{ 
                 background: "url('/assets/img/backimage.png') center center / cover no-repeat", 
                 backgroundBlendMode: "overlay", backgroundColor: "rgba(0,0,0,0.75)", 
@@ -306,7 +291,7 @@ const Landing = (props: any) => {
                     variant="contained"
                     color="inherit" 
                     size="large"
-                    // to={!isAuthenticated ? undefined : "/admin/"}
+                    // to={!isAuthenticated ? undefined : "/"}
                     hidden={!isAuthenticated}
                     sx={{ 
                         textTransform: "inherit",
@@ -316,7 +301,7 @@ const Landing = (props: any) => {
                         top: { xs: "20px", md: "25px"},
                         right: { xs: "30px", md: "230px"}
                     }}
-                    onClick={!isAuthenticated ? handleLogin : () => { navigate('/admin/'); }}
+                    onClick={!isAuthenticated ? handleLogin : () => { navigate('/'); }}
                 >
                     <FaceIcon sx={{ mr: 1 }} /> {!isAuthenticated ? t('login') : "Admin"}
                 </Button>
@@ -338,7 +323,6 @@ const Landing = (props: any) => {
                 </Button>
                 <Menu
                     sx={{ mt: '45px' }}
-                    PaperProps={{ sx: { width: "160px" } }}
                     MenuListProps={{ sx: { paddingTop: "0px", paddingBottom: "0px" } }}
                     anchorEl={anchorElLang}
                     anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
@@ -356,21 +340,20 @@ const Landing = (props: any) => {
                         <ListItemText primary={"Français"} sx={{ ml: 1 }} />
                     </MenuItem>
                 </Menu>
-                
-                <Grid container px={1} sx={{ py: { xs: 2, md: 4 } }}>
-                    <Grid item xs={12} md={12} sx={{ maxWidth: { xs: "280px", md: "915px" }, mt: 4, mb: 0, mx: "auto", backgroundColor: "#fff" }}>
+                <Grid container px={1}  sx={{ py: { xs: 2, md: 4 } }}>
+                    <Grid sx={{ maxWidth: { xs: "280px", md: "915px" }, mt: 4, mb: 0, mx: "auto", backgroundColor: "#fff" }}>
                         <img src={"/assets/img/logo-omnifreight-big.png"} className="logo-front" alt="omnifreight pro" />
                     </Grid>
                 </Grid>
                 <Grid container px={1} sx={{ mb: { xs: 3, md: 3 } }}>
-                    <Grid item xs={12} sx={{ maxWidth: { md: "840px" }, mx: { md: "auto" } }}>
-                        <Typography variant="h3" color="#fff" sx={{ fontFamily: "PT Sans", fontSize: { xs: "1.35rem", md: "2.75rem" }, lineHeight: { xs: "30px", md: "60px" } }}>
+                    <Grid sx={{ maxWidth: { md: "840px" }, mx: { md: "auto" } }}>
+                        <Typography variant="h3" color="#fff" sx={{ fontFamily: "Segoe UI, Roboto", fontSize: { xs: "1.35rem", md: "2.75rem" }, lineHeight: { xs: "30px", md: "60px" } }}>
                             {t('bannerTitle')}
                         </Typography>
                     </Grid>    
                 </Grid>
                 <Grid container sx={{ maxWidth: { md: "1300px" }, mx: { md: "auto" }, px: { xs: 1, md: 5 }, mt: { xs: 0, md: 3 }, pt: {xs: 0, md: 3} }}>
-                    <Grid item xs={12} md={4} sx={{ mb: { xs: 2 } }}>
+                    <Grid sx={{ mb: { xs: 2 } }} size={{xs: 12, md: 4}}>
                         <Card sx={cardStyles}>
                             <CardContent>
                                 <Typography sx={cardTextStyles} gutterBottom>
@@ -382,7 +365,7 @@ const Landing = (props: any) => {
                             </CardActions>
                         </Card>
                     </Grid>
-                    <Grid item xs={12} md={4} sx={{ mb: { xs: 2 } }}>
+                    <Grid sx={{ mb: { xs: 2 } }} size={{xs: 12, md: 4}}>
                         <Card sx={cardStyles}>
                             <CardContent>
                                 <Typography sx={cardTextStyles} gutterBottom>
@@ -394,7 +377,7 @@ const Landing = (props: any) => {
                             </CardActions>
                         </Card>
                     </Grid>
-                    <Grid item xs={12} md={4} sx={{ mb: { xs: 2 } }}>
+                    <Grid sx={{ mb: { xs: 2 } }} size={{xs: 12, md: 4}}>
                         <Card sx={cardStyles}>
                             <CardContent>
                                 <Typography sx={cardTextStyles} gutterBottom>
@@ -409,7 +392,6 @@ const Landing = (props: any) => {
                     </Grid>
                 </Grid>
             </Box>
-            
             <Testimonies />
             <Footer />
 
@@ -425,35 +407,35 @@ const Landing = (props: any) => {
                     <b>{t('requestQuote')}</b>
                 </BootstrapDialogTitle>
                 <DialogContent dividers>
-                    <Typography variant="subtitle1" gutterBottom px={2}>
+                    {/* <Typography variant="subtitle1" gutterBottom px={2}>
                         {t('itsEaseFillForm')}
-                    </Typography>
+                    </Typography> */}
                     <Grid container spacing={2} mt={1} px={2}>
-                        <Grid item xs={12} md={6}>
+                        <Grid size={{md:6, xs:12}}>
                             <InputLabel htmlFor="whatsapp-phone-number" sx={inputLabelStyles}>{t('whatsappNumber')}</InputLabel>
                             <MuiTelInput 
-                                id="whatsapp-phone-number" 
+                                id="whatsapp-phone-number" size="small" 
                                 value={phone} onChange={setPhone} 
-                                defaultCountry="TZ" preferredCountries={["TZ", "CM", "KE", "BE"]} 
+                                defaultCountry={countryCode} preferredCountries={["TZ", "CM", "KE", "BE"]} 
                                 fullWidth sx={{ mt: 1 }}
                                 {...properties} 
                             />
                         </Grid>
-                        <Grid item xs={12} md={6}>
+                        <Grid size={{xs:12, md:6}}>
                             <InputLabel htmlFor="request-email" sx={inputLabelStyles}>{t('emailAddress')}</InputLabel>
                             <BootstrapInput id="request-email" type="email" value={email} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)} fullWidth />
                         </Grid>
-                        <Grid item xs={12} md={6}>
+                        <Grid size={{xs:12, md:6}}>
                             <InputLabel htmlFor="departure" sx={inputLabelStyles}>{t('cargoPickup')}</InputLabel>
                             {/* <BootstrapInput id="departure" type="email" value={departure} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setDeparture(e.target.value)} fullWidth /> */}
-                            <AutocompleteSearch id="departure" placeholder="Ex : Douala, Cameroon" value={departure} onChange={setDeparture} fullWidth />
+                            <LocationSearch id="departure" placeholder="Ex : Douala, Cameroon" value={departure} onChange={setDeparture} fullWidth />
                         </Grid>
-                        <Grid item xs={12} md={6}>
+                        <Grid size={{xs:12, md:6}}>
                             <InputLabel htmlFor="arrival" sx={inputLabelStyles}>{t('cargoDeliver')}</InputLabel>
                             {/* <BootstrapInput id="arrival" type="email" value={arrival} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setArrival(e.target.value)} fullWidth /> */}
-                            <AutocompleteSearch id="arrival" placeholder="Ex : Antwerp, Belgium" value={arrival} onChange={setArrival} fullWidth />
+                            <LocationSearch id="arrival" placeholder="Ex : Antwerp, Belgium" value={arrival} onChange={setArrival} fullWidth />
                         </Grid>
-                        <Grid item xs={12} md={6}>
+                        <Grid size={{xs:12, md:6}}>
                             {/* <InputLabel htmlFor="packing-type" sx={inputLabelStyles}>In what type of packing do you want to transport your goods?</InputLabel> */}
                             <InputLabel htmlFor="packing-type" sx={inputLabelStyles}>{t('cargoTypeShip')}</InputLabel>
                             <NativeSelect
@@ -468,39 +450,16 @@ const Landing = (props: any) => {
                                 <option value="Unit RoRo">{t('roro')}</option>
                             </NativeSelect>
                         </Grid>
-                        <Grid item xs={12} md={6}>
+                        <Grid size={{xs:12, md:6}}>
                             <InputLabel htmlFor="quantity" sx={inputLabelStyles}>{t('numberUnitsShip')}</InputLabel>
                             <BootstrapInput id="quantity" type="number" inputProps={{ min: 0, max: 100 }} value={quantity} onChange={(e: any) => {console.log(e); setQuantity(e.target.value)}} fullWidth />
                         </Grid>
-                        {/* <Grid item xs={12} mt={1}>
-                            <InputLabel htmlFor="tags" sx={inputLabelStyles}>{t('specifics')}</InputLabel>
-                            {
-                                products !== null ?
-                                <Autocomplete
-                                    multiple    
-                                    disablePortal
-                                    id="cargo-products"
-                                    // placeholder="Machinery, Household goods, etc"
-                                    options={products}
-                                    getOptionLabel={(option: any) => { 
-                                        if (option !== null && option !== undefined) {
-                                            return option.productName;
-                                        }
-                                        return ""; 
-                                    }}
-                                    value={tags}
-                                    sx={{ mt: 1 }}
-                                    renderInput={(params: any) => <TextField placeholder="Machinery, Household goods, etc" {...params} sx={{ textTransform: "lowercase" }} />}
-                                    onChange={(e: any, value: any) => { setTags(value); }}
-                                    fullWidth
-                                /> : <Skeleton />
-                            }
-                        </Grid> */}
-                        <Grid item xs={12} mt={1}>
+                        
+                        <Grid size={{xs:12}} mt={1}>
                             <InputLabel htmlFor="request-message" sx={inputLabelStyles}>{t('shareOtherDetails')}</InputLabel>
-                            <BootstrapInput id="request-message" type="text" multiline rows={3} value={message} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setMessage(e.target.value)} fullWidth />
+                            <BootstrapInput id="request-message" type="text" multiline rows={2} value={message} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setMessage(e.target.value)} fullWidth />
                         </Grid>
-                        <Grid item xs={12}>
+                        <Grid size={{xs:12}}>
                             <ReCAPTCHA
                                 sitekey="6LcapWceAAAAAGab4DRszmgw_uSBgNFSivuYY9kI"
                                 hl="en-GB" onChange={onChangeCaptcha}
@@ -513,7 +472,7 @@ const Landing = (props: any) => {
                     {/* <Button variant="contained" onClick={() => { setModal(false); }} sx={buttonCloseStyles}>{t('close')}</Button> */}
                 </DialogActions>
             </BootstrapDialog>
-            
+
             {/* Modal contact manager */}
             <BootstrapDialog
                 onClose={() => setModal2(false)}
@@ -530,21 +489,21 @@ const Landing = (props: any) => {
                         {t('pleaseProvideContact')}
                     </Typography>
                     <Grid container spacing={2} mt={1} px={2}>
-                        <Grid item xs={12} md={6}>
+                        <Grid size={{xs:12, md:6}}>
                             <InputLabel htmlFor="phone-number" sx={inputLabelStyles}>{t('whatsappNumber')}</InputLabel>
                             <MuiTelInput 
-                                id="phone-number" 
+                                id="phone-number" size="small" 
                                 value={phone} onChange={setPhone} 
-                                defaultCountry="TZ" preferredCountries={["TZ", "CM", "KE", "BE"]} 
+                                defaultCountry={countryCode} preferredCountries={["TZ", "CM", "KE", "BE"]} 
                                 fullWidth sx={{ mt: 1 }}
                                 {...properties} 
                             />
                         </Grid>
-                        <Grid item xs={12} md={6}>
+                        <Grid size={{xs:12, md:6}}>
                             <InputLabel htmlFor="contact-email" sx={inputLabelStyles}>{t('email')}</InputLabel>
                             <BootstrapInput id="contact-email" type="email" value={email} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)} fullWidth />
                         </Grid>
-                        <Grid item xs={12} mt={1}>
+                        <Grid size={{xs:12}} mt={1}>
                             <InputLabel htmlFor="request-subjects" sx={inputLabelStyles}>{t('topicsInformation')}</InputLabel>
                             <Select
                                 labelId="request-subjects"
@@ -565,11 +524,11 @@ const Landing = (props: any) => {
                                 ))}
                             </Select>
                         </Grid>
-                        <Grid item xs={12} mt={1}>
+                        <Grid size={{xs:12}} mt={1}>
                             <InputLabel htmlFor="request-details" sx={inputLabelStyles}>{t('enterDetails')}</InputLabel>
                             <BootstrapInput id="request-details" type="text" multiline rows={3} value={message} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setMessage(e.target.value)} fullWidth />
                         </Grid>
-                        <Grid item xs={12}>
+                        <Grid size={{xs:12}}>
                             <ReCAPTCHA
                                 sitekey="6LcapWceAAAAAGab4DRszmgw_uSBgNFSivuYY9kI"
                                 hl="en-GB" onChange={onChangeCaptcha}
@@ -582,7 +541,7 @@ const Landing = (props: any) => {
                     <Button variant="contained" onClick={() => setModal2(false)} sx={buttonCloseStyles}>{t('close')}</Button>
                 </DialogActions>
             </BootstrapDialog>
-            
+
             {/* Modal brochure */}
             <BootstrapDialog
                 onClose={() => setModal3(false)}
@@ -599,38 +558,32 @@ const Landing = (props: any) => {
                         {t('pleaseFillFormRequest')}
                     </Typography>
                     <Grid container spacing={2} mt={1} px={2}>
-                        <Grid item xs={12} md={6}>
+                        <Grid size={{xs:12, md:6}}>
                             <InputLabel htmlFor="whatsapp-number" sx={inputLabelStyles}>{t('whatsappNumber')}</InputLabel>
                             <MuiTelInput 
                                 id="whatsapp-number" 
-                                className="custom-phone-number" 
+                                className="custom-phone-number"
+                                size="small" 
                                 value={phone} 
                                 onChange={setPhone} 
-                                defaultCountry="TZ" 
+                                defaultCountry={countryCode} 
                                 preferredCountries={["TZ", "CM", "KE", "BE"]} 
                                 fullWidth 
                                 sx={{ mt: 1 }}
                                 {...properties} 
                             />
                         </Grid>
-                        <Grid item xs={12} md={6}>
+                        <Grid size={{xs:12, md:6}}>
                             <InputLabel htmlFor="download-email" sx={inputLabelStyles}>{t('email')}</InputLabel>
                             <BootstrapInput id="download-email" type="email" value={email} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)} fullWidth />
                         </Grid>
-                        <Grid item xs={12}>
+                        <Grid size={{xs:12}}>
                             <ReCAPTCHA
                                 sitekey="6LcapWceAAAAAGab4DRszmgw_uSBgNFSivuYY9kI"
                                 hl="en-GB" onChange={onChangeCaptcha}
                             />
                         </Grid>
-                        {/* <Grid item xs={12} md={12}>
-                            <InputLabel htmlFor="mail-subject" sx={inputLabelStyles}>Subject</InputLabel>
-                            <BootstrapInput id="mail-subject" type="text" value={mailSubject} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setMailSubject(e.target.value)} fullWidth />
-                        </Grid>
-                        <Grid item xs={12} md={12}>
-                            <InputLabel htmlFor="mail-content" sx={inputLabelStyles}>Content</InputLabel>
-                            <TextField id="mail-content" type="text" multiline rows={6} value={mailContent} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setMailContent(e.target.value)} fullWidth />
-                        </Grid> */}    
+                        
                     </Grid>
                 </DialogContent>
                 <DialogActions>
@@ -659,9 +612,9 @@ const Landing = (props: any) => {
                     </Alert>
                     {/* <img src="/img/checkemail.jpg" style={{ width: "300px", display: "block", margin: "0 auto" }} alt="check email" /> */}
                 </DialogContent>
-            </BootstrapDialog>   
+            </BootstrapDialog>  
         </div>
-    );
+    )
 }
 
 export default Landing;
