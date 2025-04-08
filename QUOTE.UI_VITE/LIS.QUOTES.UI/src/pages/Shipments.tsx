@@ -3,8 +3,7 @@ import AddCircleIcon from '@mui/icons-material/AddCircle'
 import EditIcon from '@mui/icons-material/Edit'
 import SyncIcon from '@mui/icons-material/Sync'
 import ContentCopyIcon from '@mui/icons-material/ContentCopy'
-import { styled } from '@mui/material/styles';
-import {  useEffect, useMemo, useState } from "react";
+import {  useCallback, useEffect, useMemo, useState } from "react";
 import Paper from "@mui/material/Paper";
 import Typography from "@mui/material/Typography";
 import IconButton from "@mui/material/IconButton";
@@ -17,42 +16,36 @@ import { getOrdersOptions } from "../api/client/shipment/@tanstack/react-query.g
 import Tooltip from "@mui/material/Tooltip";
 import Stack from "@mui/material/Stack";
 import Search from '../components/shipments/Search';
-import { DataGrid } from '@mui/x-data-grid/DataGrid';
-import { GridColDef } from '@mui/x-data-grid/models/colDef/gridColDef';
-import { GridRenderCellParams } from '@mui/x-data-grid/models/params/gridCellParams';
+import { createColumnHelper, flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table';
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
 
 const drawerWidth = 240;
 
-const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' })<{
-  open?: boolean;
-}>(({ theme }) => ({
-  flexGrow: 1,
-  padding: theme.spacing(3),
-  transition: theme.transitions.create('margin', {
-    easing: theme.transitions.easing.sharp,
-    duration: theme.transitions.duration.leavingScreen,
-  }),
-  marginRight: -drawerWidth,
-  /**
-   * This is necessary to enable the selection of content. In the DOM, the stacking order is determined
-   * by the order of appearance. Following this rule, elements appearing later in the markup will overlay
-   * those that appear earlier. Since the Drawer comes after the Main content, this adjustment ensures
-   * proper interaction with the underlying content.
-   */
-  position: 'relative',
-  variants: [
-    {
-      props: ({ open }) => open,
-      style: {
-        transition: theme.transitions.create('margin', {
-          easing: theme.transitions.easing.easeOut,
-          duration: theme.transitions.duration.enteringScreen,
-        }),
-        marginRight: 0,
-      },
-    },
-  ],
-}));
+const getTextColor = (orderStatus?: OrderStatusEnum) => {
+  let color;
+  switch (orderStatus){
+    case OrderStatusEnum.CANCELLED:
+      color = "red";
+      break;
+    case OrderStatusEnum.CLOSED:
+      color = "gray";
+      break;
+    case OrderStatusEnum.COMPLETED:
+      color = "orange";
+      break;
+    case OrderStatusEnum.DOCS_SENT:
+      color = "purple";
+      break;
+    case OrderStatusEnum.VALIDATED:
+      color = "blue";
+      break;
+    default:
+      color = "HighlightText";
+      break;
+  }
+
+  return color
+}
 
 
 const getStatusColor = (orderStatus?: OrderStatusEnum) => {
@@ -89,101 +82,18 @@ const getStatusColor = (orderStatus?: OrderStatusEnum) => {
   </Tooltip>
 }
 
-const dateFormatted = (value?: string) => {
+const dateFormatted = (value?: Date | null) => {
 
   if(!value) return "";
 
-      var date = new Date(value)
-
-      return new Intl.DateTimeFormat('en-GB', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-      }).format(date);
+  return new Intl.DateTimeFormat('en-GB', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  }).format(new Date(value));
 }
 
-const columns: GridColDef<OrdersListDto>[] = [
-  {
-    width: 40,
-    headerName: "",
-    field: "exportation",
-    renderCell: ({value}: GridRenderCellParams<any, boolean | null>) => {
-        const isExport = value === null || value === undefined || value === true
-        return (
-          <Tooltip title={isExport ? "Export" : "Import"}>
-            <Badge badgeContent={isExport ? "E" : "I"} color={isExport ? "success" : "warning"} sx={{ml:"20px"}}  /> 
-          </Tooltip> )
-        
-    }
-  },
-  {
-    width: 30,
-    headerName: '',
-    field: 'orderStatus',
-    renderCell: ({value}: GridRenderCellParams<any, OrderStatusEnum>) => {
-      return getStatusColor(value)
-    }
-  },
-  {
-    headerName: 'Number',
-    field: 'orderNumber',
-  },
-  {
-    headerName: 'Date',
-    field: 'orderDate',
-    valueFormatter: (value?: string) => dateFormatted(value)
-  },
-  {
-    headerName: 'Fiscal',
-    field: 'fiscalYear',
-  },
-  {
-    headerName: 'Seller',
-    field: 'sellerName',
-  },
-  {
-    headerName: 'Buyer',
-    field: 'buyerName',
-  },
-  {
-    headerName: 'Customer',
-    field: 'customerName',
-  },
-  {
-    headerName: 'Loading port',
-    field: 'loadingPort',
-  },
-  {
-    headerName: 'ETD',
-    field: 'estimatedDepartureDate',
-    valueFormatter: (value?: string) => dateFormatted(value)
-  },
-  {
-    headerName: 'Discharge port',
-    field: 'dischargePort',
-  },
-  {
-    headerName: 'ETA',
-    field: 'estimatedArrivalDate',
-    valueFormatter: (value?: string) => dateFormatted(value)
-  },
-  {
-    headerName: 'Ship',
-    field: 'shipName',
-  },
-  {
-    headerName: 'Shipping Line',
-    field: 'shippingLine',
-  },
-];
-
-
-export interface GridData {
-  columns: GridColDef[];
-  rows: OrdersListDto[];
-}
-
-
+const columnHelper = createColumnHelper<OrdersListDto>()
 
 const Shipments = () => {
 
@@ -191,13 +101,87 @@ const Shipments = () => {
   const [displayBudgetDetails, setDisplayBudgetDetails] = useState(false)
   const [orderParams, setOrderParams] = useState<GetOrdersData>({
     query:{
-      Fiscal: (new Date(Date.now()).getFullYear()),
-      Month: new Date(Date.now()).getMonth() + 1
+      Fiscal: 2024//(new Date(Date.now()).getFullYear()),
+      //Month: new Date(Date.now()).getMonth() + 1
   }})
+
+  const columns = [
+    columnHelper.accessor('exportation', {  
+      header: '',
+      size: 40, 
+      cell: ({getValue}) => {
+        const isExport = getValue() === null || getValue() === undefined || getValue() === true
+        return (
+          <Tooltip title={isExport ? "Export" : "Import"}>
+            <Badge badgeContent={isExport ? "E" : "I"} color={isExport ? "success" : "warning"} sx={{ml:"20px"}}  /> 
+          </Tooltip> )
+      }
+    }),
+    columnHelper.accessor('orderStatus', {
+      header: '',
+      size: 15, 
+      cell: ({getValue}) => {
+        return getStatusColor(getValue())
+      }
+    }),
+    columnHelper.accessor('orderNumber', {
+      header: 'Number',
+      size: 75, 
+    }),
+    columnHelper.accessor('orderDate', {
+      header: 'Date',
+      size: 70, 
+      cell: ({getValue}) => dateFormatted(getValue())
+    }),
+    columnHelper.accessor('fiscalYear', {
+      header: 'Fiscal',
+      size: 45, 
+    }),
+    columnHelper.accessor('sellerName', {
+      header: 'Seller',
+    }),
+    columnHelper.accessor('buyerName', {
+      header: 'Buyer',
+    }),
+    columnHelper.accessor('customerName', {
+      header: 'Customer',
+    }),
+    columnHelper.accessor('loadingPort', {
+      header: 'Loading port',
+    }),
+    columnHelper.accessor('estimatedDepartureDate', {
+      header: 'ETD',
+      size: 70, 
+      cell: ({getValue}) => dateFormatted(getValue())
+    }),
+    columnHelper.accessor('dischargePort', {
+      header: 'Discharge port',
+    }),
+    columnHelper.accessor('estimatedArrivalDate', {
+      header: 'ETA',
+      size: 70, 
+      cell: ({getValue}) => dateFormatted(getValue())
+    }),
+    columnHelper.accessor('shipName', {
+      header: 'Ship',
+    }),
+    columnHelper.accessor('shippingLine', {
+      header: 'Shipping Line',
+    })
+  ]
+
+  
 
     const { data, refetch} = useQuery({
       ...getOrdersOptions(orderParams),
       enabled: false 
+    })
+
+    const table = useReactTable({
+      data: data?.orders ?? [],
+      columns,
+      getCoreRowModel: getCoreRowModel(),
+      getRowId: (row) => row.orderId?.toString() ?? "", 
     })
 
     const orders = useMemo(() => {
@@ -210,32 +194,35 @@ const Shipments = () => {
     }, [orderParams])
     
 
-    const handleDrawerClose = () => {
-      setOpen(false);
-    };
+    const handleDrawerClose = useCallback(
+      () => {
+        setOpen(false);
+      },
+      [open])
     
-    const refetchShipmentsGrid = (params:GetOrdersData, fiscalYearChecked: boolean, 
-      monthChecked: boolean, statusChecked: boolean ) => {
-
-      if(!fiscalYearChecked && params.query){
-        params.query.Fiscal = undefined;
-      }
-
-      if(!monthChecked && params.query){
-        params.query.Month = undefined;
-      }
-
-      if(!statusChecked && params.query){
-        params.query.Status = undefined;
-      }
-       
-      setOrderParams(params)
-    }
+    const refetchShipmentsGrid = useCallback(
+      (params:GetOrdersData, fiscalYearChecked: boolean, 
+        monthChecked: boolean, statusChecked: boolean) => {
+        if(!fiscalYearChecked && params.query){
+          params.query.Fiscal = undefined;
+        }
+  
+        if(!monthChecked && params.query){
+          params.query.Month = undefined;
+        }
+  
+        if(!statusChecked && params.query){
+          params.query.Status = undefined;
+        }
+         
+        setOrderParams(params)
+      }, [orderParams])
+    
     
     return (
       <Paper sx={{ display: 'flex', height:'100%' }}>
 
-        <Main open={open}>
+        {/* <Main open={open}> */}
           {
             displayBudgetDetails && 
           <Stack direction="row" p={2} justifyContent="space-between" border={1} borderRadius={4} borderColor="#bce8f1">
@@ -248,49 +235,103 @@ const Shipments = () => {
             
           </Stack>
           }
-          <Stack p={1} direction="row" justifyContent="space-between">
-            <div>
-              <Tooltip title="Set order's flag">
-                <span>
-                  <IconButton size="small" disabled aria-label="Set order's flag">
-                    <FlagIcon color="error" fontSize="inherit" />
+          
+
+          <Stack>
+            <Stack p={1} direction="row" justifyContent="space-between">
+              <div>
+                <Tooltip title="Set order's flag">
+                  <span>
+                    <IconButton size="small" disabled aria-label="Set order's flag">
+                      <FlagIcon color="error" fontSize="inherit" />
+                    </IconButton>
+                  </span>
+                  
+                </Tooltip>
+                <Tooltip title="New shipment">
+                  <IconButton size="small" aria-label="New shipment">
+                    <AddCircleIcon fontSize="inherit" color="success" />
                   </IconButton>
-                </span>
+                </Tooltip>
+                <Tooltip title="Edit shipment">
+                  <span>
+                    <IconButton size="small" disabled aria-label="Edit shipment">
+                      <EditIcon fontSize="inherit" sx={{color:"#f4da57"}} />
+                    </IconButton>
+                  </span>
+                </Tooltip>
+                <Tooltip title="Refresh shipments">
+                  <IconButton size="small" aria-label="Refresh shipments">
+                    <SyncIcon fontSize="inherit" color="primary" />
+                  </IconButton>
+                </Tooltip>
+                <Tooltip title="Copy shipment">
+                  <span>
+                    <IconButton size="small" disabled aria-label="Copy shipment">
+                      <ContentCopyIcon fontSize="inherit" color="primary" />
+                    </IconButton>
+                  </span>
+                </Tooltip>
+              </div>
+              <IconButton aria-label="search" onClick={()=>setOpen(true)}>
+                <SearchIcon />
+              </IconButton>
+            </Stack>
+
+            <TableContainer component={Paper}>
+            <Table id="ordersTable" aria-label="Orders table" size='small' {
+              ...{
+                style: {
+                  width: `${table.getCenterTotalSize()}px`,
+                },
+              }
+            }>
+              <TableHead>
                 
-              </Tooltip>
-              <Tooltip title="New shipment">
-                <IconButton size="small" aria-label="New shipment">
-                  <AddCircleIcon fontSize="inherit" color="success" />
-                </IconButton>
-              </Tooltip>
-              <Tooltip title="Edit shipment">
-                <span>
-                  <IconButton size="small" disabled aria-label="Edit shipment">
-                    <EditIcon fontSize="inherit" sx={{color:"#f4da57"}} />
-                  </IconButton>
-                </span>
-              </Tooltip>
-              <Tooltip title="Refresh shipments">
-                <IconButton size="small" aria-label="Refresh shipments">
-                  <SyncIcon fontSize="inherit" color="primary" />
-                </IconButton>
-              </Tooltip>
-              <Tooltip title="Copy shipment">
-                <span>
-                  <IconButton size="small" disabled aria-label="Copy shipment">
-                    <ContentCopyIcon fontSize="inherit" color="primary" />
-                  </IconButton>
-                </span>
-              </Tooltip>
-            </div>
-            <IconButton aria-label="search" onClick={()=>setOpen(true)}>
-              <SearchIcon />
-            </IconButton>
+                {
+                  table.getHeaderGroups().map(headerGroup => (
+                    <TableRow key={headerGroup.id} >
+                      {
+                        headerGroup.headers.map(header => (
+                          <TableCell key={header.id} colSpan={header.colSpan} 
+                          style={{width:`${header.getSize()}px`}} sx={{fontWeight: "bold"}}>
+                            {header.isPlaceholder ? null : 
+                              flexRender(
+                                header.column.columnDef.header,
+                                header.getContext())
+                            }
+                          </TableCell>
+                        ))
+                      }
+                    </TableRow>
+                  ))
+                }
+                
+                
+              </TableHead>
+              <TableBody>
+                {
+                  table.getRowModel().rows.map(row => (
+                    <TableRow key={row.id} sx={{color:"red"}}>
+                      {
+                        row.getVisibleCells().map(cell => (
+                          <TableCell key={cell.id} sx={{fontSize:'0.75rem', color:getTextColor(row.original.orderStatus)}} >
+                            {flexRender(
+                              cell.column.columnDef.cell,
+                              cell.getContext())}
+                          </TableCell>
+                        ))
+                      }
+                    </TableRow>
+                  ))
+                }
+              </TableBody>
+            </Table>
+          </TableContainer>
           </Stack>
 
-        <DataGrid getRowId={(row: OrdersListDto) => row.orderId ?? 0} rows={orders} columns={columns} 
-          sx={{width:"100%", height:'95%'}} density='compact'  />
-        </Main>
+          
+        {/* </Main> */}
         
         <Search open={open} closeDrawer={handleDrawerClose} reloadShipmentsGrid={refetchShipmentsGrid} 
         drawerWidth={drawerWidth} />
