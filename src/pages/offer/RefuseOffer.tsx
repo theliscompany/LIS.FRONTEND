@@ -1,20 +1,18 @@
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
 import { Button, Alert, DialogActions, DialogContent } from '@mui/material';
 import Skeleton from '@mui/material/Skeleton';
-import { enqueueSnackbar } from 'notistack';
-import { protectedResources } from '../../config/authConfig';
 import { BootstrapDialog, BootstrapDialogTitle, buttonCloseStyles } from '../../utils/misc/styles';
 import { useTranslation } from 'react-i18next';
+import { useParams } from 'react-router-dom';
+import { enqueueSnackbar, SnackbarProvider } from 'notistack';
+import { putApiQuoteOfferByIdApproval } from '../../api/client/offer';
 
-
-function RefuseOffer(props: any) {
+const RefuseOffer = () => {
     const [load, setLoad] = useState<boolean>(true);
     const [modal, setModal] = useState<boolean>(true);
     const [isRejected, setIsRejected] = useState<boolean>(false);
     
-    let { id } = useParams();
-    
+    let { id } = useParams();    
     const { t } = useTranslation();
         
     useEffect(() => {
@@ -27,14 +25,12 @@ function RefuseOffer(props: any) {
             newStatus: "Rejected"
         };
 
-        fetch(protectedResources.apiLisOffer.endPoint+"/QuoteOffer/"+id+"/approval?newStatus=Rejected", {
-            method: "PUT",
-            body: body,
-        }).then((data: any) => {
+        putApiQuoteOfferByIdApproval({path: {id: String(id)}, query: {NewStatus: "Rejected"}, body: body})
+        .then(() => {
             setLoad(false);
             setIsRejected(true);
             enqueueSnackbar(t('priceOfferRejected'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
-        }).catch(error => { 
+        }).catch(() => { 
             setLoad(false);
             enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
         });
@@ -42,6 +38,7 @@ function RefuseOffer(props: any) {
     
     return (
         <div className="App">
+            <SnackbarProvider>
             <BootstrapDialog
                 onClose={() => setModal(false)}
                 aria-labelledby="custom-dialog-title"
@@ -63,6 +60,7 @@ function RefuseOffer(props: any) {
                     <Button variant="contained" onClick={() => setModal(false)} sx={buttonCloseStyles}>{t('close')}</Button>
                 </DialogActions>
             </BootstrapDialog>
+            </SnackbarProvider>
         </div>
     );
 }

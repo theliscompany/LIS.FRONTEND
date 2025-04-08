@@ -2,21 +2,18 @@ import * as React from 'react';
 import { useState, useEffect } from 'react';
 import Box from '@mui/material/Box';
 import { SnackbarProvider, enqueueSnackbar } from 'notistack';
-import { useMsal, useAccount } from '@azure/msal-react';
-import { useAuthorizedBackendApi } from '../../api/api';
-import { Alert, Button, DialogActions, DialogContent, Grid, IconButton, InputLabel, MenuItem, Select, Skeleton, Typography } from '@mui/material';
+import { Alert, Button, DialogActions, DialogContent, IconButton, InputLabel, MenuItem, Select, Skeleton, Typography } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { DataGrid, GridColDef, GridRenderCellParams, GridToolbar } from '@mui/x-data-grid';
 // import { t } from 'i18next';
 import { sizingStyles, gridStyles, BootstrapDialog, BootstrapDialogTitle, buttonCloseStyles, BootstrapInput, actionButtonStyles, inputLabelStyles } from '../../utils/misc/styles';
 import { Edit, Delete } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
-import { getLISTransportAPI } from '../../api/client/transportService';
 import { AxiosError } from 'axios';
-import { CreatedServiceViewModel, ServiceViewModel } from '../../api/client/schemas/transport';
+import { CreatedServiceViewModel, deleteServiceByServiceId, getService, getServiceByServiceId, postService, putServiceByServiceId, ServiceViewModel } from '../../api/client/transport';
 
-const MasterDataServices: any = (props: any) => {
+const MasterDataServices: any = () => {
     const { t } = useTranslation();
-    
     const [services, setServices] = useState<any>(null);
     const [loadResults, setLoadResults] = useState<boolean>(true);
     const [loadEdit, setLoadEdit] = useState<boolean>(false);
@@ -28,16 +25,10 @@ const MasterDataServices: any = (props: any) => {
     const [currentId, setCurrentId] = useState<string>("");
     const [currentEditId, setCurrentEditId] = useState<string>("");
     
-    const { instance, accounts } = useMsal();
-    const account = useAccount(accounts[0] || {});
-    const context = useAuthorizedBackendApi();
-    
-    const { getService, getServiceServiceId, putServiceServiceId, postService, deleteServiceServiceId } = getLISTransportAPI();
-    
     const servicesOptions = [
-        {value: 1, name: "SEAFREIGHT"},
-        {value: 2, name: "HAULAGE"},
-        {value: 5, name: "MISCELLANEOUS"},
+        { value: 1, name: "SEAFREIGHT" },
+        { value: 2, name: "HAULAGE" },
+        { value: 5, name: "MISCELLANEOUS" },
     ];
 
     const columnsServices: GridColDef[] = [
@@ -73,7 +64,7 @@ const MasterDataServices: any = (props: any) => {
     const getServicesSvc = async () => {
         setLoadResults(true);
         try {
-            const servs = await getService({ pageSize: 500 });
+            const servs = await getService({query: { pageSize: 500 }});
             console.log(servs);
             setServices(servs.data);
             setLoadResults(false);
@@ -90,10 +81,10 @@ const MasterDataServices: any = (props: any) => {
     const getServiceIdSvc = async (id: number) => {
         setLoadEdit(true);
         try {
-            const serv = await getServiceServiceId(id);
+            const serv = await getServiceByServiceId({path: {serviceId: id}});
             var result = serv.data;
-            setTestName(result.serviceName ?? "");
-            setSelectedServiceTypes(result.servicesTypeId || []);
+            setTestName(result?.serviceName ?? "");
+            setSelectedServiceTypes(result?.servicesTypeId || []);
             setLoadEdit(false);
         }
         catch (err: unknown) {
@@ -108,7 +99,7 @@ const MasterDataServices: any = (props: any) => {
     const createNewService = async () => {
         if (testName !== "" && selectedServiceTypes.length !== 0) {
             try {
-                var response = null;
+                //var response = null;
                 if (currentEditId !== "") {
                     var dataSent: ServiceViewModel;
                     dataSent = {
@@ -117,7 +108,7 @@ const MasterDataServices: any = (props: any) => {
                         // "serviceDescription": testDescription,
                         "servicesTypeId": selectedServiceTypes
                     };
-                    response = await putServiceServiceId(Number(currentEditId), dataSent);
+                    await putServiceByServiceId({body: dataSent, path: {serviceId: Number(currentEditId)}});
                 }
                 else {
                     var dataSent2: CreatedServiceViewModel;
@@ -126,9 +117,9 @@ const MasterDataServices: any = (props: any) => {
                         "serviceDescription": testDescription,
                         "servicesTypeId": selectedServiceTypes
                     };
-                    response = await postService(dataSent2);
+                    await postService({query: dataSent2});
                 }
-                enqueueSnackbar(currentEditId === "" ? "The service has been added with success!" : "The service has been edited with success!", { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                enqueueSnackbar(currentEditId === "" ? t('serviceAdded') : t('serviceEdited'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
                 getServicesSvc();
                 setModal(false);    
             }
@@ -144,7 +135,7 @@ const MasterDataServices: any = (props: any) => {
     
     const deleteServiceSvc = async (id: number) => {
         try {
-            await deleteServiceServiceId(id);
+            await deleteServiceByServiceId({path: {serviceId: id}});
             enqueueSnackbar(t('rowDeletedSuccess'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
             setModal2(false);
             getServicesSvc();
@@ -166,10 +157,10 @@ const MasterDataServices: any = (props: any) => {
             <SnackbarProvider />
             <Box py={2.5}>
                 <Grid container spacing={2} mt={0} px={5}>
-                    <Grid item xs={12} md={8}>
+                    <Grid size={{ xs: 12, md: 8 }}>
                         <Typography sx={{ fontSize: 18, mb: 1 }}><b>{t('listServices')}</b></Typography>
                     </Grid>
-                    <Grid item xs={12} md={4}>
+                    <Grid size={{ xs: 12, md: 4 }}>
                         <Button 
                             variant="contained" color="inherit" 
                             sx={{ float: "right", backgroundColor: "#fff", textTransform: "none", ml: 2 }} 
@@ -185,7 +176,7 @@ const MasterDataServices: any = (props: any) => {
                             {t('newService')}
                         </Button>
                     </Grid>
-                    <Grid item xs={12}>
+                    <Grid size={{ xs: 12 }}>
                         {
                             !loadResults ? 
                             services !== null && services.length !== 0 ?
@@ -239,15 +230,15 @@ const MasterDataServices: any = (props: any) => {
                     {
                         loadEdit === false ?
                         <Grid container spacing={2}>
-                            <Grid item xs={12}>
+                            <Grid size={{ xs: 12 }}>
                                 <InputLabel htmlFor="test-name" sx={inputLabelStyles}>{t('serviceName')}</InputLabel>
                                 <BootstrapInput id="test-name" type="text" value={testName} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTestName(e.target.value)} fullWidth />
                             </Grid>
-                            <Grid item xs={12}>
+                            <Grid size={{ xs: 12 }}>
                                 <InputLabel htmlFor="test-description" sx={inputLabelStyles}>Description</InputLabel>
                                 <BootstrapInput id="test-description" type="text" multiline rows={3} value={testDescription} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTestDescription(e.target.value)} fullWidth />
                             </Grid>
-                            <Grid item xs={12}>
+                            <Grid size={{ xs: 12 }}>
                                 <InputLabel htmlFor="test-services-types" sx={inputLabelStyles}>{t('servicesTypesId')}</InputLabel>
                                 <Select
                                     labelId="test-services-types"

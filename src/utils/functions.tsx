@@ -1,6 +1,7 @@
 import React from "react";
 import { AuthenticationResult } from "@azure/msal-browser";
-import { t } from "i18next";
+import { categoriesOptions } from "./constants";
+//import { t } from "i18next";
 
 function removeAccents(input: string) {
     return input.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
@@ -236,7 +237,7 @@ export function getServicesTotal2(data: any, currency: string, quantity: number)
     return services.join('; ');
 }
 
-export function getServices(data: any, currency: string) {
+export function getServices(data: any, _: string) {
     let services = [];
 
     // Loop through the data
@@ -319,6 +320,20 @@ export function checkDifferentDefaultContainer(array: any) {
     return true; // All elements have different defaultContainer
 }
 
+export function parseInfos(inputString: string) {
+    const parts = inputString.split(', ');
+    
+    const id = parts[0];
+    const requestNumber = parts[1];
+    
+    const locationObject = {
+        id: id,
+        requestNumber: requestNumber
+    };
+    
+    return locationObject;
+}
+
 export function parseLocation(inputString: string) {
     const parts = inputString.split(', ');
     
@@ -355,6 +370,26 @@ export function parseLocation2(inputString: string) {
     return locationObject;
 }
 
+export function parseLocation3(inputString: string) {
+    const parts = inputString.split(', ');
+    
+    const city = parts[0];
+    const country = parts[1];
+    const latitude = parseFloat(parts[2]);
+    const longitude = parseFloat(parts[3]);
+    const postalCode = parts[4] || null; 
+    
+    const locationObject = {
+        city: city,
+        country: country,
+        latitude: latitude,
+        longitude: longitude,
+        postalCode: postalCode
+    };
+    
+    return locationObject.city+", "+locationObject.country;
+}
+
 export function parseContact(inputString: string) {
     const parts = inputString.split(', ');
     
@@ -369,6 +404,22 @@ export function parseContact(inputString: string) {
     return contactObject;
 }
 
+export function parseContact2(inputString: string) {
+    const parts = inputString.split(', ');
+    
+    const number = parts[0];
+    const name = parts[1];
+    const id = parts[2];
+    
+    const contactObject = {
+        contactNumber: number,
+        contactName: name,
+        contactId: id
+    };
+    
+    return contactObject;
+}
+
 // export function displayContainers(value: any) {
 //     var aux = value.map((elm: any) => '<li>'+elm.quantity+"x"+elm.container+'</li>').join('');
 //     return '<ul>'+aux+'</ul>';
@@ -378,7 +429,7 @@ export function extractCityAndPostalCode(inputString: string) {
     const parts = inputString.split(', ');
     if (parts.length >= 3) {
         const city = parts[0];
-        const country = parts[1];
+        
         const postalCode = parts[2];
         return `${city} ${postalCode}`;
     } 
@@ -438,65 +489,65 @@ export function hashCode(str: string) {
     return hash;
 }
 
-function soundex(word: string) {
-    // Convert the word to uppercase and remove any non-alphabetic characters
-    word = word.toUpperCase().replace(/[^A-Z]/g, '');
+// function soundex(word: string) {
+//     // Convert the word to uppercase and remove any non-alphabetic characters
+//     word = word.toUpperCase().replace(/[^A-Z]/g, '');
 
-    // Map each letter to its Soundex code
-    const codeMap: any = {
-        'BFPV': 1,
-        'CGJKQSXZ': 2,
-        'DT': 3,
-        'L': 4,
-        'MN': 5,
-        'R': 6
-    };
+//     // Map each letter to its Soundex code
+//     const codeMap: any = {
+//         'BFPV': 1,
+//         'CGJKQSXZ': 2,
+//         'DT': 3,
+//         'L': 4,
+//         'MN': 5,
+//         'R': 6
+//     };
 
-    // Initialize the Soundex string with the first letter
-    let soundex = word.charAt(0);
+//     // Initialize the Soundex string with the first letter
+//     let soundex = word.charAt(0);
 
-    // Iterate over the rest of the word
-    let i = 1;
-    while (i < word.length) {
-        // Get the current character and its code
-        const char = word.charAt(i);
-        const code = codeMap[char];
+//     // Iterate over the rest of the word
+//     let i = 1;
+//     while (i < word.length) {
+//         // Get the current character and its code
+//         const char = word.charAt(i);
+//         const code = codeMap[char];
 
-        // Handle special cases
-        if (char === 'H' || char === 'W') {
-            // If the previous character is the same, skip this character
-            if (char === word.charAt(i - 1)) {
-                i++;
-                continue;
-            }
-            // If the previous character is a vowel, skip this character
-            if ('AEIOU'.indexOf(word.charAt(i - 1)) !== -1) {
-                i++;
-                continue;
-            }
-        }
+//         // Handle special cases
+//         if (char === 'H' || char === 'W') {
+//             // If the previous character is the same, skip this character
+//             if (char === word.charAt(i - 1)) {
+//                 i++;
+//                 continue;
+//             }
+//             // If the previous character is a vowel, skip this character
+//             if ('AEIOU'.indexOf(word.charAt(i - 1)) !== -1) {
+//                 i++;
+//                 continue;
+//             }
+//         }
 
-        // If the character is a valid code and is different from the previous code
-        if (code && code !== codeMap[word.charAt(i - 1)]) {
-            // Add the code to the Soundex string
-            soundex += code;
-        }
+//         // If the character is a valid code and is different from the previous code
+//         if (code && code !== codeMap[word.charAt(i - 1)]) {
+//             // Add the code to the Soundex string
+//             soundex += code;
+//         }
 
-        // Move to the next character
-        i++;
-    }
+//         // Move to the next character
+//         i++;
+//     }
 
-    // Remove any non-numeric characters
-    soundex = soundex.replace(/[^\d]/g, '');
+//     // Remove any non-numeric characters
+//     soundex = soundex.replace(/[^\d]/g, '');
 
-    // Pad with zeros to ensure a length of 4
-    soundex = soundex.padEnd(4, '0');
+//     // Pad with zeros to ensure a length of 4
+//     soundex = soundex.padEnd(4, '0');
 
-    // Cut off any excess characters
-    soundex = soundex.substring(0, 4);
+//     // Cut off any excess characters
+//     soundex = soundex.substring(0, 4);
 
-    return soundex;
-}
+//     return soundex;
+// }
 
 function metaphone(word: string) {
     // Map each character to its Metaphone code
@@ -863,11 +914,7 @@ export function stringAvatar(name: string | undefined) {
 
 // Function to parse date in "MM/dd/yyyy hh:mm:ss tt" format and convert to ISO 8601
 export function parseDate(dateString: string) {
-    const options = {
-        year: 'numeric', month: 'numeric', day: 'numeric',
-        hour: 'numeric', minute: 'numeric', second: 'numeric',
-        hour12: true
-    };
+    
     const dateObj = new Date(dateString);
     if (!isNaN(dateObj.getTime())) {
         const parsedDate = new Date(dateString);
@@ -907,3 +954,29 @@ export function validateObjectHSCODEFormat(obj: any) {
         return false;
     }
 }
+
+export function getCategoryNames(inputArray: any) {
+    return inputArray.map((id: any) => {
+        const category = categoriesOptions.find((category: any) => category.value === id);
+        return category ? category.name : null;
+    }).filter((name: any) => name !== null);
+}
+      
+const isValidBase64 = (str: string) => {
+    const base64Regex = /^[A-Za-z0-9+/]+={0,2}$/;
+    return base64Regex.test(str);
+};
+    
+export const base64ToUint8Array = (base64: string) => {
+    if (!isValidBase64(base64)) {
+        throw new Error("Invalid Base64 string");
+    }
+    const binaryString = atob(base64);
+    const length = binaryString.length;
+    const bytes = new Uint8Array(length);
+    for (let i = 0; i < length; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+    }
+    return bytes;
+};
+    

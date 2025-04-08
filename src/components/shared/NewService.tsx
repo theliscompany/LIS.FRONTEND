@@ -1,37 +1,26 @@
 import { useState } from 'react';
 import { BootstrapDialogTitle, BootstrapInput, actionButtonStyles, buttonCloseStyles, inputLabelStyles } from '../../utils/misc/styles';
-import { Button, DialogActions, DialogContent, Grid, InputLabel, MenuItem, Select, Typography } from '@mui/material';
-import { useAuthorizedBackendApi } from '../../api/api';
+import { Button, DialogActions, DialogContent, InputLabel, MenuItem, Select } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { useTranslation } from 'react-i18next';
 import { enqueueSnackbar } from 'notistack';
-import { BackendService } from '../../utils/services/fetch';
-import { protectedResources } from '../../config/authConfig';
-import { useAccount, useMsal } from '@azure/msal-react';
-import { getLISTransportAPI } from '../../api/client/transportService';
-import { CreatedServiceViewModel } from '../../api/client/schemas/transport';
+import { CreatedServiceViewModel, postService } from '../../api/client/transport';
 
 function NewService(props: any) {
     const [testName, setTestName] = useState<string>("");
     const [testDescription, setTestDescription] = useState<string>("");
     const [selectedServiceTypes, setSelectedServiceTypes] = useState<any>([]);
     
-    const { instance, accounts } = useMsal();
-    const account = useAccount(accounts[0] || {});
-    const context = useAuthorizedBackendApi();
-    
-    const { postService } = getLISTransportAPI();
     const { t } = useTranslation();
     
     var serviceTypes: any = [
-        {value: 1, label: t('seafreight')},
-        {value: 2, label: t('haulage')},
-        {value: 5, label: t('miscellaneous')},
+        { value: 1, label: t('seafreight') },
+        { value: 2, label: t('haulage') },
+        { value: 5, label: t('miscellaneous') },
     ];
     
     const handleChange = (event: any) => {
-        const {
-          target: { value },
-        } = event;
+        const { target: { value },} = event;
         setSelectedServiceTypes(typeof value === 'string' ? value.split(',') : value);
     };
 
@@ -44,7 +33,7 @@ function NewService(props: any) {
             };
             
             try {
-                const response = await postService(dataSent);
+                const response = await postService({body: dataSent});
                 if (response !== null) {
                     enqueueSnackbar(t('serviceAddedSuccess'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
                     
@@ -74,17 +63,17 @@ function NewService(props: any) {
             </BootstrapDialogTitle>
             <DialogContent dividers>
                 <Grid container spacing={2}>
-                    <Grid item xs={12}>
+                    <Grid size={{ xs: 12 }}>
                         <InputLabel htmlFor="test-name" sx={inputLabelStyles}>
                             {t('serviceName')}
                         </InputLabel>
                         <BootstrapInput id="test-name" type="text" value={testName} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTestName(e.target.value)} fullWidth />
                     </Grid>
-                    <Grid item xs={12}>
+                    <Grid size={{ xs: 12 }}>
                         <InputLabel htmlFor="test-description" sx={inputLabelStyles}>Description</InputLabel>
                         <BootstrapInput id="test-description" type="text" multiline rows={3} value={testDescription} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTestDescription(e.target.value)} fullWidth />
                     </Grid>
-                    <Grid item xs={12}>
+                    <Grid size={{ xs: 12 }}>
                         <InputLabel htmlFor="test-services-types" sx={inputLabelStyles}>{t('servicesTypesId')}</InputLabel>
                         <Select
                             labelId="test-services-types"

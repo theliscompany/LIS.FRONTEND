@@ -1,17 +1,16 @@
 import { useState } from 'react';
 import { BootstrapDialogTitle, BootstrapInput, actionButtonStyles, buttonCloseStyles, inputLabelStyles } from '../../utils/misc/styles';
-import { Button, DialogActions, DialogContent, Grid, InputLabel, MenuItem, Select, Typography } from '@mui/material';
+import { Button, DialogActions, DialogContent, InputLabel } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { useTranslation } from 'react-i18next';
 import { enqueueSnackbar } from 'notistack';
 import CountrySelect from './CountrySelect';
-import { getLISTransportAPI } from '../../api/client/transportService';
-import { PortViewModel } from '../../api/client/schemas/transport';
+import { createPort, PortViewModel } from '../../api/client/transport';
 
 function NewPort(props: any) {
     const [testName, setTestName] = useState<string>("");
     const [country, setCountry] = useState<any>(null);
     
-    const { createPort } = getLISTransportAPI();
     const { t } = useTranslation();
     
     const createNewPort = async () => {
@@ -22,9 +21,9 @@ function NewPort(props: any) {
             };
             
             try {
-                const response = await createPort(dataSent);
+                const response = await createPort({body: dataSent});
                 if (response !== null) {
-                    enqueueSnackbar("The port has been added with success!", { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                    enqueueSnackbar(t('portAdded'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
                     
                     if (props.callBack !== undefined && props.callBack !== null) {
                         props.callBack();
@@ -48,16 +47,16 @@ function NewPort(props: any) {
     return (
         <>
             <BootstrapDialogTitle id="custom-dialog-title7" onClose={props.closeModal}>
-                <b>Create new port</b>
+                <b>{t('createNewPort')}</b>
             </BootstrapDialogTitle>
             <DialogContent dividers>
                 <Grid container spacing={2}>
-                    <Grid item xs={12}>
-                        <InputLabel htmlFor="test-name" sx={inputLabelStyles}>Port name</InputLabel>
+                    <Grid size={{ xs: 12 }}>
+                        <InputLabel htmlFor="test-name" sx={inputLabelStyles}>{t('portName')}</InputLabel>
                         <BootstrapInput id="test-name" type="text" value={testName} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTestName(e.target.value)} fullWidth />
                     </Grid>
-                    <Grid item xs={12}>
-                        <InputLabel htmlFor="test-country" sx={inputLabelStyles}>Country</InputLabel>
+                    <Grid size={{ xs: 12 }}>
+                        <InputLabel htmlFor="test-country" sx={inputLabelStyles}>{t('country')}</InputLabel>
                         <CountrySelect id="test-country" value={country} onChange={setCountry} fullWidth />
                     </Grid>
                 </Grid>

@@ -1,4 +1,6 @@
-export enum CategoryEnum
+
+
+export enum EnumCategory
 {
     CUSTOMERS = 1,
     SUPPLIERS = 2,

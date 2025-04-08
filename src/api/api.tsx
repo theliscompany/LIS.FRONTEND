@@ -1,125 +1,241 @@
-import { useAccount, useMsal } from "@azure/msal-react";
-import { useEffect } from "react";
-import { createContext, useContext, useState } from "react";
-import { crmRequest, loginRequest, pricingRequest, shipmentRequest, transportRequest } from "../config/authConfig";
-import { BackendService } from "../utils/services/fetch";
+import { useEffect, useState } from "react";
 import { getAccessToken } from "../utils/functions";
-import { AuthShipmentProvider } from "../auth.context";
+import { useAccount, useMsal } from "@azure/msal-react";
+import { crmRequest, documentRequest, offerRequest, pricingRequest, quoteRequest, sessionstorageRequest, shipmentRequest, templateRequest, transportRequest } from "../config/msalConfig";
+import { client as shipmentClient } from "./client/shipment";
+import { client as transportClient } from "./client/transport";
+import { client as documentClient } from "./client/document";
+import { client as crmClient } from "./client/crm";
+import { client as pricingClient } from "./client/pricing";
+import { client as templateClient } from "./client/template";
+import { client as offerClient } from "./client/offer";
+import { client as quoteClient } from "./client/quote";
+import { client as sessionstorageClient } from "./client/sessionstorage";
 
-export const AuthorizedBackendApiContext = createContext<any | null>(null!);
+const BackendServiceProvider = ({children}:{children:React.ReactNode}) => {
+    const { instance, accounts } = useMsal();
+    const account = useAccount(accounts[0] || {});
+    
+    const [tokensLoading, setTokensLoading] = useState<boolean>(true);
+    
+    // useEffect(() => {
+    //   const getTokens = async () => {
+    //     const _tokenTransport = await getAccessToken(instance, transportRequest, account);
+    //     const _tokenDocument = await getAccessToken(instance, documentRequest, account);
+    //     const _tokenShipment = await getAccessToken(instance, shipmentRequest, account);
+    //     const _tokenCrm = await getAccessToken(instance, crmRequest, account);
+    //     const _tokenPricing = await getAccessToken(instance, pricingRequest, account);
+    //     const _tokenTemplate = await getAccessToken(instance, templateRequest, account);
+    //     const _tokenOffer = await getAccessToken(instance, offerRequest, account);
+    //     const _tokenQuote = await getAccessToken(instance, quoteRequest, account);
+    //     const _tokenSessionstorage = await getAccessToken(instance, sessionstorageRequest, account);
+        
+    //     shipmentClient.setConfig({
+    //       baseURL: import.meta.env.VITE_API_LIS_SHIPMENT_ENDPOINT,
+    //       headers: {
+    //         Authorization: `Bearer ${_tokenShipment}`
+    //       }
+    //     });
 
-export const useAuthorizedBackendApi = (): any | null => {
-    return useContext(AuthorizedBackendApiContext);
-}
+    //     transportClient.setConfig({
+    //       baseURL: import.meta.env.VITE_API_LIS_TRANSPORT_ENDPOINT,
+    //       headers: {
+    //         Authorization: `Bearer ${_tokenTransport}`
+    //       }
+    //     });
 
-function decodeTokenExpiration(token: string): number {
-    try {
-        const payload = JSON.parse(atob(token.split(".")[1])); // Décoder le payload JWT
-        return payload.exp ? payload.exp * 1000 : -1; // Convertir en millisecondes
-    } catch (error) {
-        console.error("Erreur lors du décodage du token :", error);
-        return -1;
+    //     documentClient.setConfig({
+    //       baseURL: import.meta.env.VITE_API_LIS_DOCUMENT_ENDPOINT,
+    //       headers: {
+    //         Authorization: `Bearer ${_tokenDocument}`
+    //       }
+    //     });
+
+    //     crmClient.setConfig({
+    //       baseURL: import.meta.env.VITE_API_LIS_CRM_ENDPOINT,
+    //       headers: {
+    //         Authorization: `Bearer ${_tokenCrm}`
+    //       },
+          
+    //       withCredentials: true
+    //     });
+
+    //     pricingClient.setConfig({
+    //       baseURL: import.meta.env.VITE_API_LIS_PRICING_ENDPOINT,
+    //       headers: {
+    //         Authorization: `Bearer ${_tokenPricing}`
+    //       },
+    //     });
+
+    //     templateClient.setConfig({
+    //       baseURL: import.meta.env.VITE_API_LIS_TEMPLATE_ENDPOINT,
+    //       headers: {
+    //         Authorization: `Bearer ${_tokenTemplate}`
+    //       },
+    //     });
+
+    //     offerClient.setConfig({
+    //       baseURL: import.meta.env.VITE_API_LIS_OFFER_ENDPOINT,
+    //       headers: {
+    //         Authorization: `Bearer ${_tokenOffer}`
+    //       },
+    //     });
+
+    //     quoteClient.setConfig({
+    //       baseURL: import.meta.env.VITE_API_LIS_QUOTE_ENDPOINT,
+    //       headers: {
+    //         Authorization: `Bearer ${_tokenQuote}`
+    //       },
+    //     });
+
+    //     sessionstorageClient.setConfig({
+    //       baseURL: import.meta.env.VITE_API_LIS_SESSIONSTORAGE_ENDPOINT,
+    //       headers: {
+    //         Authorization: `Bearer ${_tokenSessionstorage}`
+    //       },
+    //     });
+
+    //     setTokensLoading(false);
+    //   }
+
+    //   if (account && instance){
+    //     getTokens();
+    //   }
+    // }, [account,instance]);
+    
+    useEffect(() => {
+      const configureClients = async () => {
+        if (account && instance) {
+          // alert("Superss");
+          // Obtenez les tokens uniquement si l'utilisateur est connecté
+          const _tokenTransport = await getAccessToken(instance, transportRequest, account);
+          const _tokenDocument = await getAccessToken(instance, documentRequest, account);
+          const _tokenShipment = await getAccessToken(instance, shipmentRequest, account);
+          const _tokenCrm = await getAccessToken(instance, crmRequest, account);
+          const _tokenPricing = await getAccessToken(instance, pricingRequest, account);
+          const _tokenTemplate = await getAccessToken(instance, templateRequest, account);
+          const _tokenOffer = await getAccessToken(instance, offerRequest, account);
+          const _tokenQuote = await getAccessToken(instance, quoteRequest, account);
+          const _tokenSessionstorage = await getAccessToken(instance, sessionstorageRequest, account);
+    
+          // Configurez les clients avec les tokens
+          shipmentClient.setConfig({
+            baseURL: import.meta.env.VITE_API_LIS_SHIPMENT_ENDPOINT,
+            headers: {
+              Authorization: `Bearer ${_tokenShipment}`,
+            },
+          });
+    
+          transportClient.setConfig({
+            baseURL: import.meta.env.VITE_API_LIS_TRANSPORT_ENDPOINT,
+            headers: {
+              Authorization: `Bearer ${_tokenTransport}`,
+            },
+          });
+
+          documentClient.setConfig({
+            baseURL: import.meta.env.VITE_API_LIS_DOCUMENT_ENDPOINT,
+            headers: {
+              Authorization: `Bearer ${_tokenDocument}`
+            }
+          });
+
+          crmClient.setConfig({
+            baseURL: import.meta.env.VITE_API_LIS_CRM_ENDPOINT,
+            headers: {
+              Authorization: `Bearer ${_tokenCrm}`
+            },
+            
+            withCredentials: true
+          });
+
+          pricingClient.setConfig({
+            baseURL: import.meta.env.VITE_API_LIS_PRICING_ENDPOINT,
+            headers: {
+              Authorization: `Bearer ${_tokenPricing}`
+            },
+          });
+
+          templateClient.setConfig({
+            baseURL: import.meta.env.VITE_API_LIS_TEMPLATE_ENDPOINT,
+            headers: {
+              Authorization: `Bearer ${_tokenTemplate}`
+            },
+          });
+
+          offerClient.setConfig({
+            baseURL: import.meta.env.VITE_API_LIS_OFFER_ENDPOINT,
+            headers: {
+              Authorization: `Bearer ${_tokenOffer}`
+            },
+          });
+
+          quoteClient.setConfig({
+            baseURL: import.meta.env.VITE_API_LIS_QUOTE_ENDPOINT,
+            headers: {
+              Authorization: `Bearer ${_tokenQuote}`
+            },
+          });
+
+          sessionstorageClient.setConfig({
+            baseURL: import.meta.env.VITE_API_LIS_SESSIONSTORAGE_ENDPOINT,
+            headers: {
+              Authorization: `Bearer ${_tokenSessionstorage}`
+            },
+          });
+        } 
+        else {
+          // Si l'utilisateur n'est pas connecté, configurez les clients sans en-têtes d'authentification
+          // alert("Cheese");
+          shipmentClient.setConfig({
+            baseURL: import.meta.env.VITE_API_LIS_SHIPMENT_ENDPOINT,
+          });
+    
+          transportClient.setConfig({
+            baseURL: import.meta.env.VITE_API_LIS_TRANSPORT_ENDPOINT,
+          });
+    
+          documentClient.setConfig({
+            baseURL: import.meta.env.VITE_API_LIS_DOCUMENT_ENDPOINT,
+          });
+    
+          crmClient.setConfig({
+            baseURL: import.meta.env.VITE_API_LIS_CRM_ENDPOINT,
+            withCredentials: true,
+          });
+    
+          pricingClient.setConfig({
+            baseURL: import.meta.env.VITE_API_LIS_PRICING_ENDPOINT,
+          });
+    
+          templateClient.setConfig({
+            baseURL: import.meta.env.VITE_API_LIS_TEMPLATE_ENDPOINT,
+          });
+    
+          offerClient.setConfig({
+            baseURL: import.meta.env.VITE_API_LIS_OFFER_ENDPOINT,
+          });
+    
+          quoteClient.setConfig({
+            baseURL: import.meta.env.VITE_API_LIS_QUOTE_ENDPOINT,
+          });
+    
+          sessionstorageClient.setConfig({
+            baseURL: import.meta.env.VITE_API_LIS_SESSIONSTORAGE_ENDPOINT,
+          });
+        }
+    
+        setTokensLoading(false);
+      };
+    
+      configureClients();
+    }, [account, instance]);
+    
+    if (!tokensLoading){
+        return (
+            <>{children}</>
+        )
     }
 }
 
-export function AuthorizedBackendApiProvider(props:any): any {
-    const { instance, accounts } = useMsal();
-    const account = useAccount(accounts[0] || {});
-    const [loginToken, setLoginToken] = useState<string>();
-    const [transportToken, setTransportToken] = useState<string>();
-    const [crmToken, setCrmToken] = useState<string>();
-    const [pricingToken, setPricingToken] = useState<string>();
-    const [shipmentToken, setShipmentToken] = useState<string>();
-
-    // useEffect(() => {
-    //     if (account && instance) {
-    //         const getTokens = async () => {
-    //             const token1 = await getAccessToken(instance, loginRequest, account);
-    //             const token2 = await getAccessToken(instance, transportRequest, account);
-    //             const token3 = await getAccessToken(instance, crmRequest, account);
-    //             const token4 = await getAccessToken(instance, pricingRequest, account);
-    //             const token5 = await getAccessToken(instance, shipmentRequest, account);
-
-    //             setLoginToken(token1);
-    //             setTransportToken(token2);
-    //             setCrmToken(token3);
-    //             setPricingToken(token4);
-    //             setShipmentToken(token5)
-    //         }
-    
-    //         getTokens();        
-    //     }
-    // },[account, instance, account]);
-
-    useEffect(() => {
-        if (account && instance) {
-            const getTokens = async () => {
-                const token1 = await getAccessToken(instance, loginRequest, account);
-                const token2 = await getAccessToken(instance, transportRequest, account);
-                const token3 = await getAccessToken(instance, crmRequest, account);
-                const token4 = await getAccessToken(instance, pricingRequest, account);
-                const token5 = await getAccessToken(instance, shipmentRequest, account);
-    
-                setLoginToken(token1);
-                setTransportToken(token2);
-                setCrmToken(token3);
-                setPricingToken(token4);
-                setShipmentToken(token5);
-    
-                // Vérifiez l'expiration des tokens
-                const expirations = [
-                    decodeTokenExpiration(token1),
-                    decodeTokenExpiration(token2),
-                    decodeTokenExpiration(token3),
-                    decodeTokenExpiration(token4),
-                    decodeTokenExpiration(token5)
-                ];
-    
-                const currentTime = Date.now();
-                const nextExpiration = Math.min(...expirations.filter(Boolean));
-    
-                if (nextExpiration > currentTime) {
-                    const timeUntilExpiration = nextExpiration - currentTime;
-                    console.log(`Token will expire ${timeUntilExpiration / 1000} seconds`);
-    
-                    setTimeout(() => {
-                        console.warn("Token is expiring, reload...");
-                        window.location.reload();
-                    }, timeUntilExpiration);
-                } else {
-                    console.warn("Token already expired, reload...");
-                    window.location.reload();
-                }
-            }
-    
-            getTokens();
-        }
-    }, [account, instance]);
-    
-    return (
-        <>
-        {
-            loginToken && crmToken && pricingToken && 
-            <AuthorizedBackendApiContext.Provider value={{
-                service: new BackendService(),
-                tokenLogin: loginToken, 
-                tokenCrm: crmToken,
-                tokenPricing: pricingToken,
-                tokenTransport: transportToken
-            }}>
-                <AuthShipmentProvider tokens={{
-                    shipment: shipmentToken,
-                    transport: transportToken,
-                    quote: loginToken, 
-                    pricing: pricingToken, 
-                    crm: crmToken
-                }}>
-                    <>{props.children}</>
-                </AuthShipmentProvider>
-                
-            </AuthorizedBackendApiContext.Provider>
-        }
-        </>
-        
-    );
-}
+export default BackendServiceProvider;

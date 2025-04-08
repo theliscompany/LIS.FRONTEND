@@ -1,115 +1,108 @@
-import { BrowserRouter, Route, Routes } from 'react-router-dom';
-import './App.css';
-import Layout from './components/shared/Layout';
-import Landing from './pages/Landing';
-import Requests from './pages/request/Requests';
-import Privacy from './pages/Privacy';
-import { AuthenticatedTemplate, UnauthenticatedTemplate } from '@azure/msal-react';
-import NotFound from './pages/NotFound';
-import Request from './pages/request/Request';
-import { AuthorizedBackendApiProvider } from './api/api';
-import RequestsSearch from './pages/request/RequestsSearch';
-import Tracking from './pages/Tracking';
-import NewRequest from './pages/request/NewRequest';
-import UsersAssignment from './pages/UsersAssignment';
-import Histories from './pages/Histories';
-import MyRequests from './pages/request/MyRequests';
-import PriceOffers from './pages/offer/PriceOffers';
-import ManagePriceOffer from './pages/offer/ManagePriceOffer';
-
-// Remove if locales are not used
+import { BrowserRouter, Route, Routes } from 'react-router-dom'
+import './App.css'
+import { AuthenticatedTemplate, UnauthenticatedTemplate } from '@azure/msal-react'
+import Landing from './pages/Landing'
 import './locales/i18n';
-import Login from './pages/Login';
-import Seafreights from './pages/Seafreights';
-import Haulages from './pages/Haulages';
-import Miscellaneous from './pages/Miscellaneous';
-import AcceptOffer from './pages/offer/AcceptOffer';
-import RefuseOffer from './pages/offer/RefuseOffer';
-import Templates from './pages/Templates';
-import MasterDataServices from './pages/masterdata/MasterDataServices';
-import MasterDataProducts from './pages/masterdata/MasterDataProducts';
+import Layout from './layout/Layout';
+import BackendServiceProvider from './api/api';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import MasterDataPorts from './pages/masterdata/MasterDataPorts';
+import MasterDataProducts from './pages/masterdata/MasterDataProducts';
+import MasterDataServices from './pages/masterdata/MasterDataServices';
 import MasterDataContacts from './pages/masterdata/MasterDataContacts';
-import MasterDataFiles from './pages/masterdata/MasterDataFiles';
-import MasterDataHSCodes from './pages/masterdata/MasterDataHSCodes';
-import MasterDataShips from './pages/masterdata/MasterdataShips';
-import ValidatedRequests from './pages/request/ValidatedRequests';
+import NotFound from './pages/NotFound';
+import { Login } from '@mui/icons-material';
+import Privacy from './pages/Privacy';
+import MasterDataTemplates from './pages/masterdata/MasterDataTemplates';
+import Haulages from './pages/pricing/Haulages';
+import Seafreights from './pages/pricing/Seafreights';
+import Miscellaneous from './pages/pricing/Miscellaneous';
+import AcceptOffer from './pages/offer/AcceptOffer';
+import ManagePriceOffer from './pages/offer/ManagePriceOffer';
+import PriceOffers from './pages/offer/PriceOffers';
+import RefuseOffer from './pages/offer/RefuseOffer';
 import HandleRequest from './pages/request/HandleRequest';
-import { Provider } from 'react-redux';
-import { store } from './store';
-import Orders from './pages/Orders';
-import EditOrder from './pages/EditOrder';
+import MyRequests from './pages/request/MyRequests';
+import NewRequest from './pages/request/NewRequest';
+import Requests from './pages/request/Requests';
+import RequestsSearch from './pages/request/RequestsSearch';
+import ValidatedRequests from './pages/request/ValidatedRequests';
+import Request from './pages/request/Request';
+// import Histories from './pages/Histories';
+import UsersAssignment from './pages/UsersAssignment';
+import MasterDataHSCodes from './pages/masterdata/MasterDataHSCodes';
+import Shipments from './pages/Shipments';
+import Tracking from './pages/Tracking';
+import ScrollToTop from './components/shared/ScrollToTop';
+import MasterDataFiles from './pages/masterdata/MasterDataFiles';
 
-const App = () => {
+const queryClient = new QueryClient();
+
+function App() {
+
   return (
-    <>
-		<BrowserRouter>
-			<AuthenticatedTemplate>
-				<AuthorizedBackendApiProvider>
-					<Provider store={store}>
-						<Routes>
-							<Route path='admin/*' element={<Layout />}>
-								<Route path="" element={<Histories />} />
-								<Route path="admin" element={<Histories />} />
-								<Route path="requests" element={<Requests />} />
-								<Route path="search/:search" element={<RequestsSearch />} />
-								<Route path="search" element={<RequestsSearch />} />
-								<Route path="request/:id" element={<Request />} />
-								<Route path="handle-request/:id" element={<HandleRequest />} />
-								<Route path="new-request" element={<NewRequest />} />
-								<Route path="my-requests" element={<MyRequests />} />
-								<Route path="pending-requests" element={<ValidatedRequests />} />
-								<Route path="quote-offers" element={<PriceOffers />} />
-								<Route path="quote-offers/:id" element={<ManagePriceOffer />} />
-								<Route path="edit-order/:id" element={<EditOrder />} />
-								<Route path="new-order" element={<EditOrder />} />
-								<Route path="orders" element={<Orders />} />
-								<Route path="users" element={<UsersAssignment />} />
-								<Route path="seafreights" element={<Seafreights />} />
-								<Route path="haulages" element={<Haulages />} />
-								<Route path="miscellaneous" element={<Miscellaneous />} />
-								<Route path="templates" element={<Templates />} />
-								<Route path="services" element={<MasterDataServices />} />
-								<Route path="products" element={<MasterDataProducts />} />
-								<Route path="hscodes" element={<MasterDataHSCodes />} />
-								<Route path="ports" element={<MasterDataPorts />} />
-								<Route path="contacts" element={<MasterDataContacts />} />
-								<Route path="ships" element={<MasterDataShips />} />
-								<Route path="files" element={<MasterDataFiles />} />
-							</Route> 
-							<Route path="/" element={<Layout children={<Requests />} />} />
-							<Route path="login" element={<Layout children={<Requests />} />} />
-							<Route path="landing" element={<Landing />} />
-							<Route path="quote/:lang" element={<Landing />} />
-							<Route path="privacy-policy" element={<Privacy />} />
-							<Route path="tracking" element={<Tracking />} />
-							<Route path="tracking/:id" element={<Tracking />} />
-							<Route path="acceptOffer/:id" element={<AcceptOffer />} />
-							<Route path="refuseOffer/:id" element={<RefuseOffer />} />
-							<Route path="*" element={<NotFound />} />
-						</Routes>
-					</Provider>
-				</AuthorizedBackendApiProvider>
-			</AuthenticatedTemplate>
-			<UnauthenticatedTemplate>
-				<Routes>
-					<Route path="/" element={<Landing />} />
-					<Route path="admin/" element={<Login />} />
-					<Route path="admin/*" element={<Login />} />
-					<Route path="landing" element={<Landing />} />
-					<Route path="login" element={<Login />} />
-					<Route path="privacy-policy" element={<Privacy />} />
-					<Route path="acceptOffer/:id" element={<AcceptOffer />} />
-					<Route path="refuseOffer/:id" element={<RefuseOffer />} />
-					<Route path="tracking" element={<Tracking />}>
-						<Route path=":id" element={<Tracking />} />
-					</Route>
-					<Route path="*" element={<NotFound />} />
-				</Routes>
-			</UnauthenticatedTemplate>      
-		</BrowserRouter>         
-    </>
-  );
-};
+    <BrowserRouter>
+        <AuthenticatedTemplate>
+          <QueryClientProvider client={queryClient}>
+            <BackendServiceProvider>
+              <ScrollToTop />
+              <Routes>
+                <Route path='/*' element={<Layout />}>
+                  <Route path='' element={<Shipments />} />
+                  <Route path="users" element={<UsersAssignment />} />
+                  <Route path="requests" element={<Requests />} />
+                  <Route path="search/:search" element={<RequestsSearch />} />
+                  <Route path="search" element={<RequestsSearch />} />
+                  <Route path="request/:id" element={<Request />} />
+                  <Route path="handle-request/:id" element={<HandleRequest />} />
+                  <Route path="new-request" element={<NewRequest />} />
+                  <Route path="my-requests" element={<MyRequests />} />
+                  <Route path="pending-requests" element={<ValidatedRequests />} />
+                  <Route path='ports' element={<MasterDataPorts />} />
+                  <Route path='products' element={<MasterDataProducts />} />
+                  <Route path='services' element={<MasterDataServices />} />
+                  <Route path='contacts' element={<MasterDataContacts />} />
+                  <Route path='templates' element={<MasterDataTemplates />} />
+                  <Route path='hscodes' element={<MasterDataHSCodes />} />
+                  <Route path='files' element={<MasterDataFiles />} />
+                  <Route path='haulages' element={<Haulages />} />
+                  <Route path='seafreights' element={<Seafreights />} />
+                  <Route path='miscellaneous' element={<Miscellaneous />} />
+                  <Route path="quote-offers" element={<PriceOffers />} />
+                  <Route path="quote-offers/:id" element={<ManagePriceOffer />} />
+                  <Route path="acceptOffer/:id" element={<AcceptOffer />} />
+                  <Route path="quote/:lang" element={<Landing />} />
+                  <Route path="privacy-policy" element={<Privacy />} />
+                  <Route path="tracking" element={<Tracking />} />
+                  <Route path="tracking/:id" element={<Tracking />} />
+                  <Route path='landing' element={<Landing />} />
+                  <Route path='*' element={<NotFound />} />
+                </Route>
+              </Routes>
+            </BackendServiceProvider>
+            <ReactQueryDevtools />
+          </QueryClientProvider>
+        </AuthenticatedTemplate>
+        <UnauthenticatedTemplate>
+          <BackendServiceProvider>
+            <ScrollToTop />
+            <Routes>
+              <Route path='/' element={<Landing />} />
+              <Route path="login" element={<Login />} />
+              <Route path="privacy-policy" element={<Privacy />} />
+              <Route path="acceptOffer/:id" element={<AcceptOffer />} />
+              <Route path="refuseOffer/:id" element={<RefuseOffer />} />
+              <Route path="tracking" element={<Tracking />} />
+              <Route path="tracking/:id" element={<Tracking />} />
+              <Route path='landing' element={<Landing />} />
+              <Route path='*' element={<NotFound />} />
+            </Routes>
+            </BackendServiceProvider>
+        </UnauthenticatedTemplate>
+      
+    </BrowserRouter>
+  )
+}
 
-export default App;
+export default App

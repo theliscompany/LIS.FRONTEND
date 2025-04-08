@@ -1,19 +1,18 @@
 import { useEffect, useState } from 'react';
-import { Alert, Box, Chip, Grid, IconButton, Skeleton, Typography } from '@mui/material';
+import { Alert, Box, Chip, IconButton, Skeleton, Typography } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { DarkTooltip, gridStyles } from '../utils/misc/styles';
 import { enqueueSnackbar, SnackbarProvider } from 'notistack';
 import AssignmentIndIcon from '@mui/icons-material/AssignmentInd';
 import AssignmentReturnIcon from '@mui/icons-material/AssignmentReturn';
-import { graphRequest, loginRequest, protectedResources } from '../config/authConfig';
-import { useAuthorizedBackendApi } from '../api/api';
-import { BackendService } from '../utils/services/fetch';
 import { useAccount, useMsal } from '@azure/msal-react';
 import { useTranslation } from 'react-i18next';
 import { DataGrid, GridColDef, GridRenderCellParams } from '@mui/x-data-grid';
 import { getAccessToken } from '../utils/functions';
+import { deleteApiAssigneeById, getApiAssignee, postApiAssignee } from '../api/client/quote';
 
-function UsersAssignment(props: any) {
-    const [load, setLoad] = useState<boolean>(false);
+const UsersAssignment = () => {
+    // const [load, setLoad] = useState<boolean>(false);
     const [showAlert, setShowAlert] = useState<boolean>(false);
     const [users, setUsers] = useState<any>(null);
     const [assignees, setAssignees] = useState<any>(null);
@@ -21,15 +20,12 @@ function UsersAssignment(props: any) {
     const { instance, accounts } = useMsal();
     const account = useAccount(accounts[0] || {});
     
-    const context = useAuthorizedBackendApi();
-    
     const { t } = useTranslation();
     
     const columnsUsers: GridColDef[] = [
         { field: 'id', headerName: t('id'), minWidth: 100, flex: 1.6 },
         { field: 'displayName', headerName: t('name'), minWidth: 100, flex: 1.2 },
         { field: 'mail', headerName: t('email'), minWidth: 250, flex: 1.2 },
-        // { field: 'assignee', headerName: t('assignee'), valueFormatter: (params: GridValueFormatterParams) => `${params.value !== null ? params.value.name+" (#"+params.value.id+")" : "Not defined"}`, minWidth: 100, flex: 1 },
         { field: 'xxx', headerName: t('status'), renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box>
@@ -59,34 +55,25 @@ function UsersAssignment(props: any) {
     
     useEffect(() => {
         getAssignees();
-    }, [account, instance, context]);
+    }, []);
     
     const getAssignees = async () => {
-        if (account && instance && context) {
-            try {
-                setLoad(true);
-                const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisQuotes.endPoint+"/Assignee", context.tokenLogin);
-                if (response !== null && response.code !== undefined) {
-                    if (response.code === 200) {
-                        //console.log(response);
-                        setAssignees(response.data);
-                        setLoad(false);
-
-                        // Then I can load users
-                        loadUsers();
-                    }
-                    else {
-                        setLoad(false);
-                    }
-                }
-                else {
-                    setLoad(false);
-                }
+        try {
+            // setLoad(true);
+            const response: any = await getApiAssignee();
+            if (response.data) {
+                setAssignees(response.data.data);
+                // setLoad(false);
+                // Then I can load users
+                loadUsers();
             }
-            catch (err: any) {
-                setLoad(false);
-                console.log(err);
-            }  
+            // else {
+            //     setLoad(false);
+            // }
+        }
+        catch (err: any) {
+            // setLoad(false);
+            console.log(err);
         }
     }
 
@@ -101,23 +88,23 @@ function UsersAssignment(props: any) {
         .then((response: any) => response.json())
         .then((data: any) => {
             if (data.error === undefined) {
-                console.log(data);
+                console.log("Data", data.value);
                 setUsers(data.value);
             }
             else {
                 setShowAlert(true);
-                setLoad(false);
+                // setLoad(false);
             }
         })
-        .catch(error => { 
+        .catch(() => { 
             setShowAlert(true);
-            setLoad(false);
+            // setLoad(false);
         });
     }
     
     const loadUsers = async () => {
         if (account && instance) {
-            const token = await getAccessToken(instance, graphRequest, account);
+            const token = await getAccessToken(instance, {scopes: ["https://graph.microsoft.com/User.ReadBasic.All"]}, account);
             getUsersFromAAD(token);
         }
     }
@@ -125,29 +112,25 @@ function UsersAssignment(props: any) {
     const removeAsManager = async (email: string) => {
         var assignee = assignees.find((user: any) => user.email === email);
         if (assignee) {
-            if (account && instance && context) {
-                setLoad(true);
-                const response = await (context?.service as BackendService<any>).deleteWithToken(protectedResources.apiLisQuotes.endPoint+"/Assignee/"+assignee.id, context.tokenLogin);
-                if (response !== null && response.code !== undefined) {
-                    if (response.code === 200) {
-                        //console.log(response);
-                        enqueueSnackbar(t('operationSuccess'), { variant: "info", anchorOrigin: { horizontal: "right", vertical: "top"} });
-
-                        // Here i refresh the assignees (to do a lot cleaner)
-                        const response2 = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisQuotes.endPoint+"/Assignee", context.tokenLogin);
-                        if (response2 !== null && response2.code !== undefined) {
-                            if (response2.code === 200) {
-                                setAssignees(response2.data);
-                            }
-                            else {
-                                enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
-                            }
-                        }  
+            try {
+                // setLoad(true);
+                const response = await deleteApiAssigneeById({path: {id: assignee.id}});
+                if (response !== null && response !== undefined) {
+                    enqueueSnackbar(t('operationSuccess'), { variant: "info", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                    // Here i refresh the assignees (to do a lot cleaner)
+                    const response2: any = await getApiAssignee();
+                    if (response2 !== null && response2 !== undefined) {
+                        setAssignees(response2.data.data);
                     }
-                    else {
-                        setLoad(false);
-                    }
+                    // setLoad(false);
                 }  
+                else {
+                    // setLoad(false);
+                }
+            }
+            catch (err: any) {
+                console.log(err);
+                // setLoad(false);
             }
         }
         else {
@@ -156,27 +139,25 @@ function UsersAssignment(props: any) {
     }
 
     const assignAsManager = async (name: string, email: string, idUser: string) => {
-        if (account && instance && context) {
+        try {
             let content = { "name": name, "email": email, "idUser": idUser };
-            const response = await (context?.service as BackendService<any>).postWithToken(protectedResources.apiLisQuotes.endPoint+"/Assignee", content, context.tokenLogin);
-            if (response !== null && response.status === 201) {
-                //console.log(response);
+            const response: any = await postApiAssignee({body: content});
+            // console.log("Resp : ", response);
+            if (response !== null && response !== undefined && response.data.code === 201) {
                 enqueueSnackbar(t('assigneeCreatedSuccess'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
-
                 // Here i refresh the assignees (to do a lot cleaner)
-                const response2 = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisQuotes.endPoint+"/Assignee", context.tokenLogin);
-                if (response2 !== null && response2.code !== undefined) {
-                    if (response2.code === 200) {
-                        setAssignees(response2.data);
-                    }
-                    else {
-                        enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
-                    }
+                const response2: any = await getApiAssignee();
+                // console.log("Resp : ", response2);
+                if (response2 !== null && response2 !== undefined) {
+                    setAssignees(response2.data.data);
                 }  
             }
             else {
                 enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
             }
+        }
+        catch (err: any) {
+            console.log(err);
         }
     }
     
@@ -188,7 +169,7 @@ function UsersAssignment(props: any) {
                 <Typography variant="h5" sx={{mt: {xs: 4, md: 1.5, lg: 1.5 }}} px={5}><b>{t('userAssignmentTitle')}</b></Typography>
                 <Box>
                     <Grid container spacing={1} px={5} mt={2}>
-                        <Grid item xs={12}>
+                        <Grid size={{ xs: 12 }}>
                             {
                                 users !== null && users !== undefined && assignees !== null ?
                                 <Box sx={{ overflow: "auto" }}>
@@ -205,9 +186,7 @@ function UsersAssignment(props: any) {
                                     </Box>
                                 </Box> : !showAlert ? <Skeleton sx={{ mt: 3 }} /> : null
                             }
-                            {
-                                showAlert ?<Alert severity="warning">{t('notAdministratorForAssign')}</Alert> : null
-                            }
+                            { showAlert ?<Alert severity="warning">{t('notAdministratorForAssign')}</Alert> : null }
                         </Grid>
                     </Grid>
                  </Box>

@@ -1,18 +1,17 @@
 import * as React from 'react';
 import { useState, useEffect } from 'react';
 import { SnackbarProvider, enqueueSnackbar } from 'notistack';
-import { Alert, Box, Button, DialogActions, DialogContent, Grid, IconButton, InputLabel, Skeleton, Typography } from '@mui/material';
+import { Alert, Box, Button, DialogActions, DialogContent, IconButton, InputLabel, Skeleton, Typography } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { DataGrid, GridColDef, GridRenderCellParams, GridToolbar } from '@mui/x-data-grid';
 import { sizingStyles, gridStyles, BootstrapDialog, BootstrapDialogTitle, buttonCloseStyles, BootstrapInput, actionButtonStyles, inputLabelStyles } from '../../utils/misc/styles';
 import { Edit, Delete } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
-import { getLISTransportAPI } from '../../api/client/transportService';
 import { AxiosError } from 'axios';
-import { ProductViewModel } from '../../api/client/schemas/transport';
+import { deleteProductById, getProduct, getProductById, postProduct, ProductViewModel, putProductById } from '../../api/client/transport';
 
-const MasterDataProducts: any = (props: any) => {
-    const { t } = useTranslation();
-    
+const MasterDataProducts: any = () => {
+    const { t } = useTranslation();    
     const [products, setProducts] = useState<any>(null);
     const [loadResults, setLoadResults] = useState<boolean>(true);
     const [loadEdit, setLoadEdit] = useState<boolean>(false);
@@ -21,8 +20,6 @@ const MasterDataProducts: any = (props: any) => {
     const [testName, setTestName] = useState<string>("");
     const [currentId, setCurrentId] = useState<string>("");
     const [currentEditId, setCurrentEditId] = useState<string>("");
-    
-    const { getProduct, getProductId, putProductId, postProduct, deleteProductId } = getLISTransportAPI();
     
     const columnsProducts: GridColDef[] = [
         { field: 'productId', headerName: t('id'), flex: 1 },
@@ -48,7 +45,7 @@ const MasterDataProducts: any = (props: any) => {
     const getProductsService = async () => {
         setLoadResults(true);
         try {
-            const products = await getProduct({ pageSize: 500 });
+            const products = await getProduct({query: { pageSize: 500 }});
             setProducts(products.data);
             setLoadResults(false);
         }
@@ -64,9 +61,9 @@ const MasterDataProducts: any = (props: any) => {
     const getProductService = async (id: number) => {
         setLoadEdit(true);
         try {
-            const product = await getProductId(id);
+            const product = await getProductById({path: {id: id}});
             var result = product.data;
-            setTestName(result.productName ?? "");
+            setTestName(result?.productName ?? "");
             setLoadEdit(false);
         }
         catch(err: unknown) {
@@ -82,21 +79,21 @@ const MasterDataProducts: any = (props: any) => {
         if (testName !== "") {
             try {
                 var dataSent: ProductViewModel;
-                var response = null;
+                //var response = null;
                 if (currentEditId !== "") {
                     dataSent = {
                         "productId": Number(currentEditId),
                         "productName": testName,
                     };
-                    response = await putProductId(Number(currentEditId), dataSent);
+                     await putProductById({body: dataSent, path: {id: Number(currentEditId)}});
                 }
                 else {
                     dataSent = {
                         "productName": testName,
                     };
-                    response = await postProduct(dataSent);
+                    await postProduct({ body: dataSent });
                 }
-                enqueueSnackbar(currentEditId === "" ? "The product has been added with success!" : "The product has been edited with success!", { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                enqueueSnackbar(currentEditId === "" ? t('productAdded') : t('productEdited'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
                 getProductsService();
                 setModal(false);    
             }
@@ -112,7 +109,7 @@ const MasterDataProducts: any = (props: any) => {
     
     const deleteProductService = async (id: number) => {
         try {
-            await deleteProductId(id);
+            await deleteProductById({path: {id: id}});
             enqueueSnackbar(t('rowDeletedSuccess'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
             setModal2(false);
             getProductsService();
@@ -132,10 +129,10 @@ const MasterDataProducts: any = (props: any) => {
             <SnackbarProvider />
             <Box py={2.5}>
                 <Grid container spacing={2} mt={0} px={5}>
-                    <Grid item xs={12} md={8}>
+                    <Grid size={{ xs: 12, md: 8 }}>
                         <Typography sx={{ fontSize: 18, mb: 1 }}><b>{t('listProducts')}</b></Typography>
                     </Grid>
-                    <Grid item xs={12} md={4}>
+                    <Grid size={{ xs: 12, md: 4 }}>
                         <Button 
                             variant="contained" color="inherit" 
                             sx={{ float: "right", backgroundColor: "#fff", textTransform: "none", ml: 2 }} 
@@ -151,7 +148,7 @@ const MasterDataProducts: any = (props: any) => {
                             {t('newProduct')}
                         </Button>
                     </Grid>
-                    <Grid item xs={12}>
+                    <Grid size={{ xs: 12 }}>
                         {
                             !loadResults ? 
                             products !== null && products.length !== 0 ?
@@ -205,7 +202,7 @@ const MasterDataProducts: any = (props: any) => {
                     {
                         loadEdit === false ?
                         <Grid container spacing={2}>
-                            <Grid item xs={12}>
+                            <Grid size={{ xs: 12 }}>
                                 <InputLabel htmlFor="test-name" sx={inputLabelStyles}>{t('productName')}</InputLabel>
                                 <BootstrapInput id="test-name" type="text" value={testName} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTestName(e.target.value)} fullWidth />
                             </Grid>

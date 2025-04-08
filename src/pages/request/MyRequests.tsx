@@ -3,55 +3,17 @@ import List from '@mui/material/List';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import { Dayjs } from 'dayjs';
-import { Alert, Button, Grid, Skeleton } from '@mui/material';
+import { Alert, Button, Skeleton } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import SearchIcon from '@mui/icons-material/Search';
-import { protectedResources } from '../../config/authConfig';
 import { enqueueSnackbar, SnackbarProvider } from 'notistack';
-import { useAuthorizedBackendApi } from '../../api/api';
-import { BackendService } from '../../utils/services/fetch';
-import { RequestResponseDto } from '../../utils/models/models';
 import { useAccount, useMsal } from '@azure/msal-react';
 import { useTranslation } from 'react-i18next';
-import RequestViewItem from '../../components/requestsPage/RequestViewItem';
-import SearchZone from '../../components/requestsPage/SearchZone';
-import { useSelector } from 'react-redux';
-import { getRequestQuote } from '../../api/client/quoteService';
+import RequestViewItem from '../../components/request/RequestViewItem';
+import SearchZone from '../../components/request/SearchZone';
+import { getApiAssignee, getApiRequest } from '../../api/client/quote';
 
-function createGetRequestUrl(variable1: string, variable2: string, variable3: string, variable4: string, variable5: Dayjs|null, variable6: Dayjs|null, variable7: Dayjs|null, variable8: Dayjs|null, assigneeId: number) {
-    let url = protectedResources.apiLisQuotes.endPoint+'/Request?';
-    if (variable1) {
-      url += 'departure=' + encodeURIComponent(variable1) + '&';
-    }
-    if (variable2) {
-      url += 'arrival=' + encodeURIComponent(variable2) + '&';
-    }
-    if (variable3) {
-      url += 'packingType=' + encodeURIComponent(variable3) + '&';
-    }
-    if (variable4) {
-      url += 'status=' + encodeURIComponent(variable4) + '&';
-    }
-    if (variable5) {
-        url += 'createdAtStart=' + encodeURIComponent(variable5.format('YYYY-MM-DDTHH:mm:ss')) + '&';
-    }
-    if (variable6) {
-        url += 'createdAtEnd=' + encodeURIComponent(variable6.format('YYYY-MM-DDTHH:mm:ss')) + '&';
-    }
-    if (variable7) {
-        url += 'updatedAtStart=' + encodeURIComponent(variable7.format('YYYY-MM-DDTHH:mm:ss')) + '&';
-    }
-    if (variable8) {
-        url += 'updatedAtEnd=' + encodeURIComponent(variable8.format('YYYY-MM-DDTHH:mm:ss')) + '&';
-    } 
-    url+= 'assigneeId=' + assigneeId + '&';
-    
-    if (url.slice(-1) === '&') {
-      url = url.slice(0, -1);
-    }
-    return url;
-}
-
-function MyRequests() {
+const MyRequests = () => {
     const [notifications, setNotifications] = useState<any>(null);
     const [load, setLoad] = useState<boolean>(true);
     const [assignees, setAssignees] = useState<any>(null);
@@ -65,12 +27,9 @@ function MyRequests() {
     const [updatedDateStart, setUpdatedDateStart] = useState<Dayjs | null>(null);
     const [updatedDateEnd, setUpdatedDateEnd] = useState<Dayjs | null>(null);
 
-    const { instance, accounts } = useMsal();
+    const { accounts } = useMsal();
     const account = useAccount(accounts[0] || {});    
-    const context = useAuthorizedBackendApi();
-
-    var ourAssignees: any = useSelector((state: any) => state.masterdata.assignees);
-
+    
     const handleChangePackingType = (event: { target: { value: string } }) => {
         setPackingType(event.target.value);
     };
@@ -83,7 +42,7 @@ function MyRequests() {
     
     useEffect(() => {
         getAssignees();
-    }, [instance, account]);
+    }, []);
 
     useEffect(() => {
         if (assignees !== null && assignees !== undefined) {
@@ -92,86 +51,75 @@ function MyRequests() {
     }, [assignees]);
 
     const getAssignees = async () => {
-        if (account && instance && context) {
-            if (ourAssignees !== undefined) {
-                console.log(ourAssignees);
-                setAssignees(ourAssignees.data);
+        try {
+            setLoad(true);
+            const response: any = await getApiAssignee();
+            if (response !== null && response !== undefined) {
+                setAssignees(response.data.data);
                 setLoad(false);
             }
             else {
-                try {
-                    setLoad(true);
-                    const response = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisQuotes.endPoint+"/Assignee", context.tokenLogin);
-                    if (response !== null && response.code !== undefined) {
-                        if (response.code === 200) {
-                            setAssignees(response.data);
-                            setLoad(false);
-                        }
-                        else {
-                            setLoad(false);
-                        }
-                    }
-                    else {
-                        setLoad(false);
-                    }   
-                }
-                catch (err: any) {
-                    setLoad(false);
-                    console.log(err);
-                }
-            }    
+                setLoad(false);
+            }   
+        }
+        catch (err: any) {
+            setLoad(false);
+            console.log(err);
         }
     }
     
     const loadRequests = async (assigneesList: any) => {
-        if (account && instance && context) {
+        try {
             var auxAssignee = assigneesList.find((elm: any) => elm.email === account?.username);
-            console.log("Acc", account);
-            console.log("Auxlist", assigneesList);
-            console.log("Auxass", auxAssignee);
+            // console.log("Acc", account);
+            // console.log("Auxlist", assigneesList);
+            // console.log("Auxass", auxAssignee);
             if (auxAssignee !== undefined) {
-                const response: RequestResponseDto = await (context?.service as BackendService<any>).getWithToken(protectedResources.apiLisQuotes.endPoint+"/Request?AssigneeId="+auxAssignee.id, context.tokenLogin);
-                if (response !== null && response.code !== undefined && response.data !== undefined) {
-                    if (response.code === 200) {
-                        setLoad(false);
-                        setNotifications(response.data.reverse());
-                    }
-                    else {
-                        setLoad(false);
-                        enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
-                    }
+                setCurrentUser(auxAssignee)
+                const response: any = await getApiRequest({query: {AssigneeId: auxAssignee.id}});
+                if (response !== null && response !== undefined) {
+                    setLoad(false);
+                    setNotifications(response.data.data.reverse());
                 }  
+                else {
+                    setLoad(false);
+                    enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                }
             }
             else {
                 setLoad(false);
                 enqueueSnackbar(t('cantFindRequestAssigned'), { variant: "warning", anchorOrigin: { horizontal: "right", vertical: "top"} });
             }
         }
+        catch (err: any) {
+            console.log(err);
+            setLoad(false);
+        }
     }
 
     const searchRequests = async () => {
-        if (account && instance && context) {
+        try {
             setLoad(true);
             var idAssignee = currentUser.id;
-            
             var postcode1 = "";
             var postcode2 = "";
             var auxDeparture = departure !== null && departure !== undefined ? [departure.city.toUpperCase(),departure.country,departure.latitude,departure.longitude,postcode1].filter((val: any) => { return val !== "" }).join(', ') : "";
             var auxArrival = arrival !== null && arrival !== undefined ? [arrival.city.toUpperCase(),arrival.country,arrival.latitude,arrival.longitude,postcode2].filter((val: any) => { return val !== "" }).join(', ') : "";
             console.log(auxDeparture, auxArrival);
-
-            var requestFormatted = createGetRequestUrl(auxDeparture, auxArrival, packingType, status, createdDateStart, createdDateEnd, updatedDateStart, updatedDateEnd, idAssignee);
-            const response: RequestResponseDto = await (context?.service as BackendService<any>).getSingle(requestFormatted);
-            if (response !== null && response.code !== undefined && response.data !== undefined) {
-                if (response.code === 200) {
-                    setLoad(false);
-                    setNotifications(response.data.reverse());
-                }
-                else {
-                    setLoad(false);
-                    enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
-                }
+            
+            const response: any = await getApiRequest({query: {Departure: auxDeparture, Arrival: auxArrival, PackingType: packingType, Status: status, CreatedAtStart: createdDateStart?.format('YYYY-MM-DDTHH:mm:ss'), CreatedAtEnd: createdDateEnd?.format('YYYY-MM-DDTHH:mm:ss'), UpdatedAtStart: updatedDateStart?.format('YYYY-MM-DDTHH:mm:ss'), UpdatedAtEnd: updatedDateEnd?.format('YYYY-MM-DDTHH:mm:ss'), AssigneeId: idAssignee}});
+            if (response !== null && response !== undefined) {
+                setLoad(false);
+                setNotifications(response.data.data.reverse());
             }  
+            else {
+                setLoad(false);
+                enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+            }
+        }
+        catch (err: any) {
+            console.log(err);
+            setLoad(false);
         }
     }
 
@@ -186,13 +134,13 @@ function MyRequests() {
                         arrival={arrival} setArrival={setArrival}
                         packingType={packingType} handleChangePackingType={handleChangePackingType}
                         status={status} handleChangeStatus={handleChangeStatus}
-                        updatedDateStart={updatedDateStart} setUpdatedDateStart
+                        updatedDateStart={updatedDateStart} setUpdatedDateStart={setUpdatedDateStart}
                         updatedDateEnd={updatedDateEnd} setUpdatedDateEnd={setUpdatedDateEnd}
                         createdDateEnd={createdDateEnd} setCreatedDateEnd={setCreatedDateEnd}
                         createdDateStart={createdDateStart} setCreatedDateStart={setCreatedDateStart}
                     />
                     
-                    <Grid item xs={12} md={2} mt={1} sx={{ display: "flex", alignItems: "end" }}>
+                    <Grid size={{ xs: 12, md: 2 }} mt={1} sx={{ display: "flex", alignItems: "end" }}>
                         <Button 
                             variant="contained" 
                             color="inherit"

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Autocomplete, CircularProgress, Skeleton, TextField } from "@mui/material";
 import { debounce } from "@mui/material/utils";
 import { useTranslation } from "react-i18next";
-import { getLisCrmApi } from "../../api/client/crmService";
+import { getContactGetContacts } from "../../api/client/crm";
 
 interface CompanyAutocompleteProps {
     id: string;
@@ -10,7 +10,7 @@ interface CompanyAutocompleteProps {
     onChange: (value: any) => void;
     fullWidth?: boolean;
     disabled?: boolean;
-    category: number;
+    category: 'CUSTOMERS' | 'SUPPLIERS' | 'CHARGEUR' | 'RECEIVER' | 'SHIPPING_LINES' | 'BANK' | 'SHIPPING_AGENCY11' | undefined;
     callBack?: (value: any) => void;
 }
 
@@ -18,12 +18,11 @@ const CompanySearch: React.FC<CompanyAutocompleteProps> = ({ id, value, onChange
     const [loading, setLoading] = useState(false);
     const [options, setOptions] = useState<any[]>([]);
 
-    const { getContactGetContacts } = getLisCrmApi();
-
     const debouncedSearch = debounce(async (search: string) => {
         setLoading(true);
         try {
-            const response = await getContactGetContacts(category === 0 ? { contactName: search } : { contactName: search, category: category });
+            console.log(category);
+            const response = await getContactGetContacts(category === undefined ? {query: {contactName: search}} : {query: {contactName: search, category: category}});
             if (response !== null && response !== undefined) {
                 console.log(response);
                 setOptions(response.data?.data || []);
@@ -50,14 +49,14 @@ const CompanySearch: React.FC<CompanyAutocompleteProps> = ({ id, value, onChange
                 loading={loading}
                 noOptionsText={t('typeSomething')}
                 getOptionLabel={(option) => { 
-                    // console.log(option);
                     if (option !== undefined && option !== null && option !== "") {
                         return `${option.contactName}`;
                     }
                     return "";
                 }}
                 value={value}
-                onChange={(event, newValue) => {
+                size="small"
+                onChange={(_, newValue) => {
                     onChange(newValue);
                     if (callBack) {
                         callBack(newValue);
@@ -71,8 +70,8 @@ const CompanySearch: React.FC<CompanyAutocompleteProps> = ({ id, value, onChange
                             debouncedSearch(event.target.value);
                         }}
                         sx={{ mt: 1 }}
-                        InputProps={{
-                            ...params.InputProps,
+                        slotProps={{
+                            input: {...params.InputProps,
                             endAdornment: (
                             <>
                                 {loading ? (
@@ -80,7 +79,7 @@ const CompanySearch: React.FC<CompanyAutocompleteProps> = ({ id, value, onChange
                                 ) : null}
                                 {params.InputProps.endAdornment}
                             </>
-                            ),
+                            ),}
                         }}
                     />
                 )}
@@ -90,9 +89,5 @@ const CompanySearch: React.FC<CompanyAutocompleteProps> = ({ id, value, onChange
         </>
     );
 };
-
-CompanySearch.defaultProps = {
-    disabled: false
-}
 
 export default CompanySearch;

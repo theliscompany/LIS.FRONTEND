@@ -2,20 +2,19 @@ import * as React from 'react';
 import { useState, useEffect } from 'react';
 import Box from '@mui/material/Box';
 import { SnackbarProvider, enqueueSnackbar } from 'notistack';
-import { Alert, Button, DialogActions, DialogContent, Grid, IconButton, InputLabel, Skeleton, Typography } from '@mui/material';
+import { Alert, Button, DialogActions, DialogContent, IconButton, InputLabel, Skeleton, Typography } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { DataGrid, GridColDef, GridRenderCellParams, GridToolbar } from '@mui/x-data-grid';
 import { sizingStyles, gridStyles, BootstrapDialog, BootstrapDialogTitle, buttonCloseStyles, BootstrapInput, actionButtonStyles, inputLabelStyles } from '../../utils/misc/styles';
 import { Edit, Delete } from '@mui/icons-material';
-import CountrySelect from '../../components/shared/CountrySelect';
 import { countries } from '../../utils/constants';
 import { useTranslation } from 'react-i18next';
-import { getLISTransportAPI } from '../../api/client/transportService';
 import { AxiosError } from 'axios';
-import { PortViewModel } from '../../api/client/schemas/transport';
+import { createPort, deletePort, getPort, getPorts, PortViewModel, updatePort } from '../../api/client/transport';
+import CountrySelect from '../../components/shared/CountrySelect';
 
-const MasterDataPorts: any = (props: any) => {
+const MasterDataPorts: any = () => {
     const { t } = useTranslation();
-    
     const [products, setPorts] = useState<any>(null);
     const [loadResults, setLoadResults] = useState<boolean>(true);
     const [loadEdit, setLoadEdit] = useState<boolean>(false);
@@ -25,8 +24,6 @@ const MasterDataPorts: any = (props: any) => {
     const [country, setCountry] = useState<any>(null);
     const [currentId, setCurrentId] = useState<string>("");
     const [currentEditId, setCurrentEditId] = useState<string>("");
-    
-    const { getPorts, getPort, createPort, updatePort, deletePort } = getLISTransportAPI();
     
     const columnsPorts: GridColDef[] = [
         { field: 'portId', headerName: t('id'), flex: 1 },
@@ -53,7 +50,7 @@ const MasterDataPorts: any = (props: any) => {
     const getPortsService = async () => {
         setLoadResults(true);
         try {
-            const ports = await getPorts({ pageSize: 2000 });
+            const ports = await getPorts({query: { pageSize: 2000 }});
             setPorts(ports.data);
             setLoadResults(false);
         }
@@ -69,10 +66,10 @@ const MasterDataPorts: any = (props: any) => {
     const getPortService = async (id: number) => {
         setLoadEdit(true);
         try {
-            const port = await getPort(id);
+            const port = await getPort({path: {id: id}});
             var result = port.data;
-            setTestName(result.portName ?? "");
-            setCountry(countries.find((elm: any) => elm.label.toUpperCase() === result.country));
+            setTestName(result?.portName ?? "");
+            setCountry(countries.find((elm: any) => elm.label.toUpperCase() === result?.country));
             setLoadEdit(false);
         }
         catch(err: unknown) {
@@ -88,23 +85,23 @@ const MasterDataPorts: any = (props: any) => {
         if (testName !== "" && country !== null) {
             try {
                 var dataSent: PortViewModel;
-                var response = null;
+                //var response: any = null;
                 if (currentEditId !== "") {
                     dataSent = {
                         "portId": Number(currentEditId),
                         "portName": testName.toUpperCase() || null,
                         "country": String(country.label.toUpperCase()) || null,
                     };
-                    response = await updatePort(Number(currentEditId), dataSent);
+                    await updatePort({ body: dataSent, path: {id: Number(currentEditId)} });
                 }
                 else {
                     dataSent = {
                         "portName": testName.toUpperCase() || null,
                         "country": String(country.label.toUpperCase()) || null,
                     };
-                    response = await createPort(dataSent);
+                    await createPort({ body: dataSent });
                 }
-                enqueueSnackbar(currentEditId === "" ? "The port has been added with success!" : "The port has been edited with success!", { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                enqueueSnackbar(currentEditId === "" ? t('portAdded') : t('portEdited'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
                 getPortsService();
                 setModal(false);    
             }
@@ -120,7 +117,7 @@ const MasterDataPorts: any = (props: any) => {
     
     const deletePortService = async (id: number) => {
         try {
-            await deletePort(id);
+            await deletePort({ path: {id: id} });
             enqueueSnackbar(t('rowDeletedSuccess'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
             setModal2(false);
             getPortsService();
@@ -141,10 +138,10 @@ const MasterDataPorts: any = (props: any) => {
             <SnackbarProvider />
             <Box py={2.5}>
                 <Grid container spacing={2} mt={0} px={5}>
-                    <Grid item xs={12} md={8}>
+                    <Grid size={{ xs: 12, md: 8 }}>
                         <Typography sx={{ fontSize: 18, mb: 1 }}><b>{t('listPorts')}</b></Typography>
                     </Grid>
-                    <Grid item xs={12} md={4}>
+                    <Grid size={{ xs: 12, md: 4 }}>
                         <Button 
                             variant="contained" color="inherit" 
                             sx={{ float: "right", backgroundColor: "#fff", textTransform: "none", ml: 2 }} 
@@ -160,7 +157,7 @@ const MasterDataPorts: any = (props: any) => {
                             {t('newPort')}
                         </Button>
                     </Grid>
-                    <Grid item xs={12}>
+                    <Grid size={{ xs: 12 }}>
                         {
                             !loadResults ? 
                             products !== null && products.length !== 0 ?
@@ -214,11 +211,11 @@ const MasterDataPorts: any = (props: any) => {
                     {
                         loadEdit === false ?
                         <Grid container spacing={2}>
-                            <Grid item xs={12}>
+                            <Grid size={{ xs: 12 }}>
                                 <InputLabel htmlFor="test-name" sx={inputLabelStyles}>{t('portName')}</InputLabel>
                                 <BootstrapInput id="test-name" type="text" value={testName} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTestName(e.target.value)} fullWidth />
                             </Grid>
-                            <Grid item xs={12}>
+                            <Grid size={{ xs: 12 }}>
                                 <InputLabel htmlFor="test-country" sx={inputLabelStyles}>{t('country')}</InputLabel>
                                 <CountrySelect id="test-country" value={country} onChange={setCountry} fullWidth />
                             </Grid>

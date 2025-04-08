@@ -1,12 +1,14 @@
 import { useEffect, useState } from 'react';
-import { Alert, Box, Button, Chip, Divider, Grid, List, ListItem, ListItemText, Typography } from '@mui/material';
+import { Alert, Box, Button, Chip, Divider, List, ListItem, ListItemText, Typography } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import Skeleton from '@mui/material/Skeleton';
-import { protectedResources } from '../config/authConfig';
 import { BootstrapInput } from '../utils/misc/styles';
 import { useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { getApiTrackingByTrackingNumber } from '../api/client/quote';
+import { parseLocation3 } from '../utils/functions';
 
-function Tracking() {
+const Tracking = () => {
     const { id } = useParams();
     const [trackingNumber, setTrackingNumber] = useState<string>(id !== undefined ? id : "");
     const [load, setLoad] = useState<boolean>(false);
@@ -23,16 +25,10 @@ function Tracking() {
     const loadRequest = async () => {
         setLoad(true);
         setTrackingData(null);
-        var myHeaders = new Headers();
-        myHeaders.append("Accept", "*/");
-        fetch(protectedResources.apiLisQuotes.endPoint+"/Tracking/"+trackingNumber, {
-            method: "GET",
-            headers: myHeaders
-        })
-        .then((response: any) => response.json())
+        getApiTrackingByTrackingNumber({path: {trackingNumber: trackingNumber}})
         .then((data: any) => {
-            if (data.code === 200) {
-                setTrackingData(data.data);
+            if (data.status === 200) {
+                setTrackingData(data.data.data);
                 setLoad(false);
                 console.log(data);
             }
@@ -40,7 +36,7 @@ function Tracking() {
                 setLoad(false);
             }
         })
-        .catch(error => { 
+        .catch(() => { 
             setLoad(false);
         });        
     }
@@ -48,28 +44,24 @@ function Tracking() {
     return (
         <Box sx={{ maxWidth: "lg", margin: "0 auto" }}>
             <Grid container my={5} sx={{ px: { md: 0, xs: 2 } }}>
-                <Grid item xs={12} fontSize={16} my={3}>
-                    <Typography variant="h4" fontWeight="bold">{t('requestTracking')}</Typography>
+                <Grid size={{ xs: 12 }} fontSize={16} my={3}>
+                    <Typography component="div" variant="h4" fontWeight="bold">{t('requestTracking')}</Typography>
                 </Grid>
-                <Grid item xs={12} md={6} mt={2}>
+                <Grid size={{ xs: 12, md: 6 }} mt={2}>
                     <BootstrapInput id="tracking-number" type="text" placeholder={t('trackingNumber')} value={trackingNumber} onChange={(e: any) => { setTrackingNumber(e.target.value); }} fullWidth />
                 </Grid>
-                <Grid item xs={12} md={6} mt={2}>
+                <Grid size={{ xs: 12, md: 6 }} mt={2}>
                     <Button variant="contained" color={!load ? "primary" : "info"} size="large" className="mr-3" onClick={loadRequest}  sx={{ textTransform: "none", ml: { md: 3, xs: 0 } }}>{t('trackMyRequest')}</Button>
                 </Grid>
-                <Grid item xs={12} md={12} mt={2}>
+                <Grid size={{ xs: 12, md: 12 }} mt={2}>
                     {
                         load ? <Skeleton sx={{ mt: 3 }} /> : 
                         trackingData !== null && trackingData !== undefined ? 
                         <Box>
-                            {/* {
-                                trackingData.assignee !== null ? 
-                                <Alert severity="info">Your request has been assigned to the agent : {trackingData.assignee.name}. You can contact her/him at this email : {trackingData.assignee.email} </Alert> : <Alert severity="warning">There is no agent assigned for the moment. For questions, please contact contact-assign@omnifreight.eu </Alert>
-                            } */}
                             <Alert severity='info'>
                                 {t('weAreWorkingOnRequest')}
                             </Alert>
-                            <Typography sx={{ mt: 3 }}>{t('requestStatus')} : <Chip size="small" label={trackingData.status} color={trackingData.status === "EnAttente" ? "warning" : trackingData.status === "Valider" ? "success" : "error"} sx={{ ml: 1 }} /> </Typography>
+                            <Typography component="div" sx={{ mt: 3 }}>{t('requestStatus')} : <Chip size="small" label={trackingData.status} color={trackingData.status === "EnAttente" ? "warning" : trackingData.status === "Valider" ? "success" : "error"} sx={{ ml: 1 }} /> </Typography>
                             <List sx={{ my: 3, border: "1px #e2e2e2 solid" }} dense>
                                 <ListItem>
                                     <ListItemText primary={t(('WhatsappNumber'))} secondary={trackingData.requestQuoteData.whatsapp} />
@@ -80,11 +72,11 @@ function Tracking() {
                                 </ListItem>
                                 <Divider />
                                 <ListItem>
-                                    <ListItemText primary={t('departure')} secondary={trackingData.requestQuoteData.departure} />
+                                    <ListItemText primary={t('departure')} secondary={parseLocation3(trackingData.requestQuoteData.departure)} />
                                 </ListItem>
                                 <Divider />
                                 <ListItem>
-                                    <ListItemText primary={t('arrival')} secondary={trackingData.requestQuoteData.arrival} />
+                                    <ListItemText primary={t('arrival')} secondary={parseLocation3(trackingData.requestQuoteData.arrival)} />
                                 </ListItem>
                                 <Divider />
                                 <ListItem>
@@ -104,7 +96,7 @@ function Tracking() {
                                 </ListItem>
                             </List>
                         </Box> 
-                        : <Typography sx={{ mt: 3 }}>{t('trackingCodeNotDefined')}</Typography>
+                        : <Typography component="div" sx={{ mt: 3 }}>{t('trackingCodeNotDefined')}</Typography>
                     }
                 </Grid>
             </Grid>

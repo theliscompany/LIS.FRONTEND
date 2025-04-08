@@ -1,43 +1,32 @@
 import * as React from 'react';
 import { useState, useEffect } from 'react';
 import { SnackbarProvider, enqueueSnackbar } from 'notistack';
-import { useMsal, useAccount } from '@azure/msal-react';
-import { useAuthorizedBackendApi } from '../../api/api';
-import { Alert, Box, Button, DialogActions, DialogContent, Grid, IconButton, InputLabel, Skeleton, Typography } from '@mui/material';
-import { DataGrid, GridColDef, GridRenderCellParams, GridToolbar } from '@mui/x-data-grid';
-// import { t } from 'i18next';
+import { Alert, Box, Button, DialogActions, DialogContent, InputLabel, Skeleton, Typography } from '@mui/material';
+import Grid from '@mui/material/Grid2';
+import { DataGrid, GridColDef, GridToolbar } from '@mui/x-data-grid';
 import { sizingStyles, gridStyles, BootstrapDialog, BootstrapDialogTitle, buttonCloseStyles, BootstrapInput, actionButtonStyles, inputLabelStyles } from '../../utils/misc/styles';
 import { useTranslation } from 'react-i18next';
-import { getRequestQuote } from '../../api/client/quoteService';
 import { AxiosError } from 'axios';
-import { HSCodeLIS } from '../../api/client/schemas/quote';
+import { getApiHsCodeLis, HSCodeLIS, postApiHsCodeLis, putApiHsCodeLisById } from '../../api/client/quote';
 
-const MasterDataHSCodes: any = (props: any) => {
+const MasterDataHSCodes: any = () => {
     const { t } = useTranslation();
     
     const [products, setHSCodes] = useState<any>(null);
     const [loadResults, setLoadResults] = useState<boolean>(true);
-    const [loadEdit, setLoadEdit] = useState<boolean>(false);
+    // const [loadEdit, setLoadEdit] = useState<boolean>(false);
     const [modal, setModal] = useState<boolean>(false);
-    const [modal2, setModal2] = useState<boolean>(false);
-    const [testName, setTestName] = useState<string>("");
+    // const [testName, setTestName] = useState<string>("");
     const [category, setCategory] = useState<string>("");
     const [descriptionFr, setDescriptionFr] = useState<string>("");
     const [descriptionEn, setDescriptionEn] = useState<string>("");
     const [descriptionNl, setDescriptionNl] = useState<string>("");
-    const [currentId, setCurrentId] = useState<string>("");
     const [currentEditId, setCurrentEditId] = useState<string>("");
     
-    const { instance, accounts } = useMsal();
-    const account = useAccount(accounts[0] || {});
-    const context = useAuthorizedBackendApi();
-
-    const { getApiHSCodeLIS, postApiHSCodeLIS, putApiHSCodeLISId } = getRequestQuote();
-
     const getHSCodesService = async () => {
         setLoadResults(true);
         try {
-            const codes = await getApiHSCodeLIS();
+            const codes: any = await getApiHsCodeLis();
             setHSCodes(codes.data);
             setLoadResults(false);
         }
@@ -88,7 +77,6 @@ const MasterDataHSCodes: any = (props: any) => {
         if (category !== "" && descriptionFr !== "" && descriptionEn !== "" && descriptionNl !== "") {
             try {
                 var dataSent: HSCodeLIS;
-                var response = null;
                 if (currentEditId !== "") {
                     dataSent = {
                         "hS_Code": Number(currentEditId),
@@ -97,8 +85,7 @@ const MasterDataHSCodes: any = (props: any) => {
                         "product_description_En": descriptionEn,
                         "product_description_NL": descriptionNl,
                     };
-                    // response = await (context?.service as BackendService<any>).putWithToken(protectedResources.apiLisQuotes.endPoint+"/HSCodeLIS/"+currentEditId, dataSent, context.tokenLogin);
-                    response = await putApiHSCodeLISId(Number(currentEditId), dataSent);
+                    await putApiHsCodeLisById({body: dataSent, path: {id: Number(currentEditId)}});
                 }
                 else {
                     dataSent = {
@@ -107,10 +94,9 @@ const MasterDataHSCodes: any = (props: any) => {
                         "product_description_En": descriptionEn,
                         "product_description_NL": descriptionNl,
                     };
-                    // response = await (context?.service as BackendService<any>).postWithToken(protectedResources.apiLisQuotes.endPoint+"/HSCodeLIS", dataSent, context.tokenLogin);
-                    response = await postApiHSCodeLIS(dataSent);
+                    await postApiHsCodeLis({body: dataSent});
                 }
-                enqueueSnackbar(currentEditId === "" ? "The hs-code has been added with success!" : "The hs-code has been edited with success!", { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                enqueueSnackbar(currentEditId === "" ? t('hscodeAdded') : t('hscodeEdited'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
                 getHSCodesService();
                 setModal(false);    
             }
@@ -125,7 +111,7 @@ const MasterDataHSCodes: any = (props: any) => {
     }
     
     const resetForm = () => {
-        setTestName("");
+        // setTestName("");
         setCategory("");
         setDescriptionFr("");
         setDescriptionEn("");
@@ -137,10 +123,10 @@ const MasterDataHSCodes: any = (props: any) => {
             <SnackbarProvider />
             <Box py={2.5}>
                 <Grid container spacing={2} mt={0} px={5}>
-                    <Grid item xs={12} md={8}>
+                    <Grid size={{ xs: 12, md: 8 }}>
                         <Typography sx={{ fontSize: 18, mb: 1 }}><b>{t('listHSCodes')}</b></Typography>
                     </Grid>
-                    <Grid item xs={12} md={4}>
+                    <Grid size={{ xs: 12, md: 4 }}>
                         <Button 
                             variant="contained" color="inherit" 
                             sx={{ float: "right", backgroundColor: "#fff", textTransform: "none", ml: 2 }} 
@@ -156,7 +142,7 @@ const MasterDataHSCodes: any = (props: any) => {
                             {t('newHSCode')}
                         </Button>
                     </Grid>
-                    <Grid item xs={12}>
+                    <Grid size={{ xs: 12 }}>
                         {
                             !loadResults ? 
                             products !== null && products.length !== 0 ?
@@ -199,34 +185,32 @@ const MasterDataHSCodes: any = (props: any) => {
             <BootstrapDialog
                 onClose={() => setModal(false)}
                 aria-labelledby="custom-dialog-title"
-                open={modal}
-                maxWidth="sm"
-                fullWidth
+                open={modal} maxWidth="sm" fullWidth
             >
                 <BootstrapDialogTitle id="custom-dialog-title7" onClose={() => setModal(false)}>
                     <b>{currentEditId === "" ? t('createRowHSCode') : t('editRowHSCode')}</b>
                 </BootstrapDialogTitle>
                 <DialogContent dividers>
                     {
-                        loadEdit === false ?
+                        true ? // loadEdit === false ?
                         <Grid container spacing={2}>
                             {/* <Grid item xs={12}>
                                 <InputLabel htmlFor="test-name" sx={inputLabelStyles}>HSCode name</InputLabel>
                                 <BootstrapInput id="test-name" type="text" value={testName} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTestName(e.target.value)} fullWidth />
                             </Grid> */}
-                            <Grid item xs={12}>
-                                <InputLabel htmlFor="category" sx={inputLabelStyles}>4 Digit Categories</InputLabel>
+                            <Grid size={{ xs: 12 }}>
+                                <InputLabel htmlFor="category" sx={inputLabelStyles}>{t('digitCategories')}</InputLabel>
                                 <BootstrapInput id="category" type="text" value={category} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setCategory(e.target.value)} fullWidth />
                             </Grid>
-                            <Grid item xs={12}>
+                            <Grid size={{ xs: 12 }}>
                                 <InputLabel htmlFor="descriptionFr" sx={inputLabelStyles}>Description (Fr)</InputLabel>
                                 <BootstrapInput id="descriptionFr" type="text" multiline rows={3} value={descriptionFr} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setDescriptionFr(e.target.value)} fullWidth />
                             </Grid>
-                            <Grid item xs={12}>
+                            <Grid size={{ xs: 12 }}>
                                 <InputLabel htmlFor="descriptionEn" sx={inputLabelStyles}>Description (En)</InputLabel>
                                 <BootstrapInput id="descriptionEn" type="text" multiline rows={3} value={descriptionEn} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setDescriptionEn(e.target.value)} fullWidth />
                             </Grid>
-                            <Grid item xs={12}>
+                            <Grid size={{ xs: 12 }}>
                                 <InputLabel htmlFor="descriptionNL" sx={inputLabelStyles}>Description (Nl)</InputLabel>
                                 <BootstrapInput id="descriptionNL" type="text" multiline rows={3} value={descriptionNl} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setDescriptionNl(e.target.value)} fullWidth />
                             </Grid>

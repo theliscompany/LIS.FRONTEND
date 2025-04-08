@@ -2,46 +2,37 @@ import * as React from 'react';
 import { useState, useEffect } from 'react';
 import Box from '@mui/material/Box';
 import { SnackbarProvider, enqueueSnackbar } from 'notistack';
-import { Alert, Button, DialogActions, DialogContent, Grid, IconButton, InputLabel, MenuItem, Select, Skeleton, Typography } from '@mui/material';
+import { Alert, Button, DialogActions, DialogContent, IconButton, InputLabel, MenuItem, Select, Skeleton, Typography } from '@mui/material';
 import { DataGrid, GridColDef, GridRenderCellParams, GridToolbar } from '@mui/x-data-grid';
-// import { t } from 'i18next';
+import Grid from '@mui/material/Grid2';
 import { sizingStyles, gridStyles, BootstrapDialog, BootstrapDialogTitle, buttonCloseStyles, BootstrapInput, actionButtonStyles, inputLabelStyles, properties } from '../../utils/misc/styles';
 import { Edit } from '@mui/icons-material';
 import CountrySelect from '../../components/shared/CountrySelect';
-import { categoriesOptions, CategoryEnum, countries } from '../../utils/constants';
+import { categoriesOptions } from '../../utils/constants';
 import { MuiTelInput } from 'mui-tel-input';
 import { useTranslation } from 'react-i18next';
-import { getLisCrmApi } from '../../api/client/crmService';
 import { AxiosError } from 'axios';
-import { ContactViewModel, CreateContactViewModel, UpdateContactViewModel } from '../../api/client/schemas/crm';
+import { CreateContactViewModel, getContactGetContactByIdById, getContactGetContacts, postContactCreateContact, putContactUpdateContactById, UpdateContactViewModel } from '../../api/client/crm';
+import { getCategoryNames } from '../../utils/functions';
 
 
-const MasterDataContacts: any = (props: any) => {
+const MasterDataContacts: any = () => {
     const { t } = useTranslation();
     
     const [contacts, setContacts] = useState<any>(null);
     const [loadResults, setLoadResults] = useState<boolean>(true);
     const [loadEdit, setLoadEdit] = useState<boolean>(false);
     const [modal, setModal] = useState<boolean>(false);
-    const [modal2, setModal2] = useState<boolean>(false);
+    // const [modal2, setModal2] = useState<boolean>(false);
     const [testName, setTestName] = useState<string>("");
     const [country, setCountry] = useState<any>(null);
     const [addressCountry, setAddressCountry] = useState<string>("");
     const [testPhone, setTestPhone] = useState<string>("");
     const [testEmail, setTestEmail] = useState<string>("");
     const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-    const [currentId, setCurrentId] = useState<string>("");
+    // const [currentId, setCurrentId] = useState<string>("");
     const [currentEditId, setCurrentEditId] = useState<string>("");
     
-    const { getContactGetContacts, getContactGetContactByIdId, postContactCreateContact, putContactUpdateContactId, deleteContactDeleteContactId } = getLisCrmApi();
-
-    function getCategoryNames(inputArray: any) {
-        return inputArray.map((id: any) => {
-            const category = categoriesOptions.find((category: any) => category.value === id);
-            return category ? category.name : null;
-        }).filter((name: any) => name !== null);
-    }
-      
     const columnsContacts: GridColDef[] = [
         { field: 'contactId', headerName: t('id'), flex: 0.5 },
         { field: 'contactName', headerName: t('contactName'), flex: 1.75 },
@@ -80,8 +71,8 @@ const MasterDataContacts: any = (props: any) => {
     const getContactsService = async () => {
         setLoadResults(true);
         try {
-            const conts = await getContactGetContacts({ pageSize: 4000 });
-            setContacts(conts.data.data);
+            const conts = await getContactGetContacts({query: {pageSize: 4000}});
+            setContacts(conts.data?.data);
             setLoadResults(false);
         }
         catch (err: unknown) {
@@ -96,13 +87,13 @@ const MasterDataContacts: any = (props: any) => {
     const getContactService = async (id: number) => {
         setLoadEdit(true);
         try {
-            const cont1 = await getContactGetContactByIdId(id);
+            const cont1 = await getContactGetContactByIdById({path: {id: id}});
             var result = cont1.data;
-            setTestName(result.data?.contactName || "");
-            // setCountry(countries.find((elm: any) => elm.label.toUpperCase() === result.data?.countryCode));
-            setTestPhone(result.data?.phone || "");
-            setTestEmail(result.data?.email || "");
-            setSelectedCategories(result.data?.categories || []);
+            setTestName(result?.data?.contactName || "");
+            // setCountry(countries.find((elm: any) => elm.label.toUpperCase() === result?.data?.countryCode));
+            setTestPhone(result?.data?.phone || "");
+            setTestEmail(result?.data?.email || "");
+            setSelectedCategories(result?.data?.categories || []);
             // setSelectedCategories(getCategoryNames(result.data?.categories));
             setLoadEdit(false);
         }
@@ -118,7 +109,7 @@ const MasterDataContacts: any = (props: any) => {
     const createNewContact = async () => {
         if (country !== null && testName !== "" && testPhone !== "" && testEmail !== "" && addressCountry !== "") {
             try {
-                var response = null;
+                //var response = null;
                 if (currentEditId !== "") {
                     var dataSent: UpdateContactViewModel = {
                         // "contactId": Number(currentEditId),
@@ -128,10 +119,10 @@ const MasterDataContacts: any = (props: any) => {
                         "countryCode": country.code,
                         "phone": testPhone,
                         "email": testEmail,
-                        "categories": selectedCategories,
-                        // "categories": getCategoryNames(selectedCategories)
+                        // "categories": selectedCategories,
+                        "categories": getCategoryNames(selectedCategories)
                     };
-                    response = await putContactUpdateContactId(Number(currentEditId), dataSent);
+                    await putContactUpdateContactById({body: dataSent, path: {id: Number(currentEditId)}});
                 }
                 else {
                     var dataSent2: CreateContactViewModel = {
@@ -144,9 +135,9 @@ const MasterDataContacts: any = (props: any) => {
                         "categories": selectedCategories,
                         // "categories": getCategoryNames(selectedCategories)
                     };
-                    response = await postContactCreateContact(dataSent2);
+                    postContactCreateContact({body: dataSent2});
                 }
-                enqueueSnackbar(currentEditId === "" ? "The contact has been added with success!" : "The contact has been edited with success!", { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                enqueueSnackbar(currentEditId === "" ? t('contactAdded') : t('contactEdited'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
                 getContactsService();
                 setModal(false);    
             }
@@ -160,18 +151,18 @@ const MasterDataContacts: any = (props: any) => {
         }
     }
     
-    const deleteContactService = async (id: number) => {
-        try {
-            await deleteContactDeleteContactId(id);
-            enqueueSnackbar(t('rowDeletedSuccess'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
-            setModal2(false);
-            getContactsService();
-        }
-        catch (e: any) {
-            console.log(e);
-            enqueueSnackbar(t('rowDeletedError'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
-        }
-    }
+    // const deleteContactService = async (id: number) => {
+    //     try {
+    //         await deleteContactDeleteContactById({path: {id: id}});
+    //         enqueueSnackbar(t('rowDeletedSuccess'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
+    //         setModal2(false);
+    //         getContactsService();
+    //     }
+    //     catch (e: any) {
+    //         console.log(e);
+    //         enqueueSnackbar(t('rowDeletedError'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+    //     }
+    // }
 
     const resetForm = () => {
         setTestName("");
@@ -187,10 +178,10 @@ const MasterDataContacts: any = (props: any) => {
             <SnackbarProvider />
             <Box py={2.5}>
                 <Grid container spacing={2} mt={0} px={5}>
-                    <Grid item xs={12} md={8}>
+                    <Grid size={{xs: 12, md: 8}}>
                         <Typography sx={{ fontSize: 18, mb: 1 }}><b>{t('listContacts')}</b></Typography>
                     </Grid>
-                    <Grid item xs={12} md={4}>
+                    <Grid size={{xs: 12, md: 4}}>
                         <Button 
                             variant="contained" color="inherit" 
                             sx={{ float: "right", backgroundColor: "#fff", textTransform: "none", ml: 2 }} 
@@ -206,7 +197,7 @@ const MasterDataContacts: any = (props: any) => {
                             {t('newContact')}
                         </Button>
                     </Grid>
-                    <Grid item xs={12}>
+                    <Grid size={{xs: 12}}>
                         {
                             !loadResults ? 
                             contacts !== null && contacts.length !== 0 ?
@@ -260,27 +251,28 @@ const MasterDataContacts: any = (props: any) => {
                     {
                         loadEdit === false ?
                         <Grid container spacing={2}>
-                            <Grid item xs={12}>
+                            <Grid size={{xs: 12}}>
                                 <InputLabel htmlFor="test-name" sx={inputLabelStyles}>{t('contactName')}</InputLabel>
                                 <BootstrapInput id="test-name" type="text" value={testName} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTestName(e.target.value)} fullWidth />
                             </Grid>
-                            <Grid item xs={12}>
+                            <Grid size={{xs: 12}}>
                                 <InputLabel htmlFor="addressCountry" sx={inputLabelStyles}>{t('addressCountry')}</InputLabel>
                                 <BootstrapInput id="addressCountry" type="text" value={addressCountry} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setAddressCountry(e.target.value)} fullWidth />
                             </Grid>
-                            <Grid item xs={12}>
+                            <Grid size={{xs: 12}}>
                                 <InputLabel htmlFor="countryCode" sx={inputLabelStyles}>{t('countryCode')}</InputLabel>
                                 <CountrySelect id="countryCode" value={country} onChange={setCountry} fullWidth />
                             </Grid>
-                            <Grid item xs={12}>
+                            <Grid size={{xs: 12}}>
                                 <InputLabel htmlFor="my-email" sx={inputLabelStyles}>{t('emailAddress')}</InputLabel>
                                 <BootstrapInput id="my-email" type="email" value={testEmail} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTestEmail(e.target.value)} fullWidth />
                             </Grid>
-                            <Grid item xs={12}>
+                            <Grid size={{xs: 12}}>
                                 <InputLabel htmlFor="phone-number" sx={inputLabelStyles}>{t('whatsappNumber')}</InputLabel>
                                 <MuiTelInput 
                                     id="phone-number" 
                                     value={testPhone} 
+                                    size="small"
                                     onChange={setTestPhone} 
                                     defaultCountry="CM" 
                                     preferredCountries={["CM", "BE", "KE"]} 
@@ -289,7 +281,7 @@ const MasterDataContacts: any = (props: any) => {
                                     {...properties} 
                                 />
                             </Grid>
-                            <Grid item xs={12}>
+                            <Grid size={{xs: 12}}>
                                 <InputLabel htmlFor="test-categories" sx={inputLabelStyles}>{t('categories')}</InputLabel>
                                 <Select
                                     labelId="test-categories"
@@ -317,7 +309,7 @@ const MasterDataContacts: any = (props: any) => {
                 </DialogActions>
             </BootstrapDialog>
 
-            <BootstrapDialog open={modal2} onClose={() => setModal2(false)} maxWidth="sm" fullWidth>
+            {/* <BootstrapDialog open={modal2} onClose={() => setModal2(false)} maxWidth="sm" fullWidth>
                 <BootstrapDialogTitle id="custom-dialog-title" onClose={() => setModal2(false)}>
                     <b>{t('deleteRowContact')}</b>
                 </BootstrapDialogTitle>
@@ -326,7 +318,7 @@ const MasterDataContacts: any = (props: any) => {
                     <Button variant="contained" color={"primary"} onClick={() => { deleteContactService(Number(currentId)); }} sx={{ mr: 1.5, textTransform: "none" }}>{t('accept')}</Button>
                     <Button variant="contained" onClick={() => setModal2(false)} sx={buttonCloseStyles}>{t('close')}</Button>
                 </DialogActions>
-            </BootstrapDialog>
+            </BootstrapDialog> */}
         </div>
     );
 }
