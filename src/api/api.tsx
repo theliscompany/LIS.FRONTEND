@@ -3,7 +3,7 @@ import { getAccessToken } from "../utils/functions";
 import { useAccount, useMsal } from "@azure/msal-react";
 import { crmRequest, documentRequest, offerRequest, pricingRequest, quoteRequest, sessionstorageRequest, shipmentRequest, templateRequest, transportRequest } from "../config/msalConfig";
 import { client as shipmentClient } from "./client/shipment";
-import { client as transportClient } from "./client/transport";
+import { client as masterdataClient } from "./client/transport";
 import { client as documentClient } from "./client/document";
 import { client as crmClient } from "./client/crm";
 import { client as pricingClient } from "./client/pricing";
@@ -126,22 +126,22 @@ const BackendServiceProvider = ({children}:{children:React.ReactNode}) => {
             },
           });
     
-          transportClient.setConfig({
-            baseURL: import.meta.env.VITE_API_LIS_TRANSPORT_ENDPOINT,
+          masterdataClient.setConfig({
+            baseURL: import.meta.env.VITE_APIM_URL+ import.meta.env.VITE_MASTERDATA_API_URL_SUFFIX,
             headers: {
               Authorization: `Bearer ${_tokenTransport}`,
             },
           });
 
           documentClient.setConfig({
-            baseURL: import.meta.env.VITE_API_LIS_DOCUMENT_ENDPOINT,
+            baseURL: import.meta.env.VITE_APIM_URL + import.meta.env.VITE_DOCUMENT_API_URL_SUFFIX,
             headers: {
               Authorization: `Bearer ${_tokenDocument}`
             }
           });
 
           crmClient.setConfig({
-            baseURL: import.meta.env.VITE_API_LIS_CRM_ENDPOINT,
+            baseURL: import.meta.env.VITE_APIM_URL + import.meta.env.VITE_CRM_API_URL_SUFFIX,
             headers: {
               Authorization: `Bearer ${_tokenCrm}`
             },
@@ -150,35 +150,35 @@ const BackendServiceProvider = ({children}:{children:React.ReactNode}) => {
           });
 
           pricingClient.setConfig({
-            baseURL: import.meta.env.VITE_API_LIS_PRICING_ENDPOINT,
+            baseURL: import.meta.env.VITE_APIM_URL,
             headers: {
               Authorization: `Bearer ${_tokenPricing}`
             },
           });
 
           templateClient.setConfig({
-            baseURL: import.meta.env.VITE_API_LIS_TEMPLATE_ENDPOINT,
+            baseURL: import.meta.env.VITE_APIM_URL + import.meta.env.VITE_TEMPLATE_API_URL_SUFFIX,
             headers: {
               Authorization: `Bearer ${_tokenTemplate}`
             },
           });
 
           offerClient.setConfig({
-            baseURL: import.meta.env.VITE_API_LIS_OFFER_ENDPOINT,
+            baseURL: import.meta.env.VITE_APIM_URL + import.meta.env.VITE_OFFER_API_URL_SUFFIX,
             headers: {
               Authorization: `Bearer ${_tokenOffer}`
             },
           });
 
           quoteClient.setConfig({
-            baseURL: import.meta.env.VITE_API_LIS_QUOTE_ENDPOINT,
+            baseURL: import.meta.env.VITE_APIM_URL + import.meta.env.VITE_QUOTE_API_URL_SUFFIX,
             headers: {
               Authorization: `Bearer ${_tokenQuote}`
             },
           });
 
           sessionstorageClient.setConfig({
-            baseURL: import.meta.env.VITE_API_LIS_SESSIONSTORAGE_ENDPOINT,
+            baseURL: import.meta.env.VITE_APIM_URL + import.meta.env.VITE_SESSION_API_URL_SUFFIX,
             headers: {
               Authorization: `Bearer ${_tokenSessionstorage}`
             },
@@ -191,12 +191,12 @@ const BackendServiceProvider = ({children}:{children:React.ReactNode}) => {
             baseURL: import.meta.env.VITE_API_LIS_SHIPMENT_ENDPOINT,
           });
     
-          transportClient.setConfig({
-            baseURL: import.meta.env.VITE_API_LIS_TRANSPORT_ENDPOINT,
+          masterdataClient.setConfig({
+            baseURL: import.meta.env.VITE_APIM_URL+ import.meta.env.VITE_MASTERDATA_API_URL_SUFFIX,
           });
     
           documentClient.setConfig({
-            baseURL: import.meta.env.VITE_API_LIS_DOCUMENT_ENDPOINT,
+            baseURL: import.meta.env.VITE_APIM_URL+ import.meta.env.VITE_DOCUMENT_API_URL_SUFFIX,
           });
     
           crmClient.setConfig({
@@ -205,23 +205,23 @@ const BackendServiceProvider = ({children}:{children:React.ReactNode}) => {
           });
     
           pricingClient.setConfig({
-            baseURL: import.meta.env.VITE_API_LIS_PRICING_ENDPOINT,
+            baseURL: import.meta.env.VITE_APIM_URL,
           });
     
           templateClient.setConfig({
-            baseURL: import.meta.env.VITE_API_LIS_TEMPLATE_ENDPOINT,
+            baseURL: import.meta.env.VITE_APIM_URL + import.meta.env.VITE_TEMPLATE_API_URL_SUFFIX
           });
     
           offerClient.setConfig({
-            baseURL: import.meta.env.VITE_API_LIS_OFFER_ENDPOINT,
+            baseURL: import.meta.env.VITE_APIM_URL + import.meta.env.VITE_OFFER_API_URL_SUFFIX,
           });
     
           quoteClient.setConfig({
-            baseURL: import.meta.env.VITE_API_LIS_QUOTE_ENDPOINT,
+            baseURL: import.meta.env.VITE_APIM_URL + import.meta.env.VITE_QUOTE_API_URL_SUFFIX,
           });
     
           sessionstorageClient.setConfig({
-            baseURL: import.meta.env.VITE_API_LIS_SESSIONSTORAGE_ENDPOINT,
+            baseURL: import.meta.env.VITE_APIM_URL + import.meta.env.VITE_SESSION_API_URL_SUFFIX,
           });
         }
     
