@@ -26,7 +26,7 @@ export const msalConfig: Configuration = {
 
   export const transportRequest: PopupRequest = {
     scopes: [
-      import.meta.env.VITE_TRANSPORT_REQUEST_SCOPE !== undefined ? import.meta.env.VITE_TRANSPORT_REQUEST_SCOPE : ""
+      import.meta.env.VITE_MASTERDATA_REQUEST_SCOPE !== undefined ? import.meta.env.VITE_MASTERDATA_REQUEST_SCOPE : ""
     ]
   }
 
@@ -37,7 +37,7 @@ export const msalConfig: Configuration = {
   }
 
   export const crmRequest: PopupRequest = {
-    scopes: [
+      scopes: [
       import.meta.env.VITE_CRM_REQUEST_SCOPE !== undefined ? import.meta.env.VITE_CRM_REQUEST_SCOPE : ""
     ]
   }
