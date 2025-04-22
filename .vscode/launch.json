@@ -9,7 +9,7 @@
             "request": "launch",
             "type": "chrome",
             "url": "http://localhost:5173",
-            "webRoot": "${workspaceFolder}/QUOTE.UI_VITE/LIS.QUOTES.UI"
+            "webRoot": "${workspaceFolder}"
         }
     ]
 }
