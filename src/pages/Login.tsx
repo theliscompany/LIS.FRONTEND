@@ -15,8 +15,11 @@ import { loginRequest } from '../config/msalConfig';
 function Login() {
 	const { instance } = useMsal();
 	
-	const handleLogin = () => {
-		instance.loginRedirect(loginRequest);
+	const handleLogin = async () => {
+		// if (!instance.getAllAccounts().length) {
+        //     await instance.loginRedirect(loginRequest);
+        // }
+		await instance.loginRedirect(loginRequest);
 	}
 
 	return (
