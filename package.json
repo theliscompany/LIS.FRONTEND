@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "build:prod": "vite build --mode prod",
     "lint": "eslint .",
     "preview": "vite preview",
     "generate-client-shipment": "npx @hey-api/openapi-ts -i https://lis-shipment-svc-staging.azurewebsites.net/swagger/v1/swagger.json -o src/api/client/shipment -c @hey-api/client-axios",
