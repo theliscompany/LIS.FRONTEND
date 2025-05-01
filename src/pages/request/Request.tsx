@@ -82,7 +82,7 @@ const Request = () => {
             // console.log(lisPort);
             const matchingSeaPort = allMySeaPorts.find((seaPort: any) => 
                 (complexEquality(seaPort.name.toUpperCase(), lisPort.portName.toUpperCase()) || similar(seaPort.name, lisPort.portName) 
-                || (arePhoneticallyClose(seaPort.name.toUpperCase(), lisPort.portName.toUpperCase()) && complexEquality(seaPort.country.toUpperCase(), lisPort.country.toUpperCase()))));
+                || (arePhoneticallyClose(seaPort.name.toUpperCase(), lisPort.portName.toUpperCase()) && complexEquality(seaPort.country?.toUpperCase() ?? "", lisPort.country?.toUpperCase() ?? ""))));
             if (matchingSeaPort) {
                 return { ...lisPort, name: matchingSeaPort.name, coordinates: matchingSeaPort.coordinates };
             }
