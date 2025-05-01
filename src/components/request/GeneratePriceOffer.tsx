@@ -28,7 +28,8 @@ import ContainerElement from './ContainerElement';
 import ContainerPrice from './ContainerPrice';
 import { putApiRequestByIdChangeStatus } from '../../api/client/quote';
 import { getApiMiscellaneousMiscellaneous, getApiPricingHaulagesOfferRequest, getApiPricingSeaFreightsOffersRequest } from '../../api/client/pricing';
-import { getApiFileByFolder, postApiFileUpload } from '../../api/client/document';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { getApiFileByFolderOptions, postApiFileUploadMutation } from '../../api/client/document/@tanstack/react-query.gen';
 
 const defaultTemplate = "65b74024891f9de80722fc6d";
 
@@ -71,10 +72,34 @@ const GeneratePriceOffer = (props: any) => {
     const [modalCompare, setModalCompare] = useState<boolean>(false);
     const [modalFile, setModalFile] = useState<boolean>(false);
     const [modalOffer, setModalOffer] = useState<boolean>(false);
+
+    const queryClient = useQueryClient();
+
+    const {data: files, isFetching} = useQuery({
+        ...getApiFileByFolderOptions({path: {folder: "Standard"}})
+    }); 
+
+    const postFileUploadMutation = useMutation({
+        ...postApiFileUploadMutation(),
+        onSuccess: () => {  
+            enqueueSnackbar(t('fileAdded'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
+            queryClient.invalidateQueries(getApiFileByFolderOptions({path: {folder: "Standard"}}));
+            
+            setModalFile(false);
+        },
+        onError: () => {
+            enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+        }
+    });
+
+    useEffect(() => {
+        setLoadResults(isFetching);
+    }, [isFetching])
+    
     
     // const [loadCurrentOffer, setLoadCurrentOffer] = useState<boolean>(false);
     const [currentOffer, setCurrentOffer] = useState<any>(null);
-    const [files, setFiles] = useState<any>(null);
+    //const [files, setFiles] = useState<any>(null);
     const [fileValue, setFileValue] = useState<File[] | undefined>(undefined);    
     
     const rteRef = useRef<RichTextEditorRef>(null);
@@ -239,7 +264,7 @@ const GeneratePriceOffer = (props: any) => {
     
     useEffect(() => {
         console.log("Commm: ", props.commodities);
-        setFiles([]);
+        //setFiles([]);
         setMailLanguage(mailLanguage);
         if (props.commodities !== null && props.commodities !== undefined && props.commodities.length > 0) {
             if (validateObjectHSCODEFormat(props.commodities[0])) {
@@ -268,7 +293,6 @@ const GeneratePriceOffer = (props: any) => {
     }, [formState]);
     
     useEffect(() => {
-        getFiles();
         getTemplates();
     }, []);
     
@@ -418,40 +442,10 @@ const GeneratePriceOffer = (props: any) => {
             setLoadNewOffer(false);
         }
     }
-
-    const getFiles = async () => {
-        try {
-            setLoadResults(true);
-            const response: any = await getApiFileByFolder({path: {folder: "Standard"}});
-            if (response !== null && response !== undefined) {
-                console.log(response.data);
-                setFiles(response.data);
-                setLoadResults(false);
-            }
-            else {
-                setLoadResults(false);
-            }
-        }
-        catch (err: any) {
-            console.log(err);
-            setLoadResults(false);
-        }
-    }
     
     const uploadFile = async () => {
         if (fileValue !== undefined && fileValue !== null) {
-            try {
-                const response: any = await postApiFileUpload({query: {folder: "Standard"}, body: {file: fileValue[0]}});
-                enqueueSnackbar(t('fileAdded'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
-                getFiles();
-                setModalFile(false);
-                console.log(response.data);
-                // setFormState({...formState, files: [...formState.files, response.data.data]});
-            }
-            catch (err: any) {
-                enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
-                console.log(err);
-            }
+            await postFileUploadMutation.mutateAsync({query: {folder: "Standard"}, body: {file: fileValue[0]}})
         }
         else {
             enqueueSnackbar("The file field is empty, please verify it and pick a file.", { variant: "warning", anchorOrigin: { horizontal: "right", vertical: "top"} });
@@ -1890,7 +1884,7 @@ const GeneratePriceOffer = (props: any) => {
                                                                 }}
                                                                 value={formState.files}
                                                                 size="small"
-                                                                options={files}
+                                                                options={files ?? []}
                                                                 fullWidth
                                                                 onChange={(_, value: any) => { 
                                                                     setFormState({...formState, files: value});

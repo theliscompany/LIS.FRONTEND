@@ -8,12 +8,16 @@ import { SnackbarProvider, enqueueSnackbar } from 'notistack';
 import { useState } from 'react';
 import { getQuoteOffer, putApiQuoteOfferByIdStatus } from '../../api/client/offer';
 import { postApiEmail } from '../../api/client/quote';
-import { getApiFileByFolderByFileName } from '../../api/client/document';
+import { useQueryClient } from '@tanstack/react-query';
+import { getApiFileByFolderByFileNameOptions } from '../../api/client/document/@tanstack/react-query.gen';
 
 const PriceOffer = (props: any) => {
     const [subject, setSubject] = useState<string>("Nouveau devis pour client");
 	const [language, setLanguage] = useState<string>("fr");
 	const [load, setLoad] = useState<boolean>(false);
+	
+	const queryClient = useQueryClient();
+	
 	
     const { t } = useTranslation();
     const { accounts } = useMsal();
@@ -55,16 +59,19 @@ const PriceOffer = (props: any) => {
     //     }
     // };
 
-	const downloadFile = async (id: string, name: string, type: string) => {
+	const downloadFile = async (name: string, type: string) => {
 		try {
-			const response: any = await getApiFileByFolderByFileName({path: {folder: "Standard", fileName: name.replace("Standard", "")}});
-			console.log("id", id);
-			const decodedData = base64ToUint8Array(response.data.fileBase64.replace(/^data:[^;]+;base64,/, ""));
-			const file = new File([decodedData], name, {type: type});
-			return file;
+			const response = await queryClient.fetchQuery(getApiFileByFolderByFileNameOptions({path: {folder: "Standard", fileName: name.replace("Standard", "")}}))
+			//const response: any = await getApiFileByFolderByFileName({path: {folder: "Standard", fileName: name.replace("Standard", "")}});
+			if(response.fileBase64){
+				const decodedData = base64ToUint8Array(response.fileBase64.replace(/^data:[^;]+;base64,/, ""));
+				const file = new File([decodedData], name, {type: type});
+				return file;
+			}
+			
+			return null;
 		} 
 		catch (error: any) {
-			console.log(error);
 			return null;
 		}
 	};
@@ -76,7 +83,7 @@ const PriceOffer = (props: any) => {
 		// Append the attachments to the FormData object
 		for (const { fileName, contentType } of attachments) {
 			try {
-				var filePromise = await downloadFile(fileName, fileName, contentType);
+				var filePromise = await downloadFile(fileName, contentType);
 				myFiles = [...myFiles, filePromise !== null ? filePromise : ""];
 			}
 			catch (err: any) {

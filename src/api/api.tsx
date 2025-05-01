@@ -150,7 +150,7 @@ const BackendServiceProvider = ({children}:{children:React.ReactNode}) => {
           });
 
           pricingClient.setConfig({
-            baseURL: import.meta.env.VITE_APIM_URL,
+            baseURL: import.meta.env.VITE_APIM_URL+ import.meta.env.VITE_PRICING_API_URL_SUFFIX,
             headers: {
               Authorization: `Bearer ${_tokenPricing}`
             },

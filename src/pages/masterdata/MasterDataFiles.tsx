@@ -7,13 +7,12 @@ import { DataGrid, GridColDef, GridRenderCellParams, GridToolbar } from '@mui/x-
 import { sizingStyles, gridStyles, BootstrapDialog, BootstrapDialogTitle, buttonCloseStyles, actionButtonStyles, inputLabelStyles } from '../../utils/misc/styles';
 import { Delete, Download } from '@mui/icons-material';
 import { MuiFileInput } from 'mui-file-input';
-// import { getExtensionFromContentType } from '../../utils/functions';
 import { useTranslation } from 'react-i18next';
-import { deleteApiFileByFolderByFileName, getApiFileByFolder, getApiFileByFolderByFileName, postApiFileUpload } from '../../api/client/document';
 import { base64ToUint8Array } from '../../utils/functions';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { deleteApiFileByFolderByFileNameMutation, getApiFileByFolderByFileNameOptions, getApiFileByFolderOptions, postApiFileUploadMutation } from '../../api/client/document/@tanstack/react-query.gen';
 
 const MasterDataFiles: any = () => {
-    const [files, setFiles] = useState<any>(null);
     const [loadResults, setLoadResults] = useState<boolean>(true);
     // const [loadEdit, setLoadEdit] = useState<boolean>(false);
     const [modal, setModal] = useState<boolean>(false);
@@ -23,42 +22,49 @@ const MasterDataFiles: any = () => {
     const [fileValue, setFileValue] = useState<File[] | undefined>(undefined);
     
     const { t } = useTranslation();
-    
-    const getFiles = async () => {
-        try {
-            setLoadResults(true);
-            const response = await getApiFileByFolder({path: {folder: "Standard"}});
-            if (response !== null && response !== undefined) {
-                setFiles(response.data);
-                setLoadResults(false);
-            }
-            else {
-                setLoadResults(false);
-            }
+
+    const queryClient = useQueryClient();
+
+    const {data: files, isFetching} = useQuery({
+        ...getApiFileByFolderOptions({path: {folder: "Standard"}}),
+    })
+
+    const postFileUploadMutation = useMutation({
+        ...postApiFileUploadMutation(),
+        onSuccess: () => {
+            enqueueSnackbar(t('fileAdded'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
+            getFiles();
+            setModal(false);
+        },
+        onError: () => {
+            enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
         }
-        catch (err: any) {
-            console.log(err);
-            setLoadResults(false);
-        }
-    }
-    
-    const deleteFile = async (id: string) => {
-        try {
-            const response = await deleteApiFileByFolderByFileName({path: {folder: "Standard", fileName: id.replace("Standard", "")}});
-            console.log(response);
+    })
+
+    const deleteFileByFolderByFileNameMutation = useMutation({
+        ...deleteApiFileByFolderByFileNameMutation(),
+        onSuccess: () => {
             enqueueSnackbar(t('rowDeletedSuccess'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
             setModal2(false);
             getFiles();
-        }
-        catch (e: any) {
-            console.log(e);
+        },
+        onError: () => {
             enqueueSnackbar(t('rowDeletedError'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
         }
+    })
+
+    useEffect(() => {
+        setLoadResults(isFetching);
+    }, [isFetching])
+    
+    
+    const getFiles = async () => {
+        queryClient.invalidateQueries({ queryKey: getApiFileByFolderOptions({path: {folder: "Standard"}}).queryKey });
     }
     
-    useEffect(() => {
-        getFiles();
-    }, []);
+    const deleteFile = async (id: string) => {
+        await deleteFileByFolderByFileNameMutation.mutateAsync({path: {folder: "Standard", fileName: id.replace("Standard", "")}})
+    }
 
     const columnsFiles: GridColDef[] = [
         // { field: 'id', headerName: t('id'), flex: 1 },
@@ -75,7 +81,7 @@ const MasterDataFiles: any = () => {
         { field: 'xxx', headerName: t('Actions'), renderCell: (params: GridRenderCellParams) => {
             return (
                 <Box sx={{ my: 1, mr: 1 }}>
-                    <IconButton size="small" title={t('downloadFile')} sx={{ mr: 0.5 }} onClick={() => { downloadFile(params.row.blobName, params.row.blobName, params.row.contentType); }}>
+                    <IconButton size="small" title={t('downloadFile')} sx={{ mr: 0.5 }} onClick={() => { downloadFile(params.row.blobName, params.row.contentType); }}>
                         <Download fontSize="small" />
                     </IconButton>
                     <IconButton size="small" title={t('deleteRowFile')} onClick={() => { setCurrentId(params.row.blobName); setModal2(true); }}>
@@ -88,41 +94,32 @@ const MasterDataFiles: any = () => {
     
     const uploadFile = async () => {
         if (fileValue !== undefined && fileValue !== null) {
-            try {
-                const response: any = postApiFileUpload({query: {folder: "Standard"}, body: {file:  fileValue[0]}});
-                if (response !== null && response !== undefined) {
-                    enqueueSnackbar(t('fileAdded'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
-                    getFiles();
-                    setModal(false);
-                    console.log(response);
-                }
-            } 
-            catch (error) {
-                enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
-                console.log(error);
-            }
+            await postFileUploadMutation.mutateAsync({query: {folder: "Standard"}, body: {file:  fileValue[0]}})
         }
         else {
             enqueueSnackbar("The file field is empty, please verify it and pick a file.", { variant: "warning", anchorOrigin: { horizontal: "right", vertical: "top"} });
         }
     };
 
-    const downloadFile = async (id: string, name: string, type: string) => {
+    const downloadFile = async (name: string, type: string) => {
         try {
-            const response: any = await getApiFileByFolderByFileName({path: {folder: "Standard", fileName: name.replace("Standard", "")}});
-            console.log("id", id);
-            const decodedData = base64ToUint8Array(response.data.fileBase64.replace(/^data:[^;]+;base64,/, ""));
-            const url = window.URL.createObjectURL(new File([decodedData], name, {type: type}));
-            const link = document.createElement('a');
-            link.href = url;
-            link.setAttribute('download', name.replace("Standard", "")); // replace with your file name and extension
-            document.body.appendChild(link);
-            link.click();
-            link.parentNode?.removeChild(link);
+            const response = await queryClient.fetchQuery(
+                getApiFileByFolderByFileNameOptions({path: {folder: "Standard", fileName: name.replace("Standard", "")}}))
+            
+            if(response.fileBase64){
+                const decodedData = base64ToUint8Array(response.fileBase64.replace(/^data:[^;]+;base64,/, ""));
+                const url = window.URL.createObjectURL(new File([decodedData], name, {type: type}));
+                const link = document.createElement('a');
+                link.href = url;
+                link.setAttribute('download', name.replace("Standard", "")); // replace with your file name and extension
+                document.body.appendChild(link);
+                link.click();
+                link.parentNode?.removeChild(link);
+            }
+            
         } 
         catch (error: any) {
-            console.log(error);
-            return null;
+            
         }
     };
     
@@ -157,7 +154,7 @@ const MasterDataFiles: any = () => {
                     <Grid size={{ xs: 12 }}>
                         {
                             !loadResults ? 
-                            files !== null && files.length !== 0 ?
+                            files && files.length > 0 ?
                             <Box sx={{ overflow: "auto" }}>
                                 <DataGrid
                                     rows={files}
