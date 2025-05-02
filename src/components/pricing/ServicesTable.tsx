@@ -1,18 +1,18 @@
 import * as React from 'react';
 import Box from '@mui/material/Box';
-// import Button from '@mui/material/Button';
-// import AddIcon from '@mui/icons-material/Add';
+import Button from '@mui/material/Button';
+import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/DeleteOutlined';
 import SaveIcon from '@mui/icons-material/Save';
 import CancelIcon from '@mui/icons-material/Close';
 import {
-   // GridRowsProp,
+    // GridRowsProp,
     GridRowModesModel,
     GridRowModes,
     DataGrid,
     GridColDef,
-    // GridToolbarContainer,
+    GridToolbarContainer,
     GridActionsCellItem,
     GridEventListener,
     GridRowId,
@@ -20,44 +20,37 @@ import {
     GridRowEditStopReasons,
     GridRenderCellParams,
 } from '@mui/x-data-grid';
-// import { randomId } from '@mui/x-data-grid-generator';
-import { gridStyles } from '../../utils/misc/styles';
+import { randomId } from '@mui/x-data-grid-generator';
+import { gridStyles, whiteButtonStyles } from '../../utils/misc/styles';
 import { Typography } from '@mui/material';
 import { t } from 'i18next';
-
-// interface EditToolbarProps {
-//     setRows: (newRows: (oldRows: GridRowsProp) => GridRowsProp) => void;
-//     setRowModesModel: (
-//         newModel: (oldModel: GridRowModesModel) => GridRowModesModel,
-//     ) => void;
-// }
-
-// const EditToolbar = (props: EditToolbarProps) => {
-//     const { setRows, setRowModesModel } = props;
-
-//     const handleClick = () => {
-//         const id = randomId();
-//         setRows((oldRows) => [...oldRows, { id, serviceName: '', price: 0, isNew: true }]);
-//         setRowModesModel((oldModel) => ({
-//             ...oldModel,
-//             [id]: { mode: GridRowModes.Edit, fieldToFocus: 'serviceName' },
-//         }));
-//     };
-
-//     return (
-//         <GridToolbarContainer>
-//             <Button color="primary" startIcon={<AddIcon />} onClick={handleClick} sx={whiteButtonStyles}>
-//                 {t('addService')}
-//             </Button>
-//         </GridToolbarContainer>
-//     );
-// }
 
 function ServicesTable(props: any) {
     // console.log(props);
     const [rows, setRows] = React.useState(props.services);
     const [rowModesModel, setRowModesModel] = React.useState<GridRowModesModel>({});
 
+    const EditToolbar = () => {
+        // const { setRows, setRowModesModel } = props;
+    
+        const handleClick = () => {
+            const id = randomId();
+            setRows((oldRows: any) => [...oldRows, { id, serviceName: '', price: 0, isNew: true }]);
+            setRowModesModel((oldModel: any) => ({
+                ...oldModel,
+                [id]: { mode: GridRowModes.Edit, fieldToFocus: 'serviceName' },
+            }));
+        };
+    
+        return (
+            <GridToolbarContainer>
+                <Button color="primary" startIcon={<AddIcon />} onClick={handleClick} sx={whiteButtonStyles}>
+                    {t('addService')}
+                </Button>
+            </GridToolbarContainer>
+        );
+    }
+    
     const handleRowEditStop: GridEventListener<'rowEditStop'> = (params: any, event: any) => {
         if (params.reason === GridRowEditStopReasons.rowFocusOut) {
             event.defaultMuiPrevented = true;
@@ -209,7 +202,7 @@ function ServicesTable(props: any) {
                 onRowEditStop={handleRowEditStop}
                 processRowUpdate={processRowUpdate}
                 slots={{
-                    //toolbar: EditToolbar,
+                    toolbar: EditToolbar,
                     footer: () => (
                         <Box sx={{ p: 1, display: 'flex', justifyContent: 'flex-end' }}>
                             <Typography variant="h6" fontSize={16}>
@@ -218,9 +211,9 @@ function ServicesTable(props: any) {
                         </Box>
                     ),
                 }}
-                slotProps={{
-                    //toolbar: { setRows, setRowModesModel },
-                }}
+                // slotProps={{
+                //     toolbar: { setRows, setRowModesModel },
+                // }}
                 // getRowId={(row: any) => row?.id}
                 sx={gridStyles}
             />

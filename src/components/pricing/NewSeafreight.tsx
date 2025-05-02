@@ -213,7 +213,7 @@ const NewSeafreight = (props: any) => {
                                 }}
                                 // disabled={currentEditId !== ""}
                                 size='small'
-                                renderInput={(params: any) => <TextField {...params} sx={{ mt: 1, textTransform: "lowercase" }} />}
+                                renderInput={(params: any) => <TextField size="small" {...params} sx={{ mt: 1, textTransform: "lowercase" }} />}
                                 fullWidth
                             /> : <Skeleton />
                         }

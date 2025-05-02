@@ -76,8 +76,11 @@ const Landing = () => {
     }, []);
 
     
-    const handleLogin = () => {
-        instance.loginRedirect(loginRequest);
+    const handleLogin = async () => {
+        // if (!instance.getAllAccounts().length) {
+        //     await instance.loginRedirect(loginRequest);
+        // }
+        await instance.loginRedirect(loginRequest);
     }
 
     const handleOpenLangMenu = (event: React.MouseEvent<HTMLElement>) => {

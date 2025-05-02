@@ -747,6 +747,9 @@ export async function getToken(instance: any, account: any, scope: any) {
 }
 
 export const getAccessToken = async (instance: any, scope: any, account: any) => {
+    // if (!instance.getAllAccounts().length) {
+        
+    // }
     try {
         const response = await instance.acquireTokenSilent({
             scopes: scope.scopes,
