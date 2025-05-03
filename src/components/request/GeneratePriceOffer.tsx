@@ -1008,7 +1008,7 @@ const GeneratePriceOffer = (props: any) => {
         const variables = { loadingCity, destinationPort, commodities, clientName, freeTime, overtimeTariff, frequency, transitTime, containersQuantities, listServices, pricesContainers };
         // console.log("rterEF : ", rteRef);
         // console.log("vars : ", variables);
-        rteRef.current?.editor?.commands.setContent(generateEmailContent(mailLanguage !== "en" ? templateBase.content : templateBase.contentEn, variables));
+        rteRef.current?.editor?.commands.setContent(generateEmailContent(mailLanguage !== "en" ? templateBase?.content ?? "" : templateBase.contentEn, variables));
     }, [tags, departure, clientNumber, formState.portDestination, formState.selectedSeafreight, formState.selectedHaulage, formState.selectedMisc, containersSelection, formState.margins, formState.addings, formState.marginsMiscs, seafreights, formState.options]);
 
 
@@ -1917,7 +1917,7 @@ const GeneratePriceOffer = (props: any) => {
                                                                     <RichTextEditor
                                                                         ref={rteRef}
                                                                         extensions={[StarterKit]}
-                                                                        content={getDefaultContent(mailLanguage !== "en" ? templateBase.content : templateBase.contentEn)}
+                                                                        content={getDefaultContent(mailLanguage !== "en" ? templateBase?.content ?? "" : templateBase.contentEn)}
                                                                         renderControls={() => (
                                                                             <MenuControlsContainer>
                                                                                 <MenuSelectHeading />
