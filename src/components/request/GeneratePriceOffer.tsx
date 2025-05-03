@@ -870,9 +870,9 @@ const GeneratePriceOffer = (props: any) => {
                             auxTransitTime = aux1.transitTime;
                         }
                         return "<strong>"+totalCalculatePrice(elm.container, elm.quantity, index, option)+" "+option.selectedSeafreight.currency+" / "+elm.container
-                        +" / "+t('every', { lng: templateBase.currentVersion.includes("English") ? "en" : "fr" })+" "+auxFrequency
-                        +" "+t('days', { lng: templateBase.currentVersion.includes("English") ? "en" : "fr" })+" / "+t('transitTime', { lng: templateBase.currentVersion.includes("English") ? "en" : "fr" })+" : "+auxTransitTime
-                        +" "+t('days', { lng: templateBase.currentVersion.includes("English") ? "en" : "fr" })+"</strong><br>"
+                        +" / "+t('every', { lng: templateBase.currentVersion?.includes("English") ? "en" : "fr" })+" "+auxFrequency
+                        +" "+t('days', { lng: templateBase.currentVersion?.includes("English") ? "en" : "fr" })+" / "+t('transitTime', { lng: templateBase.currentVersion.includes("English") ? "en" : "fr" })+" : "+auxTransitTime
+                        +" "+t('days', { lng: templateBase.currentVersion?.includes("English") ? "en" : "fr" })+"</strong><br>"
                     }
                     else {
                         return null;
@@ -880,19 +880,19 @@ const GeneratePriceOffer = (props: any) => {
                 }).join("") : "";
     
                 var auxPricesPrecisions = option.selectedHaulage !== undefined && option.selectedHaulage !== null && templateBase !== null ? 
-                    t('loadingOf', { lng: templateBase.currentVersion.includes("English") ? "en" : "fr" })+option.selectedHaulage.freeTime
-                    +t('includedForEachContainer', { lng: templateBase.currentVersion.includes("English") ? "en" : "fr" })+option.selectedHaulage.overtimeTariff
-                    +t('byHourIndivisible', { lng: templateBase.currentVersion.includes("English") ? "en" : "fr" }) 
+                    t('loadingOf', { lng: templateBase.currentVersion?.includes("English") ? "en" : "fr" })+option.selectedHaulage.freeTime
+                    +t('includedForEachContainer', { lng: templateBase.currentVersion?.includes("English") ? "en" : "fr" })+option.selectedHaulage.overtimeTariff
+                    +t('byHourIndivisible', { lng: templateBase.currentVersion?.includes("English") ? "en" : "fr" }) 
                 : "";
     
                 var auxPricesServices = option.myMiscs !== null && option.myMiscs.length !== 0 && templateBase !== null ? 
                     option.myMiscs.map((elm: any, index: number) => elm.defaultContainer !== null ? "<p>- "+getServices(elm.containers, elm.currency)+" "+t('included', { lng: templateBase.currentVersion.includes("English") ? "en" : "fr" })+"</p>" : "<p>- "+getServicesTotal(elm.containers, elm.currency, option.marginsMiscs[index])+" "+t('additionals', { lng: templateBase.currentVersion.includes("English") ? "en" : "fr" })+"</p>").join("")
                 : "<br>";
     
-                auxPricesContainers.push("<p># "+t('offer', { lng: templateBase.currentVersion.includes("English") ? "en" : "fr" }).toUpperCase()+" "+Number(i+1)+"<p/>"+auxPricesTotal+auxPricesPrecisions+auxPricesServices);
+                auxPricesContainers.push("<p># "+t('offer', { lng: templateBase.currentVersion?.includes("English") ? "en" : "fr" }).toUpperCase()+" "+Number(i+1)+"<p/>"+auxPricesTotal+auxPricesPrecisions+auxPricesServices);
             }
         }
-        var pricesContainers = templateBase !== null ? auxPricesContainers.join("<p>"+t('', { lng: templateBase.currentVersion.includes("English") ? "en" : "fr" })+"</p>") : "";    
+        var pricesContainers = templateBase !== null ? auxPricesContainers.join("<p>"+t('', { lng: templateBase.currentVersion?.includes("English") ? "en" : "fr" })+"</p>") : "";    
         
         // var pricesContainers = containersSelection !== null && formState.selectedSeafreight !== null && formState.selectedSeafreight !== undefined ? 
         // containersSelection.map((elm: any, index: number) => {
@@ -957,6 +957,7 @@ const GeneratePriceOffer = (props: any) => {
         
         var auxPricesContainers = [];
         if (templateBase !== null && formState.options !== undefined && formState.options !== null) {
+            const lang = templateBase.currentVersion?.includes("English") ? "en" : "fr";
             for (var i = 0; i < formState.options.length; i++) {
                 var option: any = formState.options[i];
                 var auxPricesTotal = containersSelection !== null && option.selectedSeafreight !== null && option.selectedSeafreight !== undefined && seafreights !== null ? 
@@ -970,10 +971,12 @@ const GeneratePriceOffer = (props: any) => {
                             auxFrequency = aux1.frequency;
                             auxTransitTime = aux1.transitTime;
                         }
+
+                        
                         return "<strong>"+totalCalculatePrice(elm.container, elm.quantity, index, option)+" "+option.selectedSeafreight.currency+" / "+elm.container
-                        +" / "+t('every', { lng: templateBase.currentVersion.includes("English") ? "en" : "fr" })+" "+auxFrequency
-                        +" "+t('days', { lng: templateBase.currentVersion.includes("English") ? "en" : "fr" })+" / "+t('transitTime', { lng: templateBase.currentVersion.includes("English") ? "en" : "fr" })+" : "+auxTransitTime
-                        +" "+t('days', { lng: templateBase.currentVersion.includes("English") ? "en" : "fr" })+"</strong><br>"
+                        +" / "+t('every', { lng: lang })+" "+auxFrequency
+                        +" "+t('days', { lng: lang })+" / "+t('transitTime', { lng: lang })+" : "+auxTransitTime
+                        +" "+t('days', { lng: lang })+"</strong><br>"
                     }
                     else {
                         return null;
@@ -981,19 +984,19 @@ const GeneratePriceOffer = (props: any) => {
                 }).join("") : "";
     
                 var auxPricesPrecisions = option.selectedHaulage !== undefined && option.selectedHaulage !== null && templateBase !== null ? 
-                    t('loadingOf', { lng: templateBase.currentVersion.includes("English") ? "en" : "fr" })+option.selectedHaulage.freeTime
-                    +t('includedForEachContainer', { lng: templateBase.currentVersion.includes("English") ? "en" : "fr" })+option.selectedHaulage.overtimeTariff
-                    +t('byHourIndivisible', { lng: templateBase.currentVersion.includes("English") ? "en" : "fr" }) 
+                    t('loadingOf', { lng: lang })+option.selectedHaulage.freeTime
+                    +t('includedForEachContainer', { lng: lang })+option.selectedHaulage.overtimeTariff
+                    +t('byHourIndivisible', { lng: lang }) 
                 : "";
     
                 var auxPricesServices = option.myMiscs !== null && option.myMiscs.length !== 0 && templateBase !== null ? 
-                    option.myMiscs.map((elm: any, index: number) => elm.defaultContainer !== null ? "<p>- "+getServices(elm.containers, elm.currency)+" "+t('included', { lng: templateBase.currentVersion.includes("English") ? "en" : "fr" })+"</p>" : "<p>- "+getServicesTotal(elm.containers, elm.currency, option.marginsMiscs[index])+" "+t('additionals', { lng: templateBase.currentVersion.includes("English") ? "en" : "fr" })+"</p>").join("")
+                    option.myMiscs.map((elm: any, index: number) => elm.defaultContainer !== null ? "<p>- "+getServices(elm.containers, elm.currency)+" "+t('included', { lng: lang })+"</p>" : "<p>- "+getServicesTotal(elm.containers, elm.currency, option.marginsMiscs[index])+" "+t('additionals', { lng: lang })+"</p>").join("")
                 : "<br>";
     
-                auxPricesContainers.push("<p># "+t('offer', { lng: templateBase.currentVersion.includes("English") ? "en" : "fr" }).toUpperCase()+" "+Number(i+1)+"<p/>"+auxPricesTotal+auxPricesPrecisions+auxPricesServices);
+                auxPricesContainers.push("<p># "+t('offer', { lng: lang }).toUpperCase()+" "+Number(i+1)+"<p/>"+auxPricesTotal+auxPricesPrecisions+auxPricesServices);
             }
         }
-        var pricesContainers = templateBase !== null ? auxPricesContainers.join("<p>"+t('', { lng: templateBase.currentVersion.includes("English") ? "en" : "fr" })+"</p>") : "";
+        var pricesContainers = templateBase !== null ? auxPricesContainers.join("<p>"+t('', { lng: templateBase?.currentVersion?.includes("English") ? "en" : "fr" })+"</p>") : "";
         
         var clientName = clientNumber !== null ? clientNumber.contactName : null;
         var freeTime = formState.selectedHaulage !== null && formState.selectedHaulage !== undefined ? formState.selectedHaulage.freeTime : "";
