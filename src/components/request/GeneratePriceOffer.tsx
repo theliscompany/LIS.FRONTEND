@@ -956,7 +956,7 @@ const GeneratePriceOffer = (props: any) => {
         var listServices = "";
         
         var auxPricesContainers = [];
-        if (templateBase !== null && formState.options !== undefined && formState.options !== null) {
+        if (templateBase && formState.options !== undefined && formState.options !== null) {
             const lang = templateBase.currentVersion?.includes("English") ? "en" : "fr";
             for (var i = 0; i < formState.options.length; i++) {
                 var option: any = formState.options[i];
