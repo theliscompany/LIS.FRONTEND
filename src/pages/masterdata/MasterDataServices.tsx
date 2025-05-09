@@ -1,288 +1,389 @@
-import * as React from 'react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Box from '@mui/material/Box';
-import { SnackbarProvider, enqueueSnackbar } from 'notistack';
-import { Alert, Button, DialogActions, DialogContent, IconButton, InputLabel, MenuItem, Select, Skeleton, Typography } from '@mui/material';
+import { Button, Checkbox, FormControl, IconButton, ListItemText, MenuItem, OutlinedInput, Paper, Select, SelectChangeEvent, Stack, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField } from '@mui/material';
 import Grid from '@mui/material/Grid2';
-import { DataGrid, GridColDef, GridRenderCellParams, GridToolbar } from '@mui/x-data-grid';
-// import { t } from 'i18next';
-import { sizingStyles, gridStyles, BootstrapDialog, BootstrapDialogTitle, buttonCloseStyles, BootstrapInput, actionButtonStyles, inputLabelStyles } from '../../utils/misc/styles';
-import { Edit, Delete } from '@mui/icons-material';
+import { Edit, Delete, Save, Cancel, Add, Refresh } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
-import { AxiosError } from 'axios';
-import { CreatedServiceViewModel, deleteServiceByServiceId, getService, getServiceByServiceId, postService, putServiceByServiceId, ServiceViewModel } from '../../api/client/transport';
+import { ServiceViewModel } from '../../api/client/masterdata';
+import { Column, createColumnHelper, FilterFn, flexRender, getCoreRowModel, getFilteredRowModel, Row, useReactTable } from '@tanstack/react-table';
+import { ServiceTypeEnum } from '../../utils/misc/enumsCommon';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import {  deleteServiceByIdMutation, getServiceOptions, getServiceQueryKey, postServiceMutation, putServiceByIdMutation } from '../../api/client/masterdata/@tanstack/react-query.gen';
+import { EditTextFieldCell } from '../../components/common/EditComponentCell';
+import {
+    rankItem
+  } from '@tanstack/match-sorter-utils'
+import ConfirmDialogComponent from '../../components/common/ConfirmDialogComponent';
+import TableBodySkeleton from '../../components/skeletons/TableBodySkeleton';
+import { showSnackbar } from '../../components/common/Snackbar';
+
+const SEAFREIGHT = "SEAFREIGHT";
+const HAULAGE = "HAULAGE";
+const MISCELLANEOUS = "MISCELLANEOUS";  
+
+const getServicesType = (servicesType:number[]) => {
+    return servicesType.map((serviceTypeId: number) => {
+        return serviceTypeId === ServiceTypeEnum.SEAFREIGHT ? SEAFREIGHT : 
+        serviceTypeId === ServiceTypeEnum.HAULAGE ? HAULAGE : 
+        serviceTypeId === ServiceTypeEnum.MISCELLANEOUS ? MISCELLANEOUS : ''
+    }).join(", ")
+}
+
+interface CustomTableMeta {
+    updateServiceData: <TValue>(rowIndex: number, columnId: string, value: TValue) => void;
+}
+
+const columnHelper = createColumnHelper<ServiceViewModel>()
 
 const MasterDataServices: any = () => {
     const { t } = useTranslation();
-    const [services, setServices] = useState<any>(null);
-    const [loadResults, setLoadResults] = useState<boolean>(true);
-    const [loadEdit, setLoadEdit] = useState<boolean>(false);
-    const [modal, setModal] = useState<boolean>(false);
-    const [modal2, setModal2] = useState<boolean>(false);
-    const [testName, setTestName] = useState<string>("");
-    const [testDescription, setTestDescription] = useState<string>("");
-    const [selectedServiceTypes, setSelectedServiceTypes] = useState<number[]>([]);
-    const [currentId, setCurrentId] = useState<string>("");
-    const [currentEditId, setCurrentEditId] = useState<string>("");
+    const queryClient = useQueryClient();
     
-    const servicesOptions = [
-        { value: 1, name: "SEAFREIGHT" },
-        { value: 2, name: "HAULAGE" },
-        { value: 5, name: "MISCELLANEOUS" },
-    ];
+    const [services, setServices] = useState<ServiceViewModel[]>([]);
+    const [serviceId, setServiceId] = useState<number>();
+    const [editRow, setEditRow] = useState<boolean>(false)
+    const [confirmDeleteRow, setConfirmDeleteRow] = useState(false)
+    const [savingRow, setSavingRow] = useState(false)
+    const [globalFilter, setGlobalFilter] = useState('')
+    // const [sorting, setSorting] = useState<SortingState>([
+    //         {
+    //             id: 'serviceName',
+    //             desc: false
+    //         }
+    //     ])
 
-    const columnsServices: GridColDef[] = [
-        { field: 'serviceId', headerName: t('id'), flex: 1 },
-        { field: 'serviceName', headerName: t('serviceName'), flex: 3 },
-        { field: 'servicesTypeId', headerName: t('servicesTypeId'), renderCell: (params: GridRenderCellParams) => {
-            return (
-                <Box sx={{ my: 2 }}>
-                    {
-                        params.row.servicesTypeId.map((id: any) => servicesOptions.find((service) => service.value === id)?.name).filter(Boolean).join(", ")
-                    }
-                </Box>
-            );
-        }, flex: 2 },
-        { field: 'xxx', headerName: t('Actions'), renderCell: (params: GridRenderCellParams) => {
-            return (
-                <Box sx={{ my: 1, mr: 1 }}>
-                    <IconButton size="small" title={t('editRowService')} sx={{ mr: 0.5 }} onClick={() => { setCurrentEditId(params.row.serviceId); resetForm(); getServiceIdSvc(params.row.serviceId); setModal(true); }}>
-                        <Edit fontSize="small" />
-                    </IconButton>
-                    <IconButton size="small" title={t('deleteRowService')} onClick={() => { setCurrentId(params.row.serviceId); setModal2(true); }}>
-                        <Delete fontSize="small" />
-                    </IconButton>
-                </Box>
-            );
-        }, minWidth: 120, flex: 1 },
-    ];
-    
+    const {data, isFetching} = useQuery({...getServiceOptions()})
+
     useEffect(() => {
-        getServicesSvc();
-    }, []);
+        setServices(data ?? []);
+    }, [data])
 
-    const getServicesSvc = async () => {
-        setLoadResults(true);
-        try {
-            const servs = await getService({query: { pageSize: 500 }});
-            console.log(servs);
-            setServices(servs.data);
-            setLoadResults(false);
-        }
-        catch (err: unknown) {
-            if(err instanceof AxiosError) {
-                console.log(err.response?.data);
-            }
-            console.log("An error occured");
-            setLoadResults(false);
+    const handleServiceStatusUpdated = () => {
+        return {
+            onSuccess:() => {
+                setServiceId(undefined);
+                setEditRow(false);
+
+                showSnackbar("Saved with success", "success");
+                queryClient.invalidateQueries({ queryKey: getServiceQueryKey() });
+            },
+            onError: () => showSnackbar(t('errorHappened'), "warning"),
+            onSettled:() => setSavingRow(false)
         }
     }
 
-    const getServiceIdSvc = async (id: number) => {
-        setLoadEdit(true);
-        try {
-            const serv = await getServiceByServiceId({path: {serviceId: id}});
-            var result = serv.data;
-            setTestName(result?.serviceName ?? "");
-            setSelectedServiceTypes(result?.servicesTypeId || []);
-            setLoadEdit(false);
+    const deleteServiceMutation = useMutation({
+        ...deleteServiceByIdMutation(),
+        onSuccess:() => {
+            setServiceId(undefined);
+            showSnackbar("Deleted with success", "success");
+            queryClient.invalidateQueries({ queryKey: getServiceQueryKey() });
+        },
+        onError : () => showSnackbar(t('errorHappened'), "warning")
+    })
+
+    const updateServiceMutation = useMutation({
+        ...putServiceByIdMutation(),
+        ...handleServiceStatusUpdated()
+   })
+
+   const createServiceMutation = useMutation({
+        ...postServiceMutation(),
+        ...handleServiceStatusUpdated()
+    })
+
+    const handleEditService = (id?: number) => {
+        setServiceId(id);
+        setEditRow(true);
+    }
+
+    const handleSaveService = (index:number) => {
+        setSavingRow(true);
+
+        const row = services[index];
+        if (serviceId) updateServiceMutation.mutate({ path: { id: serviceId }, body: row });
+        else createServiceMutation.mutate({ body: row });
+    }
+
+    const handleDeleteService = (id?: number) => {
+        setServiceId(id);
+        setConfirmDeleteRow(true);
+    }
+
+    const handleCancelEditService = () => {
+        setServiceId(undefined);
+        setEditRow(false);
+        setServices(data ?? []);
+    }
+
+    const handleAddService = () => {
+        setEditRow(true);
+        setServiceId(0);
+        setServices([{ serviceName: '', servicesTypeId: [] }, ...services]);
+    }
+
+    const handleIfConfirmDelete = async (deleted: boolean) => {
+        setConfirmDeleteRow(false);
+        if(!deleted) {
+            setServiceId(undefined);
         }
-        catch (err: unknown) {
-            if(err instanceof AxiosError) {
-                console.log(err.response?.data);
-            }
-            console.log("An error occured");
-            setLoadEdit(false);
+        else if(serviceId) {
+            await deleteServiceMutation.mutateAsync({ path: { id: serviceId }})
         }
     }
-    
-    const createNewService = async () => {
-        if (testName !== "" && selectedServiceTypes.length !== 0) {
-            try {
-                //var response = null;
-                if (currentEditId !== "") {
-                    var dataSent: ServiceViewModel;
-                    dataSent = {
-                        "serviceId": Number(currentEditId),
-                        "serviceName": testName,
-                        // "serviceDescription": testDescription,
-                        "servicesTypeId": selectedServiceTypes
-                    };
-                    await putServiceByServiceId({body: dataSent, path: {serviceId: Number(currentEditId)}});
+
+    const ConfirmDeletion = useCallback(
+      () => {
+        return <ConfirmDialogComponent title="Delete service" 
+            message="Are you sure you want to delete this service?" 
+            open={confirmDeleteRow} onDelete={handleIfConfirmDelete} />},
+      [confirmDeleteRow])
+
+    const editSelectCell = ({ getValue, row, column, table }: { 
+        getValue: () => number[] | null | undefined,
+        row: Row<ServiceViewModel>,
+        column: Column<ServiceViewModel, number[] | null | undefined>,
+        table: any
+    }) => {
+        const [servicesTypeValue, setServicesTypeValue] = useState(getValue() ?? [])
+
+        const onBlur = () => {
+            (table.options.meta as CustomTableMeta).updateServiceData<number[]>(row.index, column.id, servicesTypeValue)
+        }
+
+        const handleServiceTypeChange = (event: SelectChangeEvent<typeof servicesTypeValue>) => {
+            const {
+              target: { value },
+            } = event;
+            setServicesTypeValue(
+              // On autofill we get a stringified value.
+              typeof value === 'string' ? value.split(',').map((v)=>Number(v)) : value,
+            );
+          };
+
+        if((editRow && serviceId !== undefined && serviceId === row.original.serviceId) || 
+        (serviceId === 0 && row.original.serviceId === undefined)) {
+            return (
+                <FormControl fullWidth>
+                    <Select multiple displayEmpty size='small' value={servicesTypeValue} input={<OutlinedInput />}
+                    onChange={handleServiceTypeChange} onBlur={onBlur}
+                    renderValue={(selected)=>{
+                            if (selected && selected.length === 0) {
+                                return <em>-- Select service type -- </em>;
+                            }
+                            return selected ? getServicesType(selected): ""}
+                        }>
+                        {
+                            Object.keys(ServiceTypeEnum).filter(x=> !isNaN(Number(x))).map((type) => {
+                                const typeValue = Number(type);
+                                return <MenuItem key={typeValue} value={typeValue}>
+                                    <Checkbox checked={(servicesTypeValue).includes(typeValue)} />
+                                    <ListItemText primary={
+                                        typeValue === ServiceTypeEnum.SEAFREIGHT ? SEAFREIGHT : 
+                                        typeValue === ServiceTypeEnum.HAULAGE ? HAULAGE : 
+                                        typeValue === ServiceTypeEnum.MISCELLANEOUS ? MISCELLANEOUS : ''
+                                    } />
+                                </MenuItem>
+                            })
+                        }
+                    </Select>
+                </FormControl>
+            )
+        }
+        
+
+        return getServicesType(servicesTypeValue);
+    }
+
+    const columns = [
+        columnHelper.accessor('serviceName', {
+            header: t('serviceName'),
+            cell: ({getValue, row, column}) => {
+
+                const onBlur = (value: string) => {
+                    if(table){
+                        (table.options.meta as CustomTableMeta).updateServiceData<string>(row.index, column.id, value)
+                    }
                 }
-                else {
-                    var dataSent2: CreatedServiceViewModel;
-                    dataSent2 = {
-                        "serviceName": testName,
-                        "serviceDescription": testDescription,
-                        "servicesTypeId": selectedServiceTypes
-                    };
-                    await postService({query: dataSent2});
+
+                return EditTextFieldCell({
+                getValue: getValue,
+                edit: (editRow && serviceId !== undefined && serviceId === row.original.serviceId) || 
+                (serviceId === 0 && row.original.serviceId === undefined),
+                onBlur: onBlur,
+            });
+        }
+        }),
+        columnHelper.accessor('servicesTypeId', {
+            header: t('servicesTypeId'),
+            cell: editSelectCell
+        }),
+        columnHelper.display({
+            id: 'option',
+            size: 10,
+            enableSorting: false,
+            cell: ({row}) => {
+                if(row.original.serviceId !== undefined || serviceId === 0) {
+                    const _serviceId = row.original.serviceId;
+                    return (<Box>
+                        {
+                            (editRow && (serviceId === _serviceId || (serviceId === 0 && _serviceId === undefined))) ? 
+                            <>
+                                 <IconButton size="small" title={t('editRowService')} sx={{ mr: 0.5 }} 
+                                    onClick={()=>handleSaveService(row.index)} loading={savingRow}>
+                                        <Save sx={{color:'green'}} />
+                                </IconButton>
+                                   
+                                <IconButton size="small" title={t('editRowService')} sx={{ mr: 0.5 }} 
+                                    onClick={handleCancelEditService}>
+                                        <Cancel sx={{color:'red'}} />
+                                </IconButton>
+                                
+                            </> : 
+                            <>
+                                <IconButton size="small" title={t('editRowService')} sx={{ mr: 0.5 }} onClick={() => handleEditService(_serviceId)}>
+                                    <Edit sx={{color:'blue'}} />
+                                </IconButton>
+                                <IconButton size="small" title={t('deleteRowService')} sx={{ mr: 0.5 }} onClick={() => handleDeleteService(_serviceId)}>
+                                    <Delete sx={{color:'red'}} />
+                                </IconButton>
+                            </>
+                        }
+                   
+                    </Box>)
                 }
-                enqueueSnackbar(currentEditId === "" ? t('serviceAdded') : t('serviceEdited'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
-                getServicesSvc();
-                setModal(false);    
             }
-            catch (err: any) {
-                console.log(err);
-                enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+        })
+    ]
+
+    const fuzzyFilter: FilterFn<any> = (row, columnId, value, addMeta) => {
+        // Rank the item
+        const itemRank = rankItem(row.getValue(columnId), value)
+      
+        // Store the itemRank info
+        addMeta({
+          itemRank,
+        })
+      
+        // Return if the item should be filtered in/out
+        return itemRank.passed
+    }
+
+    const table = useReactTable({
+        data: services || [],
+        columns,
+        filterFns: {
+            fuzzy: fuzzyFilter,
+        },
+        state: {
+            globalFilter,
+            //sorting
+        },
+        globalFilterFn: fuzzyFilter,
+        getCoreRowModel: getCoreRowModel(),
+        getFilteredRowModel: getFilteredRowModel(),
+        //getSortedRowModel: getSortedRowModel(),
+        onGlobalFilterChange: setGlobalFilter,
+        //onSortingChange: setSorting,
+        meta:{
+            updateServiceData: (rowIndex: number, columnId: string, value: unknown) => { 
+                setServices((old) =>
+                    old.map((row, index) => {
+                      if (index === rowIndex) {
+                        return {
+                          ...old[rowIndex],
+                          [columnId]: value,
+                        };
+                      }
+                      return row;
+                    })
+                  );
             }
-        }
-        else {
-            enqueueSnackbar(t('verifyMessage'), { variant: "warning", anchorOrigin: { horizontal: "right", vertical: "top"} });
-        }
-    }
-    
-    const deleteServiceSvc = async (id: number) => {
-        try {
-            await deleteServiceByServiceId({path: {serviceId: id}});
-            enqueueSnackbar(t('rowDeletedSuccess'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
-            setModal2(false);
-            getServicesSvc();
-        }
-        catch (e: any) {
-            console.log(e);
-            enqueueSnackbar(t('rowDeletedError'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
-        }
-    }
-    
-    const resetForm = () => {
-        setTestName("");
-        setTestDescription("");
-        setSelectedServiceTypes([]);
+        } 
+    })
+
+    const handleRefreshTable = () => {
+        queryClient.invalidateQueries({ queryKey: getServiceQueryKey() });
     }
     
     return (
         <div style={{ background: "#fff", borderTopLeftRadius: 20, borderTopRightRadius: 20 }}>
-            <SnackbarProvider />
             <Box py={2.5}>
                 <Grid container spacing={2} mt={0} px={5}>
-                    <Grid size={{ xs: 12, md: 8 }}>
-                        <Typography sx={{ fontSize: 18, mb: 1 }}><b>{t('listServices')}</b></Typography>
-                    </Grid>
-                    <Grid size={{ xs: 12, md: 4 }}>
-                        <Button 
-                            variant="contained" color="inherit" 
-                            sx={{ float: "right", backgroundColor: "#fff", textTransform: "none", ml: 2 }} 
-                            onClick={() => { getServicesSvc(); }} 
-                        >
-                            {t('reload')}
-                        </Button>
-                        <Button 
-                            variant="contained" color="inherit" 
-                            sx={{ float: "right", backgroundColor: "#fff", textTransform: "none" }} 
-                            onClick={() => { setCurrentEditId(""); resetForm(); setModal(true); }} 
-                        >
-                            {t('newService')}
-                        </Button>
-                    </Grid>
+                    
                     <Grid size={{ xs: 12 }}>
-                        {
-                            !loadResults ? 
-                            services !== null && services.length !== 0 ?
-                            <Box sx={{ overflow: "auto" }}>
-                                <DataGrid
-                                    rows={services}
-                                    columns={columnsServices}
-                                    initialState={{
-                                        pagination: {
-                                            paginationModel: {
-                                                pageSize: 10,
-                                            },
-                                        },
-                                    }}
-                                    pageSizeOptions={[5, 10, 25, 50]}
-                                    getRowId={(row: any) => row?.serviceId}
-                                    getRowHeight={() => "auto" }
-                                    style={sizingStyles}
-                                    sx={gridStyles}
-                                    disableDensitySelector
-                                    disableColumnSelector
-                                    slots={{ toolbar: GridToolbar }}
-                                    slotProps={{
-                                        toolbar: {
-                                            showQuickFilter: true,
-                                        },
-                                    }}
-                                    disableRowSelectionOnClick
-                                />
-                            </Box> : 
+                        <Stack direction='row' alignItems='center' justifyContent='space-between' mb={2}>
                             <Box>
-                                <Alert severity="error">{t('noResults')}</Alert>
+                                <Button variant='contained' sx={{mr:2}} startIcon={<Add />} size='small' onClick={handleAddService}>
+                                    Add service
+                                </Button>
+                                <Button variant='outlined' startIcon={<Refresh />} size='small' onClick={handleRefreshTable}>
+                                    Refresh
+                                </Button>
                             </Box>
-                            : <Skeleton />
-                        }
+                            <TextField value={globalFilter ?? ''} onChange={(e) => setGlobalFilter(e.target.value)}
+                                size='small' placeholder="Search serrvices..." />
+                        </Stack>
+                    
+                        <TableContainer component={Paper}>
+                            <Table size='small'>
+                                <TableHead>
+                                    {
+                                        table.getHeaderGroups().map(headerGroup => (
+                                            <TableRow key={headerGroup.id}>
+                                                {
+                                                    headerGroup.headers.map(header => (
+                                                        <TableCell key={header.id} sx={{fontWeight: "bold",width:`${header.getSize()}px`}}>
+                                                            {header.isPlaceholder ? null : 
+                                                                (
+                                                                    // <div onClick={header.column.getToggleSortingHandler()} 
+                                                                    //     style={{display: 'flex', alignItems: 'center', cursor: 'pointer'}}>
+                                                                    //     {
+                                                                            flexRender(
+                                                                                header.column.columnDef.header,
+                                                                                header.getContext()
+                                                                            )
+                                                                    //     }
+                                                                    //     {{
+                                                                    //         asc: <ArrowDropUp />,
+                                                                    //         desc: <ArrowDropDown />,
+                                                                    //     }[header.column.getIsSorted() as string] ?? null}
+                                                                    // </div>
+                                                                )
+                                                            }
+                                                        </TableCell>
+                                                    ))  
+                                                }
+                                            </TableRow>
+                                        ))
+                                    }
+                                </TableHead>
+                                <TableBody>
+                                    {
+                                        !isFetching ? 
+                                        table.getRowModel().rows.map(row => (
+                                            <TableRow key={row.id}>
+                                                {
+                                                    row.getVisibleCells().map(cell => (
+                                                        <TableCell key={cell.id}>
+                                                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                                                        </TableCell>
+                                                    ))
+                                                }
+                                            </TableRow>
+                                        ))  
+                                        : 
+                                        <TableBodySkeleton columns={columns.length} rows={5} />
+                                    }
+                                </TableBody>
+                            </Table>
+                        </TableContainer>
                     </Grid>
                 </Grid>
             </Box>
-
-            <BootstrapDialog
-                onClose={() => setModal(false)}
-                aria-labelledby="custom-dialog-title"
-                open={modal}
-                maxWidth="sm"
-                fullWidth
-            >
-                <BootstrapDialogTitle id="custom-dialog-title7" onClose={() => setModal(false)}>
-                    <b>{currentEditId === "" ? t('createRowService') : t('editRowService')}</b>
-                </BootstrapDialogTitle>
-                <DialogContent dividers>
-                    {
-                        loadEdit === false ?
-                        <Grid container spacing={2}>
-                            <Grid size={{ xs: 12 }}>
-                                <InputLabel htmlFor="test-name" sx={inputLabelStyles}>{t('serviceName')}</InputLabel>
-                                <BootstrapInput id="test-name" type="text" value={testName} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTestName(e.target.value)} fullWidth />
-                            </Grid>
-                            <Grid size={{ xs: 12 }}>
-                                <InputLabel htmlFor="test-description" sx={inputLabelStyles}>Description</InputLabel>
-                                <BootstrapInput id="test-description" type="text" multiline rows={3} value={testDescription} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTestDescription(e.target.value)} fullWidth />
-                            </Grid>
-                            <Grid size={{ xs: 12 }}>
-                                <InputLabel htmlFor="test-services-types" sx={inputLabelStyles}>{t('servicesTypesId')}</InputLabel>
-                                <Select
-                                    labelId="test-services-types"
-                                    id="test-selected-services"
-                                    multiple
-                                    value={selectedServiceTypes}
-                                    onChange={(e: any) => setSelectedServiceTypes(e.target.value as number[])}
-                                    fullWidth
-                                    input={<BootstrapInput />}
-                                    renderValue={(selected: any) => selected.map((value: any) => servicesOptions.find((type: any) => type.value === value)?.name).join(', ')}
-                                >
-                                    {servicesOptions.map((serviceType: any) => (
-                                        <MenuItem key={serviceType.value} value={serviceType.value}>
-                                            {serviceType?.name}
-                                        </MenuItem>
-                                    ))}
-                                </Select>
-                            </Grid>
-                        </Grid> : <Skeleton />
-                    }
-                </DialogContent>
-                <DialogActions>
-                    <Button variant="contained" onClick={() => { createNewService(); }} sx={actionButtonStyles}>{t('validate')}</Button>
-                    <Button variant="contained" onClick={() => setModal(false)} sx={buttonCloseStyles}>{t('close')}</Button>
-                </DialogActions>
-            </BootstrapDialog>
-
-            <BootstrapDialog
-                onClose={() => setModal2(false)}
-                aria-labelledby="custom-dialog-title"
-                open={modal2}
-                maxWidth="sm"
-                fullWidth
-            >
-                <BootstrapDialogTitle id="custom-dialog-title" onClose={() => setModal2(false)}>
-                    <b>{t('deleteRowService')}</b>
-                </BootstrapDialogTitle>
-                <DialogContent dividers>{t('areYouSureDeleteRow')}</DialogContent>
-                <DialogActions>
-                    <Button variant="contained" color={"primary"} onClick={() => { deleteServiceSvc(Number(currentId)); }} sx={{ mr: 1.5, textTransform: "none" }}>{t('accept')}</Button>
-                    <Button variant="contained" onClick={() => setModal2(false)} sx={buttonCloseStyles}>{t('close')}</Button>
-                </DialogActions>
-            </BootstrapDialog>
+            { ConfirmDeletion() }
         </div>
+        
     );
 }
 

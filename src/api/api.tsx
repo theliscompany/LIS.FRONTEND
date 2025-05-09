@@ -3,7 +3,7 @@ import { getAccessToken } from "../utils/functions";
 import { useAccount, useMsal } from "@azure/msal-react";
 import { crmRequest, documentRequest, offerRequest, pricingRequest, quoteRequest, sessionstorageRequest, shipmentRequest, templateRequest, transportRequest } from "../config/msalConfig";
 import { client as shipmentClient } from "./client/shipment";
-import { client as masterdataClient } from "./client/transport";
+import { client as masterdataClient } from "./client/masterdata";
 import { client as documentClient } from "./client/document";
 import { client as crmClient } from "./client/crm";
 import { client as pricingClient } from "./client/pricing";

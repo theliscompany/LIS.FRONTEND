@@ -6,11 +6,18 @@ import { PublicClientApplication } from '@azure/msal-browser'
 import { MsalProvider } from '@azure/msal-react'
 
 import { msalConfig } from './config/msalConfig.ts';
+import { SnackbarProvider } from 'notistack'
+import { StrictMode } from 'react'
 
 const msalInstance = new PublicClientApplication(msalConfig);
 
 createRoot(document.getElementById('root')!).render(
-  <MsalProvider instance={msalInstance}>
-      <App />
-  </MsalProvider>,
+  <StrictMode>
+    <MsalProvider instance={msalInstance}>
+      <SnackbarProvider maxSnack={3}>
+        <App />
+      </SnackbarProvider>
+        
+    </MsalProvider>
+  </StrictMode>,
 )
