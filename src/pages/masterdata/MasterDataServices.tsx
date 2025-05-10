@@ -1,41 +1,21 @@
 import { useState, useEffect, useCallback } from 'react';
 import Box from '@mui/material/Box';
-import { Button, Checkbox, FormControl, IconButton, ListItemText, MenuItem, OutlinedInput, Paper, Select, SelectChangeEvent, Stack, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField } from '@mui/material';
+import { Button, IconButton, Stack, TextField } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import { Edit, Delete, Save, Cancel, Add, Refresh } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
 import { ServiceViewModel } from '../../api/client/masterdata';
-import { Column, createColumnHelper, FilterFn, flexRender, getCoreRowModel, getFilteredRowModel, Row, useReactTable } from '@tanstack/react-table';
-import { ServiceTypeEnum } from '../../utils/misc/enumsCommon';
+import { ColumnDef, createColumnHelper } from '@tanstack/react-table';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {  deleteServiceByIdMutation, getServiceOptions, getServiceQueryKey, postServiceMutation, putServiceByIdMutation } from '../../api/client/masterdata/@tanstack/react-query.gen';
-import { EditTextFieldCell } from '../../components/common/EditComponentCell';
-import {
-    rankItem
-  } from '@tanstack/match-sorter-utils'
+import { EditSelectCell, EditTextFieldCell } from '../../components/common/EditableCells';
 import ConfirmDialogComponent from '../../components/common/ConfirmDialogComponent';
-import TableBodySkeleton from '../../components/skeletons/TableBodySkeleton';
 import { showSnackbar } from '../../components/common/Snackbar';
-
-const SEAFREIGHT = "SEAFREIGHT";
-const HAULAGE = "HAULAGE";
-const MISCELLANEOUS = "MISCELLANEOUS";  
-
-const getServicesType = (servicesType:number[]) => {
-    return servicesType.map((serviceTypeId: number) => {
-        return serviceTypeId === ServiceTypeEnum.SEAFREIGHT ? SEAFREIGHT : 
-        serviceTypeId === ServiceTypeEnum.HAULAGE ? HAULAGE : 
-        serviceTypeId === ServiceTypeEnum.MISCELLANEOUS ? MISCELLANEOUS : ''
-    }).join(", ")
-}
-
-interface CustomTableMeta {
-    updateServiceData: <TValue>(rowIndex: number, columnId: string, value: TValue) => void;
-}
+import EditableTable from '../../components/common/EditableTable';
 
 const columnHelper = createColumnHelper<ServiceViewModel>()
 
-const MasterDataServices: any = () => {
+const MasterDataServices = () => {
     const { t } = useTranslation();
     const queryClient = useQueryClient();
     
@@ -45,12 +25,6 @@ const MasterDataServices: any = () => {
     const [confirmDeleteRow, setConfirmDeleteRow] = useState(false)
     const [savingRow, setSavingRow] = useState(false)
     const [globalFilter, setGlobalFilter] = useState('')
-    // const [sorting, setSorting] = useState<SortingState>([
-    //         {
-    //             id: 'serviceName',
-    //             desc: false
-    //         }
-    //     ])
 
     const {data, isFetching} = useQuery({...getServiceOptions()})
 
@@ -139,84 +113,17 @@ const MasterDataServices: any = () => {
             open={confirmDeleteRow} onDelete={handleIfConfirmDelete} />},
       [confirmDeleteRow])
 
-    const editSelectCell = ({ getValue, row, column, table }: { 
-        getValue: () => number[] | null | undefined,
-        row: Row<ServiceViewModel>,
-        column: Column<ServiceViewModel, number[] | null | undefined>,
-        table: any
-    }) => {
-        const [servicesTypeValue, setServicesTypeValue] = useState(getValue() ?? [])
-
-        const onBlur = () => {
-            (table.options.meta as CustomTableMeta).updateServiceData<number[]>(row.index, column.id, servicesTypeValue)
-        }
-
-        const handleServiceTypeChange = (event: SelectChangeEvent<typeof servicesTypeValue>) => {
-            const {
-              target: { value },
-            } = event;
-            setServicesTypeValue(
-              // On autofill we get a stringified value.
-              typeof value === 'string' ? value.split(',').map((v)=>Number(v)) : value,
-            );
-          };
-
-        if((editRow && serviceId !== undefined && serviceId === row.original.serviceId) || 
-        (serviceId === 0 && row.original.serviceId === undefined)) {
-            return (
-                <FormControl fullWidth>
-                    <Select multiple displayEmpty size='small' value={servicesTypeValue} input={<OutlinedInput />}
-                    onChange={handleServiceTypeChange} onBlur={onBlur}
-                    renderValue={(selected)=>{
-                            if (selected && selected.length === 0) {
-                                return <em>-- Select service type -- </em>;
-                            }
-                            return selected ? getServicesType(selected): ""}
-                        }>
-                        {
-                            Object.keys(ServiceTypeEnum).filter(x=> !isNaN(Number(x))).map((type) => {
-                                const typeValue = Number(type);
-                                return <MenuItem key={typeValue} value={typeValue}>
-                                    <Checkbox checked={(servicesTypeValue).includes(typeValue)} />
-                                    <ListItemText primary={
-                                        typeValue === ServiceTypeEnum.SEAFREIGHT ? SEAFREIGHT : 
-                                        typeValue === ServiceTypeEnum.HAULAGE ? HAULAGE : 
-                                        typeValue === ServiceTypeEnum.MISCELLANEOUS ? MISCELLANEOUS : ''
-                                    } />
-                                </MenuItem>
-                            })
-                        }
-                    </Select>
-                </FormControl>
-            )
-        }
-        
-
-        return getServicesType(servicesTypeValue);
-    }
-
-    const columns = [
+    const columns: ColumnDef<ServiceViewModel, any>[] = [
         columnHelper.accessor('serviceName', {
             header: t('serviceName'),
-            cell: ({getValue, row, column}) => {
-
-                const onBlur = (value: string) => {
-                    if(table){
-                        (table.options.meta as CustomTableMeta).updateServiceData<string>(row.index, column.id, value)
-                    }
-                }
-
-                return EditTextFieldCell({
-                getValue: getValue,
-                edit: (editRow && serviceId !== undefined && serviceId === row.original.serviceId) || 
-                (serviceId === 0 && row.original.serviceId === undefined),
-                onBlur: onBlur,
-            });
-        }
+            cell: x => <EditTextFieldCell<ServiceViewModel> {...x}
+                    edit={(editRow && serviceId !== undefined && serviceId === x.row.original.serviceId) || 
+                    (serviceId === 0 && x.row.original.serviceId === undefined)} />
         }),
         columnHelper.accessor('servicesTypeId', {
             header: t('servicesTypeId'),
-            cell: editSelectCell
+            cell: x => <EditSelectCell<ServiceViewModel> {...x} edit={(editRow && serviceId !== undefined && serviceId === x.row.original.serviceId) || 
+                     (serviceId === 0 && x.row.original.serviceId === undefined)} />
         }),
         columnHelper.display({
             id: 'option',
@@ -256,52 +163,6 @@ const MasterDataServices: any = () => {
         })
     ]
 
-    const fuzzyFilter: FilterFn<any> = (row, columnId, value, addMeta) => {
-        // Rank the item
-        const itemRank = rankItem(row.getValue(columnId), value)
-      
-        // Store the itemRank info
-        addMeta({
-          itemRank,
-        })
-      
-        // Return if the item should be filtered in/out
-        return itemRank.passed
-    }
-
-    const table = useReactTable({
-        data: services || [],
-        columns,
-        filterFns: {
-            fuzzy: fuzzyFilter,
-        },
-        state: {
-            globalFilter,
-            //sorting
-        },
-        globalFilterFn: fuzzyFilter,
-        getCoreRowModel: getCoreRowModel(),
-        getFilteredRowModel: getFilteredRowModel(),
-        //getSortedRowModel: getSortedRowModel(),
-        onGlobalFilterChange: setGlobalFilter,
-        //onSortingChange: setSorting,
-        meta:{
-            updateServiceData: (rowIndex: number, columnId: string, value: unknown) => { 
-                setServices((old) =>
-                    old.map((row, index) => {
-                      if (index === rowIndex) {
-                        return {
-                          ...old[rowIndex],
-                          [columnId]: value,
-                        };
-                      }
-                      return row;
-                    })
-                  );
-            }
-        } 
-    })
-
     const handleRefreshTable = () => {
         queryClient.invalidateQueries({ queryKey: getServiceQueryKey() });
     }
@@ -325,59 +186,16 @@ const MasterDataServices: any = () => {
                                 size='small' placeholder="Search serrvices..." />
                         </Stack>
                     
-                        <TableContainer component={Paper}>
-                            <Table size='small'>
-                                <TableHead>
-                                    {
-                                        table.getHeaderGroups().map(headerGroup => (
-                                            <TableRow key={headerGroup.id}>
-                                                {
-                                                    headerGroup.headers.map(header => (
-                                                        <TableCell key={header.id} sx={{fontWeight: "bold",width:`${header.getSize()}px`}}>
-                                                            {header.isPlaceholder ? null : 
-                                                                (
-                                                                    // <div onClick={header.column.getToggleSortingHandler()} 
-                                                                    //     style={{display: 'flex', alignItems: 'center', cursor: 'pointer'}}>
-                                                                    //     {
-                                                                            flexRender(
-                                                                                header.column.columnDef.header,
-                                                                                header.getContext()
-                                                                            )
-                                                                    //     }
-                                                                    //     {{
-                                                                    //         asc: <ArrowDropUp />,
-                                                                    //         desc: <ArrowDropDown />,
-                                                                    //     }[header.column.getIsSorted() as string] ?? null}
-                                                                    // </div>
-                                                                )
-                                                            }
-                                                        </TableCell>
-                                                    ))  
-                                                }
-                                            </TableRow>
-                                        ))
-                                    }
-                                </TableHead>
-                                <TableBody>
-                                    {
-                                        !isFetching ? 
-                                        table.getRowModel().rows.map(row => (
-                                            <TableRow key={row.id}>
-                                                {
-                                                    row.getVisibleCells().map(cell => (
-                                                        <TableCell key={cell.id}>
-                                                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                                                        </TableCell>
-                                                    ))
-                                                }
-                                            </TableRow>
-                                        ))  
-                                        : 
-                                        <TableBodySkeleton columns={columns.length} rows={5} />
-                                    }
-                                </TableBody>
-                            </Table>
-                        </TableContainer>
+                        <EditableTable data={services} columns={columns}
+                            onUpdate={(rowIndex, columnId, value) => {
+                                setServices((old) =>
+                                old.map((row, index) =>
+                                    index === rowIndex ? { ...old[rowIndex], [columnId]: value } : row
+                                )
+                                );
+                            }}
+                            isLoading={isFetching} globalFilter={globalFilter} onGlobalFilterChange={setGlobalFilter}
+                            />
                     </Grid>
                 </Grid>
             </Box>
