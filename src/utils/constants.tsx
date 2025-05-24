@@ -11,7 +11,10 @@ export enum EnumCategory
     SHIPPING_AGENCY = 11
 }
 
-export let categoriesOptions: any = [
+/**
+ * @deprecated - Faire le backend depuis CRM backend
+ */
+export let categoriesOptions: CategoryType[] = [
   { value: 1, name: "CUSTOMERS" },
   { value: 2, name: "SUPPLIERS" },
   { value: 3, name: "CHARGEUR" },
@@ -20,6 +23,14 @@ export let categoriesOptions: any = [
   { value: 6, name: "BANK" },
   { value: 7, name: "SHIPPING_AGENCY11" },
 ];
+
+/**
+ * @deprecated - Faire le backend depuis CRM backend
+ */
+export type CategoryType = {
+  value: number;
+  name: string
+}
 
 export let prioritiesOptions: any = [
   { label: "NORMAL", value: "NORMAL" },
@@ -73,6 +84,13 @@ export const currencyOptions = [
   { code: "USD", label: 'Dollar - $' },
   { code: "FCFA", label: 'Franc CFA - FCFA' }
 ]
+
+export const Currency: Record<string, string> = {
+  EUR: '€',
+  GBP: '£',
+  USD: '$',
+  FCFA: 'FCFA'
+}
 
 export const haulageTypeOptions = [
   { value: "On trailer, direct loading", label: 'haulageType1' },
@@ -249,7 +267,7 @@ interface CountryType {
     suggested?: boolean;
 }
 
-export const countries: readonly CountryType[] = [
+export const COUNTRIES: readonly CountryType[] = [
     { code: 'AD', label: 'Andorra', phone: '376' },
     {
       code: 'AE',

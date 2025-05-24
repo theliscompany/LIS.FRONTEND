@@ -14,7 +14,6 @@ import ServicesTable from './ServicesTable';
 import NewContact from '../shared/NewContact';
 import NewPort from '../shared/NewPort';
 import NewService from '../shared/NewService';
-import { postApiSeaFreightSeaFreight } from '../../api/client/pricing';
 import { getService } from '../../api/client/transport';
 import PortAutocomplete from '../shared/PortAutocomplete';
 
@@ -97,17 +96,17 @@ const NewSeafreight = (props: any) => {
                 };
 
                 console.log(dataSent);
-                const response = await postApiSeaFreightSeaFreight({body: dataSent});
-                if (response !== null && response !== undefined) {
-                    props.closeModal();
-                    enqueueSnackbar(t('successCreated'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
-                    setLoadSeafreight(false);
-                    props.callBack();
-                }
-                else {
-                    setLoadSeafreight(false);
-                    enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
-                }
+                // const response = await postApiSeaFreightSeaFreight({body: dataSent});
+                // if (response !== null && response !== undefined) {
+                //     props.closeModal();
+                //     enqueueSnackbar(t('successCreated'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                //     setLoadSeafreight(false);
+                //     props.callBack();
+                // }
+                // else {
+                //     setLoadSeafreight(false);
+                //     enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                // }
             }
             catch (err: any) {
                 console.log(err);

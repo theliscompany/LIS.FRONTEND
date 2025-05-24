@@ -10,7 +10,7 @@ export type HaulageOfferViewModel = {
     id?: (string) | null;
     haulierId?: number;
     haulierName?: (string) | null;
-    validUntil?: (string) | null;
+    validUntil?: (Date) | null;
     loadingPortId?: number;
     loadingPort?: (string) | null;
     currency?: (string) | null;
@@ -20,18 +20,18 @@ export type HaulageOfferViewModel = {
     unitTariff?: number;
     containerNames?: Array<(string)> | null;
     comment?: (string) | null;
-    updated?: (string) | null;
-    created?: string;
+    updated?: (Date) | null;
+    created?: Date;
 };
 
 export type HaulagePostViewModel = {
     id?: (string) | null;
     haulierId?: number;
     haulierName?: (string) | null;
-    validUntil?: string;
+    validUntil?: Date;
     currency?: (string) | null;
     loadingCity?: (string) | null;
-    updated?: string;
+    updated?: Date;
     loadingPortId?: number;
     loadingPort?: (string) | null;
     freeTime?: number;
@@ -45,11 +45,11 @@ export type HaulagePostViewModel = {
 };
 
 export type HaulageSupplierViewModel = {
-    id?: (string) | null;
+    id?: string;
     haulierName?: (string) | null;
     currency?: (string) | null;
-    validUntil?: string;
-    created?: string;
+    validUntil?: Date;
+    created?: Date;
     freeTime?: number;
     multiStop?: number;
     overtimeTariff?: number;
@@ -63,9 +63,9 @@ export type HaulageViewModel = {
     id?: (string) | null;
     haulierId?: number;
     haulierName?: (string) | null;
-    validUntil?: string;
-    created?: string;
-    updated?: (string) | null;
+    validUntil?: Date;
+    created?: Date;
+    updated?: (Date) | null;
     currency?: (string) | null;
     loadingCity?: (string) | null;
     loadingPortId?: number;
@@ -80,11 +80,6 @@ export type HaulageViewModel = {
     containers?: Array<PackageViewModel> | null;
 };
 
-export type MiscellaneousContainer = {
-    container?: Package;
-    services?: Array<Service> | null;
-};
-
 export type MiscellaneousOfferViewModel = {
     id?: (string) | null;
     supplierName?: (string) | null;
@@ -92,8 +87,8 @@ export type MiscellaneousOfferViewModel = {
     departurePortName?: (string) | null;
     destinationPortName?: (string) | null;
     comment?: (string) | null;
-    updated?: (string) | null;
-    created?: string;
+    updated?: (Date) | null;
+    created?: Date;
     price20?: number;
     price40?: number;
     price20dry?: number;
@@ -101,36 +96,48 @@ export type MiscellaneousOfferViewModel = {
     price40dry?: number;
     price40hc?: number;
     price40hcrf?: number;
-    services?: Array<MiscellaneousServiceViewModel> | null;
-    containers?: Array<MiscellaneousContainer> | null;
+    services?: Array<ServiceViewModel> | null;
 };
 
-export type MiscellaneousServiceViewModel = {
-    miscellaneousServiceId?: (string) | null;
-    service?: ServiceViewModel;
-    containers?: Array<PackageViewModel> | null;
+export type MiscellaneousSupplierViewModel = {
+    miscellaneousId?: string;
+    supplierName?: (string) | null;
+    currency?: (string) | null;
+    total20Dry?: number;
+    total40Dry?: number;
+    total20HCRF?: number;
+    total40HC?: number;
+    total20RF?: number;
+    total20?: number;
+    total40?: number;
+    services?: Array<ServiceViewModel> | null;
+    validUntil?: Date;
+    created?: (Date) | null;
+    updated?: (Date) | null;
 };
 
 export type MiscellaneousViewModel = {
-    id?: (string) | null;
+    id?: string;
     departurePortId?: (number) | null;
     destinationPortId?: (number) | null;
     departurePortName?: (string) | null;
     destinationPortName?: (string) | null;
     supplierId?: number;
     supplierName?: (string) | null;
-    validUntil?: string;
-    updated?: (string) | null;
-    created?: (string) | null;
+    validUntil?: Date;
+    updated?: (Date) | null;
+    created?: (Date) | null;
     currency?: (string) | null;
     comment?: (string) | null;
-    services?: Array<MiscellaneousServiceViewModel> | null;
-    containers?: Array<MiscellaneousContainer> | null;
+    containers?: PackageViewModel;
+    services?: Array<ServiceViewModel> | null;
 };
 
-export type Package = {
-    packageId?: number;
-    packageName?: (string) | null;
+export type MiscellaneousWithShipmentViewModel = {
+    departurePortName?: (string) | null;
+    destinationPortName?: (string) | null;
+    validCount?: number;
+    suppliers?: Array<MiscellaneousSupplierViewModel> | null;
 };
 
 export type PackageViewModel = {
@@ -138,110 +145,98 @@ export type PackageViewModel = {
     packageName?: (string) | null;
 };
 
-export type SeaFreightContainer = {
-    container?: Package;
-    services?: Array<Service> | null;
-};
-
 export type SeaFreightOfferViewModel = {
-    seaFreightId?: (string) | null;
+    seaFreightId?: string;
+    carrierAgentName?: (string) | null;
+    transitTime?: (number) | null;
+    frequency?: (number) | null;
+    currency?: (string) | null;
+    validUntil?: Date;
+    services?: Array<ServiceSeaFreightViewModel> | null;
     departurePortName?: (string) | null;
     destinationPortName?: (string) | null;
-    validUntil?: (string) | null;
     carrierName?: (string) | null;
-    carrierAgentName?: (string) | null;
     price20dry?: number;
     price20rf?: number;
     price40dry?: number;
     price40hc?: number;
     price40hcrf?: number;
-    transitTime?: (number) | null;
-    frequency?: (number) | null;
-    currency?: (string) | null;
     comment?: (string) | null;
-    lastUpdated?: (string) | null;
-    created?: string;
-    containers?: Array<SeaFreightContainer> | null;
-};
-
-export type SeaFreightServiceVieModel = {
-    seaFreightServiceId?: (string) | null;
-    service?: ServiceViewModel;
-    containers?: Array<PackageViewModel> | null;
-};
-
-export type SeaFreightSupplierViewModel = {
-    seaFreightId?: (string) | null;
-    carrierAgentName?: (string) | null;
-    transitTime?: (number) | null;
-    frequency?: (number) | null;
-    currency?: (string) | null;
-    total20Dry?: number;
-    total40Dry?: number;
-    total20HCRF?: number;
-    total40HC?: number;
-    total20RF?: number;
-    validUntil?: string;
-    created?: string;
-    containers?: Array<SeaFreightContainer> | null;
+    lastUpdated?: (Date) | null;
+    created?: Date;
 };
 
 export type SeaFreightsViewModel = {
     departurePortName?: (string) | null;
     destinationPortName?: (string) | null;
     validCount?: number;
-    suppliers?: Array<SeaFreightSupplierViewModel> | null;
+    suppliers?: Array<SupplierSeaFreightViewModel> | null;
 };
 
 export type SeaFreightViewModel = {
-    seaFreightId?: (string) | null;
+    seaFreightId?: string;
+    carrierAgentName?: (string) | null;
+    transitTime?: (number) | null;
+    frequency?: (number) | null;
+    currency?: (string) | null;
+    validUntil?: Date;
+    services?: Array<ServiceSeaFreightViewModel> | null;
     departurePortId?: number;
     destinationPortId?: number;
     departurePortName?: (string) | null;
     destinationPortName?: (string) | null;
     carrierId?: number;
-    lastUpdated?: string;
+    lastUpdated?: Date;
     carrierName?: (string) | null;
     carrierAgentId?: number;
-    carrierAgentName?: (string) | null;
-    currency?: (string) | null;
-    validUntil?: string;
-    transitTime?: (number) | null;
-    frequency?: (number) | null;
     comment?: (string) | null;
-    services?: Array<SeaFreightServiceVieModel> | null;
 };
 
-export type Service = {
-    serviceId?: number;
-    serviceName?: (string) | null;
-    price?: number;
+export type ServiceSeaFreightViewModel = {
+    seaFreightServiceId?: string;
+    service?: ServiceViewModel;
+    containers?: Array<PackageViewModel> | null;
 };
 
 export type ServiceViewModel = {
     serviceId?: number;
     serviceName?: (string) | null;
     price?: number;
-    containers?: Array<PackageViewModel> | null;
+};
+
+export type SupplierSeaFreightViewModel = {
+    seaFreightId?: string;
+    carrierAgentName?: (string) | null;
+    transitTime?: (number) | null;
+    frequency?: (number) | null;
+    currency?: (string) | null;
+    validUntil?: Date;
+    services?: Array<ServiceSeaFreightViewModel> | null;
+    total20Dry?: number;
+    total40Dry?: number;
+    total20HCRF?: number;
+    total40HC?: number;
+    total20RF?: number;
+    created?: Date;
 };
 
 export type PostApiHaulageHaulageData = {
     body?: HaulagePostViewModel;
 };
 
-export type PostApiHaulageHaulageResponse = (string);
+export type PostApiHaulageHaulageResponse = (unknown);
 
 export type PostApiHaulageHaulageError = unknown;
 
-export type GetApiHaulageHaulageData = {
-    query?: {
-        offerId?: string;
+export type GetApiHaulageHaulageByIdData = {
+    path: {
+        id: string;
     };
 };
 
-export type GetApiHaulageHaulageResponse = (HaulageViewModel);
+export type GetApiHaulageHaulageByIdResponse = (HaulageViewModel);
 
-export type GetApiHaulageHaulageError = unknown;
+export type GetApiHaulageHaulageByIdError = unknown;
 
 export type GetApiHaulageHaulagesData = {
     query?: {
@@ -258,29 +253,33 @@ export type GetApiHaulageHaulagesResponse = (Array<HaulageGridGetViewModel>);
 
 export type GetApiHaulageHaulagesError = unknown;
 
-export type DeleteApiHaulageDeleteHaulageData = {
-    query?: {
-        offerId?: string;
+export type DeleteApiHaulageDeleteHaulageByIdData = {
+    path: {
+        id: string;
     };
 };
 
-export type DeleteApiHaulageDeleteHaulageResponse = (boolean);
+export type DeleteApiHaulageDeleteHaulageByIdResponse = (boolean);
 
-export type DeleteApiHaulageDeleteHaulageError = unknown;
+export type DeleteApiHaulageDeleteHaulageByIdError = unknown;
 
-export type GetApiMiscellaneousMiscellaneousData = {
-    query?: {
-        departurePortId?: number;
-        destinationPortId?: number;
-        id?: string;
-        supplierId?: number;
-        withShipment?: boolean;
+export type GetApiMiscellaneousMiscellaneousWithShipmentResponse = (Array<MiscellaneousWithShipmentViewModel>);
+
+export type GetApiMiscellaneousMiscellaneousWithShipmentError = unknown;
+
+export type GetApiMiscellaneousMiscellaneousWithoutShipmentResponse = (Array<MiscellaneousSupplierViewModel>);
+
+export type GetApiMiscellaneousMiscellaneousWithoutShipmentError = unknown;
+
+export type GetApiMiscellaneousMiscellaneousByIdData = {
+    path: {
+        id: string;
     };
 };
 
-export type GetApiMiscellaneousMiscellaneousResponse = (unknown);
+export type GetApiMiscellaneousMiscellaneousByIdResponse = (MiscellaneousViewModel);
 
-export type GetApiMiscellaneousMiscellaneousError = unknown;
+export type GetApiMiscellaneousMiscellaneousByIdError = unknown;
 
 export type PostApiMiscellaneousMiscellaneousData = {
     body?: MiscellaneousViewModel;
@@ -306,7 +305,7 @@ export type GetApiPricingHaulagesOfferRequestData = {
         HaulageType?: string;
         LoadingCity?: string;
         LoadingPortId?: number;
-        PlannedDeparture?: string;
+        PlannedDeparture?: Date;
     };
 };
 
@@ -321,7 +320,7 @@ export type GetApiPricingMiscellaneoussOffersRequestData = {
         DestinationPortId?: number;
         Package20?: boolean;
         Package40?: boolean;
-        PlannedDeparture?: string;
+        PlannedDeparture?: Date;
     };
 };
 
@@ -334,7 +333,7 @@ export type GetApiPricingSeaFreightsOffersRequestData = {
         ContainerTypesId?: Array<(number)>;
         DeparturePortId?: number;
         DestinationPortId?: number;
-        PlannedDeparture?: string;
+        PlannedDeparture?: Date;
     };
 };
 
@@ -350,16 +349,6 @@ export type PostApiSeaFreightSeaFreightResponse = (unknown);
 
 export type PostApiSeaFreightSeaFreightError = unknown;
 
-export type GetApiSeaFreightSeaFreightData = {
-    query?: {
-        seaFreightId?: string;
-    };
-};
-
-export type GetApiSeaFreightSeaFreightResponse = (SeaFreightViewModel);
-
-export type GetApiSeaFreightSeaFreightError = unknown;
-
 export type GetApiSeaFreightGetSeaFreightsData = {
     query?: {
         CarrierAgentId?: number;
@@ -372,12 +361,256 @@ export type GetApiSeaFreightGetSeaFreightsResponse = (Array<SeaFreightsViewModel
 
 export type GetApiSeaFreightGetSeaFreightsError = unknown;
 
-export type DeleteApiSeaFreightDeleteSeaFreightPriceData = {
-    query?: {
-        id?: string;
+export type GetApiSeaFreightSeaFreightByIdData = {
+    path: {
+        id: string;
     };
 };
 
-export type DeleteApiSeaFreightDeleteSeaFreightPriceResponse = (boolean);
+export type GetApiSeaFreightSeaFreightByIdResponse = (SeaFreightViewModel);
 
-export type DeleteApiSeaFreightDeleteSeaFreightPriceError = unknown;
+export type GetApiSeaFreightSeaFreightByIdError = unknown;
+
+export type DeleteApiSeaFreightDeleteSeaFreightPriceByIdData = {
+    path: {
+        id: string;
+    };
+};
+
+export type DeleteApiSeaFreightDeleteSeaFreightPriceByIdResponse = (boolean);
+
+export type DeleteApiSeaFreightDeleteSeaFreightPriceByIdError = unknown;
+
+export type GetApiHaulageHaulageByIdResponseTransformer = (data: any) => Promise<GetApiHaulageHaulageByIdResponse>;
+
+export type HaulageViewModelModelResponseTransformer = (data: any) => HaulageViewModel;
+
+export const HaulageViewModelModelResponseTransformer: HaulageViewModelModelResponseTransformer = data => {
+    if (data?.validUntil) {
+        data.validUntil = new Date(data.validUntil);
+    }
+    if (data?.created) {
+        data.created = new Date(data.created);
+    }
+    if (data?.updated) {
+        data.updated = new Date(data.updated);
+    }
+    return data;
+};
+
+export const GetApiHaulageHaulageByIdResponseTransformer: GetApiHaulageHaulageByIdResponseTransformer = async (data) => {
+    HaulageViewModelModelResponseTransformer(data);
+    return data;
+};
+
+export type GetApiHaulageHaulagesResponseTransformer = (data: any) => Promise<GetApiHaulageHaulagesResponse>;
+
+export type HaulageGridGetViewModelModelResponseTransformer = (data: any) => HaulageGridGetViewModel;
+
+export type HaulageSupplierViewModelModelResponseTransformer = (data: any) => HaulageSupplierViewModel;
+
+export const HaulageSupplierViewModelModelResponseTransformer: HaulageSupplierViewModelModelResponseTransformer = data => {
+    if (data?.validUntil) {
+        data.validUntil = new Date(data.validUntil);
+    }
+    if (data?.created) {
+        data.created = new Date(data.created);
+    }
+    return data;
+};
+
+export const HaulageGridGetViewModelModelResponseTransformer: HaulageGridGetViewModelModelResponseTransformer = data => {
+    if (Array.isArray(data?.hauliers)) {
+        data.hauliers.forEach(HaulageSupplierViewModelModelResponseTransformer);
+    }
+    return data;
+};
+
+export const GetApiHaulageHaulagesResponseTransformer: GetApiHaulageHaulagesResponseTransformer = async (data) => {
+    if (Array.isArray(data)) {
+        data.forEach(HaulageGridGetViewModelModelResponseTransformer);
+    }
+    return data;
+};
+
+export type GetApiMiscellaneousMiscellaneousWithShipmentResponseTransformer = (data: any) => Promise<GetApiMiscellaneousMiscellaneousWithShipmentResponse>;
+
+export type MiscellaneousWithShipmentViewModelModelResponseTransformer = (data: any) => MiscellaneousWithShipmentViewModel;
+
+export type MiscellaneousSupplierViewModelModelResponseTransformer = (data: any) => MiscellaneousSupplierViewModel;
+
+export const MiscellaneousSupplierViewModelModelResponseTransformer: MiscellaneousSupplierViewModelModelResponseTransformer = data => {
+    if (data?.validUntil) {
+        data.validUntil = new Date(data.validUntil);
+    }
+    if (data?.created) {
+        data.created = new Date(data.created);
+    }
+    if (data?.updated) {
+        data.updated = new Date(data.updated);
+    }
+    return data;
+};
+
+export const MiscellaneousWithShipmentViewModelModelResponseTransformer: MiscellaneousWithShipmentViewModelModelResponseTransformer = data => {
+    if (Array.isArray(data?.suppliers)) {
+        data.suppliers.forEach(MiscellaneousSupplierViewModelModelResponseTransformer);
+    }
+    return data;
+};
+
+export const GetApiMiscellaneousMiscellaneousWithShipmentResponseTransformer: GetApiMiscellaneousMiscellaneousWithShipmentResponseTransformer = async (data) => {
+    if (Array.isArray(data)) {
+        data.forEach(MiscellaneousWithShipmentViewModelModelResponseTransformer);
+    }
+    return data;
+};
+
+export type GetApiMiscellaneousMiscellaneousWithoutShipmentResponseTransformer = (data: any) => Promise<GetApiMiscellaneousMiscellaneousWithoutShipmentResponse>;
+
+export const GetApiMiscellaneousMiscellaneousWithoutShipmentResponseTransformer: GetApiMiscellaneousMiscellaneousWithoutShipmentResponseTransformer = async (data) => {
+    if (Array.isArray(data)) {
+        data.forEach(MiscellaneousSupplierViewModelModelResponseTransformer);
+    }
+    return data;
+};
+
+export type GetApiMiscellaneousMiscellaneousByIdResponseTransformer = (data: any) => Promise<GetApiMiscellaneousMiscellaneousByIdResponse>;
+
+export type MiscellaneousViewModelModelResponseTransformer = (data: any) => MiscellaneousViewModel;
+
+export const MiscellaneousViewModelModelResponseTransformer: MiscellaneousViewModelModelResponseTransformer = data => {
+    if (data?.validUntil) {
+        data.validUntil = new Date(data.validUntil);
+    }
+    if (data?.updated) {
+        data.updated = new Date(data.updated);
+    }
+    if (data?.created) {
+        data.created = new Date(data.created);
+    }
+    return data;
+};
+
+export const GetApiMiscellaneousMiscellaneousByIdResponseTransformer: GetApiMiscellaneousMiscellaneousByIdResponseTransformer = async (data) => {
+    MiscellaneousViewModelModelResponseTransformer(data);
+    return data;
+};
+
+export type GetApiPricingHaulagesOfferRequestResponseTransformer = (data: any) => Promise<GetApiPricingHaulagesOfferRequestResponse>;
+
+export type HaulageOfferViewModelModelResponseTransformer = (data: any) => HaulageOfferViewModel;
+
+export const HaulageOfferViewModelModelResponseTransformer: HaulageOfferViewModelModelResponseTransformer = data => {
+    if (data?.validUntil) {
+        data.validUntil = new Date(data.validUntil);
+    }
+    if (data?.updated) {
+        data.updated = new Date(data.updated);
+    }
+    if (data?.created) {
+        data.created = new Date(data.created);
+    }
+    return data;
+};
+
+export const GetApiPricingHaulagesOfferRequestResponseTransformer: GetApiPricingHaulagesOfferRequestResponseTransformer = async (data) => {
+    if (Array.isArray(data)) {
+        data.forEach(HaulageOfferViewModelModelResponseTransformer);
+    }
+    return data;
+};
+
+export type GetApiPricingMiscellaneoussOffersRequestResponseTransformer = (data: any) => Promise<GetApiPricingMiscellaneoussOffersRequestResponse>;
+
+export type MiscellaneousOfferViewModelModelResponseTransformer = (data: any) => MiscellaneousOfferViewModel;
+
+export const MiscellaneousOfferViewModelModelResponseTransformer: MiscellaneousOfferViewModelModelResponseTransformer = data => {
+    if (data?.updated) {
+        data.updated = new Date(data.updated);
+    }
+    if (data?.created) {
+        data.created = new Date(data.created);
+    }
+    return data;
+};
+
+export const GetApiPricingMiscellaneoussOffersRequestResponseTransformer: GetApiPricingMiscellaneoussOffersRequestResponseTransformer = async (data) => {
+    if (Array.isArray(data)) {
+        data.forEach(MiscellaneousOfferViewModelModelResponseTransformer);
+    }
+    return data;
+};
+
+export type GetApiPricingSeaFreightsOffersRequestResponseTransformer = (data: any) => Promise<GetApiPricingSeaFreightsOffersRequestResponse>;
+
+export type SeaFreightOfferViewModelModelResponseTransformer = (data: any) => SeaFreightOfferViewModel;
+
+export const SeaFreightOfferViewModelModelResponseTransformer: SeaFreightOfferViewModelModelResponseTransformer = data => {
+    if (data?.validUntil) {
+        data.validUntil = new Date(data.validUntil);
+    }
+    if (data?.lastUpdated) {
+        data.lastUpdated = new Date(data.lastUpdated);
+    }
+    if (data?.created) {
+        data.created = new Date(data.created);
+    }
+    return data;
+};
+
+export const GetApiPricingSeaFreightsOffersRequestResponseTransformer: GetApiPricingSeaFreightsOffersRequestResponseTransformer = async (data) => {
+    if (Array.isArray(data)) {
+        data.forEach(SeaFreightOfferViewModelModelResponseTransformer);
+    }
+    return data;
+};
+
+export type GetApiSeaFreightGetSeaFreightsResponseTransformer = (data: any) => Promise<GetApiSeaFreightGetSeaFreightsResponse>;
+
+export type SeaFreightsViewModelModelResponseTransformer = (data: any) => SeaFreightsViewModel;
+
+export type SupplierSeaFreightViewModelModelResponseTransformer = (data: any) => SupplierSeaFreightViewModel;
+
+export const SupplierSeaFreightViewModelModelResponseTransformer: SupplierSeaFreightViewModelModelResponseTransformer = data => {
+    if (data?.validUntil) {
+        data.validUntil = new Date(data.validUntil);
+    }
+    if (data?.created) {
+        data.created = new Date(data.created);
+    }
+    return data;
+};
+
+export const SeaFreightsViewModelModelResponseTransformer: SeaFreightsViewModelModelResponseTransformer = data => {
+    if (Array.isArray(data?.suppliers)) {
+        data.suppliers.forEach(SupplierSeaFreightViewModelModelResponseTransformer);
+    }
+    return data;
+};
+
+export const GetApiSeaFreightGetSeaFreightsResponseTransformer: GetApiSeaFreightGetSeaFreightsResponseTransformer = async (data) => {
+    if (Array.isArray(data)) {
+        data.forEach(SeaFreightsViewModelModelResponseTransformer);
+    }
+    return data;
+};
+
+export type GetApiSeaFreightSeaFreightByIdResponseTransformer = (data: any) => Promise<GetApiSeaFreightSeaFreightByIdResponse>;
+
+export type SeaFreightViewModelModelResponseTransformer = (data: any) => SeaFreightViewModel;
+
+export const SeaFreightViewModelModelResponseTransformer: SeaFreightViewModelModelResponseTransformer = data => {
+    if (data?.validUntil) {
+        data.validUntil = new Date(data.validUntil);
+    }
+    if (data?.lastUpdated) {
+        data.lastUpdated = new Date(data.lastUpdated);
+    }
+    return data;
+};
+
+export const GetApiSeaFreightSeaFreightByIdResponseTransformer: GetApiSeaFreightSeaFreightByIdResponseTransformer = async (data) => {
+    SeaFreightViewModelModelResponseTransformer(data);
+    return data;
+};
