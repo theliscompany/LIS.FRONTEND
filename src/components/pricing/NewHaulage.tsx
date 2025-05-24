@@ -13,7 +13,6 @@ import AutocompleteSearch from '../shared/AutocompleteSearch';
 import CompanySearch from '../shared/CompanySearch';
 import PortAutocomplete from '../shared/PortAutocomplete';
 import { Dayjs } from 'dayjs';
-import { postApiHaulageHaulage } from '../../api/client/pricing';
 
 function NewHaulage(props: any) {
     const [load, setLoad] = useState<boolean>(false);
@@ -38,50 +37,50 @@ function NewHaulage(props: any) {
         setLoad(true);
         if (haulier !== null && loadingCity !== null && loadingPort !== null && freeTime > 0 && unitTariff > 0 && overtimeTariff > 0 && multiStop > 0 && validUntil !== null && containerTypes.length > 0) {
             try {
-                var dataSent = null;
-                var postalCode = loadingCity !== null ? loadingCity.postalCode !== undefined ? loadingCity.postalCode : "" : ""; 
-                var city = loadingCity !== null ? loadingCity.city.toUpperCase()+', '+loadingCity.country.toUpperCase() : "";
-                if (postalCode !== "") {
-                    if (postalCode === null) {
-                        city = loadingCity.city.toUpperCase()+', '+loadingCity.country.toUpperCase();
-                    }
-                    else {
-                        city = loadingCity.city.toUpperCase()+', '+loadingCity.country.toUpperCase()+', '+postalCode;
-                    }
-                }
+                // var dataSent = null;
+                // var postalCode = loadingCity !== null ? loadingCity.postalCode !== undefined ? loadingCity.postalCode : "" : ""; 
+                // var city = loadingCity !== null ? loadingCity.city.toUpperCase()+', '+loadingCity.country.toUpperCase() : "";
+                // if (postalCode !== "") {
+                //     if (postalCode === null) {
+                //         city = loadingCity.city.toUpperCase()+', '+loadingCity.country.toUpperCase();
+                //     }
+                //     else {
+                //         city = loadingCity.city.toUpperCase()+', '+loadingCity.country.toUpperCase()+', '+postalCode;
+                //     }
+                // }
 
-                dataSent = {
-                    "id": null,
-                    "haulierId": haulier.contactId,
-                    "haulierName": haulier.contactName,
-                    "currency": currency,
-                    "loadingCity": city,
-                    "loadingPortId": loadingPort.portId,
-                    "loadingPort": loadingPort.portName,
-                    "freeTime": freeTime,
-                    "multiStop": multiStop,
-                    "overtimeTariff": overtimeTariff,
-                    "unitTariff": Number(unitTariff),
-                    "haulageType": haulageType,
-                    "emptyPickupDepot": emptyPickupDepot,
-                    "comment": comment,
-                    "validUntil": validUntil?.toISOString(),
-                    "updated": (new Date()).toISOString(),
-                    "containers": containerTypes,
-                };
+                // dataSent = {
+                //     "id": null,
+                //     "haulierId": haulier.contactId,
+                //     "haulierName": haulier.contactName,
+                //     "currency": currency,
+                //     "loadingCity": city,
+                //     "loadingPortId": loadingPort.portId,
+                //     "loadingPort": loadingPort.portName,
+                //     "freeTime": freeTime,
+                //     "multiStop": multiStop,
+                //     "overtimeTariff": overtimeTariff,
+                //     "unitTariff": Number(unitTariff),
+                //     "haulageType": haulageType,
+                //     "emptyPickupDepot": emptyPickupDepot,
+                //     "comment": comment,
+                //     "validUntil": validUntil?.toISOString(),
+                //     "updated": (new Date()).toISOString(),
+                //     "containers": containerTypes,
+                // };
 
-                const response = await postApiHaulageHaulage({body: dataSent});
-                if (response !== null && response !== undefined) {
-                    enqueueSnackbar(t('successCreated'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
-                    props.closeModal();
-                    // Callback function here
-                    props.callBack();
-                    setLoad(false);
-                }
-                else {
-                    enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
-                    setLoad(false);
-                }
+                // const response = await postApiHaulageHaulage({body: dataSent});
+                // if (response !== null && response !== undefined) {
+                //     enqueueSnackbar(t('successCreated'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                //     props.closeModal();
+                //     // Callback function here
+                //     props.callBack();
+                //     setLoad(false);
+                // }
+                // else {
+                //     enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                //     setLoad(false);
+                // }
             }
             catch (err: any) {
                 console.log(err);

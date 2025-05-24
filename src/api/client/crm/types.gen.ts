@@ -55,7 +55,7 @@ export type UpdateContactViewModel = {
     countryCode?: (string) | null;
     phone?: (string) | null;
     email?: (string) | null;
-    categories?: Array<('CUSTOMERS' | 'SUPPLIERS' | 'CHARGEUR' | 'RECEIVER' | 'SHIPPING_LINES' | 'BANK' | 'SHIPPING_AGENCY11')> | null;
+    categories?: Array<(string)> | null;
 };
 
 export type GetContactGetContactsData = {
@@ -63,8 +63,6 @@ export type GetContactGetContactsData = {
         category?: 'CUSTOMERS' | 'SUPPLIERS' | 'CHARGEUR' | 'RECEIVER' | 'SHIPPING_LINES' | 'BANK' | 'SHIPPING_AGENCY11';
         contactName?: string;
         contactNumber?: string;
-        pageNumber?: number;
-        pageSize?: number;
     };
 };
 

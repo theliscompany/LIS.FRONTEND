@@ -5,7 +5,7 @@ import Grid from '@mui/material/Grid2';
 import { BootstrapDialog, whiteButtonStyles } from '../../utils/misc/styles';
 import { enqueueSnackbar, SnackbarProvider } from 'notistack';
 import { useTranslation } from 'react-i18next';
-import { arePhoneticallyClose, complexEquality, findClosestSeaPort, parseContact2, parseLocation, similar, sortByCloseness } from '../../utils/functions';
+import { arePhoneticallyClose, complexEquality, parseContact2, parseLocation, similar, sortByCloseness } from '../../utils/functions';
 import { containerPackages } from '../../utils/constants';
 // @ts-ignore
 import { JSON as seaPorts } from 'sea-ports';
@@ -38,9 +38,9 @@ const Request = () => {
     const [containersSelection, setContainersSelection] = useState<any>([]);
     const [unitsSelection, setUnitsSelection] = useState<any>([]);
     // const [packagesSelection, setPackagesSelection] = useState<any>([]);    
-    const [portDestination, setPortDestination] = useState<any>(null);
+    // const [portDestination, setPortDestination] = useState<any>(null);
     // const [portDeparture, setPortDeparture] = useState<any>(null);
-    const [loadingCity, setLoadingCity] = useState<any>(null);
+    // const [loadingCity, setLoadingCity] = useState<any>(null);
     const [products, setProducts] = useState<any>(null);
     const [hscodes, setHSCodes] = useState<any>(null);
     const [ports, setPorts] = useState<any>(null);
@@ -107,9 +107,9 @@ const Request = () => {
     useEffect(() => {
         if (ports !== null && products !== null && requestData !== null) {
             // const closestDeparturePort = findClosestSeaPort(parseLocation(requestData.departure), ports);
-            const closestArrivalPort = findClosestSeaPort(parseLocation(requestData.arrival), ports);
+            // const closestArrivalPort = findClosestSeaPort(parseLocation(requestData.arrival), ports);
             // setPortDeparture(closestDeparturePort);
-            setPortDestination(closestArrivalPort);
+            // setPortDestination(closestArrivalPort);
             setPorts1(sortByCloseness(parseLocation(requestData.departure), ports));
             setPorts2(sortByCloseness(parseLocation(requestData.arrival), ports));
         }
@@ -202,7 +202,7 @@ const Request = () => {
                 setPhone(response.data.data.whatsapp);
                 setDeparture(parseLocation(response.data.data.departure));
                 setArrival(parseLocation(response.data.data.arrival));
-                setLoadingCity(parseLocation(response.data.data.departure));
+                // setLoadingCity(parseLocation(response.data.data.departure));
                 setStatus(response.data.data.status);
                 setPackingType(response.data.data.packingType !== null ? response.data.data.packingType : "FCL");
                 setClientNumber(response.data.data.clientNumber !== null && response.data.data.clientNumber !== "" ? parseContact2(response.data.data.clientNumber) : "");
@@ -293,15 +293,15 @@ const Request = () => {
         if (value !== null && value !== undefined) {
             // const closest = findClosestSeaPort(value, ports);
             // setPortDeparture(closest);
-            setLoadingCity(value);
+            // setLoadingCity(value);
             setPorts1(sortByCloseness(value, ports));
         }
     }
 
     function getClosestArrival(value: any) {
         if (value !== null && value !== undefined) {
-            const closest = findClosestSeaPort(value, ports);
-            setPortDestination(closest);
+            // const closest = findClosestSeaPort(value, ports);
+            // setPortDestination(closest);
             setPorts2(sortByCloseness(value, ports));
         }
     }
@@ -344,17 +344,17 @@ const Request = () => {
                         {
                             ports1 !== null && ports2 !== null && ports !== null && products !== null && requestData !== null ? 
                             <GeneratePriceOffer
-                                id={id} email={email} tags={tags} clientNumber={clientNumber}
-                                departure={departure} setDeparture={setDeparture}
-                                loadingCity={loadingCity} setLoadingCity={setLoadingCity}
-                                portDestination={portDestination} setPortDestination={setPortDestination}
-                                containersSelection={containersSelection}
-                                ports={ports} products={products} hscodes={hscodes}
-                                ports1={ports1} ports2={ports2} trackingNumber={trackingNumber}
-                                containers={containers} status={status}
-                                canEdit={canEdit} setCanEdit={setCanEdit}
-                                requestData={requestData} type="handle" 
-                                commodities={valueSpecifics === "products" ? products : hscodes}
+                                // id={id} email={email} tags={tags} clientNumber={clientNumber}
+                                // departure={departure} setDeparture={setDeparture}
+                                // loadingCity={loadingCity} setLoadingCity={setLoadingCity}
+                                // portDestination={portDestination} setPortDestination={setPortDestination}
+                                // containersSelection={containersSelection}
+                                // ports={ports} products={products} hscodes={hscodes}
+                                // ports1={ports1} ports2={ports2} trackingNumber={trackingNumber}
+                                // containers={containers} status={status}
+                                // canEdit={canEdit} setCanEdit={setCanEdit}
+                                // requestData={requestData} type="handle" 
+                                // commodities={valueSpecifics === "products" ? products : hscodes}
                             />
                             : <Grid size={{ xs: 12 }}><Skeleton /></Grid>
                         }

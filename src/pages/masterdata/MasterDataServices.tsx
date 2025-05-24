@@ -12,6 +12,7 @@ import { EditSelectCell, EditTextFieldCell } from '../../components/common/Edita
 import ConfirmDialogComponent from '../../components/common/ConfirmDialogComponent';
 import { showSnackbar } from '../../components/common/Snackbar';
 import EditableTable from '../../components/common/EditableTable';
+import { ServiceTypeEnum } from '../../utils/misc/enumsCommon';
 
 const columnHelper = createColumnHelper<ServiceViewModel>()
 
@@ -122,8 +123,15 @@ const MasterDataServices = () => {
         }),
         columnHelper.accessor('servicesTypeId', {
             header: t('servicesTypeId'),
-            cell: x => <EditSelectCell<ServiceViewModel> {...x} edit={(editRow && serviceId !== undefined && serviceId === x.row.original.serviceId) || 
-                     (serviceId === 0 && x.row.original.serviceId === undefined)} />
+            cell: x => <EditSelectCell<ServiceViewModel> {...x} multiple
+                options={Object.entries(ServiceTypeEnum).filter(([key])=> !isNaN(Number(key))).map(([key,value])=>{
+                    return {
+                        id: key,
+                        label: value.toString()
+                    }
+                })}
+                edit={(editRow && serviceId !== undefined && serviceId === x.row.original.serviceId) || 
+                (serviceId === 0 && x.row.original.serviceId === undefined)} />
         }),
         columnHelper.display({
             id: 'option',
@@ -183,7 +191,7 @@ const MasterDataServices = () => {
                                 </Button>
                             </Box>
                             <TextField value={globalFilter ?? ''} onChange={(e) => setGlobalFilter(e.target.value)}
-                                size='small' placeholder="Search serrvices..." />
+                                size='small' placeholder="Search services..." />
                         </Stack>
                     
                         <EditableTable data={services} columns={columns}
