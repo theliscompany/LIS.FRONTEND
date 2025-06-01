@@ -1,7 +1,7 @@
 import { ColumnDef, createColumnHelper } from "@tanstack/react-table"
 import { GroupedMiscellaneousViewModel, MiscellaneousBaseViewModel } from "../../api/client/pricing"
 import EditableTable from "../common/EditableTable"
-import { Check, CheckCircle } from "@mui/icons-material"
+import { CheckCircle } from "@mui/icons-material"
 
 const columnHelper = createColumnHelper<MiscellaneousBaseViewModel>()
 
