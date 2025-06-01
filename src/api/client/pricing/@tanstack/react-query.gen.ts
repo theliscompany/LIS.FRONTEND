@@ -2,7 +2,7 @@
 
 import type { OptionsLegacyParser } from '@hey-api/client-axios';
 import { queryOptions, type UseMutationOptions } from '@tanstack/react-query';
-import type { PostApiHaulageHaulageData, PostApiHaulageHaulageError, PostApiHaulageHaulageResponse, PutApiHaulageHaulageByIdData, PutApiHaulageHaulageByIdError, PutApiHaulageHaulageByIdResponse, GetApiHaulageHaulageByIdData, GetApiHaulageHaulagesData, DeleteApiHaulageDeleteHaulageByIdData, DeleteApiHaulageDeleteHaulageByIdError, DeleteApiHaulageDeleteHaulageByIdResponse, PostApiMiscellaneousMiscellaneousData, PostApiMiscellaneousMiscellaneousError, PostApiMiscellaneousMiscellaneousResponse, GetApiMiscellaneousMiscellaneousByIdData, PutApiMiscellaneousMiscellaneousByIdData, PutApiMiscellaneousMiscellaneousByIdError, PutApiMiscellaneousMiscellaneousByIdResponse, DeleteApiMiscellaneousDeleteMiscellaneousByIdData, DeleteApiMiscellaneousDeleteMiscellaneousByIdError, DeleteApiMiscellaneousDeleteMiscellaneousByIdResponse, GetApiPricingHaulagesOfferRequestData, GetApiPricingMiscellaneoussOffersRequestData, GetApiPricingSeaFreightsOffersRequestData, PostApiSeaFreightSeaFreightData, PostApiSeaFreightSeaFreightError, PostApiSeaFreightSeaFreightResponse, GetApiSeaFreightGetSeaFreightsData, GetApiSeaFreightSeaFreightByIdData, DeleteApiSeaFreightDeleteSeaFreightPriceByIdData, DeleteApiSeaFreightDeleteSeaFreightPriceByIdError, DeleteApiSeaFreightDeleteSeaFreightPriceByIdResponse } from '../types.gen';
+import type { PostApiHaulageHaulageData, PostApiHaulageHaulageError, PostApiHaulageHaulageResponse, PutApiHaulageHaulageByIdData, PutApiHaulageHaulageByIdError, PutApiHaulageHaulageByIdResponse, GetApiHaulageHaulageByIdData, DeleteApiHaulageDeleteHaulageByIdData, DeleteApiHaulageDeleteHaulageByIdError, DeleteApiHaulageDeleteHaulageByIdResponse, PostApiMiscellaneousMiscellaneousData, PostApiMiscellaneousMiscellaneousError, PostApiMiscellaneousMiscellaneousResponse, GetApiMiscellaneousMiscellaneousByIdData, PutApiMiscellaneousMiscellaneousByIdData, PutApiMiscellaneousMiscellaneousByIdError, PutApiMiscellaneousMiscellaneousByIdResponse, DeleteApiMiscellaneousDeleteMiscellaneousByIdData, DeleteApiMiscellaneousDeleteMiscellaneousByIdError, DeleteApiMiscellaneousDeleteMiscellaneousByIdResponse, GetApiPricingHaulagesOfferRequestData, GetApiPricingMiscellaneoussOffersRequestData, GetApiPricingSeaFreightsOffersRequestData, PostApiSeaFreightSeaFreightData, PostApiSeaFreightSeaFreightError, PostApiSeaFreightSeaFreightResponse, GetApiSeaFreightGetSeaFreightsData, GetApiSeaFreightSeaFreightByIdData, DeleteApiSeaFreightDeleteSeaFreightPriceByIdData, DeleteApiSeaFreightDeleteSeaFreightPriceByIdError, DeleteApiSeaFreightDeleteSeaFreightPriceByIdResponse } from '../types.gen';
 import type { AxiosError } from 'axios';
 import { client, postApiHaulageHaulage, putApiHaulageHaulageById, getApiHaulageHaulageById, getApiHaulageHaulages, deleteApiHaulageDeleteHaulageById, getApiMiscellaneousMiscellaneous, postApiMiscellaneousMiscellaneous, getApiMiscellaneousMiscellaneousById, putApiMiscellaneousMiscellaneousById, deleteApiMiscellaneousDeleteMiscellaneousById, getApiPricingHaulagesOfferRequest, getApiPricingMiscellaneoussOffersRequest, getApiPricingSeaFreightsOffersRequest, postApiSeaFreightSeaFreight, getApiSeaFreightGetSeaFreights, getApiSeaFreightSeaFreightById, deleteApiSeaFreightDeleteSeaFreightPriceById } from '../sdk.gen';
 
@@ -99,11 +99,11 @@ export const getApiHaulageHaulageByIdOptions = (options: OptionsLegacyParser<Get
     });
 };
 
-export const getApiHaulageHaulagesQueryKey = (options?: OptionsLegacyParser<GetApiHaulageHaulagesData>) => [
+export const getApiHaulageHaulagesQueryKey = (options?: OptionsLegacyParser) => [
     createQueryKey('getApiHaulageHaulages', options)
 ];
 
-export const getApiHaulageHaulagesOptions = (options?: OptionsLegacyParser<GetApiHaulageHaulagesData>) => {
+export const getApiHaulageHaulagesOptions = (options?: OptionsLegacyParser) => {
     return queryOptions({
         queryFn: async ({ queryKey, signal }) => {
             const { data } = await getApiHaulageHaulages({

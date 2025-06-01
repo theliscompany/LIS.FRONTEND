@@ -53,7 +53,7 @@ export type HaulageViewModel = {
     currency?: (string) | null;
     loadingCityId?: number;
     loadingCity?: (string) | null;
-    updated?: Date;
+    updated?: (Date) | null;
     loadingPortId?: number;
     loadingPort?: (string) | null;
     freeTime?: number;
@@ -72,7 +72,7 @@ export type MiscellaneousBaseViewModel = {
     container20?: (boolean) | null;
     container40?: (boolean) | null;
     validUntil?: Date;
-    created?: (Date) | null;
+    created?: Date;
     currency?: (string) | null;
 };
 
@@ -98,8 +98,10 @@ export type MiscellaneousOfferViewModel = {
 export type MiscellaneousViewModel = {
     miscellaneousId?: string;
     supplierName?: (string) | null;
+    container20?: (boolean) | null;
+    container40?: (boolean) | null;
     validUntil?: Date;
-    created?: (Date) | null;
+    created?: Date;
     currency?: (string) | null;
     departurePortId?: (number) | null;
     destinationPortId?: (number) | null;
@@ -107,8 +109,6 @@ export type MiscellaneousViewModel = {
     destinationPortName?: (string) | null;
     supplierId?: number;
     updated?: (Date) | null;
-    container20?: (boolean) | null;
-    container40?: (boolean) | null;
     comment?: (string) | null;
     services?: Array<ServiceViewModel> | null;
 };
@@ -159,7 +159,7 @@ export type SeaFreightViewModel = {
     departurePortName?: (string) | null;
     destinationPortName?: (string) | null;
     carrierId?: number;
-    lastUpdated?: Date;
+    lastUpdated?: (Date) | null;
     carrierName?: (string) | null;
     carrierAgentId?: number;
     comment?: (string) | null;
@@ -221,17 +221,6 @@ export type GetApiHaulageHaulageByIdData = {
 export type GetApiHaulageHaulageByIdResponse = (HaulageViewModel);
 
 export type GetApiHaulageHaulageByIdError = (unknown);
-
-export type GetApiHaulageHaulagesData = {
-    query?: {
-        ContainerIdsType?: Array<(number)>;
-        EmptyPickupDepot?: string;
-        HaulageType?: string;
-        HaulierId?: number;
-        LoadingCity?: string;
-        LoadingPortId?: number;
-    };
-};
 
 export type GetApiHaulageHaulagesResponse = (Array<HaulageGridGetViewModel>);
 
