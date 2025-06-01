@@ -5,7 +5,7 @@ import { ColumnDef, createColumnHelper } from '@tanstack/react-table';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { getApiHaulageHaulagesOptions } from '../../api/client/pricing/@tanstack/react-query.gen';
 import EditableTable from '../../components/common/EditableTable';
-import { HaulageGridGetViewModel } from '../../api/client/pricing';
+import { HaulageGridGetViewModel, HaulageSupplierViewModel } from '../../api/client/pricing';
 import OffersHauliers from '../../components/pricing/OffersHauliers';
 import EditHaulage from '../../components/pricing/EditHaulage';
 
@@ -15,12 +15,13 @@ function Haulages() {
 
     const [globalFilter, setGlobalFilter] = useState('')
     const [openEditHaulage, setOpenEditHaulage] = useState(false)
+    const [haulageId, setHaulageId] = useState<string>()
 
     const queryClient = useQueryClient()
 
     const { data: haulages, isLoading} = useQuery({
         ...getApiHaulageHaulagesOptions(),
-        staleTime: 1000*60*5
+        staleTime: Infinity
     })
 
     const refeshHaulages = async () => {
@@ -57,6 +58,12 @@ function Haulages() {
     ]
 
     const handleOpenEditHaulage = () => {
+        setHaulageId(undefined)
+        setOpenEditHaulage(true)
+    }
+
+    const handleEditHaulage = (row: HaulageSupplierViewModel) => {
+        setHaulageId(row.haulageId)
         setOpenEditHaulage(true)
     }
     
@@ -77,10 +84,10 @@ function Haulages() {
 
             <EditableTable<HaulageGridGetViewModel> data={haulages ?? []} columns={columns} isLoading={isLoading} 
                 globalFilter={globalFilter} onGlobalFilterChange={setGlobalFilter} rowCanExpand
-                subComponent={OffersHauliers} />
+                subComponent={(row: HaulageGridGetViewModel) =><OffersHauliers haulage={row} getHaulageId={handleEditHaulage} />} />
 
             {
-                openEditHaulage && <EditHaulage open={openEditHaulage} onClose={() => setOpenEditHaulage(false)} />
+                openEditHaulage && <EditHaulage open={openEditHaulage} onClose={() => setOpenEditHaulage(false)} haulageId={haulageId} />
             }
         </>
     );

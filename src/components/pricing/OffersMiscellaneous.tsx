@@ -1,15 +1,32 @@
 import { ColumnDef, createColumnHelper } from "@tanstack/react-table"
-import { MiscellaneousSupplierViewModel, MiscellaneousWithShipmentViewModel } from "../../api/client/pricing"
+import { GroupedMiscellaneousViewModel, MiscellaneousBaseViewModel } from "../../api/client/pricing"
 import EditableTable from "../common/EditableTable"
+import { CheckCircle } from "@mui/icons-material"
 
-const columnHelper = createColumnHelper<MiscellaneousSupplierViewModel>()
+const columnHelper = createColumnHelper<MiscellaneousBaseViewModel>()
 
-const OffersMiscellaneous = (miscellaneous: MiscellaneousWithShipmentViewModel) => {
+const OffersMiscellaneous = (miscellaneous: GroupedMiscellaneousViewModel) => {
 
-    const columns: ColumnDef<MiscellaneousSupplierViewModel, any>[] = [
+    const columns: ColumnDef<MiscellaneousBaseViewModel, any>[] = [
         columnHelper.accessor('supplierName', {
             header: "Supplier",
             cell: ({ getValue}) => getValue<string | null | undefined>()
+        }),
+        columnHelper.accessor('container20', {
+            header: "20'",
+            cell: ({ getValue}) => {
+                if(getValue<boolean | null | undefined>()){
+                    return <CheckCircle fontSize="small" color="success" />
+                }
+            }
+        }),
+        columnHelper.accessor('container40', {
+            header: "40'",
+            cell: ({ getValue}) => {
+                if(getValue<boolean | null | undefined>()){
+                    return <CheckCircle fontSize="small" color="success" />
+                }
+            }
         }),
         columnHelper.accessor('validUntil', {
             header: "Valid until",
@@ -21,7 +38,6 @@ const OffersMiscellaneous = (miscellaneous: MiscellaneousWithShipmentViewModel) 
 
                     return `${date.getDate().toString().padStart(2,'0')}/${(date.getMonth()+1).toString().padStart(2,'0')}/${date.getFullYear()}`
                 }
-                
             }
         }),
         columnHelper.accessor('created', {
@@ -39,7 +55,7 @@ const OffersMiscellaneous = (miscellaneous: MiscellaneousWithShipmentViewModel) 
     ]
     
     return (
-        <EditableTable<MiscellaneousSupplierViewModel> columns={columns} data={miscellaneous.suppliers ?? []} />
+        <EditableTable<MiscellaneousBaseViewModel> columns={columns} data={miscellaneous.miscellaneousList ?? []} />
     )
 }
 
