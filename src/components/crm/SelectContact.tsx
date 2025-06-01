@@ -4,13 +4,15 @@ import { ContactViewModel } from "../../api/client/crm"
 import AutocompleteUI from "../common/AutocompleteUI"
 import { useEffect, useState } from "react"
 
-interface SelectContactProps {
-    label:string
-    //contactId?: number
+interface SelectContactProps<TFieldValues> {
+    label:string,
+    error?: boolean,
+    errorMessage?: string,
+    fieldHookForm?: TFieldValues,
     ContactSelected: (contact?:ContactViewModel | null) => void
 }
 
-const SelectContact = ({label, ContactSelected}: SelectContactProps) => {
+const SelectContact = <TFieldValues,>(props: SelectContactProps<TFieldValues>) => {
 
     const [isLoading, setIsLoading] = useState(false)
     const [contacts, setContacts] = useState<ContactViewModel[]>([])
@@ -38,13 +40,9 @@ const SelectContact = ({label, ContactSelected}: SelectContactProps) => {
         }
     }
 
-    // useEffect(() => {
-    //     setcontact(data?.data?.find(x=>x.contactId === contactId))
-    // }, [])
-
     return (
-        <AutocompleteUI<ContactViewModel> loading={isLoading} label={label} data={contacts} 
-            valueSelected={ContactSelected} getOptionLabel={(option) => option.contactName ?? ''} />
+        <AutocompleteUI<ContactViewModel, typeof props.fieldHookForm> {...props} loading={isLoading} label={props.label} 
+          data={contacts} valueSelected={props.ContactSelected} getOptionLabel={(option) => option.contactName ?? ''} />
         
     )
 }

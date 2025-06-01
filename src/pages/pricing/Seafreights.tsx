@@ -23,7 +23,7 @@ const Seafreights = () => {
 
     const { data: seaFreights, isLoading} = useQuery({
         ...getApiSeaFreightGetSeaFreightsOptions(),
-        staleTime: 1000*60*5
+        staleTime: Infinity
     })
 
     const columns: ColumnDef<SeaFreightsViewModel, any>[] = [

@@ -2,9 +2,9 @@
 
 import type { OptionsLegacyParser } from '@hey-api/client-axios';
 import { queryOptions, type UseMutationOptions } from '@tanstack/react-query';
-import type { PostApiHaulageHaulageData, PostApiHaulageHaulageError, PostApiHaulageHaulageResponse, GetApiHaulageHaulageByIdData, GetApiHaulageHaulagesData, DeleteApiHaulageDeleteHaulageByIdData, DeleteApiHaulageDeleteHaulageByIdError, DeleteApiHaulageDeleteHaulageByIdResponse, GetApiMiscellaneousMiscellaneousByIdData, PostApiMiscellaneousMiscellaneousData, PostApiMiscellaneousMiscellaneousError, PostApiMiscellaneousMiscellaneousResponse, DeleteApiMiscellaneousDeleteMiscellaneousByIdData, DeleteApiMiscellaneousDeleteMiscellaneousByIdError, DeleteApiMiscellaneousDeleteMiscellaneousByIdResponse, GetApiPricingHaulagesOfferRequestData, GetApiPricingMiscellaneoussOffersRequestData, GetApiPricingSeaFreightsOffersRequestData, PostApiSeaFreightSeaFreightData, PostApiSeaFreightSeaFreightError, PostApiSeaFreightSeaFreightResponse, GetApiSeaFreightGetSeaFreightsData, GetApiSeaFreightSeaFreightByIdData, DeleteApiSeaFreightDeleteSeaFreightPriceByIdData, DeleteApiSeaFreightDeleteSeaFreightPriceByIdError, DeleteApiSeaFreightDeleteSeaFreightPriceByIdResponse } from '../types.gen';
+import type { PostApiHaulageHaulageData, PostApiHaulageHaulageError, PostApiHaulageHaulageResponse, PutApiHaulageHaulageByIdData, PutApiHaulageHaulageByIdError, PutApiHaulageHaulageByIdResponse, GetApiHaulageHaulageByIdData, GetApiHaulageHaulagesData, DeleteApiHaulageDeleteHaulageByIdData, DeleteApiHaulageDeleteHaulageByIdError, DeleteApiHaulageDeleteHaulageByIdResponse, PostApiMiscellaneousMiscellaneousData, PostApiMiscellaneousMiscellaneousError, PostApiMiscellaneousMiscellaneousResponse, GetApiMiscellaneousMiscellaneousByIdData, PutApiMiscellaneousMiscellaneousByIdData, PutApiMiscellaneousMiscellaneousByIdError, PutApiMiscellaneousMiscellaneousByIdResponse, DeleteApiMiscellaneousDeleteMiscellaneousByIdData, DeleteApiMiscellaneousDeleteMiscellaneousByIdError, DeleteApiMiscellaneousDeleteMiscellaneousByIdResponse, GetApiPricingHaulagesOfferRequestData, GetApiPricingMiscellaneoussOffersRequestData, GetApiPricingSeaFreightsOffersRequestData, PostApiSeaFreightSeaFreightData, PostApiSeaFreightSeaFreightError, PostApiSeaFreightSeaFreightResponse, GetApiSeaFreightGetSeaFreightsData, GetApiSeaFreightSeaFreightByIdData, DeleteApiSeaFreightDeleteSeaFreightPriceByIdData, DeleteApiSeaFreightDeleteSeaFreightPriceByIdError, DeleteApiSeaFreightDeleteSeaFreightPriceByIdResponse } from '../types.gen';
 import type { AxiosError } from 'axios';
-import { client, postApiHaulageHaulage, getApiHaulageHaulageById, getApiHaulageHaulages, deleteApiHaulageDeleteHaulageById, getApiMiscellaneousMiscellaneousWithShipment, getApiMiscellaneousMiscellaneousWithoutShipment, getApiMiscellaneousMiscellaneousById, postApiMiscellaneousMiscellaneous, deleteApiMiscellaneousDeleteMiscellaneousById, getApiPricingHaulagesOfferRequest, getApiPricingMiscellaneoussOffersRequest, getApiPricingSeaFreightsOffersRequest, postApiSeaFreightSeaFreight, getApiSeaFreightGetSeaFreights, getApiSeaFreightSeaFreightById, deleteApiSeaFreightDeleteSeaFreightPriceById } from '../sdk.gen';
+import { client, postApiHaulageHaulage, putApiHaulageHaulageById, getApiHaulageHaulageById, getApiHaulageHaulages, deleteApiHaulageDeleteHaulageById, getApiMiscellaneousMiscellaneous, postApiMiscellaneousMiscellaneous, getApiMiscellaneousMiscellaneousById, putApiMiscellaneousMiscellaneousById, deleteApiMiscellaneousDeleteMiscellaneousById, getApiPricingHaulagesOfferRequest, getApiPricingMiscellaneoussOffersRequest, getApiPricingSeaFreightsOffersRequest, postApiSeaFreightSeaFreight, getApiSeaFreightGetSeaFreights, getApiSeaFreightSeaFreightById, deleteApiSeaFreightDeleteSeaFreightPriceById } from '../sdk.gen';
 
 type QueryKey<TOptions extends OptionsLegacyParser> = [
     Pick<TOptions, 'baseURL' | 'body' | 'headers' | 'path' | 'query'> & {
@@ -56,6 +56,20 @@ export const postApiHaulageHaulageMutation = (options?: Partial<OptionsLegacyPar
     const mutationOptions: UseMutationOptions<PostApiHaulageHaulageResponse, AxiosError<PostApiHaulageHaulageError>, OptionsLegacyParser<PostApiHaulageHaulageData>> = {
         mutationFn: async (localOptions) => {
             const { data } = await postApiHaulageHaulage({
+                ...options,
+                ...localOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const putApiHaulageHaulageByIdMutation = (options?: Partial<OptionsLegacyParser<PutApiHaulageHaulageByIdData>>) => {
+    const mutationOptions: UseMutationOptions<PutApiHaulageHaulageByIdResponse, AxiosError<PutApiHaulageHaulageByIdError>, OptionsLegacyParser<PutApiHaulageHaulageByIdData>> = {
+        mutationFn: async (localOptions) => {
+            const { data } = await putApiHaulageHaulageById({
                 ...options,
                 ...localOptions,
                 throwOnError: true
@@ -118,14 +132,14 @@ export const deleteApiHaulageDeleteHaulageByIdMutation = (options?: Partial<Opti
     return mutationOptions;
 };
 
-export const getApiMiscellaneousMiscellaneousWithShipmentQueryKey = (options?: OptionsLegacyParser) => [
-    createQueryKey('getApiMiscellaneousMiscellaneousWithShipment', options)
+export const getApiMiscellaneousMiscellaneousQueryKey = (options?: OptionsLegacyParser) => [
+    createQueryKey('getApiMiscellaneousMiscellaneous', options)
 ];
 
-export const getApiMiscellaneousMiscellaneousWithShipmentOptions = (options?: OptionsLegacyParser) => {
+export const getApiMiscellaneousMiscellaneousOptions = (options?: OptionsLegacyParser) => {
     return queryOptions({
         queryFn: async ({ queryKey, signal }) => {
-            const { data } = await getApiMiscellaneousMiscellaneousWithShipment({
+            const { data } = await getApiMiscellaneousMiscellaneous({
                 ...options,
                 ...queryKey[0],
                 signal,
@@ -133,45 +147,7 @@ export const getApiMiscellaneousMiscellaneousWithShipmentOptions = (options?: Op
             });
             return data;
         },
-        queryKey: getApiMiscellaneousMiscellaneousWithShipmentQueryKey(options)
-    });
-};
-
-export const getApiMiscellaneousMiscellaneousWithoutShipmentQueryKey = (options?: OptionsLegacyParser) => [
-    createQueryKey('getApiMiscellaneousMiscellaneousWithoutShipment', options)
-];
-
-export const getApiMiscellaneousMiscellaneousWithoutShipmentOptions = (options?: OptionsLegacyParser) => {
-    return queryOptions({
-        queryFn: async ({ queryKey, signal }) => {
-            const { data } = await getApiMiscellaneousMiscellaneousWithoutShipment({
-                ...options,
-                ...queryKey[0],
-                signal,
-                throwOnError: true
-            });
-            return data;
-        },
-        queryKey: getApiMiscellaneousMiscellaneousWithoutShipmentQueryKey(options)
-    });
-};
-
-export const getApiMiscellaneousMiscellaneousByIdQueryKey = (options: OptionsLegacyParser<GetApiMiscellaneousMiscellaneousByIdData>) => [
-    createQueryKey('getApiMiscellaneousMiscellaneousById', options)
-];
-
-export const getApiMiscellaneousMiscellaneousByIdOptions = (options: OptionsLegacyParser<GetApiMiscellaneousMiscellaneousByIdData>) => {
-    return queryOptions({
-        queryFn: async ({ queryKey, signal }) => {
-            const { data } = await getApiMiscellaneousMiscellaneousById({
-                ...options,
-                ...queryKey[0],
-                signal,
-                throwOnError: true
-            });
-            return data;
-        },
-        queryKey: getApiMiscellaneousMiscellaneousByIdQueryKey(options)
+        queryKey: getApiMiscellaneousMiscellaneousQueryKey(options)
     });
 };
 
@@ -198,6 +174,39 @@ export const postApiMiscellaneousMiscellaneousMutation = (options?: Partial<Opti
     const mutationOptions: UseMutationOptions<PostApiMiscellaneousMiscellaneousResponse, AxiosError<PostApiMiscellaneousMiscellaneousError>, OptionsLegacyParser<PostApiMiscellaneousMiscellaneousData>> = {
         mutationFn: async (localOptions) => {
             const { data } = await postApiMiscellaneousMiscellaneous({
+                ...options,
+                ...localOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const getApiMiscellaneousMiscellaneousByIdQueryKey = (options: OptionsLegacyParser<GetApiMiscellaneousMiscellaneousByIdData>) => [
+    createQueryKey('getApiMiscellaneousMiscellaneousById', options)
+];
+
+export const getApiMiscellaneousMiscellaneousByIdOptions = (options: OptionsLegacyParser<GetApiMiscellaneousMiscellaneousByIdData>) => {
+    return queryOptions({
+        queryFn: async ({ queryKey, signal }) => {
+            const { data } = await getApiMiscellaneousMiscellaneousById({
+                ...options,
+                ...queryKey[0],
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getApiMiscellaneousMiscellaneousByIdQueryKey(options)
+    });
+};
+
+export const putApiMiscellaneousMiscellaneousByIdMutation = (options?: Partial<OptionsLegacyParser<PutApiMiscellaneousMiscellaneousByIdData>>) => {
+    const mutationOptions: UseMutationOptions<PutApiMiscellaneousMiscellaneousByIdResponse, AxiosError<PutApiMiscellaneousMiscellaneousByIdError>, OptionsLegacyParser<PutApiMiscellaneousMiscellaneousByIdData>> = {
+        mutationFn: async (localOptions) => {
+            const { data } = await putApiMiscellaneousMiscellaneousById({
                 ...options,
                 ...localOptions,
                 throwOnError: true

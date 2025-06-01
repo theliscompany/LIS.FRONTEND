@@ -6,7 +6,11 @@ import { Currency } from "../../utils/constants";
 
 const columnHelper = createColumnHelper<HaulageSupplierViewModel>()
 
-const OffersHauliers = (haulage: HaulageGridGetViewModel) => {
+type OffersHauliersType = {
+    haulage: HaulageGridGetViewModel,
+    getHaulageId?: (row: HaulageSupplierViewModel) => void
+}
+const OffersHauliers = ({haulage, getHaulageId}: OffersHauliersType) => {
 
     const columns: ColumnDef<HaulageSupplierViewModel, any>[] = [
         columnHelper.accessor('haulierName', {
@@ -81,7 +85,7 @@ const OffersHauliers = (haulage: HaulageGridGetViewModel) => {
     ]
     
     return (
-        <EditableTable<HaulageSupplierViewModel> columns={columns} data={haulage.hauliers ?? []} />
+        <EditableTable<HaulageSupplierViewModel> columns={columns} data={haulage.hauliers ?? []} dbClick={getHaulageId} />
     )
 }
 

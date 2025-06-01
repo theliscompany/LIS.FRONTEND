@@ -33,6 +33,7 @@ import { Fragment } from 'react/jsx-runtime'
     globalFilter?: string
     onUpdate?: (rowIndex: number, columnId: string, value: unknown) => void
     onGlobalFilterChange?: (value: string) => void
+    dbClick?: (row: T) => void
     subComponent?: (row: T) => JSX.Element
   }
   
@@ -44,6 +45,7 @@ import { Fragment } from 'react/jsx-runtime'
     globalFilter,
     onUpdate,
     onGlobalFilterChange,
+    dbClick,
     subComponent
   }: Props<T>) => {
     const fuzzyFilter: FilterFn<any> = (row, columnId, value, addMeta) => {
@@ -100,7 +102,7 @@ import { Fragment } from 'react/jsx-runtime'
                 table.getRowModel().rows.map((row) => {
                   return (
                     <Fragment key={row.id}>
-                      <TableRow>
+                      <TableRow onDoubleClick={() => dbClick && dbClick(row.original)}>
                         {row.getVisibleCells().map((cell) => (
                           <TableCell key={cell.id}>
                             {flexRender(cell.column.columnDef.cell, {

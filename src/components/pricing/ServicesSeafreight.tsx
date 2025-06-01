@@ -1,25 +1,32 @@
 import { ColumnDef, createColumnHelper, isNumberArray } from "@tanstack/react-table"
 import EditableTable from "../common/EditableTable"
-import { Box, Button, Checkbox, FormControl, IconButton, ListItemText, MenuItem, OutlinedInput, Paper, Select, SelectChangeEvent, TextField } from "@mui/material"
+import { Alert, Box, Button, Checkbox, Chip, FormControl, IconButton, ListItemText, MenuItem, OutlinedInput, Paper, Select, SelectChangeEvent, Stack, TextField } from "@mui/material"
 import { AddCircle, Cancel, Check } from "@mui/icons-material"
 import { useQuery } from "@tanstack/react-query"
 import { getPackageOptions, getServiceOptions } from "../../api/client/masterdata/@tanstack/react-query.gen"
-import { ChangeEvent, useRef, useState } from "react"
+import { ChangeEvent, useEffect, useRef, useState } from "react"
 import { ServiceSeaFreightViewModel } from "../../api/client/pricing"
+import { Currency } from "../../utils/constants"
 
 interface ServicesSeafreightProps {
+    currency: string,
     data: ServiceSeaFreightViewModel[],
     getServicesAdded: (services: ServiceSeaFreightViewModel[]) => void
 }
 
 const columnHelper = createColumnHelper<ServiceSeaFreightViewModel>()
 
-const ServicesSeafreight = ({data, getServicesAdded}:ServicesSeafreightProps) => {
+const ServicesSeafreight = ({data, currency, getServicesAdded}:ServicesSeafreightProps) => {
 
     const [servicesSeafreight, setServicesSeafreight] = useState<ServiceSeaFreightViewModel[]>(data)
     const [editingRowIndex, setEditingRowIndex] = useState<number | null>(null);
 
     const rowDraftRef = useRef<ServiceSeaFreightViewModel | null>(null);
+
+    useEffect(() => {
+      setServicesSeafreight(data);
+    }, [data])
+    
 
     const {data: services} = useQuery({
         ...getServiceOptions()
@@ -93,7 +100,7 @@ const ServicesSeafreight = ({data, getServicesAdded}:ServicesSeafreightProps) =>
                     }
                 />
                 }
-                return  row.original.service?.price ?? 0
+                return  `${row.original.service?.price ?? 0} ${Currency[currency]}`
             }
         }),
         columnHelper.accessor('containers', {
@@ -140,7 +147,9 @@ const ServicesSeafreight = ({data, getServicesAdded}:ServicesSeafreightProps) =>
                             </FormControl>
                 } 
 
-                return (row.original.containers ?? []).map(x=>x.packageName)
+                return (row.original.containers ?? []).map(x=> (
+                    <Chip size="small" variant="outlined"  label={x.packageName} sx={{ml:1}} />
+                )) || ''
             }
         }),
         columnHelper.display({
@@ -170,16 +179,6 @@ const ServicesSeafreight = ({data, getServicesAdded}:ServicesSeafreightProps) =>
         setServicesSeafreight([...servicesSeafreight, newService]);
         setEditingRowIndex(servicesSeafreight.length);
         rowDraftRef.current = newService;
-        // setServicesSeafreight([...servicesSeafreight,{ 
-        //     service:{
-        //         serviceName: '', 
-        //         serviceId: 0,
-        //         price: 0,
-        //     },
-        //     containers:[]
-        //  }]);
-
-        //  setEditingRowIndex(servicesSeafreight.length);
     }
 
     const handleCancelRow = (index: number) => {
@@ -197,13 +196,15 @@ const ServicesSeafreight = ({data, getServicesAdded}:ServicesSeafreightProps) =>
         }
         setEditingRowIndex(null);
         rowDraftRef.current = null;
-        // setEditingRowIndex(null);
-        // getServicesAdded(servicesSeafreight)
     }
 
     return (
         <Paper sx={{p:2, backgroundColor:"#00404533"}}>
-            <Button sx={{mb:2}} variant="outlined" size="small" onClick={handleAddService} startIcon={<AddCircle />}>Add service</Button>
+            <Stack direction="row" alignItems="center" justifyContent="space-between" mb={2}>
+                <Button sx={{mb:2}} variant="outlined" size="small" onClick={handleAddService} startIcon={<AddCircle />}>Add service</Button>
+                {servicesSeafreight.length === 0 && <Alert severity="warning">You must add at least one service.</Alert>}
+            </Stack>
+            
             <EditableTable<ServiceSeaFreightViewModel> data={servicesSeafreight} columns={columns} 
                 onUpdate={(rowIndex, columnId, value) => {
                     setServicesSeafreight((old) =>
