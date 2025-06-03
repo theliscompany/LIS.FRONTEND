@@ -36,6 +36,9 @@ import Shipments from './pages/Shipments';
 import Tracking from './pages/Tracking';
 import ScrollToTop from './components/shared/ScrollToTop';
 import MasterDataFiles from './pages/masterdata/MasterDataFiles';
+import EditHaulage from './components/pricing/EditHaulage';
+import EditSeafreight from './components/pricing/EditSeafreight';
+import EditMiscellaneous from './components/pricing/EditMiscellaneous';
 
 const queryClient = new QueryClient();
 
@@ -68,7 +71,7 @@ function App() {
                   <Route path='files' element={<MasterDataFiles />} />
                   <Route path='haulages' element={<Haulages />} />
                   <Route path='seafreights' element={<Seafreights />} />
-                  <Route path='miscellaneous' element={<Miscellaneous />} />
+                  <Route path='miscellaneousAll' element={<Miscellaneous />} />
                   <Route path="quote-offers" element={<PriceOffers />} />
                   <Route path="quote-offers/:id" element={<ManagePriceOffer />} />
                   <Route path="acceptOffer/:id" element={<AcceptOffer />} />
@@ -78,6 +81,12 @@ function App() {
                   <Route path="tracking/:id" element={<Tracking />} />
                   <Route path='landing' element={<Landing />} />
                   <Route path='*' element={<NotFound />} />
+                  <Route path='haulage' element={<EditHaulage />} />
+                  <Route path='haulage/:id' element={<EditHaulage />} />
+                  <Route path='seafreight' element={<EditSeafreight />} />
+                  <Route path='seafreight/:id' element={<EditSeafreight />} />
+                  <Route path='miscellaneous' element={<EditMiscellaneous />} />
+                  <Route path='miscellaneous/:id' element={<EditMiscellaneous />} />
                 </Route>
               </Routes>
             </BackendServiceProvider>

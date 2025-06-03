@@ -1,30 +1,42 @@
 import Add from "@mui/icons-material/Add";
 import Refresh from "@mui/icons-material/Refresh";
-import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useMemo, useState } from "react";
 import EditableTable from "../../components/common/EditableTable";
 import { ColumnDef, createColumnHelper } from "@tanstack/react-table";
 import IconButton from "@mui/material/IconButton";
 import ExpandMore from "@mui/icons-material/ExpandMore";
 import ChevronRight from "@mui/icons-material/ChevronRight";
 import OffersMiscellaneous from "../../components/pricing/OffersMiscellaneous";
-import EditMiscellaneous from "../../components/pricing/EditMiscellaneous";
-import { GroupedMiscellaneousViewModel } from "../../api/client/pricing";
-import { getApiMiscellaneousMiscellaneousOptions } from "../../api/client/pricing/@tanstack/react-query.gen";
+import { GroupedMiscellaneousViewModel, MiscellaneousBaseViewModel } from "../../api/client/pricing";
+import { deleteApiMiscellaneousDeleteMiscellaneousMutation, getApiMiscellaneousMiscellaneousOptions, getApiMiscellaneousMiscellaneousQueryKey } from "../../api/client/pricing/@tanstack/react-query.gen";
+import Typography from "@mui/material/Typography";
+import Divider from "@mui/material/Divider";
+import ButtonGroup from "@mui/material/ButtonGroup";
+import { Link } from "react-router-dom";
+import { DeleteForever } from "@mui/icons-material";
+import { useConfirmDialog } from "../../hooks/useConfirmDialog";
+import { showSnackbar } from "../../components/common/Snackbar";
+import Breadcrumbs from "@mui/material/Breadcrumbs";
 
 const columnHelper = createColumnHelper<GroupedMiscellaneousViewModel>()
 
 function Miscellaneous() {
     const [globalFilter, setGlobalFilter] = useState('')
-    const [miscellaneousId, setMiscellaneousId] = useState<string>()
-    const [openEditMiscellaneous, setOpenEditMiscellaneous] = useState(false)
     const [miscellaneousList, setMiscellaneousList] = useState<GroupedMiscellaneousViewModel[]>([])
+    const [deleting, setDeleting] = useState(false)
+    const [allSelectedMiscelllaneousIds, setAllSelectedMiscelllaneousIds] = useState<Record<string, string[]>>({})
+
+    const uniqueSelectedIds = useMemo(() => {
+        return Array.from(new Set(Object.values(allSelectedMiscelllaneousIds).flat()))
+    }, [allSelectedMiscelllaneousIds])
 
     const queryClient = useQueryClient();
+
+    const { confirm, ConfirmDialogComponent } = useConfirmDialog();
 
     const { data, isFetching} = useQuery({
         ...getApiMiscellaneousMiscellaneousOptions(),
@@ -35,6 +47,17 @@ function Miscellaneous() {
       const miscList = data?.sort((a, b) => a.departurePortName?.localeCompare(b.departurePortName ?? "") ?? -1) ?? [];
       setMiscellaneousList(miscList);
     }, [data])
+
+    const mutationDelete = useMutation({
+        ...deleteApiMiscellaneousDeleteMiscellaneousMutation(),
+        onSuccess: () => showSnackbar("Deleted with success", "success"),
+        onError: () => showSnackbar('An error occurred', "warning"),
+        onSettled: () => {
+            setDeleting(false)
+            setAllSelectedMiscelllaneousIds({})
+            queryClient.invalidateQueries({ queryKey: getApiMiscellaneousMiscellaneousQueryKey() });
+        }
+    })
     
     const columns: ColumnDef<GroupedMiscellaneousViewModel, any>[] = [
         columnHelper.accessor('departurePortName', {
@@ -62,37 +85,67 @@ function Miscellaneous() {
             cell: ({getValue}) => getValue<string | null | undefined>()
         })
     ]
-
-    const handleOpenEditMiscellaneous = () => {
-        setMiscellaneousId(undefined)
-        setOpenEditMiscellaneous(true)
-    }
     
     const handleRefreshMiscellaneousTable = async () => {
         await queryClient.prefetchQuery({
             ...getApiMiscellaneousMiscellaneousOptions(),
         })
     }
+
+    const handleDeleteMiscellaneous = async () => {
+        const confirmResult = await confirm(
+            'Delete haulages',
+            `Are you sure you want to delete ${uniqueSelectedIds.length} miscellaneous? This action cannot be undone.`
+        );
+
+        if (confirmResult) {
+            setDeleting(true)
+            mutationDelete.mutateAsync({
+                query: {
+                    ids: uniqueSelectedIds
+                }
+            })
+        }
+    }
+
+    const handleGetRowsSelected = (key: string) => (rows: MiscellaneousBaseViewModel[]) => {
+        setAllSelectedMiscelllaneousIds(prev => ({
+            ...prev,
+            [key]: rows.map(r => r.miscellaneousId ?? '').filter(id => id !== '')
+        }))
+    }
+    
     return (
         <>
-            <Stack direction='row' alignItems='center' justifyContent='space-between' mb={2}>
-                <Box>
-                    <Button variant='contained' sx={{mr:2}} onClick={handleOpenEditMiscellaneous} startIcon={<Add />} size='small'>
-                        Add miscellaneous
+            <Breadcrumbs separator={<ChevronRight fontSize='small' />} aria-label="breadcrumb">
+                <Typography key="3" sx={{ color: 'text.primary' }}>
+                    Miscellaneous
+                </Typography>
+            </Breadcrumbs>
+            <Divider sx={{ mb: 1 }} />
+            <Stack direction='row' alignItems='center' justifyContent='space-between' mb={1}>
+                <ButtonGroup color='info' variant='text' size='small' aria-label='text button group'>
+                    <Button startIcon={<Add />} to='/miscellaneous' component={Link}>
+                        New
                     </Button>
-                    <Button variant='outlined' onClick={handleRefreshMiscellaneousTable} startIcon={<Refresh />} size='small'>
+                    <Button disabled={uniqueSelectedIds.length === 0} startIcon={<DeleteForever />} onClick={handleDeleteMiscellaneous} loading={deleting}>
+                        Delete
+                    </Button>
+                    <Button startIcon={<Refresh />} onClick={handleRefreshMiscellaneousTable}>
                         Refresh
                     </Button>
-                </Box>
+                </ButtonGroup>
                 <TextField value={globalFilter ?? ''} onChange={(e) => setGlobalFilter(e.target.value)}
                     size='small' placeholder="Search miscellaneous..." />
             </Stack>
+            
             <EditableTable<GroupedMiscellaneousViewModel> data={miscellaneousList} columns={columns} isLoading={isFetching} 
                         globalFilter={globalFilter} onGlobalFilterChange={setGlobalFilter} rowCanExpand
-                        subComponent={OffersMiscellaneous} />
-            {
-                openEditMiscellaneous && <EditMiscellaneous open={openEditMiscellaneous} onClose={() => setOpenEditMiscellaneous(false)} miscellaneousId={miscellaneousId} />
-            }
+                        subComponent={(row: GroupedMiscellaneousViewModel)=><OffersMiscellaneous miscellaneous={row} 
+                        getRowsSelected={handleGetRowsSelected(row.departurePortName && row.destinationPortName ? 
+                            `${row.departurePortName}_${row.destinationPortName}` : "General")} />} />
+            
+            { ConfirmDialogComponent }
         </>
         
     );

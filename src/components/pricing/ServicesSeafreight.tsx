@@ -1,12 +1,13 @@
 import { ColumnDef, createColumnHelper, isNumberArray } from "@tanstack/react-table"
 import EditableTable from "../common/EditableTable"
-import { Alert, Box, Button, Checkbox, Chip, FormControl, IconButton, ListItemText, MenuItem, OutlinedInput, Paper, Select, SelectChangeEvent, Stack, TextField } from "@mui/material"
-import { AddCircle, Cancel, Check } from "@mui/icons-material"
+import { Alert, Box, Button, ButtonGroup, Checkbox, Chip, FormControl, IconButton, ListItemText, MenuItem, OutlinedInput, Paper, Select, SelectChangeEvent, Stack, TextField } from "@mui/material"
+import { AddCircle, Cancel, Check, DeleteForever } from "@mui/icons-material"
 import { useQuery } from "@tanstack/react-query"
 import { getPackageOptions, getServiceOptions } from "../../api/client/masterdata/@tanstack/react-query.gen"
 import { ChangeEvent, useEffect, useRef, useState } from "react"
 import { ServiceSeaFreightViewModel } from "../../api/client/pricing"
 import { Currency } from "../../utils/constants"
+import { useConfirmDialog } from "../../hooks/useConfirmDialog"
 
 interface ServicesSeafreightProps {
     currency: string,
@@ -20,8 +21,12 @@ const ServicesSeafreight = ({data, currency, getServicesAdded}:ServicesSeafreigh
 
     const [servicesSeafreight, setServicesSeafreight] = useState<ServiceSeaFreightViewModel[]>(data)
     const [editingRowIndex, setEditingRowIndex] = useState<number | null>(null);
+    const [allSelectedServices, setAllSelectedServices] = useState<number[]>([])
+    const [tableRef, setTableRef] = useState<import("@tanstack/table-core").Table<ServiceSeaFreightViewModel>>()
 
     const rowDraftRef = useRef<ServiceSeaFreightViewModel | null>(null);
+
+    const { confirm, ConfirmDialogComponent } = useConfirmDialog();
 
     useEffect(() => {
       setServicesSeafreight(data);
@@ -41,9 +46,27 @@ const ServicesSeafreight = ({data, currency, getServicesAdded}:ServicesSeafreigh
         staleTime: Infinity
     })
 
-    
-
     const columns: ColumnDef<ServiceSeaFreightViewModel, any>[] = [
+        columnHelper.display({
+            id: 'select',
+            header: ({table})=> (
+                <Checkbox size="small"
+                    {...{ 
+                        checked: table.getIsAllRowsSelected(),
+                        indeterminate: table.getIsSomeRowsSelected(),
+                        onChange: table.getToggleAllRowsSelectedHandler()
+                    }}/>
+            ),
+            cell: ({row}) => (
+                <Checkbox size="small" 
+                {...{
+                    checked: row.getIsSelected(),
+                    disabled: !row.getCanSelect(),
+                    indeterminate: row.getIsSomeSelected(),
+                    onChange: row.getToggleSelectedHandler()
+                }} />
+            )
+        }),
         columnHelper.accessor('service.serviceName', {
             header: "Service",
             cell: ({ row }) => {
@@ -156,18 +179,15 @@ const ServicesSeafreight = ({data, currency, getServicesAdded}:ServicesSeafreigh
             id:"option",
             cell: ({row}) => 
                 editingRowIndex === row.index ? (
-                            <Box>
-                                <IconButton size="small" color="success" onClick={()=>handleValidRow()}>
-                                    <Check />
-                                </IconButton>
-                                <IconButton size="small" color="error" onClick={()=>handleCancelRow(row.index)}>
-                                    <Cancel />
-                                </IconButton>
-                            </Box>
-                        ) : null
-                    
-                
-            
+                    <Box>
+                        <IconButton size="small" color="success" onClick={()=>handleValidRow()}>
+                            <Check />
+                        </IconButton>
+                        <IconButton size="small" color="error" onClick={()=>handleCancelRow(row.index)}>
+                            <Cancel />
+                        </IconButton>
+                    </Box>
+                ) : null
         })
     ]
 
@@ -198,22 +218,56 @@ const ServicesSeafreight = ({data, currency, getServicesAdded}:ServicesSeafreigh
         rowDraftRef.current = null;
     }
 
+    const handleGetRowsSelected = (index: number[]) => setAllSelectedServices(index)
+
+    const handleDeleteServices = async () => {
+        const confirmResult = await confirm(
+            'Delete services',
+            `Are you sure you want to delete ${allSelectedServices.length} service(s)? This action cannot be undone.`
+        );
+
+        
+        if (confirmResult) {
+            const values = [...servicesSeafreight]
+
+            const result = values.filter((_,index)=> !allSelectedServices.includes(index))
+            setAllSelectedServices([])
+            setServicesSeafreight(result) 
+
+            tableRef?.resetRowSelection();
+        }
+    }
+
+    const getTable = (table: import("@tanstack/table-core").Table<ServiceSeaFreightViewModel>) => {
+        setTableRef(table);
+    }
+
     return (
-        <Paper sx={{p:2, backgroundColor:"#00404533"}}>
-            <Stack direction="row" alignItems="center" justifyContent="space-between" mb={2}>
-                <Button sx={{mb:2}} variant="outlined" size="small" onClick={handleAddService} startIcon={<AddCircle />}>Add service</Button>
-                {servicesSeafreight.length === 0 && <Alert severity="warning">You must add at least one service.</Alert>}
-            </Stack>
-            
-            <EditableTable<ServiceSeaFreightViewModel> data={servicesSeafreight} columns={columns} 
-                onUpdate={(rowIndex, columnId, value) => {
-                    setServicesSeafreight((old) =>
-                    old.map((row, index) =>
-                        index === rowIndex ? { ...old[rowIndex], [columnId]: value } : row
-                    )
-                    );
-                }}  />
-        </Paper>
+        <>
+            <Paper sx={{p:2, backgroundColor:"#00404533"}}>
+                <Stack direction="row" alignItems="center" justifyContent="space-between">
+                    <ButtonGroup color='info' variant='text' size='small' aria-label='text button group'>
+                        <Button onClick={handleAddService} startIcon={<AddCircle />}>Add service</Button>
+                        <Button disabled={allSelectedServices.length === 0} startIcon={<DeleteForever />} onClick={handleDeleteServices}>
+                            Delete
+                        </Button>
+                    </ButtonGroup>
+                    
+                    {servicesSeafreight.length === 0 && <Alert severity="warning">You must add at least one service.</Alert>}
+                </Stack>
+                
+                <EditableTable<ServiceSeaFreightViewModel> data={servicesSeafreight} columns={columns} 
+                    enableRowSelection={true} getRowsIndexSelected={handleGetRowsSelected} getTableRef={getTable}
+                    onUpdate={(rowIndex, columnId, value) => {
+                        setServicesSeafreight((old) =>
+                        old.map((row, index) =>
+                            index === rowIndex ? { ...old[rowIndex], [columnId]: value } : row
+                        ));
+                    }}  />
+            </Paper>
+            {ConfirmDialogComponent}
+        </>
+        
     )
 }
 

@@ -1,15 +1,45 @@
 import { ColumnDef, createColumnHelper } from "@tanstack/react-table"
 import { SeaFreightsViewModel, SupplierSeaFreightViewModel } from "../../api/client/pricing"
 import EditableTable from "../common/EditableTable"
+import Checkbox from "@mui/material/Checkbox"
+import { Link } from "react-router-dom"
 
 const columnHelper = createColumnHelper<SupplierSeaFreightViewModel>()
 
-const OffersSeafreight = (seafreight:SeaFreightsViewModel) => {
+type OffersSuppliersType = {
+    seafreight: SeaFreightsViewModel,
+    getRowsSelected?: (rows: SupplierSeaFreightViewModel[]) => void
+}
+
+const OffersSeafreight = ({seafreight, getRowsSelected}:OffersSuppliersType) => {
 
     const columns: ColumnDef<SupplierSeaFreightViewModel, any>[] = [
+        columnHelper.display({
+            id: 'select',
+            header: ({table})=> (
+                <Checkbox size="small"
+                    {...{ 
+                        checked: table.getIsAllRowsSelected(),
+                        indeterminate: table.getIsSomeRowsSelected(),
+                        onChange: table.getToggleAllRowsSelectedHandler()
+                    }}/>
+            ),
+            cell: ({row}) => (
+                <Checkbox size="small" 
+                {...{
+                    checked: row.getIsSelected(),
+                    disabled: !row.getCanSelect(),
+                    indeterminate: row.getIsSomeSelected(),
+                    onChange: row.getToggleSelectedHandler()
+                }} />
+            )
+        }),
         columnHelper.accessor('carrierAgentName', {
             header: "Carrier agent",
-            cell: ({ getValue}) => getValue<string | null | undefined>()
+            cell: ({ row, getValue}) => 
+                <Link to={`/seafreight/${row.original.seaFreightId}`} >
+                    {getValue<string | null | undefined>()}
+                </Link>
         }),
         columnHelper.accessor('frequency', {
             header: "Frequency",
@@ -67,7 +97,8 @@ const OffersSeafreight = (seafreight:SeaFreightsViewModel) => {
     ]
     
     return (
-        <EditableTable<SupplierSeaFreightViewModel> columns={columns} data={seafreight.suppliers ?? []} />
+        <EditableTable<SupplierSeaFreightViewModel> columns={columns} data={seafreight.suppliers ?? []} 
+            enableRowSelection={true} getRowsSelected={getRowsSelected} />
     )
 }
 

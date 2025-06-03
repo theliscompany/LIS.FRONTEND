@@ -226,15 +226,15 @@ export type GetApiHaulageHaulagesResponse = (Array<HaulageGridGetViewModel>);
 
 export type GetApiHaulageHaulagesError = unknown;
 
-export type DeleteApiHaulageDeleteHaulageByIdData = {
-    path: {
-        id: string;
+export type DeleteApiHaulageDeleteHaulageData = {
+    query?: {
+        ids?: Array<(string)>;
     };
 };
 
-export type DeleteApiHaulageDeleteHaulageByIdResponse = (HaulageViewModel);
+export type DeleteApiHaulageDeleteHaulageResponse = (boolean);
 
-export type DeleteApiHaulageDeleteHaulageByIdError = (unknown);
+export type DeleteApiHaulageDeleteHaulageError = (unknown);
 
 export type GetApiMiscellaneousMiscellaneousResponse = (Array<GroupedMiscellaneousViewModel>);
 
@@ -269,15 +269,15 @@ export type PutApiMiscellaneousMiscellaneousByIdResponse = (unknown);
 
 export type PutApiMiscellaneousMiscellaneousByIdError = (unknown);
 
-export type DeleteApiMiscellaneousDeleteMiscellaneousByIdData = {
-    path: {
-        id: string;
+export type DeleteApiMiscellaneousDeleteMiscellaneousData = {
+    query?: {
+        ids?: Array<(string)>;
     };
 };
 
-export type DeleteApiMiscellaneousDeleteMiscellaneousByIdResponse = (unknown);
+export type DeleteApiMiscellaneousDeleteMiscellaneousResponse = (boolean);
 
-export type DeleteApiMiscellaneousDeleteMiscellaneousByIdError = (unknown);
+export type DeleteApiMiscellaneousDeleteMiscellaneousError = (unknown);
 
 export type GetApiPricingHaulagesOfferRequestData = {
     query?: {
@@ -327,19 +327,18 @@ export type PostApiSeaFreightSeaFreightData = {
 
 export type PostApiSeaFreightSeaFreightResponse = (unknown);
 
-export type PostApiSeaFreightSeaFreightError = unknown;
+export type PostApiSeaFreightSeaFreightError = (unknown);
 
-export type GetApiSeaFreightGetSeaFreightsData = {
-    query?: {
-        CarrierAgentId?: number;
-        DeparturePortId?: number;
-        DestinationPortId?: number;
+export type PutApiSeaFreightSeaFreightByIdData = {
+    body?: SeaFreightViewModel;
+    path: {
+        id: string;
     };
 };
 
-export type GetApiSeaFreightGetSeaFreightsResponse = (Array<SeaFreightsViewModel>);
+export type PutApiSeaFreightSeaFreightByIdResponse = (unknown);
 
-export type GetApiSeaFreightGetSeaFreightsError = unknown;
+export type PutApiSeaFreightSeaFreightByIdError = (unknown);
 
 export type GetApiSeaFreightSeaFreightByIdData = {
     path: {
@@ -349,17 +348,21 @@ export type GetApiSeaFreightSeaFreightByIdData = {
 
 export type GetApiSeaFreightSeaFreightByIdResponse = (SeaFreightViewModel);
 
-export type GetApiSeaFreightSeaFreightByIdError = unknown;
+export type GetApiSeaFreightSeaFreightByIdError = (unknown);
 
-export type DeleteApiSeaFreightDeleteSeaFreightPriceByIdData = {
-    path: {
-        id: string;
+export type GetApiSeaFreightGetSeaFreightsResponse = (Array<SeaFreightsViewModel>);
+
+export type GetApiSeaFreightGetSeaFreightsError = (unknown);
+
+export type DeleteApiSeaFreightDeleteSeaFreightsData = {
+    query?: {
+        ids?: Array<(string)>;
     };
 };
 
-export type DeleteApiSeaFreightDeleteSeaFreightPriceByIdResponse = (boolean);
+export type DeleteApiSeaFreightDeleteSeaFreightsResponse = (boolean);
 
-export type DeleteApiSeaFreightDeleteSeaFreightPriceByIdError = unknown;
+export type DeleteApiSeaFreightDeleteSeaFreightsError = (unknown);
 
 export type GetApiHaulageHaulageByIdResponseTransformer = (data: any) => Promise<GetApiHaulageHaulageByIdResponse>;
 
@@ -407,13 +410,6 @@ export const GetApiHaulageHaulagesResponseTransformer: GetApiHaulageHaulagesResp
     if (Array.isArray(data)) {
         data.forEach(HaulageGridGetViewModelModelResponseTransformer);
     }
-    return data;
-};
-
-export type DeleteApiHaulageDeleteHaulageByIdResponseTransformer = (data: any) => Promise<DeleteApiHaulageDeleteHaulageByIdResponse>;
-
-export const DeleteApiHaulageDeleteHaulageByIdResponseTransformer: DeleteApiHaulageDeleteHaulageByIdResponseTransformer = async (data) => {
-    HaulageViewModelModelResponseTransformer(data);
     return data;
 };
 
@@ -538,6 +534,25 @@ export const GetApiPricingSeaFreightsOffersRequestResponseTransformer: GetApiPri
     return data;
 };
 
+export type GetApiSeaFreightSeaFreightByIdResponseTransformer = (data: any) => Promise<GetApiSeaFreightSeaFreightByIdResponse>;
+
+export type SeaFreightViewModelModelResponseTransformer = (data: any) => SeaFreightViewModel;
+
+export const SeaFreightViewModelModelResponseTransformer: SeaFreightViewModelModelResponseTransformer = data => {
+    if (data?.validUntil) {
+        data.validUntil = new Date(data.validUntil);
+    }
+    if (data?.lastUpdated) {
+        data.lastUpdated = new Date(data.lastUpdated);
+    }
+    return data;
+};
+
+export const GetApiSeaFreightSeaFreightByIdResponseTransformer: GetApiSeaFreightSeaFreightByIdResponseTransformer = async (data) => {
+    SeaFreightViewModelModelResponseTransformer(data);
+    return data;
+};
+
 export type GetApiSeaFreightGetSeaFreightsResponseTransformer = (data: any) => Promise<GetApiSeaFreightGetSeaFreightsResponse>;
 
 export type SeaFreightsViewModelModelResponseTransformer = (data: any) => SeaFreightsViewModel;
@@ -565,24 +580,5 @@ export const GetApiSeaFreightGetSeaFreightsResponseTransformer: GetApiSeaFreight
     if (Array.isArray(data)) {
         data.forEach(SeaFreightsViewModelModelResponseTransformer);
     }
-    return data;
-};
-
-export type GetApiSeaFreightSeaFreightByIdResponseTransformer = (data: any) => Promise<GetApiSeaFreightSeaFreightByIdResponse>;
-
-export type SeaFreightViewModelModelResponseTransformer = (data: any) => SeaFreightViewModel;
-
-export const SeaFreightViewModelModelResponseTransformer: SeaFreightViewModelModelResponseTransformer = data => {
-    if (data?.validUntil) {
-        data.validUntil = new Date(data.validUntil);
-    }
-    if (data?.lastUpdated) {
-        data.lastUpdated = new Date(data.lastUpdated);
-    }
-    return data;
-};
-
-export const GetApiSeaFreightSeaFreightByIdResponseTransformer: GetApiSeaFreightSeaFreightByIdResponseTransformer = async (data) => {
-    SeaFreightViewModelModelResponseTransformer(data);
     return data;
 };
