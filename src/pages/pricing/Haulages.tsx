@@ -1,25 +1,39 @@
-import { useState } from 'react';
-import { Box, Button, IconButton, Stack, TextField } from '@mui/material';
-import { Add, ChevronRight, ExpandMore, Refresh } from '@mui/icons-material';
+import { useMemo, useState } from 'react';
+import { Breadcrumbs, Button, ButtonGroup, Divider, IconButton, Stack, TextField, Typography } from '@mui/material';
+import { Add, ChevronRight, DeleteForever, ExpandMore, Refresh } from '@mui/icons-material';
 import { ColumnDef, createColumnHelper } from '@tanstack/react-table';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { getApiHaulageHaulagesOptions } from '../../api/client/pricing/@tanstack/react-query.gen';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { deleteApiHaulageDeleteHaulageMutation, getApiHaulageHaulagesOptions, getApiHaulageHaulagesQueryKey } from '../../api/client/pricing/@tanstack/react-query.gen';
 import EditableTable from '../../components/common/EditableTable';
 import { HaulageGridGetViewModel, HaulageSupplierViewModel } from '../../api/client/pricing';
 import OffersHauliers from '../../components/pricing/OffersHauliers';
-import EditHaulage from '../../components/pricing/EditHaulage';
+import { useConfirmDialog } from '../../hooks/useConfirmDialog';
+import { showSnackbar } from '../../components/common/Snackbar';
+import { Link } from 'react-router-dom';
 
 const columnHelper = createColumnHelper<HaulageGridGetViewModel>()
 
 function Haulages() {
 
     const [globalFilter, setGlobalFilter] = useState('')
-    const [openEditHaulage, setOpenEditHaulage] = useState(false)
-    const [haulageId, setHaulageId] = useState<string>()
+    const [allSelectedHaulageIds, setAllSelectedHaulageIds] = useState<Record<string, string[]>>({})
+    const [deleting, setDeleting] = useState(false)
 
     const queryClient = useQueryClient()
+    const { confirm, ConfirmDialogComponent } = useConfirmDialog();
 
-    const { data: haulages, isLoading} = useQuery({
+    const mutationDeleteHaulages = useMutation({
+        ...deleteApiHaulageDeleteHaulageMutation(),
+        onSuccess: () => showSnackbar("Deleted with success", "success"),
+        onError: () => showSnackbar('An error occurred', "warning"),
+        onSettled: () => {
+            setDeleting(false)
+            setAllSelectedHaulageIds({})
+            queryClient.invalidateQueries({ queryKey: getApiHaulageHaulagesQueryKey() });
+        }
+    })
+
+    const { data: haulages, isLoading } = useQuery({
         ...getApiHaulageHaulagesOptions(),
         staleTime: Infinity
     })
@@ -33,62 +47,90 @@ function Haulages() {
     const columns: ColumnDef<HaulageGridGetViewModel, any>[] = [
         columnHelper.accessor('loadingCity', {
             header: "Loading city",
-            cell: ({row, getValue}) => <>
+            cell: ({ row, getValue }) => <>
                 {
                     row.getCanExpand() ? (
                         <IconButton size='small'
-                        {...{
-                            onClick: row.getToggleExpandedHandler(),
-                            style: { cursor: 'pointer' },
-                        }}
+                            {...{
+                                onClick: row.getToggleExpandedHandler(),
+                                style: { cursor: 'pointer' },
+                            }}
                         >
-                        {row.getIsExpanded() ? <ExpandMore /> : <ChevronRight />}
+                            {row.getIsExpanded() ? <ExpandMore /> : <ChevronRight />}
                         </IconButton>
                     ) : (
                         ''
                     )
                 }
-                <span style={{marginLeft:2}}>{ getValue<string | null>() }</span>
+                <span style={{ marginLeft: 2 }}>{getValue<string | null>()}</span>
             </>
         }),
         columnHelper.accessor('loadingPort', {
             header: "Loading port",
-            cell: ({getValue}) => getValue<string | null>()
+            cell: ({ getValue }) => getValue<string | null>()
         })
     ]
 
-    const handleOpenEditHaulage = () => {
-        setHaulageId(undefined)
-        setOpenEditHaulage(true)
+    const uniqueSelectedIds = useMemo(() => {
+        return Array.from(new Set(Object.values(allSelectedHaulageIds).flat()))
+    }, [allSelectedHaulageIds])
+
+    const handleGetRowsSelected = (key: string) => (rows: HaulageSupplierViewModel[]) => {
+
+        setAllSelectedHaulageIds(prev => ({
+            ...prev,
+            [key]: rows.map(r => r.haulageId ?? '').filter(id => id !== '')
+        }))
     }
 
-    const handleEditHaulage = (row: HaulageSupplierViewModel) => {
-        setHaulageId(row.haulageId)
-        setOpenEditHaulage(true)
+    const handleDeleteHaulages = async () => {
+        const confirmResult = await confirm(
+            'Delete haulages',
+            `Are you sure you want to delete ${uniqueSelectedIds.length} haulage(s)? This action cannot be undone.`
+        );
+
+        if (confirmResult) {
+            setDeleting(true)
+            mutationDeleteHaulages.mutateAsync({
+                query: {
+                    ids: uniqueSelectedIds
+                }
+            })
+        }
     }
-    
     return (
         <>
-            <Stack direction='row' alignItems='center' justifyContent='space-between' mb={2}>
-                <Box>
-                    <Button variant='contained' sx={{mr:2}} startIcon={<Add />} size='small' onClick={handleOpenEditHaulage}>
-                        Add haulage price
+            <Breadcrumbs separator={<ChevronRight fontSize='small' />} aria-label="breadcrumb">
+                <Typography key="3" sx={{ color: 'text.primary' }}>
+                    Haulages
+                </Typography>
+            </Breadcrumbs>
+            <Divider sx={{ mb: 1 }} />
+            <Stack direction='row' alignItems='center' justifyContent='space-between' mb={1}>
+                <ButtonGroup color='info' variant='text' size='small' aria-label='text button group'>
+                    <Button startIcon={<Add />} to='/haulage' component={Link}>
+                        New
                     </Button>
-                    <Button variant='outlined' startIcon={<Refresh />} size='small' onClick={refeshHaulages}>
+                    <Button disabled={uniqueSelectedIds.length === 0} startIcon={<DeleteForever />} onClick={handleDeleteHaulages} loading={deleting}>
+                        Delete
+                    </Button>
+                    <Button startIcon={<Refresh />} onClick={refeshHaulages}>
                         Refresh
                     </Button>
-                </Box>
+                </ButtonGroup>
                 <TextField value={globalFilter ?? ''} onChange={(e) => setGlobalFilter(e.target.value)}
                     size='small' placeholder="Search haulages..." />
             </Stack>
-
-            <EditableTable<HaulageGridGetViewModel> data={haulages ?? []} columns={columns} isLoading={isLoading} 
+            <Divider sx={{ mb: 2 }} />
+            <EditableTable<HaulageGridGetViewModel> data={haulages ?? []} columns={columns} isLoading={isLoading}
                 globalFilter={globalFilter} onGlobalFilterChange={setGlobalFilter} rowCanExpand
-                subComponent={(row: HaulageGridGetViewModel) =><OffersHauliers haulage={row} getHaulageId={handleEditHaulage} />} />
+                subComponent={(row: HaulageGridGetViewModel) => {
+                    return (<OffersHauliers haulage={row} getRowsSelected={handleGetRowsSelected(`${row.loadingCity}_${row.loadingPort}`)} />)
+                }}
+            />
 
-            {
-                openEditHaulage && <EditHaulage open={openEditHaulage} onClose={() => setOpenEditHaulage(false)} haulageId={haulageId} />
-            }
+            {ConfirmDialogComponent}
+
         </>
     );
 }

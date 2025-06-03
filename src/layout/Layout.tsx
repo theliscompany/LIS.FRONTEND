@@ -369,7 +369,7 @@ const Layout = () : React.ReactNode => {
                                 <List component="div" disablePadding>
                                     <NavigationLink url="/haulages" title={t('haulages')} icon={<LocalShipping fontSize="small" />} nested />
                                     <NavigationLink url="/seafreights" title={t('seafreights')} icon={<DirectionsBoat fontSize="small" />} nested />
-                                    <NavigationLink url="/miscellaneous" title={t('miscellaneous')} icon={<Inventory2 fontSize="small" />} nested />
+                                    <NavigationLink url="/miscellaneousAll" title={t('miscellaneous')} icon={<Inventory2 fontSize="small" />} nested />
                                 </List>
                             </Collapse>
                             

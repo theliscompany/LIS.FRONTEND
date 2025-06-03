@@ -10,7 +10,7 @@ import TextField from "@mui/material/TextField";
 import { Currency } from "../../utils/constants";
 import Box from "@mui/material/Box";
 import IconButton from "@mui/material/IconButton";
-import { Cancel, Check } from "@mui/icons-material";
+import { Cancel, Check, DeleteForever } from "@mui/icons-material";
 import { useQuery } from "@tanstack/react-query";
 import { getServiceOptions } from "../../api/client/masterdata/@tanstack/react-query.gen";
 import Paper from "@mui/material/Paper";
@@ -19,6 +19,9 @@ import Button from "@mui/material/Button";
 import AddCircle from "@mui/icons-material/AddCircle";
 import Alert from "@mui/material/Alert";
 import EditableTable from "../common/EditableTable";
+import { useConfirmDialog } from "../../hooks/useConfirmDialog";
+import Checkbox from "@mui/material/Checkbox";
+import ButtonGroup from "@mui/material/ButtonGroup";
 
 interface ServicesMiscellaneousProps {
     currency: string,
@@ -31,9 +34,13 @@ const columnHelper = createColumnHelper<ServiceViewModel>()
 const ServicesMiscellaneous = ({data, currency, getServicesAdded}:ServicesMiscellaneousProps) => {
 
     const [servicesMiscellaneous, setServicesMiscellaneous] = useState<ServiceViewModel[]>(data)
-    const [editingRowIndex, setEditingRowIndex] = useState<number | null>(null);
+    const [editingRowIndex, setEditingRowIndex] = useState<number | null>(null)
+    const [allSelectedServices, setAllSelectedServices] = useState<number[]>([])
+    const [tableRef, setTableRef] = useState<import("@tanstack/table-core").Table<ServiceViewModel>>()
 
     const rowDraftRef = useRef<ServiceViewModel | null>(null);
+
+    const { confirm, ConfirmDialogComponent } = useConfirmDialog();
 
     useEffect(() => {
         setServicesMiscellaneous(data);
@@ -44,6 +51,26 @@ const ServicesMiscellaneous = ({data, currency, getServicesAdded}:ServicesMiscel
     })
 
     const columns: ColumnDef<ServiceViewModel, any>[] = [
+        columnHelper.display({
+            id: 'select',
+            header: ({table})=> (
+                <Checkbox size="small"
+                    {...{ 
+                        checked: table.getIsAllRowsSelected(),
+                        indeterminate: table.getIsSomeRowsSelected(),
+                        onChange: table.getToggleAllRowsSelectedHandler()
+                    }}/>
+            ),
+            cell: ({row}) => (
+                <Checkbox size="small" 
+                {...{
+                    checked: row.getIsSelected(),
+                    disabled: !row.getCanSelect(),
+                    indeterminate: row.getIsSomeSelected(),
+                    onChange: row.getToggleSelectedHandler()
+                }} />
+            )
+        }),
         columnHelper.accessor('serviceName', {
             header: "Service",
             cell: ({ row }) => {
@@ -140,22 +167,56 @@ const ServicesMiscellaneous = ({data, currency, getServicesAdded}:ServicesMiscel
         rowDraftRef.current = newService;
     }
 
+    const handleGetRowsSelected = (index: number[]) => setAllSelectedServices(index)
+    
+    const handleDeleteServices = async () => {
+        const confirmResult = await confirm(
+            'Delete services',
+            `Are you sure you want to delete ${allSelectedServices.length} service(s)? This action cannot be undone.`
+        );
+        
+        if (confirmResult) {
+            const values = [...servicesMiscellaneous]
+
+            const result = values.filter((_,index)=> !allSelectedServices.includes(index))
+            setAllSelectedServices([])
+            setServicesMiscellaneous(result) 
+
+            tableRef?.resetRowSelection();
+        }
+    }
+
+    const getTable = (table: import("@tanstack/table-core").Table<ServiceViewModel>) => {
+        setTableRef(table);
+    }
+
     return (
-        <Paper sx={{p:2, backgroundColor:"#00404533"}}>
-            <Stack direction="row" alignItems="center" justifyContent="space-between" mb={2}>
-                <Button sx={{mb:2}} variant="outlined" size="small" onClick={handleAddService} startIcon={<AddCircle />}>Add service</Button>
-                {servicesMiscellaneous.length === 0 && <Alert severity="warning">You must add at least one service.</Alert>}
-            </Stack>
-            
-            <EditableTable<ServiceViewModel> data={servicesMiscellaneous} columns={columns} 
-                onUpdate={(rowIndex, columnId, value) => {
-                    setServicesMiscellaneous((old) =>
-                    old.map((row, index) =>
-                        index === rowIndex ? { ...old[rowIndex], [columnId]: value } : row
-                    )
-                    );
-                }}  />
-        </Paper>
+        <>
+        
+            <Paper sx={{p:2, backgroundColor:"#00404533"}}>
+                <Stack direction="row" alignItems="center" justifyContent="space-between" >
+                    <ButtonGroup color='info' variant='text' size='small' aria-label='text button group'>
+                        <Button onClick={handleAddService} startIcon={<AddCircle />}>Add</Button>
+                        <Button disabled={allSelectedServices.length === 0} startIcon={<DeleteForever />} onClick={handleDeleteServices}>
+                            Delete
+                        </Button>
+                    </ButtonGroup>
+                    {servicesMiscellaneous.length === 0 && <Alert severity="warning">You must add at least one service.</Alert>}
+                </Stack>
+                
+                <EditableTable<ServiceViewModel> data={servicesMiscellaneous} columns={columns} 
+                enableRowSelection={true} getRowsIndexSelected={handleGetRowsSelected} getTableRef={getTable}
+                    onUpdate={(rowIndex, columnId, value) => {
+                        setServicesMiscellaneous((old) =>
+                        old.map((row, index) =>
+                            index === rowIndex ? { ...old[rowIndex], [columnId]: value } : row
+                        )
+                        );
+                    }}  />
+            </Paper>
+
+            {ConfirmDialogComponent}
+        </>
     )
 }
 

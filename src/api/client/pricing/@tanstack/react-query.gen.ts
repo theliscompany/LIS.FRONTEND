@@ -2,9 +2,9 @@
 
 import type { OptionsLegacyParser } from '@hey-api/client-axios';
 import { queryOptions, type UseMutationOptions } from '@tanstack/react-query';
-import type { PostApiHaulageHaulageData, PostApiHaulageHaulageError, PostApiHaulageHaulageResponse, PutApiHaulageHaulageByIdData, PutApiHaulageHaulageByIdError, PutApiHaulageHaulageByIdResponse, GetApiHaulageHaulageByIdData, DeleteApiHaulageDeleteHaulageByIdData, DeleteApiHaulageDeleteHaulageByIdError, DeleteApiHaulageDeleteHaulageByIdResponse, PostApiMiscellaneousMiscellaneousData, PostApiMiscellaneousMiscellaneousError, PostApiMiscellaneousMiscellaneousResponse, GetApiMiscellaneousMiscellaneousByIdData, PutApiMiscellaneousMiscellaneousByIdData, PutApiMiscellaneousMiscellaneousByIdError, PutApiMiscellaneousMiscellaneousByIdResponse, DeleteApiMiscellaneousDeleteMiscellaneousByIdData, DeleteApiMiscellaneousDeleteMiscellaneousByIdError, DeleteApiMiscellaneousDeleteMiscellaneousByIdResponse, GetApiPricingHaulagesOfferRequestData, GetApiPricingMiscellaneoussOffersRequestData, GetApiPricingSeaFreightsOffersRequestData, PostApiSeaFreightSeaFreightData, PostApiSeaFreightSeaFreightError, PostApiSeaFreightSeaFreightResponse, GetApiSeaFreightGetSeaFreightsData, GetApiSeaFreightSeaFreightByIdData, DeleteApiSeaFreightDeleteSeaFreightPriceByIdData, DeleteApiSeaFreightDeleteSeaFreightPriceByIdError, DeleteApiSeaFreightDeleteSeaFreightPriceByIdResponse } from '../types.gen';
+import type { PostApiHaulageHaulageData, PostApiHaulageHaulageError, PostApiHaulageHaulageResponse, PutApiHaulageHaulageByIdData, PutApiHaulageHaulageByIdError, PutApiHaulageHaulageByIdResponse, GetApiHaulageHaulageByIdData, DeleteApiHaulageDeleteHaulageData, DeleteApiHaulageDeleteHaulageError, DeleteApiHaulageDeleteHaulageResponse, PostApiMiscellaneousMiscellaneousData, PostApiMiscellaneousMiscellaneousError, PostApiMiscellaneousMiscellaneousResponse, GetApiMiscellaneousMiscellaneousByIdData, PutApiMiscellaneousMiscellaneousByIdData, PutApiMiscellaneousMiscellaneousByIdError, PutApiMiscellaneousMiscellaneousByIdResponse, DeleteApiMiscellaneousDeleteMiscellaneousData, DeleteApiMiscellaneousDeleteMiscellaneousError, DeleteApiMiscellaneousDeleteMiscellaneousResponse, GetApiPricingHaulagesOfferRequestData, GetApiPricingMiscellaneoussOffersRequestData, GetApiPricingSeaFreightsOffersRequestData, PostApiSeaFreightSeaFreightData, PostApiSeaFreightSeaFreightError, PostApiSeaFreightSeaFreightResponse, PutApiSeaFreightSeaFreightByIdData, PutApiSeaFreightSeaFreightByIdError, PutApiSeaFreightSeaFreightByIdResponse, GetApiSeaFreightSeaFreightByIdData, DeleteApiSeaFreightDeleteSeaFreightsData, DeleteApiSeaFreightDeleteSeaFreightsError, DeleteApiSeaFreightDeleteSeaFreightsResponse } from '../types.gen';
 import type { AxiosError } from 'axios';
-import { client, postApiHaulageHaulage, putApiHaulageHaulageById, getApiHaulageHaulageById, getApiHaulageHaulages, deleteApiHaulageDeleteHaulageById, getApiMiscellaneousMiscellaneous, postApiMiscellaneousMiscellaneous, getApiMiscellaneousMiscellaneousById, putApiMiscellaneousMiscellaneousById, deleteApiMiscellaneousDeleteMiscellaneousById, getApiPricingHaulagesOfferRequest, getApiPricingMiscellaneoussOffersRequest, getApiPricingSeaFreightsOffersRequest, postApiSeaFreightSeaFreight, getApiSeaFreightGetSeaFreights, getApiSeaFreightSeaFreightById, deleteApiSeaFreightDeleteSeaFreightPriceById } from '../sdk.gen';
+import { client, postApiHaulageHaulage, putApiHaulageHaulageById, getApiHaulageHaulageById, getApiHaulageHaulages, deleteApiHaulageDeleteHaulage, getApiMiscellaneousMiscellaneous, postApiMiscellaneousMiscellaneous, getApiMiscellaneousMiscellaneousById, putApiMiscellaneousMiscellaneousById, deleteApiMiscellaneousDeleteMiscellaneous, getApiPricingHaulagesOfferRequest, getApiPricingMiscellaneoussOffersRequest, getApiPricingSeaFreightsOffersRequest, postApiSeaFreightSeaFreight, putApiSeaFreightSeaFreightById, getApiSeaFreightSeaFreightById, getApiSeaFreightGetSeaFreights, deleteApiSeaFreightDeleteSeaFreights } from '../sdk.gen';
 
 type QueryKey<TOptions extends OptionsLegacyParser> = [
     Pick<TOptions, 'baseURL' | 'body' | 'headers' | 'path' | 'query'> & {
@@ -118,10 +118,10 @@ export const getApiHaulageHaulagesOptions = (options?: OptionsLegacyParser) => {
     });
 };
 
-export const deleteApiHaulageDeleteHaulageByIdMutation = (options?: Partial<OptionsLegacyParser<DeleteApiHaulageDeleteHaulageByIdData>>) => {
-    const mutationOptions: UseMutationOptions<DeleteApiHaulageDeleteHaulageByIdResponse, AxiosError<DeleteApiHaulageDeleteHaulageByIdError>, OptionsLegacyParser<DeleteApiHaulageDeleteHaulageByIdData>> = {
+export const deleteApiHaulageDeleteHaulageMutation = (options?: Partial<OptionsLegacyParser<DeleteApiHaulageDeleteHaulageData>>) => {
+    const mutationOptions: UseMutationOptions<DeleteApiHaulageDeleteHaulageResponse, AxiosError<DeleteApiHaulageDeleteHaulageError>, OptionsLegacyParser<DeleteApiHaulageDeleteHaulageData>> = {
         mutationFn: async (localOptions) => {
-            const { data } = await deleteApiHaulageDeleteHaulageById({
+            const { data } = await deleteApiHaulageDeleteHaulage({
                 ...options,
                 ...localOptions,
                 throwOnError: true
@@ -217,10 +217,10 @@ export const putApiMiscellaneousMiscellaneousByIdMutation = (options?: Partial<O
     return mutationOptions;
 };
 
-export const deleteApiMiscellaneousDeleteMiscellaneousByIdMutation = (options?: Partial<OptionsLegacyParser<DeleteApiMiscellaneousDeleteMiscellaneousByIdData>>) => {
-    const mutationOptions: UseMutationOptions<DeleteApiMiscellaneousDeleteMiscellaneousByIdResponse, AxiosError<DeleteApiMiscellaneousDeleteMiscellaneousByIdError>, OptionsLegacyParser<DeleteApiMiscellaneousDeleteMiscellaneousByIdData>> = {
+export const deleteApiMiscellaneousDeleteMiscellaneousMutation = (options?: Partial<OptionsLegacyParser<DeleteApiMiscellaneousDeleteMiscellaneousData>>) => {
+    const mutationOptions: UseMutationOptions<DeleteApiMiscellaneousDeleteMiscellaneousResponse, AxiosError<DeleteApiMiscellaneousDeleteMiscellaneousError>, OptionsLegacyParser<DeleteApiMiscellaneousDeleteMiscellaneousData>> = {
         mutationFn: async (localOptions) => {
-            const { data } = await deleteApiMiscellaneousDeleteMiscellaneousById({
+            const { data } = await deleteApiMiscellaneousDeleteMiscellaneous({
                 ...options,
                 ...localOptions,
                 throwOnError: true
@@ -321,23 +321,18 @@ export const postApiSeaFreightSeaFreightMutation = (options?: Partial<OptionsLeg
     return mutationOptions;
 };
 
-export const getApiSeaFreightGetSeaFreightsQueryKey = (options?: OptionsLegacyParser<GetApiSeaFreightGetSeaFreightsData>) => [
-    createQueryKey('getApiSeaFreightGetSeaFreights', options)
-];
-
-export const getApiSeaFreightGetSeaFreightsOptions = (options?: OptionsLegacyParser<GetApiSeaFreightGetSeaFreightsData>) => {
-    return queryOptions({
-        queryFn: async ({ queryKey, signal }) => {
-            const { data } = await getApiSeaFreightGetSeaFreights({
+export const putApiSeaFreightSeaFreightByIdMutation = (options?: Partial<OptionsLegacyParser<PutApiSeaFreightSeaFreightByIdData>>) => {
+    const mutationOptions: UseMutationOptions<PutApiSeaFreightSeaFreightByIdResponse, AxiosError<PutApiSeaFreightSeaFreightByIdError>, OptionsLegacyParser<PutApiSeaFreightSeaFreightByIdData>> = {
+        mutationFn: async (localOptions) => {
+            const { data } = await putApiSeaFreightSeaFreightById({
                 ...options,
-                ...queryKey[0],
-                signal,
+                ...localOptions,
                 throwOnError: true
             });
             return data;
-        },
-        queryKey: getApiSeaFreightGetSeaFreightsQueryKey(options)
-    });
+        }
+    };
+    return mutationOptions;
 };
 
 export const getApiSeaFreightSeaFreightByIdQueryKey = (options: OptionsLegacyParser<GetApiSeaFreightSeaFreightByIdData>) => [
@@ -359,10 +354,29 @@ export const getApiSeaFreightSeaFreightByIdOptions = (options: OptionsLegacyPars
     });
 };
 
-export const deleteApiSeaFreightDeleteSeaFreightPriceByIdMutation = (options?: Partial<OptionsLegacyParser<DeleteApiSeaFreightDeleteSeaFreightPriceByIdData>>) => {
-    const mutationOptions: UseMutationOptions<DeleteApiSeaFreightDeleteSeaFreightPriceByIdResponse, AxiosError<DeleteApiSeaFreightDeleteSeaFreightPriceByIdError>, OptionsLegacyParser<DeleteApiSeaFreightDeleteSeaFreightPriceByIdData>> = {
+export const getApiSeaFreightGetSeaFreightsQueryKey = (options?: OptionsLegacyParser) => [
+    createQueryKey('getApiSeaFreightGetSeaFreights', options)
+];
+
+export const getApiSeaFreightGetSeaFreightsOptions = (options?: OptionsLegacyParser) => {
+    return queryOptions({
+        queryFn: async ({ queryKey, signal }) => {
+            const { data } = await getApiSeaFreightGetSeaFreights({
+                ...options,
+                ...queryKey[0],
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getApiSeaFreightGetSeaFreightsQueryKey(options)
+    });
+};
+
+export const deleteApiSeaFreightDeleteSeaFreightsMutation = (options?: Partial<OptionsLegacyParser<DeleteApiSeaFreightDeleteSeaFreightsData>>) => {
+    const mutationOptions: UseMutationOptions<DeleteApiSeaFreightDeleteSeaFreightsResponse, AxiosError<DeleteApiSeaFreightDeleteSeaFreightsError>, OptionsLegacyParser<DeleteApiSeaFreightDeleteSeaFreightsData>> = {
         mutationFn: async (localOptions) => {
-            const { data } = await deleteApiSeaFreightDeleteSeaFreightPriceById({
+            const { data } = await deleteApiSeaFreightDeleteSeaFreights({
                 ...options,
                 ...localOptions,
                 throwOnError: true

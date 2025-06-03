@@ -1,21 +1,45 @@
 import { ColumnDef, createColumnHelper } from "@tanstack/react-table";
 import { HaulageGridGetViewModel, HaulageSupplierViewModel } from "../../api/client/pricing";
-import { Chip, Stack } from "@mui/material";
+import { Checkbox, Chip, Stack } from "@mui/material";
 import EditableTable from "../common/EditableTable";
 import { Currency } from "../../utils/constants";
+import { Link } from "react-router-dom";
 
 const columnHelper = createColumnHelper<HaulageSupplierViewModel>()
 
 type OffersHauliersType = {
     haulage: HaulageGridGetViewModel,
-    getHaulageId?: (row: HaulageSupplierViewModel) => void
+    getRowsSelected?: (rows: HaulageSupplierViewModel[]) => void
 }
-const OffersHauliers = ({haulage, getHaulageId}: OffersHauliersType) => {
+const OffersHauliers = ({haulage, getRowsSelected}: OffersHauliersType) => {
 
     const columns: ColumnDef<HaulageSupplierViewModel, any>[] = [
+        columnHelper.display({
+            id: 'select',
+            header: ({table})=> (
+                <Checkbox size="small"
+                    {...{ 
+                        checked: table.getIsAllRowsSelected(),
+                        indeterminate: table.getIsSomeRowsSelected(),
+                        onChange: table.getToggleAllRowsSelectedHandler()
+                    }}/>
+            ),
+            cell: ({row}) => (
+                <Checkbox size="small" 
+                {...{
+                    checked: row.getIsSelected(),
+                    disabled: !row.getCanSelect(),
+                    indeterminate: row.getIsSomeSelected(),
+                    onChange: row.getToggleSelectedHandler()
+                }} />
+            )
+        }),
         columnHelper.accessor('haulierName', {
             header: "Haulier",
-            cell: ({ getValue}) => getValue<string | null | undefined>()
+            cell: ({ row, getValue}) => 
+                <Link to={`/haulage/${row.original.haulageId}`}>
+                    {getValue<string | null | undefined>()}
+                </Link>
         }),
         columnHelper.accessor('unitTariff', {
             header: "Per unit",
@@ -85,7 +109,9 @@ const OffersHauliers = ({haulage, getHaulageId}: OffersHauliersType) => {
     ]
     
     return (
-        <EditableTable<HaulageSupplierViewModel> columns={columns} data={haulage.hauliers ?? []} dbClick={getHaulageId} />
+        <EditableTable<HaulageSupplierViewModel> columns={columns} data={haulage.hauliers ?? []} 
+         enableRowSelection={true}
+      getRowsSelected={getRowsSelected} />
     )
 }
 
