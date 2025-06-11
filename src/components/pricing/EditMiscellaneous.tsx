@@ -8,7 +8,7 @@ import { Controller, ControllerRenderProps, useForm } from "react-hook-form";
 import { getContactGetContactsOptions } from "../../api/client/crm/@tanstack/react-query.gen";
 import { ContactViewModel } from "../../api/client/crm";
 import { ChangeEvent, useCallback, useEffect, useState } from "react";
-import { MiscellaneousViewModel } from "../../api/client/pricing";
+import { MiscellaneousServiceViewModel, MiscellaneousViewModel } from "../../api/client/pricing";
 import TextField from "@mui/material/TextField";
 import FormControl from "@mui/material/FormControl";
 import InputLabel from "@mui/material/InputLabel";
@@ -19,9 +19,6 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import dayjs from "dayjs";
-import FormGroup from "@mui/material/FormGroup";
-import FormControlLabel from "@mui/material/FormControlLabel";
-import Checkbox from "@mui/material/Checkbox";
 import { PortViewModel, ServiceViewModel } from "../../api/client/masterdata";
 import { getPortOptions } from "../../api/client/masterdata/@tanstack/react-query.gen";
 import ServicesMiscellaneous from "./ServicesMiscellaneous";
@@ -70,7 +67,7 @@ const EditMiscellaneous = () => {
     const servicesMiscellaneous = useCallback(
         (field: ControllerRenderProps<MiscellaneousViewModel, "services">) => {
             return <ServicesMiscellaneous data={field.value ?? []} currency={watch('currency') ?? currencyOptions[0].code}
-                getServicesAdded={(newServices: ServiceViewModel[]) => field.onChange(newServices)} />
+                getServicesAdded={(newServices: MiscellaneousServiceViewModel[]) => field.onChange(newServices)} />
         },
         [watch('currency')],
     )
@@ -255,15 +252,6 @@ const EditMiscellaneous = () => {
                                                             error={!!errors.destinationPortId}
                                                             helperText={errors.destinationPortId?.message} />)} />
                                             } />
-                                    </Grid>
-
-                                    <Grid size={2}>
-                                        <FormGroup row>
-                                            <FormControlLabel control={<Checkbox checked={watch('container20') ?? false} size="small" {...register('container20')}
-                                                onChange={(_, checked: boolean) => setValue('container20', checked)} />} label="20'" />
-                                            <FormControlLabel control={<Checkbox checked={watch('container40') ?? false} size="small" {...register('container40')}
-                                                onChange={(_, checked: boolean) => setValue('container40', checked)} />} label="40'" />
-                                        </FormGroup>
                                     </Grid>
                                     <Grid size={2}>
                                         <FormControl fullWidth size="small">

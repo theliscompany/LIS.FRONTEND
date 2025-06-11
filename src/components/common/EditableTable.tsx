@@ -8,6 +8,9 @@ import {
   CellContext,
   getExpandedRowModel,
   RowSelectionState,
+  ExpandedState,
+  Row,
+  OnChangeFn,
 } from '@tanstack/react-table'
 import {
   Paper,
@@ -40,6 +43,7 @@ interface Props<T> {
   getRowsSelected?: (rows: T[]) => void;
   getRowsIndexSelected?: (index: number[]) => void;
   getTableRef?: (table: import("@tanstack/table-core").Table<T>) => void;
+  getRowExpanded?: (row: Row<T> | undefined) => void
 }
 
 const EditableTable = <T,>({
@@ -54,13 +58,15 @@ const EditableTable = <T,>({
   enableRowSelection,
   getRowsSelected,
   getRowsIndexSelected,
-  getTableRef
+  getTableRef,
+  getRowExpanded
 }: Props<T>) => {
 
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({})
+  const [expanded, setExpanded] = useState<ExpandedState>({})
 
   useEffect(() => {
-    if(getTableRef) {
+    if (getTableRef) {
       getTableRef(table)
     }
   }, [])
@@ -77,9 +83,39 @@ const EditableTable = <T,>({
     return itemRank.passed
   }
 
+  const handleExpandedChange: OnChangeFn<ExpandedState> = updaterOrValue =>  {
+    setExpanded(old => {
+      const newExpanded =
+        typeof updaterOrValue === 'function'
+          ? updaterOrValue(old)
+          : updaterOrValue;
+
+      const previousExpanded = old as Record<string, boolean>;
+      const currentExpanded = newExpanded as Record<string, boolean>;
+
+      const newlyExpandedIds = Object.keys(currentExpanded).filter(
+        id => !previousExpanded[id]
+      );
+
+      if (newlyExpandedIds.length > 0) {
+        const expandedRowId = newlyExpandedIds[0];
+        const expandedRow = table
+          .getRowModel()
+          .rows.find(row => row.id === expandedRowId);
+
+        if (getRowExpanded) {
+          getRowExpanded(expandedRow); // ✅ stocke la ligne dépliée
+        }
+      }
+
+      return newExpanded;
+    });
+  };
+
   const table = useReactTable({
     data,
     columns,
+    onExpandedChange: handleExpandedChange,
     getRowCanExpand: rowCanExpand ? () => rowCanExpand : undefined,
     getExpandedRowModel: rowCanExpand ? getExpandedRowModel() : undefined,
     getCoreRowModel: getCoreRowModel(),
@@ -87,7 +123,8 @@ const EditableTable = <T,>({
     enableRowSelection: !!enableRowSelection,
     state: {
       globalFilter,
-      rowSelection
+      rowSelection,
+      expanded
     },
     globalFilterFn: fuzzyFilter,
     onGlobalFilterChange,
@@ -97,7 +134,7 @@ const EditableTable = <T,>({
     onRowSelectionChange: (updaterOrValue) => {
       setRowSelection(updaterOrValue)
       const selection = typeof updaterOrValue === 'function' ? updaterOrValue(rowSelection) : updaterOrValue
-      
+
       if (getRowsSelected) {
         const selectedRows = table.getRowModel().rows.filter(row => selection[row.id]).map(row => row.original)
         getRowsSelected(selectedRows)
@@ -109,7 +146,6 @@ const EditableTable = <T,>({
       }
     },
   })
-
 
 
   return (

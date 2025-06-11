@@ -2,9 +2,9 @@
 
 import type { OptionsLegacyParser } from '@hey-api/client-axios';
 import { queryOptions, type UseMutationOptions } from '@tanstack/react-query';
-import type { PostApiHaulageHaulageData, PostApiHaulageHaulageError, PostApiHaulageHaulageResponse, PutApiHaulageHaulageByIdData, PutApiHaulageHaulageByIdError, PutApiHaulageHaulageByIdResponse, GetApiHaulageHaulageByIdData, DeleteApiHaulageDeleteHaulageData, DeleteApiHaulageDeleteHaulageError, DeleteApiHaulageDeleteHaulageResponse, PostApiMiscellaneousMiscellaneousData, PostApiMiscellaneousMiscellaneousError, PostApiMiscellaneousMiscellaneousResponse, GetApiMiscellaneousMiscellaneousByIdData, PutApiMiscellaneousMiscellaneousByIdData, PutApiMiscellaneousMiscellaneousByIdError, PutApiMiscellaneousMiscellaneousByIdResponse, DeleteApiMiscellaneousDeleteMiscellaneousData, DeleteApiMiscellaneousDeleteMiscellaneousError, DeleteApiMiscellaneousDeleteMiscellaneousResponse, GetApiPricingHaulagesOfferRequestData, GetApiPricingMiscellaneoussOffersRequestData, GetApiPricingSeaFreightsOffersRequestData, PostApiSeaFreightSeaFreightData, PostApiSeaFreightSeaFreightError, PostApiSeaFreightSeaFreightResponse, PutApiSeaFreightSeaFreightByIdData, PutApiSeaFreightSeaFreightByIdError, PutApiSeaFreightSeaFreightByIdResponse, GetApiSeaFreightSeaFreightByIdData, DeleteApiSeaFreightDeleteSeaFreightsData, DeleteApiSeaFreightDeleteSeaFreightsError, DeleteApiSeaFreightDeleteSeaFreightsResponse } from '../types.gen';
+import type { PostApiHaulageHaulageData, PostApiHaulageHaulageError, PostApiHaulageHaulageResponse, PutApiHaulageHaulageByIdData, PutApiHaulageHaulageByIdError, PutApiHaulageHaulageByIdResponse, GetApiHaulageHaulageByIdData, DeleteApiHaulageDeleteHaulageData, DeleteApiHaulageDeleteHaulageError, DeleteApiHaulageDeleteHaulageResponse, PostApiMiscellaneousMiscellaneousData, PostApiMiscellaneousMiscellaneousError, PostApiMiscellaneousMiscellaneousResponse, GetApiMiscellaneousMiscellaneousByPortsByDeparturePortIdByDestinationPortIdData, GetApiMiscellaneousMiscellaneousByIdData, PutApiMiscellaneousMiscellaneousByIdData, PutApiMiscellaneousMiscellaneousByIdError, PutApiMiscellaneousMiscellaneousByIdResponse, DeleteApiMiscellaneousDeleteMiscellaneousData, DeleteApiMiscellaneousDeleteMiscellaneousError, DeleteApiMiscellaneousDeleteMiscellaneousResponse, GetApiPricingHaulagesOfferRequestData, GetApiPricingMiscellaneoussOffersRequestData, GetApiPricingSeaFreightsOffersRequestData, PostApiSeaFreightSeaFreightData, PostApiSeaFreightSeaFreightError, PostApiSeaFreightSeaFreightResponse, PutApiSeaFreightSeaFreightByIdData, PutApiSeaFreightSeaFreightByIdError, PutApiSeaFreightSeaFreightByIdResponse, GetApiSeaFreightSeaFreightByIdData, DeleteApiSeaFreightDeleteSeaFreightsData, DeleteApiSeaFreightDeleteSeaFreightsError, DeleteApiSeaFreightDeleteSeaFreightsResponse } from '../types.gen';
 import type { AxiosError } from 'axios';
-import { client, postApiHaulageHaulage, putApiHaulageHaulageById, getApiHaulageHaulageById, getApiHaulageHaulages, deleteApiHaulageDeleteHaulage, getApiMiscellaneousMiscellaneous, postApiMiscellaneousMiscellaneous, getApiMiscellaneousMiscellaneousById, putApiMiscellaneousMiscellaneousById, deleteApiMiscellaneousDeleteMiscellaneous, getApiPricingHaulagesOfferRequest, getApiPricingMiscellaneoussOffersRequest, getApiPricingSeaFreightsOffersRequest, postApiSeaFreightSeaFreight, putApiSeaFreightSeaFreightById, getApiSeaFreightSeaFreightById, getApiSeaFreightGetSeaFreights, deleteApiSeaFreightDeleteSeaFreights } from '../sdk.gen';
+import { client, postApiHaulageHaulage, putApiHaulageHaulageById, getApiHaulageHaulageById, getApiHaulageHaulages, deleteApiHaulageDeleteHaulage, getApiMiscellaneousMiscellaneous, postApiMiscellaneousMiscellaneous, getApiMiscellaneousMiscellaneousByPortsByDeparturePortIdByDestinationPortId, getApiMiscellaneousMiscellaneousById, putApiMiscellaneousMiscellaneousById, deleteApiMiscellaneousDeleteMiscellaneous, getApiPricingHaulagesOfferRequest, getApiPricingMiscellaneoussOffersRequest, getApiPricingSeaFreightsOffersRequest, postApiSeaFreightSeaFreight, putApiSeaFreightSeaFreightById, getApiSeaFreightSeaFreightById, getApiSeaFreightGetSeaFreights, deleteApiSeaFreightDeleteSeaFreights } from '../sdk.gen';
 
 type QueryKey<TOptions extends OptionsLegacyParser> = [
     Pick<TOptions, 'baseURL' | 'body' | 'headers' | 'path' | 'query'> & {
@@ -182,6 +182,25 @@ export const postApiMiscellaneousMiscellaneousMutation = (options?: Partial<Opti
         }
     };
     return mutationOptions;
+};
+
+export const getApiMiscellaneousMiscellaneousByPortsByDeparturePortIdByDestinationPortIdQueryKey = (options: OptionsLegacyParser<GetApiMiscellaneousMiscellaneousByPortsByDeparturePortIdByDestinationPortIdData>) => [
+    createQueryKey('getApiMiscellaneousMiscellaneousByPortsByDeparturePortIdByDestinationPortId', options)
+];
+
+export const getApiMiscellaneousMiscellaneousByPortsByDeparturePortIdByDestinationPortIdOptions = (options: OptionsLegacyParser<GetApiMiscellaneousMiscellaneousByPortsByDeparturePortIdByDestinationPortIdData>) => {
+    return queryOptions({
+        queryFn: async ({ queryKey, signal }) => {
+            const { data } = await getApiMiscellaneousMiscellaneousByPortsByDeparturePortIdByDestinationPortId({
+                ...options,
+                ...queryKey[0],
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getApiMiscellaneousMiscellaneousByPortsByDeparturePortIdByDestinationPortIdQueryKey(options)
+    });
 };
 
 export const getApiMiscellaneousMiscellaneousByIdQueryKey = (options: OptionsLegacyParser<GetApiMiscellaneousMiscellaneousByIdData>) => [

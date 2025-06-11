@@ -3,7 +3,25 @@
 export type GroupedMiscellaneousViewModel = {
     departurePortName?: (string) | null;
     destinationPortName?: (string) | null;
-    miscellaneousList?: Array<MiscellaneousBaseViewModel> | null;
+    departurePortId?: (number) | null;
+    destinationPortId?: (number) | null;
+};
+
+export type GroupedServiceMiscellaneousViewModel = {
+    serviceId?: number;
+    serviceName?: (string) | null;
+    suppliers?: Array<GroupedSupplierMiscellaneousViewModel> | null;
+};
+
+export type GroupedSupplierMiscellaneousViewModel = {
+    miscellaneousId?: string;
+    supplierName?: (string) | null;
+    validUntil?: Date;
+    created?: Date;
+    currency?: (string) | null;
+    containers?: {
+        [key: string]: (number);
+    } | null;
 };
 
 export type HaulageGridGetViewModel = {
@@ -66,16 +84,6 @@ export type HaulageViewModel = {
     containers?: Array<PackageViewModel> | null;
 };
 
-export type MiscellaneousBaseViewModel = {
-    miscellaneousId?: string;
-    supplierName?: (string) | null;
-    container20?: (boolean) | null;
-    container40?: (boolean) | null;
-    validUntil?: Date;
-    created?: Date;
-    currency?: (string) | null;
-};
-
 export type MiscellaneousOfferViewModel = {
     miscellaneousId?: string;
     supplierName?: (string) | null;
@@ -95,11 +103,14 @@ export type MiscellaneousOfferViewModel = {
     services?: Array<ServiceViewModel> | null;
 };
 
+export type MiscellaneousServiceViewModel = {
+    containers?: Array<PackageViewModel> | null;
+    service?: ServiceViewModel;
+};
+
 export type MiscellaneousViewModel = {
     miscellaneousId?: string;
     supplierName?: (string) | null;
-    container20?: (boolean) | null;
-    container40?: (boolean) | null;
     validUntil?: Date;
     created?: Date;
     currency?: (string) | null;
@@ -110,7 +121,7 @@ export type MiscellaneousViewModel = {
     supplierId?: number;
     updated?: (Date) | null;
     comment?: (string) | null;
-    services?: Array<ServiceViewModel> | null;
+    services?: Array<MiscellaneousServiceViewModel> | null;
 };
 
 export type PackageViewModel = {
@@ -247,6 +258,17 @@ export type PostApiMiscellaneousMiscellaneousData = {
 export type PostApiMiscellaneousMiscellaneousResponse = (unknown);
 
 export type PostApiMiscellaneousMiscellaneousError = (unknown);
+
+export type GetApiMiscellaneousMiscellaneousByPortsByDeparturePortIdByDestinationPortIdData = {
+    path: {
+        departurePortId: number;
+        destinationPortId: number;
+    };
+};
+
+export type GetApiMiscellaneousMiscellaneousByPortsByDeparturePortIdByDestinationPortIdResponse = (Array<GroupedServiceMiscellaneousViewModel>);
+
+export type GetApiMiscellaneousMiscellaneousByPortsByDeparturePortIdByDestinationPortIdError = (unknown);
 
 export type GetApiMiscellaneousMiscellaneousByIdData = {
     path: {
@@ -413,13 +435,13 @@ export const GetApiHaulageHaulagesResponseTransformer: GetApiHaulageHaulagesResp
     return data;
 };
 
-export type GetApiMiscellaneousMiscellaneousResponseTransformer = (data: any) => Promise<GetApiMiscellaneousMiscellaneousResponse>;
+export type GetApiMiscellaneousMiscellaneousByPortsByDeparturePortIdByDestinationPortIdResponseTransformer = (data: any) => Promise<GetApiMiscellaneousMiscellaneousByPortsByDeparturePortIdByDestinationPortIdResponse>;
 
-export type GroupedMiscellaneousViewModelModelResponseTransformer = (data: any) => GroupedMiscellaneousViewModel;
+export type GroupedServiceMiscellaneousViewModelModelResponseTransformer = (data: any) => GroupedServiceMiscellaneousViewModel;
 
-export type MiscellaneousBaseViewModelModelResponseTransformer = (data: any) => MiscellaneousBaseViewModel;
+export type GroupedSupplierMiscellaneousViewModelModelResponseTransformer = (data: any) => GroupedSupplierMiscellaneousViewModel;
 
-export const MiscellaneousBaseViewModelModelResponseTransformer: MiscellaneousBaseViewModelModelResponseTransformer = data => {
+export const GroupedSupplierMiscellaneousViewModelModelResponseTransformer: GroupedSupplierMiscellaneousViewModelModelResponseTransformer = data => {
     if (data?.validUntil) {
         data.validUntil = new Date(data.validUntil);
     }
@@ -429,16 +451,16 @@ export const MiscellaneousBaseViewModelModelResponseTransformer: MiscellaneousBa
     return data;
 };
 
-export const GroupedMiscellaneousViewModelModelResponseTransformer: GroupedMiscellaneousViewModelModelResponseTransformer = data => {
-    if (Array.isArray(data?.miscellaneousList)) {
-        data.miscellaneousList.forEach(MiscellaneousBaseViewModelModelResponseTransformer);
+export const GroupedServiceMiscellaneousViewModelModelResponseTransformer: GroupedServiceMiscellaneousViewModelModelResponseTransformer = data => {
+    if (Array.isArray(data?.suppliers)) {
+        data.suppliers.forEach(GroupedSupplierMiscellaneousViewModelModelResponseTransformer);
     }
     return data;
 };
 
-export const GetApiMiscellaneousMiscellaneousResponseTransformer: GetApiMiscellaneousMiscellaneousResponseTransformer = async (data) => {
+export const GetApiMiscellaneousMiscellaneousByPortsByDeparturePortIdByDestinationPortIdResponseTransformer: GetApiMiscellaneousMiscellaneousByPortsByDeparturePortIdByDestinationPortIdResponseTransformer = async (data) => {
     if (Array.isArray(data)) {
-        data.forEach(GroupedMiscellaneousViewModelModelResponseTransformer);
+        data.forEach(GroupedServiceMiscellaneousViewModelModelResponseTransformer);
     }
     return data;
 };

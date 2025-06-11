@@ -4,15 +4,15 @@ import Button from "@mui/material/Button";
 import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import EditableTable from "../../components/common/EditableTable";
-import { ColumnDef, createColumnHelper } from "@tanstack/react-table";
+import { ColumnDef, createColumnHelper, Row } from "@tanstack/react-table";
 import IconButton from "@mui/material/IconButton";
 import ExpandMore from "@mui/icons-material/ExpandMore";
 import ChevronRight from "@mui/icons-material/ChevronRight";
-import OffersMiscellaneous from "../../components/pricing/OffersMiscellaneous";
-import { GroupedMiscellaneousViewModel, MiscellaneousBaseViewModel } from "../../api/client/pricing";
-import { deleteApiMiscellaneousDeleteMiscellaneousMutation, getApiMiscellaneousMiscellaneousOptions, getApiMiscellaneousMiscellaneousQueryKey } from "../../api/client/pricing/@tanstack/react-query.gen";
+import OffersMiscellaneousService from "../../components/pricing/OffersMiscellaneousService";
+import { GroupedMiscellaneousViewModel, GroupedServiceMiscellaneousViewModel } from "../../api/client/pricing";
+import { deleteApiMiscellaneousDeleteMiscellaneousMutation, getApiMiscellaneousMiscellaneousByPortsByDeparturePortIdByDestinationPortIdOptions, getApiMiscellaneousMiscellaneousOptions, getApiMiscellaneousMiscellaneousQueryKey } from "../../api/client/pricing/@tanstack/react-query.gen";
 import Typography from "@mui/material/Typography";
 import Divider from "@mui/material/Divider";
 import ButtonGroup from "@mui/material/ButtonGroup";
@@ -29,6 +29,7 @@ function Miscellaneous() {
     const [miscellaneousList, setMiscellaneousList] = useState<GroupedMiscellaneousViewModel[]>([])
     const [deleting, setDeleting] = useState(false)
     const [allSelectedMiscelllaneousIds, setAllSelectedMiscelllaneousIds] = useState<Record<string, string[]>>({})
+    const [miscellaneousServices, setMiscellaneousServices] = useState<GroupedServiceMiscellaneousViewModel[]>([])
 
     const uniqueSelectedIds = useMemo(() => {
         return Array.from(new Set(Object.values(allSelectedMiscelllaneousIds).flat()))
@@ -37,6 +38,12 @@ function Miscellaneous() {
     const queryClient = useQueryClient();
 
     const { confirm, ConfirmDialogComponent } = useConfirmDialog();
+
+    const miscellaneousServicesFn = useCallback(
+      () => <OffersMiscellaneousService miscellaneous={miscellaneousServices} />,
+      [miscellaneousServices],
+    )
+    
 
     const { data, isFetching} = useQuery({
         ...getApiMiscellaneousMiscellaneousOptions(),
@@ -108,11 +115,24 @@ function Miscellaneous() {
         }
     }
 
-    const handleGetRowsSelected = (key: string) => (rows: MiscellaneousBaseViewModel[]) => {
-        setAllSelectedMiscelllaneousIds(prev => ({
-            ...prev,
-            [key]: rows.map(r => r.miscellaneousId ?? '').filter(id => id !== '')
-        }))
+    const handleGetRowExpanded = (row?: Row<GroupedMiscellaneousViewModel>) => {
+        getMiscellaneousServices(row?.original.departurePortId ?? undefined, row?.original.destinationPortId ?? undefined)
+    }
+
+    const getMiscellaneousServices = async (departureId?: number, destinationId?: number) => {
+        if(departureId && destinationId){
+            const data = await queryClient.ensureQueryData({
+                ...getApiMiscellaneousMiscellaneousByPortsByDeparturePortIdByDestinationPortIdOptions({
+                    path:{
+                        departurePortId: departureId,
+                        destinationPortId: destinationId
+                    }
+                })
+            })
+
+            setMiscellaneousServices(data)
+        }
+        
     }
     
     return (
@@ -141,9 +161,8 @@ function Miscellaneous() {
             
             <EditableTable<GroupedMiscellaneousViewModel> data={miscellaneousList} columns={columns} isLoading={isFetching} 
                         globalFilter={globalFilter} onGlobalFilterChange={setGlobalFilter} rowCanExpand
-                        subComponent={(row: GroupedMiscellaneousViewModel)=><OffersMiscellaneous miscellaneous={row} 
-                        getRowsSelected={handleGetRowsSelected(row.departurePortName && row.destinationPortName ? 
-                            `${row.departurePortName}_${row.destinationPortName}` : "General")} />} />
+                        subComponent={()=>miscellaneousServicesFn()}
+                        getRowExpanded={handleGetRowExpanded}/>
             
             { ConfirmDialogComponent }
         </>
