@@ -12,7 +12,7 @@ import ExpandMore from "@mui/icons-material/ExpandMore";
 import ChevronRight from "@mui/icons-material/ChevronRight";
 import OffersMiscellaneousService from "../../components/pricing/OffersMiscellaneousService";
 import { GroupedMiscellaneousViewModel, GroupedServiceMiscellaneousViewModel } from "../../api/client/pricing";
-import { deleteApiMiscellaneousDeleteMiscellaneousMutation, getApiMiscellaneousMiscellaneousByPortsByDeparturePortIdByDestinationPortIdOptions, getApiMiscellaneousMiscellaneousOptions, getApiMiscellaneousMiscellaneousQueryKey } from "../../api/client/pricing/@tanstack/react-query.gen";
+import { deleteApiMiscellaneousDeleteMiscellaneousMutation, getApiMiscellaneousMiscellaneousByPortsOptions, getApiMiscellaneousMiscellaneousOptions, getApiMiscellaneousMiscellaneousQueryKey } from "../../api/client/pricing/@tanstack/react-query.gen";
 import Typography from "@mui/material/Typography";
 import Divider from "@mui/material/Divider";
 import ButtonGroup from "@mui/material/ButtonGroup";
@@ -21,10 +21,14 @@ import { DeleteForever } from "@mui/icons-material";
 import { useConfirmDialog } from "../../hooks/useConfirmDialog";
 import { showSnackbar } from "../../components/common/Snackbar";
 import Breadcrumbs from "@mui/material/Breadcrumbs";
+import Tabs from "@mui/material/Tabs";
+import { Box, Tab } from "@mui/material";
+import GeneralMiscellaneous from "../../components/pricing/GeneralMiscellaneous";
 
 const columnHelper = createColumnHelper<GroupedMiscellaneousViewModel>()
 
 function Miscellaneous() {
+    const [tabValue, setTabValue] = useState(0)
     const [globalFilter, setGlobalFilter] = useState('')
     const [miscellaneousList, setMiscellaneousList] = useState<GroupedMiscellaneousViewModel[]>([])
     const [deleting, setDeleting] = useState(false)
@@ -122,7 +126,7 @@ function Miscellaneous() {
     const getMiscellaneousServices = async (departureId?: number, destinationId?: number) => {
         if(departureId && destinationId){
             const data = await queryClient.ensureQueryData({
-                ...getApiMiscellaneousMiscellaneousByPortsByDeparturePortIdByDestinationPortIdOptions({
+                ...getApiMiscellaneousMiscellaneousByPortsOptions({
                     path:{
                         departurePortId: departureId,
                         destinationPortId: destinationId
@@ -133,6 +137,10 @@ function Miscellaneous() {
             setMiscellaneousServices(data)
         }
         
+    }
+
+    const handleChangeTab = (_:any, newValue: number) => {
+        setTabValue(newValue)
     }
     
     return (
@@ -159,11 +167,24 @@ function Miscellaneous() {
                     size='small' placeholder="Search miscellaneous..." />
             </Stack>
             
-            <EditableTable<GroupedMiscellaneousViewModel> data={miscellaneousList} columns={columns} isLoading={isFetching} 
+            <Tabs value={tabValue} onChange={handleChangeTab}>
+                <Tab label="By Shipments"  />
+                <Tab label="General" />
+            </Tabs>
+            {
+                tabValue === 0 && 
+                <Box sx={{mt:2}}>
+                    <EditableTable<GroupedMiscellaneousViewModel> data={miscellaneousList} columns={columns} isLoading={isFetching} 
                         globalFilter={globalFilter} onGlobalFilterChange={setGlobalFilter} rowCanExpand
-                        subComponent={()=>miscellaneousServicesFn()}
-                        getRowExpanded={handleGetRowExpanded}/>
-            
+                        subComponent={()=>miscellaneousServicesFn()} getRowExpanded={handleGetRowExpanded}/>
+                </Box>
+            }
+            {
+                tabValue === 1 && 
+                <Box sx={{mt:2}}>
+                    <GeneralMiscellaneous />
+                </Box>
+            }
             { ConfirmDialogComponent }
         </>
         

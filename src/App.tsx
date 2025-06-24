@@ -28,7 +28,7 @@ import NewRequest from './pages/request/NewRequest';
 import Requests from './pages/request/Requests';
 import RequestsSearch from './pages/request/RequestsSearch';
 import ValidatedRequests from './pages/request/ValidatedRequests';
-import Request from './pages/request/Request';
+import Request from './components/requestQuote/new/Request';
 // import Histories from './pages/Histories';
 import UsersAssignment from './pages/UsersAssignment';
 import MasterDataHSCodes from './pages/masterdata/MasterDataHSCodes';
@@ -57,6 +57,7 @@ function App() {
                   <Route path="requests" element={<Requests />} />
                   <Route path="search/:search" element={<RequestsSearch />} />
                   <Route path="search" element={<RequestsSearch />} />
+                  <Route path="request" element={<Request />} />
                   <Route path="request/:id" element={<Request />} />
                   <Route path="handle-request/:id" element={<HandleRequest />} />
                   <Route path="new-request" element={<NewRequest />} />

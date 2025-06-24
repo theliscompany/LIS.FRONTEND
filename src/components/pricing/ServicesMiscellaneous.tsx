@@ -1,5 +1,5 @@
-import { ColumnDef, createColumnHelper, isNumberArray } from "@tanstack/react-table";
-import { MiscellaneousServiceViewModel } from "../../api/client/pricing";
+import { ColumnDef, createColumnHelper } from "@tanstack/react-table";
+import { ServiceViewModel } from "../../api/client/pricing";
 import { ChangeEvent, useEffect, useRef, useState } from "react";
 import FormControl from "@mui/material/FormControl";
 import OutlinedInput from "@mui/material/OutlinedInput";
@@ -12,7 +12,7 @@ import Box from "@mui/material/Box";
 import IconButton from "@mui/material/IconButton";
 import { Cancel, Check, DeleteForever } from "@mui/icons-material";
 import { useQuery } from "@tanstack/react-query";
-import { getPackageOptions, getServiceOptions } from "../../api/client/masterdata/@tanstack/react-query.gen";
+import { getServiceOptions } from "../../api/client/masterdata/@tanstack/react-query.gen";
 import Paper from "@mui/material/Paper";
 import Stack from "@mui/material/Stack";
 import Button from "@mui/material/Button";
@@ -23,31 +23,29 @@ import { useConfirmDialog } from "../../hooks/useConfirmDialog";
 import Checkbox from "@mui/material/Checkbox";
 import ButtonGroup from "@mui/material/ButtonGroup";
 import FormHelperText from "@mui/material/FormHelperText";
-import Chip from "@mui/material/Chip";
 
 interface ServicesMiscellaneousProps {
     currency: string,
-    data: MiscellaneousServiceViewModel[],
-    getServicesAdded: (services: MiscellaneousServiceViewModel[]) => void
+    data: ServiceViewModel[],
+    getServicesAdded: (services: ServiceViewModel[]) => void
 }
 
 interface ServiceError {
     service?: string;
     price?: string;
-    containers?: string;
 }
 
-const columnHelper = createColumnHelper<MiscellaneousServiceViewModel>()
+const columnHelper = createColumnHelper<ServiceViewModel>()
 
 const ServicesMiscellaneous = ({data, currency, getServicesAdded}:ServicesMiscellaneousProps) => {
 
-    const [servicesMiscellaneous, setServicesMiscellaneous] = useState<MiscellaneousServiceViewModel[]>(data)
+    const [servicesMiscellaneous, setServicesMiscellaneous] = useState<ServiceViewModel[]>(data)
     const [editingRowIndex, setEditingRowIndex] = useState<number | null>(null)
     const [allSelectedServices, setAllSelectedServices] = useState<number[]>([])
-    const [tableRef, setTableRef] = useState<import("@tanstack/table-core").Table<MiscellaneousServiceViewModel>>()
+    const [tableRef, setTableRef] = useState<import("@tanstack/table-core").Table<ServiceViewModel>>()
     const [errorMessage, setErrorMessage] = useState<ServiceError>()
 
-    const rowDraftRef = useRef<MiscellaneousServiceViewModel | null>(null);
+    const rowDraftRef = useRef<ServiceViewModel | null>(null);
 
     const { confirm, ConfirmDialogComponent } = useConfirmDialog();
 
@@ -56,7 +54,7 @@ const ServicesMiscellaneous = ({data, currency, getServicesAdded}:ServicesMiscel
     }, [data])
 
     useEffect(() => {
-        if(!errorMessage?.containers && !errorMessage?.price && !errorMessage?.service && 
+        if(!errorMessage?.price && !errorMessage?.service && 
             editingRowIndex !== null && rowDraftRef.current){
             const updated = [...servicesMiscellaneous];
             updated[editingRowIndex] = rowDraftRef.current;
@@ -69,20 +67,11 @@ const ServicesMiscellaneous = ({data, currency, getServicesAdded}:ServicesMiscel
         }
     }, [errorMessage])
 
-    const {data: containers} = useQuery({
-        ...getPackageOptions({
-            query: {
-                containerOnly: true
-            }
-        }),
-        staleTime: Infinity
-    })
-
     const {data: services} = useQuery({
         ...getServiceOptions()
     })
 
-    const columns: ColumnDef<MiscellaneousServiceViewModel, any>[] = [
+    const columns: ColumnDef<ServiceViewModel, any>[] = [
         columnHelper.display({
             id: 'select',
             header: ({table})=> (
@@ -103,10 +92,10 @@ const ServicesMiscellaneous = ({data, currency, getServicesAdded}:ServicesMiscel
                 }} />
             )
         }),
-        columnHelper.accessor('service.serviceName', {
+        columnHelper.accessor('serviceName', {
             header: "Service",
             cell: ({ row }) => {
-                const [local, setlocal] = useState(row.original.service?.serviceId)
+                const [local, setlocal] = useState(row.original.serviceId)
                 if(editingRowIndex === row.index){
                     return <FormControl fullWidth>
                         <Select displayEmpty size='small' value={local ?? ''} input={<OutlinedInput />} error={!!errorMessage?.service}
@@ -120,11 +109,8 @@ const ServicesMiscellaneous = ({data, currency, getServicesAdded}:ServicesMiscel
                                 
                                 rowDraftRef.current = {
                                     ...rowDraftRef.current,
-                                    service:{
-                                        ...rowDraftRef.current.service,
-                                        serviceName: selectedService?.serviceName,
-                                        serviceId: serviceId
-                                    }
+                                    serviceName: selectedService?.serviceName,
+                                    serviceId: serviceId
                                 };
                             }}>
                             {
@@ -141,14 +127,14 @@ const ServicesMiscellaneous = ({data, currency, getServicesAdded}:ServicesMiscel
                     </FormControl>
                 }
 
-                return row.original.service?.serviceName ?? ''
+                return row.original.serviceName ?? ''
             }
             
         }),
-        columnHelper.accessor('service.price', {
+        columnHelper.accessor('price', {
             header: "Price",
             cell: ({row})=> {
-                const [local, setlocal] = useState(row.original.service?.price ?? 0)
+                const [local, setlocal] = useState(row.original.price ?? 0)
                 if(editingRowIndex === row.index){
                     return <TextField type="number" size="small" value={local ?? 0} helperText={errorMessage?.price}
                     onChange={(e?: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => 
@@ -157,68 +143,13 @@ const ServicesMiscellaneous = ({data, currency, getServicesAdded}:ServicesMiscel
                                 setlocal(e ? Number(e.target.value) : 0)
                                 rowDraftRef.current = {
                                     ...rowDraftRef.current,
-                                    service:{
-                                        ...rowDraftRef.current.service,
-                                        price: e ? Number(e.target.value) : 0
-                                    }
+                                    price: e ? Number(e.target.value) : 0
                                 };
                             }
                         }
                     } error={!!errorMessage?.price} />
                 }
-                return  `${row.original.service?.price ?? 0} ${Currency[currency]}`
-            }
-        }),
-        columnHelper.accessor('containers', {
-            header: "Containers",
-            cell: ({row})=> {
-                const [local, setlocal] = useState((row.original.containers ?? []).map(x=>x.packageId ?? 0))
-                if(editingRowIndex === row.index){
-                    return <FormControl fullWidth>
-                                <Select multiple displayEmpty size='small' error={!!errorMessage?.containers} input={<OutlinedInput />}
-                                    value={local} 
-                                    onChange={(e: SelectChangeEvent<number[]>)=>{
-
-                                        const newContainers = isNumberArray(e.target.value)
-                                            ? e.target.value.map((x) => ({
-                                                packageId: x,
-                                                packageName: containers?.find((y) => y.packageId === x)?.packageName,
-                                                }))
-                                            : [];
-
-                                        setlocal(newContainers.map(x=>x.packageId))
-
-                                        rowDraftRef.current = {
-                                            ...rowDraftRef.current,
-                                            containers: newContainers,
-                                        };
-                                    }} 
-                                    renderValue={(selected)=> {
-                                        if (selected.length === 0) {
-                                            return <em>-- Select service type -- </em>;
-                                        }
-                                            
-                                        return selected.map(x=>(containers ?? []).find((opt) => opt.packageId === x)?.packageName).join(', ')
-                                        
-                                    }}>
-                                    {
-                                        (containers ?? []).map((opt) => (
-                                            <MenuItem key={opt.packageId} value={opt.packageId}>
-                                                <Checkbox checked={opt.packageId ? local.includes(opt.packageId) : false} />
-                                                <ListItemText primary={opt.packageName} />
-                                            </MenuItem>
-                                        ))
-                                    }
-                                </Select>
-                                {
-                                    errorMessage && errorMessage.containers && <FormHelperText error={!!errorMessage.containers}>{errorMessage.containers}</FormHelperText>
-                                }
-                            </FormControl>
-                } 
-
-                return (row.original.containers ?? []).map(x=> (
-                    <Chip size="small" variant="outlined"  label={x.packageName} sx={{ml:1}} />
-                )) || ''
+                return  `${row.original.price ?? 0} ${Currency[currency]}`
             }
         }),
         columnHelper.display({
@@ -245,22 +176,19 @@ const ServicesMiscellaneous = ({data, currency, getServicesAdded}:ServicesMiscel
 
     const handleValidRow = () => {
         if (editingRowIndex !== null && rowDraftRef.current) {
-            const service:MiscellaneousServiceViewModel = rowDraftRef.current;
+            const service:ServiceViewModel = rowDraftRef.current;
             setErrorMessage({
-                service: service.service?.serviceId === undefined || service.service?.serviceName === '' ? 
+                service: service.serviceId === undefined || service.serviceName === '' ? 
                     "Service is required." : undefined,
-                price: service.service?.price === undefined || service.service?.serviceName === '' ? 
-                    "Price is required." : service.service.price <= 0 ? "Price must not be less than 0." : undefined,
-                containers: service.containers === undefined || service.containers?.length === 0 ? 
-                    "Select at least one container" : undefined
+                price: service.price === undefined || service.serviceName === '' ? 
+                    "Price is required." : service.price <= 0 ? "Price must not be less than 0." : undefined
             })
         }
     }
 
     const handleAddService = () => {
-        const newService: MiscellaneousServiceViewModel = { 
-            service: { serviceName: "", serviceId: undefined, price: 0 },
-            containers: []
+        const newService: ServiceViewModel = { 
+            serviceName: "", serviceId: undefined, price: 0
          };
         setServicesMiscellaneous([...servicesMiscellaneous, newService]);
         setEditingRowIndex(servicesMiscellaneous.length);
@@ -286,7 +214,7 @@ const ServicesMiscellaneous = ({data, currency, getServicesAdded}:ServicesMiscel
         }
     }
 
-    const getTable = (table: import("@tanstack/table-core").Table<MiscellaneousServiceViewModel>) => {
+    const getTable = (table: import("@tanstack/table-core").Table<ServiceViewModel>) => {
         setTableRef(table);
     }
 
@@ -304,7 +232,7 @@ const ServicesMiscellaneous = ({data, currency, getServicesAdded}:ServicesMiscel
                     {servicesMiscellaneous.length === 0 && <Alert severity="warning">You must add at least one service.</Alert>}
                 </Stack>
                 
-                <EditableTable<MiscellaneousServiceViewModel> data={servicesMiscellaneous} columns={columns} 
+                <EditableTable<ServiceViewModel> data={servicesMiscellaneous} columns={columns} 
                 enableRowSelection={true} getRowsIndexSelected={handleGetRowsSelected} getTableRef={getTable}
                     onUpdate={(rowIndex, columnId, value) => {
                         setServicesMiscellaneous((old) =>

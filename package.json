@@ -41,7 +41,7 @@
     "chart.js": "^4.4.7",
     "dayjs": "^1.11.13",
     "mui-file-input": "^6.0.0",
-    "mui-tel-input": "^7.0.0",
+    "mui-tel-input": "^9.0.1",
     "mui-tiptap": "^1.16.0",
     "notistack": "^3.0.1",
     "react": "^18.3.1",
