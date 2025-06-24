@@ -22,11 +22,17 @@ import EditableTable from "../common/EditableTable";
 import { useConfirmDialog } from "../../hooks/useConfirmDialog";
 import Checkbox from "@mui/material/Checkbox";
 import ButtonGroup from "@mui/material/ButtonGroup";
+import FormHelperText from "@mui/material/FormHelperText";
 
 interface ServicesMiscellaneousProps {
     currency: string,
     data: ServiceViewModel[],
     getServicesAdded: (services: ServiceViewModel[]) => void
+}
+
+interface ServiceError {
+    service?: string;
+    price?: string;
 }
 
 const columnHelper = createColumnHelper<ServiceViewModel>()
@@ -37,6 +43,7 @@ const ServicesMiscellaneous = ({data, currency, getServicesAdded}:ServicesMiscel
     const [editingRowIndex, setEditingRowIndex] = useState<number | null>(null)
     const [allSelectedServices, setAllSelectedServices] = useState<number[]>([])
     const [tableRef, setTableRef] = useState<import("@tanstack/table-core").Table<ServiceViewModel>>()
+    const [errorMessage, setErrorMessage] = useState<ServiceError>()
 
     const rowDraftRef = useRef<ServiceViewModel | null>(null);
 
@@ -45,6 +52,20 @@ const ServicesMiscellaneous = ({data, currency, getServicesAdded}:ServicesMiscel
     useEffect(() => {
         setServicesMiscellaneous(data);
     }, [data])
+
+    useEffect(() => {
+        if(!errorMessage?.price && !errorMessage?.service && 
+            editingRowIndex !== null && rowDraftRef.current){
+            const updated = [...servicesMiscellaneous];
+            updated[editingRowIndex] = rowDraftRef.current;
+            setServicesMiscellaneous(updated);
+            
+            getServicesAdded(updated);
+
+            setEditingRowIndex(null);
+            rowDraftRef.current = null;
+        }
+    }, [errorMessage])
 
     const {data: services} = useQuery({
         ...getServiceOptions()
@@ -77,22 +98,21 @@ const ServicesMiscellaneous = ({data, currency, getServicesAdded}:ServicesMiscel
                 const [local, setlocal] = useState(row.original.serviceId)
                 if(editingRowIndex === row.index){
                     return <FormControl fullWidth>
-                        <Select displayEmpty size='small' value={local ?? ''} input={<OutlinedInput />}
-                        onChange={(e?: SelectChangeEvent<number>)=>{
-                            if(!rowDraftRef.current) return;
-                            
-                            const serviceId = e ? Number(e.target.value) : undefined;
-                            const selectedService = services?.find((x) => x.serviceId === serviceId);
+                        <Select displayEmpty size='small' value={local ?? ''} input={<OutlinedInput />} error={!!errorMessage?.service}
+                            onChange={(e?: SelectChangeEvent<number>)=>{
+                                if(!rowDraftRef.current) return;
+                                
+                                const serviceId = e ? Number(e.target.value) : undefined;
+                                const selectedService = services?.find((x) => x.serviceId === serviceId);
 
-                            
-                            if (!rowDraftRef.current) rowDraftRef.current = {} as ServiceViewModel;
-                            setlocal(serviceId)
-                            rowDraftRef.current = {
-                                ...rowDraftRef.current,
-                                serviceName: selectedService?.serviceName,
-                                serviceId: serviceId
-                            };
-                        }}>
+                                setlocal(serviceId)
+                                
+                                rowDraftRef.current = {
+                                    ...rowDraftRef.current,
+                                    serviceName: selectedService?.serviceName,
+                                    serviceId: serviceId
+                                };
+                            }}>
                             {
                                 (services ?? []).map((opt) => (
                                     <MenuItem key={opt.serviceId} value={opt.serviceId}>
@@ -101,6 +121,9 @@ const ServicesMiscellaneous = ({data, currency, getServicesAdded}:ServicesMiscel
                                 ))
                             }
                         </Select>
+                        {
+                            errorMessage && errorMessage.service && <FormHelperText error={!!errorMessage.service}>{errorMessage.service}</FormHelperText>
+                        }
                     </FormControl>
                 }
 
@@ -113,16 +136,18 @@ const ServicesMiscellaneous = ({data, currency, getServicesAdded}:ServicesMiscel
             cell: ({row})=> {
                 const [local, setlocal] = useState(row.original.price ?? 0)
                 if(editingRowIndex === row.index){
-                    return <TextField type="number" size="small" value={local ?? 0}
+                    return <TextField type="number" size="small" value={local ?? 0} helperText={errorMessage?.price}
                     onChange={(e?: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => 
                         {
                             if (rowDraftRef.current) {
                                 setlocal(e ? Number(e.target.value) : 0)
-                                rowDraftRef.current.price = e ? Number(e.target.value) : 0;
+                                rowDraftRef.current = {
+                                    ...rowDraftRef.current,
+                                    price: e ? Number(e.target.value) : 0
+                                };
                             }
                         }
-                    }
-                />
+                    } error={!!errorMessage?.price} />
                 }
                 return  `${row.original.price ?? 0} ${Currency[currency]}`
             }
@@ -151,17 +176,20 @@ const ServicesMiscellaneous = ({data, currency, getServicesAdded}:ServicesMiscel
 
     const handleValidRow = () => {
         if (editingRowIndex !== null && rowDraftRef.current) {
-            const updated = [...servicesMiscellaneous];
-            updated[editingRowIndex] = rowDraftRef.current;
-            setServicesMiscellaneous(updated);
-            getServicesAdded(updated);
+            const service:ServiceViewModel = rowDraftRef.current;
+            setErrorMessage({
+                service: service.serviceId === undefined || service.serviceName === '' ? 
+                    "Service is required." : undefined,
+                price: service.price === undefined || service.serviceName === '' ? 
+                    "Price is required." : service.price <= 0 ? "Price must not be less than 0." : undefined
+            })
         }
-        setEditingRowIndex(null);
-        rowDraftRef.current = null;
     }
 
     const handleAddService = () => {
-        const newService: ServiceViewModel = { serviceName: "", serviceId: undefined, price: 0 };
+        const newService: ServiceViewModel = { 
+            serviceName: "", serviceId: undefined, price: 0
+         };
         setServicesMiscellaneous([...servicesMiscellaneous, newService]);
         setEditingRowIndex(servicesMiscellaneous.length);
         rowDraftRef.current = newService;

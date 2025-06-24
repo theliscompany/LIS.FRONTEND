@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { Box, Button, Skeleton, Typography } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import { BootstrapDialog, whiteButtonStyles } from '../../utils/misc/styles';
-import { enqueueSnackbar, SnackbarProvider } from 'notistack';
+import { SnackbarProvider } from 'notistack';
 import { useTranslation } from 'react-i18next';
 import { arePhoneticallyClose, complexEquality, parseContact2, parseLocation, similar, sortByCloseness } from '../../utils/functions';
 import { containerPackages } from '../../utils/constants';
@@ -13,7 +13,7 @@ import GeneratePriceOffer from '../../components/request/GeneratePriceOffer';
 import RequestForm from '../../components/request/RequestForm';
 import AddContainer from '../../components/request/AddContainer';
 import RequestFormHeader from '../../components/request/RequestFormHeader';
-import { getApiAssignee, getApiHsCodeLis, getApiRequestById, putApiRequestById } from '../../api/client/quote';
+import { getApiAssignee, getApiHsCodeLis, getApiRequestById } from '../../api/client/quote';
 import { getPorts, getProduct } from '../../api/client/transport';
 
 
@@ -37,7 +37,7 @@ const Request = () => {
     const [containerType, setContainerType] = useState<string>("20' Dry");
     const [quantity, setQuantity] = useState<number>(1);
     const [containersSelection, setContainersSelection] = useState<any>([]);
-    const [unitsSelection, setUnitsSelection] = useState<any>([]);
+    //const [unitsSelection, setUnitsSelection] = useState<any>([]);
     // const [packagesSelection, setPackagesSelection] = useState<any>([]);
     // const [portDestination, setPortDestination] = useState<any>(null);
     // const [portDeparture, setPortDeparture] = useState<any>(null);
@@ -179,7 +179,7 @@ const Request = () => {
 
     const loadRequest = async () => {
         try {
-            const response: any = await getApiRequestById({path: {id: Number(id)}});
+            const response: any = await getApiRequestById({path: {id: id ??''}});
             if (response !== null && response !== undefined) {
                 console.log("Saved : ", response.data);
                 // Parse the saved data string into an array of IDs
@@ -211,12 +211,12 @@ const Request = () => {
                     container: elm.containers, 
                     quantity: elm.quantity 
                 } }) || []);
-                setUnitsSelection(response.data.data.units.map((elm: any) => { return {
-                    name: elm.name,
-                    weight: elm.weight,
-                    dimensions: elm.dimension,
-                    quantity: elm.quantity
-                }}) || []);
+                // setUnitsSelection(response.data.data.units.map((elm: any) => { return {
+                //     name: elm.name,
+                //     weight: elm.weight,
+                //     dimensions: elm.dimension,
+                //     quantity: elm.quantity
+                // }}) || []);
                 setQuantity(response.data.data.quantity);
                 setMessage(response.data.data.detail);
                 setAssignedManager(response.data.data.assigneeId !== null && response.data.data.assigneeId !== "" ? response.data.data.assigneeId : "");
@@ -237,55 +237,55 @@ const Request = () => {
         var tags1 = tags !== null && tags !== undefined && tags.length !== 0 ? tags.map((elm: any) => elm.productName).join(',') : null;
         var tags2 = tags !== null && tags !== undefined && tags.length !== 0 ? tags.map((elm: any) => elm.hS_Code).join(',') : null;
             
-        var auxUnits = [];
-        if (packingType === "Breakbulk/LCL") {
-            // auxUnits = packagesSelection;
-        }
-        else if (packingType === "Unit RoRo") {
-            auxUnits = unitsSelection;
-        }
+        // var auxUnits = [];
+        // if (packingType === "Breakbulk/LCL") {
+        //     // auxUnits = packagesSelection;
+        // }
+        // else if (packingType === "Unit RoRo") {
+        //     auxUnits = unitsSelection;
+        // }
         
         try {
-            var postcode1 = departure.postalCode !== null && departure.postalCode !== undefined ? departure.postalCode : "";
-            var postcode2 = arrival.postalCode !== null && arrival.postalCode !== undefined ? arrival.postalCode : "";
+            // var postcode1 = departure.postalCode !== null && departure.postalCode !== undefined ? departure.postalCode : "";
+            // var postcode2 = arrival.postalCode !== null && arrival.postalCode !== undefined ? arrival.postalCode : "";
             console.log("Prods :", tags1);
             console.log("Codes :", tags2);
             
-            const body: any = {
-                id: Number(id),
-                email: email,
-                status: status,
-                whatsapp: phone,
-                departure: departure !== null && departure !== undefined ? [departure.city.toUpperCase(),departure.country,departure.latitude,departure.longitude,postcode1].filter((val: any) => { return val !== "" }).join(', ') : "",
-                arrival: arrival !== null && arrival !== undefined ? [arrival.city.toUpperCase(),arrival.country,arrival.latitude,arrival.longitude,postcode2].filter((val: any) => { return val !== "" }).join(', ') : "",
-                cargoType: 0,
-                packingType: packingType,
-                containers: containersSelection.map((elm: any) => { return { 
-                    id: containers.find((item: any) => item.packageName === elm.container).packageId, 
-                    containers: elm.container, 
-                    quantity: elm.quantity, 
-                } }),
-                units: auxUnits.map((elm: any, i: number) => { return { 
-                    id: i, 
-                    name: elm.name, 
-                    weight: elm.weight, 
-                    dimension: elm.dimensions, 
-                    quantity: elm.quantity, 
-                } }),
-                quantity: quantity,
-                detail: message,
-                clientNumber: clientNumber !== null ? String(clientNumber.contactNumber)+", "+clientNumber.contactName : null,
-                tags: valueSpecifics !== "hscodes" ? tags1 : tags2,
-                assigneeId: Number(assignedManager)
-            };
+            // const body: any = {
+            //     id: Number(id),
+            //     email: email,
+            //     status: status,
+            //     whatsapp: phone,
+            //     departure: departure !== null && departure !== undefined ? [departure.city.toUpperCase(),departure.country,departure.latitude,departure.longitude,postcode1].filter((val: any) => { return val !== "" }).join(', ') : "",
+            //     arrival: arrival !== null && arrival !== undefined ? [arrival.city.toUpperCase(),arrival.country,arrival.latitude,arrival.longitude,postcode2].filter((val: any) => { return val !== "" }).join(', ') : "",
+            //     cargoType: 0,
+            //     packingType: packingType,
+            //     containers: containersSelection.map((elm: any) => { return { 
+            //         id: containers.find((item: any) => item.packageName === elm.container).packageId, 
+            //         containers: elm.container, 
+            //         quantity: elm.quantity, 
+            //     } }),
+            //     units: auxUnits.map((elm: any, i: number) => { return { 
+            //         id: i, 
+            //         name: elm.name, 
+            //         weight: elm.weight, 
+            //         dimension: elm.dimensions, 
+            //         quantity: elm.quantity, 
+            //     } }),
+            //     quantity: quantity,
+            //     detail: message,
+            //     clientNumber: clientNumber !== null ? String(clientNumber.contactNumber)+", "+clientNumber.contactName : null,
+            //     tags: valueSpecifics !== "hscodes" ? tags1 : tags2,
+            //     assigneeId: Number(assignedManager)
+            // };
 
-            const data = await putApiRequestById({path: {id: Number(id)}, body: body});
-            if (data?.data) {
-                enqueueSnackbar(t('requestEditedSuccess'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
-            }
-            else {
-                enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
-            }
+            // const data = await putApiRequestById({path: {id: Number(id)}, body: body});
+            // if (data?.data) {
+            //     enqueueSnackbar(t('requestEditedSuccess'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
+            // }
+            // else {
+            //     enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+            // }
         }
         catch (err: any) {
             console.log(err);

@@ -1,20 +1,16 @@
-import { ColumnDef, createColumnHelper } from "@tanstack/react-table"
-import { GroupedMiscellaneousViewModel, MiscellaneousBaseViewModel } from "../../api/client/pricing"
-import EditableTable from "../common/EditableTable"
-import { CheckCircle } from "@mui/icons-material"
-import Checkbox from "@mui/material/Checkbox"
-import { Link } from "react-router-dom"
+import { createColumnHelper } from "@tanstack/react-table";
+import { GroupedSupplierMiscellaneousViewModel } from "../../api/client/pricing";
+import Checkbox from "@mui/material/Checkbox";
+import EditableTable from "../common/EditableTable";
+import { Currency } from "../../utils/constants";
+import { Link } from "react-router-dom";
 
-const columnHelper = createColumnHelper<MiscellaneousBaseViewModel>()
+const columnHelper = createColumnHelper<GroupedSupplierMiscellaneousViewModel>()
 
-type OffersMiscellaneousType = {
-    miscellaneous: GroupedMiscellaneousViewModel,
-    getRowsSelected?: (rows: MiscellaneousBaseViewModel[]) => void
-}
+const OffersMiscellaneousSupplier = ({suppliers}:{suppliers: GroupedSupplierMiscellaneousViewModel[]}) => {
 
-const OffersMiscellaneous = ({miscellaneous, getRowsSelected}: OffersMiscellaneousType) => {
 
-    const columns: ColumnDef<MiscellaneousBaseViewModel, any>[] = [
+    const columns = [
         columnHelper.display({
             id: 'select',
             header: ({table})=> (
@@ -38,25 +34,17 @@ const OffersMiscellaneous = ({miscellaneous, getRowsSelected}: OffersMiscellaneo
         columnHelper.accessor('supplierName', {
             header: "Supplier",
             cell: ({ row, getValue}) => 
-                <Link to={`/miscellaneous/${row.original.miscellaneousId}`} >
+                <Link to={`/miscellaneous/${row.original.miscellaneousId}`}>
                     {getValue<string | null | undefined>()}
                 </Link>
         }),
         columnHelper.accessor('container20', {
             header: "20'",
-            cell: ({ getValue}) => {
-                if(getValue<boolean | null | undefined>()){
-                    return <CheckCircle fontSize="small" color="success" />
-                }
-            }
+            cell: ({ row, getValue}) => `${getValue() ?? 0} ${row.original.currency ? Currency[row.original.currency] : '€'}`
         }),
         columnHelper.accessor('container40', {
             header: "40'",
-            cell: ({ getValue}) => {
-                if(getValue<boolean | null | undefined>()){
-                    return <CheckCircle fontSize="small" color="success" />
-                }
-            }
+            cell: ({ row, getValue}) => `${getValue() ?? 0} ${row.original.currency ? Currency[row.original.currency] : '€'}`
         }),
         columnHelper.accessor('validUntil', {
             header: "Valid until",
@@ -68,6 +56,7 @@ const OffersMiscellaneous = ({miscellaneous, getRowsSelected}: OffersMiscellaneo
 
                     return `${date.getDate().toString().padStart(2,'0')}/${(date.getMonth()+1).toString().padStart(2,'0')}/${date.getFullYear()}`
                 }
+                
             }
         }),
         columnHelper.accessor('created', {
@@ -80,14 +69,14 @@ const OffersMiscellaneous = ({miscellaneous, getRowsSelected}: OffersMiscellaneo
 
                     return `${date.getDate().toString().padStart(2,'0')}/${(date.getMonth()+1).toString().padStart(2,'0')}/${date.getFullYear()}`
                 }
+                
             }
-        }),
+        })
     ]
     
     return (
-        <EditableTable<MiscellaneousBaseViewModel> columns={columns} data={miscellaneous.miscellaneousList ?? []} 
-            enableRowSelection={true} getRowsSelected={getRowsSelected} />
+        <EditableTable<GroupedSupplierMiscellaneousViewModel> columns={columns} data={suppliers} />
     )
 }
 
-export default OffersMiscellaneous
+export default OffersMiscellaneousSupplier;

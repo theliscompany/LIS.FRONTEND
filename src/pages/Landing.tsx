@@ -11,7 +11,7 @@ import Footer from "../components/landingPage/Footer";
 import { loginRequest } from "../config/msalConfig";
 import ReCAPTCHA from "react-google-recaptcha";
 import { MuiTelInput } from 'mui-tel-input';
-import { postApiEmail, postApiRequest } from "../api/client/quote";
+//import { postApiEmail } from "../api/client/quote";
 import { enqueueSnackbar, SnackbarProvider } from "notistack";
 import LocationSearch from "../components/shared/LocationSearch";
 import axios from "axios";
@@ -112,23 +112,23 @@ const Landing = () => {
 		formData.append('HtmlContent', htmlContent);
 		
 		// Send the email with fetch
-		postApiEmail({body: {
-            From: from,
-            To: to,
-            Subject: subject,
-            HtmlContent: htmlContent
-        }})
-        // .then((response: any) => response.json())
-		.then((data) => {
-            enqueueSnackbar(t('messageSuccessSent'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
-            setLoad(false);
-            console.log(data.data);
-        })
-		.catch((error) => {
-            enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
-            setLoad(false);
-            console.error(error);
-        });
+		// postApiEmail({body: {
+        //     From: from,
+        //     To: to,
+        //     Subject: subject,
+        //     HtmlContent: htmlContent
+        // }})
+        // // .then((response: any) => response.json())
+		// .then((data) => {
+        //     enqueueSnackbar(t('messageSuccessSent'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
+        //     setLoad(false);
+        //     console.log(data.data);
+        // })
+		// .catch((error) => {
+        //     enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+        //     setLoad(false);
+        //     console.error(error);
+        // });
 	}
 
     const createSystemQuote = () => {
@@ -144,27 +144,27 @@ const Landing = () => {
                 // else if (packingType === "Unit RoRo") {
                 //     auxUnits = unitsSelection;
                 // }
-                var postcode1 = departure.postalCode !== null && departure.postalCode !== undefined ? departure.postalCode : "";
-                var postcode2 = arrival.postalCode !== null && arrival.postalCode !== undefined ? arrival.postalCode : "";
+                // var postcode1 = departure.postalCode !== null && departure.postalCode !== undefined ? departure.postalCode : "";
+                // var postcode2 = arrival.postalCode !== null && arrival.postalCode !== undefined ? arrival.postalCode : "";
                 
                 try {
-                    postApiRequest({body: {
-                        email: email,
-                        whatsapp: phone,
-                        departure: departure !== null && departure !== undefined ? [departure.city.toUpperCase(),departure.country,departure.latitude,departure.longitude,postcode1].filter((val: any) => { return val !== "" }).join(', ') : "",
-                        arrival: arrival !== null && arrival !== undefined ? [arrival.city.toUpperCase(),arrival.country,arrival.latitude,arrival.longitude,postcode2].filter((val: any) => { return val !== "" }).join(', ') : "",
-                        cargoType: "Container",
-                        // clientNumber: clientNumber !== null ? String(clientNumber.contactNumber)+", "+clientNumber.contactName+", "+clientNumber.contactId : null,
-                        packingType: packingType,
-                        // containers: containersSelection.map((elm: any) => { return { 
-                        //     id: containers.find((item: any) => item.packageName === elm.container).packageId, 
-                        //     containers: elm.container, 
-                        //     quantity: elm.quantity, 
-                        // } }),
-                        quantity: Number(quantity),
-                        detail: message+" *** Additional details : "+packingType+", "+quantity+" units.",
-                        // tags: valueSpecifics !== "hscodes" ? tags1 : tags2
-                    }})
+                    // postApiRequest({body: {
+                    //     email: email,
+                    //     whatsapp: phone,
+                    //     departure: departure !== null && departure !== undefined ? [departure.city.toUpperCase(),departure.country,departure.latitude,departure.longitude,postcode1].filter((val: any) => { return val !== "" }).join(', ') : "",
+                    //     arrival: arrival !== null && arrival !== undefined ? [arrival.city.toUpperCase(),arrival.country,arrival.latitude,arrival.longitude,postcode2].filter((val: any) => { return val !== "" }).join(', ') : "",
+                    //     cargoType: "Container",
+                    //     // clientNumber: clientNumber !== null ? String(clientNumber.contactNumber)+", "+clientNumber.contactName+", "+clientNumber.contactId : null,
+                    //     packingType: packingType,
+                    //     // containers: containersSelection.map((elm: any) => { return { 
+                    //     //     id: containers.find((item: any) => item.packageName === elm.container).packageId, 
+                    //     //     containers: elm.container, 
+                    //     //     quantity: elm.quantity, 
+                    //     // } }),
+                    //     quantity: Number(quantity),
+                    //     detail: message+" *** Additional details : "+packingType+", "+quantity+" units.",
+                    //     // tags: valueSpecifics !== "hscodes" ? tags1 : tags2
+                    // }})
                     // .then((data: any) => {
                     //     enqueueSnackbar(t('messageSuccessSent'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
                     //     setLoad(false);

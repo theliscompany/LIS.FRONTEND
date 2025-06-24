@@ -8,7 +8,7 @@ import { Controller, ControllerRenderProps, useForm } from "react-hook-form";
 import { getContactGetContactsOptions } from "../../api/client/crm/@tanstack/react-query.gen";
 import { ContactViewModel } from "../../api/client/crm";
 import { ChangeEvent, useCallback, useEffect, useState } from "react";
-import { MiscellaneousViewModel } from "../../api/client/pricing";
+import { ContainerTypeEnum, MiscellaneousViewModel } from "../../api/client/pricing";
 import TextField from "@mui/material/TextField";
 import FormControl from "@mui/material/FormControl";
 import InputLabel from "@mui/material/InputLabel";
@@ -19,9 +19,6 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import dayjs from "dayjs";
-import FormGroup from "@mui/material/FormGroup";
-import FormControlLabel from "@mui/material/FormControlLabel";
-import Checkbox from "@mui/material/Checkbox";
 import { PortViewModel, ServiceViewModel } from "../../api/client/masterdata";
 import { getPortOptions } from "../../api/client/masterdata/@tanstack/react-query.gen";
 import ServicesMiscellaneous from "./ServicesMiscellaneous";
@@ -32,7 +29,7 @@ import Breadcrumbs from "@mui/material/Breadcrumbs";
 import ChevronRight from "@mui/icons-material/ChevronRight";
 import Typography from "@mui/material/Typography";
 import Divider from "@mui/material/Divider";
-import { Paper, Stack } from "@mui/material";
+import { Checkbox, FormControlLabel, FormGroup, FormHelperText, Paper, Stack } from "@mui/material";
 import SpinningIcon from "../common/SpinningIcon";
 
 
@@ -62,7 +59,7 @@ const EditMiscellaneous = () => {
             validUntil: new Date(Date.now()),
             miscellaneousId: miscellaneousId,
             currency: currencyOptions[0].code
-        }
+        },
     });
 
     const watchFields = watch(['supplierId', 'departurePortId']);
@@ -153,6 +150,19 @@ const EditMiscellaneous = () => {
         const id = getValues('miscellaneousId')
         id ? await mutationUpdate.mutateAsync({ body: data, path: { id: id } }) :
             await mutationPost.mutateAsync({ body: data });
+    }
+
+    const handleContainersArray = (checked: boolean, container: ContainerTypeEnum) => {
+        if(checked){
+            return Array.isArray(watch('containers')) ? [...watch('containers') ?? [], container] : [container]
+        }
+
+        const _containersType = watch('containers')
+        const values = _containersType ? [..._containersType] : []
+        const index = values.findIndex(x=>x === container)
+        values.splice(index,1)
+
+        return values
     }
 
     return (
@@ -256,16 +266,23 @@ const EditMiscellaneous = () => {
                                                             helperText={errors.destinationPortId?.message} />)} />
                                             } />
                                     </Grid>
-
                                     <Grid size={2}>
-                                        <FormGroup row>
-                                            <FormControlLabel control={<Checkbox checked={watch('container20') ?? false} size="small" {...register('container20')}
-                                                onChange={(_, checked: boolean) => setValue('container20', checked)} />} label="20'" />
-                                            <FormControlLabel control={<Checkbox checked={watch('container40') ?? false} size="small" {...register('container40')}
-                                                onChange={(_, checked: boolean) => setValue('container40', checked)} />} label="40'" />
-                                        </FormGroup>
+                                        <FormControl error={!!errors.containers} {...register('containers',{required:"Select at least one container type"})}>
+                                            <FormGroup aria-label="position" row >
+                                                <FormControlLabel label="20'" control={
+                                                    <Checkbox checked={Array.isArray(watch('containers')) && watch('containers')?.includes(ContainerTypeEnum._20)} 
+                                                        onChange={(_:any, checked:boolean)=> setValue('containers', handleContainersArray(checked, ContainerTypeEnum._20))} />
+                                                    }  />
+                                                <FormControlLabel label="40'" control={
+                                                    <Checkbox checked={Array.isArray(watch('containers')) && watch('containers')?.includes(ContainerTypeEnum._40)} 
+                                                        onChange={(_:any, checked:boolean)=> setValue('containers', handleContainersArray(checked, ContainerTypeEnum._40))} />}  />
+                                            </FormGroup>
+                                            {
+                                                !!errors.containers && <FormHelperText>{errors.containers.message}</FormHelperText>
+                                            }
+                                        </FormControl>
                                     </Grid>
-                                    <Grid size={2}>
+                                    <Grid size={2}> 
                                         <FormControl fullWidth size="small">
                                             <InputLabel>Currency</InputLabel>
                                             <Select {...register('currency')} value={getValues('currency') ?? currencyOptions[0].code} label='Currency'

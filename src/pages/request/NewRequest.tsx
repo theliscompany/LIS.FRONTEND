@@ -13,7 +13,7 @@ import { containerPackages } from '../../utils/constants';
 import useProcessStatePersistence from '../../utils/processes/useProcessStatePersistence';
 import { useMsal, useAccount } from '@azure/msal-react';
 import { getProduct } from '../../api/client/transport';
-import { getApiAssignee, getApiHsCodeLis, postApiRequest, putApiAssigneeByRequestQuoteIdByAssigneeId } from '../../api/client/quote';
+import { getApiAssignee, getApiHsCodeLis } from '../../api/client/quote';
 
 function validMail(mail: string) {
     return /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/.test(mail);
@@ -23,7 +23,7 @@ const NewRequest = () => {
     const [load, setLoad] = useState<boolean>(false);
     const [loadUser, setLoadUser] = useState<boolean>(true);
     const [packingType, setPackingType] = useState<string>("FCL");
-    const [currentUser, setCurrentUser] = useState<any>(null);
+    //const [currentUser, setCurrentUser] = useState<any>(null);
     const [assignees, setAssignees] = useState<any>([]);
     const [containerType, setContainerType] = useState<string>("20' Dry");
     const [quantity, setQuantity] = useState<number>(1);
@@ -87,16 +87,16 @@ const NewRequest = () => {
         setContainers(containerPackages);
     }
 
-    const resetForm = () => {
-        setFormState({ 
-            ...formState, 
-            message: "", tags: [], phone: "", 
-            email: "", departure: null, arrival: null, 
-            packingType: "FCL", clientNumber: null,
-            containerType: "20' Dry", quantity: 1, 
-            containersSelection: []
-        });
-    }
+    // const resetForm = () => {
+    //     setFormState({ 
+    //         ...formState, 
+    //         message: "", tags: [], phone: "", 
+    //         email: "", departure: null, arrival: null, 
+    //         packingType: "FCL", clientNumber: null,
+    //         containerType: "20' Dry", quantity: 1, 
+    //         containersSelection: []
+    //     });
+    // }
     
     useEffect(() => {
         getContainers();
@@ -110,9 +110,9 @@ const NewRequest = () => {
             setLoadUser(true);
             const response: any = await getApiAssignee();
             if (response !== null && response !== undefined) {
-                var aux = response.data.data.find((elm: any) => elm.email === account?.username);
+                //var aux = response.data.data.find((elm: any) => elm.email === account?.username);
                 setAssignees(response.data.data);
-                setCurrentUser(aux);
+                //setCurrentUser(aux);
                 setLoadUser(false);
             }
             else {
@@ -125,30 +125,30 @@ const NewRequest = () => {
         }
     }
 
-    const assignManager = async (idQuote: string) => {
-        if (currentUser !== null && currentUser !== undefined && currentUser !== "") {
-            try {
-                const response = await putApiAssigneeByRequestQuoteIdByAssigneeId({path: {requestQuoteId: Number(idQuote), assigneeId: formState.assignedManager}});
-                if (response !== null) {
-                    setLoad(false);
-                }
-                else {
-                    setLoad(false);
-                }
-            }
-            catch (err: any) {
-                console.log(err);
-                setLoad(false);
-            }
-        }
-        else {
-            setLoad(false);
-        }
-    }
+    // const assignManager = async (idQuote: string) => {
+    //     if (currentUser !== null && currentUser !== undefined && currentUser !== "") {
+    //         try {
+    //             const response = await putApiAssigneeByRequestQuoteIdByAssigneeId({path: {requestQuoteId: Number(idQuote), assigneeId: formState.assignedManager}});
+    //             if (response !== null) {
+    //                 setLoad(false);
+    //             }
+    //             else {
+    //                 setLoad(false);
+    //             }
+    //         }
+    //         catch (err: any) {
+    //             console.log(err);
+    //             setLoad(false);
+    //         }
+    //     }
+    //     else {
+    //         setLoad(false);
+    //     }
+    // }
 
     function sendQuotationForm() {
-        var tags1 = formState.tags !== null && formState.tags !== undefined && formState.tags.length !== 0 ? formState.tags.map((elm: any) => elm.productName).join(',') : null;
-        var tags2 = formState.tags !== null && formState.tags !== undefined && formState.tags.length !== 0 ? formState.tags.map((elm: any) => elm.hS_Code).join(',') : null;
+        // var tags1 = formState.tags !== null && formState.tags !== undefined && formState.tags.length !== 0 ? formState.tags.map((elm: any) => elm.productName).join(',') : null;
+        // var tags2 = formState.tags !== null && formState.tags !== undefined && formState.tags.length !== 0 ? formState.tags.map((elm: any) => elm.hS_Code).join(',') : null;
         if (formState.phone !== "" && formState.email !== "" && formState.arrival !== null && formState.departure !== null && formState.containersSelection.length !== 0 && formState.clientNumber !== null) {
             if (validMail(formState.email)) {
                 setLoad(true);
@@ -159,46 +159,46 @@ const NewRequest = () => {
                 // else if (formState.packingType === "Unit RoRo") {
                 //     auxUnits = unitsSelection;
                 // }
-                var postcode1 = formState.departure.postalCode !== null && formState.departure.postalCode !== undefined ? formState.departure.postalCode : "";
-                var postcode2 = formState.arrival.postalCode !== null && formState.arrival.postalCode !== undefined ? formState.arrival.postalCode : "";
-                postApiRequest({body: {
-                    email: formState.email,
-                    whatsapp: formState.phone,
-                    departure: formState.departure !== null && formState.departure !== undefined ? [formState.departure.city.toUpperCase(),formState.departure.country,formState.departure.latitude,formState.departure.longitude,postcode1].filter((val: any) => { return val !== "" }).join(', ') : "",
-                    arrival: formState.arrival !== null && formState.arrival !== undefined ? [formState.arrival.city.toUpperCase(),formState.arrival.country,formState.arrival.latitude,formState.arrival.longitude,postcode2].filter((val: any) => { return val !== "" }).join(', ') : "",
-                    cargoType: "Container",
-                    clientNumber: formState.clientNumber !== null ? String(formState.clientNumber.contactNumber)+", "+formState.clientNumber.contactName+", "+formState.clientNumber.contactId : null,
-                    packingType: formState.packingType,
-                    containers: formState.containersSelection.map((elm: any) => { return { 
-                        id: containers.find((item: any) => item.packageName === elm.container).packageId, 
-                        containers: elm.container, 
-                        quantity: elm.quantity, 
-                    } }),
-                    quantity: Number(quantity),
-                    detail: formState.message,
-                    tags: valueSpecifics !== "hscodes" ? tags1 : tags2
-                }})
-                .then((data: any) => {
-                    console.log(data);
-                    if (data.data.code === 201) {
-                        resetForm();
-                        enqueueSnackbar(t('requestCreatedAssigned'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
-                        if (formState.assignedManager !== null && formState.assignedManager !== "null" && formState.assignedManager !== undefined && formState.assignedManager !== "") {
-                            assignManager(data.data.data.id);
-                        }
-                        else {
-                            setLoad(false);
-                        }
-                    }
-                    else {
-                        setLoad(false);
-                        enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
-                    }
-                })
-                .catch(() => { 
-                    setLoad(false);
-                    enqueueSnackbar(t('errorHappenedRequest'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
-                });
+                // var postcode1 = formState.departure.postalCode !== null && formState.departure.postalCode !== undefined ? formState.departure.postalCode : "";
+                // var postcode2 = formState.arrival.postalCode !== null && formState.arrival.postalCode !== undefined ? formState.arrival.postalCode : "";
+                // postApiRequest({body: {
+                //     email: formState.email,
+                //     whatsapp: formState.phone,
+                //     departure: formState.departure !== null && formState.departure !== undefined ? [formState.departure.city.toUpperCase(),formState.departure.country,formState.departure.latitude,formState.departure.longitude,postcode1].filter((val: any) => { return val !== "" }).join(', ') : "",
+                //     arrival: formState.arrival !== null && formState.arrival !== undefined ? [formState.arrival.city.toUpperCase(),formState.arrival.country,formState.arrival.latitude,formState.arrival.longitude,postcode2].filter((val: any) => { return val !== "" }).join(', ') : "",
+                //     cargoType: "Container",
+                //     clientNumber: formState.clientNumber !== null ? String(formState.clientNumber.contactNumber)+", "+formState.clientNumber.contactName+", "+formState.clientNumber.contactId : null,
+                //     packingType: formState.packingType,
+                //     containers: formState.containersSelection.map((elm: any) => { return { 
+                //         id: containers.find((item: any) => item.packageName === elm.container).packageId, 
+                //         containers: elm.container, 
+                //         quantity: elm.quantity, 
+                //     } }),
+                //     quantity: Number(quantity),
+                //     detail: formState.message,
+                //     tags: valueSpecifics !== "hscodes" ? tags1 : tags2
+                // }})
+                // .then((data: any) => {
+                //     console.log(data);
+                //     if (data.data.code === 201) {
+                //         resetForm();
+                //         enqueueSnackbar(t('requestCreatedAssigned'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                //         if (formState.assignedManager !== null && formState.assignedManager !== "null" && formState.assignedManager !== undefined && formState.assignedManager !== "") {
+                //             assignManager(data.data.data.id);
+                //         }
+                //         else {
+                //             setLoad(false);
+                //         }
+                //     }
+                //     else {
+                //         setLoad(false);
+                //         enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                //     }
+                // })
+                // .catch(() => { 
+                //     setLoad(false);
+                //     enqueueSnackbar(t('errorHappenedRequest'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
+                // });
             }
             else {
                 enqueueSnackbar(t('emailNotValid'), { variant: "info", anchorOrigin: { horizontal: "right", vertical: "top"} });

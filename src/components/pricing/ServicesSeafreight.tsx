@@ -1,6 +1,6 @@
 import { ColumnDef, createColumnHelper, isNumberArray } from "@tanstack/react-table"
 import EditableTable from "../common/EditableTable"
-import { Alert, Box, Button, ButtonGroup, Checkbox, Chip, FormControl, IconButton, ListItemText, MenuItem, OutlinedInput, Paper, Select, SelectChangeEvent, Stack, TextField } from "@mui/material"
+import { Alert, Box, Button, ButtonGroup, Checkbox, Chip, FormControl, FormHelperText, IconButton, ListItemText, MenuItem, OutlinedInput, Paper, Select, SelectChangeEvent, Stack, TextField } from "@mui/material"
 import { AddCircle, Cancel, Check, DeleteForever } from "@mui/icons-material"
 import { useQuery } from "@tanstack/react-query"
 import { getPackageOptions, getServiceOptions } from "../../api/client/masterdata/@tanstack/react-query.gen"
@@ -15,6 +15,12 @@ interface ServicesSeafreightProps {
     getServicesAdded: (services: ServiceSeaFreightViewModel[]) => void
 }
 
+interface ServiceError {
+    service?: string;
+    price?: string;
+    containers?: string;
+}
+
 const columnHelper = createColumnHelper<ServiceSeaFreightViewModel>()
 
 const ServicesSeafreight = ({data, currency, getServicesAdded}:ServicesSeafreightProps) => {
@@ -23,6 +29,7 @@ const ServicesSeafreight = ({data, currency, getServicesAdded}:ServicesSeafreigh
     const [editingRowIndex, setEditingRowIndex] = useState<number | null>(null);
     const [allSelectedServices, setAllSelectedServices] = useState<number[]>([])
     const [tableRef, setTableRef] = useState<import("@tanstack/table-core").Table<ServiceSeaFreightViewModel>>()
+    const [errorMessage, setErrorMessage] = useState<ServiceError>()
 
     const rowDraftRef = useRef<ServiceSeaFreightViewModel | null>(null);
 
@@ -31,6 +38,20 @@ const ServicesSeafreight = ({data, currency, getServicesAdded}:ServicesSeafreigh
     useEffect(() => {
       setServicesSeafreight(data);
     }, [data])
+    
+    useEffect(() => {
+        if(!errorMessage?.containers && !errorMessage?.price && !errorMessage?.service && 
+            editingRowIndex !== null && rowDraftRef.current){
+            const updated = [...servicesSeafreight];
+            updated[editingRowIndex] = rowDraftRef.current;
+            setServicesSeafreight(updated);
+            
+            getServicesAdded(updated);
+
+            setEditingRowIndex(null);
+            rowDraftRef.current = null;
+        }
+    }, [errorMessage])
     
 
     const {data: services} = useQuery({
@@ -73,24 +94,23 @@ const ServicesSeafreight = ({data, currency, getServicesAdded}:ServicesSeafreigh
                 const [local, setlocal] = useState(row.original.service?.serviceId)
                 if(editingRowIndex === row.index){
                     return <FormControl fullWidth>
-                        <Select displayEmpty size='small' value={local ?? ''} input={<OutlinedInput />}
-                        onChange={(e?: SelectChangeEvent<number>)=>{
-                            if(!rowDraftRef.current) return;
+                        <Select displayEmpty size='small' value={local ?? ''} input={<OutlinedInput />} error={!!errorMessage?.service}
+                            onChange={(e?: SelectChangeEvent<number>)=>{
+                                if(!rowDraftRef.current) return;
                             
-                            const serviceId = e ? Number(e.target.value) : undefined;
-                            const selectedService = services?.find((x) => x.serviceId === serviceId);
+                                const serviceId = e ? Number(e.target.value) : undefined;
+                                const selectedService = services?.find((x) => x.serviceId === serviceId);
 
-                            
-                            if (!rowDraftRef.current.service) rowDraftRef.current.service = {} as any;
-                            setlocal(serviceId)
-                            rowDraftRef.current = {
-                                ...rowDraftRef.current,
-                                service: {
-                                    ...rowDraftRef.current.service,
-                                    serviceId,
-                                    serviceName: selectedService?.serviceName,
-                                }
-                            };
+                                if (!rowDraftRef.current.service) rowDraftRef.current.service = {} as any;
+                                setlocal(serviceId)
+                                rowDraftRef.current = {
+                                    ...rowDraftRef.current,
+                                    service: {
+                                        ...rowDraftRef.current.service,
+                                        serviceId,
+                                        serviceName: selectedService?.serviceName,
+                                    }
+                                };
                         }}>
                             {
                                 (services ?? []).map((opt) => (
@@ -100,6 +120,9 @@ const ServicesSeafreight = ({data, currency, getServicesAdded}:ServicesSeafreigh
                                 ))
                             }
                         </Select>
+                        {
+                            errorMessage && errorMessage.service && <FormHelperText error={!!errorMessage.service}>{errorMessage.service}</FormHelperText>
+                        }
                     </FormControl>
                 }
 
@@ -112,7 +135,7 @@ const ServicesSeafreight = ({data, currency, getServicesAdded}:ServicesSeafreigh
             cell: ({row})=> {
                 const [local, setlocal] = useState(row.original.service?.price ?? 0)
                 if(editingRowIndex === row.index){
-                    return <TextField type="number" size="small" value={local ?? 0}
+                    return <TextField type="number" size="small" value={local ?? 0} helperText={errorMessage?.price}
                     onChange={(e?: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => 
                         {
                             if (rowDraftRef.current?.service) {
@@ -121,7 +144,7 @@ const ServicesSeafreight = ({data, currency, getServicesAdded}:ServicesSeafreigh
                             }
                         }
                     }
-                />
+                error={!!errorMessage?.price} />
                 }
                 return  `${row.original.service?.price ?? 0} ${Currency[currency]}`
             }
@@ -132,7 +155,7 @@ const ServicesSeafreight = ({data, currency, getServicesAdded}:ServicesSeafreigh
                 const [local, setlocal] = useState((row.original.containers ?? []).map(x=>x.packageId ?? 0))
                 if(editingRowIndex === row.index){
                     return <FormControl fullWidth>
-                                <Select multiple displayEmpty size='small' input={<OutlinedInput />}
+                                <Select multiple displayEmpty size='small' error={!!errorMessage?.containers} input={<OutlinedInput />}
                                     value={local} 
                                     onChange={(e: SelectChangeEvent<number[]>)=>{
 
@@ -167,6 +190,9 @@ const ServicesSeafreight = ({data, currency, getServicesAdded}:ServicesSeafreigh
                                         ))
                                     }
                                 </Select>
+                                {
+                                    errorMessage && errorMessage.containers && <FormHelperText error={!!errorMessage.containers}>{errorMessage.containers}</FormHelperText>
+                                }
                             </FormControl>
                 } 
 
@@ -209,13 +235,16 @@ const ServicesSeafreight = ({data, currency, getServicesAdded}:ServicesSeafreigh
 
     const handleValidRow = () => {
         if (editingRowIndex !== null && rowDraftRef.current) {
-            const updated = [...servicesSeafreight];
-            updated[editingRowIndex] = rowDraftRef.current;
-            setServicesSeafreight(updated);
-            getServicesAdded(updated);
+            const service:ServiceSeaFreightViewModel = rowDraftRef.current;
+            setErrorMessage({
+                service: service.service?.serviceId === undefined || service.service?.serviceName === '' ? 
+                    "Service is required." : undefined,
+                price: service.service?.price === undefined || service.service?.serviceName === '' ? 
+                    "Price is required." : service.service.price <= 0 ? "Price must not be less than 0." : undefined,
+                containers: service.containers === undefined || service.containers?.length === 0 ? 
+                    "Select at least one container" : undefined
+            })
         }
-        setEditingRowIndex(null);
-        rowDraftRef.current = null;
     }
 
     const handleGetRowsSelected = (index: number[]) => setAllSelectedServices(index)

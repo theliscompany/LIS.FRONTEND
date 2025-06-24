@@ -7,15 +7,16 @@ export type Assignee = {
     idUser?: (string) | null;
 };
 
+export type CargoDetailsViewModel = {
+    packageId?: number;
+    packageName?: (string) | null;
+    quantity?: number;
+    products?: Array<RequestQuoteProductViewModel> | null;
+};
+
 export type ChangeStatusRequest = {
     newStatus?: StatusRequest;
     customMessage?: (string) | null;
-};
-
-export type Container = {
-    id?: number;
-    containers?: (string) | null;
-    quantity?: number;
 };
 
 export type EmailConfig = {
@@ -36,32 +37,22 @@ export type HSCodeLIS = {
     product_description_NL?: (string) | null;
 };
 
-export type NoteType = 'Automatic' | 'General' | 'CustomStatusChange' | 'InformationRequest';
+export enum NoteType {
+    AUTOMATIC = 'Automatic',
+    GENERAL = 'General',
+    CUSTOM_STATUS_CHANGE = 'CustomStatusChange',
+    INFORMATION_REQUEST = 'InformationRequest'
+}
 
-export type RequestQuote = {
-    id?: number;
-    whatsapp: string;
-    email: string;
-    departure: string;
-    arrival: string;
-    status?: StatusRequest;
-    cargoType: TypeOfCargo;
-    quantity: number;
-    detail?: (string) | null;
-    createdAt?: (string) | null;
-    updatedAt?: (string) | null;
-    tags?: (string) | null;
+export type RequestQuoteBaseViewModel = {
+    requestQuoteId?: string;
     trackingNumber?: (string) | null;
-    creator?: (string) | null;
-    assigneeId?: (number) | null;
-    assignee?: Assignee;
-    notes?: Array<RequestQuoteNote> | null;
-    packingType?: (string) | null;
-    clientNumber?: (string) | null;
-    containersJson?: (string) | null;
-    unitsJson?: (string) | null;
-    containers?: Array<Container> | null;
-    units?: Array<Unit> | null;
+    customerName?: (string) | null;
+    departure?: (string) | null;
+    arrival?: (string) | null;
+    status?: StatusEnum;
+    assigneeName?: (string) | null;
+    created?: Date;
 };
 
 export type RequestQuoteHistory = {
@@ -69,14 +60,14 @@ export type RequestQuoteHistory = {
     requestQuoteId: number;
     assigneeId?: (number) | null;
     assignee?: Assignee;
-    assignedAt?: string;
-    unassignedAt?: (string) | null;
+    assignedAt?: Date;
+    unassignedAt?: (Date) | null;
 };
 
 export type RequestQuoteNote = {
     id?: number;
     content?: (string) | null;
-    createdAt?: string;
+    createdAt?: Date;
     requestQuoteId?: number;
     isInternal?: boolean;
     noteType?: NoteType;
@@ -85,17 +76,55 @@ export type RequestQuoteNote = {
     idUser?: (string) | null;
 };
 
-export type StatusRequest = 'New' | 'EnAttente' | 'Valider' | 'Rejeter' | 'EnCoursDeTraitement' | 'EnTransit' | 'EnDouane' | 'LivraisonEnCours' | 'Livre' | 'Annule' | 'Retour' | 'Problème' | 'EnAttenteDeFacturation';
-
-export type TypeOfCargo = 'Container' | 'Conventional' | 'RollOnRollOff';
-
-export type Unit = {
-    id?: number;
-    name?: (string) | null;
-    weight?: number;
-    dimension?: (string) | null;
-    quantity?: number;
+export type RequestQuoteProductViewModel = {
+    productId?: (number) | null;
+    productName?: (string) | null;
 };
+
+export type RequestQuoteViewModel = {
+    requestQuoteId?: string;
+    trackingNumber?: (string) | null;
+    customerName?: (string) | null;
+    departure?: (string) | null;
+    arrival?: (string) | null;
+    status?: StatusEnum;
+    assigneeName?: (string) | null;
+    created?: Date;
+    customerId?: number;
+    cellPhone?: (string) | null;
+    hasWhatsapp?: boolean;
+    email?: (string) | null;
+    departureId?: number;
+    arrivalId?: number;
+    cargoDetails?: Array<CargoDetailsViewModel> | null;
+    assignee?: string;
+    lastUpdated?: (Date) | null;
+    comment?: (string) | null;
+};
+
+export enum StatusEnum {
+    NEW = 'NEW',
+    PENDING = 'PENDING',
+    VALID = 'VALID',
+    REJECT = 'REJECT',
+    BLOCKED = 'BLOCKED'
+}
+
+export enum StatusRequest {
+    NEW = 'New',
+    EN_ATTENTE = 'EnAttente',
+    VALIDER = 'Valider',
+    REJETER = 'Rejeter',
+    EN_COURS_DE_TRAITEMENT = 'EnCoursDeTraitement',
+    EN_TRANSIT = 'EnTransit',
+    EN_DOUANE = 'EnDouane',
+    LIVRAISON_EN_COURS = 'LivraisonEnCours',
+    LIVRE = 'Livre',
+    ANNULE = 'Annule',
+    RETOUR = 'Retour',
+    PROBLÈME = 'Problème',
+    EN_ATTENTE_DE_FACTURATION = 'EnAttenteDeFacturation'
+}
 
 export type GetApiAssigneeData = {
     query?: {
@@ -285,57 +314,29 @@ export type DeleteApiHsCodeLisByIdResponse = (unknown);
 
 export type DeleteApiHsCodeLisByIdError = unknown;
 
-export type GetApiRequestData = {
-    query?: {
-        Arrival?: string;
-        AssigneeId?: number;
-        CargoType?: string;
-        ClientNumber?: string;
-        CreatedAtEnd?: string;
-        CreatedAtStart?: string;
-        Creator?: string;
-        Departure?: string;
-        PackingType?: string;
-        Search?: string;
-        Status?: string;
-        Tags?: string;
-        UpdatedAtEnd?: string;
-        UpdatedAtStart?: string;
-    };
+export type PostApiRequestNewData = {
+    body?: RequestQuoteViewModel;
 };
 
-export type GetApiRequestResponse = (unknown);
+export type PostApiRequestNewResponse = ({
+    [key: string]: (string);
+});
 
-export type GetApiRequestError = unknown;
+export type PostApiRequestNewError = (unknown);
 
-export type PostApiRequestData = {
-    body: RequestQuote;
-};
+export type GetApiRequestResponse = (Array<RequestQuoteBaseViewModel>);
 
-export type PostApiRequestResponse = (unknown);
-
-export type PostApiRequestError = unknown;
+export type GetApiRequestError = (unknown);
 
 export type GetApiRequestByIdData = {
     path: {
-        id: number;
+        id: string;
     };
 };
 
-export type GetApiRequestByIdResponse = (unknown);
+export type GetApiRequestByIdResponse = (RequestQuoteViewModel);
 
-export type GetApiRequestByIdError = unknown;
-
-export type PutApiRequestByIdData = {
-    body?: RequestQuote;
-    path: {
-        id: number;
-    };
-};
-
-export type PutApiRequestByIdResponse = (unknown);
-
-export type PutApiRequestByIdError = unknown;
+export type GetApiRequestByIdError = (unknown);
 
 export type DeleteApiRequestByIdData = {
     path: {
@@ -346,6 +347,17 @@ export type DeleteApiRequestByIdData = {
 export type DeleteApiRequestByIdResponse = (unknown);
 
 export type DeleteApiRequestByIdError = unknown;
+
+export type PutApiRequestUpdateByIdData = {
+    body?: RequestQuoteViewModel;
+    path: {
+        id: string;
+    };
+};
+
+export type PutApiRequestUpdateByIdResponse = (unknown);
+
+export type PutApiRequestUpdateByIdError = (unknown);
 
 export type PutApiRequestByIdChangeStatusData = {
     body?: ChangeStatusRequest;
@@ -361,9 +373,9 @@ export type PutApiRequestByIdChangeStatusError = unknown;
 export type GetApiRequestQuoteHistoryData = {
     query?: {
         assigneeId?: number;
-        endDate?: string;
+        endDate?: Date;
         requestQuoteId?: number;
-        startDate?: string;
+        startDate?: Date;
     };
 };
 
@@ -412,8 +424,8 @@ export type DeleteApiRequestQuoteHistoryByIdError = unknown;
 
 export type GetApiRequestQuoteNotesData = {
     query?: {
-        createdAtFrom?: string;
-        createdAtTo?: string;
+        createdAtFrom?: Date;
+        createdAtTo?: Date;
         isInternal?: boolean;
         noteType?: NoteType;
         requestQuoteId?: number;
@@ -521,3 +533,40 @@ export type PostWhatsAppSendmessageData = {
 export type PostWhatsAppSendmessageResponse = (unknown);
 
 export type PostWhatsAppSendmessageError = unknown;
+
+export type GetApiRequestResponseTransformer = (data: any) => Promise<GetApiRequestResponse>;
+
+export type RequestQuoteBaseViewModelModelResponseTransformer = (data: any) => RequestQuoteBaseViewModel;
+
+export const RequestQuoteBaseViewModelModelResponseTransformer: RequestQuoteBaseViewModelModelResponseTransformer = data => {
+    if (data?.created) {
+        data.created = new Date(data.created);
+    }
+    return data;
+};
+
+export const GetApiRequestResponseTransformer: GetApiRequestResponseTransformer = async (data) => {
+    if (Array.isArray(data)) {
+        data.forEach(RequestQuoteBaseViewModelModelResponseTransformer);
+    }
+    return data;
+};
+
+export type GetApiRequestByIdResponseTransformer = (data: any) => Promise<GetApiRequestByIdResponse>;
+
+export type RequestQuoteViewModelModelResponseTransformer = (data: any) => RequestQuoteViewModel;
+
+export const RequestQuoteViewModelModelResponseTransformer: RequestQuoteViewModelModelResponseTransformer = data => {
+    if (data?.created) {
+        data.created = new Date(data.created);
+    }
+    if (data?.lastUpdated) {
+        data.lastUpdated = new Date(data.lastUpdated);
+    }
+    return data;
+};
+
+export const GetApiRequestByIdResponseTransformer: GetApiRequestByIdResponseTransformer = async (data) => {
+    RequestQuoteViewModelModelResponseTransformer(data);
+    return data;
+};

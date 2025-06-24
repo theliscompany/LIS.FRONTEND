@@ -5,7 +5,7 @@ import Grid from '@mui/material/Grid2';
 import { useTranslation } from 'react-i18next';
 import { enqueueSnackbar } from 'notistack';
 import { useAccount, useMsal } from '@azure/msal-react';
-import { postApiRequestQuoteNotes, RequestQuoteNote } from '../../../api/client/quote';
+import { NoteType, postApiRequestQuoteNotes, RequestQuoteNote } from '../../../api/client/quote';
 
 const RequestAskInformation = (props: any) => {
     const [mailSubject, setMailSubject] = useState<string>("");
@@ -19,7 +19,7 @@ const RequestAskInformation = (props: any) => {
     const askInformations = async () => {
         if (mailContent !== "") {
             try {
-                var dataSent: RequestQuoteNote = { "content": mailContent, "requestQuoteId": props.id, "subject": mailSubject, "noteType": "InformationRequest", email: props.email, "idUser": account?.username };
+                var dataSent: RequestQuoteNote = { "content": mailContent, "requestQuoteId": props.id, "subject": mailSubject, "noteType": NoteType.INFORMATION_REQUEST, email: props.email, "idUser": account?.username };
                 const response = await postApiRequestQuoteNotes({body: dataSent});
                 if (response !== null) {
                     props.closeModal();
