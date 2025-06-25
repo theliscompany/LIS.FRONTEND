@@ -7,7 +7,7 @@ import { useTranslation } from "react-i18next";
 import { useAccount, useMsal } from "@azure/msal-react";
 import { stringAvatar } from "../utils/functions";
 import NavigationLink from "../components/shared/NavigationLink";
-import { Add, AnchorOutlined, AssignmentOutlined, AttachFileOutlined, AutoFixHigh, ChevronRight, ContactsOutlined, DirectionsBoat, ExpandMore, FirstPage, FolderOutlined, Groups, Home, Inventory2, InventoryOutlined, LastPage, LocalShipping, Logout, MenuOutlined, Notifications, People, Portrait, RequestQuoteOutlined, RoomServiceOutlined, Search, SettingsOutlined, TaskAltOutlined, TextSnippetOutlined } from "@mui/icons-material";
+import { AnchorOutlined, AttachFileOutlined, AutoFixHigh, ChevronRight, ContactsOutlined, DirectionsBoat, ExpandMore, FirstPage, FolderOutlined, Groups, Home, Inventory2, InventoryOutlined, LastPage, LocalShipping, Logout, MenuOutlined, Portrait, RequestQuoteOutlined, RoomServiceOutlined, Search, SettingsOutlined, TextSnippetOutlined } from "@mui/icons-material";
 
 const drawerWidth = 220;
 
@@ -60,7 +60,7 @@ const Layout = () : React.ReactNode => {
     const [searchText, setSearchText] = useState<string>("");
     const [anchorElLang, setAnchorElLang] = useState<null | HTMLElement>(null);
     const [open, setOpen] = useState(true);
-    const [openRequests, setOpenRequests] = useState<boolean>(false);
+    //const [openRequests, setOpenRequests] = useState<boolean>(false);
     const [openPrices, setOpenPrices] = useState<boolean>(false);
     const [openMasterdata, setOpenMasterdata] = useState<boolean>(false);
 
@@ -96,7 +96,7 @@ const Layout = () : React.ReactNode => {
         setOpen(false);
         setOpenMasterdata(false);
         setOpenPrices(false);
-        setOpenRequests(false);
+        //setOpenRequests(false);
     };
 
     const handleDrawerOpen = () => {
@@ -338,8 +338,9 @@ const Layout = () : React.ReactNode => {
                     <Box sx={{ minWidth: drawerWidth, margin: "0 0px", marginTop: "8px" }}>
                         <List dense style={{ minHeight: "480px" }}>
                             <NavigationLink url="/" title={t('overview')} icon={<Home fontSize="small" />} />
-                            <NavigationLink url="/users" title={t('users')} icon={<People fontSize="small" />} />
-                            <ListItem className="cs-listitem" key={"Requests part"} disablePadding disableGutters>
+                            {/* <NavigationLink url="/users" title={t('users')} icon={<People fontSize="small" />} /> */}
+                            <NavigationLink url="/requests" title={t('requests')} icon={<FolderOutlined fontSize="small" />} />
+                            {/* <ListItem className="cs-listitem" key={"Requests part"} disablePadding disableGutters>
                                 <ListItemButton className="cs-listitembutton" onClick={() => { setOpenRequests(!openRequests); }}>
                                     <ListItemIcon className="cs-listitemicon">
                                         <AssignmentOutlined fontSize="small" />
@@ -355,7 +356,7 @@ const Layout = () : React.ReactNode => {
                                     <NavigationLink url="/requests" title={t('requests')} icon={<Notifications fontSize="small" />} nested />
                                     <NavigationLink url="/pending-requests" title={t('pendingRequests')} icon={<TaskAltOutlined fontSize="small" />} nested />
                                 </List>
-                            </Collapse>                            
+                            </Collapse>                             */}
                             <ListItem className="cs-listitem" key={"Prices part"} disablePadding disableGutters>
                                 <ListItemButton className="cs-listitembutton" onClick={() => { setOpenPrices(!openPrices); }}>
                                     <ListItemIcon className="cs-listitemicon">
@@ -373,8 +374,8 @@ const Layout = () : React.ReactNode => {
                                 </List>
                             </Collapse>
                             
-                            <NavigationLink url="/quote-offers" title={t('priceOffers')} icon={<Portrait fontSize="small" />} />
-                            <NavigationLink url="/" title={t('orders')} icon={<FolderOutlined fontSize="small" />} />
+                            {/* <NavigationLink url="/quote-offers" title={t('priceOffers')} icon={<Portrait fontSize="small" />} /> */}
+                            {/* <NavigationLink url="/" title={t('orders')} icon={<FolderOutlined fontSize="small" />} /> */}
                             
                             <ListItem className="cs-listitem" key={"Masterdata part"} disablePadding disableGutters>
                                 <ListItemButton className="cs-listitembutton" onClick={() => { setOpenMasterdata(!openMasterdata); }}>
