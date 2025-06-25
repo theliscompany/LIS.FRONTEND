@@ -338,8 +338,9 @@ const Layout = () : React.ReactNode => {
                     <Box sx={{ minWidth: drawerWidth, margin: "0 0px", marginTop: "8px" }}>
                         <List dense style={{ minHeight: "480px" }}>
                             <NavigationLink url="/" title={t('overview')} icon={<Home fontSize="small" />} />
-                            <NavigationLink url="/users" title={t('users')} icon={<People fontSize="small" />} />
-                            <ListItem className="cs-listitem" key={"Requests part"} disablePadding disableGutters>
+                            {/* <NavigationLink url="/users" title={t('users')} icon={<People fontSize="small" />} /> */}
+                            <NavigationLink url="/requests" title={t('requests')} icon={<FolderOutlined fontSize="small" />} />
+                            {/* <ListItem className="cs-listitem" key={"Requests part"} disablePadding disableGutters>
                                 <ListItemButton className="cs-listitembutton" onClick={() => { setOpenRequests(!openRequests); }}>
                                     <ListItemIcon className="cs-listitemicon">
                                         <AssignmentOutlined fontSize="small" />
@@ -355,7 +356,7 @@ const Layout = () : React.ReactNode => {
                                     <NavigationLink url="/requests" title={t('requests')} icon={<Notifications fontSize="small" />} nested />
                                     <NavigationLink url="/pending-requests" title={t('pendingRequests')} icon={<TaskAltOutlined fontSize="small" />} nested />
                                 </List>
-                            </Collapse>                            
+                            </Collapse>                             */}
                             <ListItem className="cs-listitem" key={"Prices part"} disablePadding disableGutters>
                                 <ListItemButton className="cs-listitembutton" onClick={() => { setOpenPrices(!openPrices); }}>
                                     <ListItemIcon className="cs-listitemicon">
@@ -373,8 +374,8 @@ const Layout = () : React.ReactNode => {
                                 </List>
                             </Collapse>
                             
-                            <NavigationLink url="/quote-offers" title={t('priceOffers')} icon={<Portrait fontSize="small" />} />
-                            <NavigationLink url="/" title={t('orders')} icon={<FolderOutlined fontSize="small" />} />
+                            {/* <NavigationLink url="/quote-offers" title={t('priceOffers')} icon={<Portrait fontSize="small" />} /> */}
+                            {/* <NavigationLink url="/" title={t('orders')} icon={<FolderOutlined fontSize="small" />} /> */}
                             
                             <ListItem className="cs-listitem" key={"Masterdata part"} disablePadding disableGutters>
                                 <ListItemButton className="cs-listitembutton" onClick={() => { setOpenMasterdata(!openMasterdata); }}>

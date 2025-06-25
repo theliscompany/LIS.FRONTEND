@@ -52,7 +52,7 @@ function App() {
               <ScrollToTop />
               <Routes>
                 <Route path='/*' element={<Layout />}>
-                  <Route path='' element={<Shipments />} />
+                  <Route path='' element={<Requests />} />
                   <Route path="users" element={<UsersAssignment />} />
                   <Route path="requests" element={<Requests />} />
                   <Route path="search/:search" element={<RequestsSearch />} />
