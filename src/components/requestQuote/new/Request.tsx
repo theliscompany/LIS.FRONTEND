@@ -10,7 +10,7 @@ import AddCircle from "@mui/icons-material/AddCircle"
 import { Cancel, Check, CheckBox, CheckBoxOutlineBlank, ChevronRight, DeleteForever } from "@mui/icons-material"
 import EditableTable from "../../common/EditableTable"
 import { ColumnDef, createColumnHelper } from "@tanstack/react-table"
-import { CargoDetailsViewModel, HSCodeLIS, RequestQuoteProductViewModel, RequestQuoteViewModel, StatusEnum } from "../../../api/client/quote"
+import { CargoDetailsViewModel, HSCodeViewModel, RequestQuoteProductViewModel, RequestQuoteViewModel, StatusEnum } from "../../../api/client/quote"
 import { Controller, useForm } from "react-hook-form"
 import { useConfirmDialog } from "../../../hooks/useConfirmDialog"
 import React from "react"
@@ -118,15 +118,15 @@ const Request = () => {
                 
                 if(editingRowIndex === row.index){
                     return (
-                        <Autocomplete fullWidth multiple size="small" options={HsCodes?.sort((a,b)=> a.product_description_En?.localeCompare(b.product_description_En ?? '') ?? 0) ?? []} 
-                            disableCloseOnSelect getOptionLabel={(option) => option.product_description_En ?? ''} 
-                            onChange={(_:any,produts: HSCodeLIS[])=>{
+                        <Autocomplete fullWidth multiple size="small" options={HsCodes?.sort((a,b)=> a.productName?.localeCompare(b.productName ?? '') ?? 0) ?? []} 
+                            disableCloseOnSelect getOptionLabel={(option) => option.productName ?? ''} 
+                            onChange={(_:any,produts: HSCodeViewModel[])=>{
                                 rowDraftRef.current = {
                                     ...rowDraftRef.current,
                                     products: produts.map(item=> {
                                         return {
-                                            productId: item.hS_Code,
-                                            productName: item.product_description_En
+                                            productId: item.productId,
+                                            productName: item.productName
                                         } as RequestQuoteProductViewModel
                                     } )
                                 };
@@ -138,7 +138,7 @@ const Request = () => {
                                     <li key={key} {...optionProps}>
                                         <Checkbox icon={icon} checkedIcon={checkedIcon}
                                         style={{ marginRight: 8 }} checked={selected} />
-                                        {option.product_description_En}
+                                        {option.productName}
                                     </li>
                                 )
                             }}
