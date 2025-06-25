@@ -37,6 +37,13 @@ export type HSCodeLIS = {
     product_description_NL?: (string) | null;
 };
 
+export type HSCodeViewModel = {
+    productId?: string;
+    productName?: (string) | null;
+    productName_FR?: (string) | null;
+    productName_NL?: (string) | null;
+};
+
 export enum NoteType {
     AUTOMATIC = 'Automatic',
     GENERAL = 'General',
@@ -271,9 +278,9 @@ export type GetApiFileUriByBlobNameResponse = (unknown);
 
 export type GetApiFileUriByBlobNameError = unknown;
 
-export type GetApiHsCodeLisResponse = (Array<HSCodeLIS>);
+export type GetApiHsCodeLisResponse = (Array<HSCodeViewModel>);
 
-export type GetApiHsCodeLisError = unknown;
+export type GetApiHsCodeLisError = (unknown);
 
 export type PostApiHsCodeLisData = {
     body?: HSCodeLIS;
