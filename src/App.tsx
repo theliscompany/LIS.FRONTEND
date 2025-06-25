@@ -32,7 +32,7 @@ import Request from './components/requestQuote/new/Request';
 // import Histories from './pages/Histories';
 import UsersAssignment from './pages/UsersAssignment';
 import MasterDataHSCodes from './pages/masterdata/MasterDataHSCodes';
-import Shipments from './pages/Shipments';
+// import Shipments from './pages/Shipments';
 import Tracking from './pages/Tracking';
 import ScrollToTop from './components/shared/ScrollToTop';
 import MasterDataFiles from './pages/masterdata/MasterDataFiles';

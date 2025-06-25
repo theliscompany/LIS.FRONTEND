@@ -7,7 +7,7 @@ import { useTranslation } from "react-i18next";
 import { useAccount, useMsal } from "@azure/msal-react";
 import { stringAvatar } from "../utils/functions";
 import NavigationLink from "../components/shared/NavigationLink";
-import { Add, AnchorOutlined, AssignmentOutlined, AttachFileOutlined, AutoFixHigh, ChevronRight, ContactsOutlined, DirectionsBoat, ExpandMore, FirstPage, FolderOutlined, Groups, Home, Inventory2, InventoryOutlined, LastPage, LocalShipping, Logout, MenuOutlined, Notifications, People, Portrait, RequestQuoteOutlined, RoomServiceOutlined, Search, SettingsOutlined, TaskAltOutlined, TextSnippetOutlined } from "@mui/icons-material";
+import { AnchorOutlined, AttachFileOutlined, AutoFixHigh, ChevronRight, ContactsOutlined, DirectionsBoat, ExpandMore, FirstPage, FolderOutlined, Groups, Home, Inventory2, InventoryOutlined, LastPage, LocalShipping, Logout, MenuOutlined, Portrait, RequestQuoteOutlined, RoomServiceOutlined, Search, SettingsOutlined, TextSnippetOutlined } from "@mui/icons-material";
 
 const drawerWidth = 220;
 
@@ -60,7 +60,7 @@ const Layout = () : React.ReactNode => {
     const [searchText, setSearchText] = useState<string>("");
     const [anchorElLang, setAnchorElLang] = useState<null | HTMLElement>(null);
     const [open, setOpen] = useState(true);
-    const [openRequests, setOpenRequests] = useState<boolean>(false);
+    //const [openRequests, setOpenRequests] = useState<boolean>(false);
     const [openPrices, setOpenPrices] = useState<boolean>(false);
     const [openMasterdata, setOpenMasterdata] = useState<boolean>(false);
 
@@ -96,7 +96,7 @@ const Layout = () : React.ReactNode => {
         setOpen(false);
         setOpenMasterdata(false);
         setOpenPrices(false);
-        setOpenRequests(false);
+        //setOpenRequests(false);
     };
 
     const handleDrawerOpen = () => {
