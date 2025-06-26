@@ -1,6 +1,6 @@
 import { IconButton, List, ListItem, ListItemIcon, ListItemText, Paper } from "@mui/material"
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { getApiFileByFolderOptions } from "../../api/client/document/@tanstack/react-query.gen";
+import { getApiFileByFolderOptions } from '@api/client/document/@tanstack/react-query.gen';
 import DescriptionIcon from "@mui/icons-material/Description";
 import DeleteIcon from "@mui/icons-material/Delete";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";

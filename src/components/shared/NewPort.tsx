@@ -1,11 +1,11 @@
 import { useState } from 'react';
-import { BootstrapDialogTitle, BootstrapInput, actionButtonStyles, buttonCloseStyles, inputLabelStyles } from '../../utils/misc/styles';
+import { BootstrapDialogTitle, BootstrapInput, actionButtonStyles, buttonCloseStyles, inputLabelStyles } from '@utils/misc/styles';
 import { Button, DialogActions, DialogContent, InputLabel } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import { useTranslation } from 'react-i18next';
 import { enqueueSnackbar } from 'notistack';
 import CountrySelect from './CountrySelect';
-import { createPort, PortViewModel } from '../../api/client/transport';
+import { createPort, PortViewModel } from '@features/transport/api';
 
 function NewPort(props: any) {
     const [testName, setTestName] = useState<string>("");

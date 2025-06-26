@@ -1,15 +1,15 @@
 import { useEffect, useState } from 'react';
 import { Alert, Box, Chip, IconButton, Skeleton, Typography } from '@mui/material';
 import Grid from '@mui/material/Grid2';
-import { DarkTooltip, gridStyles } from '../utils/misc/styles';
+import { DarkTooltip, gridStyles } from '@utils/misc/styles';
 import { enqueueSnackbar, SnackbarProvider } from 'notistack';
 import AssignmentIndIcon from '@mui/icons-material/AssignmentInd';
 import AssignmentReturnIcon from '@mui/icons-material/AssignmentReturn';
 import { useAccount, useMsal } from '@azure/msal-react';
 import { useTranslation } from 'react-i18next';
 import { DataGrid, GridColDef, GridRenderCellParams } from '@mui/x-data-grid';
-import { getAccessToken } from '../utils/functions';
-import { deleteApiAssigneeById, getApiAssignee, postApiAssignee } from '../api/client/quote';
+import { getAccessToken } from '@utils/functions';
+import { deleteApiAssigneeById, getApiAssignee, postApiAssignee } from '@features/request/api';
 
 const UsersAssignment = () => {
     // const [load, setLoad] = useState<boolean>(false);

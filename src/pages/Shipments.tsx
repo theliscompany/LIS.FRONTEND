@@ -9,13 +9,13 @@ import Typography from "@mui/material/Typography";
 import IconButton from "@mui/material/IconButton";
 import LensIcon from "@mui/icons-material/Lens"
 import SearchIcon from "@mui/icons-material/Search"
-import { GetOrdersData, OrdersListDto, OrderStatusEnum } from "../api/client/shipment";
+import { GetOrdersData, OrdersListDto, OrderStatusEnum } from '@api/client/shipment';
 import Badge from "@mui/material/Badge";
 import { useQuery } from "@tanstack/react-query";
-import { getOrdersOptions } from "../api/client/shipment/@tanstack/react-query.gen";
+import { getOrdersOptions } from '@api/client/shipment/@tanstack/react-query.gen';
 import Tooltip from "@mui/material/Tooltip";
 import Stack from "@mui/material/Stack";
-import Search from '../components/shipments/Search';
+import Search from '@components/shipments/Search';
 import { createColumnHelper, flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table';
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
 

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { getApiProcessStateByUserIdByProcessName, postApiProcessState } from '../../api/client/sessionstorage';
+import { getApiProcessStateByUserIdByProcessName, postApiProcessState } from '@features/sessionstorage/api';
 
 // const API_BASE_URL = import.meta.env.VITE_API_LIS_SESSIONSTORAGE_ENDPOINT;
 

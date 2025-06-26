@@ -1,7 +1,7 @@
 import { Badge, BadgeProps, Box, Dialog, DialogTitle, IconButton, InputBase, TextFieldClasses, Tooltip, TooltipProps } from '@mui/material';
 import { tooltipClasses } from '@mui/material/Tooltip';
 import { styled } from '@mui/material/styles';
-import { DialogTitleProps } from '../models/models';
+import { DialogTitleProps } from '@utils/models/models';
 import CloseIcon from '@mui/icons-material/Close';
 
 interface TabPanelProps {

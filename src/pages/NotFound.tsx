@@ -1,6 +1,6 @@
 import { Box, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next'; 
-import CollapsibleDataGrid from '../components/shared/CollapseGrid';
+import CollapsibleDataGrid from '@components/shared/CollapseGrid';
 
 function NotFound() {
     const { t } = useTranslation();

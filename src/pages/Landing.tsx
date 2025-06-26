@@ -5,15 +5,15 @@ import { useIsAuthenticated, useMsal } from "@azure/msal-react";
 import FaceIcon from '@mui/icons-material/Face';
 import { useNavigate, useParams } from "react-router-dom";
 import { useTranslation } from 'react-i18next';
-import { BootstrapDialog, BootstrapDialogTitle, BootstrapInput, bottomStyles, buttonCloseStyles, buttonStyles, cardStyles, cardTextStyles, inputLabelStyles, properties } from "../utils/misc/styles";
-import Testimonies from "../components/landingPage/Testimonies";
-import Footer from "../components/landingPage/Footer";
+import { BootstrapDialog, BootstrapDialogTitle, BootstrapInput, bottomStyles, buttonCloseStyles, buttonStyles, cardStyles, cardTextStyles, inputLabelStyles, properties } from '@utils/misc/styles';
+import Testimonies from '@components/landingPage/Testimonies';
+import Footer from '@components/landingPage/Footer';
 import { loginRequest } from "../config/msalConfig";
 import ReCAPTCHA from "react-google-recaptcha";
 import { MuiTelInput } from 'mui-tel-input';
 //import { postApiEmail } from "../api/client/quote";
 import { enqueueSnackbar, SnackbarProvider } from "notistack";
-import LocationSearch from "../components/shared/LocationSearch";
+import LocationSearch from '@components/shared/LocationSearch';
 import axios from "axios";
 
 var footer = `

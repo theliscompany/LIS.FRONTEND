@@ -2,11 +2,11 @@ import { AppBar, Avatar, Box, Button, Collapse, Container, Divider, Drawer as Mu
 import Grid from "@mui/material/Grid2";
 import React, { useState } from "react";
 import { Link, Outlet, useNavigate } from "react-router-dom";
-import { BootstrapInput, DarkTooltip } from "../utils/misc/styles";
+import { BootstrapInput, DarkTooltip } from '@utils/misc/styles';
 import { useTranslation } from "react-i18next";
 import { useAccount, useMsal } from "@azure/msal-react";
-import { stringAvatar } from "../utils/functions";
-import NavigationLink from "../components/shared/NavigationLink";
+import { stringAvatar } from '@utils/functions';
+import NavigationLink from '@components/shared/NavigationLink';
 import { AnchorOutlined, AttachFileOutlined, AutoFixHigh, ChevronRight, ContactsOutlined, DirectionsBoat, ExpandMore, FirstPage, FolderOutlined, Groups, Home, Inventory2, InventoryOutlined, LastPage, LocalShipping, Logout, MenuOutlined, Portrait, RequestQuoteOutlined, RoomServiceOutlined, Search, SettingsOutlined, TextSnippetOutlined } from "@mui/icons-material";
 
 const drawerWidth = 220;

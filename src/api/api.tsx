@@ -1,16 +1,16 @@
 import { useEffect, useState } from "react";
-import { getAccessToken } from "../utils/functions";
+import { getAccessToken } from "@utils/functions";
 import { useAccount, useMsal } from "@azure/msal-react";
 import { crmRequest, documentRequest, offerRequest, pricingRequest, quoteRequest, sessionstorageRequest, shipmentRequest, templateRequest, transportRequest } from "../config/msalConfig";
-import { client as shipmentClient } from "./client/shipment";
-import { client as masterdataClient } from "./client/masterdata";
-import { client as documentClient } from "./client/document";
-import { client as crmClient } from "./client/crm";
-import { client as pricingClient } from "./client/pricing";
-import { client as templateClient } from "./client/template";
-import { client as offerClient } from "./client/offer";
-import { client as quoteClient } from "./client/quote";
-import { client as sessionstorageClient } from "./client/sessionstorage";
+import { client as shipmentClient } from "@features/shipment/api";
+import { client as masterdataClient } from "@features/masterdata/api";
+import { client as documentClient } from "@features/document/api";
+import { client as crmClient } from "@features/crm/api";
+import { client as pricingClient } from "@features/pricing/api";
+import { client as templateClient } from "@features/template/api";
+import { client as offerClient } from "@features/offer/api";
+import { client as quoteClient } from "@features/request/api";
+import { client as sessionstorageClient } from "@features/sessionstorage/api";
 
 const BackendServiceProvider = ({children}:{children:React.ReactNode}) => {
     const { instance, accounts } = useMsal();

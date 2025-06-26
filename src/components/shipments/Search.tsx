@@ -5,7 +5,7 @@ import IconButton from "@mui/material/IconButton";
 import InputLabel from "@mui/material/InputLabel";
 import Select, { SelectChangeEvent } from "@mui/material/Select";
 import Stack from "@mui/material/Stack";
-import { CategoryEnum, GetOrdersData, OrderRoleEnum, OrderStatusEnum } from "../../api/client/shipment";
+import { CategoryEnum, GetOrdersData, OrderRoleEnum, OrderStatusEnum } from '@api/client/shipment';
 import MenuItem from "@mui/material/MenuItem";
 import Autocomplete from "@mui/material/Autocomplete";
 import TextField from "@mui/material/TextField";

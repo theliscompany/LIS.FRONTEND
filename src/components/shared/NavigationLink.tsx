@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { ListItem, ListItemButton, ListItemIcon, ListItemText } from '@mui/material';
 import { NavLink } from 'react-router-dom';
-import { DarkTooltip } from '../../utils/misc/styles';
+import { DarkTooltip } from '@utils/misc/styles';
 
 interface NavigationLinkProps {
     url: string;

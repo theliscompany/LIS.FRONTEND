@@ -21,7 +21,7 @@ import {
   TableHead,
   TableRow,
 } from '@mui/material'
-import TableBodySkeleton from '../skeletons/TableBodySkeleton'
+import TableBodySkeleton from '@components/skeletons/TableBodySkeleton'
 import { rankItem } from '@tanstack/match-sorter-utils'
 import { Fragment } from 'react/jsx-runtime'
 import { useEffect, useState } from 'react'

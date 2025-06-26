@@ -1,10 +1,10 @@
 import { useState } from 'react';
-import { BootstrapDialogTitle, BootstrapInput, actionButtonStyles, buttonCloseStyles, inputLabelStyles } from '../../utils/misc/styles';
+import { BootstrapDialogTitle, BootstrapInput, actionButtonStyles, buttonCloseStyles, inputLabelStyles } from '@utils/misc/styles';
 import { Button, DialogActions, DialogContent, InputLabel, MenuItem, Select } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import { useTranslation } from 'react-i18next';
 import { enqueueSnackbar } from 'notistack';
-import { CreatedServiceViewModel, postService } from '../../api/client/transport';
+import { CreatedServiceViewModel, postService } from '@features/transport/api';
 
 function NewService(props: any) {
     const [testName, setTestName] = useState<string>("");

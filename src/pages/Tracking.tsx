@@ -2,11 +2,11 @@ import { useEffect, useState } from 'react';
 import { Alert, Box, Button, Chip, Divider, List, ListItem, ListItemText, Typography } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import Skeleton from '@mui/material/Skeleton';
-import { BootstrapInput } from '../utils/misc/styles';
+import { BootstrapInput } from '@utils/misc/styles';
 import { useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { getApiTrackingByTrackingNumber } from '../api/client/quote';
-import { parseLocation3 } from '../utils/functions';
+import { getApiTrackingByTrackingNumber } from '@features/request/api';
+import { parseLocation3 } from '@utils/functions';
 
 const Tracking = () => {
     const { id } = useParams();

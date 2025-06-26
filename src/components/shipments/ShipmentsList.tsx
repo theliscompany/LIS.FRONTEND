@@ -1,7 +1,7 @@
 import { Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from "@mui/material"
 import { flexRender } from "@tanstack/react-table"
 import { Fragment } from "react"
-import { OrdersListDto, OrderStatusEnum } from "../../api/client/shipment";
+import { OrdersListDto, OrderStatusEnum } from '@api/client/shipment';
 
 type ShipmentsListProps = {
     table: import("@tanstack/table-core").Table<OrdersListDto>;
