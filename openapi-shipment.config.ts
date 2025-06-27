@@ -6,7 +6,7 @@ export default defineConfig({
   output: {
     format: 'prettier',
     lint: 'eslint',
-    path: 'src/api/client/shipment' 
+    path: '@features/shipment/api' 
   },
   client: '@hey-api/client-axios',
   plugins: [
