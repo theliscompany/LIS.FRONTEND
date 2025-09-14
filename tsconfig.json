@@ -3,5 +3,28 @@
   "references": [
     { "path": "./tsconfig.app.json" },
     { "path": "./tsconfig.node.json" }
-  ]
+  ],
+  "compilerOptions": {
+    "baseUrl": "./src",
+    "paths": {
+      "@components/*": ["components/*"],
+      "@features/*": ["features/*"],
+      "@api/*": ["api/*"],
+      "@utils/*": ["utils/*"],
+      "@pages/*": ["pages/*"],
+      "@hooks/*": ["hooks/*"],
+
+      "@old-pages/pricing/*": ["features/pricing/pages/*"],
+      "@old-pages/offer/*": ["features/offer/pages/*"],
+      "@old-pages/quote/*": ["features/quote/pages/*"],
+      "@old-pages/shipment/*": ["features/shipment/pages/*"],
+      "@old-pages/masterdata/*": ["features/masterdata/pages/*"],
+
+      "@old-components/pricing/*": ["features/pricing/components/*"],
+      "@old-components/offer/*": ["features/offer/components/*"],
+      "@old-components/quote/*": ["features/quote/components/*"],
+      "@old-components/shipment/*": ["features/shipment/components/*"],
+      "@old-components/masterdata/*": ["features/masterdata/components/*"]
+    }
+  }
 }

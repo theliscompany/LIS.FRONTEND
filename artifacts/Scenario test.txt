@@ -1,0 +1,65 @@
+📦 Scénario – Demande de devis transport maritime
+🎯 Contexte client
+Le client souhaite expédier des marchandises en conteneurs depuis la Belgique vers Douala (Cameroun). Il compare plusieurs possibilités de combinaisons de conteneurs, de ports de départ et de transit time.
+
+🔁 Options proposées
+✅ Option 1 : Mixte 2 x 20’ DC + 1 x 40’ HC (port Anvers)
+Conteneurs : 2 x 20’ DC + 1 x 40’ HC
+
+Port de départ : Anvers (BEANR)
+
+Transit time estimé : 20 jours
+
+Haulage inclus depuis le lieu d’enlèvement jusqu’au port d’Anvers
+
+Services inclus :
+
+Assurance
+
+Déclaration douanière export
+
+Frais de documentation
+
+✅ Option 2 : 3 x 20’ DC (port Rotterdam)
+Conteneurs : 3 x 20’ DC
+
+Port de départ : Rotterdam (NLRTM)
+
+Transit time estimé : 22 jours
+
+Haulage inclus jusqu’au port de Rotterdam
+
+Services inclus :
+
+Assurance
+
+Manutention
+
+Booking & documentation
+
+✅ Option 3 : LCL (groupage)
+Conteneurs : Groupage LCL (volume estimé : 22 m³)
+
+Port de départ : Anvers (BEANR)
+
+Transit time estimé : 25 jours
+
+Solution économique pour faibles volumes
+
+Services inclus :
+
+Livraison au dépôt LCL
+
+Frais de documentation
+
+Assurance proportionnelle
+
+📌 Autres éléments valables pour les 3 options
+Incoterm : FOB
+
+Frais à destination non inclus
+
+Devis valable 14 jours
+
+Frais opérationnels supplémentaires possibles en cas d’erreurs ou manquements (stockage, surestaries, détention, etc.)
+

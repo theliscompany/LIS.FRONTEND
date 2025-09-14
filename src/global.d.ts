@@ -1,0 +1,11 @@
+declare module '@mui/icons-material/*';
+declare module '@mui/icons-material/Save';
+declare module '@mui/icons-material/LocationOn';
+declare module '@mui/icons-material/Description';
+declare module '@mui/icons-material/Person';
+declare module '@mui/icons-material/LocalShipping';
+declare module '@mui/icons-material/Inventory2';
+declare module '@mui/icons-material/Warning';
+declare module '@mui/icons-material/Security';
+declare module '@mui/icons-material/Edit';
+declare module '@mui/icons-material/Refresh'; 

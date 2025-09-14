@@ -1,0 +1,5495 @@
+{
+  "generatedAt": "2025-08-07T08:05:32.062Z",
+  "totalTypes": 102,
+  "modules": [
+    "crm",
+    "document",
+    "masterdata",
+    "offer",
+    "pricingnew",
+    "request",
+    "sessionstorage",
+    "shipment",
+    "template"
+  ],
+  "types": [
+    {
+      "typeName": "ContactViewModel",
+      "description": "ContactViewModel from Customer Relationship Management module",
+      "properties": {
+        "contactId": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "contactNumber": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "contactName": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "email": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "phone": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "celPhone": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "categories": {
+          "type": "array",
+          "required": true,
+          "isArray": true,
+          "isOptional": false
+        }
+      },
+      "module": "crm",
+      "source": "crm/api/types.gen.ts"
+    },
+    {
+      "typeName": "CreateContactViewModel",
+      "description": "CreateContactViewModel from Customer Relationship Management module",
+      "properties": {
+        "contactName": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "addressCountry": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "createdBy": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "countryCode": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "phone": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "email": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "categories": {
+          "type": "array",
+          "required": true,
+          "isArray": true,
+          "isOptional": false
+        }
+      },
+      "module": "crm",
+      "source": "crm/api/types.gen.ts"
+    },
+    {
+      "typeName": "UpdateContactViewModel",
+      "description": "UpdateContactViewModel from Customer Relationship Management module",
+      "properties": {
+        "contactName": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "addressCountry": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "createdBy": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "countryCode": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "phone": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "email": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "categories": {
+          "type": "array",
+          "required": true,
+          "isArray": true,
+          "isOptional": false
+        }
+      },
+      "module": "crm",
+      "source": "crm/api/types.gen.ts"
+    },
+    {
+      "typeName": "FileDto",
+      "description": "FileDto from Document Management module",
+      "properties": {
+        "fileBase64": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "blobName": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "contentType": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        }
+      },
+      "module": "document",
+      "source": "document/api/types.gen.ts"
+    },
+    {
+      "typeName": "CityViewModel",
+      "description": "CityViewModel from Master Data module",
+      "properties": {
+        "id": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "name": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "country": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        }
+      },
+      "module": "masterdata",
+      "source": "masterdata/api/types.gen.ts"
+    },
+    {
+      "typeName": "PackageViewModel",
+      "description": "PackageViewModel from Master Data module",
+      "properties": {
+        "packageId": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "packageName": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "isContainer": {
+          "type": "boolean",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        }
+      },
+      "module": "masterdata",
+      "source": "masterdata/api/types.gen.ts"
+    },
+    {
+      "typeName": "PortViewModel",
+      "description": "PortViewModel from Master Data module",
+      "properties": {
+        "portId": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "portName": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "country": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        }
+      },
+      "module": "masterdata",
+      "source": "masterdata/api/types.gen.ts"
+    },
+    {
+      "typeName": "ProductViewModel",
+      "description": "ProductViewModel from Master Data module",
+      "properties": {
+        "productId": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "productName": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "productDescription": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        }
+      },
+      "module": "masterdata",
+      "source": "masterdata/api/types.gen.ts"
+    },
+    {
+      "typeName": "ServiceTypeViewModel",
+      "description": "ServiceTypeViewModel from Master Data module",
+      "properties": {
+        "id": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "name": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "code": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "services": {
+          "type": "array",
+          "required": true,
+          "isArray": true,
+          "isOptional": false
+        }
+      },
+      "module": "masterdata",
+      "source": "masterdata/api/types.gen.ts"
+    },
+    {
+      "typeName": "ServiceViewModel",
+      "description": "ServiceViewModel from Master Data module",
+      "properties": {
+        "serviceId": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "serviceName": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "serviceDescription": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "serviceTypes": {
+          "type": "array",
+          "required": true,
+          "isArray": true,
+          "isOptional": false
+        }
+      },
+      "module": "masterdata",
+      "source": "masterdata/api/types.gen.ts"
+    },
+    {
+      "typeName": "AddressDto",
+      "description": "AddressDto from Quote and Offer Management module",
+      "properties": {
+        "company": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "addressLine": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "city": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "postalCode": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "country": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        }
+      },
+      "module": "offer",
+      "source": "offer/api/types.gen.ts"
+    },
+    {
+      "typeName": "AddressInfo",
+      "description": "AddressInfo from Quote and Offer Management module",
+      "properties": {
+        "company": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "addressLine": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "city": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "postalCode": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "country": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        }
+      },
+      "module": "offer",
+      "source": "offer/api/types.gen.ts"
+    },
+    {
+      "typeName": "CityInfo",
+      "description": "CityInfo from Quote and Offer Management module",
+      "properties": {
+        "cityName": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "name": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "country": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        }
+      },
+      "module": "offer",
+      "source": "offer/api/types.gen.ts"
+    },
+    {
+      "typeName": "ContainerInfo",
+      "description": "ContainerInfo from Quote and Offer Management module",
+      "properties": {
+        "id": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "containerType": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "quantity": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "unitPrice": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        }
+      },
+      "module": "offer",
+      "source": "offer/api/types.gen.ts"
+    },
+    {
+      "typeName": "ContainerOption",
+      "description": "ContainerOption from Quote and Offer Management module",
+      "properties": {
+        "id": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "containerType": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "quantity": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "unitPrice": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        }
+      },
+      "module": "offer",
+      "source": "offer/api/types.gen.ts"
+    },
+    {
+      "typeName": "ContainerOptionDto",
+      "description": "ContainerOptionDto from Quote and Offer Management module",
+      "properties": {
+        "containerId": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "containerType": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "quantity": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "unitPrice": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        }
+      },
+      "module": "offer",
+      "source": "offer/api/types.gen.ts"
+    },
+    {
+      "typeName": "CustomerInfo",
+      "description": "CustomerInfo from Quote and Offer Management module",
+      "properties": {
+        "contactId": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "contactName": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "companyName": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "email": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "phone": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        }
+      },
+      "module": "offer",
+      "source": "offer/api/types.gen.ts"
+    },
+    {
+      "typeName": "DeliveryAddressDto",
+      "description": "DeliveryAddressDto from Quote and Offer Management module",
+      "properties": {
+        "company": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "addressLine": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "city": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "postalCode": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "country": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        }
+      },
+      "module": "offer",
+      "source": "offer/api/types.gen.ts"
+    },
+    {
+      "typeName": "FileAttachment",
+      "description": "FileAttachment from Quote and Offer Management module",
+      "properties": {
+        "id": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "fileName": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "contentType": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "size": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "uploadedAt": {
+          "type": "date",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "url": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        }
+      },
+      "module": "offer",
+      "source": "offer/api/types.gen.ts"
+    },
+    {
+      "typeName": "FileAttachmentDto",
+      "description": "FileAttachmentDto from Quote and Offer Management module",
+      "properties": {
+        "id": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "fileName": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "contentType": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "size": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "uploadedAt": {
+          "type": "date",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "url": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        }
+      },
+      "module": "offer",
+      "source": "offer/api/types.gen.ts"
+    },
+    {
+      "typeName": "HaulageOption",
+      "description": "HaulageOption from Quote and Offer Management module",
+      "properties": {
+        "haulierId": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "haulierName": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "currency": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "unitTariff": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "freeTime": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "pickupAddress": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "deliveryPort": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "comment": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "validUntil": {
+          "type": "date",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        }
+      },
+      "module": "offer",
+      "source": "offer/api/types.gen.ts"
+    },
+    {
+      "typeName": "HaulageOptionDto",
+      "description": "HaulageOptionDto from Quote and Offer Management module",
+      "properties": {
+        "id": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "haulierId": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "haulierName": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "currency": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "unitTariff": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "freeTime": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "pickupAddress": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "deliveryPort": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "comment": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "validUntil": {
+          "type": "date",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        }
+      },
+      "module": "offer",
+      "source": "offer/api/types.gen.ts"
+    },
+    {
+      "typeName": "LocationInfo",
+      "description": "LocationInfo from Quote and Offer Management module",
+      "properties": {
+        "company": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "addressLine": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "city": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "postalCode": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "country": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        }
+      },
+      "module": "offer",
+      "source": "offer/api/types.gen.ts"
+    },
+    {
+      "typeName": "LocationShort",
+      "description": "LocationShort from Quote and Offer Management module",
+      "properties": {
+        "addressLine": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "city": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "postalCode": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "country": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "address": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        }
+      },
+      "module": "offer",
+      "source": "offer/api/types.gen.ts"
+    },
+    {
+      "typeName": "MiscellaneousOption",
+      "description": "MiscellaneousOption from Quote and Offer Management module",
+      "properties": {
+        "supplierName": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "currency": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "serviceId": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "serviceName": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "price": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "validUntil": {
+          "type": "date",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        }
+      },
+      "module": "offer",
+      "source": "offer/api/types.gen.ts"
+    },
+    {
+      "typeName": "MiscellaneousOptionDto",
+      "description": "MiscellaneousOptionDto from Quote and Offer Management module",
+      "properties": {
+        "miscellaneousId": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "supplierName": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "currency": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "serviceId": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "serviceName": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "price": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "validUntil": {
+          "type": "date",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        }
+      },
+      "module": "offer",
+      "source": "offer/api/types.gen.ts"
+    },
+    {
+      "typeName": "OptionTotals",
+      "description": "OptionTotals from Quote and Offer Management module",
+      "properties": {
+        "haulageTotal": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "seafreightTotal": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "miscellaneousTotal": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "grandTotal": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        }
+      },
+      "module": "offer",
+      "source": "offer/api/types.gen.ts"
+    },
+    {
+      "typeName": "OptionTotalsDto",
+      "description": "OptionTotalsDto from Quote and Offer Management module",
+      "properties": {
+        "haulageTotal": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "seafreightTotal": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "miscellaneousTotal": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "grandTotal": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        }
+      },
+      "module": "offer",
+      "source": "offer/api/types.gen.ts"
+    },
+    {
+      "typeName": "PortDto",
+      "description": "PortDto from Quote and Offer Management module",
+      "properties": {
+        "portId": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "portName": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "country": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "coordinates": {
+          "type": "array",
+          "required": true,
+          "isArray": true,
+          "isOptional": false
+        }
+      },
+      "module": "offer",
+      "source": "offer/api/types.gen.ts"
+    },
+    {
+      "typeName": "PortInfo",
+      "description": "PortInfo from Quote and Offer Management module",
+      "properties": {
+        "portId": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "portName": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "country": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "coordinates": {
+          "type": "array",
+          "required": true,
+          "isArray": true,
+          "isOptional": false
+        }
+      },
+      "module": "offer",
+      "source": "offer/api/types.gen.ts"
+    },
+    {
+      "typeName": "ProductInfo",
+      "description": "ProductInfo from Quote and Offer Management module",
+      "properties": {
+        "productId": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "productName": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        }
+      },
+      "module": "offer",
+      "source": "offer/api/types.gen.ts"
+    },
+    {
+      "typeName": "QuoteOfferUpdateModel",
+      "description": "QuoteOfferUpdateModel from Quote and Offer Management module",
+      "properties": {
+        "requestQuoteId": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "comment": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "quoteOfferNumber": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "emailUser": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "options": {
+          "type": "array",
+          "required": true,
+          "isArray": true,
+          "isOptional": false
+        },
+        "files": {
+          "type": "array",
+          "required": true,
+          "isArray": true,
+          "isOptional": false
+        },
+        "selectedOption": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "status": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "clientApproval": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "expirationDate": {
+          "type": "date",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "clientNumber": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "draftData": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        }
+      },
+      "module": "offer",
+      "source": "offer/api/types.gen.ts"
+    },
+    {
+      "typeName": "QuoteOption",
+      "description": "QuoteOption from Quote and Offer Management module",
+      "properties": {
+        "id": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "optionId": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "description": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "haulage": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "seaFreight": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "miscellaneous": {
+          "type": "array",
+          "required": true,
+          "isArray": true,
+          "isOptional": false
+        },
+        "deliveryAddress": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "totals": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "portDeparture": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "portDestination": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        }
+      },
+      "module": "offer",
+      "source": "offer/api/types.gen.ts"
+    },
+    {
+      "typeName": "QuoteOptionDto",
+      "description": "QuoteOptionDto from Quote and Offer Management module",
+      "properties": {
+        "optionId": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "description": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "haulage": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "seaFreight": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "miscellaneous": {
+          "type": "array",
+          "required": true,
+          "isArray": true,
+          "isOptional": false
+        },
+        "deliveryAddress": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "totals": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        }
+      },
+      "module": "offer",
+      "source": "offer/api/types.gen.ts"
+    },
+    {
+      "typeName": "SavedOption",
+      "description": "SavedOption from Quote and Offer Management module",
+      "properties": {
+        "id": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "name": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "selectedHaulage": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "selectedSeafreights": {
+          "type": "array",
+          "required": true,
+          "isArray": true,
+          "isOptional": false
+        },
+        "selectedMiscellaneous": {
+          "type": "array",
+          "required": true,
+          "isArray": true,
+          "isOptional": false
+        },
+        "services": {
+          "type": "array",
+          "required": true,
+          "isArray": true,
+          "isOptional": false
+        },
+        "selectedServices": {
+          "type": "array",
+          "required": true,
+          "isArray": true,
+          "isOptional": false
+        },
+        "selectedContainers": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "requestData": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "createdAt": {
+          "type": "date",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "marginType": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "marginValue": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "seafreightQuantities": {
+          "type": "object",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "haulageQuantity": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "miscQuantities": {
+          "type": "object",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "surchargeQuantities": {
+          "type": "object",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        }
+      },
+      "module": "offer",
+      "source": "offer/api/types.gen.ts"
+    },
+    {
+      "typeName": "SeaFreightOption",
+      "description": "SeaFreightOption from Quote and Offer Management module",
+      "properties": {
+        "seaFreightId": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "carrierName": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "carrierAgentName": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "departurePort": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "destinationPort": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "currency": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "transitTimeDays": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "frequency": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "defaultContainer": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "containers": {
+          "type": "array",
+          "required": true,
+          "isArray": true,
+          "isOptional": false
+        },
+        "comment": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "validUntil": {
+          "type": "date",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        }
+      },
+      "module": "offer",
+      "source": "offer/api/types.gen.ts"
+    },
+    {
+      "typeName": "SeaFreightOptionDto",
+      "description": "SeaFreightOptionDto from Quote and Offer Management module",
+      "properties": {
+        "id": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "seaFreightId": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "carrierName": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "carrierAgentName": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "departurePort": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "destinationPort": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "currency": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "transitTimeDays": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "frequency": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "defaultContainer": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "containers": {
+          "type": "array",
+          "required": true,
+          "isArray": true,
+          "isOptional": false
+        },
+        "comment": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "validUntil": {
+          "type": "date",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        }
+      },
+      "module": "offer",
+      "source": "offer/api/types.gen.ts"
+    },
+    {
+      "typeName": "SelectedContainerConfig",
+      "description": "SelectedContainerConfig from Quote and Offer Management module",
+      "properties": {
+        "list": {
+          "type": "array",
+          "required": true,
+          "isArray": true,
+          "isOptional": false
+        }
+      },
+      "module": "offer",
+      "source": "offer/api/types.gen.ts"
+    },
+    {
+      "typeName": "SelectedHaulage",
+      "description": "SelectedHaulage from Quote and Offer Management module",
+      "properties": {
+        "haulierId": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "haulierName": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "currency": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "unitTariff": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "freeTime": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "pickupAddress": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "deliveryPort": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "comment": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "validUntil": {
+          "type": "date",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        }
+      },
+      "module": "offer",
+      "source": "offer/api/types.gen.ts"
+    },
+    {
+      "typeName": "SelectedMiscellaneous",
+      "description": "SelectedMiscellaneous from Quote and Offer Management module",
+      "properties": {
+        "supplierName": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "currency": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "serviceId": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "serviceName": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "price": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "validUntil": {
+          "type": "date",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        }
+      },
+      "module": "offer",
+      "source": "offer/api/types.gen.ts"
+    },
+    {
+      "typeName": "SelectedSeafreight",
+      "description": "SelectedSeafreight from Quote and Offer Management module",
+      "properties": {
+        "seaFreightId": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "carrierName": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "carrierAgentName": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "departurePort": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "destinationPort": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "currency": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "transitTimeDays": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "frequency": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "defaultContainer": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "containers": {
+          "type": "array",
+          "required": true,
+          "isArray": true,
+          "isOptional": false
+        },
+        "comment": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "validUntil": {
+          "type": "date",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        }
+      },
+      "module": "offer",
+      "source": "offer/api/types.gen.ts"
+    },
+    {
+      "typeName": "SelectedService",
+      "description": "SelectedService from Quote and Offer Management module",
+      "properties": {
+        "serviceId": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "serviceName": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "name": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "orderCount": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "usagePercent": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        }
+      },
+      "module": "offer",
+      "source": "offer/api/types.gen.ts"
+    },
+    {
+      "typeName": "WizardPortInfo",
+      "description": "WizardPortInfo from Quote and Offer Management module",
+      "properties": {
+        "portId": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "portName": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "country": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        }
+      },
+      "module": "offer",
+      "source": "offer/api/types.gen.ts"
+    },
+    {
+      "typeName": "Carrier",
+      "description": "Carrier from Pricing and Freight module",
+      "properties": {
+        "id": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "name": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        }
+      },
+      "module": "pricingnew",
+      "source": "pricingnew/api/types.gen.ts"
+    },
+    {
+      "typeName": "Charges",
+      "description": "Charges from Pricing and Freight module",
+      "properties": {
+        "basePrice": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "surcharges": {
+          "type": "array",
+          "required": true,
+          "isArray": true,
+          "isOptional": false
+        }
+      },
+      "module": "pricingnew",
+      "source": "pricingnew/api/types.gen.ts"
+    },
+    {
+      "typeName": "ComparisonAlert",
+      "description": "ComparisonAlert from Pricing and Freight module",
+      "properties": {
+        "type": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "message": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "severity": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        }
+      },
+      "module": "pricingnew",
+      "source": "pricingnew/api/types.gen.ts"
+    },
+    {
+      "typeName": "ComparisonMetrics",
+      "description": "ComparisonMetrics from Pricing and Freight module",
+      "properties": {
+        "totalPrice": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "pricePerKg": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "pricePerCbm": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "surchargeTransparency": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "validityDaysRemaining": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "isExpired": {
+          "type": "boolean",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "frequencyLevel": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        }
+      },
+      "module": "pricingnew",
+      "source": "pricingnew/api/types.gen.ts"
+    },
+    {
+      "typeName": "ComparisonScoreBreakdown",
+      "description": "ComparisonScoreBreakdown from Pricing and Freight module",
+      "properties": {
+        "totalPriceScore": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "unitPriceScore": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "surchargeDetailsScore": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "transitTimeScore": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "frequencyScore": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "validityScore": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "incotermScore": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "containerTypeScore": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "carrierReputationScore": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "deliveryTermsScore": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        }
+      },
+      "module": "pricingnew",
+      "source": "pricingnew/api/types.gen.ts"
+    },
+    {
+      "typeName": "ComparisonSummary",
+      "description": "ComparisonSummary from Pricing and Freight module",
+      "properties": {
+        "totalOffers": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "bestScore": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "worstScore": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "averageScore": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "lowestPrice": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "highestPrice": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "averagePrice": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "shortestTransitTime": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "longestTransitTime": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "expiredOffers": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "totalAlerts": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        }
+      },
+      "module": "pricingnew",
+      "source": "pricingnew/api/types.gen.ts"
+    },
+    {
+      "typeName": "DocumentMetadata",
+      "description": "DocumentMetadata from Pricing and Freight module",
+      "properties": {
+        "documentType": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "supplier": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "documentDate": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "referenceNumber": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "contactInfo": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "confidenceScore": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "extractedFields": {
+          "type": "array",
+          "required": true,
+          "isArray": true,
+          "isOptional": false
+        },
+        "warnings": {
+          "type": "array",
+          "required": true,
+          "isArray": true,
+          "isOptional": false
+        }
+      },
+      "module": "pricingnew",
+      "source": "pricingnew/api/types.gen.ts"
+    },
+    {
+      "typeName": "Haulage",
+      "description": "Haulage from Pricing and Freight module",
+      "properties": {
+        "offerId": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "haulierId": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "haulierName": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "pickupLocation": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "loadingLocation": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "deliveryLocation": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "emptyReturnLocation": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "distanceKm": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "estimatedTransitTimeHours": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "currency": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "validFrom": {
+          "type": "date",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "validUntil": {
+          "type": "date",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "freeTime": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "multiStop": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "overtimeTariff": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "unitTariff": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "cargoTypes": {
+          "type": "array",
+          "required": true,
+          "isArray": true,
+          "isOptional": false
+        },
+        "surcharges": {
+          "type": "array",
+          "required": true,
+          "isArray": true,
+          "isOptional": false
+        },
+        "transportInsurance": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "deliveryTerms": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "comment": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "createdBy": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "createdAt": {
+          "type": "date",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "lastUpdatedBy": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "lastUpdatedAt": {
+          "type": "date",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        }
+      },
+      "module": "pricingnew",
+      "source": "pricingnew/api/types.gen.ts"
+    },
+    {
+      "typeName": "HaulageLocation",
+      "description": "HaulageLocation from Pricing and Freight module",
+      "properties": {
+        "displayName": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "formattedAddress": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "placeId": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "latitude": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "longitude": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        }
+      },
+      "module": "pricingnew",
+      "source": "pricingnew/api/types.gen.ts"
+    },
+    {
+      "typeName": "HaulagePricing",
+      "description": "HaulagePricing from Pricing and Freight module",
+      "properties": {
+        "origin": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "destination": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "haulier": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "serviceType": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "price20": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "price40": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "currency": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "validFrom": {
+          "type": "date",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "validUntil": {
+          "type": "date",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "freeTime": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "remarks": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        }
+      },
+      "module": "pricingnew",
+      "source": "pricingnew/api/types.gen.ts"
+    },
+    {
+      "typeName": "HaulageSurcharge",
+      "description": "HaulageSurcharge from Pricing and Freight module",
+      "properties": {
+        "type": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "name": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "description": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "amount": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "currency": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "isPercentage": {
+          "type": "boolean",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "isMandatory": {
+          "type": "boolean",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "validFrom": {
+          "type": "date",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "validUntil": {
+          "type": "date",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        }
+      },
+      "module": "pricingnew",
+      "source": "pricingnew/api/types.gen.ts"
+    },
+    {
+      "typeName": "HaulageTransportInsurance",
+      "description": "HaulageTransportInsurance from Pricing and Freight module",
+      "properties": {
+        "isInsured": {
+          "type": "boolean",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "rate": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "minimumAmount": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "maximumAmount": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "currency": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "insuranceProvider": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "policyNumber": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        }
+      },
+      "module": "pricingnew",
+      "source": "pricingnew/api/types.gen.ts"
+    },
+    {
+      "typeName": "Miscellaneous",
+      "description": "Miscellaneous from Pricing and Freight module",
+      "properties": {
+        "id": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "serviceProviderId": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "serviceProviderName": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "serviceType": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "serviceName": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "serviceDescription": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "departurePortId": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "departurePortName": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "destinationPortId": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "destinationPortName": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "locationCity": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "locationCountry": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "applicableContainerTypes": {
+          "type": "array",
+          "required": true,
+          "isArray": true,
+          "isOptional": false
+        },
+        "serviceDurationHours": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "serviceDurationDescription": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "pricing": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "currency": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "specialConditions": {
+          "type": "array",
+          "required": true,
+          "isArray": true,
+          "isOptional": false
+        },
+        "comment": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "validFrom": {
+          "type": "date",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "validUntil": {
+          "type": "date",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "createdBy": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "createdAt": {
+          "type": "date",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "updatedAt": {
+          "type": "date",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "isActive": {
+          "type": "boolean",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        }
+      },
+      "module": "pricingnew",
+      "source": "pricingnew/api/types.gen.ts"
+    },
+    {
+      "typeName": "MiscellaneousPricing",
+      "description": "MiscellaneousPricing from Pricing and Freight module",
+      "properties": {
+        "pricingType": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "basePrice": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "minimumCharge": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "maximumCharge": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "unitOfMeasure": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "minimumQuantity": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "maximumQuantity": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        }
+      },
+      "module": "pricingnew",
+      "source": "pricingnew/api/types.gen.ts"
+    },
+    {
+      "typeName": "MiscellaneousSpecialCondition",
+      "description": "MiscellaneousSpecialCondition from Pricing and Freight module",
+      "properties": {
+        "conditionType": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "description": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "isRequired": {
+          "type": "boolean",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        }
+      },
+      "module": "pricingnew",
+      "source": "pricingnew/api/types.gen.ts"
+    },
+    {
+      "typeName": "Port",
+      "description": "Port from Pricing and Freight module",
+      "properties": {
+        "unlocode": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "name": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        }
+      },
+      "module": "pricingnew",
+      "source": "pricingnew/api/types.gen.ts"
+    },
+    {
+      "typeName": "PriceStatistics",
+      "description": "PriceStatistics from Pricing and Freight module",
+      "properties": {
+        "minPrice": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "maxPrice": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "averagePrice": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "medianPrice": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "standardDeviation": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "pricedOffers": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "currency": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "priceRangeDistribution": {
+          "type": "object",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        }
+      },
+      "module": "pricingnew",
+      "source": "pricingnew/api/types.gen.ts"
+    },
+    {
+      "typeName": "SeaFreightComparisonCriteria",
+      "description": "SeaFreightComparisonCriteria from Pricing and Freight module",
+      "properties": {
+        "totalPriceWeight": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "unitPriceWeight": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "surchargeDetailsWeight": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "transitTimeWeight": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "frequencyWeight": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "validityWeight": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "incotermWeight": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "containerTypeWeight": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "carrierReputationWeight": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "deliveryTermsWeight": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        }
+      },
+      "module": "pricingnew",
+      "source": "pricingnew/api/types.gen.ts"
+    },
+    {
+      "typeName": "SeaFreightComparisonResult",
+      "description": "SeaFreightComparisonResult from Pricing and Freight module",
+      "properties": {
+        "offer": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "finalScore": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "scoreBreakdown": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "metrics": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "alerts": {
+          "type": "array",
+          "required": true,
+          "isArray": true,
+          "isOptional": false
+        },
+        "rank": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        }
+      },
+      "module": "pricingnew",
+      "source": "pricingnew/api/types.gen.ts"
+    },
+    {
+      "typeName": "SeaFreightPricing",
+      "description": "SeaFreightPricing from Pricing and Freight module",
+      "properties": {
+        "departurePort": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "destinationPort": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "carrier": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "serviceType": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "price20": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "price40": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "price40HC": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "currency": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "validFrom": {
+          "type": "date",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "validUntil": {
+          "type": "date",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "transitTime": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "frequency": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "remarks": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        }
+      },
+      "module": "pricingnew",
+      "source": "pricingnew/api/types.gen.ts"
+    },
+    {
+      "typeName": "SearchAggregations",
+      "description": "SearchAggregations from Pricing and Freight module",
+      "properties": {
+        "totalResults": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "carrierDistribution": {
+          "type": "object",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "containerTypeDistribution": {
+          "type": "object",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "topCarriers": {
+          "type": "object",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "topRoutes": {
+          "type": "object",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "originPortDistribution": {
+          "type": "object",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "destinationPortDistribution": {
+          "type": "object",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "priceStats": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "transitStats": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "currencyDistribution": {
+          "type": "object",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "validityPeriodDistribution": {
+          "type": "object",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        }
+      },
+      "module": "pricingnew",
+      "source": "pricingnew/api/types.gen.ts"
+    },
+    {
+      "typeName": "Surcharge",
+      "description": "Surcharge from Pricing and Freight module",
+      "properties": {
+        "name": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "value": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "type": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "description": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "isMandatory": {
+          "type": "boolean",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "currency": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        }
+      },
+      "module": "pricingnew",
+      "source": "pricingnew/api/types.gen.ts"
+    },
+    {
+      "typeName": "TransitTimeStatistics",
+      "description": "TransitTimeStatistics from Pricing and Freight module",
+      "properties": {
+        "minTransitDays": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "maxTransitDays": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "averageTransitDays": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "medianTransitDays": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        }
+      },
+      "module": "pricingnew",
+      "source": "pricingnew/api/types.gen.ts"
+    },
+    {
+      "typeName": "Validity",
+      "description": "Validity from Pricing and Freight module",
+      "properties": {
+        "startDate": {
+          "type": "date",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "endDate": {
+          "type": "date",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        }
+      },
+      "module": "pricingnew",
+      "source": "pricingnew/api/types.gen.ts"
+    },
+    {
+      "typeName": "Assignee",
+      "description": "Assignee from Request Management module",
+      "properties": {
+        "id": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "name": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "email": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "userId": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "idUser": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        }
+      },
+      "module": "request",
+      "source": "request/api/types.gen.ts"
+    },
+    {
+      "typeName": "EmailConfig",
+      "description": "EmailConfig from Request Management module",
+      "properties": {
+        "id": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "name": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "smtpServer": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "port": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "username": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "password": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "enableSsl": {
+          "type": "boolean",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        }
+      },
+      "module": "request",
+      "source": "request/api/types.gen.ts"
+    },
+    {
+      "typeName": "GraphApiUser",
+      "description": "GraphApiUser from Request Management module",
+      "properties": {
+        "id": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "displayName": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "userPrincipalName": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "mail": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "graphObjectId": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        }
+      },
+      "module": "request",
+      "source": "request/api/types.gen.ts"
+    },
+    {
+      "typeName": "LocationViewModel",
+      "description": "LocationViewModel from Request Management module",
+      "properties": {
+        "addressLine": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "city": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "postalCode": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "country": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        }
+      },
+      "module": "request",
+      "source": "request/api/types.gen.ts"
+    },
+    {
+      "typeName": "RequestQuoteListViewModel",
+      "description": "RequestQuoteListViewModel from Request Management module",
+      "properties": {
+        "requestQuoteId": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "trackingNumber": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "customerId": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "companyName": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "status": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "createdAt": {
+          "type": "date",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "updatedAt": {
+          "type": "date",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "productName": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "incoterm": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "packingType": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "pickupCity": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "pickupCountry": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "deliveryCity": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "deliveryCountry": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "assigneeId": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "assigneeDisplayName": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        }
+      },
+      "module": "request",
+      "source": "request/api/types.gen.ts"
+    },
+    {
+      "typeName": "RequestQuoteNote",
+      "description": "RequestQuoteNote from Request Management module",
+      "properties": {
+        "id": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "requestQuoteId": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "content": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "userId": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "isInternal": {
+          "type": "boolean",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "type": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "subject": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "email": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "idUser": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "createdAt": {
+          "type": "date",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        }
+      },
+      "module": "request",
+      "source": "request/api/types.gen.ts"
+    },
+    {
+      "typeName": "RequestQuoteResponseViewModel",
+      "description": "RequestQuoteResponseViewModel from Request Management module",
+      "properties": {
+        "requestQuoteId": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "trackingNumber": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "customerId": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "companyName": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "contactFullName": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "email": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "phone": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "assigneeId": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "assigneeDisplayName": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "pickupLocation": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "deliveryLocation": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "pickupDate": {
+          "type": "date",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "deliveryDate": {
+          "type": "date",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "goodsDescription": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "numberOfUnits": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "totalWeightKg": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "totalDimensions": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "isDangerousGoods": {
+          "type": "boolean",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "requiresTemperatureControl": {
+          "type": "boolean",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "isFragileOrHighValue": {
+          "type": "boolean",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "requiresSpecialHandling": {
+          "type": "boolean",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "specialInstructions": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "preferredTransportMode": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "additionalComments": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "createdAt": {
+          "type": "date",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "updatedAt": {
+          "type": "date",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "status": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "productId": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "productName": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "incoterm": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "packingType": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "tags": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "cargoType": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "quantity": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "details": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        }
+      },
+      "module": "request",
+      "source": "request/api/types.gen.ts"
+    },
+    {
+      "typeName": "RequestQuoteViewModel",
+      "description": "RequestQuoteViewModel from Request Management module",
+      "properties": {
+        "requestQuoteId": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "customerId": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "pickupLocation": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "deliveryLocation": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "cargoType": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "quantity": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "details": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "tags": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "packingType": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "assigneeId": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "productId": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "productName": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "pickupDate": {
+          "type": "date",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "deliveryDate": {
+          "type": "date",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "goodsDescription": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "numberOfUnits": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "totalWeightKg": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "totalDimensions": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "isDangerousGoods": {
+          "type": "boolean",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "requiresTemperatureControl": {
+          "type": "boolean",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "isFragileOrHighValue": {
+          "type": "boolean",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "requiresSpecialHandling": {
+          "type": "boolean",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "specialInstructions": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "preferredTransportMode": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "additionalComments": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "incoterm": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        }
+      },
+      "module": "request",
+      "source": "request/api/types.gen.ts"
+    },
+    {
+      "typeName": "ProcessState",
+      "description": "ProcessState from Session Storage module",
+      "properties": {
+        "id": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "userId": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "processName": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "stateData": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "createdAt": {
+          "type": "date",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "expiresAt": {
+          "type": "date",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        }
+      },
+      "module": "sessionstorage",
+      "source": "sessionstorage/api/types.gen.ts"
+    },
+    {
+      "typeName": "OrderDto",
+      "description": "OrderDto from Shipment Management module",
+      "properties": {
+        "orderId": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "customerId": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "sellerId": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "buyerId": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "refClient": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "refSeller": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "refBuyer": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "incoTerm": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "incotermDestination": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "exportation": {
+          "type": "boolean",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "city": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "cityIncotermTo": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "shipLineId": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "refShippingAgent": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "shippingAgent": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "shipId": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "departurePortId": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "destinationPortId": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "estimatedDepartureDate": {
+          "type": "date",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "estimatedArrivalDate": {
+          "type": "date",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        }
+      },
+      "module": "shipment",
+      "source": "shipment/api/types.gen.ts"
+    },
+    {
+      "typeName": "OrdersListDto",
+      "description": "OrdersListDto from Shipment Management module",
+      "properties": {
+        "orderId": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "orderNumber": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "orderDate": {
+          "type": "date",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "fiscalYear": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "customerName": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "sellerName": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "buyerName": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "loadingPort": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "dischargePort": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "estimatedDepartureDate": {
+          "type": "date",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "estimatedArrivalDate": {
+          "type": "date",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "shipName": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "shippingLine": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "exportation": {
+          "type": "boolean",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "orderStatus": {
+          "type": "enum",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "margin": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "ratio": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "incoming": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "outgoing": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        }
+      },
+      "module": "shipment",
+      "source": "shipment/api/types.gen.ts"
+    },
+    {
+      "typeName": "ResponseOrdersListDto",
+      "description": "ResponseOrdersListDto from Shipment Management module",
+      "properties": {
+        "orders": {
+          "type": "array",
+          "required": true,
+          "isArray": true,
+          "isOptional": false
+        },
+        "margin": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "ratio": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "incoming": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "outgoing": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "averageMargin": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "displayBudgetDetails": {
+          "type": "boolean",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        }
+      },
+      "module": "shipment",
+      "source": "shipment/api/types.gen.ts"
+    },
+    {
+      "typeName": "AddressDTO",
+      "description": "AddressDTO from template module",
+      "properties": {
+        "street": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "city": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "zipCode": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "country": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        }
+      },
+      "module": "template",
+      "source": "template/api/types.gen.ts"
+    },
+    {
+      "typeName": "CustomerDTO",
+      "description": "CustomerDTO from template module",
+      "properties": {
+        "name": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "email": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "phone": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "company": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "address": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        }
+      },
+      "module": "template",
+      "source": "template/api/types.gen.ts"
+    },
+    {
+      "typeName": "EmailTemplate",
+      "description": "EmailTemplate from template module",
+      "properties": {
+        "id": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "name": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "subject": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "htmlBody": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "textBody": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "supportedObjectTypes": {
+          "type": "array",
+          "required": true,
+          "isArray": true,
+          "isOptional": false
+        },
+        "objectSchemas": {
+          "type": "object",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "placeholders": {
+          "type": "array",
+          "required": true,
+          "isArray": true,
+          "isOptional": false
+        },
+        "configuration": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "author": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "tags": {
+          "type": "array",
+          "required": true,
+          "isArray": true,
+          "isOptional": false
+        },
+        "createdDate": {
+          "type": "date",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "modifiedDate": {
+          "type": "date",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "currentVersion": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "versionHistory": {
+          "type": "array",
+          "required": true,
+          "isArray": true,
+          "isOptional": false
+        },
+        "stats": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        }
+      },
+      "module": "template",
+      "source": "template/api/types.gen.ts"
+    },
+    {
+      "typeName": "EmailTemplateCreateDTO",
+      "description": "EmailTemplateCreateDTO from template module",
+      "properties": {
+        "name": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "subject": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "htmlBody": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "textBody": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "supportedObjectTypes": {
+          "type": "array",
+          "required": true,
+          "isArray": true,
+          "isOptional": false
+        },
+        "objectSchemas": {
+          "type": "object",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "author": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "tags": {
+          "type": "array",
+          "required": true,
+          "isArray": true,
+          "isOptional": false
+        },
+        "configuration": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        }
+      },
+      "module": "template",
+      "source": "template/api/types.gen.ts"
+    },
+    {
+      "typeName": "EmailTemplatePreviewRequestDTO",
+      "description": "EmailTemplatePreviewRequestDTO from template module",
+      "properties": {
+        "subject": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "htmlBody": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "textBody": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "sampleData": {
+          "type": "object",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "configuration": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        }
+      },
+      "module": "template",
+      "source": "template/api/types.gen.ts"
+    },
+    {
+      "typeName": "EmailTemplateRenderRequestDTO",
+      "description": "EmailTemplateRenderRequestDTO from template module",
+      "properties": {
+        "templateId": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "objectType": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "data": {
+          "type": "object",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "overrideVariables": {
+          "type": "object",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        }
+      },
+      "module": "template",
+      "source": "template/api/types.gen.ts"
+    },
+    {
+      "typeName": "EmailTemplateUpdateDTO",
+      "description": "EmailTemplateUpdateDTO from template module",
+      "properties": {
+        "name": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "subject": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "htmlBody": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "textBody": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "supportedObjectTypes": {
+          "type": "array",
+          "required": true,
+          "isArray": true,
+          "isOptional": false
+        },
+        "objectSchemas": {
+          "type": "object",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "author": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "tags": {
+          "type": "array",
+          "required": true,
+          "isArray": true,
+          "isOptional": false
+        },
+        "currentVersion": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "changeDescription": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "configuration": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        }
+      },
+      "module": "template",
+      "source": "template/api/types.gen.ts"
+    },
+    {
+      "typeName": "EmailTemplateVersion",
+      "description": "EmailTemplateVersion from template module",
+      "properties": {
+        "version": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "subject": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "htmlBody": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "textBody": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "createdDate": {
+          "type": "date",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "createdBy": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "changeDescription": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        }
+      },
+      "module": "template",
+      "source": "template/api/types.gen.ts"
+    },
+    {
+      "typeName": "GenericTemplateRenderRequestDTO",
+      "description": "GenericTemplateRenderRequestDTO from template module",
+      "properties": {
+        "templateId": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "subject": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "htmlBody": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "textBody": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "data": {
+          "type": "unknown",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "objectType": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "configuration": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        }
+      },
+      "module": "template",
+      "source": "template/api/types.gen.ts"
+    },
+    {
+      "typeName": "MailSettingsDTO",
+      "description": "MailSettingsDTO from template module",
+      "properties": {
+        "from": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "fromName": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "replyTo": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "companyName": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "companyLogo": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "supportEmail": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "websiteUrl": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        }
+      },
+      "module": "template",
+      "source": "template/api/types.gen.ts"
+    },
+    {
+      "typeName": "ObjectSchema",
+      "description": "ObjectSchema from template module",
+      "properties": {
+        "id": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "typeName": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "properties": {
+          "type": "object",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "isRequired": {
+          "type": "boolean",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "description": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        }
+      },
+      "module": "template",
+      "source": "template/api/types.gen.ts"
+    },
+    {
+      "typeName": "ObjectSchemaDTO",
+      "description": "ObjectSchemaDTO from template module",
+      "properties": {
+        "typeName": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "description": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "properties": {
+          "type": "object",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "isRequired": {
+          "type": "boolean",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        }
+      },
+      "module": "template",
+      "source": "template/api/types.gen.ts"
+    },
+    {
+      "typeName": "PropertySchema",
+      "description": "PropertySchema from template module",
+      "properties": {
+        "name": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "type": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "isRequired": {
+          "type": "boolean",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "defaultValue": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "format": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "description": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "allowedValues": {
+          "type": "array",
+          "required": true,
+          "isArray": true,
+          "isOptional": false
+        }
+      },
+      "module": "template",
+      "source": "template/api/types.gen.ts"
+    },
+    {
+      "typeName": "PropertySchemaDTO",
+      "description": "PropertySchemaDTO from template module",
+      "properties": {
+        "name": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "type": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "isRequired": {
+          "type": "boolean",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "defaultValue": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "format": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "description": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "allowedValues": {
+          "type": "array",
+          "required": true,
+          "isArray": true,
+          "isOptional": false
+        }
+      },
+      "module": "template",
+      "source": "template/api/types.gen.ts"
+    },
+    {
+      "typeName": "QuoteOfferDTO",
+      "description": "QuoteOfferDTO from template module",
+      "properties": {
+        "quoteOfferNumber": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "requestQuoteId": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "clientNumber": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "createdDate": {
+          "type": "date",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "expirationDate": {
+          "type": "date",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "comment": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "totalAmount": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "currency": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "status": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "customer": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "items": {
+          "type": "array",
+          "required": true,
+          "isArray": true,
+          "isOptional": false
+        }
+      },
+      "module": "template",
+      "source": "template/api/types.gen.ts"
+    },
+    {
+      "typeName": "QuoteOfferEmailRequestDTO",
+      "description": "QuoteOfferEmailRequestDTO from template module",
+      "properties": {
+        "quoteOffer": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "approvalUrl": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "mailSettings": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "customTemplate": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "customSubject": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "additionalVariables": {
+          "type": "object",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        }
+      },
+      "module": "template",
+      "source": "template/api/types.gen.ts"
+    },
+    {
+      "typeName": "QuoteOfferItemDTO",
+      "description": "QuoteOfferItemDTO from template module",
+      "properties": {
+        "description": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "quantity": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "unitPrice": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "totalPrice": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "unit": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        }
+      },
+      "module": "template",
+      "source": "template/api/types.gen.ts"
+    },
+    {
+      "typeName": "RenderedEmail",
+      "description": "RenderedEmail from template module",
+      "properties": {
+        "subject": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "htmlBody": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "textBody": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "templateId": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "renderedAt": {
+          "type": "date",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "metadata": {
+          "type": "object",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "renderDuration": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        }
+      },
+      "module": "template",
+      "source": "template/api/types.gen.ts"
+    },
+    {
+      "typeName": "TemplateConfiguration",
+      "description": "TemplateConfiguration from template module",
+      "properties": {
+        "engine": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "allowHtml": {
+          "type": "boolean",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "strictMode": {
+          "type": "boolean",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "globalVariables": {
+          "type": "object",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "locale": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "timeZone": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        }
+      },
+      "module": "template",
+      "source": "template/api/types.gen.ts"
+    },
+    {
+      "typeName": "TemplateConfigurationDTO",
+      "description": "TemplateConfigurationDTO from template module",
+      "properties": {
+        "engine": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "allowHtml": {
+          "type": "boolean",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "strictMode": {
+          "type": "boolean",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "globalVariables": {
+          "type": "object",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "enabledHelpers": {
+          "type": "array",
+          "required": true,
+          "isArray": true,
+          "isOptional": false
+        },
+        "autoEscapeHtml": {
+          "type": "boolean",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "renderTimeout": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        }
+      },
+      "module": "template",
+      "source": "template/api/types.gen.ts"
+    },
+    {
+      "typeName": "TemplateRenderResponseDTO",
+      "description": "TemplateRenderResponseDTO from template module",
+      "properties": {
+        "subject": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "htmlBody": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "textBody": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "templateId": {
+          "type": "string",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "renderedAt": {
+          "type": "date",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "metadata": {
+          "type": "object",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "renderTimeMs": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "warnings": {
+          "type": "array",
+          "required": true,
+          "isArray": true,
+          "isOptional": false
+        },
+        "usedPlaceholders": {
+          "type": "array",
+          "required": true,
+          "isArray": true,
+          "isOptional": false
+        },
+        "missingPlaceholders": {
+          "type": "array",
+          "required": true,
+          "isArray": true,
+          "isOptional": false
+        }
+      },
+      "module": "template",
+      "source": "template/api/types.gen.ts"
+    },
+    {
+      "typeName": "TemplateStats",
+      "description": "TemplateStats from template module",
+      "properties": {
+        "usageCount": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "lastUsed": {
+          "type": "date",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "errorHistory": {
+          "type": "array",
+          "required": true,
+          "isArray": true,
+          "isOptional": false
+        },
+        "averageRenderTime": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "successfulRenders": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "failedRenders": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        }
+      },
+      "module": "template",
+      "source": "template/api/types.gen.ts"
+    },
+    {
+      "typeName": "TimeSpan",
+      "description": "TimeSpan from template module",
+      "properties": {
+        "ticks": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "days": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "hours": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "milliseconds": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "microseconds": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "minutes": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        },
+        "seconds": {
+          "type": "number",
+          "required": true,
+          "isArray": false,
+          "isOptional": false
+        }
+      },
+      "module": "template",
+      "source": "template/api/types.gen.ts"
+    }
+  ]
+}

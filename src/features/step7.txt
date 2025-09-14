@@ -1,0 +1,23 @@
+1. Récapitulatif complet et interactif
+Affichage de toutes les informations saisies ou sélectionnées dans les étapes précédentes : client, produits, services, contacts, prix, incoterm, etc.
+Possibilité de cliquer sur une section pour revenir à l’étape correspondante et modifier (liens ou boutons « modifier »).
+2. Validation et vérification
+Mise en avant des champs obligatoires manquants ou incohérents (alerte, badge, surlignage).
+Affichage d’un message de confirmation clair avant l’envoi.
+3. Téléchargement ou aperçu PDF
+Génération d’un aperçu PDF de l’offre/devis ou de la demande, téléchargeable avant validation.
+4. Ajout de commentaires ou notes
+Champ pour ajouter un commentaire ou une note interne à l’offre/demande.
+5. Confirmation par double action
+Bouton « Valider et envoyer » avec une confirmation (dialogue ou slide-to-confirm) pour éviter les erreurs de clic.
+6. Affichage du panier final
+Récapitulatif du panier (services, prix, fournisseurs) avec possibilité de retirer un élément de dernière minute.
+7. Gestion des pièces jointes
+Possibilité d’ajouter ou de visualiser des documents joints (contrats, conditions, etc.).
+8. Indicateur de progression
+Affichage d’une barre de progression ou d’un check vert sur toutes les étapes validées.
+9. Résumé des conditions commerciales
+Affichage des conditions de paiement, incoterms, délais, etc.
+10. Actions avancées (optionnel)
+Envoi d’un email de confirmation à l’utilisateur ou au client.
+Possibilité de sauvegarder comme brouillon ou de dupliquer l’offre.

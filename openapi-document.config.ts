@@ -5,7 +5,7 @@ export default defineConfig({
     output: {
         format: 'prettier',
         lint: 'eslint',
-        path: 'src/api/client/document' 
+        path: '@features/document/api' 
       },
     client: '@hey-api/client-axios',
     plugins: [

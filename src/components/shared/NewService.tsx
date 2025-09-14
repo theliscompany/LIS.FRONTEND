@@ -1,10 +1,10 @@
 import { useState } from 'react';
-import { BootstrapDialogTitle, BootstrapInput, actionButtonStyles, buttonCloseStyles, inputLabelStyles } from '../../utils/misc/styles';
+import { BootstrapDialogTitle, BootstrapInput, actionButtonStyles, buttonCloseStyles, inputLabelStyles } from '@utils/misc/styles';
 import { Button, DialogActions, DialogContent, InputLabel, MenuItem, Select } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import { useTranslation } from 'react-i18next';
 import { enqueueSnackbar } from 'notistack';
-import { CreatedServiceViewModel, postService } from '../../api/client/transport';
+import { ServiceViewModel, postApiService } from '@features/masterdata/api';
 
 function NewService(props: any) {
     const [testName, setTestName] = useState<string>("");
@@ -26,14 +26,14 @@ function NewService(props: any) {
 
     const createNewService = async () => {
         if (testName !== "" && selectedServiceTypes.length !== 0) {
-            var dataSent: CreatedServiceViewModel = {
+            var dataSent: ServiceViewModel = {
                 "serviceName": testName,
                 "serviceDescription": testDescription,
-                "servicesTypeId": selectedServiceTypes
+                "serviceTypes": selectedServiceTypes.map((id: number) => ({ id }))
             };
             
             try {
-                const response = await postService({body: dataSent});
+                const response = await postApiService({body: dataSent});
                 if (response !== null) {
                     enqueueSnackbar(t('serviceAddedSuccess'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
                     

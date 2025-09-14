@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Chip, Box, Typography, Alert, Skeleton, Button, InputLabel } from "@mui/material";
 import Grid from '@mui/material/Grid2';
-import { BootstrapInput, datetimeStyles, gridStyles, inputLabelStyles } from "../utils/misc/styles";
+import { BootstrapInput, datetimeStyles, gridStyles, inputLabelStyles } from '@utils/misc/styles';
 import { SnackbarProvider, enqueueSnackbar } from "notistack";
 import SearchIcon from "@mui/icons-material/Search";
 import { Link } from "react-router-dom";
@@ -10,11 +10,11 @@ import { DateTimePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { Dayjs } from "dayjs";
 import { DataGrid, GridColDef, GridRenderCellParams } from "@mui/x-data-grid";
 import { useTranslation } from "react-i18next"; // Import the useTranslation hook
-import { getApiRequest } from "../api/client/quote";
-import { getApiQuoteOffer } from "../api/client/offer";
-import OffersStatusPieChart from "../components/request/chart/OffersStatusPieChart";
-import RequestsPerAssigneeChart from "../components/request/chart/RequestsPerAssigneeChart";
-import RequestsStatusPieChart from "../components/request/chart/RequestsStatusPieChart";
+import { getApiRequest } from '@features/request/api';
+// import { getApiQuoteOffer } from '@api/client/offer'; // TODO: Fix import path
+import OffersStatusPieChart from '@features/request/components/chart/OffersStatusPieChart';
+import RequestsPerAssigneeChart from '@features/request/components/chart/RequestsPerAssigneeChart';
+import RequestsStatusPieChart from '@features/request/components/chart/RequestsStatusPieChart';
 
 const Histories = () => {
 	const [load, setLoad] = useState<boolean>(false);
@@ -150,21 +150,10 @@ const Histories = () => {
 	const getPriceOffers = async () => {
 		try {
 			setLoad(true);
-			const response: any = getApiQuoteOffer()
-			if (response !== null && response.code !== undefined) {
-				if (response.code === 200 && response.data) {
-					console.log("Offers fetched", response.data);
-					setOffers(response.data.reverse());
-					setLoad(false);
-				} 
-				else {
-					console.log("Offers Not fetched", response.data);
-					setLoad(false);
-				}
-			}
-			else {
-				setLoad(false);
-			}
+			// TODO: Implement proper API call
+			console.log("Offers API not implemented yet");
+			setOffers([]);
+			setLoad(false);
 		}
 		catch (err: any) {
 			console.log(err);

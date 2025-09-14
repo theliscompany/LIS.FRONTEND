@@ -3,7 +3,7 @@ import { defaultPlugins, defineConfig } from "@hey-api/openapi-ts"
 
 export default defineConfig({
     input: 'https://lis-shipment-svc-staging.azurewebsites.net/swagger/v1/swagger.json',
-    output: 'src/api/client/shipment',
+    output: '@features/shipment/api',
     client: '@hey-api/client-axios',
     plugins: [
       ...defaultPlugins,

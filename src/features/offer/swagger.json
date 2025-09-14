@@ -1,0 +1,2165 @@
+{
+    "openapi": "3.0.1",
+    "info": {
+      "title": "LIS Offers Service API",
+      "description": "API pour la gestion des offres de devis LIS",
+      "version": "v1"
+    },
+    "paths": {
+      "/api/Quotes/search": {
+        "post": {
+          "tags": [
+            "📋 Quotes Management"
+          ],
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QuoteSearchRequest"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QuoteSearchRequest"
+                }
+              },
+              "application/*+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QuoteSearchRequest"
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "OK",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/QuoteResponseListCommonApiResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/api/Quotes/{id}": {
+        "get": {
+          "tags": [
+            "📋 Quotes Management"
+          ],
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "OK",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/QuoteResponseCommonApiResponse"
+                  }
+                }
+              }
+            },
+            "404": {
+              "description": "Not Found",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/QuoteResponseCommonApiResponse"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "delete": {
+          "tags": [
+            "📋 Quotes Management"
+          ],
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "OK",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/ObjectCommonApiResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/api/Quotes/finalize/{draftId}": {
+        "post": {
+          "tags": [
+            "📋 Quotes Management"
+          ],
+          "parameters": [
+            {
+              "name": "draftId",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinalizeDraftRequest"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinalizeDraftRequest"
+                }
+              },
+              "application/*+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinalizeDraftRequest"
+                }
+              }
+            }
+          },
+          "responses": {
+            "201": {
+              "description": "Created",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/QuoteResponseCommonApiResponse"
+                  }
+                }
+              }
+            },
+            "404": {
+              "description": "Not Found",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/QuoteResponseCommonApiResponse"
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Bad Request",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/QuoteResponseCommonApiResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/api/Quotes/{id}/status": {
+        "put": {
+          "tags": [
+            "📋 Quotes Management"
+          ],
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChangeQuoteStatusRequest"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChangeQuoteStatusRequest"
+                }
+              },
+              "application/*+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChangeQuoteStatusRequest"
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "OK",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/QuoteResponseCommonApiResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/api/Quotes/{id}/client-approval": {
+        "post": {
+          "tags": [
+            "📋 Quotes Management"
+          ],
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientApprovalRequest"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientApprovalRequest"
+                }
+              },
+              "application/*+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientApprovalRequest"
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "OK",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/QuoteResponseCommonApiResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/api/draft-quotes": {
+        "post": {
+          "tags": [
+            "📝 Draft Quotes Management (Enhanced)"
+          ],
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateDraftQuoteRequest"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateDraftQuoteRequest"
+                }
+              },
+              "application/*+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateDraftQuoteRequest"
+                }
+              }
+            }
+          },
+          "responses": {
+            "201": {
+              "description": "Created",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/DraftQuoteResponseCommonApiResponse"
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Bad Request",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/ObjectCommonApiResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/api/draft-quotes/{id}": {
+        "get": {
+          "tags": [
+            "📝 Draft Quotes Management (Enhanced)"
+          ],
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "OK",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/DraftQuoteResponseCommonApiResponse"
+                  }
+                }
+              }
+            },
+            "404": {
+              "description": "Not Found",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/ObjectCommonApiResponse"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "put": {
+          "tags": [
+            "📝 Draft Quotes Management (Enhanced)"
+          ],
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateDraftQuoteRequest"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateDraftQuoteRequest"
+                }
+              },
+              "application/*+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateDraftQuoteRequest"
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "OK",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/DraftQuoteResponseCommonApiResponse"
+                  }
+                }
+              }
+            },
+            "404": {
+              "description": "Not Found",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/ObjectCommonApiResponse"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "delete": {
+          "tags": [
+            "📝 Draft Quotes Management (Enhanced)"
+          ],
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "OK",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/ObjectCommonApiResponse"
+                  }
+                }
+              }
+            },
+            "404": {
+              "description": "Not Found",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/ObjectCommonApiResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/api/draft-quotes/{id}/options": {
+        "post": {
+          "tags": [
+            "📝 Draft Quotes Management (Enhanced)"
+          ],
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AddDraftQuoteOptionRequest"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AddDraftQuoteOptionRequest"
+                }
+              },
+              "application/*+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AddDraftQuoteOptionRequest"
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "OK",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/DraftQuoteResponseCommonApiResponse"
+                  }
+                }
+              }
+            },
+            "404": {
+              "description": "Not Found",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/ObjectCommonApiResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/api/draft-quotes/{id}/validate": {
+        "post": {
+          "tags": [
+            "📝 Draft Quotes Management (Enhanced)"
+          ],
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "OK",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/DraftQuoteValidationDtoCommonApiResponse"
+                  }
+                }
+              }
+            },
+            "404": {
+              "description": "Not Found",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/ObjectCommonApiResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/api/draft-quotes/search": {
+        "post": {
+          "tags": [
+            "📝 Draft Quotes Management (Enhanced)"
+          ],
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QuoteOfferSearchDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QuoteOfferSearchDto"
+                }
+              },
+              "application/*+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QuoteOfferSearchDto"
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "OK",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/DraftQuoteResponseListCommonApiResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "components": {
+      "schemas": {
+        "AddDraftQuoteOptionRequest": {
+          "required": [
+            "option"
+          ],
+          "type": "object",
+          "properties": {
+            "option": {
+              "$ref": "#/components/schemas/DraftQuoteOptionDto"
+            }
+          },
+          "additionalProperties": false
+        },
+        "ChangeQuoteStatusRequest": {
+          "type": "object",
+          "properties": {
+            "newStatus": {
+              "type": "string",
+              "nullable": true
+            },
+            "reason": {
+              "type": "string",
+              "nullable": true
+            },
+            "notifyClient": {
+              "type": "boolean"
+            }
+          },
+          "additionalProperties": false
+        },
+        "ClientApprovalRequest": {
+          "type": "object",
+          "properties": {
+            "approval": {
+              "type": "string",
+              "nullable": true
+            },
+            "comments": {
+              "type": "string",
+              "nullable": true
+            },
+            "selectedOptionId": {
+              "type": "integer",
+              "format": "int32",
+              "nullable": true
+            }
+          },
+          "additionalProperties": false
+        },
+        "CreateDraftQuoteRequest": {
+          "required": [
+            "requestId"
+          ],
+          "type": "object",
+          "properties": {
+            "requestId": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "header": {
+              "$ref": "#/components/schemas/DraftQuoteHeaderDto"
+            },
+            "wizardData": {
+              "$ref": "#/components/schemas/DraftQuoteWizardDataDto"
+            }
+          },
+          "additionalProperties": false
+        },
+        "DraftQuoteAuditDto": {
+          "type": "object",
+          "properties": {
+            "createdBy": {
+              "type": "string",
+              "nullable": true
+            },
+            "createdAt": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "lastUpdatedBy": {
+              "type": "string",
+              "nullable": true
+            },
+            "lastUpdatedAt": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "stepProgress": {
+              "$ref": "#/components/schemas/DraftQuoteStepProgressDto"
+            }
+          },
+          "additionalProperties": false
+        },
+        "DraftQuoteCargoDto": {
+          "type": "object",
+          "properties": {
+            "items": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/DraftQuoteCargoItemDto"
+              },
+              "nullable": true
+            },
+            "hazmat": {
+              "type": "boolean"
+            },
+            "goodsDescription": {
+              "type": "string",
+              "nullable": true
+            }
+          },
+          "additionalProperties": false
+        },
+        "DraftQuoteCargoItemDto": {
+          "type": "object",
+          "properties": {
+            "containerType": {
+              "type": "string",
+              "nullable": true
+            },
+            "quantity": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "grossWeightKg": {
+              "type": "number",
+              "format": "double"
+            },
+            "volumeM3": {
+              "type": "number",
+              "format": "double"
+            }
+          },
+          "additionalProperties": false
+        },
+        "DraftQuoteClientDto": {
+          "type": "object",
+          "properties": {
+            "company": {
+              "type": "string",
+              "nullable": true
+            },
+            "contact": {
+              "type": "string",
+              "nullable": true
+            },
+            "email": {
+              "type": "string",
+              "nullable": true
+            },
+            "phone": {
+              "type": "string",
+              "nullable": true
+            }
+          },
+          "additionalProperties": false
+        },
+        "DraftQuoteCommercialTermsDto": {
+          "type": "object",
+          "properties": {
+            "currency": {
+              "type": "string",
+              "nullable": true
+            },
+            "incoterm": {
+              "type": "string",
+              "nullable": true
+            },
+            "validityDays": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "cgvAccepted": {
+              "type": "boolean"
+            }
+          },
+          "additionalProperties": false
+        },
+        "DraftQuoteFreeTimeDto": {
+          "type": "object",
+          "properties": {
+            "origin": {
+              "$ref": "#/components/schemas/DraftQuoteFreeTimePeriodDto"
+            },
+            "destination": {
+              "$ref": "#/components/schemas/DraftQuoteFreeTimePeriodDto"
+            }
+          },
+          "additionalProperties": false
+        },
+        "DraftQuoteFreeTimePeriodDto": {
+          "type": "object",
+          "properties": {
+            "days": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          "additionalProperties": false
+        },
+        "DraftQuoteGeneralRequestInfoDto": {
+          "type": "object",
+          "properties": {
+            "channel": {
+              "type": "string",
+              "nullable": true
+            },
+            "priority": {
+              "type": "string",
+              "nullable": true
+            },
+            "notes": {
+              "type": "string",
+              "nullable": true
+            }
+          },
+          "additionalProperties": false
+        },
+        "DraftQuoteHaulageDto": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "nullable": true
+            },
+            "provider": {
+              "type": "string",
+              "nullable": true
+            },
+            "scope": {
+              "type": "string",
+              "nullable": true
+            },
+            "from": {
+              "type": "string",
+              "nullable": true
+            },
+            "to": {
+              "type": "string",
+              "nullable": true
+            },
+            "currency": {
+              "type": "string",
+              "nullable": true
+            },
+            "pricing": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/DraftQuoteHaulagePricingDto"
+              },
+              "nullable": true
+            },
+            "notes": {
+              "type": "string",
+              "nullable": true
+            }
+          },
+          "additionalProperties": false
+        },
+        "DraftQuoteHaulagePricingDto": {
+          "type": "object",
+          "properties": {
+            "containerType": {
+              "type": "string",
+              "nullable": true
+            },
+            "unit": {
+              "type": "string",
+              "nullable": true
+            },
+            "price": {
+              "type": "number",
+              "format": "double"
+            },
+            "includedWaitingHours": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "extraHourPrice": {
+              "type": "number",
+              "format": "double"
+            }
+          },
+          "additionalProperties": false
+        },
+        "DraftQuoteHeaderDto": {
+          "type": "object",
+          "properties": {
+            "client": {
+              "$ref": "#/components/schemas/DraftQuoteClientDto"
+            },
+            "shipment": {
+              "$ref": "#/components/schemas/DraftQuoteShipmentDto"
+            },
+            "commercialTerms": {
+              "$ref": "#/components/schemas/DraftQuoteCommercialTermsDto"
+            }
+          },
+          "additionalProperties": false
+        },
+        "DraftQuoteLocationDto": {
+          "type": "object",
+          "properties": {
+            "city": {
+              "type": "string",
+              "nullable": true
+            },
+            "country": {
+              "type": "string",
+              "nullable": true
+            }
+          },
+          "additionalProperties": false
+        },
+        "DraftQuoteMilestonesDto": {
+          "type": "object",
+          "properties": {
+            "pickup": {
+              "type": "string",
+              "format": "date-time",
+              "nullable": true
+            },
+            "vgm": {
+              "type": "string",
+              "format": "date-time",
+              "nullable": true
+            },
+            "si": {
+              "type": "string",
+              "format": "date-time",
+              "nullable": true
+            },
+            "cutoff": {
+              "type": "string",
+              "format": "date-time",
+              "nullable": true
+            }
+          },
+          "additionalProperties": false
+        },
+        "DraftQuoteOptionContainerDto": {
+          "type": "object",
+          "properties": {
+            "containerType": {
+              "type": "string",
+              "nullable": true
+            },
+            "quantity": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          "additionalProperties": false
+        },
+        "DraftQuoteOptionDto": {
+          "type": "object",
+          "properties": {
+            "optionId": {
+              "type": "string",
+              "nullable": true
+            },
+            "label": {
+              "type": "string",
+              "nullable": true
+            },
+            "containers": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/DraftQuoteOptionContainerDto"
+              },
+              "nullable": true
+            },
+            "seafreightRef": {
+              "type": "string",
+              "nullable": true
+            },
+            "haulageRefs": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "nullable": true
+            },
+            "serviceRefs": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "nullable": true
+            },
+            "suppliers": {
+              "$ref": "#/components/schemas/DraftQuoteOptionSuppliersDto"
+            },
+            "servicesOffered": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/DraftQuoteServiceOfferedDto"
+              },
+              "nullable": true
+            },
+            "schedule": {
+              "$ref": "#/components/schemas/DraftQuoteScheduleDto"
+            },
+            "milestones": {
+              "$ref": "#/components/schemas/DraftQuoteMilestonesDto"
+            },
+            "pricingPreview": {
+              "$ref": "#/components/schemas/DraftQuotePricingPreviewDto"
+            }
+          },
+          "additionalProperties": false
+        },
+        "DraftQuoteOptionServiceProviderDto": {
+          "type": "object",
+          "properties": {
+            "serviceId": {
+              "type": "string",
+              "nullable": true
+            },
+            "provider": {
+              "type": "string",
+              "nullable": true
+            }
+          },
+          "additionalProperties": false
+        },
+        "DraftQuoteOptionSuppliersDto": {
+          "type": "object",
+          "properties": {
+            "carrier": {
+              "type": "string",
+              "nullable": true
+            },
+            "haulage": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "nullable": true
+            },
+            "services": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/DraftQuoteOptionServiceProviderDto"
+              },
+              "nullable": true
+            }
+          },
+          "additionalProperties": false
+        },
+        "DraftQuotePricingLineDto": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "nullable": true
+            },
+            "description": {
+              "type": "string",
+              "nullable": true
+            },
+            "unitPrice": {
+              "type": "number",
+              "format": "double"
+            },
+            "qty": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "taxable": {
+              "type": "boolean"
+            },
+            "taxRate": {
+              "type": "number",
+              "format": "double",
+              "nullable": true
+            }
+          },
+          "additionalProperties": false
+        },
+        "DraftQuotePricingPreviewDto": {
+          "type": "object",
+          "properties": {
+            "currency": {
+              "type": "string",
+              "nullable": true
+            },
+            "lines": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/DraftQuotePricingLineDto"
+              },
+              "nullable": true
+            },
+            "subtotals": {
+              "$ref": "#/components/schemas/DraftQuotePricingSubtotalsDto"
+            },
+            "taxTotal": {
+              "type": "number",
+              "format": "double"
+            },
+            "grandTotal": {
+              "type": "number",
+              "format": "double"
+            }
+          },
+          "additionalProperties": false
+        },
+        "DraftQuotePricingSubtotalsDto": {
+          "type": "object",
+          "properties": {
+            "taxableBase": {
+              "type": "number",
+              "format": "double"
+            },
+            "nontaxableBase": {
+              "type": "number",
+              "format": "double"
+            }
+          },
+          "additionalProperties": false
+        },
+        "DraftQuoteRateDto": {
+          "type": "object",
+          "properties": {
+            "containerType": {
+              "type": "string",
+              "nullable": true
+            },
+            "basePrice": {
+              "type": "number",
+              "format": "double"
+            }
+          },
+          "additionalProperties": false
+        },
+        "DraftQuoteResponse": {
+          "type": "object",
+          "properties": {
+            "draftQuoteId": {
+              "type": "string",
+              "nullable": true
+            },
+            "requestId": {
+              "type": "string",
+              "nullable": true
+            },
+            "status": {
+              "type": "string",
+              "nullable": true
+            },
+            "version": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "resumeToken": {
+              "type": "string",
+              "nullable": true
+            },
+            "header": {
+              "$ref": "#/components/schemas/DraftQuoteHeaderDto"
+            },
+            "wizardData": {
+              "$ref": "#/components/schemas/DraftQuoteWizardDataDto"
+            },
+            "options": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/DraftQuoteOptionDto"
+              },
+              "nullable": true
+            },
+            "validation": {
+              "$ref": "#/components/schemas/DraftQuoteValidationDto"
+            },
+            "audit": {
+              "$ref": "#/components/schemas/DraftQuoteAuditDto"
+            },
+            "totalOptions": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "bestPrice": {
+              "type": "number",
+              "format": "double",
+              "nullable": true
+            },
+            "currency": {
+              "type": "string",
+              "nullable": true
+            }
+          },
+          "additionalProperties": false
+        },
+        "DraftQuoteResponseCommonApiResponse": {
+          "type": "object",
+          "properties": {
+            "code": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "message": {
+              "type": "string",
+              "nullable": true
+            },
+            "data": {
+              "$ref": "#/components/schemas/DraftQuoteResponse"
+            },
+            "errors": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "nullable": true
+            },
+            "meta": {
+              "nullable": true
+            }
+          },
+          "additionalProperties": false
+        },
+        "DraftQuoteResponseListCommonApiResponse": {
+          "type": "object",
+          "properties": {
+            "code": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "message": {
+              "type": "string",
+              "nullable": true
+            },
+            "data": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/DraftQuoteResponse"
+              },
+              "nullable": true
+            },
+            "errors": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "nullable": true
+            },
+            "meta": {
+              "nullable": true
+            }
+          },
+          "additionalProperties": false
+        },
+        "DraftQuoteRoutingAndCargoDto": {
+          "type": "object",
+          "properties": {
+            "portOfLoading": {
+              "type": "string",
+              "nullable": true
+            },
+            "portOfDestination": {
+              "type": "string",
+              "nullable": true
+            },
+            "cargo": {
+              "$ref": "#/components/schemas/DraftQuoteCargoDto"
+            }
+          },
+          "additionalProperties": false
+        },
+        "DraftQuoteScheduleDto": {
+          "type": "object",
+          "properties": {
+            "etd": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "eta": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          "additionalProperties": false
+        },
+        "DraftQuoteSeafreightDto": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "nullable": true
+            },
+            "carrier": {
+              "type": "string",
+              "nullable": true
+            },
+            "service": {
+              "type": "string",
+              "nullable": true
+            },
+            "etd": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "eta": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "currency": {
+              "type": "string",
+              "nullable": true
+            },
+            "validUntil": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "rates": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/DraftQuoteRateDto"
+              },
+              "nullable": true
+            },
+            "surcharges": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/DraftQuoteSurchargeDto"
+              },
+              "nullable": true
+            },
+            "freeTime": {
+              "$ref": "#/components/schemas/DraftQuoteFreeTimeDto"
+            }
+          },
+          "additionalProperties": false
+        },
+        "DraftQuoteServiceDto": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "nullable": true
+            },
+            "name": {
+              "type": "string",
+              "nullable": true
+            },
+            "provider": {
+              "type": "string",
+              "nullable": true
+            },
+            "unit": {
+              "type": "string",
+              "nullable": true
+            },
+            "price": {
+              "type": "number",
+              "format": "double"
+            },
+            "currency": {
+              "type": "string",
+              "nullable": true
+            },
+            "taxable": {
+              "type": "boolean"
+            },
+            "taxRate": {
+              "type": "number",
+              "format": "double",
+              "nullable": true
+            }
+          },
+          "additionalProperties": false
+        },
+        "DraftQuoteServiceOfferedDto": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "nullable": true
+            },
+            "details": {
+              "type": "string",
+              "nullable": true
+            }
+          },
+          "additionalProperties": false
+        },
+        "DraftQuoteShipmentDto": {
+          "type": "object",
+          "properties": {
+            "fromRequest": {
+              "type": "boolean"
+            },
+            "readonly": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "nullable": true
+            },
+            "cargoType": {
+              "type": "string",
+              "nullable": true
+            },
+            "goodsDescription": {
+              "type": "string",
+              "nullable": true
+            },
+            "origin": {
+              "$ref": "#/components/schemas/DraftQuoteLocationDto"
+            },
+            "destination": {
+              "$ref": "#/components/schemas/DraftQuoteLocationDto"
+            },
+            "requestedDeparture": {
+              "type": "string",
+              "format": "date-time",
+              "nullable": true
+            }
+          },
+          "additionalProperties": false
+        },
+        "DraftQuoteStepProgressDto": {
+          "type": "object",
+          "properties": {
+            "generalRequestInformation": {
+              "type": "string",
+              "nullable": true
+            },
+            "routingAndCargo": {
+              "type": "string",
+              "nullable": true
+            },
+            "seafreights": {
+              "type": "string",
+              "nullable": true
+            },
+            "haulages": {
+              "type": "string",
+              "nullable": true
+            },
+            "services": {
+              "type": "string",
+              "nullable": true
+            },
+            "options": {
+              "type": "string",
+              "nullable": true
+            }
+          },
+          "additionalProperties": false
+        },
+        "DraftQuoteSurchargeDto": {
+          "type": "object",
+          "properties": {
+            "code": {
+              "type": "string",
+              "nullable": true
+            },
+            "label": {
+              "type": "string",
+              "nullable": true
+            },
+            "calc": {
+              "type": "string",
+              "nullable": true
+            },
+            "base": {
+              "type": "string",
+              "nullable": true
+            },
+            "unit": {
+              "type": "string",
+              "nullable": true
+            },
+            "value": {
+              "type": "number",
+              "format": "double"
+            },
+            "currency": {
+              "type": "string",
+              "nullable": true
+            },
+            "taxable": {
+              "type": "boolean"
+            },
+            "appliesTo": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "nullable": true
+            }
+          },
+          "additionalProperties": false
+        },
+        "DraftQuoteValidationCheckDto": {
+          "type": "object",
+          "properties": {
+            "rule": {
+              "type": "string",
+              "nullable": true
+            },
+            "ok": {
+              "type": "boolean"
+            },
+            "message": {
+              "type": "string",
+              "nullable": true
+            }
+          },
+          "additionalProperties": false
+        },
+        "DraftQuoteValidationDto": {
+          "type": "object",
+          "properties": {
+            "checks": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/DraftQuoteValidationCheckDto"
+              },
+              "nullable": true
+            },
+            "warnings": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/DraftQuoteValidationWarningDto"
+              },
+              "nullable": true
+            }
+          },
+          "additionalProperties": false
+        },
+        "DraftQuoteValidationDtoCommonApiResponse": {
+          "type": "object",
+          "properties": {
+            "code": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "message": {
+              "type": "string",
+              "nullable": true
+            },
+            "data": {
+              "$ref": "#/components/schemas/DraftQuoteValidationDto"
+            },
+            "errors": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "nullable": true
+            },
+            "meta": {
+              "nullable": true
+            }
+          },
+          "additionalProperties": false
+        },
+        "DraftQuoteValidationWarningDto": {
+          "type": "object",
+          "properties": {
+            "code": {
+              "type": "string",
+              "nullable": true
+            },
+            "message": {
+              "type": "string",
+              "nullable": true
+            }
+          },
+          "additionalProperties": false
+        },
+        "DraftQuoteWizardDataDto": {
+          "type": "object",
+          "properties": {
+            "generalRequestInformation": {
+              "$ref": "#/components/schemas/DraftQuoteGeneralRequestInfoDto"
+            },
+            "routingAndCargo": {
+              "$ref": "#/components/schemas/DraftQuoteRoutingAndCargoDto"
+            },
+            "seafreights": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/DraftQuoteSeafreightDto"
+              },
+              "nullable": true
+            },
+            "haulages": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/DraftQuoteHaulageDto"
+              },
+              "nullable": true
+            },
+            "services": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/DraftQuoteServiceDto"
+              },
+              "nullable": true
+            }
+          },
+          "additionalProperties": false
+        },
+        "FinalizeDraftRequest": {
+          "type": "object",
+          "properties": {
+            "options": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/QuoteOptionRequest"
+              },
+              "nullable": true
+            },
+            "preferredOptionId": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "quoteComments": {
+              "type": "string",
+              "nullable": true
+            },
+            "expirationDate": {
+              "type": "string",
+              "format": "date-time",
+              "nullable": true
+            },
+            "sendToClient": {
+              "type": "boolean"
+            }
+          },
+          "additionalProperties": false
+        },
+        "HaulageOptionRequest": {
+          "type": "object",
+          "properties": {
+            "provider": {
+              "type": "string",
+              "nullable": true
+            },
+            "route": {
+              "type": "string",
+              "nullable": true
+            },
+            "pricing": {
+              "$ref": "#/components/schemas/QuoteOptionPricingRequest"
+            }
+          },
+          "additionalProperties": false
+        },
+        "MiscellaneousOptionRequest": {
+          "type": "object",
+          "properties": {
+            "serviceName": {
+              "type": "string",
+              "nullable": true
+            },
+            "provider": {
+              "type": "string",
+              "nullable": true
+            },
+            "pricing": {
+              "$ref": "#/components/schemas/QuoteOptionPricingRequest"
+            }
+          },
+          "additionalProperties": false
+        },
+        "ObjectCommonApiResponse": {
+          "type": "object",
+          "properties": {
+            "code": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "message": {
+              "type": "string",
+              "nullable": true
+            },
+            "data": {
+              "nullable": true
+            },
+            "errors": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "nullable": true
+            },
+            "meta": {
+              "nullable": true
+            }
+          },
+          "additionalProperties": false
+        },
+        "PricingBreakdownRequest": {
+          "type": "object",
+          "properties": {
+            "category": {
+              "type": "string",
+              "nullable": true
+            },
+            "description": {
+              "type": "string",
+              "nullable": true
+            },
+            "amount": {
+              "type": "number",
+              "format": "double"
+            }
+          },
+          "additionalProperties": false
+        },
+        "QuoteOfferSearchDto": {
+          "type": "object",
+          "properties": {
+            "clientNumber": {
+              "type": "string",
+              "nullable": true
+            },
+            "emailUser": {
+              "type": "string",
+              "nullable": true
+            },
+            "status": {
+              "type": "string",
+              "nullable": true
+            },
+            "createdFrom": {
+              "type": "string",
+              "format": "date-time",
+              "nullable": true
+            },
+            "createdTo": {
+              "type": "string",
+              "format": "date-time",
+              "nullable": true
+            },
+            "quoteOfferNumber": {
+              "type": "integer",
+              "format": "int32",
+              "nullable": true
+            },
+            "requestQuoteId": {
+              "type": "string",
+              "nullable": true
+            },
+            "page": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "pageSize": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "sortBy": {
+              "type": "string",
+              "nullable": true
+            },
+            "sortOrder": {
+              "type": "string",
+              "nullable": true
+            }
+          },
+          "additionalProperties": false
+        },
+        "QuoteOptionDetailsDto": {
+          "type": "object",
+          "properties": {
+            "haulageProvider": {
+              "type": "string",
+              "nullable": true
+            },
+            "seaFreightCarrier": {
+              "type": "string",
+              "nullable": true
+            },
+            "route": {
+              "type": "string",
+              "nullable": true
+            },
+            "etd": {
+              "type": "string",
+              "format": "date-time",
+              "nullable": true
+            },
+            "eta": {
+              "type": "string",
+              "format": "date-time",
+              "nullable": true
+            },
+            "servicesIncluded": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "nullable": true
+            }
+          },
+          "additionalProperties": false
+        },
+        "QuoteOptionPricingRequest": {
+          "type": "object",
+          "properties": {
+            "totalAmount": {
+              "type": "number",
+              "format": "double"
+            },
+            "currency": {
+              "type": "string",
+              "nullable": true
+            },
+            "breakdown": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/PricingBreakdownRequest"
+              },
+              "nullable": true
+            }
+          },
+          "additionalProperties": false
+        },
+        "QuoteOptionRequest": {
+          "type": "object",
+          "properties": {
+            "optionId": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "description": {
+              "type": "string",
+              "nullable": true
+            },
+            "pricing": {
+              "$ref": "#/components/schemas/QuoteOptionPricingRequest"
+            },
+            "haulage": {
+              "$ref": "#/components/schemas/HaulageOptionRequest"
+            },
+            "seaFreight": {
+              "$ref": "#/components/schemas/SeaFreightOptionRequest"
+            },
+            "miscellaneous": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/MiscellaneousOptionRequest"
+              },
+              "nullable": true
+            }
+          },
+          "additionalProperties": false
+        },
+        "QuoteOptionResponse": {
+          "type": "object",
+          "properties": {
+            "optionId": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "description": {
+              "type": "string",
+              "nullable": true
+            },
+            "isPreferred": {
+              "type": "boolean"
+            },
+            "totals": {
+              "$ref": "#/components/schemas/QuoteOptionTotalsDto"
+            },
+            "details": {
+              "$ref": "#/components/schemas/QuoteOptionDetailsDto"
+            }
+          },
+          "additionalProperties": false
+        },
+        "QuoteOptionTotalsDto": {
+          "type": "object",
+          "properties": {
+            "haulageTotal": {
+              "type": "number",
+              "format": "double"
+            },
+            "seaFreightTotal": {
+              "type": "number",
+              "format": "double"
+            },
+            "miscellaneousTotal": {
+              "type": "number",
+              "format": "double"
+            },
+            "grandTotal": {
+              "type": "number",
+              "format": "double"
+            },
+            "currency": {
+              "type": "string",
+              "nullable": true
+            }
+          },
+          "additionalProperties": false
+        },
+        "QuoteResponse": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "nullable": true
+            },
+            "quoteNumber": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "requestQuoteId": {
+              "type": "string",
+              "nullable": true
+            },
+            "clientNumber": {
+              "type": "string",
+              "nullable": true
+            },
+            "emailUser": {
+              "type": "string",
+              "nullable": true
+            },
+            "comments": {
+              "type": "string",
+              "nullable": true
+            },
+            "status": {
+              "type": "string",
+              "nullable": true
+            },
+            "clientApproval": {
+              "type": "string",
+              "nullable": true
+            },
+            "options": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/QuoteOptionResponse"
+              },
+              "nullable": true
+            },
+            "preferredOptionId": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "summary": {
+              "$ref": "#/components/schemas/QuoteSummaryDto"
+            },
+            "expirationDate": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "createdDate": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "lastModified": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "files": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "nullable": true
+            }
+          },
+          "additionalProperties": false
+        },
+        "QuoteResponseCommonApiResponse": {
+          "type": "object",
+          "properties": {
+            "code": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "message": {
+              "type": "string",
+              "nullable": true
+            },
+            "data": {
+              "$ref": "#/components/schemas/QuoteResponse"
+            },
+            "errors": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "nullable": true
+            },
+            "meta": {
+              "nullable": true
+            }
+          },
+          "additionalProperties": false
+        },
+        "QuoteResponseListCommonApiResponse": {
+          "type": "object",
+          "properties": {
+            "code": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "message": {
+              "type": "string",
+              "nullable": true
+            },
+            "data": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/QuoteResponse"
+              },
+              "nullable": true
+            },
+            "errors": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "nullable": true
+            },
+            "meta": {
+              "nullable": true
+            }
+          },
+          "additionalProperties": false
+        },
+        "QuoteSearchRequest": {
+          "type": "object",
+          "properties": {
+            "clientNumber": {
+              "type": "string",
+              "nullable": true
+            },
+            "emailUser": {
+              "type": "string",
+              "nullable": true
+            },
+            "status": {
+              "type": "string",
+              "nullable": true
+            },
+            "createdFrom": {
+              "type": "string",
+              "format": "date-time",
+              "nullable": true
+            },
+            "createdTo": {
+              "type": "string",
+              "format": "date-time",
+              "nullable": true
+            },
+            "expirationFrom": {
+              "type": "string",
+              "format": "date-time",
+              "nullable": true
+            },
+            "expirationTo": {
+              "type": "string",
+              "format": "date-time",
+              "nullable": true
+            },
+            "minAmount": {
+              "type": "number",
+              "format": "double",
+              "nullable": true
+            },
+            "maxAmount": {
+              "type": "number",
+              "format": "double",
+              "nullable": true
+            },
+            "query": {
+              "type": "string",
+              "nullable": true
+            },
+            "pageNumber": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "pageSize": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          "additionalProperties": false
+        },
+        "QuoteSummaryDto": {
+          "type": "object",
+          "properties": {
+            "route": {
+              "type": "string",
+              "nullable": true
+            },
+            "totalOptions": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "bestPrice": {
+              "type": "number",
+              "format": "double"
+            },
+            "highestPrice": {
+              "type": "number",
+              "format": "double"
+            },
+            "currency": {
+              "type": "string",
+              "nullable": true
+            },
+            "preferredOptionDescription": {
+              "type": "string",
+              "nullable": true
+            }
+          },
+          "additionalProperties": false
+        },
+        "SeaFreightOptionRequest": {
+          "type": "object",
+          "properties": {
+            "carrier": {
+              "type": "string",
+              "nullable": true
+            },
+            "service": {
+              "type": "string",
+              "nullable": true
+            },
+            "etd": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "eta": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "pricing": {
+              "$ref": "#/components/schemas/QuoteOptionPricingRequest"
+            }
+          },
+          "additionalProperties": false
+        },
+        "UpdateDraftQuoteRequest": {
+          "type": "object",
+          "properties": {
+            "header": {
+              "$ref": "#/components/schemas/DraftQuoteHeaderDto"
+            },
+            "wizardData": {
+              "$ref": "#/components/schemas/DraftQuoteWizardDataDto"
+            },
+            "options": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/DraftQuoteOptionDto"
+              },
+              "nullable": true
+            },
+            "notes": {
+              "type": "string",
+              "nullable": true
+            }
+          },
+          "additionalProperties": false
+        }
+      }
+    }
+  }

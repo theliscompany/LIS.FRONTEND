@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Autocomplete, CircularProgress, Skeleton, TextField } from "@mui/material";
 import { debounce } from "@mui/material/utils";
 import { useTranslation } from "react-i18next";
-import { getContactGetContacts } from "../../api/client/crm";
+import { getContactGetContacts } from "@features/crm/api";
 
 interface LocationAutocompleteProps {
     id: string;

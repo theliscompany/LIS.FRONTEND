@@ -1,12 +1,12 @@
 import { useState } from 'react';
-import { BootstrapDialogTitle, BootstrapInput, actionButtonStyles, buttonCloseStyles, inputLabelStyles, properties } from '../../utils/misc/styles';
+import { BootstrapDialogTitle, BootstrapInput, actionButtonStyles, buttonCloseStyles, inputLabelStyles, properties } from '@utils/misc/styles';
 import { Button, DialogActions, DialogContent, InputLabel } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import { useTranslation } from 'react-i18next';
 import { enqueueSnackbar } from 'notistack';
 import { MuiTelInput } from 'mui-tel-input';
 import CountrySelect from './CountrySelect';
-import { postContactCreateContact } from '../../api/client/crm';
+import { postContactCreateContact } from '@features/crm/api';
 
 
 function NewContact(props: any) {

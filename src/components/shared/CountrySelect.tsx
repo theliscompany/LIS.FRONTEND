@@ -2,7 +2,7 @@ import * as React from 'react';
 import Box from '@mui/material/Box';
 import TextField from '@mui/material/TextField';
 import Autocomplete from '@mui/material/Autocomplete';
-import { COUNTRIES } from '../../utils/constants';
+import { COUNTRIES } from '@utils/constants';
 
 interface CountryAutocompleteProps {
     id: string;

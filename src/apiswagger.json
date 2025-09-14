@@ -1,0 +1,3596 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "QuoteOffer",
+    "version": "v1"
+  },
+  "paths": {
+    "/api/CorsTest/test": {
+      "get": {
+        "tags": [
+          "CorsTest"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "CorsTest"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { }
+            },
+            "text/json": {
+              "schema": { }
+            },
+            "application/*+json": {
+              "schema": { }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      },
+      "options": {
+        "tags": [
+          "CorsTest"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/Migration/status": {
+      "get": {
+        "tags": [
+          "Migration"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/Migration/migrate-requestquoteid": {
+      "post": {
+        "tags": [
+          "Migration"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/Migration/migrate-fieldnames": {
+      "post": {
+        "tags": [
+          "Migration"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/Migration/migrate-all": {
+      "post": {
+        "tags": [
+          "Migration"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/Quote/from-draft": {
+      "post": {
+        "tags": [
+          "Quote"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateQuoteFromDraftRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateQuoteFromDraftRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateQuoteFromDraftRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "text/plain": {
+                "schema": { }
+              },
+              "application/json": {
+                "schema": { }
+              },
+              "text/json": {
+                "schema": { }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Quote/{id}": {
+      "get": {
+        "tags": [
+          "Quote"
+        ],
+        "operationId": "GetQuote",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": { }
+              },
+              "application/json": {
+                "schema": { }
+              },
+              "text/json": {
+                "schema": { }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Quote/{id}/select-preferred-option": {
+      "put": {
+        "tags": [
+          "Quote"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SelectPreferredOptionRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SelectPreferredOptionRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/SelectPreferredOptionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": { }
+              },
+              "application/json": {
+                "schema": { }
+              },
+              "text/json": {
+                "schema": { }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Quote/search": {
+      "post": {
+        "tags": [
+          "Quote"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/QuoteSearchRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/QuoteSearchRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/QuoteSearchRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": { }
+              },
+              "application/json": {
+                "schema": { }
+              },
+              "text/json": {
+                "schema": { }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Quote/{id}/summary": {
+      "get": {
+        "tags": [
+          "Quote"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": { }
+              },
+              "application/json": {
+                "schema": { }
+              },
+              "text/json": {
+                "schema": { }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/QuoteOffer/draft": {
+      "post": {
+        "tags": [
+          "QuoteOffer"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OptimizedCreateWizardDraftRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OptimizedCreateWizardDraftRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/OptimizedCreateWizardDraftRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "text/plain": {
+                "schema": { }
+              },
+              "application/json": {
+                "schema": { }
+              },
+              "text/json": {
+                "schema": { }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/QuoteOffer/draft/{id}": {
+      "put": {
+        "tags": [
+          "QuoteOffer"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OptimizedUpdateWizardDraftRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OptimizedUpdateWizardDraftRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/OptimizedUpdateWizardDraftRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": { }
+              },
+              "application/json": {
+                "schema": { }
+              },
+              "text/json": {
+                "schema": { }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "QuoteOffer"
+        ],
+        "operationId": "GetDraft",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": { }
+              },
+              "application/json": {
+                "schema": { }
+              },
+              "text/json": {
+                "schema": { }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "QuoteOffer"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": { }
+              },
+              "application/json": {
+                "schema": { }
+              },
+              "text/json": {
+                "schema": { }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/QuoteOffer/drafts": {
+      "get": {
+        "tags": [
+          "QuoteOffer"
+        ],
+        "parameters": [
+          {
+            "name": "emailUser",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "clientNumber",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "pageNumber",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 1
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": { }
+              },
+              "application/json": {
+                "schema": { }
+              },
+              "text/json": {
+                "schema": { }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/QuoteOffer/draft/{id}/step4/overtime": {
+      "put": {
+        "tags": [
+          "QuoteOffer"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HaulageOvertimeUpdateDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HaulageOvertimeUpdateDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/HaulageOvertimeUpdateDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": { }
+              },
+              "application/json": {
+                "schema": { }
+              },
+              "text/json": {
+                "schema": { }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/QuoteOffer/draft/{draftId}/finalize-to-option": {
+      "post": {
+        "tags": [
+          "QuoteOffer"
+        ],
+        "parameters": [
+          {
+            "name": "draftId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "quoteId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "text/plain": {
+                "schema": { }
+              },
+              "application/json": {
+                "schema": { }
+              },
+              "text/json": {
+                "schema": { }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/QuoteOffer/quote/{quoteId}/duplicate-option/{optionId}": {
+      "post": {
+        "tags": [
+          "QuoteOffer"
+        ],
+        "parameters": [
+          {
+            "name": "quoteId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "optionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "text/plain": {
+                "schema": { }
+              },
+              "application/json": {
+                "schema": { }
+              },
+              "text/json": {
+                "schema": { }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/QuoteOffer/quote/{id}": {
+      "get": {
+        "tags": [
+          "QuoteOffer"
+        ],
+        "operationId": "GetQuoteOffer",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": { }
+              },
+              "application/json": {
+                "schema": { }
+              },
+              "text/json": {
+                "schema": { }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/QuoteOffer/generate-option/{draftId}": {
+      "post": {
+        "tags": [
+          "QuoteOffer"
+        ],
+        "parameters": [
+          {
+            "name": "draftId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/QuoteOptionDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/QuoteOptionDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/QuoteOptionDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "text/plain": {
+                "schema": { }
+              },
+              "application/json": {
+                "schema": { }
+              },
+              "text/json": {
+                "schema": { }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/QuoteOffer/save-quote/{tempQuoteId}": {
+      "post": {
+        "tags": [
+          "QuoteOffer"
+        ],
+        "parameters": [
+          {
+            "name": "tempQuoteId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": { }
+              },
+              "application/json": {
+                "schema": { }
+              },
+              "text/json": {
+                "schema": { }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/QuoteOffer/restart-wizard/{draftId}": {
+      "post": {
+        "tags": [
+          "QuoteOffer"
+        ],
+        "parameters": [
+          {
+            "name": "draftId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": { }
+              },
+              "application/json": {
+                "schema": { }
+              },
+              "text/json": {
+                "schema": { }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/QuoteOffer/add-option/{quoteId}": {
+      "post": {
+        "tags": [
+          "QuoteOffer"
+        ],
+        "parameters": [
+          {
+            "name": "quoteId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/QuoteOptionDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/QuoteOptionDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/QuoteOptionDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": { }
+              },
+              "application/json": {
+                "schema": { }
+              },
+              "text/json": {
+                "schema": { }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/QuoteOffer/Draft/{id}/WithOptions": {
+      "get": {
+        "tags": [
+          "QuoteOffer"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/QuoteOffer/Draft/{id}/SaveAsOption": {
+      "post": {
+        "tags": [
+          "QuoteOffer"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveAsOptionRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveAsOptionRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveAsOptionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/QuoteOffer/Draft/{id}/LoadOption/{optionId}": {
+      "post": {
+        "tags": [
+          "QuoteOffer"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "optionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/QuoteOffer/Draft/{id}/Option/{optionId}": {
+      "delete": {
+        "tags": [
+          "QuoteOffer"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "optionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AddressData": {
+        "type": "object",
+        "properties": {
+          "company": {
+            "type": "string",
+            "nullable": true
+          },
+          "city": {
+            "type": "string",
+            "nullable": true
+          },
+          "country": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "AddressDto": {
+        "required": [
+          "addressLine",
+          "city",
+          "company",
+          "country",
+          "postalCode"
+        ],
+        "type": "object",
+        "properties": {
+          "company": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "addressLine": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "city": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "postalCode": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "country": {
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "CargoData": {
+        "type": "object",
+        "properties": {
+          "product": {
+            "$ref": "#/components/schemas/ProductData"
+          },
+          "incoterm": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "CityData": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "country": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ContainerData": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "nullable": true
+          },
+          "type": {
+            "type": "string",
+            "nullable": true
+          },
+          "quantity": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "teu": {
+            "type": "number",
+            "format": "double"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ContainerOptionDto": {
+        "required": [
+          "containerType"
+        ],
+        "type": "object",
+        "properties": {
+          "containerId": {
+            "type": "string",
+            "nullable": true
+          },
+          "containerType": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "quantity": {
+            "maximum": 2147483647,
+            "minimum": 1,
+            "type": "integer",
+            "format": "int32"
+          },
+          "unitPrice": {
+            "minimum": 0,
+            "type": "number",
+            "format": "double"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ContainerPricingDto": {
+        "required": [
+          "containerType",
+          "unitPricing"
+        ],
+        "type": "object",
+        "properties": {
+          "containerType": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "quantity": {
+            "maximum": 100,
+            "minimum": 1,
+            "type": "integer",
+            "format": "int32"
+          },
+          "unitPricing": {
+            "$ref": "#/components/schemas/QuotePricingDto"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ContainerSummary": {
+        "type": "object",
+        "properties": {
+          "totalContainers": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalTEU": {
+            "type": "number",
+            "format": "double"
+          },
+          "containerTypes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "CreateQuoteFromDraftRequest": {
+        "required": [
+          "draftId",
+          "options"
+        ],
+        "type": "object",
+        "properties": {
+          "draftId": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "options": {
+            "maxItems": 3,
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/QuoteOptionRequest"
+            }
+          },
+          "preferredOptionId": {
+            "maximum": 3,
+            "minimum": 1,
+            "type": "integer",
+            "format": "int32"
+          },
+          "expirationDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "quoteComments": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "CustomerData": {
+        "type": "object",
+        "properties": {
+          "contactId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "contactName": {
+            "type": "string",
+            "nullable": true
+          },
+          "companyName": {
+            "type": "string",
+            "nullable": true
+          },
+          "email": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "DeliveryAddressDto": {
+        "required": [
+          "addressLine",
+          "city",
+          "company",
+          "country",
+          "postalCode"
+        ],
+        "type": "object",
+        "properties": {
+          "company": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "addressLine": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "city": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "postalCode": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "country": {
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "DraftOption": {
+        "type": "object",
+        "properties": {
+          "optionId": {
+            "type": "string",
+            "nullable": true
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "haulageSelectionId": {
+            "type": "string",
+            "nullable": true
+          },
+          "seafreightSelectionIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          },
+          "miscSelectionIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          },
+          "step4Data": {
+            "$ref": "#/components/schemas/OptimizedStep4"
+          },
+          "step5Data": {
+            "$ref": "#/components/schemas/OptimizedStep5"
+          },
+          "step6Data": {
+            "$ref": "#/components/schemas/OptimizedStep6"
+          },
+          "step7Data": {
+            "$ref": "#/components/schemas/OptimizedStep7"
+          },
+          "marginType": {
+            "type": "string",
+            "nullable": true
+          },
+          "marginValue": {
+            "type": "number",
+            "format": "double"
+          },
+          "totals": {
+            "$ref": "#/components/schemas/OptionTotals"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdBy": {
+            "type": "string",
+            "nullable": true
+          },
+          "calculatedMargin": {
+            "type": "number",
+            "format": "double",
+            "readOnly": true
+          },
+          "finalTotal": {
+            "type": "number",
+            "format": "double",
+            "readOnly": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "HaulageCalculation": {
+        "type": "object",
+        "properties": {
+          "quantity": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "unitPrice": {
+            "type": "number",
+            "format": "double"
+          },
+          "subtotal": {
+            "type": "number",
+            "format": "double"
+          },
+          "overtimeAmount": {
+            "type": "number",
+            "format": "double"
+          },
+          "totalAmount": {
+            "type": "number",
+            "format": "double"
+          },
+          "currency": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "HaulageOptionDto": {
+        "required": [
+          "currency",
+          "deliveryPort",
+          "haulierId",
+          "haulierName",
+          "pickupAddress",
+          "validUntil"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "nullable": true
+          },
+          "haulierId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "haulierName": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "currency": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "unitTariff": {
+            "minimum": 0,
+            "type": "number",
+            "format": "double"
+          },
+          "freeTime": {
+            "maximum": 2147483647,
+            "minimum": 0,
+            "type": "integer",
+            "format": "int32"
+          },
+          "pickupAddress": {
+            "$ref": "#/components/schemas/AddressDto"
+          },
+          "deliveryPort": {
+            "$ref": "#/components/schemas/PortDto"
+          },
+          "comment": {
+            "type": "string",
+            "nullable": true
+          },
+          "validUntil": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "additionalProperties": false
+      },
+      "HaulageOvertimeUpdateDto": {
+        "type": "object",
+        "properties": {
+          "overtimeQuantity": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "overtimePrice": {
+            "type": "number",
+            "format": "double"
+          },
+          "currency": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "HaulageRoute": {
+        "type": "object",
+        "properties": {
+          "pickup": {
+            "$ref": "#/components/schemas/AddressData"
+          },
+          "delivery": {
+            "$ref": "#/components/schemas/PortDelivery"
+          }
+        },
+        "additionalProperties": false
+      },
+      "HaulageSelection": {
+        "type": "object",
+        "properties": {
+          "offerId": {
+            "type": "string",
+            "nullable": true
+          },
+          "haulierId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "haulierName": {
+            "type": "string",
+            "nullable": true
+          },
+          "tariff": {
+            "$ref": "#/components/schemas/HaulageTariff"
+          },
+          "route": {
+            "$ref": "#/components/schemas/HaulageRoute"
+          },
+          "validity": {
+            "$ref": "#/components/schemas/ValidityData"
+          },
+          "overtimeQuantity": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "overtimePrice": {
+            "type": "number",
+            "format": "double"
+          }
+        },
+        "additionalProperties": false
+      },
+      "HaulageServiceDto": {
+        "required": [
+          "haulierId",
+          "haulierName",
+          "pricing",
+          "serviceType"
+        ],
+        "type": "object",
+        "properties": {
+          "haulierId": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "haulierName": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "serviceType": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "pricing": {
+            "$ref": "#/components/schemas/QuotePricingDto"
+          },
+          "freeTime": {
+            "type": "string",
+            "nullable": true
+          },
+          "pickupAddress": {
+            "$ref": "#/components/schemas/AddressDto"
+          },
+          "deliveryPort": {
+            "$ref": "#/components/schemas/PortDto"
+          },
+          "comments": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "HaulageTariff": {
+        "type": "object",
+        "properties": {
+          "unitPrice": {
+            "type": "number",
+            "format": "double"
+          },
+          "currency": {
+            "type": "string",
+            "nullable": true
+          },
+          "freeTime": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "LocationData": {
+        "type": "object",
+        "properties": {
+          "city": {
+            "$ref": "#/components/schemas/CityData"
+          },
+          "port": {
+            "$ref": "#/components/schemas/PortData"
+          }
+        },
+        "additionalProperties": false
+      },
+      "MetadataData": {
+        "type": "object",
+        "properties": {
+          "comment": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "MiscPricing": {
+        "type": "object",
+        "properties": {
+          "unitPrice": {
+            "type": "number",
+            "format": "double"
+          },
+          "quantity": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "subtotal": {
+            "type": "number",
+            "format": "double"
+          },
+          "currency": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "MiscSelection": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "nullable": true
+          },
+          "service": {
+            "$ref": "#/components/schemas/ServiceData"
+          },
+          "supplier": {
+            "$ref": "#/components/schemas/SupplierData"
+          },
+          "pricing": {
+            "$ref": "#/components/schemas/MiscPricing"
+          },
+          "validity": {
+            "$ref": "#/components/schemas/ValidityData"
+          }
+        },
+        "additionalProperties": false
+      },
+      "MiscSummary": {
+        "type": "object",
+        "properties": {
+          "totalSelections": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalAmount": {
+            "type": "number",
+            "format": "double"
+          },
+          "currency": {
+            "type": "string",
+            "nullable": true
+          },
+          "categories": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "MiscellaneousOptionDto": {
+        "required": [
+          "currency",
+          "serviceId",
+          "serviceName",
+          "supplierName",
+          "validUntil"
+        ],
+        "type": "object",
+        "properties": {
+          "miscellaneousId": {
+            "type": "string",
+            "nullable": true
+          },
+          "supplierName": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "currency": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "serviceId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "serviceName": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "price": {
+            "minimum": 0,
+            "type": "number",
+            "format": "double"
+          },
+          "validUntil": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "additionalProperties": false
+      },
+      "MiscellaneousServiceDto": {
+        "required": [
+          "pricing",
+          "serviceId",
+          "serviceName",
+          "supplierName"
+        ],
+        "type": "object",
+        "properties": {
+          "serviceId": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "serviceName": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "supplierName": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "pricing": {
+            "$ref": "#/components/schemas/QuotePricingDto"
+          },
+          "comments": {
+            "type": "string",
+            "nullable": true
+          },
+          "validUntil": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "OptimizedCreateWizardDraftRequest": {
+        "required": [
+          "clientNumber",
+          "draftData",
+          "emailUser",
+          "requestQuoteId"
+        ],
+        "type": "object",
+        "properties": {
+          "requestQuoteId": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "emailUser": {
+            "minLength": 1,
+            "type": "string",
+            "format": "email"
+          },
+          "clientNumber": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "comment": {
+            "type": "string",
+            "nullable": true
+          },
+          "draftData": {
+            "$ref": "#/components/schemas/OptimizedDraftData"
+          }
+        },
+        "additionalProperties": false
+      },
+      "OptimizedDraftData": {
+        "type": "object",
+        "properties": {
+          "wizard": {
+            "$ref": "#/components/schemas/WizardData"
+          },
+          "steps": {
+            "$ref": "#/components/schemas/WizardSteps"
+          },
+          "totals": {
+            "$ref": "#/components/schemas/WizardTotals"
+          },
+          "options": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DraftOption"
+            },
+            "nullable": true
+          },
+          "currentWorkingOptionId": {
+            "type": "string",
+            "nullable": true
+          },
+          "preferredOptionId": {
+            "type": "string",
+            "nullable": true
+          },
+          "maxOptionsAllowed": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "OptimizedStep1": {
+        "type": "object",
+        "properties": {
+          "customer": {
+            "$ref": "#/components/schemas/CustomerData"
+          },
+          "route": {
+            "$ref": "#/components/schemas/RouteData"
+          },
+          "cargo": {
+            "$ref": "#/components/schemas/CargoData"
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/MetadataData"
+          }
+        },
+        "additionalProperties": false
+      },
+      "OptimizedStep2": {
+        "type": "object",
+        "properties": {
+          "selectedServices": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SelectedServiceData"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "OptimizedStep3": {
+        "type": "object",
+        "properties": {
+          "containers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ContainerData"
+            },
+            "nullable": true
+          },
+          "summary": {
+            "$ref": "#/components/schemas/ContainerSummary"
+          },
+          "route": {
+            "$ref": "#/components/schemas/RouteData"
+          }
+        },
+        "additionalProperties": false
+      },
+      "OptimizedStep4": {
+        "type": "object",
+        "properties": {
+          "selection": {
+            "$ref": "#/components/schemas/HaulageSelection"
+          },
+          "calculation": {
+            "$ref": "#/components/schemas/HaulageCalculation"
+          }
+        },
+        "additionalProperties": false
+      },
+      "OptimizedStep5": {
+        "type": "object",
+        "properties": {
+          "selections": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SeafreightPricingSelection"
+            },
+            "nullable": true
+          },
+          "summary": {
+            "$ref": "#/components/schemas/SeafreightSelectionSummary"
+          }
+        },
+        "additionalProperties": false
+      },
+      "OptimizedStep6": {
+        "type": "object",
+        "properties": {
+          "selections": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MiscSelection"
+            },
+            "nullable": true
+          },
+          "summary": {
+            "$ref": "#/components/schemas/MiscSummary"
+          }
+        },
+        "additionalProperties": false
+      },
+      "OptimizedStep7": {
+        "type": "object",
+        "properties": {
+          "finalization": {
+            "$ref": "#/components/schemas/OptionFinalization"
+          },
+          "validation": {
+            "$ref": "#/components/schemas/ValidationSummary"
+          },
+          "pricingSummary": {
+            "$ref": "#/components/schemas/PricingSummary"
+          }
+        },
+        "additionalProperties": false
+      },
+      "OptimizedUpdateWizardDraftRequest": {
+        "type": "object",
+        "properties": {
+          "requestQuoteId": {
+            "type": "string",
+            "nullable": true
+          },
+          "emailUser": {
+            "type": "string",
+            "nullable": true
+          },
+          "clientNumber": {
+            "type": "string",
+            "nullable": true
+          },
+          "comment": {
+            "type": "string",
+            "nullable": true
+          },
+          "draftData": {
+            "$ref": "#/components/schemas/OptimizedDraftData"
+          }
+        },
+        "additionalProperties": false
+      },
+      "OptionFinalization": {
+        "type": "object",
+        "properties": {
+          "optionName": {
+            "type": "string",
+            "nullable": true
+          },
+          "optionDescription": {
+            "type": "string",
+            "nullable": true
+          },
+          "marginPercentage": {
+            "type": "number",
+            "format": "double"
+          },
+          "marginAmount": {
+            "type": "number",
+            "format": "double"
+          },
+          "marginType": {
+            "type": "string",
+            "nullable": true
+          },
+          "isReadyToGenerate": {
+            "type": "boolean"
+          },
+          "generatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "OptionTotals": {
+        "type": "object",
+        "properties": {
+          "haulageTotalAmount": {
+            "type": "number",
+            "format": "double"
+          },
+          "seafreightBaseAmount": {
+            "type": "number",
+            "format": "double"
+          },
+          "seafreightSurchargesAmount": {
+            "type": "number",
+            "format": "double"
+          },
+          "seafreightTotalAmount": {
+            "type": "number",
+            "format": "double"
+          },
+          "miscTotalAmount": {
+            "type": "number",
+            "format": "double"
+          },
+          "subTotal": {
+            "type": "number",
+            "format": "double"
+          },
+          "marginAmount": {
+            "type": "number",
+            "format": "double"
+          },
+          "finalTotal": {
+            "type": "number",
+            "format": "double"
+          },
+          "currency": {
+            "type": "string",
+            "nullable": true
+          },
+          "calculatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "additionalProperties": false
+      },
+      "OptionTotalsDto": {
+        "type": "object",
+        "properties": {
+          "haulageTotal": {
+            "type": "number",
+            "format": "double"
+          },
+          "seafreightTotal": {
+            "type": "number",
+            "format": "double"
+          },
+          "miscellaneousTotal": {
+            "type": "number",
+            "format": "double"
+          },
+          "grandTotal": {
+            "type": "number",
+            "format": "double"
+          }
+        },
+        "additionalProperties": false
+      },
+      "PortData": {
+        "type": "object",
+        "properties": {
+          "portId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "portName": {
+            "type": "string",
+            "nullable": true
+          },
+          "country": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "PortDelivery": {
+        "type": "object",
+        "properties": {
+          "portId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "portName": {
+            "type": "string",
+            "nullable": true
+          },
+          "country": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "PortDto": {
+        "required": [
+          "country",
+          "portId",
+          "portName"
+        ],
+        "type": "object",
+        "properties": {
+          "portId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "portName": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "country": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "coordinates": {
+            "type": "array",
+            "items": {
+              "type": "number",
+              "format": "double"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "PriceBreakdown": {
+        "type": "object",
+        "properties": {
+          "haulageAmount": {
+            "type": "number",
+            "format": "double"
+          },
+          "seafreightAmount": {
+            "type": "number",
+            "format": "double"
+          },
+          "miscellaneousAmount": {
+            "type": "number",
+            "format": "double"
+          },
+          "totalBeforeMargin": {
+            "type": "number",
+            "format": "double"
+          },
+          "components": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PriceComponent"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "PriceComponent": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "category": {
+            "type": "string",
+            "nullable": true
+          },
+          "amount": {
+            "type": "number",
+            "format": "double"
+          },
+          "currency": {
+            "type": "string",
+            "nullable": true
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "PricingSummary": {
+        "type": "object",
+        "properties": {
+          "baseTotal": {
+            "type": "number",
+            "format": "double"
+          },
+          "marginAmount": {
+            "type": "number",
+            "format": "double"
+          },
+          "finalTotal": {
+            "type": "number",
+            "format": "double"
+          },
+          "currency": {
+            "type": "string",
+            "nullable": true
+          },
+          "breakdown": {
+            "$ref": "#/components/schemas/PriceBreakdown"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ProductData": {
+        "type": "object",
+        "properties": {
+          "productId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "productName": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "QuoteOptionDto": {
+        "required": [
+          "deliveryAddress",
+          "description"
+        ],
+        "type": "object",
+        "properties": {
+          "optionId": {
+            "type": "string",
+            "nullable": true
+          },
+          "description": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "haulage": {
+            "$ref": "#/components/schemas/HaulageOptionDto"
+          },
+          "seaFreight": {
+            "$ref": "#/components/schemas/SeaFreightOptionDto"
+          },
+          "miscellaneous": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MiscellaneousOptionDto"
+            },
+            "nullable": true
+          },
+          "deliveryAddress": {
+            "$ref": "#/components/schemas/DeliveryAddressDto"
+          },
+          "totals": {
+            "$ref": "#/components/schemas/OptionTotalsDto"
+          },
+          "portDeparture": {
+            "$ref": "#/components/schemas/PortDto"
+          },
+          "portDestination": {
+            "$ref": "#/components/schemas/PortDto"
+          }
+        },
+        "additionalProperties": false
+      },
+      "QuoteOptionRequest": {
+        "required": [
+          "description",
+          "optionId",
+          "pricing",
+          "validUntil"
+        ],
+        "type": "object",
+        "properties": {
+          "optionId": {
+            "maximum": 3,
+            "minimum": 1,
+            "type": "integer",
+            "format": "int32"
+          },
+          "description": {
+            "maxLength": 200,
+            "minLength": 1,
+            "type": "string"
+          },
+          "haulage": {
+            "$ref": "#/components/schemas/HaulageServiceDto"
+          },
+          "seaFreight": {
+            "$ref": "#/components/schemas/SeaFreightServiceDto"
+          },
+          "miscellaneous": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MiscellaneousServiceDto"
+            },
+            "nullable": true
+          },
+          "pricing": {
+            "$ref": "#/components/schemas/QuotePricingDto"
+          },
+          "validUntil": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "additionalProperties": false
+      },
+      "QuotePricingDto": {
+        "required": [
+          "amount",
+          "currency"
+        ],
+        "type": "object",
+        "properties": {
+          "amount": {
+            "minimum": 0,
+            "type": "number",
+            "format": "double"
+          },
+          "currency": {
+            "maxLength": 3,
+            "minLength": 0,
+            "type": "string"
+          },
+          "taxRate": {
+            "maximum": 100,
+            "minimum": 0,
+            "type": "number",
+            "format": "double"
+          },
+          "taxAmount": {
+            "type": "number",
+            "format": "double",
+            "readOnly": true
+          },
+          "totalAmount": {
+            "type": "number",
+            "format": "double",
+            "readOnly": true
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "QuoteSearchRequest": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "nullable": true
+          },
+          "clientNumber": {
+            "type": "string",
+            "nullable": true
+          },
+          "emailUser": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdFrom": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "createdTo": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "expirationFrom": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "expirationTo": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "minAmount": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "maxAmount": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "currency": {
+            "type": "string",
+            "nullable": true
+          },
+          "pageNumber": {
+            "maximum": 2147483647,
+            "minimum": 1,
+            "type": "integer",
+            "format": "int32"
+          },
+          "pageSize": {
+            "maximum": 100,
+            "minimum": 1,
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "RouteData": {
+        "type": "object",
+        "properties": {
+          "origin": {
+            "$ref": "#/components/schemas/LocationData"
+          },
+          "destination": {
+            "$ref": "#/components/schemas/LocationData"
+          }
+        },
+        "additionalProperties": false
+      },
+      "SaveAsOptionRequest": {
+        "type": "object",
+        "properties": {
+          "existingOptionId": {
+            "type": "string",
+            "nullable": true
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "marginType": {
+            "type": "string",
+            "nullable": true
+          },
+          "marginValue": {
+            "type": "number",
+            "format": "double"
+          }
+        },
+        "additionalProperties": false
+      },
+      "SeaFreightOptionDto": {
+        "required": [
+          "carrierAgentName",
+          "carrierName",
+          "containers",
+          "currency",
+          "defaultContainer",
+          "departurePort",
+          "destinationPort",
+          "frequency",
+          "seaFreightId",
+          "validUntil"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "nullable": true
+          },
+          "seaFreightId": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "carrierName": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "carrierAgentName": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "departurePort": {
+            "$ref": "#/components/schemas/PortDto"
+          },
+          "destinationPort": {
+            "$ref": "#/components/schemas/PortDto"
+          },
+          "currency": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "transitTimeDays": {
+            "maximum": 2147483647,
+            "minimum": 1,
+            "type": "integer",
+            "format": "int32"
+          },
+          "frequency": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "defaultContainer": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "containers": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ContainerOptionDto"
+            }
+          },
+          "comment": {
+            "type": "string",
+            "nullable": true
+          },
+          "validUntil": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "additionalProperties": false
+      },
+      "SeaFreightServiceDto": {
+        "required": [
+          "carrierName",
+          "pricing",
+          "seaFreightId",
+          "serviceType"
+        ],
+        "type": "object",
+        "properties": {
+          "seaFreightId": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "carrierName": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "carrierAgentName": {
+            "type": "string",
+            "nullable": true
+          },
+          "serviceType": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "pricing": {
+            "$ref": "#/components/schemas/QuotePricingDto"
+          },
+          "transitTimeDays": {
+            "maximum": 365,
+            "minimum": 1,
+            "type": "integer",
+            "format": "int32"
+          },
+          "frequency": {
+            "type": "string",
+            "nullable": true
+          },
+          "containers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ContainerPricingDto"
+            },
+            "nullable": true
+          },
+          "departurePort": {
+            "$ref": "#/components/schemas/PortDto"
+          },
+          "destinationPort": {
+            "$ref": "#/components/schemas/PortDto"
+          },
+          "comments": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "SeafreightCarrierInfo": {
+        "type": "object",
+        "properties": {
+          "carrierId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "carrierName": {
+            "type": "string",
+            "nullable": true
+          },
+          "agentName": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "SeafreightChargesInfo": {
+        "type": "object",
+        "properties": {
+          "basePrice": {
+            "type": "number",
+            "format": "double"
+          },
+          "currency": {
+            "type": "string",
+            "nullable": true
+          },
+          "surcharges": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SeafreightSurcharge"
+            },
+            "nullable": true
+          },
+          "totalPrice": {
+            "type": "number",
+            "format": "double"
+          }
+        },
+        "additionalProperties": false
+      },
+      "SeafreightContainerInfo": {
+        "type": "object",
+        "properties": {
+          "containerType": {
+            "type": "string",
+            "nullable": true
+          },
+          "isReefer": {
+            "type": "boolean"
+          },
+          "quantity": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "volumeM3": {
+            "type": "number",
+            "format": "double"
+          },
+          "weightKg": {
+            "type": "number",
+            "format": "double"
+          },
+          "unitPrice": {
+            "type": "number",
+            "format": "double"
+          },
+          "subtotal": {
+            "type": "number",
+            "format": "double"
+          }
+        },
+        "additionalProperties": false
+      },
+      "SeafreightPortInfo": {
+        "type": "object",
+        "properties": {
+          "unlocode": {
+            "type": "string",
+            "nullable": true
+          },
+          "portName": {
+            "type": "string",
+            "nullable": true
+          },
+          "country": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "SeafreightPricingSelection": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "nullable": true
+          },
+          "seafreightId": {
+            "type": "string",
+            "nullable": true
+          },
+          "quoteNumber": {
+            "type": "string",
+            "nullable": true
+          },
+          "carrier": {
+            "$ref": "#/components/schemas/SeafreightCarrierInfo"
+          },
+          "route": {
+            "$ref": "#/components/schemas/SeafreightRouteInfo"
+          },
+          "container": {
+            "$ref": "#/components/schemas/SeafreightContainerInfo"
+          },
+          "charges": {
+            "$ref": "#/components/schemas/SeafreightChargesInfo"
+          },
+          "service": {
+            "$ref": "#/components/schemas/SeafreightServiceInfo"
+          },
+          "validity": {
+            "$ref": "#/components/schemas/SeafreightValidityInfo"
+          },
+          "remarks": {
+            "type": "string",
+            "nullable": true
+          },
+          "isSelected": {
+            "type": "boolean"
+          },
+          "selectedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "totalContainerPrice": {
+            "type": "number",
+            "format": "double",
+            "readOnly": true
+          },
+          "totalChargesPrice": {
+            "type": "number",
+            "format": "double",
+            "readOnly": true
+          },
+          "grandTotal": {
+            "type": "number",
+            "format": "double",
+            "readOnly": true
+          },
+          "isValidSelection": {
+            "type": "boolean",
+            "readOnly": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "SeafreightRouteInfo": {
+        "type": "object",
+        "properties": {
+          "departurePort": {
+            "$ref": "#/components/schemas/SeafreightPortInfo"
+          },
+          "destinationPort": {
+            "$ref": "#/components/schemas/SeafreightPortInfo"
+          },
+          "transitDays": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "frequency": {
+            "type": "string",
+            "nullable": true
+          },
+          "incoterm": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "SeafreightSelectionSummary": {
+        "type": "object",
+        "properties": {
+          "totalSelections": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalContainers": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalAmount": {
+            "type": "number",
+            "format": "double"
+          },
+          "currency": {
+            "type": "string",
+            "nullable": true
+          },
+          "selectedCarriers": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          },
+          "containerTypes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          },
+          "preferredSelectionId": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "SeafreightServiceInfo": {
+        "type": "object",
+        "properties": {
+          "deliveryTerms": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdBy": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdDate": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "additionalProperties": false
+      },
+      "SeafreightSurcharge": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "value": {
+            "type": "number",
+            "format": "double"
+          },
+          "type": {
+            "type": "string",
+            "nullable": true
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "isMandatory": {
+            "type": "boolean"
+          },
+          "currency": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "SeafreightValidityInfo": {
+        "type": "object",
+        "properties": {
+          "startDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "endDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "isExpired": {
+            "type": "boolean",
+            "readOnly": true
+          },
+          "daysRemaining": {
+            "type": "integer",
+            "format": "int32",
+            "readOnly": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "SelectPreferredOptionRequest": {
+        "required": [
+          "optionId"
+        ],
+        "type": "object",
+        "properties": {
+          "optionId": {
+            "maximum": 3,
+            "minimum": 1,
+            "type": "integer",
+            "format": "int32"
+          },
+          "reason": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "SelectedServiceData": {
+        "type": "object",
+        "properties": {
+          "serviceId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "serviceName": {
+            "type": "string",
+            "nullable": true
+          },
+          "category": {
+            "type": "string",
+            "nullable": true
+          },
+          "usagePercent": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ServiceData": {
+        "type": "object",
+        "properties": {
+          "serviceId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "serviceName": {
+            "type": "string",
+            "nullable": true
+          },
+          "category": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "SupplierData": {
+        "type": "object",
+        "properties": {
+          "supplierName": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ValidationError": {
+        "type": "object",
+        "properties": {
+          "stepNumber": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "fieldName": {
+            "type": "string",
+            "nullable": true
+          },
+          "errorMessage": {
+            "type": "string",
+            "nullable": true
+          },
+          "errorCode": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ValidationSummary": {
+        "type": "object",
+        "properties": {
+          "allStepsValid": {
+            "type": "boolean"
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "nullable": true
+          },
+          "warnings": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ValidationWarning"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ValidationWarning": {
+        "type": "object",
+        "properties": {
+          "stepNumber": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "fieldName": {
+            "type": "string",
+            "nullable": true
+          },
+          "warningMessage": {
+            "type": "string",
+            "nullable": true
+          },
+          "warningCode": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ValidityData": {
+        "type": "object",
+        "properties": {
+          "validUntil": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "additionalProperties": false
+      },
+      "WizardData": {
+        "type": "object",
+        "properties": {
+          "currentStep": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "completedSteps": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "nullable": true
+          },
+          "status": {
+            "type": "string",
+            "nullable": true
+          },
+          "lastModified": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "version": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "WizardSteps": {
+        "type": "object",
+        "properties": {
+          "step1": {
+            "$ref": "#/components/schemas/OptimizedStep1"
+          },
+          "step2": {
+            "$ref": "#/components/schemas/OptimizedStep2"
+          },
+          "step3": {
+            "$ref": "#/components/schemas/OptimizedStep3"
+          },
+          "step4": {
+            "$ref": "#/components/schemas/OptimizedStep4"
+          },
+          "step5": {
+            "$ref": "#/components/schemas/OptimizedStep5"
+          },
+          "step6": {
+            "$ref": "#/components/schemas/OptimizedStep6"
+          },
+          "step7": {
+            "$ref": "#/components/schemas/OptimizedStep7"
+          }
+        },
+        "additionalProperties": false
+      },
+      "WizardTotals": {
+        "type": "object",
+        "properties": {
+          "haulage": {
+            "type": "number",
+            "format": "double"
+          },
+          "seafreight": {
+            "type": "number",
+            "format": "double"
+          },
+          "miscellaneous": {
+            "type": "number",
+            "format": "double"
+          },
+          "subtotal": {
+            "type": "number",
+            "format": "double"
+          },
+          "grandTotal": {
+            "type": "number",
+            "format": "double"
+          },
+          "currency": {
+            "type": "string",
+            "nullable": true
+          },
+          "totalTEU": {
+            "type": "number",
+            "format": "double"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "securitySchemes": {
+      "Bearer": {
+        "type": "http",
+        "description": "Entrez le token JWT avec le préfixe 'Bearer'",
+        "scheme": "bearer"
+      }
+    }
+  },
+  "security": [
+    {
+      "Bearer": [ ]
+    }
+  ]
+}
