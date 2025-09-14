@@ -2,8 +2,8 @@
 
 import type { OptionsLegacyParser } from '@hey-api/client-axios';
 import { queryOptions, type UseMutationOptions } from '@tanstack/react-query';
-import { client, getCity, getPackage, getPort, postPort, getPortById, putPortById, deletePortById, getProduct, postProduct, getProductById, putProductById, deleteProductById, postService, getService, getServiceById, putServiceById, deleteServiceById } from '../sdk.gen';
-import type { GetPackageData, PostPortData, PostPortError, PostPortResponse, GetPortByIdData, PutPortByIdData, PutPortByIdError, PutPortByIdResponse, DeletePortByIdData, DeletePortByIdError, DeletePortByIdResponse, PostProductData, PostProductError, PostProductResponse, GetProductByIdData, PutProductByIdData, PutProductByIdError, PutProductByIdResponse, DeleteProductByIdData, DeleteProductByIdError, DeleteProductByIdResponse, PostServiceData, PostServiceError, PostServiceResponse, GetServiceByIdData, PutServiceByIdData, PutServiceByIdError, PutServiceByIdResponse, DeleteServiceByIdData, DeleteServiceByIdError, DeleteServiceByIdResponse } from '../types.gen';
+import { client, getApiCity, postApiCity, getApiCityById, putApiCityById, deleteApiCityById, getApiCityCountryByCountry, getApiCitySearch, getApiPackage, getApiPort, postApiPort, getApiPortById, putApiPortById, deleteApiPortById, getApiProduct, postApiProduct, getApiProductById, putApiProductById, deleteApiProductById, getApiService, postApiService, getApiServiceById, putApiServiceById, deleteApiServiceById, getApiServiceTypeByServiceTypeId, getApiServiceWithTypes, getApiServiceSearch, getApiServiceType, postApiServiceType, getApiServiceTypeById, putApiServiceTypeById, deleteApiServiceTypeById, getApiServiceTypeCodeByCode, getApiServiceTypeSearch, getApiServiceTypeWithServices } from '../sdk.gen';
+import type { PostApiCityData, PostApiCityError, PostApiCityResponse, GetApiCityByIdData, PutApiCityByIdData, PutApiCityByIdError, PutApiCityByIdResponse, DeleteApiCityByIdData, DeleteApiCityByIdError, DeleteApiCityByIdResponse, GetApiCityCountryByCountryData, GetApiCitySearchData, GetApiPackageData, PostApiPortData, PostApiPortError, PostApiPortResponse, GetApiPortByIdData, PutApiPortByIdData, PutApiPortByIdError, PutApiPortByIdResponse, DeleteApiPortByIdData, DeleteApiPortByIdError, DeleteApiPortByIdResponse, PostApiProductData, PostApiProductError, PostApiProductResponse, GetApiProductByIdData, PutApiProductByIdData, PutApiProductByIdError, PutApiProductByIdResponse, DeleteApiProductByIdData, DeleteApiProductByIdError, DeleteApiProductByIdResponse, PostApiServiceData, PostApiServiceError, PostApiServiceResponse, GetApiServiceByIdData, PutApiServiceByIdData, PutApiServiceByIdError, PutApiServiceByIdResponse, DeleteApiServiceByIdData, DeleteApiServiceByIdError, DeleteApiServiceByIdResponse, GetApiServiceTypeByServiceTypeIdData, GetApiServiceSearchData, PostApiServiceTypeData, PostApiServiceTypeError, PostApiServiceTypeResponse, GetApiServiceTypeByIdData, PutApiServiceTypeByIdData, PutApiServiceTypeByIdError, PutApiServiceTypeByIdResponse, DeleteApiServiceTypeByIdData, DeleteApiServiceTypeByIdError, DeleteApiServiceTypeByIdResponse, GetApiServiceTypeCodeByCodeData, GetApiServiceTypeSearchData } from '../types.gen';
 import type { AxiosError } from 'axios';
 
 type QueryKey<TOptions extends OptionsLegacyParser> = [
@@ -33,14 +33,14 @@ const createQueryKey = <TOptions extends OptionsLegacyParser>(id: string, option
     return params;
 };
 
-export const getCityQueryKey = (options?: OptionsLegacyParser) => [
-    createQueryKey('getCity', options)
+export const getApiCityQueryKey = (options?: OptionsLegacyParser) => [
+    createQueryKey('getApiCity', options)
 ];
 
-export const getCityOptions = (options?: OptionsLegacyParser) => {
+export const getApiCityOptions = (options?: OptionsLegacyParser) => {
     return queryOptions({
         queryFn: async ({ queryKey, signal }) => {
-            const { data } = await getCity({
+            const { data } = await getApiCity({
                 ...options,
                 ...queryKey[0],
                 signal,
@@ -48,18 +48,18 @@ export const getCityOptions = (options?: OptionsLegacyParser) => {
             });
             return data;
         },
-        queryKey: getCityQueryKey(options)
+        queryKey: getApiCityQueryKey(options)
     });
 };
 
-export const getPackageQueryKey = (options?: OptionsLegacyParser<GetPackageData>) => [
-    createQueryKey('getPackage', options)
+export const postApiCityQueryKey = (options?: OptionsLegacyParser<PostApiCityData>) => [
+    createQueryKey('postApiCity', options)
 ];
 
-export const getPackageOptions = (options?: OptionsLegacyParser<GetPackageData>) => {
+export const postApiCityOptions = (options?: OptionsLegacyParser<PostApiCityData>) => {
     return queryOptions({
         queryFn: async ({ queryKey, signal }) => {
-            const { data } = await getPackage({
+            const { data } = await postApiCity({
                 ...options,
                 ...queryKey[0],
                 signal,
@@ -67,52 +67,14 @@ export const getPackageOptions = (options?: OptionsLegacyParser<GetPackageData>)
             });
             return data;
         },
-        queryKey: getPackageQueryKey(options)
+        queryKey: postApiCityQueryKey(options)
     });
 };
 
-export const getPortQueryKey = (options?: OptionsLegacyParser) => [
-    createQueryKey('getPort', options)
-];
-
-export const getPortOptions = (options?: OptionsLegacyParser) => {
-    return queryOptions({
-        queryFn: async ({ queryKey, signal }) => {
-            const { data } = await getPort({
-                ...options,
-                ...queryKey[0],
-                signal,
-                throwOnError: true
-            });
-            return data;
-        },
-        queryKey: getPortQueryKey(options)
-    });
-};
-
-export const postPortQueryKey = (options?: OptionsLegacyParser<PostPortData>) => [
-    createQueryKey('postPort', options)
-];
-
-export const postPortOptions = (options?: OptionsLegacyParser<PostPortData>) => {
-    return queryOptions({
-        queryFn: async ({ queryKey, signal }) => {
-            const { data } = await postPort({
-                ...options,
-                ...queryKey[0],
-                signal,
-                throwOnError: true
-            });
-            return data;
-        },
-        queryKey: postPortQueryKey(options)
-    });
-};
-
-export const postPortMutation = (options?: Partial<OptionsLegacyParser<PostPortData>>) => {
-    const mutationOptions: UseMutationOptions<PostPortResponse, AxiosError<PostPortError>, OptionsLegacyParser<PostPortData>> = {
+export const postApiCityMutation = (options?: Partial<OptionsLegacyParser<PostApiCityData>>) => {
+    const mutationOptions: UseMutationOptions<PostApiCityResponse, AxiosError<PostApiCityError>, OptionsLegacyParser<PostApiCityData>> = {
         mutationFn: async (localOptions) => {
-            const { data } = await postPort({
+            const { data } = await postApiCity({
                 ...options,
                 ...localOptions,
                 throwOnError: true
@@ -123,14 +85,14 @@ export const postPortMutation = (options?: Partial<OptionsLegacyParser<PostPortD
     return mutationOptions;
 };
 
-export const getPortByIdQueryKey = (options: OptionsLegacyParser<GetPortByIdData>) => [
-    createQueryKey('getPortById', options)
+export const getApiCityByIdQueryKey = (options: OptionsLegacyParser<GetApiCityByIdData>) => [
+    createQueryKey('getApiCityById', options)
 ];
 
-export const getPortByIdOptions = (options: OptionsLegacyParser<GetPortByIdData>) => {
+export const getApiCityByIdOptions = (options: OptionsLegacyParser<GetApiCityByIdData>) => {
     return queryOptions({
         queryFn: async ({ queryKey, signal }) => {
-            const { data } = await getPortById({
+            const { data } = await getApiCityById({
                 ...options,
                 ...queryKey[0],
                 signal,
@@ -138,14 +100,14 @@ export const getPortByIdOptions = (options: OptionsLegacyParser<GetPortByIdData>
             });
             return data;
         },
-        queryKey: getPortByIdQueryKey(options)
+        queryKey: getApiCityByIdQueryKey(options)
     });
 };
 
-export const putPortByIdMutation = (options?: Partial<OptionsLegacyParser<PutPortByIdData>>) => {
-    const mutationOptions: UseMutationOptions<PutPortByIdResponse, AxiosError<PutPortByIdError>, OptionsLegacyParser<PutPortByIdData>> = {
+export const putApiCityByIdMutation = (options?: Partial<OptionsLegacyParser<PutApiCityByIdData>>) => {
+    const mutationOptions: UseMutationOptions<PutApiCityByIdResponse, AxiosError<PutApiCityByIdError>, OptionsLegacyParser<PutApiCityByIdData>> = {
         mutationFn: async (localOptions) => {
-            const { data } = await putPortById({
+            const { data } = await putApiCityById({
                 ...options,
                 ...localOptions,
                 throwOnError: true
@@ -156,10 +118,10 @@ export const putPortByIdMutation = (options?: Partial<OptionsLegacyParser<PutPor
     return mutationOptions;
 };
 
-export const deletePortByIdMutation = (options?: Partial<OptionsLegacyParser<DeletePortByIdData>>) => {
-    const mutationOptions: UseMutationOptions<DeletePortByIdResponse, AxiosError<DeletePortByIdError>, OptionsLegacyParser<DeletePortByIdData>> = {
+export const deleteApiCityByIdMutation = (options?: Partial<OptionsLegacyParser<DeleteApiCityByIdData>>) => {
+    const mutationOptions: UseMutationOptions<DeleteApiCityByIdResponse, AxiosError<DeleteApiCityByIdError>, OptionsLegacyParser<DeleteApiCityByIdData>> = {
         mutationFn: async (localOptions) => {
-            const { data } = await deletePortById({
+            const { data } = await deleteApiCityById({
                 ...options,
                 ...localOptions,
                 throwOnError: true
@@ -170,14 +132,14 @@ export const deletePortByIdMutation = (options?: Partial<OptionsLegacyParser<Del
     return mutationOptions;
 };
 
-export const getProductQueryKey = (options?: OptionsLegacyParser) => [
-    createQueryKey('getProduct', options)
+export const getApiCityCountryByCountryQueryKey = (options: OptionsLegacyParser<GetApiCityCountryByCountryData>) => [
+    createQueryKey('getApiCityCountryByCountry', options)
 ];
 
-export const getProductOptions = (options?: OptionsLegacyParser) => {
+export const getApiCityCountryByCountryOptions = (options: OptionsLegacyParser<GetApiCityCountryByCountryData>) => {
     return queryOptions({
         queryFn: async ({ queryKey, signal }) => {
-            const { data } = await getProduct({
+            const { data } = await getApiCityCountryByCountry({
                 ...options,
                 ...queryKey[0],
                 signal,
@@ -185,18 +147,18 @@ export const getProductOptions = (options?: OptionsLegacyParser) => {
             });
             return data;
         },
-        queryKey: getProductQueryKey(options)
+        queryKey: getApiCityCountryByCountryQueryKey(options)
     });
 };
 
-export const postProductQueryKey = (options?: OptionsLegacyParser<PostProductData>) => [
-    createQueryKey('postProduct', options)
+export const getApiCitySearchQueryKey = (options?: OptionsLegacyParser<GetApiCitySearchData>) => [
+    createQueryKey('getApiCitySearch', options)
 ];
 
-export const postProductOptions = (options?: OptionsLegacyParser<PostProductData>) => {
+export const getApiCitySearchOptions = (options?: OptionsLegacyParser<GetApiCitySearchData>) => {
     return queryOptions({
         queryFn: async ({ queryKey, signal }) => {
-            const { data } = await postProduct({
+            const { data } = await getApiCitySearch({
                 ...options,
                 ...queryKey[0],
                 signal,
@@ -204,32 +166,18 @@ export const postProductOptions = (options?: OptionsLegacyParser<PostProductData
             });
             return data;
         },
-        queryKey: postProductQueryKey(options)
+        queryKey: getApiCitySearchQueryKey(options)
     });
 };
 
-export const postProductMutation = (options?: Partial<OptionsLegacyParser<PostProductData>>) => {
-    const mutationOptions: UseMutationOptions<PostProductResponse, AxiosError<PostProductError>, OptionsLegacyParser<PostProductData>> = {
-        mutationFn: async (localOptions) => {
-            const { data } = await postProduct({
-                ...options,
-                ...localOptions,
-                throwOnError: true
-            });
-            return data;
-        }
-    };
-    return mutationOptions;
-};
-
-export const getProductByIdQueryKey = (options: OptionsLegacyParser<GetProductByIdData>) => [
-    createQueryKey('getProductById', options)
+export const getApiPackageQueryKey = (options?: OptionsLegacyParser<GetApiPackageData>) => [
+    createQueryKey('getApiPackage', options)
 ];
 
-export const getProductByIdOptions = (options: OptionsLegacyParser<GetProductByIdData>) => {
+export const getApiPackageOptions = (options?: OptionsLegacyParser<GetApiPackageData>) => {
     return queryOptions({
         queryFn: async ({ queryKey, signal }) => {
-            const { data } = await getProductById({
+            const { data } = await getApiPackage({
                 ...options,
                 ...queryKey[0],
                 signal,
@@ -237,46 +185,18 @@ export const getProductByIdOptions = (options: OptionsLegacyParser<GetProductByI
             });
             return data;
         },
-        queryKey: getProductByIdQueryKey(options)
+        queryKey: getApiPackageQueryKey(options)
     });
 };
 
-export const putProductByIdMutation = (options?: Partial<OptionsLegacyParser<PutProductByIdData>>) => {
-    const mutationOptions: UseMutationOptions<PutProductByIdResponse, AxiosError<PutProductByIdError>, OptionsLegacyParser<PutProductByIdData>> = {
-        mutationFn: async (localOptions) => {
-            const { data } = await putProductById({
-                ...options,
-                ...localOptions,
-                throwOnError: true
-            });
-            return data;
-        }
-    };
-    return mutationOptions;
-};
-
-export const deleteProductByIdMutation = (options?: Partial<OptionsLegacyParser<DeleteProductByIdData>>) => {
-    const mutationOptions: UseMutationOptions<DeleteProductByIdResponse, AxiosError<DeleteProductByIdError>, OptionsLegacyParser<DeleteProductByIdData>> = {
-        mutationFn: async (localOptions) => {
-            const { data } = await deleteProductById({
-                ...options,
-                ...localOptions,
-                throwOnError: true
-            });
-            return data;
-        }
-    };
-    return mutationOptions;
-};
-
-export const postServiceQueryKey = (options?: OptionsLegacyParser<PostServiceData>) => [
-    createQueryKey('postService', options)
+export const getApiPortQueryKey = (options?: OptionsLegacyParser) => [
+    createQueryKey('getApiPort', options)
 ];
 
-export const postServiceOptions = (options?: OptionsLegacyParser<PostServiceData>) => {
+export const getApiPortOptions = (options?: OptionsLegacyParser) => {
     return queryOptions({
         queryFn: async ({ queryKey, signal }) => {
-            const { data } = await postService({
+            const { data } = await getApiPort({
                 ...options,
                 ...queryKey[0],
                 signal,
@@ -284,32 +204,18 @@ export const postServiceOptions = (options?: OptionsLegacyParser<PostServiceData
             });
             return data;
         },
-        queryKey: postServiceQueryKey(options)
+        queryKey: getApiPortQueryKey(options)
     });
 };
 
-export const postServiceMutation = (options?: Partial<OptionsLegacyParser<PostServiceData>>) => {
-    const mutationOptions: UseMutationOptions<PostServiceResponse, AxiosError<PostServiceError>, OptionsLegacyParser<PostServiceData>> = {
-        mutationFn: async (localOptions) => {
-            const { data } = await postService({
-                ...options,
-                ...localOptions,
-                throwOnError: true
-            });
-            return data;
-        }
-    };
-    return mutationOptions;
-};
-
-export const getServiceQueryKey = (options?: OptionsLegacyParser) => [
-    createQueryKey('getService', options)
+export const postApiPortQueryKey = (options?: OptionsLegacyParser<PostApiPortData>) => [
+    createQueryKey('postApiPort', options)
 ];
 
-export const getServiceOptions = (options?: OptionsLegacyParser) => {
+export const postApiPortOptions = (options?: OptionsLegacyParser<PostApiPortData>) => {
     return queryOptions({
         queryFn: async ({ queryKey, signal }) => {
-            const { data } = await getService({
+            const { data } = await postApiPort({
                 ...options,
                 ...queryKey[0],
                 signal,
@@ -317,18 +223,32 @@ export const getServiceOptions = (options?: OptionsLegacyParser) => {
             });
             return data;
         },
-        queryKey: getServiceQueryKey(options)
+        queryKey: postApiPortQueryKey(options)
     });
 };
 
-export const getServiceByIdQueryKey = (options: OptionsLegacyParser<GetServiceByIdData>) => [
-    createQueryKey('getServiceById', options)
+export const postApiPortMutation = (options?: Partial<OptionsLegacyParser<PostApiPortData>>) => {
+    const mutationOptions: UseMutationOptions<PostApiPortResponse, AxiosError<PostApiPortError>, OptionsLegacyParser<PostApiPortData>> = {
+        mutationFn: async (localOptions) => {
+            const { data } = await postApiPort({
+                ...options,
+                ...localOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const getApiPortByIdQueryKey = (options: OptionsLegacyParser<GetApiPortByIdData>) => [
+    createQueryKey('getApiPortById', options)
 ];
 
-export const getServiceByIdOptions = (options: OptionsLegacyParser<GetServiceByIdData>) => {
+export const getApiPortByIdOptions = (options: OptionsLegacyParser<GetApiPortByIdData>) => {
     return queryOptions({
         queryFn: async ({ queryKey, signal }) => {
-            const { data } = await getServiceById({
+            const { data } = await getApiPortById({
                 ...options,
                 ...queryKey[0],
                 signal,
@@ -336,14 +256,14 @@ export const getServiceByIdOptions = (options: OptionsLegacyParser<GetServiceByI
             });
             return data;
         },
-        queryKey: getServiceByIdQueryKey(options)
+        queryKey: getApiPortByIdQueryKey(options)
     });
 };
 
-export const putServiceByIdMutation = (options?: Partial<OptionsLegacyParser<PutServiceByIdData>>) => {
-    const mutationOptions: UseMutationOptions<PutServiceByIdResponse, AxiosError<PutServiceByIdError>, OptionsLegacyParser<PutServiceByIdData>> = {
+export const putApiPortByIdMutation = (options?: Partial<OptionsLegacyParser<PutApiPortByIdData>>) => {
+    const mutationOptions: UseMutationOptions<PutApiPortByIdResponse, AxiosError<PutApiPortByIdError>, OptionsLegacyParser<PutApiPortByIdData>> = {
         mutationFn: async (localOptions) => {
-            const { data } = await putServiceById({
+            const { data } = await putApiPortById({
                 ...options,
                 ...localOptions,
                 throwOnError: true
@@ -354,10 +274,10 @@ export const putServiceByIdMutation = (options?: Partial<OptionsLegacyParser<Put
     return mutationOptions;
 };
 
-export const deleteServiceByIdMutation = (options?: Partial<OptionsLegacyParser<DeleteServiceByIdData>>) => {
-    const mutationOptions: UseMutationOptions<DeleteServiceByIdResponse, AxiosError<DeleteServiceByIdError>, OptionsLegacyParser<DeleteServiceByIdData>> = {
+export const deleteApiPortByIdMutation = (options?: Partial<OptionsLegacyParser<DeleteApiPortByIdData>>) => {
+    const mutationOptions: UseMutationOptions<DeleteApiPortByIdResponse, AxiosError<DeleteApiPortByIdError>, OptionsLegacyParser<DeleteApiPortByIdData>> = {
         mutationFn: async (localOptions) => {
-            const { data } = await deleteServiceById({
+            const { data } = await deleteApiPortById({
                 ...options,
                 ...localOptions,
                 throwOnError: true
@@ -366,4 +286,415 @@ export const deleteServiceByIdMutation = (options?: Partial<OptionsLegacyParser<
         }
     };
     return mutationOptions;
+};
+
+export const getApiProductQueryKey = (options?: OptionsLegacyParser) => [
+    createQueryKey('getApiProduct', options)
+];
+
+export const getApiProductOptions = (options?: OptionsLegacyParser) => {
+    return queryOptions({
+        queryFn: async ({ queryKey, signal }) => {
+            const { data } = await getApiProduct({
+                ...options,
+                ...queryKey[0],
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getApiProductQueryKey(options)
+    });
+};
+
+export const postApiProductQueryKey = (options?: OptionsLegacyParser<PostApiProductData>) => [
+    createQueryKey('postApiProduct', options)
+];
+
+export const postApiProductOptions = (options?: OptionsLegacyParser<PostApiProductData>) => {
+    return queryOptions({
+        queryFn: async ({ queryKey, signal }) => {
+            const { data } = await postApiProduct({
+                ...options,
+                ...queryKey[0],
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: postApiProductQueryKey(options)
+    });
+};
+
+export const postApiProductMutation = (options?: Partial<OptionsLegacyParser<PostApiProductData>>) => {
+    const mutationOptions: UseMutationOptions<PostApiProductResponse, AxiosError<PostApiProductError>, OptionsLegacyParser<PostApiProductData>> = {
+        mutationFn: async (localOptions) => {
+            const { data } = await postApiProduct({
+                ...options,
+                ...localOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const getApiProductByIdQueryKey = (options: OptionsLegacyParser<GetApiProductByIdData>) => [
+    createQueryKey('getApiProductById', options)
+];
+
+export const getApiProductByIdOptions = (options: OptionsLegacyParser<GetApiProductByIdData>) => {
+    return queryOptions({
+        queryFn: async ({ queryKey, signal }) => {
+            const { data } = await getApiProductById({
+                ...options,
+                ...queryKey[0],
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getApiProductByIdQueryKey(options)
+    });
+};
+
+export const putApiProductByIdMutation = (options?: Partial<OptionsLegacyParser<PutApiProductByIdData>>) => {
+    const mutationOptions: UseMutationOptions<PutApiProductByIdResponse, AxiosError<PutApiProductByIdError>, OptionsLegacyParser<PutApiProductByIdData>> = {
+        mutationFn: async (localOptions) => {
+            const { data } = await putApiProductById({
+                ...options,
+                ...localOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const deleteApiProductByIdMutation = (options?: Partial<OptionsLegacyParser<DeleteApiProductByIdData>>) => {
+    const mutationOptions: UseMutationOptions<DeleteApiProductByIdResponse, AxiosError<DeleteApiProductByIdError>, OptionsLegacyParser<DeleteApiProductByIdData>> = {
+        mutationFn: async (localOptions) => {
+            const { data } = await deleteApiProductById({
+                ...options,
+                ...localOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const getApiServiceQueryKey = (options?: OptionsLegacyParser) => [
+    createQueryKey('getApiService', options)
+];
+
+export const getApiServiceOptions = (options?: OptionsLegacyParser) => {
+    return queryOptions({
+        queryFn: async ({ queryKey, signal }) => {
+            const { data } = await getApiService({
+                ...options,
+                ...queryKey[0],
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getApiServiceQueryKey(options)
+    });
+};
+
+export const postApiServiceQueryKey = (options?: OptionsLegacyParser<PostApiServiceData>) => [
+    createQueryKey('postApiService', options)
+];
+
+export const postApiServiceOptions = (options?: OptionsLegacyParser<PostApiServiceData>) => {
+    return queryOptions({
+        queryFn: async ({ queryKey, signal }) => {
+            const { data } = await postApiService({
+                ...options,
+                ...queryKey[0],
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: postApiServiceQueryKey(options)
+    });
+};
+
+export const postApiServiceMutation = (options?: Partial<OptionsLegacyParser<PostApiServiceData>>) => {
+    const mutationOptions: UseMutationOptions<PostApiServiceResponse, AxiosError<PostApiServiceError>, OptionsLegacyParser<PostApiServiceData>> = {
+        mutationFn: async (localOptions) => {
+            const { data } = await postApiService({
+                ...options,
+                ...localOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const getApiServiceByIdQueryKey = (options: OptionsLegacyParser<GetApiServiceByIdData>) => [
+    createQueryKey('getApiServiceById', options)
+];
+
+export const getApiServiceByIdOptions = (options: OptionsLegacyParser<GetApiServiceByIdData>) => {
+    return queryOptions({
+        queryFn: async ({ queryKey, signal }) => {
+            const { data } = await getApiServiceById({
+                ...options,
+                ...queryKey[0],
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getApiServiceByIdQueryKey(options)
+    });
+};
+
+export const putApiServiceByIdMutation = (options?: Partial<OptionsLegacyParser<PutApiServiceByIdData>>) => {
+    const mutationOptions: UseMutationOptions<PutApiServiceByIdResponse, AxiosError<PutApiServiceByIdError>, OptionsLegacyParser<PutApiServiceByIdData>> = {
+        mutationFn: async (localOptions) => {
+            const { data } = await putApiServiceById({
+                ...options,
+                ...localOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const deleteApiServiceByIdMutation = (options?: Partial<OptionsLegacyParser<DeleteApiServiceByIdData>>) => {
+    const mutationOptions: UseMutationOptions<DeleteApiServiceByIdResponse, AxiosError<DeleteApiServiceByIdError>, OptionsLegacyParser<DeleteApiServiceByIdData>> = {
+        mutationFn: async (localOptions) => {
+            const { data } = await deleteApiServiceById({
+                ...options,
+                ...localOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const getApiServiceTypeByServiceTypeIdQueryKey = (options: OptionsLegacyParser<GetApiServiceTypeByServiceTypeIdData>) => [
+    createQueryKey('getApiServiceTypeByServiceTypeId', options)
+];
+
+export const getApiServiceTypeByServiceTypeIdOptions = (options: OptionsLegacyParser<GetApiServiceTypeByServiceTypeIdData>) => {
+    return queryOptions({
+        queryFn: async ({ queryKey, signal }) => {
+            const { data } = await getApiServiceTypeByServiceTypeId({
+                ...options,
+                ...queryKey[0],
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getApiServiceTypeByServiceTypeIdQueryKey(options)
+    });
+};
+
+export const getApiServiceWithTypesQueryKey = (options?: OptionsLegacyParser) => [
+    createQueryKey('getApiServiceWithTypes', options)
+];
+
+export const getApiServiceWithTypesOptions = (options?: OptionsLegacyParser) => {
+    return queryOptions({
+        queryFn: async ({ queryKey, signal }) => {
+            const { data } = await getApiServiceWithTypes({
+                ...options,
+                ...queryKey[0],
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getApiServiceWithTypesQueryKey(options)
+    });
+};
+
+export const getApiServiceSearchQueryKey = (options?: OptionsLegacyParser<GetApiServiceSearchData>) => [
+    createQueryKey('getApiServiceSearch', options)
+];
+
+export const getApiServiceSearchOptions = (options?: OptionsLegacyParser<GetApiServiceSearchData>) => {
+    return queryOptions({
+        queryFn: async ({ queryKey, signal }) => {
+            const { data } = await getApiServiceSearch({
+                ...options,
+                ...queryKey[0],
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getApiServiceSearchQueryKey(options)
+    });
+};
+
+export const getApiServiceTypeQueryKey = (options?: OptionsLegacyParser) => [
+    createQueryKey('getApiServiceType', options)
+];
+
+export const getApiServiceTypeOptions = (options?: OptionsLegacyParser) => {
+    return queryOptions({
+        queryFn: async ({ queryKey, signal }) => {
+            const { data } = await getApiServiceType({
+                ...options,
+                ...queryKey[0],
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getApiServiceTypeQueryKey(options)
+    });
+};
+
+export const postApiServiceTypeQueryKey = (options?: OptionsLegacyParser<PostApiServiceTypeData>) => [
+    createQueryKey('postApiServiceType', options)
+];
+
+export const postApiServiceTypeOptions = (options?: OptionsLegacyParser<PostApiServiceTypeData>) => {
+    return queryOptions({
+        queryFn: async ({ queryKey, signal }) => {
+            const { data } = await postApiServiceType({
+                ...options,
+                ...queryKey[0],
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: postApiServiceTypeQueryKey(options)
+    });
+};
+
+export const postApiServiceTypeMutation = (options?: Partial<OptionsLegacyParser<PostApiServiceTypeData>>) => {
+    const mutationOptions: UseMutationOptions<PostApiServiceTypeResponse, AxiosError<PostApiServiceTypeError>, OptionsLegacyParser<PostApiServiceTypeData>> = {
+        mutationFn: async (localOptions) => {
+            const { data } = await postApiServiceType({
+                ...options,
+                ...localOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const getApiServiceTypeByIdQueryKey = (options: OptionsLegacyParser<GetApiServiceTypeByIdData>) => [
+    createQueryKey('getApiServiceTypeById', options)
+];
+
+export const getApiServiceTypeByIdOptions = (options: OptionsLegacyParser<GetApiServiceTypeByIdData>) => {
+    return queryOptions({
+        queryFn: async ({ queryKey, signal }) => {
+            const { data } = await getApiServiceTypeById({
+                ...options,
+                ...queryKey[0],
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getApiServiceTypeByIdQueryKey(options)
+    });
+};
+
+export const putApiServiceTypeByIdMutation = (options?: Partial<OptionsLegacyParser<PutApiServiceTypeByIdData>>) => {
+    const mutationOptions: UseMutationOptions<PutApiServiceTypeByIdResponse, AxiosError<PutApiServiceTypeByIdError>, OptionsLegacyParser<PutApiServiceTypeByIdData>> = {
+        mutationFn: async (localOptions) => {
+            const { data } = await putApiServiceTypeById({
+                ...options,
+                ...localOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const deleteApiServiceTypeByIdMutation = (options?: Partial<OptionsLegacyParser<DeleteApiServiceTypeByIdData>>) => {
+    const mutationOptions: UseMutationOptions<DeleteApiServiceTypeByIdResponse, AxiosError<DeleteApiServiceTypeByIdError>, OptionsLegacyParser<DeleteApiServiceTypeByIdData>> = {
+        mutationFn: async (localOptions) => {
+            const { data } = await deleteApiServiceTypeById({
+                ...options,
+                ...localOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const getApiServiceTypeCodeByCodeQueryKey = (options: OptionsLegacyParser<GetApiServiceTypeCodeByCodeData>) => [
+    createQueryKey('getApiServiceTypeCodeByCode', options)
+];
+
+export const getApiServiceTypeCodeByCodeOptions = (options: OptionsLegacyParser<GetApiServiceTypeCodeByCodeData>) => {
+    return queryOptions({
+        queryFn: async ({ queryKey, signal }) => {
+            const { data } = await getApiServiceTypeCodeByCode({
+                ...options,
+                ...queryKey[0],
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getApiServiceTypeCodeByCodeQueryKey(options)
+    });
+};
+
+export const getApiServiceTypeSearchQueryKey = (options?: OptionsLegacyParser<GetApiServiceTypeSearchData>) => [
+    createQueryKey('getApiServiceTypeSearch', options)
+];
+
+export const getApiServiceTypeSearchOptions = (options?: OptionsLegacyParser<GetApiServiceTypeSearchData>) => {
+    return queryOptions({
+        queryFn: async ({ queryKey, signal }) => {
+            const { data } = await getApiServiceTypeSearch({
+                ...options,
+                ...queryKey[0],
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getApiServiceTypeSearchQueryKey(options)
+    });
+};
+
+export const getApiServiceTypeWithServicesQueryKey = (options?: OptionsLegacyParser) => [
+    createQueryKey('getApiServiceTypeWithServices', options)
+];
+
+export const getApiServiceTypeWithServicesOptions = (options?: OptionsLegacyParser) => {
+    return queryOptions({
+        queryFn: async ({ queryKey, signal }) => {
+            const { data } = await getApiServiceTypeWithServices({
+                ...options,
+                ...queryKey[0],
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getApiServiceTypeWithServicesQueryKey(options)
+    });
 };

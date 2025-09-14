@@ -5,7 +5,7 @@ import { BootstrapDialog, BootstrapDialogTitle, buttonCloseStyles } from '@utils
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { enqueueSnackbar, SnackbarProvider } from 'notistack';
-import { putApiQuoteOfferByIdApproval } from '@features/offer/api';
+// import { putApiQuoteOfferByIdApproval } from '@features/offer/api';
 
 const RefuseOffer = () => {
     const [load, setLoad] = useState<boolean>(true);
@@ -25,6 +25,11 @@ const RefuseOffer = () => {
             newStatus: "Rejected"
         };
 
+        // Endpoint supprimé - fonctionnalité désactivée
+        enqueueSnackbar('Fonctionnalité de refus temporairement indisponible', { variant: "warning", anchorOrigin: { horizontal: "right", vertical: "top"} });
+        setLoad(false);
+        
+        /*
         putApiQuoteOfferByIdApproval({path: {id: String(id)}, query: {NewStatus: "Rejected"}, body: body})
         .then(() => {
             setLoad(false);
@@ -34,6 +39,7 @@ const RefuseOffer = () => {
             setLoad(false);
             enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
         });
+        */
     }
     
     return (

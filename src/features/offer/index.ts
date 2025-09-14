@@ -1,0 +1,16 @@
+// Export des pages de gestion des devis
+export { default as QuoteApproval } from './pages/QuoteApproval';
+export { default as ApprovedQuotes } from './pages/ApprovedQuotes';
+export { default as PriceOffers } from './pages/PriceOffers';
+export { default as ManagePriceOffer } from './pages/ManagePriceOffer';
+export { default as AcceptOffer } from './pages/AcceptOffer';
+export { default as RefuseOffer } from './pages/RefuseOffer';
+export { default as QuoteDisplay } from './components/QuoteDisplay';
+export { default as QuoteDetail } from './components/QuoteDetail';
+export { default as QuoteViewer } from './components/QuoteViewer';
+export { default as QuoteViewerPage } from './pages/QuoteViewerPage';
+export { default as QuoteOptionsEditor } from './components/QuoteOptionsEditor';
+export { default as QuoteGeneralInfoEditor } from './components/QuoteGeneralInfoEditor';
+export { default as QuoteFinalConfigEditor } from './components/QuoteFinalConfigEditor';
+export { default as QuoteActionButtons } from './components/QuoteActionButtons';
+export { default as QuoteEmailSender } from './components/QuoteEmailSender'; 

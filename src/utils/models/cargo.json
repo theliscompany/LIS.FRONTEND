@@ -1,0 +1,90 @@
+{
+  "cargoTypes": [
+    {
+      "code": "20Dry",
+      "label": "20' Dry",
+      "description": "Conteneur sec 20 pieds standard (Dry Van)."
+    },
+    {
+      "code": "40Dry",
+      "label": "40' Dry",
+      "description": "Conteneur sec 40 pieds standard."
+    },
+    {
+      "code": "40HC",
+      "label": "40' High Cube",
+      "description": "Conteneur 40 pieds avec hauteur majorée."
+    },
+    {
+      "code": "45HC",
+      "label": "45' High Cube",
+      "description": "Conteneur 45 pieds avec hauteur majorée."
+    },
+    {
+      "code": "20Reefer",
+      "label": "20' Reefer",
+      "description": "Conteneur frigorifique 20 pieds."
+    },
+    {
+      "code": "40Reefer",
+      "label": "40' Reefer",
+      "description": "Conteneur frigorifique 40 pieds."
+    },
+    {
+      "code": "20OpenTop",
+      "label": "20' Open Top",
+      "description": "Conteneur à toit ouvert 20 pieds."
+    },
+    {
+      "code": "40OpenTop",
+      "label": "40' Open Top",
+      "description": "Conteneur à toit ouvert 40 pieds."
+    },
+    {
+      "code": "20FlatRack",
+      "label": "20' Flat Rack",
+      "description": "Conteneur plateforme 20 pieds (chargement latéral)."
+    },
+    {
+      "code": "40FlatRack",
+      "label": "40' Flat Rack",
+      "description": "Conteneur plateforme 40 pieds."
+    },
+    {
+      "code": "20Tank",
+      "label": "20' Tank",
+      "description": "Conteneur citerne 20 pieds."
+    },
+    {
+      "code": "20Ventilated",
+      "label": "20' Ventilated",
+      "description": "Conteneur ventilé (pour café, cacao, etc.)."
+    },
+    {
+      "code": "BulkContainer",
+      "label": "Bulk Container",
+      "description": "Conteneur vrac sec."
+    },
+    {
+      "code": "NonConventionalCargo",
+      "label": "Non-Conventional Cargo",
+      "description": "Colis hors gabarit."
+    },
+    {
+      "code": "RollingEquipment",
+      "label": "Rolling Equipment",
+      "description": "Véhicules et engins roulants (Ro-Ro)."
+    },
+    {
+      "code": "BreakBulk",
+      "label": "Break Bulk",
+      "description": "Marchandises non conteneurisées en colis."
+    },
+    {
+      "code": "ProjectCargo",
+      "label": "Project Cargo",
+      "description": "Equipements industriels lourds ou projets spéciaux."
+    }
+  ]
+}
+  

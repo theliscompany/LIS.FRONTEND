@@ -6,7 +6,7 @@ import { BootstrapInput, buttonCloseStyles, inputLabelStyles } from '@utils/misc
 import { useMsal, useAccount } from '@azure/msal-react';
 import { SnackbarProvider, enqueueSnackbar } from 'notistack';
 import { useState } from 'react';
-import { getQuoteOffer, putApiQuoteOfferByIdStatus } from '@features/offer/api';
+import { getQuote /* putApiQuoteOfferByIdStatus */ } from '@features/offer/api';
 import { postApiEmail } from '@features/request/api';
 import { useQueryClient } from '@tanstack/react-query';
 import { getApiFileByFolderByFileNameOptions } from '@features/document/api/@tanstack/react-query.gen';
@@ -104,7 +104,7 @@ const PriceOffer = (props: any) => {
 
 	const loadOffer = async () => {
 		try {
-			const response: any = await getQuoteOffer({path: {id: props.id}});
+			const response: any = await getQuote({path: {id: props.id}});
 			if (response !== null && response !== undefined) {
 				console.log(response.data);
 				// var objTotal = JSON.parse(response.data.createdBy);
@@ -128,8 +128,10 @@ const PriceOffer = (props: any) => {
 				newStatus: "Accepted",
 			};
 
-			const response = await putApiQuoteOfferByIdStatus({body: body, path: {id: props.id}, query: {newStatus: "Accepted"}});
-			if (response !== null && response !== undefined) {
+			// Endpoint supprimé - fonctionnalité désactivée
+			enqueueSnackbar('Fonctionnalité d\'acceptation temporairement indisponible', { variant: "warning" });
+			// const response = await putApiQuoteOfferByIdStatus({body: body, path: {id: props.id}, query: {newStatus: "Accepted"}});
+			if (false) { // Fonctionnalité désactivée
 				enqueueSnackbar(t('priceOfferApproved'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top" } });
 				var optionsButtons = props.options.map((_: any, index: number) => {
 					return `<a href="${import.meta.env.VITE_ORIGIN_URL+"/acceptOffer/"+props.id}?option=${index}" style="display:inline-block;background-color:#008089;color:#fff;padding:10px 20px;text-decoration:none" target="_blank">${t('selectOptionOffer', {lng: language})} #${Number(index+1)}</a>`;
@@ -172,7 +174,9 @@ const PriceOffer = (props: any) => {
 				newStatus: "Rejected",
 			};
 
-			const response: any = await putApiQuoteOfferByIdStatus({body: body, path: {id: props.id}, query: {newStatus: "Rejected"}});
+			// Endpoint supprimé - fonctionnalité désactivée
+			enqueueSnackbar('Fonctionnalité de rejet temporairement indisponible', { variant: "warning" });
+			const response: any = null; // await putApiQuoteOfferByIdStatus({body: body, path: {id: props.id}, query: {newStatus: "Rejected"}});
 			if (response !== null && response !== undefined) {
 				enqueueSnackbar(t('priceOfferRejected'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top" } });
 				setLoad(true);

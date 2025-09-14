@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Box, Button, Skeleton, Typography } from '@mui/material';
+import { Box, Button, Skeleton, Typography, IconButton, Tooltip } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import { BootstrapDialog, whiteButtonStyles } from '@utils/misc/styles';
 import { SnackbarProvider } from 'notistack';
@@ -13,8 +13,9 @@ import GeneratePriceOffer from '@features/request/components/GeneratePriceOffer'
 import RequestForm from '@features/request/components/RequestForm';
 import AddContainer from '@features/request/components/AddContainer';
 import RequestFormHeader from '@features/request/components/RequestFormHeader';
-import { getApiAssignee, getApiHsCodeLis, getApiRequestById } from '@features/request/api';
-import { getPorts, getProduct } from '@features/transport/api';
+import { getApiAssignee, getApiRequestById } from '@features/request/api';
+import { getApiPort, getApiProduct } from '@features/masterdata/api';
+import AutoFixHighIcon from '@mui/icons-material/AutoFixHigh';
 
 const Request = () => {
     // const [load, setLoad] = useState<boolean>(false);
@@ -139,7 +140,7 @@ const Request = () => {
     
     const getPortsService = async () => {
         try {
-            const response = await getPorts({query: { pageSize: 2000 }});
+            const response = await getApiPort();
             if (response !== null && response !== undefined) {
                 var addedCoordinatesPorts = addedCoordinatesToPorts(response.data);
                 setPorts(addedCoordinatesPorts);
@@ -153,7 +154,7 @@ const Request = () => {
     
     const getProductsService = async () => {
         try {
-            const response = await getProduct({query: { pageSize: 500 }});
+            const response = await getApiProduct();
             if (response !== null && response !== undefined) {
                 setProducts(response.data);
             }    
@@ -166,10 +167,10 @@ const Request = () => {
 
     const getHSCodes = async () => {
         try {
-            const response = await getApiHsCodeLis();
-            if (response !== null && response !== undefined) {
-                setHSCodes(response.data);
-            }
+            // const response = await getApiHsCodeLis();
+            // if (response !== null && response !== undefined) {
+            //     setHSCodes(response.data);
+            // }
         }
         catch (err: any) {
             setLoadAssignees(false);
@@ -310,7 +311,41 @@ const Request = () => {
         <div style={{ background: "#fff", borderTopLeftRadius: 20, borderTopRightRadius: 20 }}>
             <SnackbarProvider />
             <Box py={2.5}>
-                <Typography variant="h5" sx={{mt: {xs: 4, md: 1.5, lg: 1.5 }}} mx={5}><b>{t('manageRequestQuote')} {id}</b></Typography>
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mx: 5 }}>
+                    <Typography variant="h5" sx={{mt: {xs: 4, md: 1.5, lg: 1.5 }}}><b>{t('manageRequestQuote')} {id}</b></Typography>
+                    <Tooltip title={t("Lancer l'assistant commande") as string}>
+                        <IconButton
+                            size="medium"
+                            color="primary"
+                            onClick={() => {
+                                navigate('/request-wizard', {
+                                    state: {
+                                        requestData: {
+                                            requestQuoteId: id,
+                                            customerName: requestData?.customerName,
+                                            departure: requestData?.departure,
+                                            arrival: requestData?.arrival,
+                                            status: requestData?.status,
+                                            assigneeName: requestData?.assigneeName,
+                                            assignee: requestData?.assigneeId,
+                                            created: requestData?.createdAt,
+                                            trackingNumber: requestData?.trackingNumber,
+                                            email: requestData?.email,
+                                            comment: requestData?.detail,
+                                            productName: requestData?.productName,
+                                            productId: requestData?.productId,
+                                            incotermName: requestData?.incoterm,
+                                            cellPhone: requestData?.whatsapp
+                                        }
+                                    }
+                                });
+                            }}
+                            sx={{ '&:hover': { backgroundColor: 'rgba(25, 118, 210, 0.08)', transform: 'scale(1.1)', transition: 'all 0.2s' } }}
+                        >
+                            <AutoFixHighIcon fontSize="medium" />
+                        </IconButton>
+                    </Tooltip>
+                </Box>
                 <Box>
                 {
                     true ? // !load

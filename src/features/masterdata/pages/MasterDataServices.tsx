@@ -7,7 +7,7 @@ import { useTranslation } from 'react-i18next';
 import { ServiceViewModel } from '@features/masterdata/api';
 import { ColumnDef, createColumnHelper } from '@tanstack/react-table';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import {  deleteServiceByIdMutation, getServiceOptions, getServiceQueryKey, postServiceMutation, putServiceByIdMutation } from '@features/masterdata/api/@tanstack/react-query.gen';
+import {  deleteApiServiceByIdMutation, getApiServiceOptions, getApiServiceQueryKey, postApiServiceMutation, putApiServiceByIdMutation } from '@features/masterdata/api/@tanstack/react-query.gen';
 import { EditSelectCell, EditTextFieldCell } from '@components/common/EditableCells';
 import ConfirmDialogComponent from '@components/common/ConfirmDialogComponent';
 import { showSnackbar } from '@components/common/Snackbar';
@@ -27,7 +27,7 @@ const MasterDataServices = () => {
     const [savingRow, setSavingRow] = useState(false)
     const [globalFilter, setGlobalFilter] = useState('')
 
-    const {data, isFetching} = useQuery({...getServiceOptions()})
+    const {data, isFetching} = useQuery({...getApiServiceOptions()})
 
     useEffect(() => {
         setServices(data ?? []);
@@ -40,7 +40,7 @@ const MasterDataServices = () => {
                 setEditRow(false);
 
                 showSnackbar("Saved with success", "success");
-                queryClient.invalidateQueries({ queryKey: getServiceQueryKey() });
+                queryClient.invalidateQueries({ queryKey: getApiServiceQueryKey() });
             },
             onError: () => showSnackbar(t('errorHappened'), "warning"),
             onSettled:() => setSavingRow(false)
@@ -48,22 +48,22 @@ const MasterDataServices = () => {
     }
 
     const deleteServiceMutation = useMutation({
-        ...deleteServiceByIdMutation(),
+        ...deleteApiServiceByIdMutation(),
         onSuccess:() => {
             setServiceId(undefined);
             showSnackbar("Deleted with success", "success");
-            queryClient.invalidateQueries({ queryKey: getServiceQueryKey() });
+            queryClient.invalidateQueries({ queryKey: getApiServiceQueryKey() });
         },
         onError : () => showSnackbar(t('errorHappened'), "warning")
     })
 
     const updateServiceMutation = useMutation({
-        ...putServiceByIdMutation(),
+        ...putApiServiceByIdMutation(),
         ...handleServiceStatusUpdated()
    })
 
    const createServiceMutation = useMutation({
-        ...postServiceMutation(),
+        ...postApiServiceMutation(),
         ...handleServiceStatusUpdated()
     })
 
@@ -172,7 +172,7 @@ const MasterDataServices = () => {
     ]
 
     const handleRefreshTable = () => {
-        queryClient.invalidateQueries({ queryKey: getServiceQueryKey() });
+        queryClient.invalidateQueries({ queryKey: getApiServiceQueryKey() });
     }
     
     return (

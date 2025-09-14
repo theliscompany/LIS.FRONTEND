@@ -9,6 +9,7 @@ import { useAccount, useMsal } from '@azure/msal-react';
 import { useTranslation } from 'react-i18next';
 import { DataGrid, GridColDef, GridRenderCellParams } from '@mui/x-data-grid';
 import { getAccessToken } from '@utils/functions';
+import { InteractionStatus } from '@azure/msal-browser';
 import { deleteApiAssigneeById, getApiAssignee, postApiAssignee } from '@features/request/api';
 
 const UsersAssignment = () => {
@@ -104,7 +105,7 @@ const UsersAssignment = () => {
     
     const loadUsers = async () => {
         if (account && instance) {
-            const token = await getAccessToken(instance, {scopes: ["https://graph.microsoft.com/User.ReadBasic.All"]}, account);
+            const token = await getAccessToken(instance, {scopes: ["https://graph.microsoft.com/User.ReadBasic.All"]}, account, InteractionStatus.None);
             getUsersFromAAD(token);
         }
     }

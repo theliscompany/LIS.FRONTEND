@@ -1,13 +1,16 @@
-import { Chip, ListItem, ListItemText, Skeleton, Typography } from "@mui/material";
+import { Chip, ListItem, ListItemText, Skeleton, Typography, IconButton, Tooltip, Box } from "@mui/material";
 import Grid from "@mui/material/Grid2";
 import { NavLink } from "react-router-dom";
 import PlaceIcon from '@mui/icons-material/Place';
 import { useTranslation } from 'react-i18next';
 import { colorsTypes } from '@utils/functions';
 import { statusTypes } from '@utils/constants';
+import AutoFixHighIcon from '@mui/icons-material/AutoFixHigh';
+import { useNavigate } from "react-router-dom";
 
 const RequestViewItem = (props: any) => {
     const { t } = useTranslation();
+    const navigate = useNavigate();
     // Find the status type by type
     const statusType = statusTypes.find((elm) => elm.type === props.item.status);
     // Translate the label
@@ -50,9 +53,47 @@ const RequestViewItem = (props: any) => {
             sx={{ 
                 '&:hover': { backgroundColor: "#fbfbfb" },
                 borderTop: "1px solid #e6e6e6", 
-                px: { xs: 5, md: 5 }, pt: 1.25, pb: 2 
+                px: { xs: 5, md: 5 }, pt: 1.25, pb: 2,
+                position: 'relative'
             }}
         >
+            {/* Magic wand button in top right */}
+            <Box sx={{ position: 'absolute', top: 8, right: 16, zIndex: 2 }}>
+                <Tooltip title={t("Lancer l'assistant commande") as string}>
+                    <IconButton
+                        size="small"
+                        color="primary"
+                        onClick={e => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            navigate('/request-wizard', {
+                                state: {
+                                    requestData: {
+                                        requestQuoteId: props.item.id,
+                                        customerName: props.item.customerName,
+                                        departure: props.item.departure,
+                                        arrival: props.item.arrival,
+                                        status: props.item.status,
+                                        assigneeName: props.item.assigneeName,
+                                        assignee: props.item.assignee,
+                                        created: props.item.createdAt,
+                                        trackingNumber: props.item.trackingNumber,
+                                        email: props.item.email,
+                                        comment: props.item.comment,
+                                        productName: props.item.productName,
+                                        productId: props.item.productId,
+                                        incotermName: props.item.incoterm,
+                                        cellPhone: props.item.cellPhone
+                                    }
+                                }
+                            });
+                        }}
+                        sx={{ '&:hover': { backgroundColor: 'rgba(25, 118, 210, 0.08)', transform: 'scale(1.1)', transition: 'all 0.2s' } }}
+                    >
+                        <AutoFixHighIcon fontSize="small" />
+                    </IconButton>
+                </Tooltip>
+            </Box>
             <Grid container sx={{ maxWidth: "600px", color: "#333" }}>
                 <Grid size={{ xs: 12 }}>
                     <ListItemText

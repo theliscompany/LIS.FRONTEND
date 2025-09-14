@@ -1,10 +1,10 @@
 import { useAccount, useMsal } from "@azure/msal-react";
 import { useEffect, useRef, useState } from "react";
-import { CargoDetailsViewModel, PostApiRequestNewResponse, RequestQuoteViewModel } from "@features/request/api";
+import { PostApiRequestResponse, RequestQuoteViewModel } from "@features/request/api";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getContactGetContactsOptions } from "@features/crm/api/@tanstack/react-query.gen";
-import { getCityOptions, getPackageOptions } from "@features/masterdata/api/@tanstack/react-query.gen";
-import { getApiHsCodeLisOptions, getApiRequestQueryKey, postApiRequestNewMutation, putApiRequestUpdateByIdMutation } from "@features/request/api/@tanstack/react-query.gen";
+import { getApiCityOptions, getApiPackageOptions, getApiProductOptions } from "@features/masterdata/api/@tanstack/react-query.gen";
+import { getApiRequestQueryKey, postApiRequestMutation, putApiRequestUpdateByIdMutation } from "@features/request/api/@tanstack/react-query.gen";
 import { AccountInfo } from "@azure/msal-browser";
 import { SubmitHandler, UseFormSetValue } from "react-hook-form";
 import { showSnackbar } from "@components/common/Snackbar";
@@ -17,8 +17,12 @@ export interface GraphUser {
     // Ajoutez d'autres champs si besoin selon la doc Graph
 }
 
-export const useNewRequestQuote = ({requestQuoteId, setValue}:
-    { requestQuoteId?: string, setValue: UseFormSetValue<RequestQuoteViewModel>}) => {
+export interface CargoDetailsViewModel {
+    quantity: number;
+    products: any[];
+}
+
+export const useNewRequestQuote = ({requestQuoteId, setValue}: { requestQuoteId?: string, setValue?: UseFormSetValue<RequestQuoteViewModel> }) => {
     const { instance, accounts } = useMsal();
 
     const account = useAccount(accounts[0] || {});
@@ -47,32 +51,28 @@ export const useNewRequestQuote = ({requestQuoteId, setValue}:
     })
 
     const { data: cities, isLoading: isLoadingCities } = useQuery({
-        ...getCityOptions(),
+        ...getApiCityOptions(),
         staleTime: Infinity
     })
 
     const { data: packages } = useQuery({
-        ...getPackageOptions(),
+        ...getApiPackageOptions(),
         staleTime: Infinity
     })
 
-    // const { data: products } = useQuery({
-    //     ...getProductOptions(),
-    //     staleTime: Infinity
-    // })
-
-    const { data: HsCodes } = useQuery({
-        ...getApiHsCodeLisOptions(),
+    const { data: products } = useQuery({
+        ...getApiProductOptions(),
         staleTime: Infinity
     })
 
     const mutationPost = useMutation({
-        ...postApiRequestNewMutation(),
-        onSuccess: (data: PostApiRequestNewResponse) => {
+        ...postApiRequestMutation(),
+        onSuccess: (data: PostApiRequestResponse) => {
             showSnackbar('Request quote saved','success')
             const requestQuoteId = Object.keys(data)[0]
-            setValue('requestQuoteId', requestQuoteId)
-            setValue('trackingNumber', data[requestQuoteId])
+            if (setValue) {
+                setValue('requestQuoteId', requestQuoteId)
+            }
             queryClient.invalidateQueries({
                 queryKey: getApiRequestQueryKey()
             })
@@ -100,12 +100,12 @@ export const useNewRequestQuote = ({requestQuoteId, setValue}:
     const getMembersCanAssigne = async (_account: AccountInfo) => {
         try {
             const result = await instance.acquireTokenSilent({
-                scopes: ["GroupMember.Read.All"],
+                scopes: ["User.Read.All", "Group.Read.All", "GroupMember.Read.All"],
                 account: _account,
             });
             const groupId = "bc8d8ba0-7c17-4357-ab82-f0233b90b4d9"
             const res = await fetch(
-                `https://graph.microsoft.com/v1.0/groups/${groupId}/members`,
+                `https://graph.microsoft.com/v1.0/groups/${groupId}/members?$select=id,displayName,givenName,surname,userPrincipalName,mail`,
                 {
                     headers: {
                         Authorization: `Bearer ${result.accessToken}`,
@@ -113,7 +113,10 @@ export const useNewRequestQuote = ({requestQuoteId, setValue}:
                 }
             );
             const data = await res.json();
-            setMembers(data.value as GraphUser[]);
+            // Filtrer uniquement les users
+            const users = (data.value || []).filter((m: any) => m['@odata.type'] === '#microsoft.graph.user');
+            console.log('[DEBUG] Liste des membres récupérés du backend:', users);
+            setMembers(users as GraphUser[]);
         }
         catch (e: any) {
             console.log(e)
@@ -179,8 +182,7 @@ export const useNewRequestQuote = ({requestQuoteId, setValue}:
         cities,
         isLoadingCities,
         packages,
-        // products,
-        HsCodes,
+        products,
         rowDraftRef,
         queryClient,
         handleGetRowsSelected,

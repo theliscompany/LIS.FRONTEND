@@ -6,8 +6,9 @@ import { BootstrapDialog, BootstrapDialogTitle, buttonCloseStyles } from '@utils
 import { useTranslation } from 'react-i18next';
 import { useLocation, useParams } from 'react-router-dom';
 // import { enqueueSnackbar } from 'notistack';
-import { putApiQuoteOfferByIdApproval } from '@features/offer/api';
-import { postOrder } from '@features/shipment/api';
+// import { putApiQuoteOfferByIdApproval } from '@features/offer/api'; // Fonction non disponible dans la nouvelle API
+import { getQuote, putApiQuoteByIdSelectPreferredOption } from '@features/offer/api';
+import { postApiOrders } from '@features/shipment/api';
 import { postApiEmail } from '@features/request/api';
 import { enqueueSnackbar, SnackbarProvider } from 'notistack';
 import { parseInfos } from '@utils/functions';
@@ -42,19 +43,33 @@ const AcceptOffer = () => {
 
     const acceptOffer = async () => {
         var cOption = currentOption !== null && currentOption !== undefined ? Number(currentOption) : 0;
-        putApiQuoteOfferByIdApproval({path: {id: String(id)}, query: {NewStatus: "Accepted", option: cOption}})
-        .then((data: any) => {
-            console.log("Data: ", data.data.data);
-            createOrder(data.data.data.options[cOption], data.data.data, cOption);
-            setLoad(false);
-            setIsAccepted(true);
-            enqueueSnackbar(t('priceOfferApproved'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top" } });
-        })
-        .catch(error => { 
+        
+        // Étape 1: Récupérer la quote
+        try {
+            const quoteData = await getQuote({path: {id: String(id)}});
+            console.log("Quote Data: ", quoteData.data);
+            
+            // Étape 2: Sélectionner l'option préférée (simule l'approbation)
+            await putApiQuoteByIdSelectPreferredOption({
+                path: {id: String(id)}, 
+                query: {optionIndex: cOption}
+            });
+            
+            // Étape 3: Traiter comme approuvé
+            if (quoteData.data && typeof quoteData.data === 'object') {
+                const quote = quoteData.data as any;
+                createOrder(quote.options[cOption], quote, cOption);
+                setLoad(false);
+                setIsAccepted(true);
+                enqueueSnackbar(t('priceOfferApproved'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top" } });
+            } else {
+                throw new Error('Données de quote invalides');
+            }
+        } catch (error) { 
             setLoad(false);
             console.log(error);
             enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top" } });
-        });
+        }
     }
 
     const extractName = (html: string): string | null => {
@@ -72,12 +87,12 @@ const AcceptOffer = () => {
         console.log("Option : ", option);
         console.log("Data : ", offerData);
 
-        postOrder({body: {
+        postApiOrders({body: {
             orderId: 0,
             customerId: Number(parseInfos(offerData.clientNumber).id),
             exportation: true,
-            departurePortId: option.portDeparture.portId,
-            destinationPortId: option.portDestination.portId
+            departurePort: option.portDeparture.portId,
+            destinationPort: option.portDestination.portId
         }})
         .then((data: any) => {
             console.log("All : ", data.data);            
@@ -114,7 +129,7 @@ const AcceptOffer = () => {
             </div>`;            
             sendEmail("pricing@omnifreight.eu", offerData.emailUser, t('confirmationOffer', {lng: lang}), messageText);
         })
-        .catch(error => { 
+        .catch((error: any) => { 
             setLoad(false);
             console.log(error);
         });

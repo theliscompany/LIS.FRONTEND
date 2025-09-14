@@ -1,6 +1,7 @@
 import React from "react";
 import { AuthenticationResult } from "@azure/msal-browser";
 import { categoriesOptions } from "./constants";
+import { InteractionStatus } from "@azure/msal-browser";
 //import { t } from "i18next";
 
 function removeAccents(input: string) {
@@ -206,18 +207,15 @@ export function getTotalNumber(data: any) {
 }
 
 export function getServicesTotal(data: any, currency: string, margin: number) {
+    if (!Array.isArray(data)) return '';
     let services = [];
-
-    // Loop through the data
     for(let i = 0; i < data.length; i++) {
-        // Loop through the services in the current data object
+        if (!data[i] || !Array.isArray(data[i].services)) continue;
         for(let j = 0; j < data[i].services.length; j++) {
             let service = data[i].services[j];
             services.push(`${service.serviceName} : ${(service.price*(1+margin/100)).toFixed(2)} ${currency}`);
         }
     }
-
-    // Return the services and their total price in the desired format
     return services.join('; ');
 }
 
@@ -705,12 +703,16 @@ export function isJSON(str: string) {
 export function getTotalPrice(seaFreightObject: any) {
     let totalPrice:number = 0;
   
-    // Loop through the containers array
-    for (const container of seaFreightObject.containers) {
-        // Loop through the services array inside each container
-        for (const service of container.services) {
-            // Add the price of the service to the totalPrice
-            totalPrice += service.price;
+    // Loop through the containers array, only if it's an array
+    if (Array.isArray(seaFreightObject?.containers)) {
+        for (const container of seaFreightObject.containers) {
+            // Loop through the services array inside each container
+            if (Array.isArray(container?.services)) {
+                for (const service of container.services) {
+                    // Add the price of the service to the totalPrice
+                    totalPrice += service.price;
+                }
+            }
         }
     }
   
@@ -718,6 +720,7 @@ export function getTotalPrice(seaFreightObject: any) {
 }
 
 export function getTotalPrices(seaFreights: any) {
+    if (!Array.isArray(seaFreights)) return 0;
     var listPrices = 0;
     for (const seaFreight of seaFreights) {
         const totalPrice = getTotalPrice(seaFreight);
@@ -746,24 +749,37 @@ export async function getToken(instance: any, account: any, scope: any) {
     );
 }
 
-export const getAccessToken = async (instance: any, scope: any, account: any) => {
-    // if (!instance.getAllAccounts().length) {
-        
-    // }
-    try {
-        const response = await instance.acquireTokenSilent({
-            scopes: scope.scopes,
-            account: account,
-        });
-        return response.accessToken;
-    } 
-    catch (error) {
-        const response = await instance.acquireTokenPopup({
-            ...scope,
-            account: account,
-        });
-        return response.accessToken;
-    }
+/**
+ * Récupère un accessToken MSAL de façon sécurisée.
+ * @param instance L'instance MSAL
+ * @param scope Les scopes à demander
+ * @param account Le compte utilisateur
+ * @param inProgress L'état d'interaction MSAL (InteractionStatus)
+ * @returns accessToken ou null si une interaction est déjà en cours
+ */
+export const getAccessToken = async (
+  instance: any,
+  scope: any,
+  account: any,
+  inProgress: InteractionStatus
+) => {
+  if (inProgress !== InteractionStatus.None) {
+    // Une interaction MSAL est déjà en cours, on ne fait rien
+    return null;
+  }
+  try {
+    const response = await instance.acquireTokenSilent({
+      scopes: scope.scopes,
+      account: account,
+    });
+    return response.accessToken;
+  } catch (error) {
+    const response = await instance.acquireTokenPopup({
+      ...scope,
+      account: account,
+    });
+    return response.accessToken;
+  }
 };
 
 export const getExtensionFromContentType = (contentType: string): string => {
@@ -837,41 +853,68 @@ export const getExtensionFromContentType = (contentType: string): string => {
 // }
 
 export function statusLabel(value: string) {
-    if (value === "Accepted")
-        return "Approved";
-    else
-        return value;
+    if (!value) return '';
+    switch (value) {
+        case "Accepted":
+            return "Approved";
+        case "DRAFT":
+            return "Brouillon";
+        case "PENDING_APPROVAL":
+            return "En attente d'approbation";
+        case "APPROVED":
+            return "Approuvé";
+        case "SENT_TO_CLIENT":
+            return "Envoyé au client";
+        case "PENDING":
+            return "En attente";
+        case "REJECTED":
+            return "Rejeté";
+        case "NO_RESPONSE":
+            return "Pas de réponse";
+        case "EXHALE":
+            return "Expiré";
+        default:
+            return value;
+    }
 }
 
 export function colorsTypes(value: string) {
+    if (!value) return 'default';
     switch (value) {
         case "EnAttente": 
             return "warning";
-            break;
         case "EnCoursDeTraitement":
             return "info";
-            break;
         case "Valider":
             return "success";
-            break;
         case "Accepted":
             return "success";
-            break;
         case "New":
             return "warning";
-            break;
         case "Rejeter": 
             return "error";
-            break;
         case "Problème": 
             return "error";
-            break;
         case "Rejected": 
             return "error";
-            break;
         case "No response": 
             return "default";
-            break;
+        case "DRAFT":
+            return "default";
+        case "PENDING_APPROVAL":
+            return "warning";
+        case "APPROVED":
+            return "success";
+        case "SENT_TO_CLIENT":
+            return "info";
+        case "PENDING":
+            return "warning";
+        case "NO_RESPONSE":
+            return "default";
+        case "EXHALE":
+            return "error";
+        default:
+            return "default";
     }
 }
 
@@ -982,4 +1025,224 @@ export const base64ToUint8Array = (base64: string) => {
     }
     return bytes;
 };
+    
+// --- TEU UTILS ---
+/**
+ * Retourne le nombre de TEU pour un type de container (20' = 1, 40' = 2, 45' = 2.25, sinon 0)
+ */
+export function getTEU(containerType: string): number {
+  if (!containerType) return 0;
+  const type = containerType.toLowerCase();
+  if (type.includes("20")) return 1;
+  if (type.includes("40")) return 2;
+  if (type.includes("45")) return 2.25;
+  return 0;
+}
+
+/**
+ * Calcule le total TEU pour une liste de containers [{containerType, quantity}]
+ */
+export function getTotalTEU(containers: Array<{containerType: string, quantity: number}>): number {
+  if (!Array.isArray(containers)) return 0;
+  return containers.reduce((sum, c) => sum + getTEU(c.containerType) * (c.quantity || 1), 0);
+}
+
+/**
+ * Génère le payload pour POST /api/QuoteOffer à partir du draftQuote et des quantités éditées.
+ * @param draftQuote L'objet global du wizard (état complet)
+ * @param seafreightQuantities Quantités éditées pour chaque offre seafreight (clé = id)
+ * @param haulageQuantity Quantité éditée pour le haulage
+ * @param miscQuantities Quantités éditées pour chaque miscellaneous (clé = id)
+ * @param emailUser Email de l'utilisateur connecté
+ * @param files Liste des fichiers joints (optionnel)
+ * @param selectedOption Index de l'option sélectionnée (optionnel, défaut 0)
+ */
+export function buildCreateQuoteOfferPayload({
+  draftQuote,
+  seafreightQuantities,
+  haulageQuantity,
+  miscQuantities,
+  emailUser,
+  files = [],
+  selectedOption = 0
+}: {
+  draftQuote: any,
+  seafreightQuantities: { [id: string]: number },
+  haulageQuantity: number,
+  miscQuantities: { [id: string]: number },
+  emailUser: string,
+  files?: any[],
+  selectedOption?: number
+}) {
+  // Helper pour PortDto
+  const mapPort = (port: any) => port ? {
+    portId: port.portId || port.id,
+    portName: port.portName || port.name,
+    country: port.country
+  } : undefined;
+
+  // Helper pour AddressDto
+  const mapAddress = (addr: any) => addr ? {
+    company: addr.company,
+    addressLine: addr.addressLine,
+    city: addr.city,
+    postalCode: addr.postalCode,
+    country: addr.country
+  } : undefined;
+
+  // Helper pour DeliveryAddressDto
+  const mapDeliveryAddress = (addr: any) => addr ? {
+    company: addr.company,
+    addressLine: addr.addressLine,
+    city: addr.city,
+    postalCode: addr.postalCode,
+    country: addr.country
+  } : undefined;
+
+  // Helper pour les fichiers joints
+  const mapFiles = (files: any[]) => files.map(f => ({
+    fileName: f.name,
+    contentType: f.type,
+    size: f.size,
+    uploadedAt: f.uploadedAt || new Date().toISOString(),
+    url: f.url
+  }));
+
+  // Construction de l'option principale (adapte si tu as plusieurs options)
+  const option = {
+    optionId: draftQuote.optionId || undefined,
+    description: draftQuote.step1?.comment || 'Option générée',
+    haulage: draftQuote.selectedHaulage ? {
+      haulierId: draftQuote.selectedHaulage.haulierId,
+      haulierName: draftQuote.selectedHaulage.haulierName,
+      currency: draftQuote.selectedHaulage.currency,
+      unitTariff: draftQuote.selectedHaulage.unitTariff,
+      freeTime: draftQuote.selectedHaulage.freeTime,
+      pickupAddress: mapAddress(draftQuote.selectedHaulage.pickupAddress),
+      deliveryPort: mapPort(draftQuote.selectedHaulage.deliveryPort),
+      comment: draftQuote.selectedHaulage.comment,
+      validUntil: draftQuote.selectedHaulage.validUntil,
+      quantity: haulageQuantity
+    } : undefined,
+    seaFreight: draftQuote.selectedSeafreights && draftQuote.selectedSeafreights.length > 0 ? {
+      id: draftQuote.selectedSeafreights[0].id,
+      seaFreightId: draftQuote.selectedSeafreights[0].id,
+      carrierName: draftQuote.selectedSeafreights[0].carrier?.name,
+      carrierAgentName: draftQuote.selectedSeafreights[0].carrierAgentName,
+      departurePort: mapPort(draftQuote.selectedSeafreights[0].departurePort),
+      destinationPort: mapPort(draftQuote.selectedSeafreights[0].arrivalPort),
+      currency: draftQuote.selectedSeafreights[0].currency,
+      transitTimeDays: draftQuote.selectedSeafreights[0].transitTimeDays,
+      frequency: draftQuote.selectedSeafreights[0].frequency,
+      defaultContainer: draftQuote.selectedSeafreights[0].containerType,
+      containers: draftQuote.selectedSeafreights.map((sf: any) => ({
+        containerType: sf.containerType,
+        quantity: seafreightQuantities[sf.id] ?? 1,
+        unitPrice: sf.charges?.basePrice
+      })),
+      comment: draftQuote.selectedSeafreights[0].comment,
+      validUntil: draftQuote.selectedSeafreights[0].validity?.endDate
+    } : undefined,
+    miscellaneous: Array.isArray(draftQuote.selectedMiscellaneous) ? draftQuote.selectedMiscellaneous.map((misc: any) => ({
+      miscellaneousId: misc.id,
+      supplierName: misc.supplierName,
+      currency: misc.pricing?.currency,
+      serviceId: misc.serviceId,
+      serviceName: misc.name,
+      price: misc.pricing?.basePrice,
+      validUntil: misc.validUntil,
+      quantity: miscQuantities[misc.id] ?? 1
+    })) : [],
+    deliveryAddress: mapDeliveryAddress(draftQuote.step1?.deliveryLocation),
+    totals: {
+      haulageTotal: draftQuote.haulageTotal,
+      seafreightTotal: draftQuote.seafreightTotal,
+      miscellaneousTotal: draftQuote.miscTotal,
+      grandTotal: draftQuote.totalPrice
+    }
+  };
+
+  return {
+    requestQuoteId: draftQuote.step1?.requestQuoteId || draftQuote.requestQuoteId,
+    clientNumber: draftQuote.step1?.customer?.clientNumber || draftQuote.step1?.customer?.contactId,
+    emailUser,
+    comment: draftQuote.step1?.comment,
+    selectedOption,
+    files: mapFiles(files),
+    options: [option]
+  };
+}
+
+/**
+ * Transforme le payload API de création de devis en payload client simplifié.
+ * @param apiPayload Le payload API complet (avec options, selectedOption, etc.)
+ * @returns Un objet client-friendly prêt à envoyer au client.
+ */
+export function transformToClientPayload(apiPayload: any) {
+  const preferredIdx = apiPayload.selectedOption ?? 0;
+  return {
+    quoteNumber: apiPayload.quoteOfferNumber || apiPayload.requestQuoteId,
+    date: new Date().toISOString().slice(0, 10),
+    client: {
+      name: apiPayload.clientName || '',
+      contact: apiPayload.clientContact || '',
+      email: apiPayload.emailUser
+    },
+    validUntil: apiPayload.options?.[preferredIdx]?.selectedSeafreights?.[0]?.validity?.endDate || '',
+    comment: apiPayload.comment,
+    options: (apiPayload.options || []).map((opt: any, idx: number) => {
+      const sea = opt.selectedSeafreights?.[0] || {};
+      const haulage = opt.selectedHaulage || {};
+      const misc = opt.myMiscs || [];
+      const seaTotal = (sea.charges?.basePrice || 0) + (sea.charges?.surcharges?.reduce((sum: number, s: any) => sum + (s.value || 0), 0) || 0);
+      const haulageTotal = haulage.unitTariff || 0;
+      const miscTotal = misc.reduce((sum: number, m: any) => sum + (m.pricing?.basePrice || 0), 0);
+      const total = seaTotal + haulageTotal + miscTotal;
+      return {
+        label: opt.name || `Option ${idx + 1}`,
+        preferred: idx === preferredIdx,
+        total,
+        currency: sea.currency || haulage.currency || 'EUR',
+        details: {
+          seaFreight: {
+            carrier: sea.carrier?.name || sea.carrierName,
+            departurePort: sea.departurePort?.name,
+            arrivalPort: sea.arrivalPort?.name,
+            containerType: sea.containerType,
+            quantity: 1, // à ajuster si info dispo
+            basePrice: sea.charges?.basePrice,
+            surcharges: (sea.charges?.surcharges || []).map((s: any) => ({
+              name: s.name,
+              price: s.value,
+              currency: s.currency
+            })),
+            transitTimeDays: sea.transitTimeDays,
+            frequency: sea.frequency
+          },
+          haulage: {
+            haulier: haulage.haulierName,
+            from: haulage.pickupLocation?.displayName,
+            to: haulage.deliveryLocation?.displayName,
+            price: haulage.unitTariff
+          },
+          miscellaneous: misc.map((m: any) => ({
+            service: m.serviceName,
+            provider: m.supplierName,
+            price: m.pricing?.basePrice
+          }))
+        },
+        incoterm: sea.incoterm,
+        deliveryTerms: haulage.deliveryTerms,
+        paymentTerms: opt.paymentTerms || '',
+        validUntil: sea.validity?.endDate
+      };
+    }),
+    preferredOption: preferredIdx,
+    attachments: (apiPayload.files || []).map((f: any) => ({
+      fileName: f.fileName,
+      url: f.url
+    }))
+  };
+}
+
     

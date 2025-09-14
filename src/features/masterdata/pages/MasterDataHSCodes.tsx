@@ -7,7 +7,6 @@ import { DataGrid, GridColDef, GridToolbar } from '@mui/x-data-grid';
 import { sizingStyles, gridStyles, BootstrapDialog, BootstrapDialogTitle, buttonCloseStyles, BootstrapInput, actionButtonStyles, inputLabelStyles } from '@utils/misc/styles';
 import { useTranslation } from 'react-i18next';
 import { AxiosError } from 'axios';
-import { getApiHsCodeLis, HSCodeLIS, postApiHsCodeLis, putApiHsCodeLisById } from '@features/request/api';
 
 const MasterDataHSCodes: any = () => {
     const { t } = useTranslation();

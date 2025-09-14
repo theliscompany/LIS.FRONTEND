@@ -5,12 +5,12 @@ import Grid from '@mui/material/Grid2';
 import { Edit, Delete, Add, Refresh, Save, Cancel } from '@mui/icons-material';
 //import { countries } from '../../utils/constants';
 import { useTranslation } from 'react-i18next';
-import { PortViewModel } from '@features/transport/api';
+import { PortViewModel } from '@features/masterdata/api';
 //import CountrySelect from '../../components/shared/CountrySelect';
 import EditableTable from '@components/common/EditableTable';
 import ConfirmDialogComponent from '@components/common/ConfirmDialogComponent';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { deletePortByIdMutation, getPortOptions, getPortQueryKey, postPortMutation, putPortByIdMutation } from '@features/masterdata/api/@tanstack/react-query.gen';
+import { deleteApiPortByIdMutation, getApiPortOptions, getApiPortQueryKey, postApiPortMutation, putApiPortByIdMutation } from '@features/masterdata/api/@tanstack/react-query.gen';
 import { showSnackbar } from '@components/common/Snackbar';
 import { ColumnDef, createColumnHelper } from '@tanstack/react-table';
 import { EditTextFieldCell } from '@components/common/EditableCells';
@@ -22,7 +22,7 @@ const MasterDataPorts: any = () => {
 
     const queryClient = useQueryClient();
 
-    const {data, isFetching} = useQuery({...getPortOptions()})
+    const {data, isFetching} = useQuery({...getApiPortOptions()})
     
     const [ports, setPorts] = useState<PortViewModel[]>([])
     const [confirmDeleteRow, setConfirmDeleteRow] = useState(false)
@@ -42,11 +42,11 @@ const MasterDataPorts: any = () => {
     [confirmDeleteRow])
 
     const deletePortMutation = useMutation({
-        ...deletePortByIdMutation(),
+        ...deleteApiPortByIdMutation(),
         onSuccess:() => {
             setPortId(undefined);
             showSnackbar("Deleted with success", "success");
-            queryClient.invalidateQueries({ queryKey: getPortQueryKey() });
+            queryClient.invalidateQueries({ queryKey: getApiPortQueryKey() });
         },
         onError : () => showSnackbar(t('errorHappened'), "warning")
     })
@@ -58,7 +58,7 @@ const MasterDataPorts: any = () => {
                 setEditRow(false);
 
                 showSnackbar("Saved with success", "success");
-                queryClient.invalidateQueries({ queryKey: getPortQueryKey() });
+                queryClient.invalidateQueries({ queryKey: getApiPortQueryKey() });
             },
             onError: () => showSnackbar(t('errorHappened'), "warning"),
             onSettled:() => setSavingRow(false)
@@ -66,12 +66,12 @@ const MasterDataPorts: any = () => {
     }
 
     const updatePortMutation = useMutation({
-            ...putPortByIdMutation(),
+            ...putApiPortByIdMutation(),
             ...handlePortStatusUpdated()
        })
     
        const createPortMutation = useMutation({
-            ...postPortMutation(),
+            ...postApiPortMutation(),
             ...handlePortStatusUpdated()
         })
 
@@ -142,7 +142,7 @@ const MasterDataPorts: any = () => {
     }
 
     const handleRefreshTable = () => {
-        queryClient.invalidateQueries({ queryKey: getPortQueryKey() });
+        queryClient.invalidateQueries({ queryKey: getApiPortQueryKey() });
     }
 
     const handleIfConfirmDelete = async (deleted: boolean) => {

@@ -4,7 +4,7 @@ import { Button, DialogActions, DialogContent, InputLabel } from '@mui/material'
 import Grid from '@mui/material/Grid2';
 import { useTranslation } from 'react-i18next';
 import { enqueueSnackbar } from 'notistack';
-import { postProduct, ProductViewModel } from '@features/transport/api';
+import { postApiProduct, ProductViewModel } from '@features/masterdata/api';
 
 function NewProduct(props: any) {
     const [testName, setTestName] = useState<string>("");
@@ -18,7 +18,7 @@ function NewProduct(props: any) {
             };
             
             try {
-                const response = await postProduct({body: dataSent});
+                const response = await postApiProduct({body: dataSent});
                 if (response !== null) {
                     enqueueSnackbar(t('productAdded'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
                     

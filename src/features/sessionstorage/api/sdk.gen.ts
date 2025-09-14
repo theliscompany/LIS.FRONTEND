@@ -3,6 +3,7 @@
 import { createClient, createConfig, type OptionsLegacyParser } from '@hey-api/client-axios';
 import type { GetApiProcessStateByUserIdByProcessNameData, GetApiProcessStateByUserIdByProcessNameError, GetApiProcessStateByUserIdByProcessNameResponse, PostApiProcessStateData, PostApiProcessStateError, PostApiProcessStateResponse, DeleteApiProcessStateByStateIdData, DeleteApiProcessStateByStateIdError, DeleteApiProcessStateByStateIdResponse } from './types.gen';
 
+//export const client = createClient(createConfig());
 export const client = createClient(createConfig());
 
 export const getApiProcessStateByUserIdByProcessName = <ThrowOnError extends boolean = false>(options: OptionsLegacyParser<GetApiProcessStateByUserIdByProcessNameData, ThrowOnError>) => {

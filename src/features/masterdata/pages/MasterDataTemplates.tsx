@@ -11,24 +11,25 @@ import { BootstrapDialog, BootstrapDialogTitle, BootstrapInput, buttonCloseStyle
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { Dayjs } from 'dayjs';
-import StarterKit from '@tiptap/starter-kit';
-import { 
-    RichTextEditor, 
-    MenuControlsContainer, 
-    MenuSelectHeading, 
-    MenuDivider, 
-    MenuButtonBold, 
-    MenuButtonItalic, 
-    MenuButtonStrikethrough, 
-    MenuButtonOrderedList, 
-    MenuButtonBulletedList, 
-    MenuSelectTextAlign, 
-    MenuButtonEditLink, 
-    MenuButtonHorizontalRule, 
-    MenuButtonUndo, 
-    MenuButtonRedo, 
-    type RichTextEditorRef,
-} from 'mui-tiptap';
+// TODO: Remplacer mui-tiptap par une solution alternative
+// import StarterKit from '@tiptap/starter-kit';
+// import { 
+//     RichTextEditor, 
+//     MenuControlsContainer, 
+//     MenuSelectHeading, 
+//     MenuDivider, 
+//     MenuButtonBold, 
+//     MenuButtonItalic, 
+//     MenuButtonStrikethrough, 
+//     MenuButtonOrderedList, 
+//     MenuButtonBulletedList, 
+//     MenuSelectTextAlign, 
+//     MenuButtonEditLink, 
+//     MenuButtonHorizontalRule, 
+//     MenuButtonUndo, 
+//     MenuButtonRedo, 
+//     type RichTextEditorRef,
+// } from 'mui-tiptap';
 import { AxiosError } from 'axios';
 import { deleteApiTemplateById, getApiTemplate, getApiTemplateById, postApiTemplate, putApiTemplateById } from '@features/template/api';
 
@@ -52,7 +53,9 @@ const MasterDataTemplates: any = () => {
     
     const [mailLanguage] = useState<string>("fr");
     
-    const rteRef = useRef<RichTextEditorRef>(null);
+    // TODO: Remplacer par une solution alternative
+    // const rteRef = useRef<RichTextEditorRef>(null);
+    const rteRef = useRef<any>(null);
     //const rteRef2 = useRef<RichTextEditorRef>(null);
     
     const { t } = useTranslation();
@@ -188,7 +191,7 @@ const MasterDataTemplates: any = () => {
     }
 
     const createUpdateTemplate = async () => {
-        if (name !== "" && rteRef.current?.editor?.getHTML() !== "") {
+        if (name !== "" && content !== "") {
             try {
                 var dataSent = null;
                 if (currentEditId !== "") {
@@ -196,9 +199,9 @@ const MasterDataTemplates: any = () => {
                         // "id": currentEditId,
                         "name": name,
                         "currentVersion": currentVersion,
-                        "content": rteRef.current?.editor?.getHTML(),
+                        "content": content,
                         // "contentEn": rteRef2.current?.editor?.getHTML(),
-                        "contentEn": rteRef.current?.editor?.getHTML(),
+                        "contentEn": content,
                         "author": "Cyrille Penaye",
                         "tags": tags
                     };
@@ -222,9 +225,9 @@ const MasterDataTemplates: any = () => {
                     dataSent = {
                         "name": name,
                         "currentVersion": currentVersion,
-                        "content": rteRef.current?.editor?.getHTML(),
+                        "content": content,
                         // "contentEn": rteRef2.current?.editor?.getHTML(),
-                        "contentEn": rteRef.current?.editor?.getHTML(),
+                        "contentEn": content,
                         "author": "Cyrille Penaye",
                         "tags": tags
                     };
@@ -518,7 +521,8 @@ const MasterDataTemplates: any = () => {
                                                     label={elm.label} 
                                                     variant='outlined' 
                                                     onClick={() => { 
-                                                        rteRef.current?.editor?.commands.insertContent('{{'+elm.value+'}}');
+                                                        // TODO: Implémenter l'insertion de variables
+                                                        setContent(prev => prev + '{{'+elm.value+'}}');
                                                     }} 
                                                     sx={{ my: 1, mr: 0.5 }} 
                                                 />
@@ -553,26 +557,14 @@ const MasterDataTemplates: any = () => {
                                             <Box sx={{ mt: 1 }}>
                                                 <InputLabel htmlFor="content" sx={inputLabelStyles} style={{ position: "relative", bottom: 6 }}>{t('content')} - FR</InputLabel>
                                                 <Box sx={{ mt: 0 }}>
-                                                    <RichTextEditor
-                                                        ref={rteRef}
-                                                        extensions={[StarterKit]}
-                                                        content={content}
-                                                        renderControls={() => (
-                                                        <MenuControlsContainer>
-                                                            <MenuSelectHeading />
-                                                            <MenuDivider />
-                                                            <MenuButtonBold />
-                                                            <MenuButtonItalic />
-                                                            <MenuButtonStrikethrough />
-                                                            <MenuButtonOrderedList />
-                                                            <MenuButtonBulletedList />
-                                                            <MenuSelectTextAlign />
-                                                            <MenuButtonEditLink />
-                                                            <MenuButtonHorizontalRule />
-                                                            <MenuButtonUndo />
-                                                            <MenuButtonRedo />
-                                                        </MenuControlsContainer>
-                                                        )}
+                                                    {/* TODO: Remplacer RichTextEditor par une solution alternative */}
+                                                    <TextField
+                                                        multiline
+                                                        rows={10}
+                                                        value={content}
+                                                        onChange={(e) => setContent(e.target.value)}
+                                                        placeholder="Contenu du template..."
+                                                        fullWidth
                                                     />
                                                 </Box>
                                             </Box> : 

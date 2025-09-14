@@ -3,7 +3,7 @@ import { ProductViewModel } from '@features/masterdata/api';
 import { useTranslation } from "react-i18next";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useState } from "react";
-import { deleteProductByIdMutation, getProductOptions, getProductQueryKey, postProductMutation, putProductByIdMutation } from '@features/masterdata/api/@tanstack/react-query.gen';
+import { deleteApiProductByIdMutation, getApiProductOptions, getApiProductQueryKey, postApiProductMutation, putApiProductByIdMutation } from '@features/masterdata/api/@tanstack/react-query.gen';
 import { showSnackbar } from '@components/common/Snackbar';
 import ConfirmDialogComponent from '@components/common/ConfirmDialogComponent';
 import { EditTextFieldCell } from '@components/common/EditableCells';
@@ -26,7 +26,7 @@ const MasterDataProducts = () => {
     const [savingRow, setSavingRow] = useState(false)
     const [globalFilter, setGlobalFilter] = useState('')
 
-    const {data, isFetching} = useQuery({...getProductOptions()})
+    const {data, isFetching} = useQuery({...getApiProductOptions()})
 
     useEffect(() => {
         setProducts(data ?? []);
@@ -39,7 +39,7 @@ const MasterDataProducts = () => {
                 setEditRow(false);
 
                 showSnackbar("Saved with success", "success");
-                queryClient.invalidateQueries({ queryKey: getProductQueryKey() });
+                queryClient.invalidateQueries({ queryKey: getApiProductQueryKey() });
             },
             onError: () => showSnackbar(t('errorHappened'), "warning"),
             onSettled:() => setSavingRow(false)
@@ -47,22 +47,22 @@ const MasterDataProducts = () => {
     }
 
     const deleteProductMutation = useMutation({
-        ...deleteProductByIdMutation(),
+        ...deleteApiProductByIdMutation(),
         onSuccess:() => {
             setProductId(undefined);
             showSnackbar("Deleted with success", "success");
-            queryClient.invalidateQueries({ queryKey: getProductQueryKey() });
+            queryClient.invalidateQueries({ queryKey: getApiProductQueryKey() });
         },
         onError : () => showSnackbar(t('errorHappened'), "warning")
     })
 
     const updateProductMutation = useMutation({
-        ...putProductByIdMutation(),
+        ...putApiProductByIdMutation(),
         ...handleProductStatusUpdated()
    })
 
    const createProductMutation = useMutation({
-        ...postProductMutation(),
+        ...postApiProductMutation(),
         ...handleProductStatusUpdated()
     })
 
@@ -159,7 +159,7 @@ const MasterDataProducts = () => {
     ]
 
     const handleRefreshTable = () => {
-        queryClient.invalidateQueries({ queryKey: getProductQueryKey() });
+        queryClient.invalidateQueries({ queryKey: getApiProductQueryKey() });
     }
     
     return (

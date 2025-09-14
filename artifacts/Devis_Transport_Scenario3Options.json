@@ -1,0 +1,186 @@
+{
+  "reference": "DEV2025-0803-001",
+  "client": "Société Alpha Logistics",
+  "date": "03/08/2025",
+  "origin": "Belgique / Pays-Bas",
+  "destination": "Douala, Cameroun (CMDLA)",
+  "incoterm": "FOB",
+  "validity": "14 jours",
+  "options": [
+    {
+      "option_id": "Option 1",
+      "transit_time": 20,
+      "port_of_loading": "Anvers (BEANR)",
+      "containers": [
+        {
+          "type": "20’ DC",
+          "quantity": 2,
+          "unit_haulage": [
+            {
+              "description": "Ramassage dépôt",
+              "amount": 100.0
+            },
+            {
+              "description": "Livraison port Anvers",
+              "amount": 120.0
+            }
+          ],
+          "unit_seafreight": {
+            "freight": {
+              "description": "Fret maritime 20’ DC - BEANR → CMDLA",
+              "amount": 950.0
+            },
+            "surcharges": [
+              {
+                "code": "BAF",
+                "amount": 45.0
+              },
+              {
+                "code": "CAF",
+                "amount": 35.0
+              }
+            ]
+          },
+          "unit_services": [
+            {
+              "description": "Assurance",
+              "amount": 30.0
+            },
+            {
+              "description": "Déclaration douanière",
+              "amount": 50.0
+            }
+          ]
+        },
+        {
+          "type": "40’ HC",
+          "quantity": 1,
+          "unit_haulage": [
+            {
+              "description": "Ramassage dépôt",
+              "amount": 110.0
+            },
+            {
+              "description": "Livraison port Anvers",
+              "amount": 140.0
+            }
+          ],
+          "unit_seafreight": {
+            "freight": {
+              "description": "Fret maritime 40’ HC - BEANR → CMDLA",
+              "amount": 1600.0
+            },
+            "surcharges": [
+              {
+                "code": "BAF",
+                "amount": 65.0
+              }
+            ]
+          },
+          "unit_services": [
+            {
+              "description": "Assurance",
+              "amount": 45.0
+            },
+            {
+              "description": "Frais de documentation",
+              "amount": 20.0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "option_id": "Option 2",
+      "transit_time": 22,
+      "port_of_loading": "Rotterdam (NLRTM)",
+      "containers": [
+        {
+          "type": "20’ DC",
+          "quantity": 3,
+          "unit_haulage": [
+            {
+              "description": "Ramassage dépôt",
+              "amount": 110.0
+            },
+            {
+              "description": "Livraison port Rotterdam",
+              "amount": 130.0
+            }
+          ],
+          "unit_seafreight": {
+            "freight": {
+              "description": "Fret maritime 20’ DC - NLRTM → CMDLA",
+              "amount": 980.0
+            },
+            "surcharges": [
+              {
+                "code": "CAF",
+                "amount": 35.0
+              }
+            ]
+          },
+          "unit_services": [
+            {
+              "description": "Assurance",
+              "amount": 30.0
+            },
+            {
+              "description": "Manutention",
+              "amount": 25.0
+            },
+            {
+              "description": "Booking & documentation",
+              "amount": 20.0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "option_id": "Option 3",
+      "transit_time": 25,
+      "port_of_loading": "Anvers (BEANR)",
+      "containers": [
+        {
+          "type": "LCL",
+          "quantity": 1,
+          "unit_haulage": [
+            {
+              "description": "Livraison au dépôt LCL",
+              "amount": 50.0
+            }
+          ],
+          "unit_seafreight": {
+            "freight": {
+              "description": "Fret maritime LCL - BEANR → CMDLA",
+              "amount": 380.0
+            },
+            "surcharges": [
+              {
+                "code": "PSS",
+                "amount": 30.0
+              }
+            ]
+          },
+          "unit_services": [
+            {
+              "description": "Frais de documentation",
+              "amount": 15.0
+            },
+            {
+              "description": "Assurance proportionnelle",
+              "amount": 20.0
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "remarks": [
+    "Validité du prix sous réserve de disponibilité navire & équipements.",
+    "Les délais sont indicatifs et non contractuels.",
+    "Les frais à destination ne sont pas inclus dans ce devis.",
+    "Des frais opérationnels supplémentaires peuvent s'appliquer en cas de manquements, oublis ou retards imputables au client (ex. : absence de documentation, erreurs dans les instructions, retard dans le chargement, non-respect des délais convenus). Ces frais peuvent inclure, sans s'y limiter : frais de stockage, surestaries, détentions, rebooking, ajustements douaniers ou pénalités imposées par les prestataires tiers."
+  ]
+}

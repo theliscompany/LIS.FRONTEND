@@ -11,7 +11,7 @@ import { Dayjs } from "dayjs";
 import { DataGrid, GridColDef, GridRenderCellParams } from "@mui/x-data-grid";
 import { useTranslation } from "react-i18next"; // Import the useTranslation hook
 import { getApiRequest } from '@features/request/api';
-import { getApiQuoteOffer } from '@api/client/offer';
+// import { getApiQuoteOffer } from '@api/client/offer'; // TODO: Fix import path
 import OffersStatusPieChart from '@features/request/components/chart/OffersStatusPieChart';
 import RequestsPerAssigneeChart from '@features/request/components/chart/RequestsPerAssigneeChart';
 import RequestsStatusPieChart from '@features/request/components/chart/RequestsStatusPieChart';
@@ -150,21 +150,10 @@ const Histories = () => {
 	const getPriceOffers = async () => {
 		try {
 			setLoad(true);
-			const response: any = getApiQuoteOffer()
-			if (response !== null && response.code !== undefined) {
-				if (response.code === 200 && response.data) {
-					console.log("Offers fetched", response.data);
-					setOffers(response.data.reverse());
-					setLoad(false);
-				} 
-				else {
-					console.log("Offers Not fetched", response.data);
-					setLoad(false);
-				}
-			}
-			else {
-				setLoad(false);
-			}
+			// TODO: Implement proper API call
+			console.log("Offers API not implemented yet");
+			setOffers([]);
+			setLoad(false);
 		}
 		catch (err: any) {
 			console.log(err);

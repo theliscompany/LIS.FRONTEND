@@ -1,31 +1,59 @@
-import { Accordion, AccordionSummary, Typography, AccordionDetails, InputLabel, Autocomplete, TextField, Skeleton, Button, ListItem, IconButton, ListItemText, NativeSelect, Box } from '@mui/material';
+import { Accordion, AccordionSummary, Typography, AccordionDetails, InputLabel, Autocomplete, TextField, Skeleton, Button, ListItem, IconButton, ListItemText, NativeSelect, Box, Dialog, DialogTitle, DialogContent, DialogActions, Stack } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import { MuiTelInput } from 'mui-tel-input';
 import { inputLabelStyles, BootstrapInput, whiteButtonStyles, properties } from '@utils/misc/styles';
 import AutocompleteSearch from '@components/shared/AutocompleteSearch';
 import ClientSearch from '@components/shared/ClientSearch';
+import AssigneeSelector from '@components/shared/AssigneeSelector';
 import { Delete, ExpandMore } from '@mui/icons-material';
 import { enqueueSnackbar } from 'notistack';
 import { useTranslation } from 'react-i18next';
-import { putApiAssigneeByRequestQuoteIdByAssigneeId, putApiAssigneeUnassignByRequestQuoteId } from '@features/request/api';
+import { postContactCreateContact } from '@features/crm/api';
+import { useState } from 'react';
+import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 
 const RequestForm = (props: any) => {
     const { t, i18n } = useTranslation();
     
+    const [openProspectModal, setOpenProspectModal] = useState(false);
+    const [prospectForm, setProspectForm] = useState({
+        contactName: '',
+        email: '',
+        phone: '',
+        countryCode: 'BE',
+    });
+    const [prospectLoading, setProspectLoading] = useState(false);
+
+    const handleOpenProspectModal = () => setOpenProspectModal(true);
+    const handleCloseProspectModal = () => {
+        setOpenProspectModal(false);
+        setProspectForm({ contactName: '', email: '', phone: '', countryCode: 'BE' });
+    };
+    const handleProspectChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setProspectForm({ ...prospectForm, [e.target.name]: e.target.value });
+    };
+    const handleCreateProspect = async () => {
+        if (!prospectForm.contactName) return enqueueSnackbar(t('prospectNameRequired'), { variant: 'error' });
+        setProspectLoading(true);
+        try {
+            const res = await postContactCreateContact({ body: { ...prospectForm, categories: ['CUSTOMERS'] } });
+            if (res?.data) {
+                enqueueSnackbar(t('prospectCreated'), { variant: 'success' });
+                if (props.setClientNumber) props.setClientNumber({ contactId: res.data, ...prospectForm });
+                handleCloseProspectModal();
+            } else {
+                enqueueSnackbar(t('prospectCreateError'), { variant: 'error' });
+            }
+        } catch (e) {
+            enqueueSnackbar(t('prospectCreateError'), { variant: 'error' });
+        } finally {
+            setProspectLoading(false);
+        }
+    };
+
     const assignManager = async () => {
         if (props.assignedManager !== null && props.assignedManager !== undefined && props.assignedManager !== "") {
-            try {
-                const response = await putApiAssigneeByRequestQuoteIdByAssigneeId({path: {requestQuoteId: props.id, assigneeId: props.assignedManager}});
-                if (response !== null) {
-                    enqueueSnackbar(t('managerAssignedRequest'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
-                }
-                else {
-                    enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
-                }
-            }
-            catch (err: any) {
-                console.log(err);
-            }
+            // TODO: L'API pour désassigner un manager n'existe plus. Implémenter la logique ici si besoin.
         }
         else {
             enqueueSnackbar(t('selectManagerFirst'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
@@ -33,19 +61,7 @@ const RequestForm = (props: any) => {
     }
 
     const removeManager = async () => {
-        try {
-            const response = await putApiAssigneeUnassignByRequestQuoteId({path: {requestQuoteId: props.id}, body: []})
-            if (response !== null && response !== undefined) {
-                enqueueSnackbar(t('managerRemovedRequest'), { variant: "success", anchorOrigin: { horizontal: "right", vertical: "top"} });
-                props.setAssignedManager("");
-            }
-            else {
-                enqueueSnackbar(t('errorHappened'), { variant: "error", anchorOrigin: { horizontal: "right", vertical: "top"} });
-            }
-        }
-        catch (err: any) {
-            console.log(err);
-        }
+        // TODO: L'API pour désassigner un manager n'existe plus. Implémenter la logique ici si besoin.
     }
     
     return (
@@ -60,26 +76,27 @@ const RequestForm = (props: any) => {
                 </AccordionSummary>
                 <AccordionDetails>
                     <Grid container spacing={2} px={2}>
-                        <Grid size={{ xs: 12, md: 6 }}>
-                            <InputLabel htmlFor="client-number" sx={inputLabelStyles} style={{ marginTop: "8px" }}>{t('clientNumber')}</InputLabel>
-                            <ClientSearch 
-                                id="client-number"
-                                name="clientNumber" 
-                                value={props.clientNumber} 
-                                onChange={props.setClientNumber}
-                                disabled={!props.canEdit} 
-                                callBack={(value: any) => {
-                                    // props.setClientNumber(value);
-                                    // if (props.clientNumber !== null) {
-                                    //     props.setPhone(props.clientNumber.phone !== null ? props.clientNumber.phone : "");
-                                    // }
-                                    if (value !== null) {
-                                        props.setPhone(value.phone !== null ? value.phone : "");
-                                        props.setEmail(value.email !== null ? value.email : "");
-                                    }
-                                }} 
-                                fullWidth 
-                            />
+                        <Grid size={{ xs: 12, md: 6 }} sx={{ display: 'flex', alignItems: 'flex-end' }}>
+                            <Box sx={{ flex: 1 }}>
+                                <InputLabel htmlFor="client-number" sx={inputLabelStyles} style={{ marginTop: "8px" }}>{t('clientNumber')}</InputLabel>
+                                <ClientSearch 
+                                    id="client-number"
+                                    name="clientNumber" 
+                                    value={props.clientNumber} 
+                                    onChange={props.setClientNumber}
+                                    disabled={!props.canEdit} 
+                                    callBack={(value: any) => {
+                                        if (value !== null) {
+                                            props.setPhone(value.phone !== null ? value.phone : "");
+                                            props.setEmail(value.email !== null ? value.email : "");
+                                        }
+                                    }} 
+                                    fullWidth 
+                                />
+                            </Box>
+                            <IconButton color="primary" sx={{ ml: 1, mb: 1 }} onClick={handleOpenProspectModal} disabled={!props.canEdit}>
+                                <AddCircleOutlineIcon />
+                            </IconButton>
                         </Grid>
                         <Grid size={{ xs: 12, md: 6 }} mt={1}>
                             <InputLabel htmlFor="departure" sx={inputLabelStyles}>{t('departure')}</InputLabel>
@@ -152,7 +169,7 @@ const RequestForm = (props: any) => {
                                             multiple    
                                             disablePortal
                                             id="tags"
-                                            options={props.products}
+                                            options={props.products ?? []}
                                             getOptionLabel={(option: any) => { 
                                                 if (option !== null && option !== undefined) {
                                                     return option.productName;
@@ -177,7 +194,7 @@ const RequestForm = (props: any) => {
                                             multiple    
                                             disablePortal
                                             id="tags"
-                                            options={props.hscodes}
+                                            options={props.hscodes ?? []}
                                             getOptionLabel={(option: any) => { 
                                                 if (option !== null && option !== undefined) {
                                                     if (i18n.language === "fr") {
@@ -261,45 +278,72 @@ const RequestForm = (props: any) => {
                             <BootstrapInput id="request-message" type="text" multiline rows={3.5} value={props.message} onChange={(e: React.ChangeEvent<HTMLInputElement>) => props.setMessage(e.target.value)} fullWidth disabled={!props.canEdit} />
                         </Grid>
                         <Grid size={{ xs: 12, md: 6 }} mt={1}>
-                            <InputLabel htmlFor="assigned-manager" sx={inputLabelStyles}>{t('assignedManager')}</InputLabel>
-                            {
-                                !props.loadAssignees && props.assignees !== null ? 
-                                <>
-                                    <NativeSelect
-                                        id="assigned-manager"
-                                        value={props.assignedManager}
-                                        onChange={(e: any) => { props.setAssignedManager(e.target.value); }}
-                                        input={<BootstrapInput />}
-                                        fullWidth
-                                        disabled={!props.canEdit}
-                                    >
-                                        <option value="">{t('noAgentAssigned')}</option>
-                                        {
-                                            props.assignees.map((row: any, i: number) => (
-                                                <option key={"assigneeId-"+i} value={String(row.id)}>{row.name}</option>
-                                            ))
-                                        }
-                                    </NativeSelect>
-                                    <Button 
-                                        variant="contained" color="inherit" 
-                                        sx={whiteButtonStyles} style={{ marginRight: "10px" }} 
-                                        onClick={assignManager} disabled={!props.canEdit}
-                                    >
-                                        {t('updateManager')}
-                                    </Button>
-                                    <Button 
-                                        variant="contained" color="inherit" 
-                                        sx={whiteButtonStyles} 
-                                        onClick={removeManager} disabled={!props.canEdit}
-                                    >
-                                        {t('removeManager')}
-                                    </Button>
-                                </> : <Skeleton sx={{ mt: 3 }} />   
-                            }
+                            <AssigneeSelector
+                                assignee={props.assignedManager}
+                                setAssignee={props.setAssignedManager}
+                                assignees={props.assignees || []}
+                                isLoading={props.loadAssignees}
+                                disabled={!props.canEdit}
+                                showActions={true}
+                                onAssign={assignManager}
+                                onRemove={removeManager}
+                                variant="select"
+                                label={t('assignedManager')}
+                                placeholder={t('noAgentAssigned')}
+                            />
                         </Grid>
                     </Grid>                                
                 </AccordionDetails>
             </Accordion>
+            <Button
+                variant="contained"
+                color="success"
+                type="submit"
+                sx={{ float: "right", mt: 2 }}
+            >
+                {props.wizardMode ? "Save and continue" : "Save"}
+            </Button>
+            {/* Modal de création de prospect */}
+            <Dialog open={openProspectModal} onClose={handleCloseProspectModal} maxWidth="xs" fullWidth>
+                <DialogTitle>{t('newProspect')}</DialogTitle>
+                <DialogContent>
+                    <Stack spacing={2} mt={1}>
+                        <TextField
+                            label={t('prospectName')}
+                            name="contactName"
+                            value={prospectForm.contactName}
+                            onChange={handleProspectChange}
+                            required
+                            autoFocus
+                        />
+                        <TextField
+                            label={t('emailAddress')}
+                            name="email"
+                            value={prospectForm.email}
+                            onChange={handleProspectChange}
+                            type="email"
+                        />
+                        <TextField
+                            label={t('phoneNumber')}
+                            name="phone"
+                            value={prospectForm.phone}
+                            onChange={handleProspectChange}
+                        />
+                        <TextField
+                            label={t('country')}
+                            name="countryCode"
+                            value={prospectForm.countryCode}
+                            onChange={handleProspectChange}
+                        />
+                    </Stack>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleCloseProspectModal} color="inherit">{t('cancel')}</Button>
+                    <Button onClick={handleCreateProspect} color="success" variant="contained" disabled={prospectLoading}>
+                        {t('create')}
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </Grid>
     );
 }
