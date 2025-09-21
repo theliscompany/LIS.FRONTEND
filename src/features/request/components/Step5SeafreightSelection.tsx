@@ -159,6 +159,28 @@ const Step5SeafreightSelection: React.FC<Step5SeafreightSelectionProps> = ({
     const selectedId = draftQuote?.id;
   }, [draftQuote, seafreightOffers]);
 
+  // ✅ Log des données reçues pour débogage
+  useEffect(() => {
+    console.log('🔧 [STEP5] Données reçues dans requestData:', {
+      requestData: requestData,
+      step1: requestData?.step1,
+      customer: requestData?.customer,
+      shipment: requestData?.shipment,
+      incoterm: requestData?.incoterm,
+      comment: requestData?.comment,
+      // Données spécifiques
+      customerName: requestData?.customer?.name,
+      customerContactPerson: requestData?.customer?.contactPerson?.fullName,
+      originLocation: requestData?.shipment?.origin?.location,
+      originCountry: requestData?.shipment?.origin?.country,
+      destinationLocation: requestData?.shipment?.destination?.location,
+      destinationCountry: requestData?.shipment?.destination?.country,
+      commodityProductName: requestData?.shipment?.commodity?.productName,
+      commodity: requestData?.shipment?.commodity
+    });
+  }, [requestData]);
+
+
   // Forcer la sélection au chargement si des seafreights sont sélectionnés dans step5
   useEffect(() => {
     if (draftQuote?.step5?.selections && seafreightOffers.length > 0) {
@@ -248,6 +270,13 @@ const Step5SeafreightSelection: React.FC<Step5SeafreightSelectionProps> = ({
   // === LOGIQUE DE SYNCHRONISATION CORRIGÉE POUR SÉLECTION MULTIPLE ===
   // Synchronisation qui récupère les données du brouillon sans écraser les changements manuels
   useEffect(() => {
+    console.log('🔧 [STEP5] useEffect de synchronisation déclenché:', {
+      seafreightOffersLength: seafreightOffers.length,
+      hasValidSeafreightSelection,
+      draftQuoteStep5: draftQuote?.step5?.selections,
+      currentSelectedIds: selectedSeafreightIds
+    });
+
     // Synchronisation si :
     // 1. Les offres sont chargées
     // 2. Il y a des sélections valides dans step5
@@ -267,6 +296,8 @@ const Step5SeafreightSelection: React.FC<Step5SeafreightSelectionProps> = ({
           console.log('🔄 [STEP5] Synchronisation avec step5 - sélection multiple:', step5Ids);
           setSelectedSeafreightIds(step5Ids);
           setSelectedSeafreights(matchingOffers);
+        } else {
+          console.log('🔧 [STEP5] Pas de synchronisation nécessaire - données identiques');
         }
       } else {
         console.warn('[DEBUG][Step5] No matching offers found for step5 selections:', step5Ids);
@@ -286,7 +317,7 @@ const Step5SeafreightSelection: React.FC<Step5SeafreightSelectionProps> = ({
         setSelectedSeafreights([]);
       }
     }
-  }, [seafreightOffers, draftQuote, hasValidSeafreightSelection]); // Garder les dépendances pour la synchronisation
+  }, [seafreightOffers, draftQuote?.step5?.selections, hasValidSeafreightSelection]); // Retirer selectedSeafreightIds des dépendances
 
   // Handler pour changer la quantité d'un container
   const handleContainerQuantityChange = (type: string, value: number) => {
@@ -350,12 +381,11 @@ const Step5SeafreightSelection: React.FC<Step5SeafreightSelectionProps> = ({
       return;
     }
 
-    // Log détaillé de chaque surcharge
-    if (offer.charges?.surcharges && Array.isArray(offer.charges.surcharges)) {
-      offer.charges.surcharges.forEach((surcharge: any, index: number) => {
-
-      });
-    }
+    console.log('🔧 [STEP5] handleToggleSeafreight appelé avec:', {
+      offerId,
+      currentSelectedIds: selectedSeafreightIds,
+      offer: offer
+    });
 
     // Déterminer l'action : ajouter ou retirer
     const isCurrentlySelected = selectedSeafreightIds.includes(offerId);
@@ -367,17 +397,22 @@ const Step5SeafreightSelection: React.FC<Step5SeafreightSelectionProps> = ({
       // RETIRER l'offre (désélectionner)
       newIds = selectedSeafreightIds.filter(id => id !== offerId);
       newSeafreights = selectedSeafreights.filter(sf => sf.id !== offerId);
-      console.log('🔄 [STEP5] Désélection du seafreight:', offerId);
+      console.log('🔄 [STEP5] Désélection du seafreight:', offerId, 'Nouveaux IDs:', newIds);
     } else {
       // AJOUTER l'offre (ajout à la sélection existante)
       newIds = [...selectedSeafreightIds, offerId];
       newSeafreights = [...selectedSeafreights, offer];
-      console.log('🔄 [STEP5] Ajout du seafreight:', offerId, '(sélection multiple autorisée)');
+      console.log('🔄 [STEP5] Ajout du seafreight:', offerId, 'Nouveaux IDs:', newIds);
     }
 
     // Mettre à jour les états locaux IMMÉDIATEMENT
     setSelectedSeafreightIds(newIds);
     setSelectedSeafreights(newSeafreights);
+    
+    console.log('🔧 [STEP5] États mis à jour:', {
+      selectedSeafreightIds: newIds,
+      selectedSeafreights: newSeafreights.length
+    });
 
 
 
@@ -696,6 +731,9 @@ const Step5SeafreightSelection: React.FC<Step5SeafreightSelectionProps> = ({
         <Typography variant="h3" sx={{ fontWeight: 700, mb: 1, color: '#fff', textShadow: '2px 2px 4px rgba(0,0,0,0.08)' }}>
           {t('requestWizard.step5.title')}
         </Typography>
+        <Typography variant="h6" sx={{ opacity: 0.95, color: '#e3f0ff' }}>
+          {t('requestWizard.step5.subtitle')}
+        </Typography>
       </Box>
       
       {/* Section Request details */}
@@ -723,14 +761,19 @@ const Step5SeafreightSelection: React.FC<Step5SeafreightSelectionProps> = ({
                     <PersonIcon sx={{ color: '#3498db', mr: 1 }} />
                     <Typography variant="subtitle1" sx={{ fontWeight: 500 }}>
                       <strong>{t('requestWizard.step3.client')}:</strong> {(() => {
-                        // Accès correct via requestData.step1.customer
+                        // Priorité 1: Données du client au niveau racine (DraftQuote.customer)
+                        if (requestData?.customer?.name) return requestData.customer.name;
+                        if (requestData?.customer?.contactPerson?.fullName) return requestData.customer.contactPerson.fullName;
+                        
+                        // Priorité 2: Données du step1
                         if (requestData?.step1?.customer?.contactName) return requestData.step1.customer.contactName;
                         if (requestData?.step1?.customer?.companyName) return requestData.step1.customer.companyName;
-                        // Fallback sur les anciennes propriétés pour compatibilité
-                        if (requestData?.customer?.contactName) return requestData.customer.contactName;
-                        if (requestData?.customer?.name) return requestData.customer.name;
+                        if (requestData?.step1?.customer?.name) return requestData.step1.customer.name;
+                        
+                        // Priorité 3: Données alternatives
                         if (requestData?.customerName) return requestData.customerName;
                         if (requestData?.contactName) return requestData.contactName;
+                        
                         return '-';
                       })()}
                     </Typography>
@@ -739,12 +782,19 @@ const Step5SeafreightSelection: React.FC<Step5SeafreightSelectionProps> = ({
                     <LocationOnIcon sx={{ color: '#e74c3c', mr: 1 }} />
                     <Typography variant="subtitle1" sx={{ fontWeight: 500 }}>
                       <strong>{t('requestWizard.step3.departure')}:</strong> {(() => {
-                        // Accès correct via requestData.step1.cityFrom
+                        // Priorité 1: Données du shipment (DraftQuote.shipment.origin)
+                        if (requestData?.shipment?.origin?.location && requestData?.shipment?.origin?.country) {
+                          return `${requestData.shipment.origin.location}, ${requestData.shipment.origin.country.toUpperCase()}`;
+                        }
+                        if (requestData?.shipment?.origin?.location) return requestData.shipment.origin.location;
+                        
+                        // Priorité 2: Données du step1
                         if (requestData?.step1?.cityFrom?.name && requestData?.step1?.cityFrom?.country) {
                           return `${requestData.step1.cityFrom.name}, ${requestData.step1.cityFrom.country.toUpperCase()}`;
                         }
                         if (requestData?.step1?.cityFrom?.name) return requestData.step1.cityFrom.name;
-                        // Fallback sur les anciennes propriétés pour compatibilité
+                        
+                        // Priorité 3: Données alternatives
                         if (requestData?.cityFrom?.name && requestData?.cityFrom?.country) {
                           return `${requestData.cityFrom.name}, ${requestData.cityFrom.country.toUpperCase()}`;
                         }
@@ -755,6 +805,7 @@ const Step5SeafreightSelection: React.FC<Step5SeafreightSelectionProps> = ({
                         if (requestData?.pickupLocation?.city) return requestData.pickupLocation.city;
                         if (requestData?.departureCity) return requestData.departureCity;
                         if (requestData?.fromCity) return requestData.fromCity;
+                        
                         return '-';
                       })()}
                     </Typography>
@@ -763,12 +814,19 @@ const Step5SeafreightSelection: React.FC<Step5SeafreightSelectionProps> = ({
                     <LocationOnIcon sx={{ color: '#27ae60', mr: 1 }} />
                     <Typography variant="subtitle1" sx={{ fontWeight: 500 }}>
                       <strong>{t('requestWizard.step3.arrival')}:</strong> {(() => {
-                        // Accès correct via requestData.step1.cityTo
+                        // Priorité 1: Données du shipment (DraftQuote.shipment.destination)
+                        if (requestData?.shipment?.destination?.location && requestData?.shipment?.destination?.country) {
+                          return `${requestData.shipment.destination.location}, ${requestData.shipment.destination.country.toUpperCase()}`;
+                        }
+                        if (requestData?.shipment?.destination?.location) return requestData.shipment.destination.location;
+                        
+                        // Priorité 2: Données du step1
                         if (requestData?.step1?.cityTo?.name && requestData?.step1?.cityTo?.country) {
                           return `${requestData.step1.cityTo.name}, ${requestData.step1.cityTo.country.toUpperCase()}`;
                         }
                         if (requestData?.step1?.cityTo?.name) return requestData.step1.cityTo.name;
-                        // Fallback sur les anciennes propriétés pour compatibilité
+                        
+                        // Priorité 3: Données alternatives
                         if (requestData?.cityTo?.name && requestData?.cityTo?.country) {
                           return `${requestData.cityTo.name}, ${requestData.cityTo.country.toUpperCase()}`;
                         }
@@ -779,6 +837,7 @@ const Step5SeafreightSelection: React.FC<Step5SeafreightSelectionProps> = ({
                         if (requestData?.deliveryLocation?.city) return requestData.deliveryLocation.city;
                         if (requestData?.arrivalCity) return requestData.arrivalCity;
                         if (requestData?.toCity) return requestData.toCity;
+                        
                         return '-';
                       })()}
                     </Typography>
@@ -789,13 +848,18 @@ const Step5SeafreightSelection: React.FC<Step5SeafreightSelectionProps> = ({
                     <ReceiptIcon sx={{ color: '#f39c12', mr: 1 }} />
                     <Typography variant="subtitle1" sx={{ fontWeight: 500 }}>
                       <strong>{t('requestWizard.step3.incoterm')}:</strong> {(() => {
-                        // Accès correct via requestData.step1.incotermName
-                        if (requestData?.step1?.incotermName) return requestData.step1.incotermName;
-                        if (requestData?.step1?.cargo?.incoterm) return requestData.step1.cargo.incoterm;
-                        // Fallback sur les anciennes propriétés pour compatibilité
-                        if (requestData?.incotermName) return requestData.incotermName;
+                        // Priorité 1: Données au niveau racine (DraftQuote.incoterm)
                         if (requestData?.incoterm) return requestData.incoterm;
+                        
+                        // Priorité 2: Données du step1
+                        if (requestData?.step1?.incotermName) return requestData.step1.incotermName;
+                        if (requestData?.step1?.incoterm) return requestData.step1.incoterm;
+                        if (requestData?.step1?.cargo?.incoterm) return requestData.step1.cargo.incoterm;
+                        
+                        // Priorité 3: Données alternatives
+                        if (requestData?.incotermName) return requestData.incotermName;
                         if (requestData?.incoterms) return requestData.incoterms;
+                        
                         return '-';
                       })()}
                     </Typography>
@@ -804,10 +868,15 @@ const Step5SeafreightSelection: React.FC<Step5SeafreightSelectionProps> = ({
                     <LocalShippingIcon sx={{ color: '#9b59b6', mr: 1 }} />
                     <Typography variant="subtitle1" sx={{ fontWeight: 500 }}>
                       <strong>{t('requestWizard.step3.product')}:</strong> {(() => {
-                        // Accès correct via requestData.step1.productName
+                        // Priorité 1: Données du shipment (DraftQuote.shipment.commodity)
+                        if (requestData?.shipment?.commodity?.productName) return requestData.shipment.commodity.productName;
+                        if (requestData?.shipment?.commodity) return requestData.shipment.commodity;
+                        
+                        // Priorité 2: Données du step1
                         if (requestData?.step1?.productName?.productName) return requestData.step1.productName.productName;
                         if (requestData?.step1?.cargo?.product?.productName) return requestData.step1.cargo.product.productName;
-                        // Fallback sur les anciennes propriétés pour compatibilité
+                        
+                        // Priorité 3: Données alternatives
                         if (requestData?.productName && typeof requestData.productName === 'object' && requestData.productName.productName) {
                           return requestData.productName.productName;
                         }
@@ -819,6 +888,7 @@ const Step5SeafreightSelection: React.FC<Step5SeafreightSelectionProps> = ({
                           if (found && found.productName) return found.productName;
                         }
                         if (requestData?.product) return requestData.product;
+                        
                         return '-';
                       })()}
                     </Typography>
@@ -827,13 +897,17 @@ const Step5SeafreightSelection: React.FC<Step5SeafreightSelectionProps> = ({
                     <InfoIcon sx={{ color: '#34495e', mr: 1 }} />
                     <Typography variant="subtitle1" sx={{ fontWeight: 500 }}>
                       <strong>{t('requestWizard.step3.comment')}:</strong> {(() => {
-                        // Accès correct via requestData.step1.comment
+                        // Priorité 1: Données au niveau racine
+                        if (requestData?.comment) return requestData.comment;
+                        
+                        // Priorité 2: Données du step1
                         if (requestData?.step1?.comment) return requestData.step1.comment;
                         if (requestData?.step1?.metadata?.comment) return requestData.step1.metadata.comment;
-                        // Fallback sur les anciennes propriétés pour compatibilité
-                        if (requestData?.comment) return requestData.comment;
+                        
+                        // Priorité 3: Données alternatives
                         if (requestData?.description) return requestData.description;
                         if (requestData?.notes) return requestData.notes;
+                        
                         return '-';
                       })()}
                     </Typography>
@@ -897,13 +971,13 @@ const Step5SeafreightSelection: React.FC<Step5SeafreightSelectionProps> = ({
             <Grid item xs={12}>
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, gap: 3 }}>
                 <Typography variant="subtitle1" sx={{ fontWeight: 600, color: '#f39c12' }}>
-                  {t('requestWizard.step5.totalTEU', 'Total TEU sélectionné')}: <b>{availableTEU.toLocaleString(undefined, { maximumFractionDigits: 2 })}</b>
+                  {t('requestWizard.step5.totalTEU')}: <b>{availableTEU.toLocaleString(undefined, { maximumFractionDigits: 2 })}</b>
                 </Typography>
               </Box>
               {Array.isArray(selectedContainers?.list) && selectedContainers.list.length > 0 && (
                 <Box sx={{ mb: 2, ml: 1 }}>
                   <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#1976d2', mb: 0.5 }}>
-                    {t('requestWizard.step5.selectedContainers', 'Containers sélectionnés')} :
+                    {t('requestWizard.step5.selectedContainers')} :
                   </Typography>
                   {selectedContainers.list.map((c: any, idx: number) => (
                     <Typography key={idx} sx={{ fontSize: 15, color: '#333', ml: 1 }}>
@@ -917,215 +991,6 @@ const Step5SeafreightSelection: React.FC<Step5SeafreightSelectionProps> = ({
         </AccordionDetails>
       </Accordion>
       
-      {/* Récapitulatif du haulage sélectionné (optionnel) */}
-      {selectedHaulage && (
-        <Accordion defaultExpanded={false} sx={{ mb: 3, borderRadius: 3, boxShadow: '0 4px 24px rgba(0,0,0,0.07)', background: '#f5f7fa' }}>
-          <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-            <Box sx={{ display: 'flex', alignItems: 'center' }}>
-              <LocalShippingIcon sx={{ color: '#1976d2', mr: 1 }} />
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
-                <Typography variant="subtitle1" sx={{ fontWeight: 600, color: '#1976d2' }}>
-                  {t('requestWizard.step5.selectedHaulage')}:
-                </Typography>
-                <Typography variant="body2" sx={{ color: '#666', fontStyle: 'italic' }}>
-                  {selectedHaulage.haulierName || '-'} 
-                  {(() => {
-                    const pickup = selectedHaulage.pickupLocation;
-                    const loadingCity = pickup?.displayName || pickup?.formattedAddress;
-                    return loadingCity ? ` • ${loadingCity}` : '';
-                  })()}
-                </Typography>
-              </Box>
-            </Box>
-          </AccordionSummary>
-          <AccordionDetails>
-            <Box sx={{ mt: 2, p: 3, background: 'linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)', borderRadius: 2, border: '1px solid #dee2e6' }}>
-              <Grid container spacing={3}>
-                <Grid item xs={12} sm={6} md={4}>
-                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
-                    <Typography variant="caption" sx={{ color: '#6c757d', fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.5 }}>
-                      Haulier
-                    </Typography>
-                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                      <LocalShippingIcon sx={{ color: '#2980b9', mr: 1, fontSize: '1.2em' }} />
-                                          <Typography variant="body1" sx={{ fontWeight: 500, color: '#212529' }}>
-                      {selectedHaulage.haulierName || '-'}
-                    </Typography>
-                    </Box>
-                  </Box>
-                </Grid>
-                <Grid item xs={12} sm={6} md={4}>
-                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
-                    <Typography variant="caption" sx={{ color: '#6c757d', fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.5 }}>
-                      Tariff
-                    </Typography>
-                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                      <EuroIcon sx={{ color: '#f39c12', mr: 1, fontSize: '1.2em' }} />
-                                          <Typography variant="body1" sx={{ fontWeight: 500, color: '#212529' }}>
-                      {(() => {
-                        const tariff = selectedHaulage.unitTariff;
-                        const currency = selectedHaulage.currency || 'EUR';
-                        return tariff ? `${tariff} ${currency}` : '-';
-                      })()}
-                    </Typography>
-                    </Box>
-                  </Box>
-                </Grid>
-                <Grid item xs={12} sm={6} md={4}>
-                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
-                    <Typography variant="caption" sx={{ color: '#6c757d', fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.5 }}>
-                      Free time
-                    </Typography>
-                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                      <AccessTimeIcon sx={{ color: '#16a085', mr: 1, fontSize: '1.2em' }} />
-                      <Typography variant="body1" sx={{ fontWeight: 500, color: '#212529' }}>
-                        {selectedHaulage.freeTime ? `${selectedHaulage.freeTime}h` : '-'}
-                      </Typography>
-                    </Box>
-                  </Box>
-                </Grid>
-                <Grid item xs={12} sm={6} md={4}>
-                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
-                    <Typography variant="caption" sx={{ color: '#6c757d', fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.5 }}>
-                      Pickup Location
-                    </Typography>
-                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                      <MapIcon sx={{ color: '#e74c3c', mr: 1, fontSize: '1.2em' }} />
-                      <Typography variant="body1" sx={{ fontWeight: 500, color: '#212529' }}>
-                        {(() => {
-                          const pickup = selectedHaulage.pickupLocation;
-                          if (pickup?.displayName) return pickup.displayName;
-                          if (pickup?.formattedAddress) return pickup.formattedAddress;
-                          return '-';
-                        })()}
-                      </Typography>
-                    </Box>
-                  </Box>
-                </Grid>
-                <Grid item xs={12} sm={6} md={4}>
-                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
-                    <Typography variant="caption" sx={{ color: '#6c757d', fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.5 }}>
-                      Loading Location
-                    </Typography>
-                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                      <MapIcon sx={{ color: '#3498db', mr: 1, fontSize: '1.2em' }} />
-                      <Typography variant="body1" sx={{ fontWeight: 500, color: '#212529' }}>
-                        {(() => {
-                          const loading = selectedHaulage.loadingLocation;
-                          if (loading?.displayName) return loading.displayName;
-                          if (loading?.formattedAddress) return loading.formattedAddress;
-                          return '-';
-                        })()}
-                      </Typography>
-                    </Box>
-                  </Box>
-                </Grid>
-                <Grid item xs={12} sm={6} md={4}>
-                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
-                    <Typography variant="caption" sx={{ color: '#6c757d', fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.5 }}>
-                      Delivery Location
-                    </Typography>
-                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                      <MapIcon sx={{ color: '#27ae60', mr: 1, fontSize: '1.2em' }} />
-                      <Typography variant="body1" sx={{ fontWeight: 500, color: '#212529' }}>
-                        {(() => {
-                          const delivery = selectedHaulage.deliveryLocation;
-                          if (delivery?.displayName) return delivery.displayName;
-                          if (delivery?.formattedAddress) return delivery.formattedAddress;
-                          return '-';
-                        })()}
-                      </Typography>
-                    </Box>
-                  </Box>
-                </Grid>
-                
-                {/* Troisième ligne - Informations supplémentaires */}
-                <Grid item xs={12} sm={6} md={4}>
-                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
-                    <Typography variant="caption" sx={{ color: '#6c757d', fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.5 }}>
-                      Distance
-                    </Typography>
-                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                      <StraightenIcon sx={{ color: '#9b59b6', mr: 1, fontSize: '1.2em' }} />
-                      <Typography variant="body1" sx={{ fontWeight: 500, color: '#212529' }}>
-                        {selectedHaulage.distanceKm ? `${selectedHaulage.distanceKm} km` : '-'}
-                      </Typography>
-                    </Box>
-                  </Box>
-                </Grid>
-                <Grid item xs={12} sm={6} md={4}>
-                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
-                    <Typography variant="caption" sx={{ color: '#6c757d', fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.5 }}>
-                      Valid Until
-                    </Typography>
-                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                      <ScheduleIcon sx={{ color: '#e67e22', mr: 1, fontSize: '1.2em' }} />
-                      <Typography variant="body1" sx={{ fontWeight: 500, color: '#212529' }}>
-                        {selectedHaulage.validUntil ? (dayjs(selectedHaulage.validUntil).isValid() ? dayjs(selectedHaulage.validUntil).format('DD/MM/YYYY') : '-') : '-'}
-                      </Typography>
-                    </Box>
-                  </Box>
-                </Grid>
-                <Grid item xs={12} sm={6} md={4}>
-                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
-                    <Typography variant="caption" sx={{ color: '#6c757d', fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.5 }}>
-                      Multi-stop
-                    </Typography>
-                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                      <RouteIcon sx={{ color: '#8e44ad', mr: 1, fontSize: '1.2em' }} />
-                      <Typography variant="body1" sx={{ fontWeight: 500, color: '#212529' }}>
-                        {selectedHaulage.multiStop ? `${selectedHaulage.multiStop} stops` : '-'}
-                      </Typography>
-                    </Box>
-                  </Box>
-                </Grid>
-                
-                {/* Quatrième ligne - Informations de tarification */}
-                <Grid item xs={12} sm={6} md={4}>
-                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
-                    <Typography variant="caption" sx={{ color: '#6c757d', fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.5 }}>
-                      Overtime Tariff
-                    </Typography>
-                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                      <AttachMoneyIcon sx={{ color: '#e74c3c', mr: 1, fontSize: '1.2em' }} />
-                      <Typography variant="body1" sx={{ fontWeight: 500, color: '#212529' }}>
-                        {selectedHaulage.overtimeTariff ? `${selectedHaulage.overtimeTariff} ${selectedHaulage.currency || ''}` : '-'}
-                      </Typography>
-                    </Box>
-                  </Box>
-                </Grid>
-                <Grid item xs={12} sm={6} md={4}>
-                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
-                    <Typography variant="caption" sx={{ color: '#6c757d', fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.5 }}>
-                      Currency
-                    </Typography>
-                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                      <LanguageIcon sx={{ color: '#27ae60', mr: 1, fontSize: '1.2em' }} />
-                      <Typography variant="body1" sx={{ fontWeight: 500, color: '#212529' }}>
-                        {selectedHaulage.currency || '-'}
-                      </Typography>
-                    </Box>
-                  </Box>
-                </Grid>
-                <Grid item xs={12} sm={6} md={4}>
-                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
-                    <Typography variant="caption" sx={{ color: '#6c757d', fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.5 }}>
-                      Offer ID
-                    </Typography>
-                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                      <FingerprintIcon sx={{ color: '#34495e', mr: 1, fontSize: '1.2em' }} />
-                      <Typography variant="body1" sx={{ fontWeight: 500, color: '#212529', fontFamily: 'monospace', fontSize: '0.9em' }}>
-                        {selectedHaulage.offerId || selectedHaulage.haulierId || '-'}
-                      </Typography>
-                    </Box>
-                  </Box>
-                </Grid>
-              </Grid>
-            </Box>
-
-          </AccordionDetails>
-        </Accordion>
-      )}
       {/* Filtres maritimes avec PortAutocomplete pour les ports */}
       <LocalizationProvider dateAdapter={AdapterDayjs}>
         <Card sx={{ mb: 3, borderRadius: 3, boxShadow: '0 4px 24px rgba(25,118,210,0.07)', p: 2 }}>
@@ -1172,7 +1037,7 @@ const Step5SeafreightSelection: React.FC<Step5SeafreightSelectionProps> = ({
           fullWidth
           size="small"
           variant="outlined"
-          placeholder={t('requestWizard.step5.searchSeafreightPlaceholder', 'Rechercher une offre maritime...')}
+          placeholder={t('requestWizard.step5.searchSeafreightPlaceholder')}
           value={searchText}
           onChange={e => setSearchText(e.target.value)}
         />
@@ -1231,73 +1096,73 @@ const Step5SeafreightSelection: React.FC<Step5SeafreightSelectionProps> = ({
                     <TableCell sx={{ color: '#fff', fontWeight: 700 }}>
                       <Box sx={{ display: 'flex', alignItems: 'center' }}>
                         <DirectionsBoatIcon sx={{ verticalAlign: 'middle', mr: 1 }} fontSize="small" />
-                        {t('requestWizard.step5.carrier', 'Carrier')}
+                        {t('requestWizard.step5.carrier')}
                       </Box>
                     </TableCell>
                     <TableCell sx={{ color: '#fff', fontWeight: 700 }}>
                       <Box sx={{ display: 'flex', alignItems: 'center' }}>
                         <LocationOnIcon sx={{ verticalAlign: 'middle', mr: 1 }} fontSize="small" />
-                        {t('requestWizard.step5.departurePort', 'Departure port')}
+                        {t('requestWizard.step5.departurePort')}
                       </Box>
                     </TableCell>
                     <TableCell sx={{ color: '#fff', fontWeight: 700 }}>
                       <Box sx={{ display: 'flex', alignItems: 'center' }}>
                         <LocationOnIcon sx={{ verticalAlign: 'middle', mr: 1 }} fontSize="small" />
-                        {t('requestWizard.step5.arrivalPort', 'Arrival port')}
+                        {t('requestWizard.step5.arrivalPort')}
                       </Box>
                     </TableCell>
                     <TableCell sx={{ color: '#fff', fontWeight: 700 }}>
                       <Box sx={{ display: 'flex', alignItems: 'center' }}>
                         <CategoryIcon sx={{ verticalAlign: 'middle', mr: 1 }} fontSize="small" />
-                        {t('requestWizard.step5.container', 'Container')}
+                        {t('requestWizard.step5.container')}
                       </Box>
                     </TableCell>
                     <TableCell sx={{ color: '#fff', fontWeight: 700 }}>
                       <Box sx={{ display: 'flex', alignItems: 'center' }}>
                         <EuroIcon sx={{ verticalAlign: 'middle', mr: 1 }} fontSize="small" />
-                        {t('requestWizard.step5.baseFreightLabel', 'Base freight')}
+                        {t('requestWizard.step5.baseFreightLabel')}
                       </Box>
                     </TableCell>
                     <TableCell sx={{ color: '#fff', fontWeight: 700 }}>
                       <Box sx={{ display: 'flex', alignItems: 'center' }}>
                         <EuroIcon sx={{ verticalAlign: 'middle', mr: 1 }} fontSize="small" />
-                        {t('requestWizard.step5.totalLabel', 'Total')}
+                        {t('requestWizard.step5.totalLabel')}
                       </Box>
                     </TableCell>
                     <TableCell sx={{ color: '#fff', fontWeight: 700 }}>
                       <Box sx={{ display: 'flex', alignItems: 'center' }}>
                         <CalendarMonthIcon sx={{ verticalAlign: 'middle', mr: 1 }} fontSize="small" />
-                        {t('requestWizard.step5.validUntil', 'Valid until')}
+                        {t('requestWizard.step5.validUntil')}
                       </Box>
                     </TableCell>
                     <TableCell sx={{ color: '#fff', fontWeight: 700 }}>
                       <Box sx={{ display: 'flex', alignItems: 'center' }}>
                         <AccessTimeIcon sx={{ verticalAlign: 'middle', mr: 1 }} fontSize="small" />
-                        {t('requestWizard.step5.transitLabel', 'Transit (days)')}
+                        {t('requestWizard.step5.transitLabel')}
                       </Box>
                     </TableCell>
                     <TableCell sx={{ color: '#fff', fontWeight: 700 }}>
                       <Box sx={{ display: 'flex', alignItems: 'center' }}>
                         <RepeatIcon sx={{ verticalAlign: 'middle', mr: 1 }} fontSize="small" />
-                        {t('requestWizard.step5.frequencyLabel', 'Frequency')}
+                        {t('requestWizard.step5.frequencyLabel')}
                       </Box>
                     </TableCell>
                     <TableCell sx={{ color: '#fff', fontWeight: 700 }}>
                       <Box sx={{ display: 'flex', alignItems: 'center' }}>
                         <CategoryIcon sx={{ verticalAlign: 'middle', mr: 1 }} fontSize="small" />
-                        {t('requestWizard.step5.quantity', 'Quantity')}
+                        {t('requestWizard.step5.quantity')}
                       </Box>
                     </TableCell>
                     <TableCell align="center" sx={{ color: '#fff', fontWeight: 700 }}>
                       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                         <CheckCircleIcon sx={{ verticalAlign: 'middle', mr: 1 }} fontSize="small" />
-                        {t('requestWizard.step5.select', 'Select')}
+                        {t('requestWizard.step5.select')}
                       </Box>
                     </TableCell>
                     <TableCell align="center" sx={{ color: '#fff', fontWeight: 700 }}>
                       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                         <VisibilityIcon sx={{ verticalAlign: 'middle', mr: 1 }} fontSize="small" />
-                        Détails
+{t('requestWizard.step5.details')}
                       </Box>
                     </TableCell>
                   </TableRow>
@@ -1321,7 +1186,10 @@ const Step5SeafreightSelection: React.FC<Step5SeafreightSelectionProps> = ({
                           <Checkbox
                             color="primary"
                             checked={isSelected}
-                            onChange={() => handleToggleSeafreight(offer)}
+                            onChange={() => {
+                              console.log('🔧 [STEP5] Checkbox cliquée pour offer:', offer.id, 'isSelected:', isSelected);
+                              handleToggleSeafreight(offer);
+                            }}
                             inputProps={{ 'aria-label': 'select seafreight offer' }}
                           />
                         </TableCell>
@@ -1399,17 +1267,20 @@ const Step5SeafreightSelection: React.FC<Step5SeafreightSelectionProps> = ({
                             variant={isSelected ? "contained" : "outlined"}
                             color="primary"
                             size="small"
-                            onClick={() => handleToggleSeafreight(offer)}
+                            onClick={() => {
+                              console.log('🔧 [STEP5] Bouton cliqué pour offer:', offer.id, 'isSelected:', isSelected);
+                              handleToggleSeafreight(offer);
+                            }}
                             sx={{ fontWeight: 600, minWidth: 90 }}
                           >
                             {isSelected 
-                              ? 'Désélectionner' 
+                              ? t('requestWizard.step5.deselect')
                               : t('requestWizard.step5.select')
                             }
                           </Button>
                         </TableCell>
                         <TableCell align="center">
-                          <Tooltip title="Voir les détails de l'offre" arrow>
+                          <Tooltip title={t('requestWizard.step5.details')} arrow>
                             <IconButton
                               size="small"
                               onClick={() => handleOpenDetailsModal(offer)}
@@ -1775,7 +1646,7 @@ const Step5SeafreightSelection: React.FC<Step5SeafreightSelectionProps> = ({
                 fontWeight: 600,
               }}
             >
-              Fermer
+{t('requestWizard.step5.close')}
             </Button>
             {selectedOfferForDetails && (
               <Button
@@ -1795,7 +1666,7 @@ const Step5SeafreightSelection: React.FC<Step5SeafreightSelectionProps> = ({
                   },
                 }}
               >
-                {selectedSeafreightIds.includes(selectedOfferForDetails.id || '') ? 'Désélectionner' : 'Sélectionner cette offre'}
+{selectedSeafreightIds.includes(selectedOfferForDetails.id || '') ? t('requestWizard.step5.deselect') : t('requestWizard.step5.selectThisOffer')}
               </Button>
             )}
           </Box>

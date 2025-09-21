@@ -1,12 +1,13 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { 
   // ✅ SDK QUOTE OFFER API (pour les brouillons)
-  postApiQuoteOfferDraft, 
-  putApiQuoteOfferDraftById, 
-  getDraft, 
-  deleteApiQuoteOfferDraftById, 
-  getApiQuoteOfferDrafts 
+  postApiDraftQuotes, 
+  putApiDraftQuotesById, 
+  getApiDraftQuotesById, 
+  deleteApiDraftQuotesById, 
+  getApiDraftQuotes 
 } from '@features/offer/api/sdk.gen';
+import { DraftQuoteApiMapper, DraftQuoteApiUtils } from '../services/DraftQuoteApiMapper';
 import { 
   // ✅ TYPES QUOTE OFFER API
   OptimizedCreateWizardDraftRequest,
@@ -24,7 +25,7 @@ export const useDraftCRUD = () => {
   // === CRÉATION D'UN NOUVEAU BROUILLON ===
   const createDraftMutation = useMutation({
     mutationFn: async (draftData: OptimizedCreateWizardDraftRequest) => {
-      const response = await postApiQuoteOfferDraft({
+      const response = await postApiDraftQuotes({
         body: draftData
       });
       return response.data;
@@ -43,7 +44,7 @@ export const useDraftCRUD = () => {
   // === MISE À JOUR D'UN BROUILLON EXISTANT ===
   const updateDraftMutation = useMutation({
     mutationFn: async ({ id, data }: { id: string; data: OptimizedUpdateWizardDraftRequest }) => {
-      const response = await putApiQuoteOfferDraftById({
+      const response = await putApiDraftQuotesById({
         path: { id },
         body: data
       });
@@ -64,7 +65,7 @@ export const useDraftCRUD = () => {
   // === SUPPRESSION D'UN BROUILLON ===
   const deleteDraftMutation = useMutation({
     mutationFn: async (id: string) => {
-      const response = await deleteApiQuoteOfferDraftById({
+      const response = await deleteApiDraftQuotesById({
         path: { id }
       });
       return response.data;
@@ -106,7 +107,7 @@ export const useDraft = (draftId: string | null) => {
     queryFn: async () => {
       if (!draftId) return null;
       
-      const response = await getDraft({
+      const response = await getApiDraftQuotesById({
         path: { id: draftId }
       });
       return response.data;
@@ -128,7 +129,7 @@ export const useDrafts = (filters?: {
   return useQuery({
     queryKey: ['drafts', filters],
     queryFn: async () => {
-      const response = await getApiQuoteOfferDrafts({
+      const response = await getApiDraftQuotes({
         query: {
           ...filters,
           page: filters?.page || 1,

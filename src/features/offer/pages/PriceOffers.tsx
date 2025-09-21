@@ -46,7 +46,7 @@ import { DataGrid, GridColDef, GridRenderCellParams } from '@mui/x-data-grid';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { statusLabel, colorsTypes } from '@utils/functions';
-import { postApiQuoteSearch } from '@features/offer/api';
+import { getApiDraftQuotes } from '@features/offer/api';
 import QuoteDisplay from '@features/offer/components/QuoteDisplay';
 import QuoteActionButtons from '@features/offer/components/QuoteActionButtons';
 // import { QuoteOfferStatus } from '@features/offer/api/types.gen';
@@ -76,8 +76,9 @@ const PriceOffers: React.FC = () => {
   const loadQuotes = async () => {
     try {
       setLoading(true);
-      const response: any = await postApiQuoteSearch({
-        body: {
+      // TODO: Remplacer par l'endpoint de recherche une fois créé dans le backend
+      const response: any = await getApiDraftQuotes({
+        query: {
           pageNumber: 1,
           pageSize: 100
         }

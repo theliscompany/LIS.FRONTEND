@@ -2,3 +2,6 @@
 export * from './sdk.gen';
 export * from './types.gen';
 export * from './@tanstack/react-query.gen';
+
+// Export du client configuré
+export { client } from './config';

@@ -1,9 +1,9 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
-import { DraftQuote, syncDraftQuoteData, buildSDKPayload } from '../types';
+import { DraftQuote, syncDraftQuoteData, buildCreateDraftPayload, buildUpdateDraftPayload } from '../types';
 import { 
-  postApiQuoteOfferDraft, 
-  putApiQuoteOfferDraftById,
-  getDraft 
+  postApiDraftQuotes, 
+  putApiDraftQuotesById,
+  getApiDraftQuotesById 
 } from '@features/offer/api';
 
 // === HOOK DE SYNCHRONISATION PARFAITE DRAFTQUOTE ===
@@ -81,19 +81,22 @@ export const useDraftQuoteSync = (initialDraftQuote: DraftQuote) => {
     try {
       let response;
       
-      if (draftId) {
+      // ✅ CORRECTION : Vérifier si draftId est valide (non null, non undefined, non "new", non string vide)
+      const hasValidDraftId = draftId && draftId.trim() !== '' && draftId !== 'new';
+      
+      if (hasValidDraftId) {
         // Mise à jour d'un brouillon existant
         console.log('🔄 Mise à jour du brouillon existant...');
-        response = await putApiQuoteOfferDraftById({
-          body: buildSDKPayload(draftQuote),
+        response = await putApiDraftQuotesById({
+          body: buildUpdateDraftPayload(draftQuote),
           path: { id: draftId }
         });
         console.log('✅ Brouillon mis à jour avec succès');
       } else {
         // Création d'un nouveau brouillon
         console.log('🚀 Création d\'un nouveau brouillon...');
-        response = await postApiQuoteOfferDraft({
-          body: buildSDKPayload(draftQuote)
+        response = await postApiDraftQuotes({
+          body: buildCreateDraftPayload(draftQuote)
         });
         
         // Extraire l'ID de la réponse
@@ -132,7 +135,7 @@ export const useDraftQuoteSync = (initialDraftQuote: DraftQuote) => {
   const loadDraft = useCallback(async (id: string): Promise<boolean> => {
     try {
       console.log('📥 Chargement du brouillon...');
-      const response = await getDraft({ path: { id } });
+      const response = await getApiDraftQuotesById({ path: { id } });
       const responseData = response.data as any;
       
       if (responseData?.data?.OptimizedDraftData) {

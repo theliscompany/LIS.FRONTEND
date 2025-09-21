@@ -44,8 +44,8 @@ import {
 import { DataGrid, GridRenderCellParams } from '@mui/x-data-grid';
 import { useNavigate } from 'react-router-dom';
 import { 
-  getApiQuoteOfferDraftsOptions, 
-  deleteApiQuoteOfferDraftByIdMutation 
+  getApiDraftQuotesOptions, 
+  deleteApiDraftQuotesByIdMutation 
 } from '@features/offer/api/@tanstack/react-query.gen';
 
 interface DraftQuote {
@@ -220,9 +220,9 @@ const DraftQuotes: React.FC = () => {
     isLoading: loading, 
     error,
     refetch: loadDrafts 
-  } = useQuery(getApiQuoteOfferDraftsOptions({
+  } = useQuery(getApiDraftQuotesOptions({
     query: {
-      pageNumber: 1,
+      page: 1,
       pageSize: 100
     }
   }));
@@ -246,12 +246,13 @@ const DraftQuotes: React.FC = () => {
   
   // Mutation pour supprimer un draft
   const queryClient = useQueryClient();
-  const deleteDraftMutation = useMutation(deleteApiQuoteOfferDraftByIdMutation());
+  const deleteDraftMutation = useMutation(deleteApiDraftQuotesByIdMutation());
 
   // Traiter les données quand elles arrivent via React Query
   useEffect(() => {
     if (draftsResponse) {
-      console.log('[DraftQuotes] Données reçues via useQuery:', draftsResponse);
+      console.log('🔍 [DraftQuotes] Données reçues via useQuery:', draftsResponse);
+      console.log('🔍 [DraftQuotes] Structure complète de la réponse:', JSON.stringify(draftsResponse, null, 2));
       processDraftsData(draftsResponse);
     }
   }, [draftsResponse]);
@@ -272,12 +273,9 @@ const DraftQuotes: React.FC = () => {
     try {
       console.log('[DraftQuotes] Traitement des données reçues via useQuery:', response);
       
-      // Extraire les données avec la structure API: { code: 200, message: 'Success', data: { items: [...], pageNumber: 1, ... } }
+      // Extraire les données avec la nouvelle structure API: { code: 200, message: 'Success', data: [...] }
       let draftsData = [];
-      if (response?.data?.items && Array.isArray(response.data.items)) {
-        draftsData = response.data.items;
-        console.log('[DraftQuotes] Extraction depuis response.data.items:', draftsData.length, 'éléments');
-      } else if (response?.data && Array.isArray(response.data)) {
+      if (response?.data && Array.isArray(response.data)) {
         draftsData = response.data;
         console.log('[DraftQuotes] Extraction depuis response.data (tableau direct)');
       } else if (Array.isArray(response)) {
@@ -297,7 +295,42 @@ const DraftQuotes: React.FC = () => {
           console.log(`[DraftQuotes] Brouillon ${index} - Status: "${quote.status}", ID: ${quote.id}, Email: ${quote.emailUser}`);
         });
         
-        const draftQuotes = draftsData.map((quote: any) => {
+        const draftQuotes = draftsData
+          .filter((quote: any) => {
+            // 🔍 DEBUG : Voir tous les brouillons pour comprendre la structure
+            console.log(`[DraftQuotes] Brouillon analysé:`, {
+              id: quote.id,
+              draftQuoteId: quote.draftQuoteId,
+              hasId: !!quote.id,
+              hasDraftQuoteId: !!quote.draftQuoteId,
+              idType: typeof quote.id,
+              draftQuoteIdType: typeof quote.draftQuoteId,
+              fullQuote: quote
+            });
+            
+            // ✅ Utiliser draftQuoteId (ID MongoDB) au lieu de id
+            const mongoId = quote.draftQuoteId || quote.id;
+            if (!mongoId) {
+              console.warn(`[DraftQuotes] Brouillon sans ID MongoDB - ignoré:`, quote);
+              return false;
+            }
+            return true;
+          })
+          .map((quote: any, index: number) => {
+            // Log pour déboguer la structure des données
+            console.log(`[DraftQuotes] Brouillon ${index} - Structure complète:`, {
+              id: quote.id,
+              quoteOfferNumber: quote.quoteOfferNumber,
+              requestQuoteId: quote.requestQuoteId,
+              clientNumber: quote.clientNumber,
+              emailUser: quote.emailUser,
+              status: quote.status,
+              created: quote.created,
+              assignedTo: quote.assignedTo,
+              lastModified: quote.lastModified,
+              draftData: quote.draftData
+            });
+            
             // Extraire les données sauvegardées depuis draftData
             const draftData = quote.draftData || {};
             
@@ -348,7 +381,7 @@ const DraftQuotes: React.FC = () => {
             });
             
             return {
-              id: quote.id,
+              id: quote.draftQuoteId || quote.id || `temp-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`, // ✅ Utiliser draftQuoteId (ID MongoDB)
               quoteOfferNumber: quote.quoteOfferNumber || 0,
               requestQuoteId: quote.requestQuoteId,
               clientNumber: quote.clientNumber,
@@ -421,6 +454,12 @@ const DraftQuotes: React.FC = () => {
   };
 
   const handleContinueDraft = (draft: DraftQuote) => {
+    if (!draft.id) {
+      console.error('[DraftQuotes] Impossible de continuer le brouillon: ID manquant');
+      showSnackbar('Erreur: ID du brouillon manquant', 'error');
+      return;
+    }
+    
     console.log('[DraftQuotes] Continuer le brouillon:', draft.id);
     console.log('[DraftQuotes] Étape actuelle:', draft.currentStep);
     console.log('[DraftQuotes] Données du draft:', draft.draftData);
@@ -436,10 +475,21 @@ const DraftQuotes: React.FC = () => {
 
 
   const handleViewDraft = (draft: DraftQuote) => {
+    if (!draft.id) {
+      console.error('[DraftQuotes] Impossible de voir le brouillon: ID manquant');
+      showSnackbar('Erreur: ID du brouillon manquant', 'error');
+      return;
+    }
     navigate(`/quote-offers/${draft.id}`);
   };
 
   const handleManageQuote = (draft: DraftQuote) => {
+    if (!draft.id) {
+      console.error('[DraftQuotes] Impossible de gérer le devis: ID manquant');
+      showSnackbar('Erreur: ID du brouillon manquant', 'error');
+      return;
+    }
+    
     // TODO: Récupérer l'ID du devis associé au brouillon
     // Pour l'instant, on utilise l'ID du brouillon comme placeholder
     console.log('[DraftQuotes] Gérer le devis pour le brouillon:', draft.id);
@@ -460,7 +510,7 @@ const DraftQuotes: React.FC = () => {
       });
       
       // Invalider le cache pour recharger les données
-      queryClient.invalidateQueries({ queryKey: ['getApiQuoteOfferDrafts'] });
+      queryClient.invalidateQueries({ queryKey: ['getApiDraftQuotes'] });
       
       setDeleteDialogOpen(false);
       setDeletingDraft(null);
@@ -684,7 +734,7 @@ const DraftQuotes: React.FC = () => {
                               Brouillon #{draft.quoteOfferNumber || 'N/A'}
                       </Typography>
                             <Typography variant="body2" color="text.secondary">
-                              ID: {draft.id.substring(0, 8)}...
+                              ID: {draft.id ? draft.id.substring(0, 8) + '...' : 'N/A'}
                             </Typography>
                           </Box>
                             <Chip 

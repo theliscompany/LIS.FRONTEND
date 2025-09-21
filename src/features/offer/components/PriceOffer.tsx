@@ -6,7 +6,7 @@ import { BootstrapInput, buttonCloseStyles, inputLabelStyles } from '@utils/misc
 import { useMsal, useAccount } from '@azure/msal-react';
 import { SnackbarProvider, enqueueSnackbar } from 'notistack';
 import { useState } from 'react';
-import { getQuote /* putApiQuoteOfferByIdStatus */ } from '@features/offer/api';
+import { getApiQuotesById /* putApiQuoteOfferByIdStatus */ } from '@features/offer/api';
 import { postApiEmail } from '@features/request/api';
 import { useQueryClient } from '@tanstack/react-query';
 import { getApiFileByFolderByFileNameOptions } from '@features/document/api/@tanstack/react-query.gen';
@@ -104,7 +104,7 @@ const PriceOffer = (props: any) => {
 
 	const loadOffer = async () => {
 		try {
-			const response: any = await getQuote({path: {id: props.id}});
+			const response: any = await getApiQuotesById({path: {id: props.id}});
 			if (response !== null && response !== undefined) {
 				console.log(response.data);
 				// var objTotal = JSON.parse(response.data.createdBy);

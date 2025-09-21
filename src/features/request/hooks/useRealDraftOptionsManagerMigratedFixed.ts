@@ -7,7 +7,7 @@ import {
   getApiDraftQuotesById,              // Récupérer draft
   postApiDraftQuotes,                 // Créer draft
   putApiDraftQuotesById,              // Mettre à jour draft
-  postApiQuotesFinalizeByDraftId      // Finaliser en devis
+  postApiDraftQuotesByIdFinalize      // Finaliser en devis
 } from '../../offer/api/sdk.gen';
 
 // Types simplifiés pour la migration
@@ -372,10 +372,10 @@ export const useRealDraftOptionsManagerMigratedFixed = ({
         throw new Error('DraftQuote avec ID requis pour créer un devis');
       }
 
-      console.log('[MIGRATION] Création devis avec postApiQuotesFinalizeByDraftId:', data);
+      console.log('[MIGRATION] Création devis avec postApiDraftQuotesByIdFinalize:', data);
       
-      return await postApiQuotesFinalizeByDraftId({
-        path: { draftId: draftQuote.id },
+      return await postApiDraftQuotesByIdFinalize({
+        path: { id: draftQuote.id },
         body: {
           options: options.map((option, index) => ({
             optionId: index + 1, // Les IDs d'options sont des entiers dans le nouveau système

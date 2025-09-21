@@ -1,12 +1,12 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useSnackbar } from 'notistack';
 import { 
-  postApiQuoteOfferDraft,
-  putApiQuoteOfferDraftById,
-  getDraft
+  postApiDraftQuotes,
+  putApiDraftQuotesById,
+  getApiDraftQuotesById
 } from '../../offer/api/sdk.gen';
 import type { DraftQuote } from '../types/DraftQuote';
-import { buildSDKPayload, calculateCurrentStep } from '../types/DraftQuote';
+import { buildCreateDraftPayload, buildUpdateDraftPayload, calculateCurrentStep } from '../types/DraftQuote';
 // import { useDraftPersistence } from './useDraftPersistence'; // TODO: À implémenter
 
 export interface WizardState {
@@ -31,7 +31,7 @@ export interface UseWizardStateManagerReturn {
 }
 
 export const useWizardStateManager = (
-  initialDraftQuote: DraftQuote,
+  initialDraftQuote: DraftQuote | null,
   currentUserEmail: string,
   clientNumber: string,
   initialDraftId?: string | null
@@ -56,9 +56,37 @@ export const useWizardStateManager = (
   const lastSavedDataRef = useRef<string>('');
   const isInitialLoadRef = useRef<boolean>(true);
 
+  // ✅ Créer un brouillon par défaut si initialDraftQuote est null
+  const defaultDraftQuote = {
+    id: 'new',
+    requestQuoteId: 'temp-request-id',
+    clientNumber: clientNumber,
+    emailUser: currentUserEmail,
+    status: 'DRAFT',
+    created: new Date().toISOString(),
+    assignedTo: '',
+    lastModified: new Date().toISOString(),
+    progress: 0,
+    currentStep: 1,
+    totalSteps: 6,
+    completedSteps: [],
+    draftData: {},
+    requestData: {},
+    step1: {},
+    step2: {},
+    step3: {},
+    step4: {},
+    step5: {},
+    step6: {},
+    savedOptions: [],
+    selectedHaulage: null,
+    selectedSeafreights: [],
+    selectedMiscellaneous: []
+  };
+
   const [state, setState] = useState<WizardState>({
     activeStep: 0,
-    draftQuote: initialDraftQuote,
+    draftQuote: initialDraftQuote || defaultDraftQuote,
     isDirty: false,
     lastSavedAt: null,
     isSaving: false,
@@ -88,6 +116,10 @@ export const useWizardStateManager = (
   });
 
   console.log('✅ [HOOK] État initial créé:', state);
+
+  // ✅ CRÉATION AUTOMATIQUE DU BROUILLON VIA L'API SI NÉCESSAIRE
+  // ✅ SUPPRIMÉ : Création automatique pour éviter la double création
+  // Le brouillon sera créé uniquement lors de la première sauvegarde
 
   // === FONCTIONS UTILITAIRES ===
   const serializeDraftQuote = (draft: DraftQuote): string => {
@@ -211,15 +243,6 @@ export const useWizardStateManager = (
     console.log('✅ [SAVE_DRAFT] État isSaving mis à true');
 
     try {
-      console.log('🔧 [SAVE_DRAFT] Construction du payload avec buildSDKPayload...');
-      const draftData = buildSDKPayload(state.draftQuote, currentUserEmail);
-      
-      console.log('💾 [SAVE_DRAFT] Tentative de sauvegarde:', {
-        hasDraftId: !!currentDraftId,
-        currentDraftId,
-        draftData: draftData
-      });
-
       // ✅ CORRECTION : Utiliser l'ID du draftQuote ou currentDraftId
       const effectiveDraftId = state.draftQuote?.id || currentDraftId;
       
@@ -229,20 +252,34 @@ export const useWizardStateManager = (
         effectiveDraftId
       });
 
+      // ✅ CORRECTION : Vérifier si effectiveDraftId est valide (non null, non undefined, non "new", non string vide)
+      const hasValidDraftId = effectiveDraftId && effectiveDraftId.trim() !== '' && effectiveDraftId !== 'new';
+      
+      console.log('🔧 [SAVE_DRAFT] Construction du payload...');
+      const draftData = hasValidDraftId 
+        ? buildUpdateDraftPayload(state.draftQuote, currentUserEmail)
+        : buildCreateDraftPayload(state.draftQuote, currentUserEmail);
+      
+      console.log('💾 [SAVE_DRAFT] Tentative de sauvegarde:', {
+        hasDraftId: !!currentDraftId,
+        currentDraftId,
+        draftData: draftData
+      });
+
       let result;
-      if (effectiveDraftId) {
+      if (hasValidDraftId) {
         // Mise à jour d'un brouillon existant
         console.log('🔄 [SAVE_DRAFT] Mise à jour du brouillon existant:', effectiveDraftId);
-        console.log('🔄 [SAVE_DRAFT] Appel de putApiQuoteOfferDraftById...');
-        result = await putApiQuoteOfferDraftById({
+        console.log('🔄 [SAVE_DRAFT] Appel de putApiDraftQuotesById...');
+        result = await putApiDraftQuotesById({
           path: { id: effectiveDraftId },
           body: draftData
         });
       } else {
         // Création d'un nouveau brouillon
         console.log('🆕 [SAVE_DRAFT] Création d\'un nouveau brouillon');
-        console.log('🆕 [SAVE_DRAFT] Appel de postApiQuoteOfferDraft...');
-        result = await postApiQuoteOfferDraft({
+        console.log('🆕 [SAVE_DRAFT] Appel de postApiDraftQuotes...');
+        result = await postApiDraftQuotes({
           body: draftData
         });
       }
@@ -308,7 +345,7 @@ export const useWizardStateManager = (
       
       // Appel API pour charger le brouillon
       console.log('📡 [LOAD_DRAFT] Appel API getDraft avec:', { id: draftIdToLoad });
-      const response = await getDraft({ 
+      const response = await getApiDraftQuotesById({ 
         path: { id: draftIdToLoad } 
       });
       
@@ -388,9 +425,6 @@ export const useWizardStateManager = (
     setState(prev => ({ ...prev, isSaving: true, saveError: null }));
 
     try {
-      console.log('⏰ [AUTO_SAVE] Construction du payload avec buildSDKPayload...');
-      const draftData = buildSDKPayload(state.draftQuote, currentUserEmail);
-      
       // ✅ CORRECTION : Utiliser l'ID du draftQuote ou currentDraftId
       const effectiveDraftId = state.draftQuote?.id || currentDraftId;
       
@@ -400,18 +434,26 @@ export const useWizardStateManager = (
         effectiveDraftId
       });
       
+      // ✅ CORRECTION : Vérifier si effectiveDraftId est valide (non null, non undefined, non "new", non string vide)
+      const hasValidDraftId = effectiveDraftId && effectiveDraftId.trim() !== '' && effectiveDraftId !== 'new';
+      
+      console.log('⏰ [AUTO_SAVE] Construction du payload...');
+      const draftData = hasValidDraftId 
+        ? buildUpdateDraftPayload(state.draftQuote, currentUserEmail)
+        : buildCreateDraftPayload(state.draftQuote, currentUserEmail);
+      
       let result;
-      if (effectiveDraftId) {
+      if (hasValidDraftId) {
         // Mise à jour d'un brouillon existant
         console.log('⏰ [AUTO_SAVE] Mise à jour du brouillon existant:', effectiveDraftId);
-        result = await putApiQuoteOfferDraftById({
+        result = await putApiDraftQuotesById({
           path: { id: effectiveDraftId },
           body: draftData
         });
       } else {
         // Création d'un nouveau brouillon
         console.log('⏰ [AUTO_SAVE] Création d\'un nouveau brouillon');
-        result = await postApiQuoteOfferDraft({
+        result = await postApiDraftQuotes({
           body: draftData
         });
       }
@@ -732,26 +774,98 @@ function transformDraftQuoteToRequest(
   return buildSDKPayload(draftQuote, currentUserEmail);
 }
 
+// ✅ FONCTIONS DE TRANSFORMATION API -> FRONTEND
+function transformGeneralInfoToStep1(generalInfo: any, routingCargo: any): any {
+  console.log('🔄 [TRANSFORM_STEP1] Transformation des informations générales:', { generalInfo, routingCargo });
+  
+  return {
+    customer: {
+      contactId: generalInfo.contactId || 0,
+      contactName: generalInfo.contactName || '',
+      companyName: generalInfo.companyName || '',
+      email: generalInfo.email || ''
+    },
+    route: {
+      origin: {
+        city: {
+          name: routingCargo.portOfLoading || '',
+          country: ''
+        }
+      },
+      destination: {
+        city: {
+          name: routingCargo.portOfDestination || '',
+          country: ''
+        }
+      }
+    },
+    productName: {
+      productId: generalInfo.productId || 0,
+      productName: generalInfo.productName || ''
+    },
+    incotermName: generalInfo.incoterm || '',
+    cityFrom: {
+      name: routingCargo.portOfLoading || '',
+      country: ''
+    },
+    cityTo: {
+      name: routingCargo.portOfDestination || '',
+      country: ''
+    }
+  };
+}
+
+function transformServicesToStep2(services: any[]): any {
+  console.log('🔄 [TRANSFORM_STEP2] Transformation des services:', services);
+  
+  return {
+    selected: services.map(service => ({
+      serviceId: service.serviceId || 0,
+      serviceName: service.serviceName || '',
+      description: service.description || '',
+      price: service.price || 0,
+      currency: service.currency || 'EUR'
+    }))
+  };
+}
+
 function transformApiResponseToDraftQuote(apiResponse: any): DraftQuote {
   console.log('🔄 [TRANSFORM] Transformation de la réponse API:', apiResponse);
+  console.log('🔄 [TRANSFORM] Structure complète de la réponse:', JSON.stringify(apiResponse, null, 2));
   
   // Créer un brouillon de base
   const baseDraft = createInitialDraftQuote(apiResponse.emailUser || 'user@example.com');
   
-  // Extraire les données des steps depuis draftData
-  const draftData = apiResponse.draftData || {};
-  const steps = draftData.steps || {};
-  const step1 = steps.step1 || {};
-  const step2 = steps.step2 || {};
-  
-  console.log('🔄 [TRANSFORM] Données extraites:', { 
-    draftData, 
-    steps, 
-    step1, 
-    step2,
-    optionsCount: draftData.options?.length || 0,
-    options: draftData.options || []
+  // 🔍 DEBUG : Voir toutes les structures possibles
+  console.log('🔍 [TRANSFORM] Structures disponibles:', {
+    hasDraftData: !!apiResponse.draftData,
+    hasWizardData: !!apiResponse.wizardData,
+    hasSteps: !!apiResponse.steps,
+    hasStep1: !!apiResponse.step1,
+    draftDataKeys: apiResponse.draftData ? Object.keys(apiResponse.draftData) : [],
+    wizardDataKeys: apiResponse.wizardData ? Object.keys(apiResponse.wizardData) : [],
+    apiResponseKeys: Object.keys(apiResponse)
   });
+  
+  // ✅ MAPPING CORRECT : Transformer la structure API vers la structure frontend
+  const wizardData = apiResponse.wizardData || {};
+  const generalInfo = wizardData.generalRequestInformation || {};
+  const routingCargo = wizardData.routingAndCargo || {};
+  
+  console.log('🔄 [TRANSFORM] Données API extraites:', { 
+    wizardData,
+    generalInfo,
+    routingCargo,
+    seafreights: wizardData.seafreights || [],
+    haulages: wizardData.haulages || [],
+    services: wizardData.services || []
+  });
+  
+  // Transformer les données API vers la structure frontend
+  const step1 = transformGeneralInfoToStep1(generalInfo, routingCargo);
+  const step2 = transformServicesToStep2(wizardData.services || []);
+  
+  console.log('🔄 [TRANSFORM] Steps transformés:', { step1, step2 });
   
   // Enrichir avec les données de l'API
   const transformedDraft: DraftQuote = {
@@ -767,82 +881,11 @@ function transformApiResponseToDraftQuote(apiResponse: any): DraftQuote {
     // version: draftData.wizard?.version || '1.0', // Commenté car pas dans le type DraftQuote
     step1: {
       ...baseDraft.step1,
-      customer: {
-        ...baseDraft.step1.customer,
-        contactId: step1.customer?.contactId || 0,
-        contactName: step1.customer?.contactName || '',
-        companyName: step1.customer?.companyName || '',
-        email: step1.customer?.email || baseDraft.step1.customer.email
-      },
-      route: {
-        ...baseDraft.step1.route,
-        origin: {
-          ...baseDraft.step1.route.origin,
-          city: { 
-            name: step1.route?.origin?.city?.name || '', 
-            country: step1.route?.origin?.city?.country || '' 
-          },
-          port: { 
-            portId: step1.route?.origin?.port?.portId || 0, 
-            portName: step1.route?.origin?.port?.portName || '', 
-            country: step1.route?.origin?.port?.country || '' 
-          }
-        },
-        destination: {
-          ...baseDraft.step1.route.destination,
-          city: { 
-            name: step1.route?.destination?.city?.name || '', 
-            country: step1.route?.destination?.city?.country || '' 
-          },
-          port: { 
-            portId: step1.route?.destination?.port?.portId || 0, 
-            portName: step1.route?.destination?.port?.portName || '', 
-            country: step1.route?.destination?.port?.country || '' 
-          }
-        }
-      },
-      cargo: {
-        ...baseDraft.step1.cargo,
-        product: { 
-          productId: step1.cargo?.product?.productId || 1, 
-          productName: step1.cargo?.product?.productName || '' 
-        },
-        incoterm: step1.cargo?.incoterm || ''
-      },
-      metadata: { 
-        comment: step1.metadata?.comment || '' 
-      },
-      cityFrom: { 
-        name: step1.route?.origin?.city?.name || '', 
-        country: step1.route?.origin?.city?.country || '' 
-      },
-      cityTo: { 
-        name: step1.route?.destination?.city?.name || '', 
-        country: step1.route?.destination?.city?.country || '' 
-      },
-      productName: { 
-        productId: step1.cargo?.product?.productId || 1, 
-        productName: step1.cargo?.product?.productName || '' 
-      },
-      incotermName: step1.cargo?.incoterm || '',
-      portFrom: { 
-        portId: step1.route?.origin?.port?.portId || 0, 
-        portName: step1.route?.origin?.port?.portName || '', 
-        country: step1.route?.origin?.port?.country || '' 
-      },
-      portTo: { 
-        portId: step1.route?.destination?.port?.portId || 0, 
-        portName: step1.route?.destination?.port?.portName || '', 
-        country: step1.route?.destination?.port?.country || '' 
-      },
-      comment: step1.metadata?.comment || '',
-      assignee: apiResponse.emailUser || baseDraft.emailUser,
-      status: 'NEW'
+      ...step1 // ✅ Utiliser les données transformées
     },
     step2: {
       ...baseDraft.step2,
-      selectedServices: steps.step2?.selectedServices || baseDraft.step2.selectedServices,
-      selected: steps.step2?.selected || baseDraft.step2.selected
+      ...step2 // ✅ Utiliser les données transformées
     },
     step3: {
       ...baseDraft.step3,

@@ -26,7 +26,7 @@ import {
   Delete as DeleteIcon,
   AssignmentTurnedIn as ValidateIcon
 } from '@mui/icons-material';
-import { getQuoteOffer } from '@features/offer/api/sdk.gen';
+import { getApiQuotesById } from '@features/offer/api/sdk.gen';
 
 interface QuoteOptionsManagerProps {
   quoteId: string;
@@ -77,7 +77,7 @@ const QuoteOptionsManager: React.FC<QuoteOptionsManagerProps> = ({
     const loadQuoteData = async () => {
       try {
         setLoading(true);
-        const response = await getQuoteOffer({ path: { id: quoteId } });
+        const response = await getApiQuotesById({ path: { id: quoteId } });
         console.log('[QuoteOptionsManager] Données du devis chargées:', response);
         setQuoteData(response as any);
       } catch (err: any) {

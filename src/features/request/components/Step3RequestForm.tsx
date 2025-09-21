@@ -129,13 +129,21 @@ const Step3RequestForm: React.FC<Step3RequestFormProps> = ({
   // ✅ Log des données reçues pour débogage
   useEffect(() => {
     console.log('🔧 [STEP3] Données reçues dans requestData:', {
+      requestData: requestData,
       step1: requestData?.step1,
-      customer: requestData?.step1?.customer,
-      cityFrom: requestData?.step1?.cityFrom,
-      cityTo: requestData?.step1?.cityTo,
-      productName: requestData?.step1?.productName,
-      incotermName: requestData?.step1?.incotermName,
-      comment: requestData?.step1?.comment
+      customer: requestData?.customer,
+      shipment: requestData?.shipment,
+      incoterm: requestData?.incoterm,
+      comment: requestData?.comment,
+      // Données spécifiques
+      customerName: requestData?.customer?.name,
+      customerContactPerson: requestData?.customer?.contactPerson?.fullName,
+      originLocation: requestData?.shipment?.origin?.location,
+      originCountry: requestData?.shipment?.origin?.country,
+      destinationLocation: requestData?.shipment?.destination?.location,
+      destinationCountry: requestData?.shipment?.destination?.country,
+      commodityProductName: requestData?.shipment?.commodity?.productName,
+      commodity: requestData?.shipment?.commodity
     });
     
     // ✅ NOUVEAU: Log des services sélectionnés
@@ -506,21 +514,36 @@ const Step3RequestForm: React.FC<Step3RequestFormProps> = ({
 
   // Ajout des labels robustes pour l'affichage
   const getCustomerLabel = () => {
+    // Priorité 1: Données du client au niveau racine (DraftQuote.customer)
+    if (requestData?.customer?.name) return requestData.customer.name;
+    if (requestData?.customer?.contactPerson?.fullName) return requestData.customer.contactPerson.fullName;
+    
+    // Priorité 2: Données du step1
     if (requestData?.step1?.customer?.contactName) return requestData.step1.customer.contactName;
     if (requestData?.step1?.customer?.companyName) return requestData.step1.customer.companyName;
     if (requestData?.step1?.customer?.name) return requestData.step1.customer.name;
-    if (requestData?.customer?.contactName) return requestData.customer.contactName;
-    if (requestData?.customer?.name) return requestData.customer.name;
+    
+    // Priorité 3: Données alternatives
     if (requestData?.customerName) return requestData.customerName;
     if (requestData?.contactName) return requestData.contactName;
+    
     return '-';
   };
 
   const getDepartureLabel = () => {
+    // Priorité 1: Données du shipment (DraftQuote.shipment.origin)
+    if (requestData?.shipment?.origin?.location && requestData?.shipment?.origin?.country) {
+      return `${requestData.shipment.origin.location}, ${requestData.shipment.origin.country.toUpperCase()}`;
+    }
+    if (requestData?.shipment?.origin?.location) return requestData.shipment.origin.location;
+    
+    // Priorité 2: Données du step1
     if (requestData?.step1?.cityFrom?.name && requestData?.step1?.cityFrom?.country) {
       return `${requestData.step1.cityFrom.name}, ${requestData.step1.cityFrom.country.toUpperCase()}`;
     }
     if (requestData?.step1?.cityFrom?.name) return requestData.step1.cityFrom.name;
+    
+    // Priorité 3: Données alternatives
     if (requestData?.cityFrom?.name && requestData?.cityFrom?.country) {
       return `${requestData.cityFrom.name}, ${requestData.cityFrom.country.toUpperCase()}`;
     }
@@ -531,14 +554,24 @@ const Step3RequestForm: React.FC<Step3RequestFormProps> = ({
     if (requestData?.pickupLocation?.city) return requestData.pickupLocation.city;
     if (requestData?.departureCity) return requestData.departureCity;
     if (requestData?.fromCity) return requestData.fromCity;
+    
     return '-';
   };
 
   const getArrivalLabel = () => {
+    // Priorité 1: Données du shipment (DraftQuote.shipment.destination)
+    if (requestData?.shipment?.destination?.location && requestData?.shipment?.destination?.country) {
+      return `${requestData.shipment.destination.location}, ${requestData.shipment.destination.country.toUpperCase()}`;
+    }
+    if (requestData?.shipment?.destination?.location) return requestData.shipment.destination.location;
+    
+    // Priorité 2: Données du step1
     if (requestData?.step1?.cityTo?.name && requestData?.step1?.cityTo?.country) {
       return `${requestData.step1.cityTo.name}, ${requestData.step1.cityTo.country.toUpperCase()}`;
     }
     if (requestData?.step1?.cityTo?.name) return requestData.step1.cityTo.name;
+    
+    // Priorité 3: Données alternatives
     if (requestData?.cityTo?.name && requestData?.cityTo?.country) {
       return `${requestData.cityTo.name}, ${requestData.cityTo.country.toUpperCase()}`;
     }
@@ -549,16 +582,24 @@ const Step3RequestForm: React.FC<Step3RequestFormProps> = ({
     if (requestData?.deliveryLocation?.city) return requestData.deliveryLocation.city;
     if (requestData?.arrivalCity) return requestData.arrivalCity;
     if (requestData?.toCity) return requestData.toCity;
+    
     return '-';
   };
 
   const getProductLabel = () => {
+    // Priorité 1: Données du shipment (DraftQuote.shipment.commodity)
+    if (requestData?.shipment?.commodity?.productName) return requestData.shipment.commodity.productName;
+    if (requestData?.shipment?.commodity) return requestData.shipment.commodity;
+    
+    // Priorité 2: Données du step1
     if (requestData?.step1?.productName && typeof requestData.step1.productName === 'object' && requestData.step1.productName.productName) {
       return requestData.step1.productName.productName;
     }
     if (typeof requestData?.step1?.productName === 'string' && requestData.step1.productName) {
       return requestData.step1.productName;
     }
+    
+    // Priorité 3: Données alternatives
     if (requestData?.productName && typeof requestData.productName === 'object' && requestData.productName.productName) {
       return requestData.productName.productName;
     }
@@ -575,24 +616,38 @@ const Step3RequestForm: React.FC<Step3RequestFormProps> = ({
     }
     if (requestData?.step1?.product) return requestData.step1.product;
     if (requestData?.product) return requestData.product;
+    
     return '-';
   };
 
   const getIncotermLabel = () => {
+    // Priorité 1: Données au niveau racine (DraftQuote.incoterm)
+    if (requestData?.incoterm) return requestData.incoterm;
+    
+    // Priorité 2: Données du step1
     if (requestData?.step1?.incotermName) return requestData.step1.incotermName;
     if (requestData?.step1?.incoterm) return requestData.step1.incoterm;
+    
+    // Priorité 3: Données alternatives
     if (requestData?.incotermName) return requestData.incotermName;
-    if (requestData?.incoterm) return requestData.incoterm;
     if (requestData?.incoterms) return requestData.incoterms;
+    
     return '-';
   };
 
   const getCommentLabel = () => {
+    // Priorité 1: Données au niveau racine
+    if (requestData?.comment) return requestData.comment;
+    
+    // Priorité 2: Données du step1
     if (requestData?.step1?.comment) return requestData.step1.comment;
     if (requestData?.step1?.description) return requestData.step1.description;
-    if (requestData?.comment) return requestData.comment;
+    if (requestData?.step1?.metadata?.comment) return requestData.step1.metadata.comment;
+    
+    // Priorité 3: Données alternatives
     if (requestData?.description) return requestData.description;
     if (requestData?.notes) return requestData.notes;
+    
     return '-';
   };
 

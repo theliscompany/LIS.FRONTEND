@@ -2,9 +2,9 @@
 
 import type { OptionsLegacyParser } from '@hey-api/client-axios';
 import { queryOptions, type UseMutationOptions, infiniteQueryOptions, type InfiniteData } from '@tanstack/react-query';
-import type { PostApiQuotesSearchData, PostApiQuotesSearchError, PostApiQuotesSearchResponse, GetApiQuotesByIdData, DeleteApiQuotesByIdData, DeleteApiQuotesByIdError, DeleteApiQuotesByIdResponse, PostApiQuotesFinalizeByDraftIdData, PostApiQuotesFinalizeByDraftIdError, PostApiQuotesFinalizeByDraftIdResponse, PutApiQuotesByIdStatusData, PutApiQuotesByIdStatusError, PutApiQuotesByIdStatusResponse, PostApiQuotesByIdClientApprovalData, PostApiQuotesByIdClientApprovalError, PostApiQuotesByIdClientApprovalResponse, PostApiDraftQuotesData, PostApiDraftQuotesError, PostApiDraftQuotesResponse, GetApiDraftQuotesByIdData, PutApiDraftQuotesByIdData, PutApiDraftQuotesByIdError, PutApiDraftQuotesByIdResponse, DeleteApiDraftQuotesByIdData, DeleteApiDraftQuotesByIdError, DeleteApiDraftQuotesByIdResponse, PostApiDraftQuotesByIdOptionsData, PostApiDraftQuotesByIdOptionsError, PostApiDraftQuotesByIdOptionsResponse, PostApiDraftQuotesByIdValidateData, PostApiDraftQuotesByIdValidateError, PostApiDraftQuotesByIdValidateResponse, PostApiDraftQuotesSearchData, PostApiDraftQuotesSearchError, PostApiDraftQuotesSearchResponse } from '../types.gen';
+import type { PostApiQuotesData, PostApiQuotesError, PostApiQuotesResponse, GetApiQuotesData, GetApiQuotesByIdData, PutApiQuotesByIdData, PutApiQuotesByIdError, PutApiQuotesByIdResponse, DeleteApiQuotesByIdData, DeleteApiQuotesByIdError, DeleteApiQuotesByIdResponse, PostApiQuotesByIdApprovalData, PostApiQuotesByIdApprovalError, PostApiQuotesByIdApprovalResponse, PostApiDraftQuotesData, PostApiDraftQuotesError, PostApiDraftQuotesResponse, GetApiDraftQuotesData, GetApiDraftQuotesError, GetApiDraftQuotesResponse, GetApiDraftQuotesByIdData, PutApiDraftQuotesByIdData, PutApiDraftQuotesByIdError, PutApiDraftQuotesByIdResponse, DeleteApiDraftQuotesByIdData, DeleteApiDraftQuotesByIdError, DeleteApiDraftQuotesByIdResponse, PostApiDraftQuotesByIdOptionsData, PostApiDraftQuotesByIdOptionsError, PostApiDraftQuotesByIdOptionsResponse, DeleteApiDraftQuotesByIdOptionsByOptionIdData, DeleteApiDraftQuotesByIdOptionsByOptionIdError, DeleteApiDraftQuotesByIdOptionsByOptionIdResponse, PostApiDraftQuotesByIdFinalizeData, PostApiDraftQuotesByIdFinalizeError, PostApiDraftQuotesByIdFinalizeResponse } from '../types.gen';
 import type { AxiosError } from 'axios';
-import { client, postApiQuotesSearch, getApiQuotesById, deleteApiQuotesById, postApiQuotesFinalizeByDraftId, putApiQuotesByIdStatus, postApiQuotesByIdClientApproval, postApiDraftQuotes, getApiDraftQuotesById, putApiDraftQuotesById, deleteApiDraftQuotesById, postApiDraftQuotesByIdOptions, postApiDraftQuotesByIdValidate, postApiDraftQuotesSearch } from '../sdk.gen';
+import { client, postApiQuotes, getApiQuotes, getApiQuotesById, putApiQuotesById, deleteApiQuotesById, postApiQuotesByIdApproval, postApiDraftQuotes, getApiDraftQuotes, getApiDraftQuotesById, putApiDraftQuotesById, deleteApiDraftQuotesById, postApiDraftQuotesByIdOptions, deleteApiDraftQuotesByIdOptionsByOptionId, postApiDraftQuotesByIdFinalize } from '../sdk.gen';
 
 type QueryKey<TOptions extends OptionsLegacyParser> = [
     Pick<TOptions, 'baseURL' | 'body' | 'headers' | 'path' | 'query'> & {
@@ -33,14 +33,14 @@ const createQueryKey = <TOptions extends OptionsLegacyParser>(id: string, option
     return params;
 };
 
-export const postApiQuotesSearchQueryKey = (options?: OptionsLegacyParser<PostApiQuotesSearchData>) => [
-    createQueryKey('postApiQuotesSearch', options)
+export const postApiQuotesQueryKey = (options?: OptionsLegacyParser<PostApiQuotesData>) => [
+    createQueryKey('postApiQuotes', options)
 ];
 
-export const postApiQuotesSearchOptions = (options?: OptionsLegacyParser<PostApiQuotesSearchData>) => {
+export const postApiQuotesOptions = (options?: OptionsLegacyParser<PostApiQuotesData>) => {
     return queryOptions({
         queryFn: async ({ queryKey, signal }) => {
-            const { data } = await postApiQuotesSearch({
+            const { data } = await postApiQuotes({
                 ...options,
                 ...queryKey[0],
                 signal,
@@ -48,14 +48,14 @@ export const postApiQuotesSearchOptions = (options?: OptionsLegacyParser<PostApi
             });
             return data;
         },
-        queryKey: postApiQuotesSearchQueryKey(options)
+        queryKey: postApiQuotesQueryKey(options)
     });
 };
 
-export const postApiQuotesSearchMutation = (options?: Partial<OptionsLegacyParser<PostApiQuotesSearchData>>) => {
-    const mutationOptions: UseMutationOptions<PostApiQuotesSearchResponse, AxiosError<PostApiQuotesSearchError>, OptionsLegacyParser<PostApiQuotesSearchData>> = {
+export const postApiQuotesMutation = (options?: Partial<OptionsLegacyParser<PostApiQuotesData>>) => {
+    const mutationOptions: UseMutationOptions<PostApiQuotesResponse, AxiosError<PostApiQuotesError>, OptionsLegacyParser<PostApiQuotesData>> = {
         mutationFn: async (localOptions) => {
-            const { data } = await postApiQuotesSearch({
+            const { data } = await postApiQuotes({
                 ...options,
                 ...localOptions,
                 throwOnError: true
@@ -64,6 +64,25 @@ export const postApiQuotesSearchMutation = (options?: Partial<OptionsLegacyParse
         }
     };
     return mutationOptions;
+};
+
+export const getApiQuotesQueryKey = (options?: OptionsLegacyParser<GetApiQuotesData>) => [
+    createQueryKey('getApiQuotes', options)
+];
+
+export const getApiQuotesOptions = (options?: OptionsLegacyParser<GetApiQuotesData>) => {
+    return queryOptions({
+        queryFn: async ({ queryKey, signal }) => {
+            const { data } = await getApiQuotes({
+                ...options,
+                ...queryKey[0],
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getApiQuotesQueryKey(options)
+    });
 };
 
 export const getApiQuotesByIdQueryKey = (options: OptionsLegacyParser<GetApiQuotesByIdData>) => [
@@ -85,6 +104,20 @@ export const getApiQuotesByIdOptions = (options: OptionsLegacyParser<GetApiQuote
     });
 };
 
+export const putApiQuotesByIdMutation = (options?: Partial<OptionsLegacyParser<PutApiQuotesByIdData>>) => {
+    const mutationOptions: UseMutationOptions<PutApiQuotesByIdResponse, AxiosError<PutApiQuotesByIdError>, OptionsLegacyParser<PutApiQuotesByIdData>> = {
+        mutationFn: async (localOptions) => {
+            const { data } = await putApiQuotesById({
+                ...options,
+                ...localOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
 export const deleteApiQuotesByIdMutation = (options?: Partial<OptionsLegacyParser<DeleteApiQuotesByIdData>>) => {
     const mutationOptions: UseMutationOptions<DeleteApiQuotesByIdResponse, AxiosError<DeleteApiQuotesByIdError>, OptionsLegacyParser<DeleteApiQuotesByIdData>> = {
         mutationFn: async (localOptions) => {
@@ -99,14 +132,14 @@ export const deleteApiQuotesByIdMutation = (options?: Partial<OptionsLegacyParse
     return mutationOptions;
 };
 
-export const postApiQuotesFinalizeByDraftIdQueryKey = (options: OptionsLegacyParser<PostApiQuotesFinalizeByDraftIdData>) => [
-    createQueryKey('postApiQuotesFinalizeByDraftId', options)
+export const postApiQuotesByIdApprovalQueryKey = (options: OptionsLegacyParser<PostApiQuotesByIdApprovalData>) => [
+    createQueryKey('postApiQuotesByIdApproval', options)
 ];
 
-export const postApiQuotesFinalizeByDraftIdOptions = (options: OptionsLegacyParser<PostApiQuotesFinalizeByDraftIdData>) => {
+export const postApiQuotesByIdApprovalOptions = (options: OptionsLegacyParser<PostApiQuotesByIdApprovalData>) => {
     return queryOptions({
         queryFn: async ({ queryKey, signal }) => {
-            const { data } = await postApiQuotesFinalizeByDraftId({
+            const { data } = await postApiQuotesByIdApproval({
                 ...options,
                 ...queryKey[0],
                 signal,
@@ -114,61 +147,14 @@ export const postApiQuotesFinalizeByDraftIdOptions = (options: OptionsLegacyPars
             });
             return data;
         },
-        queryKey: postApiQuotesFinalizeByDraftIdQueryKey(options)
+        queryKey: postApiQuotesByIdApprovalQueryKey(options)
     });
 };
 
-export const postApiQuotesFinalizeByDraftIdMutation = (options?: Partial<OptionsLegacyParser<PostApiQuotesFinalizeByDraftIdData>>) => {
-    const mutationOptions: UseMutationOptions<PostApiQuotesFinalizeByDraftIdResponse, AxiosError<PostApiQuotesFinalizeByDraftIdError>, OptionsLegacyParser<PostApiQuotesFinalizeByDraftIdData>> = {
+export const postApiQuotesByIdApprovalMutation = (options?: Partial<OptionsLegacyParser<PostApiQuotesByIdApprovalData>>) => {
+    const mutationOptions: UseMutationOptions<PostApiQuotesByIdApprovalResponse, AxiosError<PostApiQuotesByIdApprovalError>, OptionsLegacyParser<PostApiQuotesByIdApprovalData>> = {
         mutationFn: async (localOptions) => {
-            const { data } = await postApiQuotesFinalizeByDraftId({
-                ...options,
-                ...localOptions,
-                throwOnError: true
-            });
-            return data;
-        }
-    };
-    return mutationOptions;
-};
-
-export const putApiQuotesByIdStatusMutation = (options?: Partial<OptionsLegacyParser<PutApiQuotesByIdStatusData>>) => {
-    const mutationOptions: UseMutationOptions<PutApiQuotesByIdStatusResponse, AxiosError<PutApiQuotesByIdStatusError>, OptionsLegacyParser<PutApiQuotesByIdStatusData>> = {
-        mutationFn: async (localOptions) => {
-            const { data } = await putApiQuotesByIdStatus({
-                ...options,
-                ...localOptions,
-                throwOnError: true
-            });
-            return data;
-        }
-    };
-    return mutationOptions;
-};
-
-export const postApiQuotesByIdClientApprovalQueryKey = (options: OptionsLegacyParser<PostApiQuotesByIdClientApprovalData>) => [
-    createQueryKey('postApiQuotesByIdClientApproval', options)
-];
-
-export const postApiQuotesByIdClientApprovalOptions = (options: OptionsLegacyParser<PostApiQuotesByIdClientApprovalData>) => {
-    return queryOptions({
-        queryFn: async ({ queryKey, signal }) => {
-            const { data } = await postApiQuotesByIdClientApproval({
-                ...options,
-                ...queryKey[0],
-                signal,
-                throwOnError: true
-            });
-            return data;
-        },
-        queryKey: postApiQuotesByIdClientApprovalQueryKey(options)
-    });
-};
-
-export const postApiQuotesByIdClientApprovalMutation = (options?: Partial<OptionsLegacyParser<PostApiQuotesByIdClientApprovalData>>) => {
-    const mutationOptions: UseMutationOptions<PostApiQuotesByIdClientApprovalResponse, AxiosError<PostApiQuotesByIdClientApprovalError>, OptionsLegacyParser<PostApiQuotesByIdClientApprovalData>> = {
-        mutationFn: async (localOptions) => {
-            const { data } = await postApiQuotesByIdClientApproval({
+            const { data } = await postApiQuotesByIdApproval({
                 ...options,
                 ...localOptions,
                 throwOnError: true
@@ -210,6 +196,82 @@ export const postApiDraftQuotesMutation = (options?: Partial<OptionsLegacyParser
         }
     };
     return mutationOptions;
+};
+
+export const getApiDraftQuotesQueryKey = (options?: OptionsLegacyParser<GetApiDraftQuotesData>) => [
+    createQueryKey('getApiDraftQuotes', options)
+];
+
+export const getApiDraftQuotesOptions = (options?: OptionsLegacyParser<GetApiDraftQuotesData>) => {
+    return queryOptions({
+        queryFn: async ({ queryKey, signal }) => {
+            const { data } = await getApiDraftQuotes({
+                ...options,
+                ...queryKey[0],
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getApiDraftQuotesQueryKey(options)
+    });
+};
+
+const createInfiniteParams = <K extends Pick<QueryKey<OptionsLegacyParser>[0], 'body' | 'headers' | 'path' | 'query'>>(queryKey: QueryKey<OptionsLegacyParser>, page: K) => {
+    const params = queryKey[0];
+    if (page.body) {
+        params.body = {
+            ...queryKey[0].body as any,
+            ...page.body as any
+        };
+    }
+    if (page.headers) {
+        params.headers = {
+            ...queryKey[0].headers,
+            ...page.headers
+        };
+    }
+    if (page.path) {
+        params.path = {
+            ...queryKey[0].path,
+            ...page.path
+        };
+    }
+    if (page.query) {
+        params.query = {
+            ...queryKey[0].query,
+            ...page.query
+        };
+    }
+    return params as unknown as typeof page;
+};
+
+export const getApiDraftQuotesInfiniteQueryKey = (options?: OptionsLegacyParser<GetApiDraftQuotesData>): QueryKey<OptionsLegacyParser<GetApiDraftQuotesData>> => [
+    createQueryKey('getApiDraftQuotes', options, true)
+];
+
+export const getApiDraftQuotesInfiniteOptions = (options?: OptionsLegacyParser<GetApiDraftQuotesData>) => {
+    return infiniteQueryOptions<GetApiDraftQuotesResponse, AxiosError<GetApiDraftQuotesError>, InfiniteData<GetApiDraftQuotesResponse>, QueryKey<OptionsLegacyParser<GetApiDraftQuotesData>>, number | Pick<QueryKey<OptionsLegacyParser<GetApiDraftQuotesData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<OptionsLegacyParser<GetApiDraftQuotesData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    page: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await getApiDraftQuotes({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getApiDraftQuotesInfiniteQueryKey(options)
+    });
 };
 
 export const getApiDraftQuotesByIdQueryKey = (options: OptionsLegacyParser<GetApiDraftQuotesByIdData>) => [
@@ -292,29 +354,10 @@ export const postApiDraftQuotesByIdOptionsMutation = (options?: Partial<OptionsL
     return mutationOptions;
 };
 
-export const postApiDraftQuotesByIdValidateQueryKey = (options: OptionsLegacyParser<PostApiDraftQuotesByIdValidateData>) => [
-    createQueryKey('postApiDraftQuotesByIdValidate', options)
-];
-
-export const postApiDraftQuotesByIdValidateOptions = (options: OptionsLegacyParser<PostApiDraftQuotesByIdValidateData>) => {
-    return queryOptions({
-        queryFn: async ({ queryKey, signal }) => {
-            const { data } = await postApiDraftQuotesByIdValidate({
-                ...options,
-                ...queryKey[0],
-                signal,
-                throwOnError: true
-            });
-            return data;
-        },
-        queryKey: postApiDraftQuotesByIdValidateQueryKey(options)
-    });
-};
-
-export const postApiDraftQuotesByIdValidateMutation = (options?: Partial<OptionsLegacyParser<PostApiDraftQuotesByIdValidateData>>) => {
-    const mutationOptions: UseMutationOptions<PostApiDraftQuotesByIdValidateResponse, AxiosError<PostApiDraftQuotesByIdValidateError>, OptionsLegacyParser<PostApiDraftQuotesByIdValidateData>> = {
+export const deleteApiDraftQuotesByIdOptionsByOptionIdMutation = (options?: Partial<OptionsLegacyParser<DeleteApiDraftQuotesByIdOptionsByOptionIdData>>) => {
+    const mutationOptions: UseMutationOptions<DeleteApiDraftQuotesByIdOptionsByOptionIdResponse, AxiosError<DeleteApiDraftQuotesByIdOptionsByOptionIdError>, OptionsLegacyParser<DeleteApiDraftQuotesByIdOptionsByOptionIdData>> = {
         mutationFn: async (localOptions) => {
-            const { data } = await postApiDraftQuotesByIdValidate({
+            const { data } = await deleteApiDraftQuotesByIdOptionsByOptionId({
                 ...options,
                 ...localOptions,
                 throwOnError: true
@@ -325,14 +368,14 @@ export const postApiDraftQuotesByIdValidateMutation = (options?: Partial<Options
     return mutationOptions;
 };
 
-export const postApiDraftQuotesSearchQueryKey = (options?: OptionsLegacyParser<PostApiDraftQuotesSearchData>) => [
-    createQueryKey('postApiDraftQuotesSearch', options)
+export const postApiDraftQuotesByIdFinalizeQueryKey = (options: OptionsLegacyParser<PostApiDraftQuotesByIdFinalizeData>) => [
+    createQueryKey('postApiDraftQuotesByIdFinalize', options)
 ];
 
-export const postApiDraftQuotesSearchOptions = (options?: OptionsLegacyParser<PostApiDraftQuotesSearchData>) => {
+export const postApiDraftQuotesByIdFinalizeOptions = (options: OptionsLegacyParser<PostApiDraftQuotesByIdFinalizeData>) => {
     return queryOptions({
         queryFn: async ({ queryKey, signal }) => {
-            const { data } = await postApiDraftQuotesSearch({
+            const { data } = await postApiDraftQuotesByIdFinalize({
                 ...options,
                 ...queryKey[0],
                 signal,
@@ -340,71 +383,14 @@ export const postApiDraftQuotesSearchOptions = (options?: OptionsLegacyParser<Po
             });
             return data;
         },
-        queryKey: postApiDraftQuotesSearchQueryKey(options)
+        queryKey: postApiDraftQuotesByIdFinalizeQueryKey(options)
     });
 };
 
-const createInfiniteParams = <K extends Pick<QueryKey<OptionsLegacyParser>[0], 'body' | 'headers' | 'path' | 'query'>>(queryKey: QueryKey<OptionsLegacyParser>, page: K) => {
-    const params = queryKey[0];
-    if (page.body) {
-        params.body = {
-            ...queryKey[0].body as any,
-            ...page.body as any
-        };
-    }
-    if (page.headers) {
-        params.headers = {
-            ...queryKey[0].headers,
-            ...page.headers
-        };
-    }
-    if (page.path) {
-        params.path = {
-            ...queryKey[0].path,
-            ...page.path
-        };
-    }
-    if (page.query) {
-        params.query = {
-            ...queryKey[0].query,
-            ...page.query
-        };
-    }
-    return params as unknown as typeof page;
-};
-
-export const postApiDraftQuotesSearchInfiniteQueryKey = (options?: OptionsLegacyParser<PostApiDraftQuotesSearchData>): QueryKey<OptionsLegacyParser<PostApiDraftQuotesSearchData>> => [
-    createQueryKey('postApiDraftQuotesSearch', options, true)
-];
-
-export const postApiDraftQuotesSearchInfiniteOptions = (options?: OptionsLegacyParser<PostApiDraftQuotesSearchData>) => {
-    return infiniteQueryOptions<PostApiDraftQuotesSearchResponse, AxiosError<PostApiDraftQuotesSearchError>, InfiniteData<PostApiDraftQuotesSearchResponse>, QueryKey<OptionsLegacyParser<PostApiDraftQuotesSearchData>>, number | Pick<QueryKey<OptionsLegacyParser<PostApiDraftQuotesSearchData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
-    // @ts-ignore
-    {
-        queryFn: async ({ pageParam, queryKey, signal }) => {
-            // @ts-ignore
-            const page: Pick<QueryKey<OptionsLegacyParser<PostApiDraftQuotesSearchData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
-                body: {
-                    page: pageParam
-                }
-            };
-            const params = createInfiniteParams(queryKey, page);
-            const { data } = await postApiDraftQuotesSearch({
-                ...options,
-                ...params,
-                signal,
-                throwOnError: true
-            });
-            return data;
-        },
-        queryKey: postApiDraftQuotesSearchInfiniteQueryKey(options)
-    });
-};
-
-export const postApiDraftQuotesSearchMutation = (options?: Partial<OptionsLegacyParser<PostApiDraftQuotesSearchData>>) => {
-    const mutationOptions: UseMutationOptions<PostApiDraftQuotesSearchResponse, AxiosError<PostApiDraftQuotesSearchError>, OptionsLegacyParser<PostApiDraftQuotesSearchData>> = {
+export const postApiDraftQuotesByIdFinalizeMutation = (options?: Partial<OptionsLegacyParser<PostApiDraftQuotesByIdFinalizeData>>) => {
+    const mutationOptions: UseMutationOptions<PostApiDraftQuotesByIdFinalizeResponse, AxiosError<PostApiDraftQuotesByIdFinalizeError>, OptionsLegacyParser<PostApiDraftQuotesByIdFinalizeData>> = {
         mutationFn: async (localOptions) => {
-            const { data } = await postApiDraftQuotesSearch({
+            const { data } = await postApiDraftQuotesByIdFinalize({
                 ...options,
                 ...localOptions,
                 throwOnError: true

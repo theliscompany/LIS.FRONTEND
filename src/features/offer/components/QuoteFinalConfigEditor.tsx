@@ -28,7 +28,7 @@ import {
   AttachMoney as MoneyIcon
 } from '@mui/icons-material';
 import { useSnackbar } from 'notistack';
-import { putApiQuoteOfferDraftById } from '../api';
+import { putApiDraftQuotesById } from '../api';
 
 interface QuoteFinalConfigEditorProps {
   quote: any;
@@ -158,7 +158,7 @@ const QuoteFinalConfigEditor: React.FC<QuoteFinalConfigEditorProps> = ({
       };
 
       // Appel API pour sauvegarder
-      await putApiQuoteOfferDraftById({
+      await putApiDraftQuotesById({
         path: { id: quote.id },
         body: updatedQuote
       });

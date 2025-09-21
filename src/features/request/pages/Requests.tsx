@@ -38,7 +38,7 @@ import { getApiRequestById } from '@features/request/api/sdk.gen';
 import { getApiAssignee } from '@features/request/api';
 import { putApiRequestUpdateById, getUserGroupUsersByUserId } from '@features/request/api/sdk.gen';
 import { safeGetUserDetails } from '@utils/userUtils';
-import { postApiQuoteSearch } from '@features/offer/api';
+import { getApiQuotes } from '@features/offer/api';
 // import debounce from 'lodash.debounce'; // REMOVED: Not used currently
 import TuneIcon from '@mui/icons-material/Tune';
 import CircularProgress from '@mui/material/CircularProgress';
@@ -267,10 +267,10 @@ const Requests = () => {
         setLoadingQuotes(prev => ({ ...prev, [requestId]: true }));
         
         try {
-            const response = await postApiQuoteSearch({
-                body: {
-                    query: requestId,
-                    pageNumber: 1,
+            const response = await getApiQuotes({
+                query: {
+                    requestQuoteId: requestId,
+                    page: 1,
                     pageSize: 100
                 }
             });

@@ -9,7 +9,7 @@ import {
   Alert
 } from '@mui/material';
 import { useQuery } from '@tanstack/react-query';
-import { getApiQuoteOfferDraftsOptions } from '@features/offer/api/@tanstack/react-query.gen';
+import { getApiDraftQuotesOptions } from '@features/offer/api/@tanstack/react-query.gen';
 
 interface Draft {
   id: string;
@@ -28,14 +28,14 @@ const DraftQuotesSimple: React.FC = () => {
 
   // Test 1: useQuery avec React Query Options - Sans paramètres
   const { data: data1, isLoading: loading1, error: error1 } = useQuery(
-    getApiQuoteOfferDraftsOptions()
+    getApiDraftQuotesOptions()
   );
 
   // Test 2: useQuery avec paramètres de pagination
   const { data: data2, isLoading: loading2, error: error2 } = useQuery(
-    getApiQuoteOfferDraftsOptions({
+    getApiDraftQuotesOptions({
       query: {
-        pageNumber: 1,
+        page: 1,
         pageSize: 100
       }
     })
@@ -43,10 +43,10 @@ const DraftQuotesSimple: React.FC = () => {
 
   // Test 3: useQuery avec emailUser spécifique
   const { data: data3, isLoading: loading3, error: error3 } = useQuery(
-    getApiQuoteOfferDraftsOptions({
+    getApiDraftQuotesOptions({
       query: {
-        emailUser: 'clement.dzou@omnifreight.eu',
-        pageNumber: 1,
+        customerName: 'clement.dzou@omnifreight.eu',
+        page: 1,
         pageSize: 100
       }
     })

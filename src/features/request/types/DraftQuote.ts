@@ -608,8 +608,98 @@ export function syncDraftQuoteData(draftQuote: DraftQuote): DraftQuote {
 }
 
 /**
+ * Génère un ID de requête unique
+ */
+function generateRequestId(): string {
+  return `REQ_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+}
+
+/**
+ * Construit le payload pour la création d'un nouveau brouillon (POST)
+ * Retourne CreateDraftQuoteRequest
+ */
+export function buildCreateDraftPayload(draftQuote: DraftQuote, accountUsername?: string): any {
+  const emailUser = accountUsername || draftQuote.emailUser || '';
+  
+  console.log('🔧 [BUILD_CREATE_PAYLOAD] Construction du payload POST:', {
+    draftQuoteId: draftQuote.id,
+    requestQuoteId: draftQuote.requestQuoteId,
+    emailUser
+  });
+  
+  // ✅ PAYLOAD POUR POST /api/draft-quotes
+  // Utiliser UNIQUEMENT le requestQuoteId de la requête existante
+  if (!draftQuote.requestQuoteId) {
+    throw new Error('RequestQuoteId manquant - impossible de créer un brouillon sans requête existante');
+  }
+  
+  const requestId = draftQuote.requestQuoteId;
+  
+  console.log('🔧 [BUILD_CREATE_PAYLOAD] RequestId utilisé:', {
+    requestQuoteId: draftQuote.requestQuoteId,
+    finalRequestId: requestId,
+    source: 'existing_request'
+  });
+  
+  const payload = {
+    requestId: requestId,
+    header: {
+      createdBy: emailUser,
+      createdAt: new Date().toISOString(),
+      lastUpdatedBy: emailUser,
+      lastUpdatedAt: new Date().toISOString()
+    },
+    wizardData: {
+      currentStep: calculateCurrentStep(draftQuote),
+      completedSteps: draftQuote.draftData?.wizard?.completedSteps || [],
+      status: 'draft',
+      lastModified: new Date().toISOString(),
+      version: '1.0'
+    }
+  };
+  
+  console.log('🔧 [BUILD_CREATE_PAYLOAD] Payload POST final:', JSON.stringify(payload, null, 2));
+  return payload;
+}
+
+/**
+ * Construit le payload pour la mise à jour d'un brouillon existant (PUT)
+ * Retourne UpdateDraftQuoteRequest
+ */
+export function buildUpdateDraftPayload(draftQuote: DraftQuote, accountUsername?: string): any {
+  const emailUser = accountUsername || draftQuote.emailUser || '';
+  
+  console.log('🔧 [BUILD_UPDATE_PAYLOAD] Construction du payload PUT:', {
+    draftQuoteId: draftQuote.id,
+    requestQuoteId: draftQuote.requestQuoteId,
+    emailUser
+  });
+  
+  // ✅ PAYLOAD POUR PUT /api/draft-quotes/{id}
+  const payload = {
+    header: {
+      lastUpdatedBy: emailUser,
+      lastUpdatedAt: new Date().toISOString()
+    },
+    wizardData: {
+      currentStep: calculateCurrentStep(draftQuote),
+      completedSteps: draftQuote.draftData?.wizard?.completedSteps || [],
+      status: 'draft',
+      lastModified: new Date().toISOString(),
+      version: '1.0'
+    },
+    options: draftQuote.savedOptions || [],
+    notes: draftQuote.step1?.comment || ''
+  };
+  
+  console.log('🔧 [BUILD_UPDATE_PAYLOAD] Payload PUT final:', JSON.stringify(payload, null, 2));
+  return payload;
+}
+
+/**
  * Construit le payload exact attendu par l'API pour la sauvegarde
  * Transforme DraftQuote en OptimizedCreateWizardDraftRequest ou OptimizedUpdateWizardDraftRequest
+ * @deprecated Utiliser buildCreateDraftPayload ou buildUpdateDraftPayload selon le contexte
  */
 export function buildSDKPayload(draftQuote: DraftQuote, accountUsername?: string): any {
   // Utiliser l'email de l'utilisateur fourni ou celui du draft
@@ -1021,20 +1111,22 @@ export function buildSDKPayload(draftQuote: DraftQuote, accountUsername?: string
  * Crée un brouillon initial avec des valeurs par défaut
  */
 export function createInitialDraftQuote(currentUserEmail?: string, existingRequestQuoteId?: string): DraftQuote {
-  // ✅ CORRIGÉ: Ne PAS générer d'ID local - laisser l'API générer un vrai MongoDB ObjectId
-  // existingRequestQuoteId est le requestQuoteId, PAS l'ID du draft
+  // ✅ VALIDATION OBLIGATOIRE du requestQuoteId
+  if (!existingRequestQuoteId) {
+    throw new Error('RequestQuoteId obligatoire - impossible de créer un brouillon sans requête existante');
+  }
   
   // Log pour debug
   console.log('🎯 [CREATE_INITIAL_DRAFT] Création du brouillon initial:', {
     currentUserEmail,
     existingRequestQuoteId,
-    requestQuoteId: existingRequestQuoteId || 'unknown'
+    requestQuoteId: existingRequestQuoteId
   });
   
   return {
     id: 'new', // ✅ ID temporaire - sera remplacé par l'API
     draftId: undefined, // ✅ Sera auto-généré par l'API lors de la création
-    requestQuoteId: existingRequestQuoteId || 'unknown', // ✅ ID de la requête originale
+    requestQuoteId: existingRequestQuoteId, // ✅ ID de la requête originale (obligatoire)
     clientNumber: 'DEFAULT',
     emailUser: currentUserEmail || '',
     step1: {
@@ -1168,6 +1260,11 @@ export function validateNavigationData(locationState: any): {
  * Transforme les données de requête en structure DraftQuote
  */
 export function createDraftQuoteFromRequest(requestData: any, currentUserEmail?: string): DraftQuote {
+  // ✅ VALIDATION OBLIGATOIRE du requestQuoteId
+  if (!requestData.requestQuoteId) {
+    throw new Error('RequestQuoteId manquant dans les données de requête - impossible de créer un brouillon');
+  }
+  
   console.log('🔄 [DRAFT_CREATION] Création du brouillon depuis la requête:', {
     requestId: requestData.requestQuoteId,
     companyName: requestData.companyName,

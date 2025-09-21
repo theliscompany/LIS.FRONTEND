@@ -7,7 +7,7 @@ import {
   getApiDraftQuotesById,              // Récupérer draft
   postApiDraftQuotes,                 // Créer draft
   putApiDraftQuotesById,              // Mettre à jour draft
-  postApiQuotesFinalizeByDraftId      // Finaliser en devis
+  postApiDraftQuotesByIdFinalize      // Finaliser en devis
 } from '../../offer/api';
 import type { DraftQuote } from '../types/DraftQuote';
 
@@ -293,9 +293,9 @@ export const useRealDraftOptionsManagerMigrated = ({
         throw new Error('DraftQuote avec ID requis pour créer un devis');
       }
 
-      console.log('[MIGRATION] Création devis avec postApiQuotesFinalizeByDraftId:', data);
+      console.log('[MIGRATION] Création devis avec postApiDraftQuotesByIdFinalize:', data);
       
-      return await postApiQuotesFinalizeByDraftId({
+      return await postApiDraftQuotesByIdFinalize({
         path: { draftId: draftQuote.id },
         body: {
           options: options.map((option, index) => ({

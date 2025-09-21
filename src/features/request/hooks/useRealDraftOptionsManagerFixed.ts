@@ -3,9 +3,9 @@ import { useSnackbar } from 'notistack';
 import { useMutation } from '@tanstack/react-query';
 // Import des fonctions SDK qui existent vraiment
 import {
-  postApiQuoteFromDraft,
-  postApiQuoteOfferDraftByIdSaveAsOption,
-  getApiQuoteOfferDraftByIdWithOptions
+  postApiDraftQuotesByIdFinalize,
+  postApiDraftQuotesByIdOptions,
+  getApiDraftQuotesById
 } from '../../offer/api';
 import type { DraftQuote } from '../types/DraftQuote';
 
@@ -190,7 +190,7 @@ export const useRealDraftOptionsManagerFixed = ({
     
     try {
       console.log('[DEBUG] Chargement des options depuis WithOptions endpoint');
-      const response = await getApiQuoteOfferDraftByIdWithOptions({
+      const response = await getApiDraftQuotesById({
         path: { id: draftQuote.id }
       });
       
@@ -213,14 +213,16 @@ export const useRealDraftOptionsManagerFixed = ({
       console.log('[DEBUG] Création option avec endpoint SaveAsOption:', data);
       
       // Utiliser le nouvel endpoint dédié
-      const result = await postApiQuoteOfferDraftByIdSaveAsOption({
+      const result = await postApiDraftQuotesByIdOptions({
         path: { id: draftQuote.id },
         body: {
-          name: data.name || `Option ${options.length + 1}`,
-          description: data.description || 'Option créée depuis le wizard',
-          marginType: data.marginType || 'percentage',
-          marginValue: data.marginValue || 15,
-          setAsPreferred: false
+          option: {
+            label: data.name || `Option ${options.length + 1}`,
+            // description: data.description || 'Option créée depuis le wizard',
+            // marginType: data.marginType || 'percentage',
+            // marginValue: data.marginValue || 15,
+            // setAsPreferred: false
+          }
         }
       });
       
@@ -272,7 +274,7 @@ export const useRealDraftOptionsManagerFixed = ({
   });
 
   const createQuoteFromDraftMutation = useMutation({
-    mutationFn: (data: any) => postApiQuoteFromDraft(data),
+    mutationFn: (data: any) => postApiDraftQuotesByIdFinalize(data),
     onSuccess: () => {
       enqueueSnackbar('Devis créé avec succès', { variant: 'success' });
     },

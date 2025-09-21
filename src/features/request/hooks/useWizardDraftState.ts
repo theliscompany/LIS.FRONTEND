@@ -55,7 +55,10 @@ export const useWizardDraftState = (
     try {
       setIsLoading(true);
       
-      if (draftId) {
+      // ✅ CORRECTION : Vérifier si draftId est valide (non null, non undefined, non "new", non string vide)
+      const hasValidDraftId = draftId && draftId.trim() !== '' && draftId !== 'new';
+      
+      if (hasValidDraftId) {
         // Mise à jour d'un brouillon existant
         const updateRequest = transformDraftQuoteToUpdateRequest(
           draftQuote, 
@@ -99,7 +102,10 @@ export const useWizardDraftState = (
     try {
       setIsLoading(true);
       
-      if (draftId) {
+      // ✅ CORRECTION : Vérifier si draftId est valide (non null, non undefined, non "new", non string vide)
+      const hasValidDraftId = draftId && draftId.trim() !== '' && draftId !== 'new';
+      
+      if (hasValidDraftId) {
         const updateRequest = transformDraftQuoteToUpdateRequest(
           draftQuote, 
           currentUserEmail, 

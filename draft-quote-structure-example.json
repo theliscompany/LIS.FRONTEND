@@ -1,0 +1,1202 @@
+{
+  "id": "draft_123456",
+  "draftId": "507f1f77bcf86cd799439011",
+  "requestQuoteId": "req_789012",
+  "clientNumber": "CLIENT_001",
+  "emailUser": "user@example.com",
+  
+  "step1": {
+    "customer": {
+      "contactId": 1001,
+      "contactName": "John Doe",
+      "companyName": "ACME Corporation",
+      "email": "john.doe@acme.com"
+    },
+    "route": {
+      "origin": {
+        "city": {
+          "name": "Antwerp",
+          "country": "Belgium"
+        },
+        "port": {
+          "portId": 1,
+          "portName": "Port of Antwerp",
+          "country": "Belgium",
+          "unlocode": "BEANR"
+        }
+      },
+      "destination": {
+        "city": {
+          "name": "Shanghai",
+          "country": "China"
+        },
+        "port": {
+          "portId": 2,
+          "portName": "Port of Shanghai",
+          "country": "China",
+          "unlocode": "CNSHA"
+        }
+      }
+    },
+    "cargo": {
+      "product": {
+        "productId": 1,
+        "productName": "Electronics"
+      },
+      "incoterm": "FOB"
+    },
+    "metadata": {
+      "comment": "Urgent shipment for Q4 delivery"
+    },
+    "status": "IN_PROGRESS",
+    "assignee": "user123",
+    "cityFrom": {
+      "name": "Antwerp",
+      "country": "Belgium"
+    },
+    "cityTo": {
+      "name": "Shanghai",
+      "country": "China"
+    },
+    "productName": {
+      "productId": 1,
+      "productName": "Electronics"
+    },
+    "incotermName": "FOB",
+    "portFrom": {
+      "portId": 1,
+      "portName": "Port of Antwerp",
+      "country": "Belgium",
+      "unlocode": "BEANR"
+    },
+    "portTo": {
+      "portId": 2,
+      "portName": "Port of Shanghai",
+      "country": "China",
+      "unlocode": "CNSHA"
+    },
+    "comment": "Urgent shipment for Q4 delivery"
+  },
+  
+  "step2": {
+    "selectedServices": [
+      {
+        "serviceId": 1,
+        "serviceName": "Customs Clearance",
+        "category": "Documentation",
+        "usagePercent": 100
+      },
+      {
+        "serviceId": 2,
+        "serviceName": "Insurance",
+        "category": "Protection",
+        "usagePercent": 100
+      }
+    ],
+    "selected": [
+      {
+        "serviceId": 1,
+        "serviceName": "Customs Clearance",
+        "category": "Documentation",
+        "usagePercent": 100
+      },
+      {
+        "serviceId": 2,
+        "serviceName": "Insurance",
+        "category": "Protection",
+        "usagePercent": 100
+      }
+    ]
+  },
+  
+  "step3": {
+    "containers": [
+      {
+        "id": "container_1",
+        "type": "40HC",
+        "quantity": 2,
+        "teu": 2
+      },
+      {
+        "id": "container_2",
+        "type": "20GP",
+        "quantity": 1,
+        "teu": 1
+      }
+    ],
+    "summary": {
+      "totalContainers": 3,
+      "totalTEU": 3,
+      "containerTypes": ["40HC", "20GP"]
+    },
+    "route": {
+      "origin": {
+        "city": {
+          "name": "Antwerp",
+          "country": "Belgium"
+        },
+        "port": {
+          "portId": 1,
+          "portName": "Port of Antwerp",
+          "country": "Belgium",
+          "unlocode": "BEANR"
+        }
+      },
+      "destination": {
+        "city": {
+          "name": "Shanghai",
+          "country": "China"
+        },
+        "port": {
+          "portId": 2,
+          "portName": "Port of Shanghai",
+          "country": "China",
+          "unlocode": "CNSHA"
+        }
+      }
+    },
+    "selectedContainers": {
+      "list": [
+        {
+          "id": "container_1",
+          "type": "40HC",
+          "quantity": 2,
+          "teu": 2
+        },
+        {
+          "id": "container_2",
+          "type": "20GP",
+          "quantity": 1,
+          "teu": 1
+        }
+      ]
+    }
+  },
+  
+  "step4": {
+    "selection": {
+      "offerId": "haulage_offer_001",
+      "haulierId": 2001,
+      "haulierName": "Fast Logistics BV",
+      "tariff": {
+        "unitPrice": 450.00,
+        "currency": "EUR",
+        "freeTime": 24
+      },
+      "route": {
+        "pickup": {
+          "company": "ACME Corporation",
+          "city": "Antwerp",
+          "country": "Belgium"
+        },
+        "delivery": {
+          "portId": 1,
+          "portName": "Port of Antwerp",
+          "country": "Belgium"
+        }
+      },
+      "validity": {
+        "validUntil": "2024-12-31T23:59:59Z"
+      },
+      "overtimeQuantity": 2,
+      "overtimePrice": 50.00
+    },
+    "calculation": {
+      "quantity": 3,
+      "unitPrice": 450.00,
+      "subtotal": 1350.00,
+      "overtimeAmount": 100.00,
+      "totalAmount": 1450.00,
+      "currency": "EUR"
+    }
+  },
+  
+  "step5": {
+    "selections": [
+      {
+        "id": "seafreight_001",
+        "seafreightId": "sf_001",
+        "quoteNumber": "SF-2024-001",
+        "carrier": {
+          "carrierId": 3001,
+          "carrierName": "MSC",
+          "agentName": "MSC Belgium"
+        },
+        "route": {
+          "departurePort": {
+            "portId": 1,
+            "portName": "Port of Antwerp",
+            "country": "Belgium",
+            "unlocode": "BEANR"
+          },
+          "destinationPort": {
+            "portId": 2,
+            "portName": "Port of Shanghai",
+            "country": "China",
+            "unlocode": "CNSHA"
+          },
+          "transitDays": 28,
+          "frequency": "Weekly",
+          "incoterm": "FOB"
+        },
+        "container": {
+          "containerType": "40HC",
+          "isReefer": false,
+          "quantity": 2,
+          "volumeM3": 67.7,
+          "weightKg": 26500,
+          "unitPrice": 1200.00,
+          "subtotal": 2400.00
+        },
+        "charges": {
+          "basePrice": 1200.00,
+          "currency": "USD",
+          "surcharges": [
+            {
+              "name": "Bunker Adjustment Factor",
+              "value": 150.00,
+              "type": "BAF",
+              "description": "Fuel surcharge",
+              "isMandatory": true,
+              "currency": "USD"
+            },
+            {
+              "name": "Currency Adjustment Factor",
+              "value": 50.00,
+              "type": "CAF",
+              "description": "Currency fluctuation",
+              "isMandatory": true,
+              "currency": "USD"
+            }
+          ],
+          "totalPrice": 1400.00
+        },
+        "service": {
+          "deliveryTerms": "Door to Door",
+          "createdBy": "user123",
+          "createdDate": "2024-01-15T10:30:00Z"
+        },
+        "validity": {
+          "startDate": "2024-01-15T00:00:00Z",
+          "endDate": "2024-02-15T23:59:59Z",
+          "isExpired": false,
+          "daysRemaining": 15
+        },
+        "remarks": "Priority booking confirmed",
+        "isSelected": true,
+        "selectedAt": "2024-01-15T10:30:00Z",
+        "totalContainerPrice": 2400.00,
+        "totalChargesPrice": 400.00,
+        "grandTotal": 2800.00,
+        "isValidSelection": true
+      }
+    ],
+    "summary": {
+      "totalSelections": 1,
+      "totalContainers": 2,
+      "totalAmount": 2800.00,
+      "currency": "USD",
+      "selectedCarriers": ["MSC"],
+      "containerTypes": ["40HC"],
+      "preferredSelectionId": "seafreight_001"
+    }
+  },
+  
+  "step6": {
+    "selections": [
+      {
+        "id": "misc_001",
+        "name": "Customs Documentation",
+        "provider": "Customs Pro BV",
+        "pricing": {
+          "unitPrice": 150.00,
+          "totalPrice": 150.00,
+          "unit": "per_shipment",
+          "taxable": true,
+          "taxRate": 21
+        }
+      },
+      {
+        "id": "misc_002",
+        "name": "Cargo Insurance",
+        "provider": "Marine Insurance Ltd",
+        "pricing": {
+          "unitPrice": 200.00,
+          "totalPrice": 200.00,
+          "unit": "per_shipment",
+          "taxable": false
+        }
+      }
+    ],
+    "summary": {
+      "totalSelections": 2,
+      "totalAmount": 350.00,
+      "currency": "EUR",
+      "categories": ["Documentation", "Insurance"]
+    }
+  },
+  
+  "step7": {
+    "finalization": {
+      "optionName": "Standard Option",
+      "optionDescription": "Standard shipping option with basic services",
+      "marginPercentage": 15.0,
+      "marginAmount": 675.00,
+      "marginType": "percentage",
+      "isReadyToGenerate": true,
+      "generatedAt": "2024-01-15T14:30:00Z"
+    },
+    "validation": {
+      "allStepsValid": true,
+      "errors": [],
+      "warnings": [
+        "Consider adding cargo insurance for high-value goods"
+      ]
+    },
+    "pricingSummary": {
+      "baseTotal": 4500.00,
+      "marginAmount": 675.00,
+      "finalTotal": 5175.00,
+      "currency": "EUR",
+      "breakdown": {
+        "haulageAmount": 1450.00,
+        "seafreightAmount": 2800.00,
+        "miscellaneousAmount": 350.00,
+        "totalBeforeMargin": 4500.00,
+        "components": [
+          {
+            "type": "haulage",
+            "amount": 1450.00,
+            "currency": "EUR"
+          },
+          {
+            "type": "seafreight",
+            "amount": 2800.00,
+            "currency": "USD"
+          },
+          {
+            "type": "miscellaneous",
+            "amount": 350.00,
+            "currency": "EUR"
+          }
+        ]
+      }
+    }
+  },
+  
+  "totals": {
+    "haulage": 1450.00,
+    "seafreight": 2800.00,
+    "miscellaneous": 350.00,
+    "subtotal": 4500.00,
+    "grandTotal": 5175.00,
+    "currency": "EUR",
+    "totalTEU": 3
+  },
+  
+  "savedOptions": [
+    {
+      "optionId": "option_001",
+      "name": "Standard Option",
+      "description": "Standard shipping option with basic services",
+      "haulageSelectionId": "haulage_offer_001",
+      "seafreightSelectionIds": ["seafreight_001"],
+      "miscSelectionIds": ["misc_001", "misc_002"],
+      "step4Data": {
+        "selection": {
+          "offerId": "haulage_offer_001",
+          "haulierId": 2001,
+          "haulierName": "Fast Logistics BV",
+          "tariff": {
+            "unitPrice": 450.00,
+            "currency": "EUR",
+            "freeTime": 24
+          },
+          "route": {
+            "pickup": {
+              "company": "ACME Corporation",
+              "city": "Antwerp",
+              "country": "Belgium"
+            },
+            "delivery": {
+              "portId": 1,
+              "portName": "Port of Antwerp",
+              "country": "Belgium"
+            }
+          },
+          "validity": {
+            "validUntil": "2024-12-31T23:59:59Z"
+          },
+          "overtimeQuantity": 2,
+          "overtimePrice": 50.00
+        },
+        "calculation": {
+          "quantity": 3,
+          "unitPrice": 450.00,
+          "subtotal": 1350.00,
+          "overtimeAmount": 100.00,
+          "totalAmount": 1450.00,
+          "currency": "EUR"
+        }
+      },
+      "step5Data": {
+        "selections": [
+          {
+            "id": "seafreight_001",
+            "seafreightId": "sf_001",
+            "quoteNumber": "SF-2024-001",
+            "carrier": {
+              "carrierId": 3001,
+              "carrierName": "MSC",
+              "agentName": "MSC Belgium"
+            },
+            "route": {
+              "departurePort": {
+                "portId": 1,
+                "portName": "Port of Antwerp",
+                "country": "Belgium",
+                "unlocode": "BEANR"
+              },
+              "destinationPort": {
+                "portId": 2,
+                "portName": "Port of Shanghai",
+                "country": "China",
+                "unlocode": "CNSHA"
+              },
+              "transitDays": 28,
+              "frequency": "Weekly",
+              "incoterm": "FOB"
+            },
+            "container": {
+              "containerType": "40HC",
+              "isReefer": false,
+              "quantity": 2,
+              "volumeM3": 67.7,
+              "weightKg": 26500,
+              "unitPrice": 1200.00,
+              "subtotal": 2400.00
+            },
+            "charges": {
+              "basePrice": 1200.00,
+              "currency": "USD",
+              "surcharges": [
+                {
+                  "name": "Bunker Adjustment Factor",
+                  "value": 150.00,
+                  "type": "BAF",
+                  "description": "Fuel surcharge",
+                  "isMandatory": true,
+                  "currency": "USD"
+                },
+                {
+                  "name": "Currency Adjustment Factor",
+                  "value": 50.00,
+                  "type": "CAF",
+                  "description": "Currency fluctuation",
+                  "isMandatory": true,
+                  "currency": "USD"
+                }
+              ],
+              "totalPrice": 1400.00
+            },
+            "service": {
+              "deliveryTerms": "Door to Door",
+              "createdBy": "user123",
+              "createdDate": "2024-01-15T10:30:00Z"
+            },
+            "validity": {
+              "startDate": "2024-01-15T00:00:00Z",
+              "endDate": "2024-02-15T23:59:59Z",
+              "isExpired": false,
+              "daysRemaining": 15
+            },
+            "remarks": "Priority booking confirmed",
+            "isSelected": true,
+            "selectedAt": "2024-01-15T10:30:00Z",
+            "totalContainerPrice": 2400.00,
+            "totalChargesPrice": 400.00,
+            "grandTotal": 2800.00,
+            "isValidSelection": true
+          }
+        ],
+        "summary": {
+          "totalSelections": 1,
+          "totalContainers": 2,
+          "totalAmount": 2800.00,
+          "currency": "USD",
+          "selectedCarriers": ["MSC"],
+          "containerTypes": ["40HC"],
+          "preferredSelectionId": "seafreight_001"
+        }
+      },
+      "step6Data": {
+        "selections": [
+          {
+            "id": "misc_001",
+            "name": "Customs Documentation",
+            "provider": "Customs Pro BV",
+            "pricing": {
+              "unitPrice": 150.00,
+              "totalPrice": 150.00,
+              "unit": "per_shipment",
+              "taxable": true,
+              "taxRate": 21
+            }
+          },
+          {
+            "id": "misc_002",
+            "name": "Cargo Insurance",
+            "provider": "Marine Insurance Ltd",
+            "pricing": {
+              "unitPrice": 200.00,
+              "totalPrice": 200.00,
+              "unit": "per_shipment",
+              "taxable": false
+            }
+          }
+        ],
+        "summary": {
+          "totalSelections": 2,
+          "totalAmount": 350.00,
+          "currency": "EUR",
+          "categories": ["Documentation", "Insurance"]
+        }
+      },
+      "step7Data": {
+        "finalization": {
+          "optionName": "Standard Option",
+          "optionDescription": "Standard shipping option with basic services",
+          "marginPercentage": 15.0,
+          "marginAmount": 675.00,
+          "marginType": "percentage",
+          "isReadyToGenerate": true,
+          "generatedAt": "2024-01-15T14:30:00Z"
+        },
+        "validation": {
+          "allStepsValid": true,
+          "errors": [],
+          "warnings": [
+            "Consider adding cargo insurance for high-value goods"
+          ]
+        },
+        "pricingSummary": {
+          "baseTotal": 4500.00,
+          "marginAmount": 675.00,
+          "finalTotal": 5175.00,
+          "currency": "EUR",
+          "breakdown": {
+            "haulageAmount": 1450.00,
+            "seafreightAmount": 2800.00,
+            "miscellaneousAmount": 350.00,
+            "totalBeforeMargin": 4500.00,
+            "components": [
+              {
+                "type": "haulage",
+                "amount": 1450.00,
+                "currency": "EUR"
+              },
+              {
+                "type": "seafreight",
+                "amount": 2800.00,
+                "currency": "USD"
+              },
+              {
+                "type": "miscellaneous",
+                "amount": 350.00,
+                "currency": "EUR"
+              }
+            ]
+          }
+        }
+      },
+      "marginType": "percentage",
+      "marginValue": 15.0,
+      "totals": {
+        "haulageTotalAmount": 1450.00,
+        "seafreightBaseAmount": 2400.00,
+        "seafreightSurchargesAmount": 400.00,
+        "seafreightTotalAmount": 2800.00,
+        "miscTotalAmount": 350.00,
+        "subTotal": 4500.00,
+        "marginAmount": 675.00,
+        "finalTotal": 5175.00,
+        "currency": "EUR",
+        "calculatedAt": "2024-01-15T14:30:00Z"
+      },
+      "createdAt": "2024-01-15T14:30:00Z",
+      "updatedAt": "2024-01-15T14:30:00Z",
+      "createdBy": "user123",
+      "calculatedMargin": 675.00,
+      "finalTotal": 5175.00
+    }
+  ],
+  
+  "currentWorkingOptionId": "option_001",
+  "preferredOptionId": "option_001",
+  "maxOptionsAllowed": 5,
+  
+  "selectedHaulage": {
+    "offerId": "haulage_offer_001",
+    "haulierId": 2001,
+    "haulierName": "Fast Logistics BV",
+    "tariff": {
+      "unitPrice": 450.00,
+      "currency": "EUR",
+      "freeTime": 24
+    },
+    "route": {
+      "pickup": {
+        "company": "ACME Corporation",
+        "city": "Antwerp",
+        "country": "Belgium"
+      },
+      "delivery": {
+        "portId": 1,
+        "portName": "Port of Antwerp",
+        "country": "Belgium"
+      }
+    },
+    "validity": {
+      "validUntil": "2024-12-31T23:59:59Z"
+    },
+    "overtimeQuantity": 2,
+    "overtimePrice": 50.00
+  },
+  
+  "selectedSeafreights": [
+    {
+      "id": "seafreight_001",
+      "seafreightId": "sf_001",
+      "quoteNumber": "SF-2024-001",
+      "carrier": {
+        "carrierId": 3001,
+        "carrierName": "MSC",
+        "agentName": "MSC Belgium"
+      },
+      "route": {
+        "departurePort": {
+          "portId": 1,
+          "portName": "Port of Antwerp",
+          "country": "Belgium",
+          "unlocode": "BEANR"
+        },
+        "destinationPort": {
+          "portId": 2,
+          "portName": "Port of Shanghai",
+          "country": "China",
+          "unlocode": "CNSHA"
+        },
+        "transitDays": 28,
+        "frequency": "Weekly",
+        "incoterm": "FOB"
+      },
+      "container": {
+        "containerType": "40HC",
+        "isReefer": false,
+        "quantity": 2,
+        "volumeM3": 67.7,
+        "weightKg": 26500,
+        "unitPrice": 1200.00,
+        "subtotal": 2400.00
+      },
+      "charges": {
+        "basePrice": 1200.00,
+        "currency": "USD",
+        "surcharges": [
+          {
+            "name": "Bunker Adjustment Factor",
+            "value": 150.00,
+            "type": "BAF",
+            "description": "Fuel surcharge",
+            "isMandatory": true,
+            "currency": "USD"
+          },
+          {
+            "name": "Currency Adjustment Factor",
+            "value": 50.00,
+            "type": "CAF",
+            "description": "Currency fluctuation",
+            "isMandatory": true,
+            "currency": "USD"
+          }
+        ],
+        "totalPrice": 1400.00
+      },
+      "service": {
+        "deliveryTerms": "Door to Door",
+        "createdBy": "user123",
+        "createdDate": "2024-01-15T10:30:00Z"
+      },
+      "validity": {
+        "startDate": "2024-01-15T00:00:00Z",
+        "endDate": "2024-02-15T23:59:59Z",
+        "isExpired": false,
+        "daysRemaining": 15
+      },
+      "remarks": "Priority booking confirmed",
+      "isSelected": true,
+      "selectedAt": "2024-01-15T10:30:00Z",
+      "totalContainerPrice": 2400.00,
+      "totalChargesPrice": 400.00,
+      "grandTotal": 2800.00,
+      "isValidSelection": true
+    }
+  ],
+  
+  "selectedMiscellaneous": [
+    {
+      "id": "misc_001",
+      "name": "Customs Documentation",
+      "provider": "Customs Pro BV",
+      "pricing": {
+        "unitPrice": 150.00,
+        "totalPrice": 150.00,
+        "unit": "per_shipment",
+        "taxable": true,
+        "taxRate": 21
+      }
+    },
+    {
+      "id": "misc_002",
+      "name": "Cargo Insurance",
+      "provider": "Marine Insurance Ltd",
+      "pricing": {
+        "unitPrice": 200.00,
+        "totalPrice": 200.00,
+        "unit": "per_shipment",
+        "taxable": false
+      }
+    }
+  ],
+  
+  "selectedContainers": {
+    "container_1": {
+      "id": "container_1",
+      "type": "40HC",
+      "quantity": 2,
+      "teu": 2
+    },
+    "container_2": {
+      "id": "container_2",
+      "type": "20GP",
+      "quantity": 1,
+      "teu": 1
+    }
+  },
+  
+  "marginType": "percentage",
+  "marginValue": 15.0,
+  "totalPrice": 5175.00,
+  "seafreightTotal": 2800.00,
+  "haulageTotal": 1450.00,
+  "miscTotal": 350.00,
+  "totalTEU": 3,
+  
+  "seafreightQuantities": {
+    "40HC": 2,
+    "20GP": 1
+  },
+  
+  "miscQuantities": {
+    "misc_001": 1,
+    "misc_002": 1
+  },
+  
+  "surchargeQuantities": {
+    "BAF": 2,
+    "CAF": 2
+  },
+  
+  "draftData": {
+    "wizard": {
+      "currentStep": 7,
+      "completedSteps": [1, 2, 3, 4, 5, 6, 7],
+      "status": "completed",
+      "lastModified": "2024-01-15T14:30:00Z",
+      "version": "1.0.0"
+    },
+    "steps": {
+      "step1": {
+        "customer": {
+          "contactId": 1001,
+          "contactName": "John Doe",
+          "companyName": "ACME Corporation",
+          "email": "john.doe@acme.com"
+        },
+        "route": {
+          "origin": {
+            "city": {
+              "name": "Antwerp",
+              "country": "Belgium"
+            },
+            "port": {
+              "portId": 1,
+              "portName": "Port of Antwerp",
+              "country": "Belgium",
+              "unlocode": "BEANR"
+            }
+          },
+          "destination": {
+            "city": {
+              "name": "Shanghai",
+              "country": "China"
+            },
+            "port": {
+              "portId": 2,
+              "portName": "Port of Shanghai",
+              "country": "China",
+              "unlocode": "CNSHA"
+            }
+          }
+        },
+        "cargo": {
+          "product": {
+            "productId": 1,
+            "productName": "Electronics"
+          },
+          "incoterm": "FOB"
+        },
+        "metadata": {
+          "comment": "Urgent shipment for Q4 delivery"
+        },
+        "status": "IN_PROGRESS",
+        "assignee": "user123",
+        "cityFrom": {
+          "name": "Antwerp",
+          "country": "Belgium"
+        },
+        "cityTo": {
+          "name": "Shanghai",
+          "country": "China"
+        },
+        "productName": {
+          "productId": 1,
+          "productName": "Electronics"
+        },
+        "incotermName": "FOB",
+        "portFrom": {
+          "portId": 1,
+          "portName": "Port of Antwerp",
+          "country": "Belgium",
+          "unlocode": "BEANR"
+        },
+        "portTo": {
+          "portId": 2,
+          "portName": "Port of Shanghai",
+          "country": "China",
+          "unlocode": "CNSHA"
+        },
+        "comment": "Urgent shipment for Q4 delivery"
+      },
+      "step2": {
+        "selectedServices": [
+          {
+            "serviceId": 1,
+            "serviceName": "Customs Clearance",
+            "category": "Documentation",
+            "usagePercent": 100
+          },
+          {
+            "serviceId": 2,
+            "serviceName": "Insurance",
+            "category": "Protection",
+            "usagePercent": 100
+          }
+        ],
+        "selected": [
+          {
+            "serviceId": 1,
+            "serviceName": "Customs Clearance",
+            "category": "Documentation",
+            "usagePercent": 100
+          },
+          {
+            "serviceId": 2,
+            "serviceName": "Insurance",
+            "category": "Protection",
+            "usagePercent": 100
+          }
+        ]
+      },
+      "step3": {
+        "containers": [
+          {
+            "id": "container_1",
+            "type": "40HC",
+            "quantity": 2,
+            "teu": 2
+          },
+          {
+            "id": "container_2",
+            "type": "20GP",
+            "quantity": 1,
+            "teu": 1
+          }
+        ],
+        "summary": {
+          "totalContainers": 3,
+          "totalTEU": 3,
+          "containerTypes": ["40HC", "20GP"]
+        },
+        "route": {
+          "origin": {
+            "city": {
+              "name": "Antwerp",
+              "country": "Belgium"
+            },
+            "port": {
+              "portId": 1,
+              "portName": "Port of Antwerp",
+              "country": "Belgium",
+              "unlocode": "BEANR"
+            }
+          },
+          "destination": {
+            "city": {
+              "name": "Shanghai",
+              "country": "China"
+            },
+            "port": {
+              "portId": 2,
+              "portName": "Port of Shanghai",
+              "country": "China",
+              "unlocode": "CNSHA"
+            }
+          }
+        },
+        "selectedContainers": {
+          "list": [
+            {
+              "id": "container_1",
+              "type": "40HC",
+              "quantity": 2,
+              "teu": 2
+            },
+            {
+              "id": "container_2",
+              "type": "20GP",
+              "quantity": 1,
+              "teu": 1
+            }
+          ]
+        }
+      },
+      "step4": {
+        "selection": {
+          "offerId": "haulage_offer_001",
+          "haulierId": 2001,
+          "haulierName": "Fast Logistics BV",
+          "tariff": {
+            "unitPrice": 450.00,
+            "currency": "EUR",
+            "freeTime": 24
+          },
+          "route": {
+            "pickup": {
+              "company": "ACME Corporation",
+              "city": "Antwerp",
+              "country": "Belgium"
+            },
+            "delivery": {
+              "portId": 1,
+              "portName": "Port of Antwerp",
+              "country": "Belgium"
+            }
+          },
+          "validity": {
+            "validUntil": "2024-12-31T23:59:59Z"
+          },
+          "overtimeQuantity": 2,
+          "overtimePrice": 50.00
+        },
+        "calculation": {
+          "quantity": 3,
+          "unitPrice": 450.00,
+          "subtotal": 1350.00,
+          "overtimeAmount": 100.00,
+          "totalAmount": 1450.00,
+          "currency": "EUR"
+        }
+      },
+      "step5": {
+        "selections": [
+          {
+            "id": "seafreight_001",
+            "seafreightId": "sf_001",
+            "quoteNumber": "SF-2024-001",
+            "carrier": {
+              "carrierId": 3001,
+              "carrierName": "MSC",
+              "agentName": "MSC Belgium"
+            },
+            "route": {
+              "departurePort": {
+                "portId": 1,
+                "portName": "Port of Antwerp",
+                "country": "Belgium",
+                "unlocode": "BEANR"
+              },
+              "destinationPort": {
+                "portId": 2,
+                "portName": "Port of Shanghai",
+                "country": "China",
+                "unlocode": "CNSHA"
+              },
+              "transitDays": 28,
+              "frequency": "Weekly",
+              "incoterm": "FOB"
+            },
+            "container": {
+              "containerType": "40HC",
+              "isReefer": false,
+              "quantity": 2,
+              "volumeM3": 67.7,
+              "weightKg": 26500,
+              "unitPrice": 1200.00,
+              "subtotal": 2400.00
+            },
+            "charges": {
+              "basePrice": 1200.00,
+              "currency": "USD",
+              "surcharges": [
+                {
+                  "name": "Bunker Adjustment Factor",
+                  "value": 150.00,
+                  "type": "BAF",
+                  "description": "Fuel surcharge",
+                  "isMandatory": true,
+                  "currency": "USD"
+                },
+                {
+                  "name": "Currency Adjustment Factor",
+                  "value": 50.00,
+                  "type": "CAF",
+                  "description": "Currency fluctuation",
+                  "isMandatory": true,
+                  "currency": "USD"
+                }
+              ],
+              "totalPrice": 1400.00
+            },
+            "service": {
+              "deliveryTerms": "Door to Door",
+              "createdBy": "user123",
+              "createdDate": "2024-01-15T10:30:00Z"
+            },
+            "validity": {
+              "startDate": "2024-01-15T00:00:00Z",
+              "endDate": "2024-02-15T23:59:59Z",
+              "isExpired": false,
+              "daysRemaining": 15
+            },
+            "remarks": "Priority booking confirmed",
+            "isSelected": true,
+            "selectedAt": "2024-01-15T10:30:00Z",
+            "totalContainerPrice": 2400.00,
+            "totalChargesPrice": 400.00,
+            "grandTotal": 2800.00,
+            "isValidSelection": true
+          }
+        ],
+        "summary": {
+          "totalSelections": 1,
+          "totalContainers": 2,
+          "totalAmount": 2800.00,
+          "currency": "USD",
+          "selectedCarriers": ["MSC"],
+          "containerTypes": ["40HC"],
+          "preferredSelectionId": "seafreight_001"
+        }
+      },
+      "step6": {
+        "selections": [
+          {
+            "id": "misc_001",
+            "name": "Customs Documentation",
+            "provider": "Customs Pro BV",
+            "pricing": {
+              "unitPrice": 150.00,
+              "totalPrice": 150.00,
+              "unit": "per_shipment",
+              "taxable": true,
+              "taxRate": 21
+            }
+          },
+          {
+            "id": "misc_002",
+            "name": "Cargo Insurance",
+            "provider": "Marine Insurance Ltd",
+            "pricing": {
+              "unitPrice": 200.00,
+              "totalPrice": 200.00,
+              "unit": "per_shipment",
+              "taxable": false
+            }
+          }
+        ],
+        "summary": {
+          "totalSelections": 2,
+          "totalAmount": 350.00,
+          "currency": "EUR",
+          "categories": ["Documentation", "Insurance"]
+        }
+      },
+      "step7": {
+        "finalization": {
+          "optionName": "Standard Option",
+          "optionDescription": "Standard shipping option with basic services",
+          "marginPercentage": 15.0,
+          "marginAmount": 675.00,
+          "marginType": "percentage",
+          "isReadyToGenerate": true,
+          "generatedAt": "2024-01-15T14:30:00Z"
+        },
+        "validation": {
+          "allStepsValid": true,
+          "errors": [],
+          "warnings": [
+            "Consider adding cargo insurance for high-value goods"
+          ]
+        },
+        "pricingSummary": {
+          "baseTotal": 4500.00,
+          "marginAmount": 675.00,
+          "finalTotal": 5175.00,
+          "currency": "EUR",
+          "breakdown": {
+            "haulageAmount": 1450.00,
+            "seafreightAmount": 2800.00,
+            "miscellaneousAmount": 350.00,
+            "totalBeforeMargin": 4500.00,
+            "components": [
+              {
+                "type": "haulage",
+                "amount": 1450.00,
+                "currency": "EUR"
+              },
+              {
+                "type": "seafreight",
+                "amount": 2800.00,
+                "currency": "USD"
+              },
+              {
+                "type": "miscellaneous",
+                "amount": 350.00,
+                "currency": "EUR"
+              }
+            ]
+          }
+        }
+      }
+    },
+    "totals": {
+      "haulage": 1450.00,
+      "seafreight": 2800.00,
+      "miscellaneous": 350.00,
+      "subtotal": 4500.00,
+      "grandTotal": 5175.00,
+      "currency": "EUR",
+      "totalTEU": 3
+    }
+  }
+}

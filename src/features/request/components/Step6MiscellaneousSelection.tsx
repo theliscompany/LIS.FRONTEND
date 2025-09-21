@@ -121,15 +121,19 @@ const Step6MiscellaneousSelection: React.FC<Step6MiscellaneousSelectionProps> = 
 
     // ✅ NOUVELLE STRUCTURE : Synchronisation avec draftQuote.step6
   useEffect(() => {
-
+    console.log('🔧 [STEP6] Synchronisation avec draftQuote.step6:', {
+      step6Selections: draftQuote?.step6?.selections,
+      step6Length: draftQuote?.step6?.selections?.length,
+      currentSelected: selected.length
+    });
     
     // ✅ PRIORITÉ 1: Utiliser draftQuote.step6.selections si disponible
     if (draftQuote?.step6?.selections && Array.isArray(draftQuote.step6.selections) && draftQuote.step6.selections.length > 0) {
-
+      console.log('🔧 [STEP6] Données step6 trouvées, conversion en cours...');
       
       // ✅ NOUVELLE LOGIQUE : Créer directement les services depuis step6
       const step6Services = draftQuote.step6.selections.map((step6Service: any) => {
-
+        console.log('🔧 [STEP6] Conversion service step6:', step6Service);
         
         // Créer un objet service complet à partir des données step6
         return {
@@ -151,8 +155,7 @@ const Step6MiscellaneousSelection: React.FC<Step6MiscellaneousSelectionProps> = 
         };
       });
       
-
-      
+      console.log('🔧 [STEP6] Services convertis:', step6Services);
       setSelected(step6Services);
     }
     // ✅ PRIORITÉ 2: Fallback vers selectedMiscellaneous si step6 non disponible
@@ -294,8 +297,6 @@ const Step6MiscellaneousSelection: React.FC<Step6MiscellaneousSelectionProps> = 
     
     // ✅ NOUVELLE STRUCTURE : Notifier le parent via onStep6Update
     if (onStep6Update) {
-
-      
       // ✅ Construire la structure step6 conforme à DraftQuote.ts
       const step6Data = {
         selections: newSelected.map(service => ({
@@ -329,14 +330,17 @@ const Step6MiscellaneousSelection: React.FC<Step6MiscellaneousSelectionProps> = 
         }
       };
       
+      console.log('🔧 [STEP6] Envoi des données step6:', {
+        step6Data,
+        newSelectedCount: newSelected.length,
+        miscTotal
+      });
+      
       onStep6Update(step6Data);
     }
     // ✅ FALLBACK : Utiliser setSelectedMiscellaneous pour compatibilité
     else if (setSelectedMiscellaneous) {
-
       setSelectedMiscellaneous(newSelected, miscTotal);
-    } else {
-      console.warn('🔍 [DEBUG_STEP6] Aucun callback disponible pour notifier la sélection !');
     }
     
 
@@ -373,18 +377,6 @@ const Step6MiscellaneousSelection: React.FC<Step6MiscellaneousSelectionProps> = 
   // Utiliser les données complètes de l'API ou fallback sur selectedSeafreightsFromStep5
   const seafreightsToDisplay = fullSeafreightData ? [fullSeafreightData] : selectedSeafreightsFromStep5;
 
-  // ✅ DEBUG : Logs pour diagnostiquer le problème de chargement
-  useEffect(() => {
-    console.log('🔍 [STEP6] Debug Seafreight Loading:');
-    console.log('  - draftQuote?.step5?.selections:', draftQuote?.step5?.selections);
-    console.log('  - selectedSeafreightsFromStep5:', selectedSeafreightsFromStep5);
-    console.log('  - firstSeafreight:', firstSeafreight);
-    console.log('  - seafreightId:', seafreightId);
-    console.log('  - fullSeafreightData:', fullSeafreightData);
-    console.log('  - isLoadingSeafreight:', isLoadingSeafreight);
-    console.log('  - seafreightError:', seafreightError);
-    console.log('  - seafreightsToDisplay:', seafreightsToDisplay);
-  }, [draftQuote?.step5?.selections, selectedSeafreightsFromStep5, firstSeafreight, seafreightId, fullSeafreightData, isLoadingSeafreight, seafreightError, seafreightsToDisplay]);
 
 
 
@@ -392,8 +384,6 @@ const Step6MiscellaneousSelection: React.FC<Step6MiscellaneousSelectionProps> = 
 
   // Fonction de comparaison réutilisable - VERSION STRICTE
   const isServiceMatching = (selectedItem: any, miscItem: any) => {
-
-    
     // PRIORITÉ 1: Comparaison par UUID (id) - plus fiable
     if (selectedItem.id && miscItem.id) {
       const idsMatch = selectedItem.id === miscItem.id;
@@ -406,12 +396,9 @@ const Step6MiscellaneousSelection: React.FC<Step6MiscellaneousSelectionProps> = 
     const selectedServiceId = selectedItem.serviceId;
     const miscServiceId = miscItem.serviceProviderId || miscItem.serviceId; // Utiliser serviceProviderId d'abord
     
-
-    
     if (selectedServiceId && miscServiceId && 
         selectedServiceId !== 0 && miscServiceId !== 0 &&
         selectedServiceId === miscServiceId) {
-      
       return true;
     }
     
@@ -424,10 +411,7 @@ const Step6MiscellaneousSelection: React.FC<Step6MiscellaneousSelectionProps> = 
                           selectedItem.serviceProviderName.trim() !== '' && miscItem.serviceProviderName.trim() !== '' &&
                           selectedItem.serviceProviderName === miscItem.serviceProviderName;
     
-
-    
     if (nameMatch && providerMatch) {
-
       return true;
     }
     
@@ -437,7 +421,6 @@ const Step6MiscellaneousSelection: React.FC<Step6MiscellaneousSelectionProps> = 
       const selectedIdStr = String(selectedItem.id);
       const miscIdStr = String(miscItem.id);
       if (selectedIdStr === miscIdStr) {
-
         return true;
       }
     }
@@ -447,22 +430,17 @@ const Step6MiscellaneousSelection: React.FC<Step6MiscellaneousSelectionProps> = 
       const selectedServiceIdStr = String(selectedItem.serviceId);
       const miscServiceIdStr = String(miscItem.serviceId);
       if (selectedServiceIdStr === miscServiceIdStr) {
-
         return true;
       }
     }
-    
 
     return false;
   };
 
   // Handler for removing miscellaneous
   const handleRemoveMisc = (id: string) => {
-
-    
     if (typeof setSelectedMiscellaneous === 'function') {
       const filteredMisc = (selectedMiscellaneous || []).filter(m => m.id !== id);
-
       setSelectedMiscellaneous(filteredMisc, 0);
     }
   };
@@ -489,10 +467,8 @@ const Step6MiscellaneousSelection: React.FC<Step6MiscellaneousSelectionProps> = 
 
     try {
       const response = await getApiHaulageById({ path: { id: String(haulageId) } });
-
       setFullHaulageData(response.data);
     } catch (err: any) {
-
       setHaulageError(err.message || 'Erreur lors du chargement du haulage');
     } finally {
       setIsLoadingHaulage(false);
@@ -542,12 +518,15 @@ const Step6MiscellaneousSelection: React.FC<Step6MiscellaneousSelectionProps> = 
                     <PersonIcon sx={{ color: '#3498db', mr: 1 }} />
                     <Typography variant="subtitle1" sx={{ fontWeight: 500 }}>
                       <strong>{t('requestWizard.step3.client')}:</strong> {(() => {
-                        // Accès correct via requestData.step1.customer
+                        // Priorité 1: Données du client depuis requestData.customer (niveau racine)
+                        if (requestData?.customer?.name) return requestData.customer.name;
+                        if (requestData?.customer?.contactPerson?.fullName) return requestData.customer.contactPerson.fullName;
+                        if (requestData?.customer?.contactName) return requestData.customer.contactName;
+                        if (requestData?.customer?.companyName) return requestData.customer.companyName;
+                        // Priorité 2: Données depuis step1
                         if (requestData?.step1?.customer?.contactName) return requestData.step1.customer.contactName;
                         if (requestData?.step1?.customer?.companyName) return requestData.step1.customer.companyName;
                         // Fallback sur les anciennes propriétés pour compatibilité
-                        if (requestData?.customer?.contactName) return requestData.customer.contactName;
-                        if (requestData?.customer?.name) return requestData.customer.name;
                         if (requestData?.customerName) return requestData.customerName;
                         if (requestData?.contactName) return requestData.contactName;
                         return '-';
@@ -558,7 +537,12 @@ const Step6MiscellaneousSelection: React.FC<Step6MiscellaneousSelectionProps> = 
                     <LocationOnIcon sx={{ color: '#e74c3c', mr: 1 }} />
                     <Typography variant="subtitle1" sx={{ fontWeight: 500 }}>
                       <strong>{t('requestWizard.step3.departure')}:</strong> {(() => {
-                        // Accès correct via requestData.step1.cityFrom
+                        // Priorité 1: Données depuis requestData.shipment.origin
+                        if (requestData?.shipment?.origin?.location && requestData?.shipment?.origin?.country) {
+                          return `${requestData.shipment.origin.location}, ${requestData.shipment.origin.country.toUpperCase()}`;
+                        }
+                        if (requestData?.shipment?.origin?.location) return requestData.shipment.origin.location;
+                        // Priorité 2: Données depuis step1
                         if (requestData?.step1?.cityFrom?.name && requestData?.step1?.cityFrom?.country) {
                           return `${requestData.step1.cityFrom.name}, ${requestData.step1.cityFrom.country.toUpperCase()}`;
                         }
@@ -582,7 +566,12 @@ const Step6MiscellaneousSelection: React.FC<Step6MiscellaneousSelectionProps> = 
                     <LocationOnIcon sx={{ color: '#27ae60', mr: 1 }} />
                     <Typography variant="subtitle1" sx={{ fontWeight: 500 }}>
                       <strong>{t('requestWizard.step3.arrival')}:</strong> {(() => {
-                        // Accès correct via requestData.step1.cityTo
+                        // Priorité 1: Données depuis requestData.shipment.destination
+                        if (requestData?.shipment?.destination?.location && requestData?.shipment?.destination?.country) {
+                          return `${requestData.shipment.destination.location}, ${requestData.shipment.destination.country.toUpperCase()}`;
+                        }
+                        if (requestData?.shipment?.destination?.location) return requestData.shipment.destination.location;
+                        // Priorité 2: Données depuis step1
                         if (requestData?.step1?.cityTo?.name && requestData?.step1?.cityTo?.country) {
                           return `${requestData.step1.cityTo.name}, ${requestData.step1.cityTo.country.toUpperCase()}`;
                         }
@@ -608,12 +597,13 @@ const Step6MiscellaneousSelection: React.FC<Step6MiscellaneousSelectionProps> = 
                     <ReceiptIcon sx={{ color: '#f39c12', mr: 1 }} />
                     <Typography variant="subtitle1" sx={{ fontWeight: 500 }}>
                       <strong>{t('requestWizard.step3.incoterm')}:</strong> {(() => {
-                        // Accès correct via requestData.step1.incotermName
+                        // Priorité 1: Données depuis requestData.incoterm (niveau racine)
+                        if (requestData?.incoterm) return requestData.incoterm;
+                        if (requestData?.incotermName) return requestData.incotermName;
+                        // Priorité 2: Données depuis step1
                         if (requestData?.step1?.incotermName) return requestData.step1.incotermName;
                         if (requestData?.step1?.cargo?.incoterm) return requestData.step1.cargo.incoterm;
                         // Fallback sur les anciennes propriétés pour compatibilité
-                        if (requestData?.incotermName) return requestData.incotermName;
-                        if (requestData?.incoterm) return requestData.incoterm;
                         if (requestData?.incoterms) return requestData.incoterms;
                         return '-';
                       })()}
@@ -623,7 +613,10 @@ const Step6MiscellaneousSelection: React.FC<Step6MiscellaneousSelectionProps> = 
                     <LocalShippingIcon sx={{ color: '#9b59b6', mr: 1 }} />
                     <Typography variant="subtitle1" sx={{ fontWeight: 500 }}>
                       <strong>{t('requestWizard.step3.product')}:</strong> {(() => {
-                        // Accès correct via requestData.step1.productName
+                        // Priorité 1: Données depuis requestData.shipment.commodity
+                        if (requestData?.shipment?.commodity?.productName) return requestData.shipment.commodity.productName;
+                        if (requestData?.shipment?.commodity?.product?.productName) return requestData.shipment.commodity.product.productName;
+                        // Priorité 2: Données depuis step1
                         if (requestData?.step1?.productName?.productName) return requestData.step1.productName.productName;
                         if (requestData?.step1?.cargo?.product?.productName) return requestData.step1.cargo.product.productName;
                         // Fallback sur les anciennes propriétés pour compatibilité
@@ -646,11 +639,12 @@ const Step6MiscellaneousSelection: React.FC<Step6MiscellaneousSelectionProps> = 
                     <InfoIcon sx={{ color: '#34495e', mr: 1 }} />
                     <Typography variant="subtitle1" sx={{ fontWeight: 500 }}>
                       <strong>{t('requestWizard.step3.comment')}:</strong> {(() => {
-                        // Accès correct via requestData.step1.comment
+                        // Priorité 1: Données depuis requestData.comment (niveau racine)
+                        if (requestData?.comment) return requestData.comment;
+                        // Priorité 2: Données depuis step1
                         if (requestData?.step1?.comment) return requestData.step1.comment;
                         if (requestData?.step1?.metadata?.comment) return requestData.step1.metadata.comment;
                         // Fallback sur les anciennes propriétés pour compatibilité
-                        if (requestData?.comment) return requestData.comment;
                         if (requestData?.description) return requestData.description;
                         if (requestData?.notes) return requestData.notes;
                         return '-';
@@ -659,6 +653,49 @@ const Step6MiscellaneousSelection: React.FC<Step6MiscellaneousSelectionProps> = 
                   </Box>
                 </Grid>
               </Grid>
+
+              {/* Section Ports */}
+              <Box sx={{ mt: 4, mb: 2, p: 2, borderRadius: 2, background: 'linear-gradient(90deg, #e3f0ff 0%, #f5f7fa 100%)', boxShadow: '0 2px 8px #1976d220' }}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 600, color: '#1976d2', mb: 1 }}>
+                  {t('departurePort', 'Departure port')} & {t('destinationPort', 'Destination port')}
+                </Typography>
+                <Grid container spacing={3}>
+                  <Grid item xs={12} md={6}>
+                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                      <DirectionsBoatIcon sx={{ color: '#2980b9', mr: 1 }} />
+                      <Typography variant="body1" sx={{ fontWeight: 500 }}>
+                        <strong>{t('departurePort', 'Departure port')}:</strong> {(() => {
+                          // Priorité 1: Données depuis requestData.shipment.portFrom
+                          if (requestData?.shipment?.portFrom?.portName) return requestData.shipment.portFrom.portName;
+                          // Priorité 2: Données depuis step1
+                          if (requestData?.step1?.portFrom?.portName) return requestData.step1.portFrom.portName;
+                          // Fallback
+                          if (requestData?.portFrom?.portName) return requestData.portFrom.portName;
+                          if (requestData?.departurePort) return requestData.departurePort;
+                          return '-';
+                        })()}
+                      </Typography>
+                    </Box>
+                  </Grid>
+                  <Grid item xs={12} md={6}>
+                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                      <DirectionsBoatIcon sx={{ color: '#16a085', mr: 1 }} />
+                      <Typography variant="body1" sx={{ fontWeight: 500 }}>
+                        <strong>{t('destinationPort', 'Destination port')}:</strong> {(() => {
+                          // Priorité 1: Données depuis requestData.shipment.portTo
+                          if (requestData?.shipment?.portTo?.portName) return requestData.shipment.portTo.portName;
+                          // Priorité 2: Données depuis step1
+                          if (requestData?.step1?.portTo?.portName) return requestData.step1.portTo.portName;
+                          // Fallback
+                          if (requestData?.portTo?.portName) return requestData.portTo.portName;
+                          if (requestData?.destinationPort) return requestData.destinationPort;
+                          return '-';
+                        })()}
+                      </Typography>
+                    </Box>
+                  </Grid>
+                </Grid>
+              </Box>
 
               {/* Section Containers - Affichage des containers sélectionnés du Step 3 */}
               
@@ -901,298 +938,679 @@ const Step6MiscellaneousSelection: React.FC<Step6MiscellaneousSelectionProps> = 
                     </Typography>
                   </Box>
                   
-                  <Grid container spacing={2}>
-                    <Grid item xs={12}>
-                      <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                        <BusinessIcon sx={{ color: '#2980b9', mr: 1, fontSize: '1.2em' }} />
-                        <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                          <strong>Transporteur:</strong> {draftQuote.step4.selection.haulierName || '-'}
+                  <Grid container spacing={3}>
+                    {/* Colonne 1: Informations générales */}
+                    <Grid item xs={12} md={6}>
+                      <Box sx={{ p: 2, background: 'linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)', borderRadius: 2, border: '1px solid #dee2e6' }}>
+                        <Typography variant="h6" sx={{ fontWeight: 600, color: '#495057', mb: 2, display: 'flex', alignItems: 'center' }}>
+                          <BusinessIcon sx={{ mr: 1, color: '#6c757d' }} />
+                          Informations générales
                         </Typography>
+                        
+                        <Grid container spacing={2}>
+                          <Grid item xs={12}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                              <BusinessIcon sx={{ color: '#2980b9', mr: 1, fontSize: '1.1em' }} />
+                              <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                                <strong>Transporteur:</strong> {(() => {
+                                  if (draftQuote.step4.selection.haulierName) return draftQuote.step4.selection.haulierName;
+                                  if (draftQuote.step4.selection.haulierId) return `Haulier ${draftQuote.step4.selection.haulierId}`;
+                                  return '-';
+                                })()}
+                              </Typography>
+                            </Box>
+                          </Grid>
+
+                          <Grid item xs={12}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                              <FingerprintIcon sx={{ color: '#16a085', mr: 1, fontSize: '1.1em' }} />
+                              <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                                <strong>ID Offre:</strong> {(() => {
+                                  if (draftQuote.step4.selection.offerId) return draftQuote.step4.selection.offerId;
+                                  if (draftQuote.step4.selection.haulierId) return `Haulier ${draftQuote.step4.selection.haulierId}`;
+                                  return '-';
+                                })()}
+                              </Typography>
+                            </Box>
+                          </Grid>
+
+                          <Grid item xs={12}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                              <CheckCircleIcon sx={{ color: '#27ae60', mr: 1, fontSize: '1.1em' }} />
+                              <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                                <strong>Statut:</strong> {(() => {
+                                  if (draftQuote.step4.completed) return 'Complété';
+                                  if (draftQuote.step4.selection) return 'Sélectionné';
+                                  return 'En cours';
+                                })()}
+                              </Typography>
+                            </Box>
+                          </Grid>
+
+                          <Grid item xs={12}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                              <ScheduleIcon sx={{ color: '#e67e22', mr: 1, fontSize: '1.1em' }} />
+                              <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                                <strong>Date de sélection:</strong> {(() => {
+                                  if (draftQuote.step4.selection.selectedAt) {
+                                    return dayjs(draftQuote.step4.selection.selectedAt).format('DD/MM/YYYY HH:mm');
+                                  }
+                                  return '-';
+                                })()}
+                              </Typography>
+                            </Box>
+                          </Grid>
+
+                          <Grid item xs={12}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                              <InfoIcon sx={{ color: '#34495e', mr: 1, fontSize: '1.1em' }} />
+                              <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                                <strong>Remarques:</strong> {(() => {
+                                  if (draftQuote.step4.selection.remarks) {
+                                    return draftQuote.step4.selection.remarks;
+                                  }
+                                  return '-';
+                                })()}
+                              </Typography>
+                            </Box>
+                          </Grid>
+                        </Grid>
                       </Box>
                     </Grid>
-                    
-                    <Grid item xs={12}>
-                      <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                        <LocationOnIcon sx={{ color: '#e74c3c', mr: 1, fontSize: '1.2em' }} />
-                        <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                          <strong>Pickup:</strong> {draftQuote.step4.selection.route?.pickup?.city || '-'}, {draftQuote.step4.selection.route?.pickup?.country || '-'}
+
+                    {/* Colonne 2: Informations de route */}
+                    <Grid item xs={12} md={6}>
+                      <Box sx={{ p: 2, background: 'linear-gradient(135deg, #e8f5e8 0%, #c8e6c9 100%)', borderRadius: 2, border: '1px solid #4caf50' }}>
+                        <Typography variant="h6" sx={{ fontWeight: 600, color: '#2e7d32', mb: 2, display: 'flex', alignItems: 'center' }}>
+                          <RouteIcon sx={{ mr: 1, color: '#4caf50' }} />
+                          Informations de route
                         </Typography>
+                        
+                        <Grid container spacing={2}>
+                          <Grid item xs={12}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                              <LocationOnIcon sx={{ color: '#e74c3c', mr: 1, fontSize: '1.1em' }} />
+                              <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                                <strong>Pickup:</strong> {(() => {
+                                  if (draftQuote.step4.selection.route?.pickup?.city && draftQuote.step4.selection.route?.pickup?.country) {
+                                    return `${draftQuote.step4.selection.route.pickup.city}, ${draftQuote.step4.selection.route.pickup.country}`;
+                                  }
+                                  if (draftQuote.step4.selection.route?.pickup?.city) return draftQuote.step4.selection.route.pickup.city;
+                                  if (draftQuote.step4.selection.route?.pickup?.company) return draftQuote.step4.selection.route.pickup.company;
+                                  return '-';
+                                })()}
+                              </Typography>
+                            </Box>
+                          </Grid>
+
+                          <Grid item xs={12}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                              <LocationOnIcon sx={{ color: '#27ae60', mr: 1, fontSize: '1.1em' }} />
+                              <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                                <strong>Delivery:</strong> {(() => {
+                                  if (draftQuote.step4.selection.route?.delivery?.portName && draftQuote.step4.selection.route?.delivery?.country) {
+                                    return `${draftQuote.step4.selection.route.delivery.portName}, ${draftQuote.step4.selection.route.delivery.country}`;
+                                  }
+                                  if (draftQuote.step4.selection.route?.delivery?.portName) return draftQuote.step4.selection.route.delivery.portName;
+                                  return '-';
+                                })()}
+                              </Typography>
+                            </Box>
+                          </Grid>
+
+                          <Grid item xs={12}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                              <StraightenIcon sx={{ color: '#9b59b6', mr: 1, fontSize: '1.1em' }} />
+                              <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                                <strong>Distance:</strong> {(() => {
+                                  if (draftQuote.step4.selection.route?.distance) return `${draftQuote.step4.selection.route.distance} km`;
+                                  if (draftQuote.step4.selection.calculation?.distance) return `${draftQuote.step4.selection.calculation.distance} km`;
+                                  return '-';
+                                })()}
+                              </Typography>
+                            </Box>
+                          </Grid>
+
+                          <Grid item xs={12}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                              <RouteIcon sx={{ color: '#8e44ad', mr: 1, fontSize: '1.1em' }} />
+                              <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                                <strong>Multi-stop:</strong> {(() => {
+                                  if (draftQuote.step4.selection.route?.multiStop !== undefined) {
+                                    return draftQuote.step4.selection.route.multiStop ? 'Oui' : 'Non';
+                                  }
+                                  return '-';
+                                })()}
+                              </Typography>
+                            </Box>
+                          </Grid>
+
+                          <Grid item xs={12}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                              <CalendarMonthIcon sx={{ color: '#e67e22', mr: 1, fontSize: '1.1em' }} />
+                              <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                                <strong>Valide jusqu'au:</strong> {(() => {
+                                  if (draftQuote.step4.selection.validity?.validUntil) {
+                                    return dayjs(draftQuote.step4.selection.validity.validUntil).format('DD/MM/YYYY');
+                                  }
+                                  return '-';
+                                })()}
+                              </Typography>
+                            </Box>
+                          </Grid>
+                        </Grid>
                       </Box>
                     </Grid>
-                    
-                    <Grid item xs={12}>
-                      <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                        <LocationOnIcon sx={{ color: '#27ae60', mr: 1, fontSize: '1.2em' }} />
-                        <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                          <strong>Delivery:</strong> {draftQuote.step4.selection.route?.delivery?.portName || '-'}, {draftQuote.step4.selection.route?.delivery?.country || '-'}
+
+                    {/* Colonne 3: Informations tarifaires */}
+                    <Grid item xs={12} md={6}>
+                      <Box sx={{ p: 2, background: 'linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%)', borderRadius: 2, border: '1px solid #ff9800' }}>
+                        <Typography variant="h6" sx={{ fontWeight: 600, color: '#e65100', mb: 2, display: 'flex', alignItems: 'center' }}>
+                          <EuroIcon sx={{ mr: 1, color: '#ff9800' }} />
+                          Informations tarifaires
                         </Typography>
+                        
+                        <Grid container spacing={2}>
+                          <Grid item xs={12}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                              <EuroIcon sx={{ color: '#f39c12', mr: 1, fontSize: '1.1em' }} />
+                              <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                                <strong>Tarif unitaire:</strong> {(() => {
+                                  if (draftQuote.step4.selection.tariff?.unitPrice) {
+                                    return `${draftQuote.step4.selection.tariff.unitPrice.toLocaleString(undefined, { maximumFractionDigits: 2 })} ${draftQuote.step4.selection.tariff.currency || 'EUR'}`;
+                                  }
+                                  if (draftQuote.step4.selection.calculation?.unitPrice) {
+                                    return `${draftQuote.step4.selection.calculation.unitPrice.toLocaleString(undefined, { maximumFractionDigits: 2 })} ${draftQuote.step4.selection.calculation.currency || 'EUR'}`;
+                                  }
+                                  return '-';
+                                })()}
+                              </Typography>
+                            </Box>
+                          </Grid>
+
+                          <Grid item xs={12}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                              <AccessTimeIcon sx={{ color: '#16a085', mr: 1, fontSize: '1.1em' }} />
+                              <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                                <strong>Free time:</strong> {(() => {
+                                  if (draftQuote.step4.selection.tariff?.freeTime) return `${draftQuote.step4.selection.tariff.freeTime}h`;
+                                  if (draftQuote.step4.selection.calculation?.freeTime) return `${draftQuote.step4.selection.calculation.freeTime}h`;
+                                  return '-';
+                                })()}
+                              </Typography>
+                            </Box>
+                          </Grid>
+
+                          <Grid item xs={12}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                              <AttachMoneyIcon sx={{ color: '#e74c3c', mr: 1, fontSize: '1.1em' }} />
+                              <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                                <strong>Tarif Overtime:</strong> {(() => {
+                                  if (draftQuote.step4.selection.tariff?.overtimeTariff) {
+                                    return `${draftQuote.step4.selection.tariff.overtimeTariff} ${draftQuote.step4.selection.tariff.currency || 'EUR'}`;
+                                  }
+                                  if (draftQuote.step4.selection.calculation?.overtimeTariff) {
+                                    return `${draftQuote.step4.selection.calculation.overtimeTariff} ${draftQuote.step4.selection.calculation.currency || 'EUR'}`;
+                                  }
+                                  return '-';
+                                })()}
+                              </Typography>
+                            </Box>
+                          </Grid>
+
+                          <Grid item xs={12}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                              <LanguageIcon sx={{ color: '#27ae60', mr: 1, fontSize: '1.1em' }} />
+                              <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                                <strong>Devise:</strong> {(() => {
+                                  if (draftQuote.step4.selection.tariff?.currency) return draftQuote.step4.selection.tariff.currency;
+                                  if (draftQuote.step4.selection.calculation?.currency) return draftQuote.step4.selection.calculation.currency;
+                                  return 'EUR';
+                                })()}
+                              </Typography>
+                            </Box>
+                          </Grid>
+
+                          <Grid item xs={12}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                              <InfoIcon sx={{ color: '#34495e', mr: 1, fontSize: '1.1em' }} />
+                              <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                                <strong>Source du prix:</strong> {(() => {
+                                  if (draftQuote.step4.selection.calculation?.priceSource) {
+                                    return draftQuote.step4.selection.calculation.priceSource;
+                                  }
+                                  return 'API_DIRECT';
+                                })()}
+                              </Typography>
+                            </Box>
+                          </Grid>
+                        </Grid>
                       </Box>
                     </Grid>
-                    
-                    <Grid item xs={12}>
-                      <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                        <EuroIcon sx={{ color: '#f39c12', mr: 1, fontSize: '1.2em' }} />
-                        <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                          <strong>Tarif unitaire:</strong> {draftQuote.step4.selection.tariff?.unitPrice ? 
-                            `${draftQuote.step4.selection.tariff.unitPrice.toLocaleString(undefined, { maximumFractionDigits: 2 })} ${draftQuote.step4.selection.tariff.currency || 'EUR'}` : 
-                            '-'
-                          }
+
+                    {/* Colonne 4: Calculs et quantités */}
+                    <Grid item xs={12} md={6}>
+                      <Box sx={{ p: 2, background: 'linear-gradient(135deg, #e3f2fd 0%, #f5f7fa 100%)', borderRadius: 2, border: '1px solid #1976d2' }}>
+                        <Typography variant="h6" sx={{ fontWeight: 600, color: '#1976d2', mb: 2, display: 'flex', alignItems: 'center' }}>
+                          <AssignmentIcon sx={{ mr: 1, color: '#1976d2' }} />
+                          Calculs et quantités
                         </Typography>
-                      </Box>
-                    </Grid>
-                    
-                    <Grid item xs={12}>
-                      <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                        <AccessTimeIcon sx={{ color: '#16a085', mr: 1, fontSize: '1.2em' }} />
-                        <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                          <strong>Free time:</strong> {draftQuote.step4.selection.tariff?.freeTime || '-'}h
-                        </Typography>
-                      </Box>
-                    </Grid>
-                    
-                    <Grid item xs={12}>
-                      <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                        <CalendarMonthIcon sx={{ color: '#e67e22', mr: 1, fontSize: '1.2em' }} />
-                        <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                          <strong>Valide jusqu'au:</strong> {draftQuote.step4.selection.validity?.validUntil ? 
-                            dayjs(draftQuote.step4.selection.validity.validUntil).format('DD/MM/YYYY') : 
-                            '-'
-                          }
-                        </Typography>
+                        
+                        <Grid container spacing={2}>
+                          <Grid item xs={12}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                              <AssignmentIcon sx={{ color: '#16a085', mr: 1, fontSize: '1.1em' }} />
+                              <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                                <strong>Quantité:</strong> {(() => {
+                                  if (draftQuote.step4.selection.calculation?.quantity) return draftQuote.step4.selection.calculation.quantity;
+                                  return '1';
+                                })()}
+                              </Typography>
+                            </Box>
+                          </Grid>
+
+                          <Grid item xs={12}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                              <EuroIcon sx={{ color: '#27ae60', mr: 1, fontSize: '1.1em' }} />
+                              <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                                <strong>Sous-total:</strong> {(() => {
+                                  if (draftQuote.step4.selection.calculation?.subtotal) {
+                                    return `${draftQuote.step4.selection.calculation.subtotal.toLocaleString(undefined, { maximumFractionDigits: 2 })} ${draftQuote.step4.selection.calculation.currency || 'EUR'}`;
+                                  }
+                                  return '-';
+                                })()}
+                              </Typography>
+                            </Box>
+                          </Grid>
+
+                          <Grid item xs={12}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                              <EuroIcon sx={{ color: '#f39c12', mr: 1, fontSize: '1.1em' }} />
+                              <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                                <strong>Prix de base:</strong> {(() => {
+                                  if (draftQuote.step4.selection.calculation?.basePrice) {
+                                    return `${draftQuote.step4.selection.calculation.basePrice.toLocaleString(undefined, { maximumFractionDigits: 2 })} ${draftQuote.step4.selection.calculation.currency || 'EUR'}`;
+                                  }
+                                  return '-';
+                                })()}
+                              </Typography>
+                            </Box>
+                          </Grid>
+
+                          <Grid item xs={12}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                              <AttachMoneyIcon sx={{ color: '#9b59b6', mr: 1, fontSize: '1.1em' }} />
+                              <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                                <strong>Surcharges totales:</strong> {(() => {
+                                  if (draftQuote.step4.selection.calculation?.surchargesTotal) {
+                                    return `${draftQuote.step4.selection.calculation.surchargesTotal.toLocaleString(undefined, { maximumFractionDigits: 2 })} ${draftQuote.step4.selection.calculation.currency || 'EUR'}`;
+                                  }
+                                  return '-';
+                                })()}
+                              </Typography>
+                            </Box>
+                          </Grid>
+
+                          <Grid item xs={12}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                              <AssignmentIcon sx={{ color: '#8e44ad', mr: 1, fontSize: '1.1em' }} />
+                              <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                                <strong>Nombre de surcharges:</strong> {(() => {
+                                  if (draftQuote.step4.selection.calculation?.surchargesCount) {
+                                    return draftQuote.step4.selection.calculation.surchargesCount;
+                                  }
+                                  return '0';
+                                })()}
+                              </Typography>
+                            </Box>
+                          </Grid>
+                        </Grid>
                       </Box>
                     </Grid>
                   </Grid>
                 </CardContent>
               </Card>
+              
+              {/* Résumé global du haulage */}
+              <Box sx={{ mt: 3, p: 2, background: 'linear-gradient(135deg, #e8f5e8 0%, #c8e6c9 100%)', borderRadius: 2, border: '1px solid #4caf50' }}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 600, color: '#2e7d32', mb: 1 }}>
+                  📊 Résumé global du haulage
+                </Typography>
+                <Grid container spacing={2}>
+                  <Grid item xs={12} sm={6} md={3}>
+                    <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                      <strong>Transporteur:</strong> {draftQuote.step4.selection.haulierName || '-'}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={12} sm={6} md={3}>
+                    <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                      <strong>ID Offre:</strong> {draftQuote.step4.selection.offerId || '-'}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={12} sm={6} md={3}>
+                    <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                      <strong>Tarif unitaire:</strong> {draftQuote.step4.selection.tariff?.unitPrice ? 
+                        `${draftQuote.step4.selection.tariff.unitPrice.toLocaleString(undefined, { maximumFractionDigits: 2 })} ${draftQuote.step4.selection.tariff.currency || 'EUR'}` : 
+                        '-'
+                      }
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={12} sm={6} md={3}>
+                    <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                      <strong>Sous-total:</strong> {draftQuote.step4.selection.calculation?.subtotal ? 
+                        `${draftQuote.step4.selection.calculation.subtotal.toLocaleString(undefined, { maximumFractionDigits: 2 })} ${draftQuote.step4.selection.calculation.currency || 'EUR'}` : 
+                        '-'
+                      }
+                    </Typography>
+                  </Grid>
+                </Grid>
+              </Box>
+              
+              {/* Informations de contact du transporteur */}
+              <Box sx={{ mt: 3, p: 2, background: 'linear-gradient(135deg, #e3f2fd 0%, #f5f7fa 100%)', borderRadius: 2, border: '1px solid #1976d2' }}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 600, color: '#1976d2', mb: 1 }}>
+                  📞 Informations de contact
+                </Typography>
+                <Grid container spacing={2}>
+                  <Grid item xs={12} sm={6} md={4}>
+                    <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                      <strong>Email:</strong> {draftQuote.step4.selection.contact?.email || '-'}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={12} sm={6} md={4}>
+                    <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                      <strong>Téléphone:</strong> {draftQuote.step4.selection.contact?.phone || '-'}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={12} sm={6} md={4}>
+                    <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                      <strong>Contact:</strong> {draftQuote.step4.selection.contact?.name || '-'}
+                    </Typography>
+                  </Grid>
+                </Grid>
+              </Box>
+              
+              {/* Conditions spéciales */}
+              <Box sx={{ mt: 3, p: 2, background: 'linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%)', borderRadius: 2, border: '1px solid #ff9800' }}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 600, color: '#e65100', mb: 1 }}>
+                  ⚠️ Conditions spéciales
+                </Typography>
+                <Grid container spacing={2}>
+                  <Grid item xs={12} sm={6} md={4}>
+                    <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                      <strong>Conditions de paiement:</strong> {draftQuote.step4.selection.terms?.paymentTerms || '-'}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={12} sm={6} md={4}>
+                    <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                      <strong>Conditions de livraison:</strong> {draftQuote.step4.selection.terms?.deliveryTerms || '-'}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={12} sm={6} md={4}>
+                    <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                      <strong>Conditions générales:</strong> {draftQuote.step4.selection.terms?.generalTerms || '-'}
+                    </Typography>
+                  </Grid>
+                </Grid>
+              </Box>
+              
+              {/* Informations de suivi */}
+              <Box sx={{ mt: 3, p: 2, background: 'linear-gradient(135deg, #f3e5f5 0%, #e1bee7 100%)', borderRadius: 2, border: '1px solid #9c27b0' }}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 600, color: '#7b1fa2', mb: 1 }}>
+                  🔍 Informations de suivi
+                </Typography>
+                <Grid container spacing={2}>
+                  <Grid item xs={12} sm={6} md={4}>
+                    <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                      <strong>Numéro de suivi:</strong> {draftQuote.step4.selection.tracking?.trackingNumber || '-'}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={12} sm={6} md={4}>
+                    <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                      <strong>Statut de suivi:</strong> {draftQuote.step4.selection.tracking?.status || '-'}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={12} sm={6} md={4}>
+                    <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                      <strong>Dernière mise à jour:</strong> {draftQuote.step4.selection.tracking?.lastUpdate ? 
+                        dayjs(draftQuote.step4.selection.tracking.lastUpdate).format('DD/MM/YYYY HH:mm') : 
+                        '-'
+                      }
+                    </Typography>
+                  </Grid>
+                </Grid>
+              </Box>
+              
+              {/* Informations de documentation */}
+              <Box sx={{ mt: 3, p: 2, background: 'linear-gradient(135deg, #e8f5e8 0%, #c8e6c9 100%)', borderRadius: 2, border: '1px solid #4caf50' }}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 600, color: '#2e7d32', mb: 1 }}>
+                  📄 Informations de documentation
+                </Typography>
+                <Grid container spacing={2}>
+                  <Grid item xs={12} sm={6} md={4}>
+                    <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                      <strong>Documents requis:</strong> {draftQuote.step4.selection.documentation?.requiredDocuments?.join(', ') || '-'}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={12} sm={6} md={4}>
+                    <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                      <strong>Documents fournis:</strong> {draftQuote.step4.selection.documentation?.providedDocuments?.join(', ') || '-'}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={12} sm={6} md={4}>
+                    <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                      <strong>Statut documentation:</strong> {draftQuote.step4.selection.documentation?.status || '-'}
+                    </Typography>
+                  </Grid>
+                </Grid>
+              </Box>
+              
+              {/* Informations de sécurité */}
+              <Box sx={{ mt: 3, p: 2, background: 'linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%)', borderRadius: 2, border: '1px solid #f44336' }}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 600, color: '#c62828', mb: 1 }}>
+                  🔒 Informations de sécurité
+                </Typography>
+                <Grid container spacing={2}>
+                  <Grid item xs={12} sm={6} md={4}>
+                    <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                      <strong>Niveau de sécurité:</strong> {draftQuote.step4.selection.security?.securityLevel || '-'}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={12} sm={6} md={4}>
+                    <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                      <strong>Mesures de sécurité:</strong> {draftQuote.step4.selection.security?.securityMeasures?.join(', ') || '-'}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={12} sm={6} md={4}>
+                    <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                      <strong>Certifications:</strong> {draftQuote.step4.selection.security?.certifications?.join(', ') || '-'}
+                    </Typography>
+                  </Grid>
+                </Grid>
+              </Box>
+              
+              {/* Informations de qualité */}
+              <Box sx={{ mt: 3, p: 2, background: 'linear-gradient(135deg, #e0f2f1 0%, #b2dfdb 100%)', borderRadius: 2, border: '1px solid #009688' }}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 600, color: '#00695c', mb: 1 }}>
+                  ⭐ Informations de qualité
+                </Typography>
+                <Grid container spacing={2}>
+                  <Grid item xs={12} sm={6} md={4}>
+                    <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                      <strong>Niveau de qualité:</strong> {draftQuote.step4.selection.quality?.qualityLevel || '-'}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={12} sm={6} md={4}>
+                    <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                      <strong>Standards de qualité:</strong> {draftQuote.step4.selection.quality?.qualityStandards?.join(', ') || '-'}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={12} sm={6} md={4}>
+                    <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                      <strong>Certifications qualité:</strong> {draftQuote.step4.selection.quality?.qualityCertifications?.join(', ') || '-'}
+                    </Typography>
+                  </Grid>
+                </Grid>
+              </Box>
+              
+              {/* Informations de performance */}
+              <Box sx={{ mt: 3, p: 2, background: 'linear-gradient(135deg, #f3e5f5 0%, #e1bee7 100%)', borderRadius: 2, border: '1px solid #9c27b0' }}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 600, color: '#7b1fa2', mb: 1 }}>
+                  🚀 Informations de performance
+                </Typography>
+                <Grid container spacing={2}>
+                  <Grid item xs={12} sm={6} md={4}>
+                    <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                      <strong>Score de performance:</strong> {draftQuote.step4.selection.performance?.performanceScore || '-'}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={12} sm={6} md={4}>
+                    <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                      <strong>Métriques de performance:</strong> {draftQuote.step4.selection.performance?.performanceMetrics?.join(', ') || '-'}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={12} sm={6} md={4}>
+                    <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                      <strong>Indicateurs de performance:</strong> {draftQuote.step4.selection.performance?.performanceIndicators?.join(', ') || '-'}
+                    </Typography>
+                  </Grid>
+                </Grid>
+              </Box>
+              
+              {/* Informations de maintenance */}
+              <Box sx={{ mt: 3, p: 2, background: 'linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%)', borderRadius: 2, border: '1px solid #ff9800' }}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 600, color: '#e65100', mb: 1 }}>
+                  🔧 Informations de maintenance
+                </Typography>
+                <Grid container spacing={2}>
+                  <Grid item xs={12} sm={6} md={4}>
+                    <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                      <strong>Niveau de maintenance:</strong> {draftQuote.step4.selection.maintenance?.maintenanceLevel || '-'}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={12} sm={6} md={4}>
+                    <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                      <strong>Fréquence de maintenance:</strong> {draftQuote.step4.selection.maintenance?.maintenanceFrequency || '-'}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={12} sm={6} md={4}>
+                    <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                      <strong>Dernière maintenance:</strong> {draftQuote.step4.selection.maintenance?.lastMaintenance ? 
+                        dayjs(draftQuote.step4.selection.maintenance.lastMaintenance).format('DD/MM/YYYY') : 
+                        '-'
+                      }
+                    </Typography>
+                  </Grid>
+                </Grid>
+              </Box>
+              
+              {/* Informations de support */}
+              <Box sx={{ mt: 3, p: 2, background: 'linear-gradient(135deg, #e3f2fd 0%, #f5f7fa 100%)', borderRadius: 2, border: '1px solid #1976d2' }}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 600, color: '#1976d2', mb: 1 }}>
+                  🆘 Informations de support
+                </Typography>
+                <Grid container spacing={2}>
+                  <Grid item xs={12} sm={6} md={4}>
+                    <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                      <strong>Niveau de support:</strong> {draftQuote.step4.selection.support?.supportLevel || '-'}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={12} sm={6} md={4}>
+                    <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                      <strong>Types de support:</strong> {draftQuote.step4.selection.support?.supportTypes?.join(', ') || '-'}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={12} sm={6} md={4}>
+                    <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                      <strong>Disponibilité support:</strong> {draftQuote.step4.selection.support?.supportAvailability || '-'}
+                    </Typography>
+                  </Grid>
+                </Grid>
+              </Box>
+              
+              {/* Informations de conformité */}
+              <Box sx={{ mt: 3, p: 2, background: 'linear-gradient(135deg, #e8f5e8 0%, #c8e6c9 100%)', borderRadius: 2, border: '1px solid #4caf50' }}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 600, color: '#2e7d32', mb: 1 }}>
+                  ✅ Informations de conformité
+                </Typography>
+                <Grid container spacing={2}>
+                  <Grid item xs={12} sm={6} md={4}>
+                    <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                      <strong>Niveau de conformité:</strong> {draftQuote.step4.selection.compliance?.complianceLevel || '-'}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={12} sm={6} md={4}>
+                    <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                      <strong>Standards de conformité:</strong> {draftQuote.step4.selection.compliance?.complianceStandards?.join(', ') || '-'}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={12} sm={6} md={4}>
+                    <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                      <strong>Certifications de conformité:</strong> {draftQuote.step4.selection.compliance?.complianceCertifications?.join(', ') || '-'}
+                    </Typography>
+                  </Grid>
+                </Grid>
+              </Box>
+              
+              {/* Informations de durabilité */}
+              <Box sx={{ mt: 3, p: 2, background: 'linear-gradient(135deg, #e0f2f1 0%, #b2dfdb 100%)', borderRadius: 2, border: '1px solid #009688' }}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 600, color: '#00695c', mb: 1 }}>
+                  🌱 Informations de durabilité
+                </Typography>
+                <Grid container spacing={2}>
+                  <Grid item xs={12} sm={6} md={4}>
+                    <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                      <strong>Niveau de durabilité:</strong> {draftQuote.step4.selection.sustainability?.sustainabilityLevel || '-'}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={12} sm={6} md={4}>
+                    <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                      <strong>Pratiques durables:</strong> {draftQuote.step4.selection.sustainability?.sustainablePractices?.join(', ') || '-'}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={12} sm={6} md={4}>
+                    <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                      <strong>Certifications durables:</strong> {draftQuote.step4.selection.sustainability?.sustainabilityCertifications?.join(', ') || '-'}
+                    </Typography>
+                  </Grid>
+                </Grid>
+              </Box>
+              
+              {/* Informations de coût total */}
+              <Box sx={{ mt: 3, p: 2, background: 'linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%)', borderRadius: 2, border: '1px solid #ff9800' }}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 600, color: '#e65100', mb: 1 }}>
+                  💰 Informations de coût total
+                </Typography>
+                <Grid container spacing={2}>
+                  <Grid item xs={12} sm={6} md={4}>
+                    <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                      <strong>Coût total:</strong> {draftQuote.step4.selection.calculation?.totalCost ? 
+                        `${draftQuote.step4.selection.calculation.totalCost.toLocaleString(undefined, { maximumFractionDigits: 2 })} ${draftQuote.step4.selection.calculation.currency || 'EUR'}` : 
+                        '-'
+                      }
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={12} sm={6} md={4}>
+                    <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                      <strong>Coût de base:</strong> {draftQuote.step4.selection.calculation?.baseCost ? 
+                        `${draftQuote.step4.selection.calculation.baseCost.toLocaleString(undefined, { maximumFractionDigits: 2 })} ${draftQuote.step4.selection.calculation.currency || 'EUR'}` : 
+                        '-'
+                      }
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={12} sm={6} md={4}>
+                    <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                      <strong>Coût des surcharges:</strong> {draftQuote.step4.selection.calculation?.surchargesCost ? 
+                        `${draftQuote.step4.selection.calculation.surchargesCost.toLocaleString(undefined, { maximumFractionDigits: 2 })} ${draftQuote.step4.selection.calculation.currency || 'EUR'}` : 
+                        '-'
+                      }
+                    </Typography>
+                  </Grid>
+                </Grid>
+              </Box>
             </AccordionDetails>
           </Accordion>
         </Slide>
-      )}
-      
-      {/* Récapitulatif du haulage sélectionné */}
-      {haulageToDisplay && (
-        <>
-          {/* Indicateur de chargement pour l'API call */}
-          {isLoadingHaulage && (
-            <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
-              <CircularProgress size={24} />
-              <Typography variant="body2" sx={{ ml: 1, color: '#666' }}>
-                Chargement des détails du haulage...
-              </Typography>
-            </Box>
-          )}
-
-          {/* Affichage des erreurs d'API */}
-          {haulageError && (
-            <Alert severity="warning" sx={{ mb: 2 }}>
-              <Typography variant="body2">
-                Impossible de charger les détails complets du haulage. Affichage des données de base.
-              </Typography>
-            </Alert>
-          )}
-          
-          <Accordion defaultExpanded={false} sx={{ mb: 3, borderRadius: 3, boxShadow: '0 4px 24px rgba(0,0,0,0.07)', background: '#f5f7fa' }}>
-          <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-            <Box sx={{ display: 'flex', alignItems: 'center' }}>
-              <LocalShippingIcon sx={{ color: '#1976d2', mr: 1 }} />
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
-                <Typography variant="subtitle1" sx={{ fontWeight: 600, color: '#1976d2' }}>
-                  {t('requestWizard.step5.selectedHaulage')}:
-                </Typography>
-                <Typography variant="body2" sx={{ color: '#666', fontStyle: 'italic' }}>
-                  {haulageToDisplay.haulierName || '-'} 
-                  {(() => {
-                    const pickup = haulageToDisplay.pickupLocation;
-                    const loadingCity = pickup?.displayName || pickup?.formattedAddress;
-                    return loadingCity ? ` • ${loadingCity}` : '';
-                  })()}
-                </Typography>
-              </Box>
-            </Box>
-          </AccordionSummary>
-          <AccordionDetails>
-            <Box sx={{ mt: 2, p: 3, background: 'linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)', borderRadius: 2, border: '1px solid #dee2e6' }}>
-              <Grid container spacing={3}>
-                <Grid item xs={12} sm={6} md={4}>
-                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
-                    <Typography variant="caption" sx={{ color: '#6c757d', fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.5 }}>
-                      Haulier
-                    </Typography>
-                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                      <LocalShippingIcon sx={{ color: '#2980b9', mr: 1, fontSize: '1.2em' }} />
-                      <Typography variant="body1" sx={{ fontWeight: 500, color: '#212529' }}>
-                        {haulageToDisplay.haulierName || '-'}
-                      </Typography>
-                    </Box>
-                  </Box>
-                </Grid>
-                <Grid item xs={12} sm={6} md={4}>
-                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
-                    <Typography variant="caption" sx={{ color: '#6c757d', fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.5 }}>
-                      Tariff
-                    </Typography>
-                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                      <EuroIcon sx={{ color: '#f39c12', mr: 1, fontSize: '1.2em' }} />
-                      <Typography variant="body1" sx={{ fontWeight: 500, color: '#212529' }}>
-                        {(() => {
-                          const tariff = haulageToDisplay.unitTariff;
-                          const currency = haulageToDisplay.currency || 'EUR';
-                          return tariff ? `${tariff} ${currency}` : '-';
-                        })()}
-                      </Typography>
-                    </Box>
-                  </Box>
-                </Grid>
-                <Grid item xs={12} sm={6} md={4}>
-                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
-                    <Typography variant="caption" sx={{ color: '#6c757d', fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.5 }}>
-                      Free time
-                    </Typography>
-                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                      <AccessTimeIcon sx={{ color: '#16a085', mr: 1, fontSize: '1.2em' }} />
-                      <Typography variant="body1" sx={{ fontWeight: 500, color: '#212529' }}>
-                        {haulageToDisplay.freeTime ? `${haulageToDisplay.freeTime}h` : '-'}
-                      </Typography>
-                    </Box>
-                  </Box>
-                </Grid>
-                <Grid item xs={12} sm={6} md={4}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                    <Typography variant="caption" sx={{ color: '#6c757d', fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.5 }}>
-                      Pickup Location
-                    </Typography>
-                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                      <MapIcon sx={{ color: '#e74c3c', mr: 1, fontSize: '1.2em' }} />
-                      <Typography variant="body1" sx={{ fontWeight: 500, color: '#212529' }}>
-                        {(() => {
-                          const pickup = haulageToDisplay.pickupLocation;
-                          if (pickup?.displayName) return pickup.displayName;
-                          if (pickup?.formattedAddress) return pickup.formattedAddress;
-                          return '-';
-                        })()}
-                      </Typography>
-                    </Box>
-                  </Box>
-                </Grid>
-                <Grid item xs={12} sm={6} md={4}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                    <Typography variant="caption" sx={{ color: '#6c757d', fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.5 }}>
-                      Loading Location
-                    </Typography>
-                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                      <MapIcon sx={{ color: '#3498db', mr: 1, fontSize: '1.2em' }} />
-                      <Typography variant="body1" sx={{ fontWeight: 500, color: '#212529' }}>
-                        {(() => {
-                          const loading = haulageToDisplay.loadingLocation;
-                          if (loading?.displayName) return loading.displayName;
-                          if (loading?.formattedAddress) return loading.formattedAddress;
-                          return '-';
-                        })()}
-                      </Typography>
-                    </Box>
-                  </Box>
-                </Grid>
-                <Grid item xs={12} sm={6} md={4}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                    <Typography variant="caption" sx={{ color: '#6c757d', fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.5 }}>
-                      Delivery Location
-                    </Typography>
-                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                      <MapIcon sx={{ color: '#27ae60', mr: 1, fontSize: '1.2em' }} />
-                      <Typography variant="body1" sx={{ fontWeight: 500, color: '#212529' }}>
-                        {(() => {
-                          const delivery = haulageToDisplay.deliveryLocation;
-                          if (delivery?.displayName) return delivery.displayName;
-                          if (delivery?.formattedAddress) return delivery.formattedAddress;
-                          return '-';
-                        })()}
-                      </Typography>
-                    </Box>
-                  </Box>
-                </Grid>
-                <Grid item xs={12} sm={6} md={4}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                    <Typography variant="caption" sx={{ color: '#6c757d', fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.5 }}>
-                      Distance
-                    </Typography>
-                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                      <StraightenIcon sx={{ color: '#9b59b6', mr: 1, fontSize: '1.2em' }} />
-                      <Typography variant="body1" sx={{ fontWeight: 500, color: '#212529' }}>
-                        {haulageToDisplay.distanceKm ? `${haulageToDisplay.distanceKm} km` : '-'}
-                      </Typography>
-                    </Box>
-                  </Box>
-                </Grid>
-                <Grid item xs={12} sm={6} md={4}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                    <Typography variant="caption" sx={{ color: '#6c757d', fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.5 }}>
-                      Valid Until
-                    </Typography>
-                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                      <ScheduleIcon sx={{ color: '#e67e22', mr: 1, fontSize: '1.2em' }} />
-                      <Typography variant="body1" sx={{ fontWeight: 500, color: '#212529' }}>
-                        {haulageToDisplay.validUntil ? (dayjs(haulageToDisplay.validUntil).isValid() ? dayjs(haulageToDisplay.validUntil).format('DD/MM/YYYY') : '-') : '-'}
-                      </Typography>
-                    </Box>
-                  </Box>
-                </Grid>
-                <Grid item xs={12} sm={6} md={4}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                    <Typography variant="caption" sx={{ color: '#6c757d', fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.5 }}>
-                      Multi-stop
-                    </Typography>
-                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                      <RouteIcon sx={{ color: '#8e44ad', mr: 1, fontSize: '1.2em' }} />
-                      <Typography variant="body1" sx={{ fontWeight: 500, color: '#212529' }}>
-                        {haulageToDisplay.multiStop ? `${haulageToDisplay.multiStop} stops` : '-'}
-                      </Typography>
-                    </Box>
-                  </Box>
-                </Grid>
-                <Grid item xs={12} sm={6} md={4}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                    <Typography variant="caption" sx={{ color: '#6c757d', fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.5 }}>
-                      Overtime Tariff
-                    </Typography>
-                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                      <AttachMoneyIcon sx={{ color: '#e74c3c', mr: 1, fontSize: '1.2em' }} />
-                      <Typography variant="body1" sx={{ fontWeight: 500, color: '#212529' }}>
-                        {haulageToDisplay.overtimeTariff ? `${haulageToDisplay.overtimeTariff} ${haulageToDisplay.currency || ''}` : '-'}
-                      </Typography>
-                    </Box>
-                  </Box>
-                </Grid>
-                <Grid item xs={12} sm={6} md={4}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                    <Typography variant="caption" sx={{ color: '#6c757d', fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.5 }}>
-                      Currency
-                    </Typography>
-                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                      <LanguageIcon sx={{ color: '#27ae60', mr: 1, fontSize: '1.2em' }} />
-                      <Typography variant="body1" sx={{ fontWeight: 500, color: '#212529' }}>
-                        {haulageToDisplay.currency || '-'}
-                      </Typography>
-                    </Box>
-                  </Box>
-                </Grid>
-                <Grid item xs={12} sm={6} md={4}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                    <Typography variant="caption" sx={{ color: '#6c757d', fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.5 }}>
-                      Offer ID
-                    </Typography>
-                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                      <FingerprintIcon sx={{ color: '#16a085', mr: 1, fontSize: '1.2em' }} />
-                      <Typography variant="body1" sx={{ fontWeight: 500, color: '#212529' }}>
-                        {haulageToDisplay.offerId || haulageToDisplay.haulierId || '-'}
-                      </Typography>
-                    </Box>
-                  </Box>
-                </Grid>
-              </Grid>
-            </Box>
-                    </AccordionDetails>
-        </Accordion>
-        </>
       )}
       
       {loading && <CircularProgress sx={{ my: 4 }} />}
@@ -1227,8 +1645,6 @@ const Step6MiscellaneousSelection: React.FC<Step6MiscellaneousSelectionProps> = 
                 {filteredOffers.map((misc, idx) => {
                   // Utiliser la fonction de comparaison centralisée
                   const isSelected = selected.some(s => isServiceMatching(s, misc));
-                  
-
                   
                   return (
                     <TableRow

@@ -3,11 +3,11 @@ import { useSnackbar } from 'notistack';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 // Import des fonctions SDK directement
 import {
-  getApiQuoteOfferDraftByIdWithOptions,
-  postApiQuoteOfferDraftByIdSaveAsOption,
-  postApiQuoteOfferDraftByIdLoadOptionByOptionId,
-  deleteApiQuoteOfferDraftByIdOptionByOptionId,
-  postApiQuoteFromDraft
+  getApiDraftQuotesById,
+  postApiDraftQuotesByIdOptions,
+  postApiDraftQuotesByIdOptions,
+  deleteApiDraftQuotesById,
+  postApiDraftQuotesByIdFinalize
 } from '../../offer/api/sdk.gen';
 import type { DraftQuote } from '../types/DraftQuote';
 
@@ -107,7 +107,7 @@ export const useRealDraftOptionsManagerSimple = ({
     refetch: refetchOptions
   } = useQuery({
     queryKey: ['draft-with-options', draftQuote?.id],
-    queryFn: () => getApiQuoteOfferDraftByIdWithOptions({
+    queryFn: () => getApiDraftQuotesById({
       path: { id: draftQuote?.id || '' }
     }),
     enabled: !!draftQuote?.id,
@@ -252,7 +252,7 @@ export const useRealDraftOptionsManagerSimple = ({
   });
 
   const createQuoteFromDraftMutation = useMutation({
-    mutationFn: (data: any) => postApiQuoteFromDraft(data),
+    mutationFn: (data: any) => postApiDraftQuotesByIdFinalize(data),
     onSuccess: (data: any) => {
       enqueueSnackbar('Devis créé avec succès', { variant: 'success' });
       refreshOptions();

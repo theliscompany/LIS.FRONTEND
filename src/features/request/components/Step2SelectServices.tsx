@@ -38,6 +38,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import OfferBasketDrawerAccordion from './OfferBasketDrawerAccordion';
 import { useQuery } from '@tanstack/react-query';
 import { getApiServiceStatisticsUsageByCountryOptions } from '@features/shipment/api/@tanstack/react-query.gen';
+import { getStep1Data, getStep2Data, Step1Data, Step2Data } from '../adapters/StepDataAdapters';
 
 interface Step2SelectServicesProps {
   requestData: any;
@@ -78,13 +79,15 @@ export default function Step2SelectServices({
   const [page, setPage] = useState(1);
   const rowsPerPage = 10;
 
-  // ✅ Utilisation du SDK pour charger les services
-  const departureCountry = requestData?.step1?.cityFrom?.country;
-  const destinationCountry = requestData?.step1?.cityTo?.country;
-  const productNameParam = typeof requestData?.step1?.productName === 'object'
-    ? requestData.step1.productName?.productName
-    : requestData?.step1?.productName;
-  const incotermNameParam = requestData?.step1?.incotermName;
+  // ✅ NOUVEAU: Utilisation des adaptateurs de données
+  const step1Data = getStep1Data(requestData);
+  const step2Data = getStep2Data(requestData);
+
+  // ✅ Utilisation du SDK pour charger les services avec les données normalisées
+  const departureCountry = step1Data.cityFrom.country;
+  const destinationCountry = step1Data.cityTo.country;
+  const productNameParam = step1Data.productName.productName;
+  const incotermNameParam = step1Data.incotermName;
 
   // ✅ Query pour charger les services via le SDK
   const { data: servicesData, isLoading: loadingServices, error: servicesError } = useQuery(
@@ -110,14 +113,14 @@ export default function Step2SelectServices({
 
   // ✅ NOUVELLE LOGIQUE: Synchronisation des services sauvegardés avec les services chargés
   useEffect(() => {
-    if (selected.length > 0) {
+    if (step2Data.selected.length > 0) {
       console.log('🔄 [STEP2] Synchronisation des services sauvegardés avec les services chargés');
-      console.log('🔄 [STEP2] Services sauvegardés:', selected);
+      console.log('🔄 [STEP2] Services sauvegardés:', step2Data.selected);
       console.log('🔄 [STEP2] Services chargés depuis l\'API:', services.length);
       
       if (services.length > 0) {
         // Vérifier si tous les services sauvegardés sont présents dans les services chargés
-        const missingServices = selected.filter(savedService => 
+        const missingServices = step2Data.selected.filter(savedService => 
           !services.some(apiService => 
             savedService.serviceId === apiService.serviceId || 
             savedService.serviceName === apiService.serviceName
@@ -134,7 +137,7 @@ export default function Step2SelectServices({
         console.log('⏳ [STEP2] Services de l\'API pas encore chargés, mais services sauvegardés disponibles');
       }
     }
-  }, [services, selected]);
+  }, [services, step2Data.selected]);
 
   // ✅ Log des paramètres pour débogage
   useEffect(() => {
@@ -149,13 +152,28 @@ export default function Step2SelectServices({
     
     // ✅ Log des données reçues pour débogage
     console.log('🔧 [STEP2] Données reçues dans requestData:', {
+      requestData: requestData,
       step1: requestData?.step1,
-      customer: requestData?.step1?.customer,
-      cityFrom: requestData?.step1?.cityFrom,
-      cityTo: requestData?.step1?.cityTo,
-      productName: requestData?.step1?.productName,
-      incotermName: requestData?.step1?.incotermName,
-      comment: requestData?.step1?.comment
+      customer: requestData?.customer,
+      shipment: requestData?.shipment,
+      incoterm: requestData?.incoterm,
+      comment: requestData?.comment,
+      // Props passées directement
+      cityFrom: cityFrom,
+      cityTo: cityTo,
+      productName: productName,
+      incotermName: incotermName
+    });
+
+    // ✅ Log spécifique pour le client
+    console.log('👤 [STEP2] Données client détaillées:', {
+      'requestData?.customer': requestData?.customer,
+      'requestData?.customer?.name': requestData?.customer?.name,
+      'requestData?.customer?.contactPerson': requestData?.customer?.contactPerson,
+      'requestData?.customer?.contactPerson?.fullName': requestData?.customer?.contactPerson?.fullName,
+      'requestData?.step1?.customer': requestData?.step1?.customer,
+      'requestData?.step1?.customer?.companyName': requestData?.step1?.customer?.companyName,
+      'requestData?.step1?.customer?.contactName': requestData?.step1?.customer?.contactName
     });
 
     // ✅ Log de l'état de sélection
@@ -199,8 +217,8 @@ export default function Step2SelectServices({
   // ✅ NOUVELLE LOGIQUE: Ajouter les services sélectionnés qui ne sont pas dans l'API
   const allServices = [...mappedServices];
   
-  if (selected.length > 0) {
-    selected.forEach(savedService => {
+  if (step2Data.selected.length > 0) {
+    step2Data.selected.forEach(savedService => {
       const isAlreadyInList = allServices.some(apiService => 
         apiService.serviceId === savedService.serviceId || 
         apiService.serviceName === savedService.serviceName
@@ -228,12 +246,12 @@ export default function Step2SelectServices({
     console.log('🔄 [STEP2] handleToggle appelé avec:', {
       service: service.serviceName,
       serviceId: service.serviceId,
-      currentSelected: selected.length,
-      currentSelectedDetails: selected.map(s => ({ name: s.serviceName, id: s.serviceId }))
+      currentSelected: step2Data.selected.length,
+      currentSelectedDetails: step2Data.selected.map(s => ({ name: s.serviceName, id: s.serviceId }))
     });
     
     // ✅ CORRECTION: Logique de comparaison robuste
-    const isCurrentlySelected = selected.some((s) => 
+    const isCurrentlySelected = step2Data.selected.some((s) => 
       s.serviceId === service.serviceId || 
       s.serviceName === service.serviceName
     );
@@ -242,7 +260,7 @@ export default function Step2SelectServices({
     
     if (isCurrentlySelected) {
       // Désélectionner le service
-      const newSelected = selected.filter((s) => 
+      const newSelected = step2Data.selected.filter((s) => 
         !(s.serviceId === service.serviceId || 
           s.serviceName === service.serviceName)
       );
@@ -252,7 +270,7 @@ export default function Step2SelectServices({
       onChange(newSelected);
     } else {
       // Sélectionner le service
-      const newSelected = [...selected, service];
+      const newSelected = [...step2Data.selected, service];
       console.log('🔧 [STEP2] Service sélectionné:', service.serviceName);
       console.log('🔧 [STEP2] Nouvelle sélection (sélection):', newSelected.length, 'services');
       console.log('🔧 [STEP2] Détail nouvelle sélection:', newSelected.map(s => s.serviceName));
@@ -322,7 +340,9 @@ export default function Step2SelectServices({
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
                       <PersonIcon sx={{ color: '#3498db' }} />
                       <Typography variant="subtitle2" color="text.secondary">{t('requestWizard.step2.client')}:</Typography>
-                      <Typography variant="body1" sx={{ fontWeight: 600 }}>{requestData?.step1?.customer?.contactName || requestData?.step1?.customer?.companyName || '-'}</Typography>
+                      <Typography variant="body1" sx={{ fontWeight: 600 }}>
+                        {step1Data.customer.companyName || step1Data.customer.contactName || '-'}
+                      </Typography>
                     </Box>
                   </Grid>
                   <Grid item xs={12} sm={6}>
@@ -330,7 +350,7 @@ export default function Step2SelectServices({
                       <LocationOnIcon sx={{ color: '#e74c3c' }} />
                       <Typography variant="subtitle2" color="text.secondary">{t('requestWizard.step2.departure')}:</Typography>
                       <Typography variant="body1" sx={{ fontWeight: 600 }}>
-                        {cityFrom?.name || requestData?.step1?.cityFrom?.name || '-'} / {cityFrom?.country || requestData?.step1?.cityFrom?.country || '-'}
+                        {step1Data.cityFrom.name || '-'} / {step1Data.cityFrom.country || '-'}
                       </Typography>
                     </Box>
                   </Grid>
@@ -339,7 +359,7 @@ export default function Step2SelectServices({
                       <LocationOnIcon sx={{ color: '#27ae60' }} />
                       <Typography variant="subtitle2" color="text.secondary">{t('requestWizard.step2.arrival')}:</Typography>
                       <Typography variant="body1" sx={{ fontWeight: 600 }}>
-                        {cityTo?.name || requestData?.step1?.cityTo?.name || '-'} / {cityTo?.country || requestData?.step1?.cityTo?.country || '-'}
+                        {step1Data.cityTo.name || '-'} / {step1Data.cityTo.country || '-'}
                       </Typography>
                     </Box>
                   </Grid>
@@ -348,9 +368,7 @@ export default function Step2SelectServices({
                       <LocalShippingIcon sx={{ color: '#9b59b6' }} />
                       <Typography variant="subtitle2" color="text.secondary">{t('requestWizard.step2.product')}:</Typography>
                       <Typography variant="body1" sx={{ fontWeight: 600 }}>
-                        {typeof requestData?.step1?.productName === 'object'
-                          ? requestData.step1.productName?.productName || '-'
-                          : requestData?.step1?.productName || '-'}
+                        {step1Data.productName.productName || '-'}
                       </Typography>
                     </Box>
                   </Grid>
@@ -358,14 +376,18 @@ export default function Step2SelectServices({
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
                       <AssignmentIcon sx={{ color: '#34495e' }} />
                       <Typography variant="subtitle2" color="text.secondary">{t('requestWizard.step2.incoterm')}:</Typography>
-                      <Typography variant="body1" sx={{ fontWeight: 600 }}>{requestData?.step1?.incotermName || '-'}</Typography>
+                      <Typography variant="body1" sx={{ fontWeight: 600 }}>
+                        {step1Data.incotermName || '-'}
+                      </Typography>
                     </Box>
                   </Grid>
                   <Grid item xs={12} sm={6}>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
                       <DescriptionIcon sx={{ color: '#e67e22' }} />
                       <Typography variant="subtitle2" color="text.secondary">{t('requestWizard.step2.comment')}:</Typography>
-                      <Typography variant="body1" sx={{ fontWeight: 600 }}>{requestData?.step1?.comment || '-'}</Typography>
+                      <Typography variant="body1" sx={{ fontWeight: 600 }}>
+                        {step1Data.comment || '-'}
+                      </Typography>
                     </Box>
                   </Grid>
                 </Grid>
@@ -394,7 +416,7 @@ export default function Step2SelectServices({
                     {t('requestWizard.step2.availableServicesTitle')}
                   </Typography>
                   <Chip 
-                    label={t('requestWizard.step2.selectedCount', { count: selected.length })} 
+                    label={t('requestWizard.step2.selectedCount', { count: step2Data.selected.length })} 
                     color="success" 
                     sx={{ ml: 2 }}
                   />
@@ -438,14 +460,14 @@ export default function Step2SelectServices({
                       <List sx={{ p: 0 }}>
                         {paginatedServices.map((service, idx) => {
                           // ✅ CORRECTION: Comparaison robuste basée sur serviceId ET serviceName
-                          const isSelected = selected.some((s) => 
+                          const isSelected = step2Data.selected.some((s) => 
                             s.serviceId === service.serviceId || 
                             s.serviceName === service.serviceName
                           );
                           
                           // ✅ LOG DÉTAILLÉ pour débogage
-                          if (selected.length > 0) {
-                            const matchingService = selected.find((s) => 
+                          if (step2Data.selected.length > 0) {
+                            const matchingService = step2Data.selected.find((s) => 
                               s.serviceId === service.serviceId || 
                               s.serviceName === service.serviceName
                             );
@@ -604,19 +626,19 @@ export default function Step2SelectServices({
         onRemoveMisc={id => setSelectedMiscellaneous(selectedMiscellaneous.filter(m => m.id !== id))}
         currentStep={2}
         requestData={{
-          customer: requestData?.step1?.customer,
-          cityFrom: requestData?.step1?.cityFrom,
-          cityTo: requestData?.step1?.cityTo,
-          productName: requestData?.step1?.productName,
-          incotermName: requestData?.step1?.incotermName
+          customer: step1Data.customer,
+          cityFrom: step1Data.cityFrom,
+          cityTo: step1Data.cityTo,
+          productName: step1Data.productName,
+          incotermName: step1Data.incotermName
         }}
-        selectedServices={selected}
+        selectedServices={step2Data.selected}
         selectedContainers={{}}
       >
         <Box sx={{ p: 2 }}>
           <Typography variant="h6">Résumé de l'offre</Typography>
           <Typography variant="body2" color="text.secondary">
-            Services sélectionnés: {selected.length}
+            Services sélectionnés: {step2Data.selected.length}
           </Typography>
         </Box>
       </OfferBasketDrawerAccordion>
