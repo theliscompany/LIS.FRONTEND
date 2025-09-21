@@ -36,7 +36,7 @@ import Step5SeafreightSelection from '../components/Step5SeafreightSelection';
 import Step6MiscellaneousSelection from '../components/Step6MiscellaneousSelection';
 import Step7Recap from '../components/Step7Recap';
 // === NOUVEAUX IMPORTS POUR LA CRÉATION DE DEVIS ===
-import { getApiQuoteOfferDrafts, postApiQuoteOfferDraft, putApiQuoteOfferDraftById, getDraft, getQuoteOffer } from '@features/offer/api/sdk.gen';
+import { postApiDraftQuotesSearch, postApiDraftQuotes, putApiDraftQuotesById, getApiDraftQuotesById, getApiQuotesById } from '@features/offer/api/sdk.gen';
 import { enqueueSnackbar } from 'notistack';
 import CompareOptions from '../components/CompareOptions';
 import FinalValidation from '../components/FinalValidation';
@@ -82,7 +82,7 @@ const checkForExistingDraft = async (requestId: string, emailUser: string, debug
   
   try {
     // Recherche générale par emailUser
-    const draftsResponse = await getApiQuoteOfferDrafts({
+    const draftsResponse = await postApiDraftQuotesSearch({
       query: {
         emailUser: emailUser,
         pageNumber: 1,
@@ -365,7 +365,7 @@ export default function RequestWizard() {
         if (draftIdFromUrl) {
           // Chargement du draft existant
           try {
-            const response = await getDraft({ path: { id: draftIdFromUrl } });
+            const response = await getApiDraftQuotesById({ path: { id: draftIdFromUrl } });
             
             // Réponse API reçue
             

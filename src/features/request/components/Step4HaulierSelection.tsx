@@ -89,12 +89,21 @@ const Step4HaulierSelection: React.FC<Step4HaulierSelectionProps> = ({
 
   // ✅ NOUVELLE LOGIQUE : Synchronisation avec step4 depuis draftQuote
   useEffect(() => {
+    console.log('🔧 [STEP4] useEffect de synchronisation déclenché:', {
+      draftQuoteStep4: draftQuote?.step4,
+      selection: draftQuote?.step4?.selection,
+      offerId: draftQuote?.step4?.selection?.offerId,
+      haulageOffersLength: haulageOffers.length
+    });
+
     // ✅ VÉRIFIER SI step4 CONTIENT DES DONNÉES VALIDES
     if (draftQuote?.step4?.selection?.offerId && haulageOffers.length > 0) {
       const matchingOffer = haulageOffers.find(offer => offer.offerId === draftQuote.step4.selection.offerId);
       
       if (!matchingOffer) {
-        // Silently handle missing offer
+        console.warn('⚠️ [STEP4] Offre non trouvée pour offerId:', draftQuote.step4.selection.offerId);
+      } else {
+        console.log('✅ [STEP4] Offre trouvée:', matchingOffer);
       }
     }
   }, [draftQuote?.step4?.selection?.offerId, haulageOffers]);
@@ -244,8 +253,15 @@ const Step4HaulierSelection: React.FC<Step4HaulierSelectionProps> = ({
 
   // ✅ NOUVELLE APPROCHE : Mise à jour via callback onStep4Update
   const handleSelectHaulage = (haulage: HaulageResponse) => {
+    console.log('🔧 [STEP4] handleSelectHaulage appelé avec:', {
+      haulage: haulage,
+      offerId: haulage.offerId,
+      haulierName: haulage.haulierName
+    });
+
     // ✅ VÉRIFICATION : S'assurer que l'offerId est présent
     if (!haulage.offerId) {
+      console.error('❌ [STEP4] Erreur: L\'offerId est manquant dans la sélection du haulage');
       alert('❌ Erreur: L\'offerId est manquant dans la sélection du haulage');
       return;
     }
@@ -312,7 +328,10 @@ const Step4HaulierSelection: React.FC<Step4HaulierSelectionProps> = ({
     
     // ✅ APPELER LE CALLBACK POUR METTRE À JOUR REQUESTWIZARD
     if (onStep4Update) {
+      console.log('🔄 [STEP4] Appel onStep4Update avec step4Data:', step4Data);
       onStep4Update(step4Data);
+    } else {
+      console.warn('⚠️ [STEP4] onStep4Update callback non fourni');
     }
   };
 
@@ -329,7 +348,10 @@ const Step4HaulierSelection: React.FC<Step4HaulierSelectionProps> = ({
     
     // ✅ APPELER LE CALLBACK POUR METTRE À JOUR REQUESTWIZARD
     if (onStep4Update) {
+      console.log('🔄 [STEP4] Appel onStep4Update pour désélection:', step4Data);
       onStep4Update(step4Data);
+    } else {
+      console.warn('⚠️ [STEP4] onStep4Update callback non fourni pour désélection');
     }
   };
 
@@ -364,6 +386,175 @@ const Step4HaulierSelection: React.FC<Step4HaulierSelectionProps> = ({
           {t('requestWizard.step4.subtitle')}
         </Typography>
       </Box>
+      
+      {/* Section Selected Seafreight - Afficher les seafreights sélectionnés */}
+      {draftQuote?.step5?.selections && draftQuote.step5.selections.length > 0 && (
+        <Slide direction="up" in timeout={1000}>
+          <Accordion defaultExpanded={false} sx={{ mb: 4, borderRadius: 3, boxShadow: '0 10px 30px rgba(0,0,0,0.1)', background: 'linear-gradient(135deg, #e8f5e8 0%, #c8e6c9 100%)' }}>
+            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+              <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                <Avatar sx={{ 
+                  bgcolor: 'success.main', 
+                  mr: 2,
+                  background: 'linear-gradient(135deg, #4caf50 0%, #2e7d32 100%)'
+                }}>
+                  <DirectionsBoatIcon />
+                </Avatar>
+                <Typography variant="h5" sx={{ fontWeight: 600, color: '#2e7d32' }}>
+                  {t('requestWizard.step4.selectedSeafreights', 'Selected Seafreights')}
+                </Typography>
+              </Box>
+            </AccordionSummary>
+            <AccordionDetails>
+              <Grid container spacing={3}>
+                {draftQuote.step5.selections.map((seafreight: any, index: number) => (
+                  <Grid item xs={12} md={6} key={seafreight.id || seafreight.seafreightId || index}>
+                    <Card sx={{ 
+                      borderRadius: 2, 
+                      boxShadow: '0 4px 12px rgba(0,0,0,0.1)', 
+                      background: 'linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)',
+                      border: '1px solid #4caf50',
+                      borderLeft: '4px solid #4caf50'
+                    }}>
+                      <CardContent>
+                        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                          <DirectionsBoatIcon sx={{ color: '#4caf50', mr: 1 }} />
+                          <Typography variant="h6" sx={{ fontWeight: 600, color: '#2e7d32' }}>
+                            Seafreight #{index + 1}
+                          </Typography>
+                        </Box>
+                        
+                        <Grid container spacing={2}>
+                          <Grid item xs={12}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                              <BusinessIcon sx={{ color: '#2980b9', mr: 1, fontSize: '1.2em' }} />
+                              <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                                <strong>Transporteur:</strong> {seafreight.carrier?.name || '-'}
+                              </Typography>
+                            </Box>
+                          </Grid>
+                          
+                          <Grid item xs={12}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                              <LocationOnIcon sx={{ color: '#e74c3c', mr: 1, fontSize: '1.2em' }} />
+                              <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                                <strong>Port départ:</strong> {seafreight.route?.departurePort?.portName || '-'}
+                              </Typography>
+                            </Box>
+                          </Grid>
+                          
+                          <Grid item xs={12}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                              <LocationOnIcon sx={{ color: '#27ae60', mr: 1, fontSize: '1.2em' }} />
+                              <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                                <strong>Port arrivée:</strong> {seafreight.route?.destinationPort?.portName || '-'}
+                              </Typography>
+                            </Box>
+                          </Grid>
+                          
+                          <Grid item xs={12}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                              <AssignmentIcon sx={{ color: '#9b59b6', mr: 1, fontSize: '1.2em' }} />
+                              <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                                <strong>Type conteneur:</strong> {seafreight.container?.containerType || '-'}
+                              </Typography>
+                            </Box>
+                          </Grid>
+                          
+                          <Grid item xs={12}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                              <EuroIcon sx={{ color: '#f39c12', mr: 1, fontSize: '1.2em' }} />
+                              <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                                <strong>Prix unitaire:</strong> {seafreight.container?.unitPrice ? 
+                                  `${seafreight.container.unitPrice.toLocaleString(undefined, { maximumFractionDigits: 2 })} EUR` : 
+                                  '-'
+                                }
+                              </Typography>
+                            </Box>
+                          </Grid>
+                          
+                          <Grid item xs={12}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                              <AssignmentIcon sx={{ color: '#16a085', mr: 1, fontSize: '1.2em' }} />
+                              <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                                <strong>Quantité:</strong> {seafreight.container?.quantity || '-'}
+                              </Typography>
+                            </Box>
+                          </Grid>
+                          
+                          <Grid item xs={12}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                              <EuroIcon sx={{ color: '#27ae60', mr: 1, fontSize: '1.2em' }} />
+                              <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                                <strong>Sous-total:</strong> {seafreight.container?.subtotal ? 
+                                  `${seafreight.container.subtotal.toLocaleString(undefined, { maximumFractionDigits: 2 })} EUR` : 
+                                  '-'
+                                }
+                              </Typography>
+                            </Box>
+                          </Grid>
+                          
+                          <Grid item xs={12}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                              <AccessTimeIcon sx={{ color: '#16a085', mr: 1, fontSize: '1.2em' }} />
+                              <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                                <strong>Temps de transit:</strong> {seafreight.route?.transitDays || '-'} {seafreight.route?.transitDays ? 'jours' : ''}
+                              </Typography>
+                            </Box>
+                          </Grid>
+                          
+                          <Grid item xs={12}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                              <RepeatIcon sx={{ color: '#8e44ad', mr: 1, fontSize: '1.2em' }} />
+                              <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                                <strong>Fréquence:</strong> {seafreight.route?.frequency || '-'}
+                              </Typography>
+                            </Box>
+                          </Grid>
+                        </Grid>
+                      </CardContent>
+                    </Card>
+                  </Grid>
+                ))}
+              </Grid>
+              
+              {/* Résumé global - seulement si il y a des sélections */}
+              {draftQuote?.step5?.selections && draftQuote.step5.selections.length > 0 && (
+                <Box sx={{ mt: 3, p: 2, background: 'linear-gradient(135deg, #e8f5e8 0%, #c8e6c9 100%)', borderRadius: 2, border: '1px solid #4caf50' }}>
+                  <Typography variant="subtitle1" sx={{ fontWeight: 600, color: '#2e7d32', mb: 1 }}>
+                    📊 Résumé global des seafreights
+                  </Typography>
+                  <Grid container spacing={2}>
+                    <Grid item xs={12} sm={6} md={3}>
+                      <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                        <strong>Nombre total:</strong> {draftQuote.step5.selections.length} seafreight(s)
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={12} sm={6} md={3}>
+                      <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                        <strong>Transporteurs:</strong> {[...new Set(draftQuote.step5.selections.map((s: any) => s.carrier?.name).filter(Boolean))].join(', ') || '-'}
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={12} sm={6} md={3}>
+                      <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                        <strong>Types conteneurs:</strong> {[...new Set(draftQuote.step5.selections.map((s: any) => s.container?.containerType).filter(Boolean))].join(', ') || '-'}
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={12} sm={6} md={3}>
+                      <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                        <strong>Total prix:</strong> {draftQuote.step5.selections.reduce((sum: number, s: any) => {
+                          const total = s.container?.subtotal || 0;
+                          return sum + total;
+                        }, 0).toLocaleString(undefined, { maximumFractionDigits: 2 })} EUR
+                      </Typography>
+                    </Grid>
+                  </Grid>
+                </Box>
+              )}
+            </AccordionDetails>
+          </Accordion>
+        </Slide>
+      )}
       
       {/* ✅ ALERTE SUR LE PROBLÈME OFFERID NULL */}
       {draftQuote?.step4?.selection && !draftQuote.step4.selection.offerId && (
@@ -491,173 +682,6 @@ const Step4HaulierSelection: React.FC<Step4HaulierSelectionProps> = ({
           </Accordion>
         </Slide>
       )}
-
-      {/* Section Seafreight sélectionnés (Step 5) */}
-      {draftQuote?.step5?.selections && draftQuote.step5.selections.length > 0 && (
-        <Slide direction="up" in timeout={1000}>
-          <Accordion defaultExpanded={false} sx={{ mb: 4, borderRadius: 3, boxShadow: '0 10px 30px rgba(0,0,0,0.1)', background: 'linear-gradient(135deg, #e3f2fd 0%, #f5f7fa 100%)' }}>
-            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-              <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <Avatar sx={{ 
-                  bgcolor: 'primary.main', 
-                  mr: 2,
-                  background: 'linear-gradient(135deg, #1976d2 0%, #7b1fa2 100%)'
-                }}>
-                  <DirectionsBoatIcon />
-                </Avatar>
-                <Typography variant="h5" sx={{ fontWeight: 600, color: '#2c3e50' }}>
-                  Selected seafreights
-                </Typography>
-              </Box>
-            </AccordionSummary>
-            <AccordionDetails>
-
-              <Grid container spacing={3}>
-                {draftQuote.step5.selections.map((seafreight: any, index: number) => (
-                  <Grid item xs={12} md={6} key={seafreight.id || seafreight.seafreightId || index}>
-                    <Card sx={{ 
-                      borderRadius: 2, 
-                      boxShadow: '0 4px 12px rgba(0,0,0,0.1)', 
-                      background: 'linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)',
-                      border: '1px solid #e3f2fd'
-                    }}>
-                      <CardContent>
-                        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                          <DirectionsBoatIcon sx={{ color: '#1976d2', mr: 1 }} />
-                          <Typography variant="h6" sx={{ fontWeight: 600, color: '#1976d2' }}>
-                            Seafreight #{index + 1}
-                          </Typography>
-                        </Box>
-                        
-                        <Grid container spacing={2}>
-                          <Grid item xs={12}>
-                            <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                              <BusinessIcon sx={{ color: '#2980b9', mr: 1, fontSize: '1.2em' }} />
-                              <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                                <strong>Transporteur:</strong> {seafreight.carrier?.name || '-'}
-                              </Typography>
-                            </Box>
-                          </Grid>
-                          
-                          <Grid item xs={12}>
-                            <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                              <LocationOnIcon sx={{ color: '#e74c3c', mr: 1, fontSize: '1.2em' }} />
-                              <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                                <strong>Port départ:</strong> {seafreight.route?.departurePort?.portName || '-'}
-                              </Typography>
-                            </Box>
-                          </Grid>
-                          
-                          <Grid item xs={12}>
-                            <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                              <LocationOnIcon sx={{ color: '#27ae60', mr: 1, fontSize: '1.2em' }} />
-                              <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                                <strong>Port arrivée:</strong> {seafreight.route?.destinationPort?.portName || '-'}
-                              </Typography>
-                            </Box>
-                          </Grid>
-                          
-                          <Grid item xs={12}>
-                            <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                              <AssignmentIcon sx={{ color: '#9b59b6', mr: 1, fontSize: '1.2em' }} />
-                              <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                                <strong>Type conteneur:</strong> {seafreight.container?.containerType || '-'}
-                              </Typography>
-                            </Box>
-                          </Grid>
-                          
-                          <Grid item xs={12}>
-                            <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                              <EuroIcon sx={{ color: '#f39c12', mr: 1, fontSize: '1.2em' }} />
-                              <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                                <strong>Prix unitaire:</strong> {seafreight.container?.unitPrice ? 
-                                  `${seafreight.container.unitPrice.toLocaleString(undefined, { maximumFractionDigits: 2 })} EUR` : 
-                                  '-'
-                                }
-                              </Typography>
-                            </Box>
-                          </Grid>
-                          
-                          <Grid item xs={12}>
-                            <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                              <AssignmentIcon sx={{ color: '#16a085', mr: 1, fontSize: '1.2em' }} />
-                              <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                                <strong>Quantité:</strong> {seafreight.container?.quantity || '-'}
-                              </Typography>
-                            </Box>
-                          </Grid>
-                          
-                          <Grid item xs={12}>
-                            <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                              <EuroIcon sx={{ color: '#27ae60', mr: 1, fontSize: '1.2em' }} />
-                              <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                                <strong>Sous-total:</strong> {seafreight.container?.subtotal ? 
-                                  `${seafreight.container.subtotal.toLocaleString(undefined, { maximumFractionDigits: 2 })} EUR` : 
-                                  '-'
-                                }
-                              </Typography>
-                            </Box>
-                          </Grid>
-                          
-                          <Grid item xs={12}>
-                            <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                              <AccessTimeIcon sx={{ color: '#16a085', mr: 1, fontSize: '1.2em' }} />
-                              <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                                <strong>Temps de transit:</strong> {seafreight.route?.transitDays || '-'} {seafreight.route?.transitDays ? 'jours' : ''}
-                              </Typography>
-                            </Box>
-                          </Grid>
-                          
-                          <Grid item xs={12}>
-                            <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                              <RepeatIcon sx={{ color: '#8e44ad', mr: 1, fontSize: '1.2em' }} />
-                              <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                                <strong>Fréquence:</strong> {seafreight.route?.frequency || '-'}
-                              </Typography>
-                            </Box>
-                          </Grid>
-                        </Grid>
-                      </CardContent>
-                    </Card>
-                  </Grid>
-                ))}
-              </Grid>
-              
-              {/* Résumé global */}
-              <Box sx={{ mt: 3, p: 2, background: 'linear-gradient(135deg, #e8f5e8 0%, #c8e6c9 100%)', borderRadius: 2, border: '1px solid #4caf50' }}>
-                <Typography variant="subtitle1" sx={{ fontWeight: 600, color: '#2e7d32', mb: 1 }}>
-                  📊 Résumé global des seafreights
-                </Typography>
-                <Grid container spacing={2}>
-                  <Grid item xs={12} sm={6} md={3}>
-                    <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                      <strong>Nombre total:</strong> {draftQuote.step5.selections.length} seafreight(s)
-                    </Typography>
-                  </Grid>
-                  <Grid item xs={12} sm={6} md={3}>
-                    <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                      <strong>Transporteurs:</strong> {[...new Set(draftQuote.step5.selections.map((s: any) => s.carrier?.name).filter(Boolean))].join(', ') || '-'}
-                    </Typography>
-                  </Grid>
-                  <Grid item xs={12} sm={6} md={3}>
-                    <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                      <strong>Types conteneurs:</strong> {[...new Set(draftQuote.step5.selections.map((s: any) => s.container?.containerType).filter(Boolean))].join(', ') || '-'}
-                    </Typography>
-                  </Grid>
-                  <Grid item xs={12} sm={6} md={3}>
-                    <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                      <strong>Total prix:</strong> {draftQuote.step5.selections.reduce((sum: number, s: any) => {
-                        const total = s.container?.subtotal || 0;
-                        return sum + total;
-                      }, 0).toLocaleString(undefined, { maximumFractionDigits: 2 })} EUR
-                    </Typography>
-                  </Grid>
-                </Grid>
-              </Box>
-            </AccordionDetails>
-          </Accordion>
-        </Slide>
-      )}
       
       {/* Filtres */}
       <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -751,7 +775,7 @@ const Step4HaulierSelection: React.FC<Step4HaulierSelectionProps> = ({
                     <TableCell align="center" sx={{ color: '#fff', fontWeight: 700 }}>
                       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                         <VisibilityIcon sx={{ verticalAlign: 'middle', mr: 1 }} fontSize="small" />
-                        Détails
+{t('requestWizard.step4.details')}
                       </Box>
                     </TableCell>
                   </TableRow>
@@ -852,6 +876,11 @@ const Step4HaulierSelection: React.FC<Step4HaulierSelectionProps> = ({
                             color="primary"
                             size="small"
                             onClick={() => {
+                              console.log('🔧 [STEP4] Bouton cliqué pour haulage:', {
+                                offerId: h.offerId,
+                                haulierName: h.haulierName,
+                                isSelected: isSelected
+                              });
                               if (isSelected) {
                                 handleDeselectHaulage();
                               } else {
@@ -863,13 +892,13 @@ const Step4HaulierSelection: React.FC<Step4HaulierSelectionProps> = ({
                             startIcon={null}
                           >
                             {isSelected 
-                              ? t('requestWizard.step4.deselect', 'Deselect')
+                              ? t('requestWizard.step4.deselect')
                               : t('requestWizard.step4.select')
                             }
                           </Button>
                         </TableCell>
                         <TableCell align="center">
-                          <Tooltip title="Voir les détails de l'offre" arrow>
+                          <Tooltip title={t('requestWizard.step4.details')} arrow>
                             <IconButton
                               size="small"
                               onClick={() => handleOpenDetailsModal(h)}
@@ -1215,7 +1244,7 @@ const Step4HaulierSelection: React.FC<Step4HaulierSelectionProps> = ({
                 fontWeight: 600,
               }}
             >
-              Fermer
+{t('requestWizard.step4.close')}
             </Button>
             {selectedHaulageForDetails && (
           <Button 
@@ -1235,7 +1264,7 @@ const Step4HaulierSelection: React.FC<Step4HaulierSelectionProps> = ({
                   },
                 }}
               >
-                {draftQuote?.step4?.selection?.offerId === selectedHaulageForDetails.offerId ? 'Désélectionner' : 'Sélectionner cette offre'}
+{draftQuote?.step4?.selection?.offerId === selectedHaulageForDetails.offerId ? t('requestWizard.step4.deselect') : t('requestWizard.step4.selectThisOffer')}
           </Button>
             )}
       </Box>

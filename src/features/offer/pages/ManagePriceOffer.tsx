@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import QuoteOptionsEditor from '@features/offer/components/QuoteOptionsEditor';
 import QuoteGeneralInfoEditor from '@features/offer/components/QuoteGeneralInfoEditor';
 import QuoteFinalConfigEditor from '@features/offer/components/QuoteFinalConfigEditor';
-import { getQuote } from '@features/offer/api';
+import { getApiQuotesById } from '@features/offer/api';
 
 interface ManagePriceOfferProps {}
 
@@ -35,7 +35,7 @@ const ManagePriceOffer: React.FC<ManagePriceOfferProps> = () => {
   const loadOffer = async () => {
     try {
       setLoading(true);
-      const response: any = await getQuote({ path: { id: id || "" } });
+      const response: any = await getApiQuotesById({ path: { id: id || "" } });
       if (response !== null && response !== undefined) {
         console.log(response.data.data);
         var objTotal = response.data.data;

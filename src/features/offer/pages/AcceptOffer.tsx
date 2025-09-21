@@ -7,7 +7,7 @@ import { useTranslation } from 'react-i18next';
 import { useLocation, useParams } from 'react-router-dom';
 // import { enqueueSnackbar } from 'notistack';
 // import { putApiQuoteOfferByIdApproval } from '@features/offer/api'; // Fonction non disponible dans la nouvelle API
-import { getQuote, putApiQuoteByIdSelectPreferredOption } from '@features/offer/api';
+import { getApiQuotesById } from '@features/offer/api';
 import { postApiOrders } from '@features/shipment/api';
 import { postApiEmail } from '@features/request/api';
 import { enqueueSnackbar, SnackbarProvider } from 'notistack';
@@ -46,14 +46,15 @@ const AcceptOffer = () => {
         
         // Étape 1: Récupérer la quote
         try {
-            const quoteData = await getQuote({path: {id: String(id)}});
+            const quoteData = await getApiQuotesById({path: {id: String(id)}});
             console.log("Quote Data: ", quoteData.data);
             
             // Étape 2: Sélectionner l'option préférée (simule l'approbation)
-            await putApiQuoteByIdSelectPreferredOption({
-                path: {id: String(id)}, 
-                query: {optionIndex: cOption}
-            });
+            // TODO: Implémenter avec le nouveau SDK - cette fonction n'existe plus
+            // await putApiQuoteByIdSelectPreferredOption({
+            //     path: {id: String(id)}, 
+            //     query: {optionIndex: cOption}
+            // });
             
             // Étape 3: Traiter comme approuvé
             if (quoteData.data && typeof quoteData.data === 'object') {

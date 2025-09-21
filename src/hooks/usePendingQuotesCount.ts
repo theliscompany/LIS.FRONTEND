@@ -1,38 +1,29 @@
 import { useQuery } from '@tanstack/react-query';
-import { postApiQuotesSearch } from '../features/offer/api/sdk.gen';
+import { getApiDraftQuotes } from '../features/offer/api/sdk.gen';
 
 export const usePendingQuotesCount = () => {
   return useQuery({
     queryKey: ['pendingQuotesCount'],
     queryFn: async () => {
       try {
-        const response = await postApiQuotesSearch({
-          body: {
-            status: 'PENDING_APPROVAL',
+        // Récupérer tous les brouillons de devis
+        const response = await getApiDraftQuotes({
+          query: {
             pageNumber: 1,
-            pageSize: 100 // Taille maximale autorisée par l'API (entre 1 et 100)
+            pageSize: 100 // Taille maximale autorisée par l'API
           }
         });
         
-        // La structure exacte dépend de votre API, ajustez selon votre réponse
-        if (response?.data && typeof response.data === 'object') {
-          // Si c'est un tableau direct
-          if (Array.isArray(response.data)) {
-            return response.data.length;
-          }
-          // Si c'est un objet avec une propriété data
-          if ('data' in response.data && Array.isArray(response.data.data)) {
-            return response.data.data.length;
-          }
-          // Si c'est un objet avec une propriété items (pagination)
-          if ('items' in response.data && Array.isArray(response.data.items)) {
-            return (response.data as any).items.length;
-          }
-          // Si c'est un objet avec totalCount
-          if ('totalCount' in response.data) {
-            return (response.data as any).totalCount;
-          }
+        // Filtrer les brouillons en attente d'approbation
+        if (response?.data?.data) {
+          const pendingQuotes = response.data.data.filter((quote: any) => 
+            quote.status === 'pending_approval' || 
+            quote.status === 'PENDING_APPROVAL' ||
+            quote.status === 'pending'
+          );
+          return pendingQuotes.length;
         }
+        
         return 0;
       } catch (error) {
         console.error('Erreur lors du chargement du nombre de devis en attente:', error);

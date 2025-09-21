@@ -237,7 +237,7 @@ const BackendServiceProvider = ({children}:{children:React.ReactNode}) => {
     
           // Si on est en local, utiliser le baseURL local pour quoteClient
           quoteClient.setConfig({
-            baseURL: isLocal ? 'https://localhost:7089/' : (import.meta.env.VITE_APIM_URL + import.meta.env.VITE_QUOTE_API_URL_SUFFIX),
+            baseURL: isLocal ? 'http://localhost:5153/' : (import.meta.env.VITE_APIM_URL + import.meta.env.VITE_QUOTE_API_URL_SUFFIX),
           });
     
           sessionstorageClient.setConfig({

@@ -27,7 +27,7 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { fr } from 'date-fns/locale';
-import { putApiQuoteOfferDraftById } from '../api';
+import { putApiDraftQuotesById } from '../api';
 // import type { QuoteOfferStatus, ClientApprovalStatus } from '../api/types.gen';
 
 interface QuoteGeneralInfoEditorProps {
@@ -83,7 +83,7 @@ const QuoteGeneralInfoEditor: React.FC<QuoteGeneralInfoEditorProps> = ({
         created: editedQuote.created ? new Date(editedQuote.created).toISOString() : null
       };
 
-      await putApiQuoteOfferDraftById({
+      await putApiDraftQuotesById({
         path: { id: quote.id },
         body: payload
       });

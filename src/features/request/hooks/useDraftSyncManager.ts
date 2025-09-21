@@ -1,10 +1,11 @@
 import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
-import { DraftQuote, syncDraftQuoteData, buildSDKPayload } from '../types';
+import { DraftQuote, syncDraftQuoteData, buildCreateDraftPayload, buildUpdateDraftPayload } from '../types';
 import { 
-  postApiQuoteOfferDraft, 
-  putApiQuoteOfferDraftById,
-  getDraft 
+  postApiDraftQuotes, 
+  putApiDraftQuotesById,
+  getApiDraftQuotesById 
 } from '@features/offer/api';
+import { isValidDraftId } from '../utils/draftIdValidation';
 
 // === TYPES POUR LA GESTION DE SYNCHRONISATION ===
 export interface SyncStatus {
@@ -90,7 +91,7 @@ export const useDraftSyncManager = (
     try {
       console.log('📥 [SYNC] Synchronisation depuis la base de données...');
       
-      const response = await getDraft({ path: { id: targetId } });
+      const response = await getApiDraftQuotesById({ path: { id: targetId } });
       const responseData = response.data as any;
       
       if (!responseData?.data?.OptimizedDraftData) {
@@ -209,18 +210,19 @@ export const useDraftSyncManager = (
       let response;
       let isNewDraft = false;
       
-      if (draftId) {
+      // ✅ CORRECTION : Vérifier si draftId est valide pour une mise à jour
+      if (isValidDraftId(draftId)) {
         // Mise à jour d'un brouillon existant
         console.log('🔄 [SYNC] Mise à jour du brouillon existant...');
-        response = await putApiQuoteOfferDraftById({
-          body: buildSDKPayload(draftQuote),
+        response = await putApiDraftQuotesById({
+          body: buildUpdateDraftPayload(draftQuote),
           path: { id: draftId }
         });
       } else {
         // Création d'un nouveau brouillon
         console.log('🚀 [SYNC] Création d\'un nouveau brouillon...');
-        response = await postApiQuoteOfferDraft({
-          body: buildSDKPayload(draftQuote)
+        response = await postApiDraftQuotes({
+          body: buildCreateDraftPayload(draftQuote)
         });
         isNewDraft = true;
       }

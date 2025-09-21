@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useMutation } from '@tanstack/react-query';
-import { postApiQuoteFromDraft } from '../../offer/api/sdk.gen';
+import { postApiDraftQuotesByIdFinalize } from '../../offer/api/sdk.gen';
 import { 
   Box, 
   Typography, 
@@ -26,7 +26,8 @@ import {
   IconButton,
   InputAdornment,
   Tabs,
-  Tab
+  Tab,
+  Divider
 } from '@mui/material';
 import {
   AssignmentTurnedIn,
@@ -43,8 +44,8 @@ import {
   Delete,
   ViewList as ViewListIcon
 } from '@mui/icons-material';
-import RealDraftOptionsManagerFixed from './RealDraftOptionsManagerFixed';
-import { useRealDraftOptionsManagerFixed as useRealDraftOptionsManager } from '../hooks/useRealDraftOptionsManagerFixed';
+import OptionsManager from './OptionsManager';
+import { useOptionsManager } from '../hooks/useOptionsManager';
 
 interface Step7RecapProps {
   draftQuote: any;
@@ -112,18 +113,16 @@ const Step7Recap: React.FC<Step7RecapProps> = ({
 
   // === MUTATIONS POUR L'API (OPTIMISÉES) ===
   const createQuoteFromDraftMutation = useMutation({
-    mutationFn: (data: any) => postApiQuoteFromDraft(data)
+    mutationFn: (data: any) => postApiDraftQuotesByIdFinalize(data)
   });
 
   // === HOOK POUR LA GESTION DES OPTIONS RÉELLES ===
   const {
     options,
     createOption,
-    exportForQuoteCreation
-  } = useRealDraftOptionsManager({
-    draftQuote,
-    onDraftUpdate: onDraftSaved
-  });
+    canAddMoreOptions,
+    startCreating
+  } = useOptionsManager(draftQuote);
 
   // === DONNÉES MÉMORISÉES ===
   const initialContainerQuantities = useMemo(() => {
@@ -242,6 +241,13 @@ const Step7Recap: React.FC<Step7RecapProps> = ({
   const calculatedMiscellaneousServices = useMemo(() => {
     const miscServices = draftQuote?.step6?.selections || draftQuote?.selectedMiscellaneous || [];
     
+    console.log('🔧 [STEP7] Services divers calculés:', {
+      step6Selections: draftQuote?.step6?.selections,
+      selectedMiscellaneous: draftQuote?.selectedMiscellaneous,
+      miscServices,
+      count: miscServices.length
+    });
+    
     if (miscServices && miscServices.length > 0) {
       return miscServices;
     } else {
@@ -342,30 +348,23 @@ const Step7Recap: React.FC<Step7RecapProps> = ({
   // === CALCUL DES TOTAUX OPTIMISÉ ===
   const calculateTotals = useMemo(() => {
     // ✅ NOUVELLE LOGIQUE : Priorité absolue à step4
-
-    
-    // ✅ NOUVELLE LOGIQUE : Priorité absolue à step4
     let haulageTotal = 0;
-    let haulageSource = 'AUCUNE';
     
     // PRIORITÉ 1: step4.calculation.subtotal (calculé et persisté)
     if (draftQuote?.step4?.calculation?.subtotal) {
       haulageTotal = parseFloat(String(draftQuote.step4.calculation.subtotal)) || 0;
-      haulageSource = 'step4.calculation.subtotal';
     } 
     // PRIORITÉ 2: Calcul depuis step4.selection.tariff.unitPrice
     else if (draftQuote?.step4?.selection?.tariff?.unitPrice && draftQuote?.totalTEU) {
       const unitPrice = parseFloat(String(draftQuote.step4.selection.tariff.unitPrice)) || 0;
       const totalTEU = parseFloat(String(draftQuote.totalTEU)) || 0;
       haulageTotal = totalTEU * unitPrice;
-      haulageSource = 'step4.selection.tariff.unitPrice × totalTEU';
     }
     // PRIORITÉ 3: Calcul depuis step4.calculation.unitPrice
     else if (draftQuote?.step4?.calculation?.unitPrice && draftQuote?.totalTEU) {
       const unitPrice = parseFloat(String(draftQuote.step4.calculation.unitPrice)) || 0;
       const totalTEU = parseFloat(String(draftQuote.totalTEU)) || 0;
       haulageTotal = totalTEU * unitPrice;
-      haulageSource = 'step4.calculation.unitPrice × totalTEU';
     }
     
 
@@ -381,7 +380,7 @@ const Step7Recap: React.FC<Step7RecapProps> = ({
     if (draftQuote?.step3?.containers && selectedSeafreights.length > 0) {
       // ✅ CORRECTION: Calculer exactement comme affiché dans le tableau
       // Chaque seafreight × chaque container (pas de moyenne)
-      selectedSeafreights.forEach((seafreight: any, seafreightIndex: number) => {
+      selectedSeafreights.forEach((_seafreight: any, seafreightIndex: number) => {
         draftQuote.step3.containers.forEach((container: any) => {
           const containerId = container.id;
           const quantity = containerQuantities[containerId] || container.quantity || 1;
@@ -401,7 +400,7 @@ const Step7Recap: React.FC<Step7RecapProps> = ({
     
     // ✅ CORRECTION: Si pas de containers, additionner tous les seafreights
     if (seafreightBaseTotal === 0 && selectedSeafreights.length > 0) {
-      selectedSeafreights.forEach((seafreight: any, seafreightIndex: number) => {
+      selectedSeafreights.forEach((_seafreight: any, seafreightIndex: number) => {
         const basePrice = getSeafreightBasePrice('', seafreightIndex);
         seafreightBaseTotal += basePrice;
       });
@@ -518,7 +517,7 @@ const Step7Recap: React.FC<Step7RecapProps> = ({
     if (draftQuote?.step5?.selections?.length > 0) {
       if (draftQuote?.step3?.containers && draftQuote.step3.containers.length > 0) {
         // Cas avec containers : chaque seafreight × chaque container
-        draftQuote.step5.selections.forEach((seafreight: any, seafreightIndex: number) => {
+        draftQuote.step5.selections.forEach((_seafreight: any, seafreightIndex: number) => {
           draftQuote.step3.containers.forEach((container: any) => {
             const containerId = container.id;
             const quantity = containerQuantities[containerId] || container.quantity || 1;
@@ -528,7 +527,7 @@ const Step7Recap: React.FC<Step7RecapProps> = ({
         });
       } else {
         // Cas sans containers : chaque seafreight directement
-        draftQuote.step5.selections.forEach((seafreight: any, seafreightIndex: number) => {
+        draftQuote.step5.selections.forEach((_seafreight: any, seafreightIndex: number) => {
           const basePrice = getSeafreightBasePrice('', seafreightIndex);
           displayedTotal += basePrice;
         });
@@ -750,7 +749,7 @@ const Step7Recap: React.FC<Step7RecapProps> = ({
       const optionData = {
         name: `Option ${options.length + 1}`,
         description: optionDescription || 'Option créée depuis le récapitulatif Step 7',
-        marginType: profitMarginType,
+        marginType: (profitMarginType === 'amount' ? 'fixed' : 'percentage') as 'percentage' | 'fixed',
         marginValue: profitMargin
       };
 
@@ -877,7 +876,7 @@ const Step7Recap: React.FC<Step7RecapProps> = ({
               />
               <Tab
                 value="options"
-                label={`Options (${options.length})`}
+                label={`Options (${options.length}/5)`}
                 icon={<ViewListIcon />}
                 iconPosition="start"
                 disabled={!quoteId && !draftId}
@@ -1508,7 +1507,7 @@ const Step7Recap: React.FC<Step7RecapProps> = ({
         </Accordion>
 
         {/* Actions principales */}
-        <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mb: 4 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mb: 4, flexWrap: 'wrap' }}>
           {isEditingMode ? (
             <>
               {/* MODE ÉDITION D'OPTION */}
@@ -1535,6 +1534,59 @@ const Step7Recap: React.FC<Step7RecapProps> = ({
             </>
           ) : (
             <>
+              {/* Instructions pour créer des options */}
+              <Box sx={{ 
+                bgcolor: 'info.light', 
+                p: 3, 
+                borderRadius: 2, 
+                mb: 3,
+                border: '2px solid',
+                borderColor: 'info.main'
+              }}>
+                <Typography variant="h6" gutterBottom sx={{ color: 'info.dark', fontWeight: 600 }}>
+                  🎯 Comment créer des options pour ce brouillon
+                </Typography>
+                <Typography variant="body1" sx={{ mb: 2, color: 'info.dark' }}>
+                  <strong>Étape 1 :</strong> Configurez vos paramètres (marge, services, etc.) dans les sections ci-dessus
+                </Typography>
+                <Typography variant="body1" sx={{ mb: 2, color: 'info.dark' }}>
+                  <strong>Étape 2 :</strong> Cliquez sur le bouton ci-dessous pour créer une option avec ces paramètres
+                </Typography>
+              <Typography variant="body1" sx={{ color: 'info.dark' }}>
+                <strong>Étape 3 :</strong> Répétez pour créer jusqu'à 5 options différentes, puis finalisez le devis
+              </Typography>
+              <Typography variant="body1" sx={{ color: 'info.dark', mt: 2, fontWeight: 600 }}>
+                💾 <strong>Sauvegarde :</strong> Les options sont automatiquement sauvegardées avec le brouillon
+              </Typography>
+            </Box>
+
+            {/* Bouton de sauvegarde manuelle */}
+            <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3 }}>
+              <Button
+                variant="outlined"
+                color="primary"
+                startIcon={<SaveIcon />}
+                onClick={() => {
+                  // Déclencher la sauvegarde via le parent
+                  if (onDraftSaved) {
+                    onDraftSaved(draftQuote);
+                  }
+                }}
+                sx={{ 
+                  px: 4, 
+                  py: 1.5,
+                  borderWidth: 2,
+                  '&:hover': {
+                    borderWidth: 2,
+                    backgroundColor: 'primary.light',
+                    color: 'white'
+                  }
+                }}
+              >
+                💾 Sauvegarder le brouillon avec ses options
+              </Button>
+            </Box>
+
               {/* MODE NORMAL */}
               {quoteId ? (
                 <Button 
@@ -1544,9 +1596,20 @@ const Step7Recap: React.FC<Step7RecapProps> = ({
                   startIcon={<AddIcon />}
                   onClick={handleFinalizeToOption}
                   disabled={isCreatingOption}
-                  sx={{ fontWeight: 700, borderRadius: 2, px: 4, py: 1.5 }}
+                  sx={{ 
+                    fontWeight: 700, 
+                    borderRadius: 2, 
+                    px: 4, 
+                    py: 1.5,
+                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                    '&:hover': {
+                      background: 'linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)'
+                    },
+                    boxShadow: 3,
+                    fontSize: '1.1rem'
+                  }}
                 >
-                  {isCreatingOption ? 'Création...' : `Ajouter Option ${existingOptions.length + 1}`}
+                  {isCreatingOption ? 'Création...' : `🚀 CRÉER OPTION ${existingOptions.length + 1}/5`}
                 </Button>
               ) : (
                 <Button 
@@ -1556,11 +1619,39 @@ const Step7Recap: React.FC<Step7RecapProps> = ({
                   startIcon={<AssignmentTurnedIn />}
                   onClick={handleFinalizeToOption}
                   disabled={isCreatingOption}
-                  sx={{ fontWeight: 700, borderRadius: 2, px: 4, py: 1.5 }}
+                  sx={{ 
+                    fontWeight: 700, 
+                    borderRadius: 2, 
+                    px: 4, 
+                    py: 1.5,
+                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                    '&:hover': {
+                      background: 'linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)'
+                    },
+                    boxShadow: 3,
+                    fontSize: '1.1rem'
+                  }}
                 >
-                  {isCreatingOption ? 'Création...' : 'Créer le Devis avec cette Option'}
+                  {isCreatingOption ? 'Création...' : '✅ CRÉER LE DEVIS AVEC CETTE OPTION'}
                 </Button>
               )}
+              
+              {/* NOUVEAU : Bouton pour créer une option rapidement */}
+              <Button 
+                variant="contained" 
+                color="secondary" 
+                size="large"
+                startIcon={<AddIcon />}
+                onClick={() => {
+                  // Basculer vers l'onglet Options et démarrer la création
+                  setActiveTab('options');
+                  setTimeout(() => startCreating(), 100);
+                }}
+                disabled={!canAddMoreOptions}
+                sx={{ fontWeight: 700, borderRadius: 2, px: 4, py: 1.5 }}
+              >
+                Créer une Option ({options.length}/5)
+              </Button>
               
               <Button 
                 variant="outlined" 
@@ -1590,19 +1681,232 @@ const Step7Recap: React.FC<Step7RecapProps> = ({
         ) : (
           <>
             {/* === CONTENU DE LA GESTION DES OPTIONS === */}
-            <RealDraftOptionsManagerFixed
+            <OptionsManager
               draftQuote={draftQuote}
               onDraftUpdate={onDraftSaved}
               onQuoteCreation={handleQuoteCreation}
-              // Passer les données calculées du Step 7
-              currentTotals={{
-                displayedTotal: calculateDisplayedTotal,
-                marginAmount: calculateMarginAmount,
-                totalWithMargin: calculateTotalWithMargin,
-                marginType: profitMarginType,
-                marginValue: profitMargin
-              }}
             />
+            
+            {/* === AFFICHAGE DES DONNÉES COMPLÈTES DES OPTIONS === */}
+            <Box sx={{ mt: 4 }}>
+              <Typography variant="h5" gutterBottom sx={{ mb: 3, color: 'primary.main', fontWeight: 600 }}>
+                📊 Données complètes des options créées
+              </Typography>
+              
+              {options.length > 0 ? (
+                options.map((option) => (
+                  <Accordion key={option.optionId} sx={{ mb: 2, border: '1px solid', borderColor: 'divider' }}>
+                    <AccordionSummary expandIcon={<ExpandMore />}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, width: '100%' }}>
+                        <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                          {option.name}
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          Créée le {new Date(option.createdAt).toLocaleDateString('fr-FR')}
+                        </Typography>
+                        <Typography variant="h6" color="primary.main" sx={{ ml: 'auto' }}>
+                          {option.totals.finalTotal.toFixed(2)} {option.totals.currency}
+                        </Typography>
+                      </Box>
+                    </AccordionSummary>
+                    <AccordionDetails>
+                      <Grid container spacing={3}>
+                        {/* Informations générales */}
+                        <Grid item xs={12} md={6}>
+                          <Paper sx={{ p: 2, bgcolor: 'grey.50' }}>
+                            <Typography variant="h6" gutterBottom color="primary">
+                              📝 Informations générales
+                            </Typography>
+                            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                              <Typography variant="body2">
+                                <strong>ID:</strong> {option.optionId}
+                              </Typography>
+                              <Typography variant="body2">
+                                <strong>Nom:</strong> {option.name}
+                              </Typography>
+                              <Typography variant="body2">
+                                <strong>Description:</strong> {option.description || 'Aucune description'}
+                              </Typography>
+                              <Typography variant="body2">
+                                <strong>Type de marge:</strong> {option.marginType === 'percentage' ? 'Pourcentage' : 'Montant fixe'}
+                              </Typography>
+                              <Typography variant="body2">
+                                <strong>Valeur de marge:</strong> {option.marginValue} {option.marginType === 'percentage' ? '%' : 'EUR'}
+                              </Typography>
+                              <Typography variant="body2">
+                                <strong>Créée par:</strong> {option.createdBy || 'Utilisateur inconnu'}
+                              </Typography>
+                              <Typography variant="body2">
+                                <strong>Dernière modification:</strong> {option.updatedAt ? new Date(option.updatedAt).toLocaleDateString('fr-FR') : 'Jamais'}
+                              </Typography>
+                            </Box>
+                          </Paper>
+                        </Grid>
+
+                        {/* Totaux détaillés */}
+                        <Grid item xs={12} md={6}>
+                          <Paper sx={{ p: 2, bgcolor: 'grey.50' }}>
+                            <Typography variant="h6" gutterBottom color="primary">
+                              💰 Totaux détaillés
+                            </Typography>
+                            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                              <Typography variant="body2">
+                                <strong>Haulage:</strong> {option.totals.haulageTotal.toFixed(2)} {option.totals.currency}
+                              </Typography>
+                              <Typography variant="body2">
+                                <strong>Seafreight (base):</strong> Calculé automatiquement
+                              </Typography>
+                              <Typography variant="body2">
+                                <strong>Seafreight (surcharges):</strong> Calculé automatiquement
+                              </Typography>
+                              <Typography variant="body2">
+                                <strong>Seafreight (total):</strong> {option.totals.seafreightTotal.toFixed(2)} {option.totals.currency}
+                              </Typography>
+                              <Typography variant="body2">
+                                <strong>Services divers:</strong> {option.totals.miscTotal.toFixed(2)} {option.totals.currency}
+                              </Typography>
+                              <Divider sx={{ my: 1 }} />
+                              <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                                <strong>Sous-total:</strong> {option.totals.subTotal.toFixed(2)} {option.totals.currency}
+                              </Typography>
+                              <Typography variant="body2" sx={{ fontWeight: 600, color: 'secondary.main' }}>
+                                <strong>Marge:</strong> {option.totals.marginAmount.toFixed(2)} {option.totals.currency}
+                              </Typography>
+                              <Typography variant="h6" sx={{ fontWeight: 700, color: 'primary.main' }}>
+                                <strong>Total final:</strong> {option.totals.finalTotal.toFixed(2)} {option.totals.currency}
+                              </Typography>
+                              <Typography variant="caption" color="text.secondary">
+                                Calculé le {new Date().toLocaleString('fr-FR')}
+                              </Typography>
+                            </Box>
+                          </Paper>
+                        </Grid>
+
+                        {/* Données brutes (pour debug) */}
+                        <Grid item xs={12}>
+                          <Accordion>
+                            <AccordionSummary expandIcon={<ExpandMore />}>
+                              <Typography variant="subtitle2" color="text.secondary">
+                                🔍 Données brutes (JSON) - Pour debug
+                              </Typography>
+                            </AccordionSummary>
+                            <AccordionDetails>
+                              <Box sx={{ 
+                                bgcolor: 'black', 
+                                color: 'lime', 
+                                p: 2, 
+                                borderRadius: 1,
+                                fontFamily: 'monospace',
+                                fontSize: '0.75rem',
+                                maxHeight: 300,
+                                overflow: 'auto'
+                              }}>
+                                <pre>{JSON.stringify(option, null, 2)}</pre>
+                              </Box>
+                            </AccordionDetails>
+                          </Accordion>
+                        </Grid>
+                      </Grid>
+                    </AccordionDetails>
+                  </Accordion>
+                ))
+              ) : (
+                <Box sx={{ 
+                  textAlign: 'center', 
+                  p: 4, 
+                  border: '2px dashed #ccc', 
+                  borderRadius: 2,
+                  background: 'linear-gradient(135deg, #f5f7fa 0%, #e3f0ff 100%)'
+                }}>
+                  <Typography variant="h6" color="text.secondary" gutterBottom sx={{ mb: 2 }}>
+                    🚀 Aucune option créée pour le moment
+                  </Typography>
+                  <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
+                    Créez votre première option pour voir les données complètes ici
+                  </Typography>
+                  
+                  <Button 
+                    variant="contained" 
+                    color="primary" 
+                    size="large"
+                    startIcon={<AddIcon />}
+                    onClick={() => {
+                      // Basculer vers l'onglet Récapitulatif et créer une option
+                      setActiveTab('recap');
+                      setTimeout(() => {
+                        // Déclencher la création d'option
+                        if (startCreating) {
+                          startCreating();
+                        }
+                      }, 100);
+                    }}
+                    sx={{ 
+                      fontWeight: 700, 
+                      borderRadius: 2, 
+                      px: 4, 
+                      py: 1.5,
+                      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                      '&:hover': {
+                        background: 'linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)'
+                      }
+                    }}
+                  >
+                    🚀 Créer ma première option
+                  </Button>
+                  
+                  {/* Exemple de structure d'option */}
+                  <Paper sx={{ p: 3, mt: 3, textAlign: 'left', maxWidth: 600, mx: 'auto' }}>
+                    <Typography variant="h6" gutterBottom color="primary">
+                      📋 Exemple de structure d'option
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                      Voici ce que vous verrez une fois qu'une option sera créée :
+                    </Typography>
+                    
+                    <Grid container spacing={2}>
+                      <Grid item xs={12} md={6}>
+                        <Typography variant="subtitle2" color="primary" gutterBottom>
+                          📝 Informations générales
+                        </Typography>
+                        <Typography variant="body2" sx={{ fontSize: '0.875rem' }}>
+                          • ID de l'option<br/>
+                          • Nom et description<br/>
+                          • Type de marge<br/>
+                          • Valeur de marge<br/>
+                          • Créateur<br/>
+                          • Dates de création/modification
+                        </Typography>
+                      </Grid>
+                      
+                      <Grid item xs={12} md={6}>
+                        <Typography variant="subtitle2" color="primary" gutterBottom>
+                          💰 Totaux détaillés
+                        </Typography>
+                        <Typography variant="body2" sx={{ fontSize: '0.875rem' }}>
+                          • Haulage total<br/>
+                          • Seafreight (base + surcharges)<br/>
+                          • Services divers<br/>
+                          • Sous-total<br/>
+                          • Marge calculée<br/>
+                          • Total final
+                        </Typography>
+                      </Grid>
+                      
+                      <Grid item xs={12}>
+                        <Typography variant="subtitle2" color="primary" gutterBottom>
+                          🔍 Données brutes (JSON)
+                        </Typography>
+                        <Typography variant="body2" sx={{ fontSize: '0.875rem' }}>
+                          • Structure complète de l'option<br/>
+                          • Format JSON lisible<br/>
+                          • Mode debug pour développeurs
+                        </Typography>
+                      </Grid>
+                    </Grid>
+                  </Paper>
+                </Box>
+              )}
+            </Box>
           </>
         )}
 

@@ -57,7 +57,7 @@ import { useMsal, useAccount } from '@azure/msal-react';
 import { enqueueSnackbar } from 'notistack';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { getUserGroupUsersOptions } from '@features/request/api/@tanstack/react-query.gen';
-import { postApiQuoteOfferDraftMutation, postApiQuoteFromDraftMutation } from '@features/offer/api';
+import { postApiDraftQuotesMutation, postApiDraftQuotesByIdFinalizeMutation } from '@features/offer/api';
 // import { getUserGroupUsersByUserId } from '@features/request/api/sdk.gen'; // Plus utilisé
 import AssigneeField from '@components/shared/AssigneeField';
 // === NOUVEAUX IMPORTS POUR JSON ===
@@ -296,7 +296,7 @@ const FinalValidation: React.FC<FinalValidationProps> = ({
 
   // === MUTATION POUR CRÉER UN BROUILLON ===
   const createDraftMutation = useMutation({
-    ...postApiQuoteOfferDraftMutation(),
+    ...postApiDraftQuotesMutation(),
     onSuccess: (data) => {
       // Brouillon créé avec succès
     },
@@ -308,7 +308,7 @@ const FinalValidation: React.FC<FinalValidationProps> = ({
 
   // === MUTATION POUR CRÉER LE DEVIS À PARTIR D'UN BROUILLON ===
   const createQuoteMutation = useMutation({
-    ...postApiQuoteFromDraftMutation(),
+    ...postApiDraftQuotesByIdFinalizeMutation(),
     onSuccess: (data) => {
       enqueueSnackbar('Devis créé avec succès !', { variant: "success" });
     },

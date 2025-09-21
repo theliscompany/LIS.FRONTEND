@@ -61,8 +61,8 @@ import { useTranslation } from 'react-i18next';
 import { useMsal, useAccount } from '@azure/msal-react';
 import { enqueueSnackbar } from 'notistack';
 import { useQuery } from '@tanstack/react-query';
-import { getQuote } from '@features/offer/api';
-import { getQuoteOptions } from '@features/offer/api/@tanstack/react-query.gen';
+import { getApiQuotesById } from '@features/offer/api';
+import { getApiQuotesByIdOptions } from '@features/offer/api/@tanstack/react-query.gen';
 // import type { QuoteOfferStatus, ClientApprovalStatus } from '@features/offer/api';
 import QuoteEmailSender from './QuoteEmailSender';
 
@@ -86,7 +86,7 @@ const QuoteViewer: React.FC<QuoteViewerProps> = ({
   const [showEmailSender, setShowEmailSender] = useState(false);
 
   // Charger les données du devis avec l'endpoint spécifique
-  const queryOptions = getQuoteOptions({ 
+  const queryOptions = getApiQuotesByIdOptions({ 
     path: { id: quoteId } 
   });
   console.log('[QuoteViewer] Options de requête:', queryOptions);

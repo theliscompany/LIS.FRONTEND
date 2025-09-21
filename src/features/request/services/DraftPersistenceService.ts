@@ -1,11 +1,12 @@
 // === SERVICE DE PERSISTANCE CENTRALISÉ ===
 import { 
-  getApiQuoteOfferDrafts, 
-  postApiQuoteOfferDraft, 
-  putApiQuoteOfferDraftById, 
-  getDraft 
+  getApiDraftQuotes, 
+  postApiDraftQuotes, 
+  putApiDraftQuotesById, 
+  getApiDraftQuotesById 
 } from '@features/offer/api/sdk.gen';
-import { buildSDKPayload } from '../types/DraftQuote';
+import { DraftQuoteApiMapper, DraftQuoteApiUtils } from './DraftQuoteApiMapper';
+import { buildCreateDraftPayload, buildUpdateDraftPayload } from '../types/DraftQuote';
 
 export interface SaveOptions {
   retryCount?: number;
@@ -59,24 +60,26 @@ export class DraftPersistenceService {
         }
       }
 
-      // Utiliser la fonction buildSDKPayload corrigée
-      const optimizedData = buildSDKPayload(draftQuote, userEmail);
+      // ✅ CORRECTION : Vérifier si draftId est valide (non null, non undefined, non "new", non string vide)
+      const hasValidDraftId = draftId && draftId.trim() !== '' && draftId !== 'new';
+      
+      // Utiliser la fonction de payload appropriée selon le contexte
+      const optimizedData = hasValidDraftId 
+        ? buildUpdateDraftPayload(draftQuote, userEmail)
+        : buildCreateDraftPayload(draftQuote, userEmail);
 
       let result: DraftPersistenceResult;
-
-      // Vérifier si draftId est valide (non null, non undefined, non string vide)
-      const hasDraftId = draftId && draftId.trim() !== '';
       
       this.debugLog('PERSISTENCE - Choix méthode sauvegarde', { 
         draftId, 
         draftIdType: typeof draftId,
         draftIdLength: draftId?.length,
-        hasDraftId,
+        hasValidDraftId,
         requestId, 
-        method: hasDraftId ? 'PUT (mise à jour)' : 'POST (création)' 
+        method: hasValidDraftId ? 'PUT (mise à jour)' : 'POST (création)' 
       });
 
-      if (hasDraftId) {
+      if (hasValidDraftId) {
         // Mise à jour d'un brouillon existant → PUT
         this.debugLog('PERSISTENCE - Utilisation PUT pour mise à jour', { draftId });
         result = await this.updateExistingDraft(draftId, optimizedData, requestId, userEmail);
@@ -131,7 +134,7 @@ export class DraftPersistenceService {
     try {
       this.debugLog('PERSISTENCE - Chargement brouillon', { draftId });
       
-      const response = await getDraft({ path: { id: draftId } });
+      const response = await getApiDraftQuotesById({ path: { id: draftId } });
       const draftData = (response as any)?.data;
       
       if (draftData) {
@@ -168,7 +171,7 @@ export class DraftPersistenceService {
       this.debugLog('PERSISTENCE - Payload POST', payload);
       
       console.log('🚀 [ENDPOINT] POST /api/QuoteOffer/draft - Création nouveau brouillon');
-      const response = await postApiQuoteOfferDraft({ body: payload });
+      const response = await postApiDraftQuotes({ body: payload });
       const responseData = (response as any)?.data;
       
       if (responseData?.id) {
@@ -199,7 +202,7 @@ export class DraftPersistenceService {
       this.debugLog('PERSISTENCE - Payload PUT', payload);
       
       console.log('🚀 [ENDPOINT] PUT /api/QuoteOffer/draft/' + draftId + ' - Mise à jour brouillon existant');
-      const response = await putApiQuoteOfferDraftById({ 
+      const response = await putApiDraftQuotesById({ 
         path: { id: draftId },
         body: payload 
       });
@@ -222,10 +225,10 @@ export class DraftPersistenceService {
     try {
       this.debugLog('PERSISTENCE - Vérification doublon', { requestId, userEmail });
       
-      const response = await getApiQuoteOfferDrafts({
+      const response = await getApiDraftQuotes({
         query: {
-          emailUser: userEmail,
-          pageNumber: 1,
+          customerName: userEmail,
+          page: 1,
           pageSize: 100
         }
       });

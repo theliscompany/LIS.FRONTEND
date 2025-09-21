@@ -45,7 +45,7 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 
 import { fr } from 'date-fns/locale';
-import { putApiQuoteOfferDraftById } from '../api';
+import { putApiDraftQuotesById } from '../api';
 
 
 interface QuoteOptionsEditorProps {
@@ -306,7 +306,7 @@ const QuoteOptionsEditor: React.FC<QuoteOptionsEditorProps> = ({
         }))
       };
 
-      await putApiQuoteOfferDraftById({
+      await putApiDraftQuotesById({
         path: { id: quote.id },
         body: payload
       });

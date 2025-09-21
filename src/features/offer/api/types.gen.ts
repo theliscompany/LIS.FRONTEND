@@ -4,109 +4,94 @@ export type AddDraftQuoteOptionRequest = {
     option: DraftQuoteOptionDto;
 };
 
-export type ChangeQuoteStatusRequest = {
-    newStatus?: (string) | null;
-    reason?: (string) | null;
-    notifyClient?: boolean;
-};
-
-export type ClientApprovalRequest = {
-    approval?: (string) | null;
-    comments?: (string) | null;
-    selectedOptionId?: (number) | null;
-};
-
 export type CreateDraftQuoteRequest = {
-    requestId: string;
-    header?: DraftQuoteHeaderDto;
-    wizardData?: DraftQuoteWizardDataDto;
+    requestQuoteId: string;
+    customer?: DraftQuoteCustomerDto;
+    shipment?: DraftQuoteShipmentDto;
+    wizard?: DraftQuoteWizardDto;
 };
 
-export type DraftQuoteAuditDto = {
-    createdBy?: (string) | null;
-    createdAt?: Date;
-    lastUpdatedBy?: (string) | null;
-    lastUpdatedAt?: Date;
-    stepProgress?: DraftQuoteStepProgressDto;
+export type CreateQuoteRequest = {
+    draftQuoteId?: (string) | null;
+    selectedOptionId?: (string) | null;
+    validityDays?: number;
+    paymentTerms?: (string) | null;
+    notes?: (string) | null;
 };
 
-export type DraftQuoteCargoDto = {
-    items?: Array<DraftQuoteCargoItemDto> | null;
-    hazmat?: boolean;
-    goodsDescription?: (string) | null;
+export type DraftQuoteAddressDto = {
+    line1?: (string) | null;
+    line2?: (string) | null;
+    city?: (string) | null;
+    zip?: (string) | null;
+    country?: (string) | null;
 };
 
-export type DraftQuoteCargoItemDto = {
-    containerType?: (string) | null;
-    quantity?: number;
-    grossWeightKg?: number;
-    volumeM3?: number;
-};
-
-export type DraftQuoteClientDto = {
-    company?: (string) | null;
-    contact?: (string) | null;
-    email?: (string) | null;
-    phone?: (string) | null;
+export type DraftQuoteAttachmentDto = {
+    id?: (string) | null;
+    name?: (string) | null;
+    mime?: (string) | null;
 };
 
 export type DraftQuoteCommercialTermsDto = {
-    currency?: (string) | null;
-    incoterm?: (string) | null;
-    validityDays?: number;
-    cgvAccepted?: boolean;
+    depositPolicy?: DraftQuoteDepositPolicyDto;
+    generalConditionsId?: (string) | null;
 };
 
-export type DraftQuoteFreeTimeDto = {
-    origin?: DraftQuoteFreeTimePeriodDto;
-    destination?: DraftQuoteFreeTimePeriodDto;
+export type DraftQuoteConstraintsDto = {
+    minTruckLeadDays?: number;
+    terminalCutoffDays?: number;
+    customsDeadlineHours?: number;
 };
 
-export type DraftQuoteFreeTimePeriodDto = {
-    days?: number;
+export type DraftQuoteContactPersonDto = {
+    fullName?: (string) | null;
+    phone?: (string) | null;
+    email?: (string) | null;
 };
 
-export type DraftQuoteGeneralRequestInfoDto = {
-    channel?: (string) | null;
-    priority?: (string) | null;
-    notes?: (string) | null;
+export type DraftQuoteContainerTotalsDto = {
+    qty?: number;
+    unitPrice?: number;
+    subtotal?: number;
+};
+
+export type DraftQuoteCustomerDto = {
+    type?: (string) | null;
+    name?: (string) | null;
+    vat?: (string) | null;
+    emails?: Array<(string)> | null;
+    phones?: Array<(string)> | null;
+    address?: DraftQuoteAddressDto;
+    contactPerson?: DraftQuoteContactPersonDto;
+};
+
+export type DraftQuoteDepositPolicyDto = {
+    type?: (string) | null;
+    value?: number;
+};
+
+export type DraftQuoteDocsDto = {
+    requiresVGM?: boolean;
+    requiresBLDraftApproval?: boolean;
 };
 
 export type DraftQuoteHaulageDto = {
     id?: (string) | null;
-    provider?: (string) | null;
-    scope?: (string) | null;
+    phase?: (string) | null;
+    mode?: (string) | null;
     from?: (string) | null;
     to?: (string) | null;
-    currency?: (string) | null;
-    pricing?: Array<DraftQuoteHaulagePricingDto> | null;
-    notes?: (string) | null;
-};
-
-export type DraftQuoteHaulagePricingDto = {
-    containerType?: (string) | null;
-    unit?: (string) | null;
-    price?: number;
-    includedWaitingHours?: number;
-    extraHourPrice?: number;
-};
-
-export type DraftQuoteHeaderDto = {
-    client?: DraftQuoteClientDto;
-    shipment?: DraftQuoteShipmentDto;
-    commercialTerms?: DraftQuoteCommercialTermsDto;
+    pricingScope?: (string) | null;
+    containerFilter?: Array<(string)> | null;
+    windows?: DraftQuoteWindowsDto;
+    basePrice?: number;
+    surcharges?: Array<DraftQuoteSurchargeDto> | null;
 };
 
 export type DraftQuoteLocationDto = {
-    city?: (string) | null;
+    location?: (string) | null;
     country?: (string) | null;
-};
-
-export type DraftQuoteMilestonesDto = {
-    pickup?: (Date) | null;
-    vgm?: (Date) | null;
-    si?: (Date) | null;
-    cutoff?: (Date) | null;
 };
 
 export type DraftQuoteOptionContainerDto = {
@@ -117,48 +102,75 @@ export type DraftQuoteOptionContainerDto = {
 export type DraftQuoteOptionDto = {
     optionId?: (string) | null;
     label?: (string) | null;
-    containers?: Array<DraftQuoteOptionContainerDto> | null;
-    seafreightRef?: (string) | null;
-    haulageRefs?: Array<(string)> | null;
-    serviceRefs?: Array<(string)> | null;
-    suppliers?: DraftQuoteOptionSuppliersDto;
-    servicesOffered?: Array<DraftQuoteServiceOfferedDto> | null;
-    schedule?: DraftQuoteScheduleDto;
-    milestones?: DraftQuoteMilestonesDto;
-    pricingPreview?: DraftQuotePricingPreviewDto;
-};
-
-export type DraftQuoteOptionServiceProviderDto = {
-    serviceId?: (string) | null;
-    provider?: (string) | null;
-};
-
-export type DraftQuoteOptionSuppliersDto = {
-    carrier?: (string) | null;
-    haulage?: Array<(string)> | null;
-    services?: Array<DraftQuoteOptionServiceProviderDto> | null;
-};
-
-export type DraftQuotePricingLineDto = {
-    kind?: (string) | null;
-    description?: (string) | null;
-    unitPrice?: number;
-    qty?: number;
-    taxable?: boolean;
-    taxRate?: (number) | null;
-};
-
-export type DraftQuotePricingPreviewDto = {
+    validUntil?: (string) | null;
     currency?: (string) | null;
-    lines?: Array<DraftQuotePricingLineDto> | null;
-    subtotals?: DraftQuotePricingSubtotalsDto;
-    taxTotal?: number;
+    containers?: Array<DraftQuoteOptionContainerDto> | null;
+    planning?: DraftQuotePlanningDto;
+    seafreight?: DraftQuoteOptionSeafreightDto;
+    haulages?: Array<DraftQuoteOptionHaulageDto> | null;
+    services?: Array<DraftQuoteOptionServiceDto> | null;
+    totals?: DraftQuoteOptionTotalsDto;
+    terms?: DraftQuoteOptionTermsDto;
+};
+
+export type DraftQuoteOptionHaulageDto = {
+    id?: (string) | null;
+    phase?: (string) | null;
+    mode?: (string) | null;
+    from?: (string) | null;
+    to?: (string) | null;
+    pricingScope?: (string) | null;
+    containerFilter?: Array<(string)> | null;
+    windows?: DraftQuoteWindowsDto;
+    basePrice?: number;
+    surcharges?: Array<DraftQuoteSurchargeDto> | null;
+};
+
+export type DraftQuoteOptionSeafreightDto = {
+    id?: (string) | null;
+    carrier?: (string) | null;
+    service?: (string) | null;
+    rate?: Array<DraftQuoteRateDto> | null;
+    surcharges?: Array<DraftQuoteSurchargeDto> | null;
+};
+
+export type DraftQuoteOptionServiceDto = {
+    code?: (string) | null;
+    label?: (string) | null;
+    calc?: (string) | null;
+    unit?: (string) | null;
+    value?: number;
+    currency?: (string) | null;
+    taxable?: boolean;
+};
+
+export type DraftQuoteOptionTermsDto = {
+    depositPolicy?: DraftQuoteDepositPolicyDto;
+    generalConditionsId?: (string) | null;
+};
+
+export type DraftQuoteOptionTotalsDto = {
+    perContainer?: {
+        [key: string]: (number);
+    } | null;
+    byContainerType?: {
+        [key: string]: DraftQuoteContainerTotalsDto;
+    } | null;
+    seafreightBaseTotal?: number;
+    haulageTotal?: number;
+    servicesTotal?: number;
+    surchargesTotal?: number;
     grandTotal?: number;
 };
 
-export type DraftQuotePricingSubtotalsDto = {
-    taxableBase?: number;
-    nontaxableBase?: number;
+export type DraftQuotePlanningDto = {
+    emptyPickupDate?: (string) | null;
+    vgmDate?: (string) | null;
+    siDate?: (string) | null;
+    customsDate?: (string) | null;
+    fullGateInDate?: (string) | null;
+    etd?: (string) | null;
+    eta?: (string) | null;
 };
 
 export type DraftQuoteRateDto = {
@@ -168,93 +180,66 @@ export type DraftQuoteRateDto = {
 
 export type DraftQuoteResponse = {
     draftQuoteId?: (string) | null;
-    requestId?: (string) | null;
-    status?: (string) | null;
-    version?: number;
+    requestQuoteId?: (string) | null;
     resumeToken?: (string) | null;
-    header?: DraftQuoteHeaderDto;
-    wizardData?: DraftQuoteWizardDataDto;
-    options?: Array<DraftQuoteOptionDto> | null;
-    validation?: DraftQuoteValidationDto;
-    audit?: DraftQuoteAuditDto;
-    totalOptions?: number;
-    bestPrice?: (number) | null;
+    createdAt?: Date;
+    updatedAt?: Date;
+    status?: (string) | null;
     currency?: (string) | null;
+    incoterm?: (string) | null;
+    customer?: DraftQuoteCustomerDto;
+    shipment?: DraftQuoteShipmentDto;
+    attachments?: Array<DraftQuoteAttachmentDto> | null;
+    commercialTerms?: DraftQuoteCommercialTermsDto;
+    wizard?: DraftQuoteWizardDto;
+    options?: Array<DraftQuoteOptionDto> | null;
 };
 
 export type DraftQuoteResponseCommonApiResponse = {
     code?: number;
     message?: (string) | null;
     data?: DraftQuoteResponse;
-    errors?: Array<(string)> | null;
     meta?: unknown;
+    errors?: Array<(string)> | null;
 };
 
 export type DraftQuoteResponseListCommonApiResponse = {
     code?: number;
     message?: (string) | null;
     data?: Array<DraftQuoteResponse> | null;
-    errors?: Array<(string)> | null;
     meta?: unknown;
-};
-
-export type DraftQuoteRoutingAndCargoDto = {
-    portOfLoading?: (string) | null;
-    portOfDestination?: (string) | null;
-    cargo?: DraftQuoteCargoDto;
-};
-
-export type DraftQuoteScheduleDto = {
-    etd?: Date;
-    eta?: Date;
+    errors?: Array<(string)> | null;
 };
 
 export type DraftQuoteSeafreightDto = {
     id?: (string) | null;
     carrier?: (string) | null;
     service?: (string) | null;
-    etd?: Date;
-    eta?: Date;
-    currency?: (string) | null;
-    validUntil?: Date;
-    rates?: Array<DraftQuoteRateDto> | null;
+    rate?: Array<DraftQuoteRateDto> | null;
     surcharges?: Array<DraftQuoteSurchargeDto> | null;
-    freeTime?: DraftQuoteFreeTimeDto;
 };
 
 export type DraftQuoteServiceDto = {
-    id?: (string) | null;
-    name?: (string) | null;
-    provider?: (string) | null;
+    code?: (string) | null;
+    label?: (string) | null;
+    calc?: (string) | null;
     unit?: (string) | null;
-    price?: number;
+    value?: number;
     currency?: (string) | null;
     taxable?: boolean;
-    taxRate?: (number) | null;
-};
-
-export type DraftQuoteServiceOfferedDto = {
-    type?: (string) | null;
-    details?: (string) | null;
 };
 
 export type DraftQuoteShipmentDto = {
-    fromRequest?: boolean;
-    readonly?: Array<(string)> | null;
-    cargoType?: (string) | null;
-    goodsDescription?: (string) | null;
+    mode?: (string) | null;
+    containerCount?: number;
+    containerTypes?: Array<(string)> | null;
+    commodity?: (string) | null;
+    hsCodes?: Array<(string)> | null;
     origin?: DraftQuoteLocationDto;
     destination?: DraftQuoteLocationDto;
     requestedDeparture?: (Date) | null;
-};
-
-export type DraftQuoteStepProgressDto = {
-    generalRequestInformation?: (string) | null;
-    routingAndCargo?: (string) | null;
-    seafreights?: (string) | null;
-    haulages?: (string) | null;
-    services?: (string) | null;
-    options?: (string) | null;
+    docs?: DraftQuoteDocsDto;
+    constraints?: DraftQuoteConstraintsDto;
 };
 
 export type DraftQuoteSurchargeDto = {
@@ -269,208 +254,324 @@ export type DraftQuoteSurchargeDto = {
     appliesTo?: Array<(string)> | null;
 };
 
-export type DraftQuoteValidationCheckDto = {
-    rule?: (string) | null;
-    ok?: boolean;
-    message?: (string) | null;
+export type DraftQuoteWindowsDto = {
+    load?: (string) | null;
+    returnDeadline?: (string) | null;
 };
 
-export type DraftQuoteValidationDto = {
-    checks?: Array<DraftQuoteValidationCheckDto> | null;
-    warnings?: Array<DraftQuoteValidationWarningDto> | null;
-};
-
-export type DraftQuoteValidationDtoCommonApiResponse = {
-    code?: number;
-    message?: (string) | null;
-    data?: DraftQuoteValidationDto;
-    errors?: Array<(string)> | null;
-    meta?: unknown;
-};
-
-export type DraftQuoteValidationWarningDto = {
-    code?: (string) | null;
-    message?: (string) | null;
-};
-
-export type DraftQuoteWizardDataDto = {
-    generalRequestInformation?: DraftQuoteGeneralRequestInfoDto;
-    routingAndCargo?: DraftQuoteRoutingAndCargoDto;
+export type DraftQuoteWizardDto = {
+    notes?: (string) | null;
+    selectedServiceLevel?: (string) | null;
     seafreights?: Array<DraftQuoteSeafreightDto> | null;
     haulages?: Array<DraftQuoteHaulageDto> | null;
     services?: Array<DraftQuoteServiceDto> | null;
-};
-
-export type FinalizeDraftRequest = {
-    options?: Array<QuoteOptionRequest> | null;
-    preferredOptionId?: number;
-    quoteComments?: (string) | null;
-    expirationDate?: (Date) | null;
-    sendToClient?: boolean;
-};
-
-export type HaulageOptionRequest = {
-    provider?: (string) | null;
-    route?: (string) | null;
-    pricing?: QuoteOptionPricingRequest;
-};
-
-export type MiscellaneousOptionRequest = {
-    serviceName?: (string) | null;
-    provider?: (string) | null;
-    pricing?: QuoteOptionPricingRequest;
 };
 
 export type ObjectCommonApiResponse = {
     code?: number;
     message?: (string) | null;
     data?: unknown;
-    errors?: Array<(string)> | null;
     meta?: unknown;
+    errors?: Array<(string)> | null;
 };
 
-export type PricingBreakdownRequest = {
-    category?: (string) | null;
-    description?: (string) | null;
-    amount?: number;
+export type QuoteAddressDto = {
+    line1?: (string) | null;
+    line2?: (string) | null;
+    city?: (string) | null;
+    zip?: (string) | null;
+    country?: (string) | null;
 };
 
-export type QuoteOfferSearchDto = {
-    clientNumber?: (string) | null;
-    emailUser?: (string) | null;
+export type QuoteApprovalRequest = {
+    action?: (string) | null;
+    comments?: (string) | null;
+    clientName?: (string) | null;
+    clientEmail?: (string) | null;
+};
+
+export type QuoteAttachmentDto = {
+    id?: (string) | null;
+    name?: (string) | null;
+    mime?: (string) | null;
+    url?: (string) | null;
+};
+
+export type QuoteAvailableOptionDto = {
+    optionId?: (string) | null;
+    label?: (string) | null;
+    validUntil?: (Date) | null;
+    currency?: (string) | null;
+    containers?: Array<QuoteContainerDto> | null;
+    planning?: QuotePlanningDto;
+    totals?: QuoteTotalsDto;
+};
+
+export type QuoteClientApprovalDto = {
     status?: (string) | null;
-    createdFrom?: (Date) | null;
-    createdTo?: (Date) | null;
-    quoteOfferNumber?: (number) | null;
-    requestQuoteId?: (string) | null;
-    searchTerm?: (string) | null;
-    page?: number;
-    pageSize?: number;
-    sortBy?: (string) | null;
-    sortOrder?: (string) | null;
-    sortDirection?: (string) | null;
+    requestedAt?: (Date) | null;
+    deadline?: (Date) | null;
+    approvalUrl?: (string) | null;
+    rejectionUrl?: (string) | null;
 };
 
-export type QuoteOptionDetailsDto = {
-    haulageProvider?: (string) | null;
-    seaFreightCarrier?: (string) | null;
-    route?: (string) | null;
+export type QuoteCommercialTermsDto = {
+    depositPolicy?: QuoteDepositPolicyDto;
+    generalConditionsId?: (string) | null;
+    paymentTerms?: (string) | null;
+    validityPeriod?: (string) | null;
+};
+
+export type QuoteConstraintsDto = {
+    minTruckLeadDays?: number;
+    terminalCutoffDays?: number;
+    customsDeadlineHours?: number;
+};
+
+export type QuoteContactPersonDto = {
+    fullName?: (string) | null;
+    phone?: (string) | null;
+    email?: (string) | null;
+};
+
+export type QuoteContainerDto = {
+    containerType?: (string) | null;
+    quantity?: number;
+};
+
+export type QuoteContainerTotalsDto = {
+    qty?: number;
+    unitPrice?: number;
+    subtotal?: number;
+};
+
+export type QuoteCustomerDto = {
+    type?: (string) | null;
+    name?: (string) | null;
+    vat?: (string) | null;
+    emails?: Array<(string)> | null;
+    phones?: Array<(string)> | null;
+    address?: QuoteAddressDto;
+    contactPerson?: QuoteContactPersonDto;
+};
+
+export type QuoteDepositPolicyDto = {
+    type?: (string) | null;
+    value?: number;
+};
+
+export type QuoteDocsDto = {
+    requiresVGM?: boolean;
+    requiresBLDraftApproval?: boolean;
+};
+
+export type QuoteHaulageDto = {
+    id?: (string) | null;
+    phase?: (string) | null;
+    mode?: (string) | null;
+    from?: (string) | null;
+    to?: (string) | null;
+    pricingScope?: (string) | null;
+    containerFilter?: Array<(string)> | null;
+    windows?: QuoteWindowsDto;
+    basePrice?: number;
+    surcharges?: Array<QuoteSurchargeDto> | null;
+};
+
+export type QuoteLocationDto = {
+    location?: (string) | null;
+    country?: (string) | null;
+};
+
+export type QuoteMetadataDto = {
+    createdBy?: (string) | null;
+    sentBy?: (string) | null;
+    version?: (string) | null;
+    template?: (string) | null;
+    language?: (string) | null;
+    notes?: (string) | null;
+};
+
+export type QuotePlanningDto = {
+    emptyPickupDate?: (Date) | null;
+    vgmDate?: (Date) | null;
+    siDate?: (Date) | null;
+    customsDate?: (Date) | null;
+    fullGateInDate?: (Date) | null;
     etd?: (Date) | null;
     eta?: (Date) | null;
-    servicesIncluded?: Array<(string)> | null;
 };
 
-export type QuoteOptionPricingRequest = {
-    totalAmount?: number;
-    currency?: (string) | null;
-    breakdown?: Array<PricingBreakdownRequest> | null;
-};
-
-export type QuoteOptionRequest = {
-    optionId?: number;
-    description?: (string) | null;
-    pricing?: QuoteOptionPricingRequest;
-    haulage?: HaulageOptionRequest;
-    seaFreight?: SeaFreightOptionRequest;
-    miscellaneous?: Array<MiscellaneousOptionRequest> | null;
-};
-
-export type QuoteOptionResponse = {
-    optionId?: number;
-    description?: (string) | null;
-    isPreferred?: boolean;
-    totals?: QuoteOptionTotalsDto;
-    details?: QuoteOptionDetailsDto;
-};
-
-export type QuoteOptionTotalsDto = {
-    haulageTotal?: number;
-    seaFreightTotal?: number;
-    miscellaneousTotal?: number;
-    grandTotal?: number;
-    currency?: (string) | null;
+export type QuoteRateDto = {
+    containerType?: (string) | null;
+    basePrice?: number;
 };
 
 export type QuoteResponse = {
-    id?: (string) | null;
-    quoteNumber?: number;
+    quoteId?: (string) | null;
+    draftQuoteId?: (string) | null;
     requestQuoteId?: (string) | null;
-    clientNumber?: (string) | null;
-    emailUser?: (string) | null;
-    comments?: (string) | null;
+    quoteNumber?: (string) | null;
     status?: (string) | null;
-    clientApproval?: (string) | null;
-    options?: Array<QuoteOptionResponse> | null;
-    preferredOptionId?: number;
-    summary?: QuoteSummaryDto;
-    expirationDate?: Date;
-    createdDate?: Date;
-    lastModified?: Date;
-    files?: Array<(string)> | null;
+    createdAt?: Date;
+    updatedAt?: Date;
+    sentAt?: (Date) | null;
+    expiresAt?: (Date) | null;
+    currency?: (string) | null;
+    incoterm?: (string) | null;
+    validityDays?: number;
+    customer?: QuoteCustomerDto;
+    shipment?: QuoteShipmentDto;
+    attachments?: Array<QuoteAttachmentDto> | null;
+    commercialTerms?: QuoteCommercialTermsDto;
+    selectedOption?: QuoteSelectedOptionDto;
+    availableOptions?: Array<QuoteAvailableOptionDto> | null;
+    clientApproval?: QuoteClientApprovalDto;
+    metadata?: QuoteMetadataDto;
 };
 
 export type QuoteResponseCommonApiResponse = {
     code?: number;
     message?: (string) | null;
     data?: QuoteResponse;
-    errors?: Array<(string)> | null;
     meta?: unknown;
+    errors?: Array<(string)> | null;
 };
 
-export type QuoteResponseListCommonApiResponse = {
-    code?: number;
-    message?: (string) | null;
-    data?: Array<QuoteResponse> | null;
-    errors?: Array<(string)> | null;
-    meta?: unknown;
-};
-
-export type QuoteSearchRequest = {
-    clientNumber?: (string) | null;
-    emailUser?: (string) | null;
-    status?: (string) | null;
-    createdFrom?: (Date) | null;
-    createdTo?: (Date) | null;
-    expirationFrom?: (Date) | null;
-    expirationTo?: (Date) | null;
-    minAmount?: (number) | null;
-    maxAmount?: (number) | null;
-    query?: (string) | null;
+export type QuoteResponsePagedResult = {
+    items?: Array<QuoteResponse> | null;
+    totalCount?: number;
     pageNumber?: number;
     pageSize?: number;
+    readonly totalPages?: number;
 };
 
-export type QuoteSummaryDto = {
-    route?: (string) | null;
-    totalOptions?: number;
-    bestPrice?: number;
-    highestPrice?: number;
-    currency?: (string) | null;
-    preferredOptionDescription?: (string) | null;
+export type QuoteResponsePagedResultCommonApiResponse = {
+    code?: number;
+    message?: (string) | null;
+    data?: QuoteResponsePagedResult;
+    meta?: unknown;
+    errors?: Array<(string)> | null;
 };
 
-export type SeaFreightOptionRequest = {
+export type QuoteSeafreightDto = {
+    id?: (string) | null;
     carrier?: (string) | null;
     service?: (string) | null;
-    etd?: Date;
-    eta?: Date;
-    pricing?: QuoteOptionPricingRequest;
+    rate?: Array<QuoteRateDto> | null;
+    surcharges?: Array<QuoteSurchargeDto> | null;
+};
+
+export type QuoteSelectedOptionDto = {
+    optionId?: (string) | null;
+    label?: (string) | null;
+    validUntil?: (Date) | null;
+    currency?: (string) | null;
+    containers?: Array<QuoteContainerDto> | null;
+    planning?: QuotePlanningDto;
+    seafreight?: QuoteSeafreightDto;
+    haulages?: Array<QuoteHaulageDto> | null;
+    services?: Array<QuoteServiceDto> | null;
+    totals?: QuoteTotalsDto;
+    terms?: QuoteTermsDto;
+};
+
+export type QuoteServiceDto = {
+    code?: (string) | null;
+    label?: (string) | null;
+    calc?: (string) | null;
+    unit?: (string) | null;
+    value?: number;
+    currency?: (string) | null;
+    taxable?: boolean;
+};
+
+export type QuoteShipmentDto = {
+    mode?: (string) | null;
+    containerCount?: number;
+    containerTypes?: Array<(string)> | null;
+    commodity?: (string) | null;
+    hsCodes?: Array<(string)> | null;
+    origin?: QuoteLocationDto;
+    destination?: QuoteLocationDto;
+    requestedDeparture?: (Date) | null;
+    docs?: QuoteDocsDto;
+    constraints?: QuoteConstraintsDto;
+};
+
+export type QuoteSurchargeDto = {
+    code?: (string) | null;
+    label?: (string) | null;
+    calc?: (string) | null;
+    base?: (string) | null;
+    unit?: (string) | null;
+    value?: number;
+    currency?: (string) | null;
+    taxable?: boolean;
+    appliesTo?: Array<(string)> | null;
+};
+
+export type QuoteTermsDto = {
+    depositPolicy?: QuoteDepositPolicyDto;
+    generalConditionsId?: (string) | null;
+};
+
+export type QuoteTotalsDto = {
+    perContainer?: {
+        [key: string]: (number);
+    } | null;
+    byContainerType?: {
+        [key: string]: QuoteContainerTotalsDto;
+    } | null;
+    seafreightBaseTotal?: number;
+    haulageTotal?: number;
+    servicesTotal?: number;
+    surchargesTotal?: number;
+    grandTotal?: number;
+};
+
+export type QuoteWindowsDto = {
+    load?: (Date) | null;
+    returnDeadline?: (Date) | null;
 };
 
 export type UpdateDraftQuoteRequest = {
-    header?: DraftQuoteHeaderDto;
-    wizardData?: DraftQuoteWizardDataDto;
+    customer?: DraftQuoteCustomerDto;
+    shipment?: DraftQuoteShipmentDto;
+    wizard?: DraftQuoteWizardDto;
     options?: Array<DraftQuoteOptionDto> | null;
     notes?: (string) | null;
 };
 
-export type PostApiQuotesSearchData = {
-    body?: QuoteSearchRequest;
+export type UpdateQuoteRequest = {
+    status?: (string) | null;
+    expiresAt?: (Date) | null;
+    clientApproval?: (string) | null;
+    notes?: (string) | null;
 };
 
-export type PostApiQuotesSearchResponse = (QuoteResponseListCommonApiResponse);
+export type PostApiQuotesData = {
+    body?: CreateQuoteRequest;
+};
 
-export type PostApiQuotesSearchError = unknown;
+export type PostApiQuotesResponse = (QuoteResponseCommonApiResponse);
+
+export type PostApiQuotesError = (ObjectCommonApiResponse);
+
+export type GetApiQuotesData = {
+    query?: {
+        customerName?: string;
+        dateFrom?: Date;
+        dateTo?: Date;
+        pageNumber?: number;
+        pageSize?: number;
+        status?: string;
+    };
+};
+
+export type GetApiQuotesResponse = (QuoteResponsePagedResultCommonApiResponse);
+
+export type GetApiQuotesError = unknown;
 
 export type GetApiQuotesByIdData = {
     path: {
@@ -480,7 +581,18 @@ export type GetApiQuotesByIdData = {
 
 export type GetApiQuotesByIdResponse = (QuoteResponseCommonApiResponse);
 
-export type GetApiQuotesByIdError = (QuoteResponseCommonApiResponse);
+export type GetApiQuotesByIdError = (ObjectCommonApiResponse);
+
+export type PutApiQuotesByIdData = {
+    body?: UpdateQuoteRequest;
+    path: {
+        id: string;
+    };
+};
+
+export type PutApiQuotesByIdResponse = (QuoteResponseCommonApiResponse);
+
+export type PutApiQuotesByIdError = (ObjectCommonApiResponse);
 
 export type DeleteApiQuotesByIdData = {
     path: {
@@ -490,40 +602,18 @@ export type DeleteApiQuotesByIdData = {
 
 export type DeleteApiQuotesByIdResponse = (ObjectCommonApiResponse);
 
-export type DeleteApiQuotesByIdError = unknown;
+export type DeleteApiQuotesByIdError = (ObjectCommonApiResponse);
 
-export type PostApiQuotesFinalizeByDraftIdData = {
-    body?: FinalizeDraftRequest;
-    path: {
-        draftId: string;
-    };
-};
-
-export type PostApiQuotesFinalizeByDraftIdResponse = (QuoteResponseCommonApiResponse);
-
-export type PostApiQuotesFinalizeByDraftIdError = (QuoteResponseCommonApiResponse);
-
-export type PutApiQuotesByIdStatusData = {
-    body?: ChangeQuoteStatusRequest;
+export type PostApiQuotesByIdApprovalData = {
+    body?: QuoteApprovalRequest;
     path: {
         id: string;
     };
 };
 
-export type PutApiQuotesByIdStatusResponse = (QuoteResponseCommonApiResponse);
+export type PostApiQuotesByIdApprovalResponse = (QuoteResponseCommonApiResponse);
 
-export type PutApiQuotesByIdStatusError = unknown;
-
-export type PostApiQuotesByIdClientApprovalData = {
-    body?: ClientApprovalRequest;
-    path: {
-        id: string;
-    };
-};
-
-export type PostApiQuotesByIdClientApprovalResponse = (QuoteResponseCommonApiResponse);
-
-export type PostApiQuotesByIdClientApprovalError = unknown;
+export type PostApiQuotesByIdApprovalError = (ObjectCommonApiResponse);
 
 export type PostApiDraftQuotesData = {
     body?: CreateDraftQuoteRequest;
@@ -532,6 +622,19 @@ export type PostApiDraftQuotesData = {
 export type PostApiDraftQuotesResponse = (DraftQuoteResponseCommonApiResponse);
 
 export type PostApiDraftQuotesError = (ObjectCommonApiResponse);
+
+export type GetApiDraftQuotesData = {
+    query?: {
+        customerName?: string;
+        page?: number;
+        pageSize?: number;
+        status?: string;
+    };
+};
+
+export type GetApiDraftQuotesResponse = (DraftQuoteResponseListCommonApiResponse);
+
+export type GetApiDraftQuotesError = unknown;
 
 export type GetApiDraftQuotesByIdData = {
     path: {
@@ -575,35 +678,62 @@ export type PostApiDraftQuotesByIdOptionsResponse = (DraftQuoteResponseCommonApi
 
 export type PostApiDraftQuotesByIdOptionsError = (ObjectCommonApiResponse);
 
-export type PostApiDraftQuotesByIdValidateData = {
+export type DeleteApiDraftQuotesByIdOptionsByOptionIdData = {
+    path: {
+        id: string;
+        optionId: string;
+    };
+};
+
+export type DeleteApiDraftQuotesByIdOptionsByOptionIdResponse = (DraftQuoteResponseCommonApiResponse);
+
+export type DeleteApiDraftQuotesByIdOptionsByOptionIdError = (ObjectCommonApiResponse);
+
+export type PostApiDraftQuotesByIdFinalizeData = {
     path: {
         id: string;
     };
 };
 
-export type PostApiDraftQuotesByIdValidateResponse = (DraftQuoteValidationDtoCommonApiResponse);
+export type PostApiDraftQuotesByIdFinalizeResponse = (DraftQuoteResponseCommonApiResponse);
 
-export type PostApiDraftQuotesByIdValidateError = (ObjectCommonApiResponse);
+export type PostApiDraftQuotesByIdFinalizeError = (ObjectCommonApiResponse);
 
-export type PostApiDraftQuotesSearchData = {
-    body?: QuoteOfferSearchDto;
-};
+export type PostApiQuotesResponseTransformer = (data: any) => Promise<PostApiQuotesResponse>;
 
-export type PostApiDraftQuotesSearchResponse = (DraftQuoteResponseListCommonApiResponse);
-
-export type PostApiDraftQuotesSearchError = unknown;
-
-export type PostApiQuotesSearchResponseTransformer = (data: any) => Promise<PostApiQuotesSearchResponse>;
-
-export type QuoteResponseListCommonApiResponseModelResponseTransformer = (data: any) => QuoteResponseListCommonApiResponse;
+export type QuoteResponseCommonApiResponseModelResponseTransformer = (data: any) => QuoteResponseCommonApiResponse;
 
 export type QuoteResponseModelResponseTransformer = (data: any) => QuoteResponse;
 
-export type QuoteOptionResponseModelResponseTransformer = (data: any) => QuoteOptionResponse;
+export type QuoteShipmentDtoModelResponseTransformer = (data: any) => QuoteShipmentDto;
 
-export type QuoteOptionDetailsDtoModelResponseTransformer = (data: any) => QuoteOptionDetailsDto;
+export const QuoteShipmentDtoModelResponseTransformer: QuoteShipmentDtoModelResponseTransformer = data => {
+    if (data?.requestedDeparture) {
+        data.requestedDeparture = new Date(data.requestedDeparture);
+    }
+    return data;
+};
 
-export const QuoteOptionDetailsDtoModelResponseTransformer: QuoteOptionDetailsDtoModelResponseTransformer = data => {
+export type QuoteSelectedOptionDtoModelResponseTransformer = (data: any) => QuoteSelectedOptionDto;
+
+export type QuotePlanningDtoModelResponseTransformer = (data: any) => QuotePlanningDto;
+
+export const QuotePlanningDtoModelResponseTransformer: QuotePlanningDtoModelResponseTransformer = data => {
+    if (data?.emptyPickupDate) {
+        data.emptyPickupDate = new Date(data.emptyPickupDate);
+    }
+    if (data?.vgmDate) {
+        data.vgmDate = new Date(data.vgmDate);
+    }
+    if (data?.siDate) {
+        data.siDate = new Date(data.siDate);
+    }
+    if (data?.customsDate) {
+        data.customsDate = new Date(data.customsDate);
+    }
+    if (data?.fullGateInDate) {
+        data.fullGateInDate = new Date(data.fullGateInDate);
+    }
     if (data?.etd) {
         data.etd = new Date(data.etd);
     }
@@ -613,44 +743,91 @@ export const QuoteOptionDetailsDtoModelResponseTransformer: QuoteOptionDetailsDt
     return data;
 };
 
-export const QuoteOptionResponseModelResponseTransformer: QuoteOptionResponseModelResponseTransformer = data => {
-    if (data?.details) {
-        QuoteOptionDetailsDtoModelResponseTransformer(data.details);
+export type QuoteHaulageDtoModelResponseTransformer = (data: any) => QuoteHaulageDto;
+
+export type QuoteWindowsDtoModelResponseTransformer = (data: any) => QuoteWindowsDto;
+
+export const QuoteWindowsDtoModelResponseTransformer: QuoteWindowsDtoModelResponseTransformer = data => {
+    if (data?.load) {
+        data.load = new Date(data.load);
+    }
+    if (data?.returnDeadline) {
+        data.returnDeadline = new Date(data.returnDeadline);
+    }
+    return data;
+};
+
+export const QuoteHaulageDtoModelResponseTransformer: QuoteHaulageDtoModelResponseTransformer = data => {
+    if (data?.windows) {
+        QuoteWindowsDtoModelResponseTransformer(data.windows);
+    }
+    return data;
+};
+
+export const QuoteSelectedOptionDtoModelResponseTransformer: QuoteSelectedOptionDtoModelResponseTransformer = data => {
+    if (data?.validUntil) {
+        data.validUntil = new Date(data.validUntil);
+    }
+    if (data?.planning) {
+        QuotePlanningDtoModelResponseTransformer(data.planning);
+    }
+    if (Array.isArray(data?.haulages)) {
+        data.haulages.forEach(QuoteHaulageDtoModelResponseTransformer);
+    }
+    return data;
+};
+
+export type QuoteAvailableOptionDtoModelResponseTransformer = (data: any) => QuoteAvailableOptionDto;
+
+export const QuoteAvailableOptionDtoModelResponseTransformer: QuoteAvailableOptionDtoModelResponseTransformer = data => {
+    if (data?.validUntil) {
+        data.validUntil = new Date(data.validUntil);
+    }
+    if (data?.planning) {
+        QuotePlanningDtoModelResponseTransformer(data.planning);
+    }
+    return data;
+};
+
+export type QuoteClientApprovalDtoModelResponseTransformer = (data: any) => QuoteClientApprovalDto;
+
+export const QuoteClientApprovalDtoModelResponseTransformer: QuoteClientApprovalDtoModelResponseTransformer = data => {
+    if (data?.requestedAt) {
+        data.requestedAt = new Date(data.requestedAt);
+    }
+    if (data?.deadline) {
+        data.deadline = new Date(data.deadline);
     }
     return data;
 };
 
 export const QuoteResponseModelResponseTransformer: QuoteResponseModelResponseTransformer = data => {
-    if (Array.isArray(data?.options)) {
-        data.options.forEach(QuoteOptionResponseModelResponseTransformer);
+    if (data?.createdAt) {
+        data.createdAt = new Date(data.createdAt);
     }
-    if (data?.expirationDate) {
-        data.expirationDate = new Date(data.expirationDate);
+    if (data?.updatedAt) {
+        data.updatedAt = new Date(data.updatedAt);
     }
-    if (data?.createdDate) {
-        data.createdDate = new Date(data.createdDate);
+    if (data?.sentAt) {
+        data.sentAt = new Date(data.sentAt);
     }
-    if (data?.lastModified) {
-        data.lastModified = new Date(data.lastModified);
+    if (data?.expiresAt) {
+        data.expiresAt = new Date(data.expiresAt);
+    }
+    if (data?.shipment) {
+        QuoteShipmentDtoModelResponseTransformer(data.shipment);
+    }
+    if (data?.selectedOption) {
+        QuoteSelectedOptionDtoModelResponseTransformer(data.selectedOption);
+    }
+    if (Array.isArray(data?.availableOptions)) {
+        data.availableOptions.forEach(QuoteAvailableOptionDtoModelResponseTransformer);
+    }
+    if (data?.clientApproval) {
+        QuoteClientApprovalDtoModelResponseTransformer(data.clientApproval);
     }
     return data;
 };
-
-export const QuoteResponseListCommonApiResponseModelResponseTransformer: QuoteResponseListCommonApiResponseModelResponseTransformer = data => {
-    if (Array.isArray(data?.data)) {
-        data.data.forEach(QuoteResponseModelResponseTransformer);
-    }
-    return data;
-};
-
-export const PostApiQuotesSearchResponseTransformer: PostApiQuotesSearchResponseTransformer = async (data) => {
-    QuoteResponseListCommonApiResponseModelResponseTransformer(data);
-    return data;
-};
-
-export type GetApiQuotesByIdResponseTransformer = (data: any) => Promise<GetApiQuotesByIdResponse>;
-
-export type QuoteResponseCommonApiResponseModelResponseTransformer = (data: any) => QuoteResponseCommonApiResponse;
 
 export const QuoteResponseCommonApiResponseModelResponseTransformer: QuoteResponseCommonApiResponseModelResponseTransformer = data => {
     if (data?.data) {
@@ -659,28 +836,53 @@ export const QuoteResponseCommonApiResponseModelResponseTransformer: QuoteRespon
     return data;
 };
 
+export const PostApiQuotesResponseTransformer: PostApiQuotesResponseTransformer = async (data) => {
+    QuoteResponseCommonApiResponseModelResponseTransformer(data);
+    return data;
+};
+
+export type GetApiQuotesResponseTransformer = (data: any) => Promise<GetApiQuotesResponse>;
+
+export type QuoteResponsePagedResultCommonApiResponseModelResponseTransformer = (data: any) => QuoteResponsePagedResultCommonApiResponse;
+
+export type QuoteResponsePagedResultModelResponseTransformer = (data: any) => QuoteResponsePagedResult;
+
+export const QuoteResponsePagedResultModelResponseTransformer: QuoteResponsePagedResultModelResponseTransformer = data => {
+    if (Array.isArray(data?.items)) {
+        data.items.forEach(QuoteResponseModelResponseTransformer);
+    }
+    return data;
+};
+
+export const QuoteResponsePagedResultCommonApiResponseModelResponseTransformer: QuoteResponsePagedResultCommonApiResponseModelResponseTransformer = data => {
+    if (data?.data) {
+        QuoteResponsePagedResultModelResponseTransformer(data.data);
+    }
+    return data;
+};
+
+export const GetApiQuotesResponseTransformer: GetApiQuotesResponseTransformer = async (data) => {
+    QuoteResponsePagedResultCommonApiResponseModelResponseTransformer(data);
+    return data;
+};
+
+export type GetApiQuotesByIdResponseTransformer = (data: any) => Promise<GetApiQuotesByIdResponse>;
+
 export const GetApiQuotesByIdResponseTransformer: GetApiQuotesByIdResponseTransformer = async (data) => {
     QuoteResponseCommonApiResponseModelResponseTransformer(data);
     return data;
 };
 
-export type PostApiQuotesFinalizeByDraftIdResponseTransformer = (data: any) => Promise<PostApiQuotesFinalizeByDraftIdResponse>;
+export type PutApiQuotesByIdResponseTransformer = (data: any) => Promise<PutApiQuotesByIdResponse>;
 
-export const PostApiQuotesFinalizeByDraftIdResponseTransformer: PostApiQuotesFinalizeByDraftIdResponseTransformer = async (data) => {
+export const PutApiQuotesByIdResponseTransformer: PutApiQuotesByIdResponseTransformer = async (data) => {
     QuoteResponseCommonApiResponseModelResponseTransformer(data);
     return data;
 };
 
-export type PutApiQuotesByIdStatusResponseTransformer = (data: any) => Promise<PutApiQuotesByIdStatusResponse>;
+export type PostApiQuotesByIdApprovalResponseTransformer = (data: any) => Promise<PostApiQuotesByIdApprovalResponse>;
 
-export const PutApiQuotesByIdStatusResponseTransformer: PutApiQuotesByIdStatusResponseTransformer = async (data) => {
-    QuoteResponseCommonApiResponseModelResponseTransformer(data);
-    return data;
-};
-
-export type PostApiQuotesByIdClientApprovalResponseTransformer = (data: any) => Promise<PostApiQuotesByIdClientApprovalResponse>;
-
-export const PostApiQuotesByIdClientApprovalResponseTransformer: PostApiQuotesByIdClientApprovalResponseTransformer = async (data) => {
+export const PostApiQuotesByIdApprovalResponseTransformer: PostApiQuotesByIdApprovalResponseTransformer = async (data) => {
     QuoteResponseCommonApiResponseModelResponseTransformer(data);
     return data;
 };
@@ -691,8 +893,6 @@ export type DraftQuoteResponseCommonApiResponseModelResponseTransformer = (data:
 
 export type DraftQuoteResponseModelResponseTransformer = (data: any) => DraftQuoteResponse;
 
-export type DraftQuoteHeaderDtoModelResponseTransformer = (data: any) => DraftQuoteHeaderDto;
-
 export type DraftQuoteShipmentDtoModelResponseTransformer = (data: any) => DraftQuoteShipmentDto;
 
 export const DraftQuoteShipmentDtoModelResponseTransformer: DraftQuoteShipmentDtoModelResponseTransformer = data => {
@@ -702,103 +902,15 @@ export const DraftQuoteShipmentDtoModelResponseTransformer: DraftQuoteShipmentDt
     return data;
 };
 
-export const DraftQuoteHeaderDtoModelResponseTransformer: DraftQuoteHeaderDtoModelResponseTransformer = data => {
-    if (data?.shipment) {
-        DraftQuoteShipmentDtoModelResponseTransformer(data.shipment);
-    }
-    return data;
-};
-
-export type DraftQuoteWizardDataDtoModelResponseTransformer = (data: any) => DraftQuoteWizardDataDto;
-
-export type DraftQuoteSeafreightDtoModelResponseTransformer = (data: any) => DraftQuoteSeafreightDto;
-
-export const DraftQuoteSeafreightDtoModelResponseTransformer: DraftQuoteSeafreightDtoModelResponseTransformer = data => {
-    if (data?.etd) {
-        data.etd = new Date(data.etd);
-    }
-    if (data?.eta) {
-        data.eta = new Date(data.eta);
-    }
-    if (data?.validUntil) {
-        data.validUntil = new Date(data.validUntil);
-    }
-    return data;
-};
-
-export const DraftQuoteWizardDataDtoModelResponseTransformer: DraftQuoteWizardDataDtoModelResponseTransformer = data => {
-    if (Array.isArray(data?.seafreights)) {
-        data.seafreights.forEach(DraftQuoteSeafreightDtoModelResponseTransformer);
-    }
-    return data;
-};
-
-export type DraftQuoteOptionDtoModelResponseTransformer = (data: any) => DraftQuoteOptionDto;
-
-export type DraftQuoteScheduleDtoModelResponseTransformer = (data: any) => DraftQuoteScheduleDto;
-
-export const DraftQuoteScheduleDtoModelResponseTransformer: DraftQuoteScheduleDtoModelResponseTransformer = data => {
-    if (data?.etd) {
-        data.etd = new Date(data.etd);
-    }
-    if (data?.eta) {
-        data.eta = new Date(data.eta);
-    }
-    return data;
-};
-
-export type DraftQuoteMilestonesDtoModelResponseTransformer = (data: any) => DraftQuoteMilestonesDto;
-
-export const DraftQuoteMilestonesDtoModelResponseTransformer: DraftQuoteMilestonesDtoModelResponseTransformer = data => {
-    if (data?.pickup) {
-        data.pickup = new Date(data.pickup);
-    }
-    if (data?.vgm) {
-        data.vgm = new Date(data.vgm);
-    }
-    if (data?.si) {
-        data.si = new Date(data.si);
-    }
-    if (data?.cutoff) {
-        data.cutoff = new Date(data.cutoff);
-    }
-    return data;
-};
-
-export const DraftQuoteOptionDtoModelResponseTransformer: DraftQuoteOptionDtoModelResponseTransformer = data => {
-    if (data?.schedule) {
-        DraftQuoteScheduleDtoModelResponseTransformer(data.schedule);
-    }
-    if (data?.milestones) {
-        DraftQuoteMilestonesDtoModelResponseTransformer(data.milestones);
-    }
-    return data;
-};
-
-export type DraftQuoteAuditDtoModelResponseTransformer = (data: any) => DraftQuoteAuditDto;
-
-export const DraftQuoteAuditDtoModelResponseTransformer: DraftQuoteAuditDtoModelResponseTransformer = data => {
+export const DraftQuoteResponseModelResponseTransformer: DraftQuoteResponseModelResponseTransformer = data => {
     if (data?.createdAt) {
         data.createdAt = new Date(data.createdAt);
     }
-    if (data?.lastUpdatedAt) {
-        data.lastUpdatedAt = new Date(data.lastUpdatedAt);
+    if (data?.updatedAt) {
+        data.updatedAt = new Date(data.updatedAt);
     }
-    return data;
-};
-
-export const DraftQuoteResponseModelResponseTransformer: DraftQuoteResponseModelResponseTransformer = data => {
-    if (data?.header) {
-        DraftQuoteHeaderDtoModelResponseTransformer(data.header);
-    }
-    if (data?.wizardData) {
-        DraftQuoteWizardDataDtoModelResponseTransformer(data.wizardData);
-    }
-    if (Array.isArray(data?.options)) {
-        data.options.forEach(DraftQuoteOptionDtoModelResponseTransformer);
-    }
-    if (data?.audit) {
-        DraftQuoteAuditDtoModelResponseTransformer(data.audit);
+    if (data?.shipment) {
+        DraftQuoteShipmentDtoModelResponseTransformer(data.shipment);
     }
     return data;
 };
@@ -812,6 +924,22 @@ export const DraftQuoteResponseCommonApiResponseModelResponseTransformer: DraftQ
 
 export const PostApiDraftQuotesResponseTransformer: PostApiDraftQuotesResponseTransformer = async (data) => {
     DraftQuoteResponseCommonApiResponseModelResponseTransformer(data);
+    return data;
+};
+
+export type GetApiDraftQuotesResponseTransformer = (data: any) => Promise<GetApiDraftQuotesResponse>;
+
+export type DraftQuoteResponseListCommonApiResponseModelResponseTransformer = (data: any) => DraftQuoteResponseListCommonApiResponse;
+
+export const DraftQuoteResponseListCommonApiResponseModelResponseTransformer: DraftQuoteResponseListCommonApiResponseModelResponseTransformer = data => {
+    if (Array.isArray(data?.data)) {
+        data.data.forEach(DraftQuoteResponseModelResponseTransformer);
+    }
+    return data;
+};
+
+export const GetApiDraftQuotesResponseTransformer: GetApiDraftQuotesResponseTransformer = async (data) => {
+    DraftQuoteResponseListCommonApiResponseModelResponseTransformer(data);
     return data;
 };
 
@@ -836,18 +964,16 @@ export const PostApiDraftQuotesByIdOptionsResponseTransformer: PostApiDraftQuote
     return data;
 };
 
-export type PostApiDraftQuotesSearchResponseTransformer = (data: any) => Promise<PostApiDraftQuotesSearchResponse>;
+export type DeleteApiDraftQuotesByIdOptionsByOptionIdResponseTransformer = (data: any) => Promise<DeleteApiDraftQuotesByIdOptionsByOptionIdResponse>;
 
-export type DraftQuoteResponseListCommonApiResponseModelResponseTransformer = (data: any) => DraftQuoteResponseListCommonApiResponse;
-
-export const DraftQuoteResponseListCommonApiResponseModelResponseTransformer: DraftQuoteResponseListCommonApiResponseModelResponseTransformer = data => {
-    if (Array.isArray(data?.data)) {
-        data.data.forEach(DraftQuoteResponseModelResponseTransformer);
-    }
+export const DeleteApiDraftQuotesByIdOptionsByOptionIdResponseTransformer: DeleteApiDraftQuotesByIdOptionsByOptionIdResponseTransformer = async (data) => {
+    DraftQuoteResponseCommonApiResponseModelResponseTransformer(data);
     return data;
 };
 
-export const PostApiDraftQuotesSearchResponseTransformer: PostApiDraftQuotesSearchResponseTransformer = async (data) => {
-    DraftQuoteResponseListCommonApiResponseModelResponseTransformer(data);
+export type PostApiDraftQuotesByIdFinalizeResponseTransformer = (data: any) => Promise<PostApiDraftQuotesByIdFinalizeResponse>;
+
+export const PostApiDraftQuotesByIdFinalizeResponseTransformer: PostApiDraftQuotesByIdFinalizeResponseTransformer = async (data) => {
+    DraftQuoteResponseCommonApiResponseModelResponseTransformer(data);
     return data;
 };

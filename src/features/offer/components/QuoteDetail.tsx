@@ -60,7 +60,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
 import { statusLabel, colorsTypes } from '@utils/functions';
 // import { QuoteOfferStatus, ClientApprovalStatus } from '@features/offer/api/types.gen';
-import { getQuote /* putApiQuoteOfferByIdStatus */ } from '@features/offer/api';
+import { getApiQuotesById /* putApiQuoteOfferByIdStatus */ } from '@features/offer/api';
 
 // Types temporaires pour éviter les erreurs
 const QuoteOfferStatus = {
@@ -116,7 +116,7 @@ const QuoteDetail: React.FC<QuoteDetailProps> = ({ quoteId: propQuoteId, onClose
   const loadQuote = async () => {
     try {
       setLoading(true);
-      const response = await getQuote({ path: { id: quoteId! } });
+      const response = await getApiQuotesById({ path: { id: quoteId! } });
       if (response?.data) {
         setQuote(response.data);
       }

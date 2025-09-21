@@ -2,7 +2,7 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 import { useSnackbar } from 'notistack';
 import { LocalStorageService } from '../services/LocalStorageService';
 import { DraftQuote } from '../types/DraftQuote';
-import { buildSDKPayload } from '../types/DraftQuote';
+import { buildCreateDraftPayload, buildUpdateDraftPayload } from '../types/DraftQuote';
 import { postApiQuoteOfferDraft, putApiQuoteOfferDraftById } from '../../offer/api/sdk.gen';
 
 export interface UseDraftPersistenceReturn {
@@ -97,11 +97,16 @@ export const useDraftPersistence = (
       LocalStorageService.saveDraft(draftQuote, draftId);
       console.log('💾 [MANUAL_SAVE] Sauvegarde locale terminée');
       
+      // ✅ CORRECTION : Vérifier si draftId est valide (non null, non undefined, non "new", non string vide)
+      const hasValidDraftId = draftId && draftId.trim() !== '' && draftId !== 'new';
+      
       // 2. Sauvegarde en BD
-      const draftData = buildSDKPayload(draftQuote, currentUserEmail);
+      const draftData = hasValidDraftId 
+        ? buildUpdateDraftPayload(draftQuote, currentUserEmail)
+        : buildCreateDraftPayload(draftQuote, currentUserEmail);
       
       let result;
-      if (draftId) {
+      if (hasValidDraftId) {
         // Mise à jour d'un brouillon existant
         console.log('💾 [MANUAL_SAVE] Mise à jour du brouillon existant:', draftId);
         result = await putApiQuoteOfferDraftById({
