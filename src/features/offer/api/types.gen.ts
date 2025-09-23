@@ -173,6 +173,14 @@ export type DraftQuotePlanningDto = {
     eta?: (string) | null;
 };
 
+export type DraftQuotePortDto = {
+    portId?: number;
+    portName?: (string) | null;
+    unlocode?: (string) | null;
+    country?: (string) | null;
+    city?: (string) | null;
+};
+
 export type DraftQuoteRateDto = {
     containerType?: (string) | null;
     basePrice?: number;
@@ -237,6 +245,8 @@ export type DraftQuoteShipmentDto = {
     hsCodes?: Array<(string)> | null;
     origin?: DraftQuoteLocationDto;
     destination?: DraftQuoteLocationDto;
+    portFrom?: DraftQuotePortDto;
+    portTo?: DraftQuotePortDto;
     requestedDeparture?: (Date) | null;
     docs?: DraftQuoteDocsDto;
     constraints?: DraftQuoteConstraintsDto;

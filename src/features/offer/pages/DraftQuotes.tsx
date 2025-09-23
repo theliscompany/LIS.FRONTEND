@@ -464,12 +464,22 @@ const DraftQuotes: React.FC = () => {
     console.log('[DraftQuotes] Étape actuelle:', draft.currentStep);
     console.log('[DraftQuotes] Données du draft:', draft.draftData);
 
-    // Naviguer vers le wizard à la dernière étape enregistrée
-    if (draft.currentStep && draft.currentStep > 1) {
-      navigate(`/request-wizard?loadDraft=${draft.id}&step=${draft.currentStep}`);
-    } else {
-      navigate(`/request-wizard?loadDraft=${draft.id}`);
-    }
+    // Naviguer vers le nouveau wizard avec le draftId dans l'URL
+    // Le wizard fera lui-même l'appel API pour récupérer les données
+    // Format: /request-wizard/draft/{draftId}/{step}
+    const step = draft.currentStep && draft.currentStep > 1 ? draft.currentStep : 'basics';
+    const url = `/request-wizard/draft/${draft.id}/${step}`;
+    
+    console.log('[DraftQuotes] URL de navigation:', url);
+    console.log('[DraftQuotes] DraftId passé au wizard:', draft.id);
+    console.log('[DraftQuotes] Étape initiale:', step);
+    
+    navigate(url, {
+      state: {
+        initialStep: step
+        // Plus besoin de passer draftData, le wizard fera l'appel API
+      }
+    });
   };
 
 
@@ -480,7 +490,11 @@ const DraftQuotes: React.FC = () => {
       showSnackbar('Erreur: ID du brouillon manquant', 'error');
       return;
     }
-    navigate(`/quote-offers/${draft.id}`);
+    // Naviguer vers le wizard pour voir/éditer le brouillon
+    // Format: /request-wizard/draft/{draftId}/review
+    const url = `/request-wizard/draft/${draft.id}/review`;
+    console.log('[DraftQuotes] Navigation vers le wizard pour voir le brouillon:', url);
+    navigate(url);
   };
 
   const handleManageQuote = (draft: DraftQuote) => {
@@ -490,10 +504,11 @@ const DraftQuotes: React.FC = () => {
       return;
     }
     
-    // TODO: Récupérer l'ID du devis associé au brouillon
-    // Pour l'instant, on utilise l'ID du brouillon comme placeholder
-    console.log('[DraftQuotes] Gérer le devis pour le brouillon:', draft.id);
-    navigate(`/quote-management/${draft.id}`);
+    // Naviguer vers le wizard pour gérer le brouillon
+    // Format: /request-wizard/draft/{draftId}/options
+    const url = `/request-wizard/draft/${draft.id}/options`;
+    console.log('[DraftQuotes] Navigation vers le wizard pour gérer le brouillon:', url);
+    navigate(url);
   };
 
   const handleDeleteDraft = (draft: DraftQuote) => {

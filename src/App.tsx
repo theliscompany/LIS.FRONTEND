@@ -40,6 +40,8 @@ import MasterDataFiles from '@features/masterdata/pages/MasterDataFiles';
 //import EditHaulage from '@features/pricing/components/EditHaulage';
 //import EditMiscellaneous from '@features/pricing/components/EditMiscellaneous';
 import RequestWizard from '@features/request/pages/RequestWizard';
+import NewRequestWizard from '@features/request/wizard/NewRequestWizard';
+import ExpressWizard from '@features/request/wizard/ExpressWizard';
 import { MiscellaneousCRUDPage, HaulagePage, HaulageCRUDPage, SeaFreightPage, SeaFreightCRUDPage, SeaFreightDetailsPage } from '@features/pricingnew';
 import SupportBackdoorAll from '@features/pricingnew/pages/SupportBackdoorAll';
 import { LoadScript } from '@react-google-maps/api';
@@ -76,9 +78,13 @@ function App() {
                     <Route path="request" element={<Request />} />
                     <Route path="request/:id" element={<Request />} />
                     <Route path="handle-request/:id" element={<HandleRequest />} />
-                    <Route path="new-request" element={<RequestWizard />} />
-                    <Route path="request-wizard" element={<RequestWizard />} />
-                    <Route path="request-wizard/:id" element={<RequestWizard />} />
+                    <Route path="new-request" element={<NewRequestWizard />} />
+                    <Route path="request-wizard" element={<NewRequestWizard />} />
+                    <Route path="request-wizard/:id" element={<NewRequestWizard />} />
+                    <Route path="request-wizard/:id/:step" element={<NewRequestWizard />} />
+                    <Route path="request-wizard/draft/:draftId" element={<NewRequestWizard />} />
+                    <Route path="request-wizard/draft/:draftId/:step" element={<NewRequestWizard />} />
+                    <Route path="request-express" element={<ExpressWizard />} />
                     <Route path="my-requests" element={<MyRequests />} />
                     <Route path="pending-requests" element={<ValidatedRequests />} />
                     <Route path='ports' element={<MasterDataPorts />} />
@@ -108,7 +114,6 @@ function App() {
                     <Route path='landing' element={<Landing />} />
                     <Route path='*' element={<NotFound />} />
                     {/* Removed EditHaulage, EditSeafreight, EditMiscellaneous routes due to missing components */}
-                    <Route path="request-wizard" element={<RequestWizard />} />
                             <Route path="pricingnew/miscellaneous" element={<MiscellaneousCRUDPage />} />
         <Route path="pricingnew/miscellaneous/:id" element={<MiscellaneousEditPage />} />
         <Route path="pricingnew/miscellaneous/details/:id" element={<MiscellaneousDetailsPage />} />

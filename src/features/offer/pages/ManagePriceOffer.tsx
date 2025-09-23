@@ -35,9 +35,15 @@ const ManagePriceOffer: React.FC<ManagePriceOfferProps> = () => {
   const loadOffer = async () => {
     try {
       setLoading(true);
+      
+      // Vérifier que l'ID est valide (format UUID)
+      if (!id || id.length < 10) {
+        throw new Error('ID d\'offre invalide');
+      }
+      
       const response: any = await getApiQuotesById({ path: { id: id || "" } });
-      if (response !== null && response !== undefined) {
-        console.log(response.data.data);
+      if (response !== null && response !== undefined && response.data) {
+        console.log('Données de l\'offre reçues:', response.data);
         var objTotal = response.data.data;
         setFiles(objTotal.files);
         setOptions(objTotal.options);
@@ -45,9 +51,13 @@ const ManagePriceOffer: React.FC<ManagePriceOfferProps> = () => {
         setOfferNumber(response.data.data.quoteOfferNumber);
 
         // Plus besoin de préparer les données pour FinalValidation
+      } else {
+        throw new Error('Aucune donnée reçue de l\'API');
       }
     } catch (err: any) {
-      console.log(err);
+      console.error('Erreur lors du chargement de l\'offre:', err);
+      // Afficher un message d'erreur à l'utilisateur
+      alert(`Erreur lors du chargement de l'offre: ${err.message}`);
     } finally {
       setLoading(false);
     }

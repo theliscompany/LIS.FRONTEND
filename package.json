@@ -36,6 +36,7 @@
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
     "@hey-api/client-axios": "^0.3.3",
+    "@hookform/resolvers": "^5.2.2",
     "@mui/icons-material": "^6.2.1",
     "@mui/material": "^6.4.11",
     "@mui/system": "^7.2.0",
@@ -52,10 +53,12 @@
     "@tiptap/starter-kit": "^2.10.4",
     "@toolpad/core": "^0.13.0",
     "@types/handlebars": "^4.0.40",
+    "@types/uuid": "^10.0.0",
     "axios": "^1.7.9",
     "chart.js": "^4.4.7",
     "date-fns": "^2.30.0",
     "dayjs": "^1.11.13",
+    "framer-motion": "^12.23.16",
     "handlebars": "^4.7.8",
     "i18next": "^25.3.2",
     "lodash.debounce": "^4.0.8",
@@ -70,7 +73,9 @@
     "react-i18next": "^15.6.1",
     "react-router-dom": "^7.0.2",
     "sea-ports": "^0.0.9",
-    "use-debounce": "^10.0.4"
+    "use-debounce": "^10.0.4",
+    "uuid": "^13.0.0",
+    "zod": "^4.1.11"
   },
   "devDependencies": {
     "@eslint/js": "^9.15.0",

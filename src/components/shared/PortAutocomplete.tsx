@@ -1,62 +1,72 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Autocomplete, TextField, CircularProgress } from '@mui/material';
-
-interface Port {
-  id?: string;
-  unlocode?: string;
-  portName?: string;
-  name?: string;
-  country?: string;
-}
+import { useQuery } from '@tanstack/react-query';
+import { getApiPortOptions } from '@features/masterdata/api/@tanstack/react-query.gen';
+import { PortViewModel } from '@features/masterdata/api/types.gen';
 
 interface PortAutocompleteProps {
   label: string;
-  value: Port | null;
-  onChange: (port: Port | null) => void;
+  value: PortViewModel | null;
+  onChange: (port: PortViewModel | null) => void;
   disabled?: boolean;
 }
 
-const fetchPorts = async (search: string): Promise<Port[]> => {
-  // Remplacer l'URL par celle de ton API de ports si besoin
-  const url = `https://localhost:7271/Port?search=${encodeURIComponent(search)}`;
-  const res = await fetch(url);
-  const data = await res.json();
-  return Array.isArray(data) ? data : [];
-};
-
 const PortAutocomplete: React.FC<PortAutocompleteProps> = ({ label, value, onChange, disabled }) => {
   const [inputValue, setInputValue] = useState('');
-  const [options, setOptions] = useState<Port[]>([]);
-  const [loading, setLoading] = useState(false);
+  
+  // Utiliser l'API React Query pour charger les ports
+  const { data: portsData, isLoading: loading, error } = useQuery({
+    ...getApiPortOptions({
+      baseURL: 'https://localhost:7271'
+    }),
+    enabled: true, // Charger immédiatement tous les ports
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
+  });
 
-  useEffect(() => {
-    let active = true;
-    if (inputValue.length < 2) {
-      setOptions([]);
-      return;
-    }
-    setLoading(true);
-    fetchPorts(inputValue).then((ports) => {
-      if (active) {
-        setOptions(ports);
-        setLoading(false);
-      }
+  // Debug: Log des données reçues
+  React.useEffect(() => {
+    console.log('🔧 [PortAutocomplete] Données ports:', {
+      portsData,
+      loading,
+      error,
+      inputValue
     });
-    return () => {
-      active = false;
-    };
-  }, [inputValue]);
+  }, [portsData, loading, error, inputValue]);
+
+  // Filtrer les ports basé sur la recherche
+  const filteredOptions = React.useMemo(() => {
+    if (!portsData || !Array.isArray(portsData)) {
+      console.log('🔧 [PortAutocomplete] Pas de données ports ou pas un array:', portsData);
+      return [];
+    }
+    
+    // Si pas de recherche, retourner les premiers 20 ports
+    if (!inputValue || inputValue.length < 2) {
+      const limited = portsData.slice(0, 20);
+      console.log('🔧 [PortAutocomplete] Ports limités (pas de recherche):', limited);
+      return limited;
+    }
+    
+    const searchLower = inputValue.toLowerCase();
+    const filtered = portsData.filter((port: PortViewModel) => 
+      port.portName?.toLowerCase().includes(searchLower) ||
+      port.country?.toLowerCase().includes(searchLower)
+    );
+    
+    console.log('🔧 [PortAutocomplete] Ports filtrés:', filtered);
+    return filtered;
+  }, [portsData, inputValue]);
 
   return (
     <Autocomplete
       disabled={disabled}
-      options={options}
+      options={filteredOptions}
       getOptionLabel={(option) =>
-        option.portName || option.name || option.unlocode || ''
+        option.portName || ''
       }
       isOptionEqualToValue={(option, val) =>
-        (option.unlocode && val.unlocode && option.unlocode === val.unlocode) ||
-        (option.id && val.id && option.id === val.id)
+        option.portId === val.portId
       }
       value={value}
       onChange={(_, newValue) => onChange(newValue)}
@@ -64,8 +74,8 @@ const PortAutocomplete: React.FC<PortAutocompleteProps> = ({ label, value, onCha
       onInputChange={(_, newInputValue) => setInputValue(newInputValue)}
       loading={loading}
       renderOption={(props, option) => (
-        <li {...props} key={option.unlocode || option.id}>
-          {option.portName || option.name} {option.country ? `(${option.country.toUpperCase()})` : ''}
+        <li {...props} key={option.portId}>
+          {option.portName} {option.country ? `(${option.country.toUpperCase()})` : ''}
         </li>
       )}
       renderInput={(params) => (
@@ -74,6 +84,8 @@ const PortAutocomplete: React.FC<PortAutocompleteProps> = ({ label, value, onCha
           label={label}
           variant="outlined"
           fullWidth
+          error={!!error}
+          helperText={error ? `Erreur de chargement: ${error.message}` : ''}
           InputProps={{
             ...params.InputProps,
             endAdornment: (

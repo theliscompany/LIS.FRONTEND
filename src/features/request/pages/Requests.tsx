@@ -301,21 +301,13 @@ const Requests = () => {
     const handleLaunchWizard = async (request: RequestQuoteListViewModel) => {
         setLoadingWizardId(request.requestQuoteId ?? '');
         try {
-            // Toujours charger la demande complète
-            const res = await getApiRequestById({ path: { id: request.requestQuoteId ?? '' } });
-            if (res && res.data) {
-                // Patch : si companyName est vide dans la réponse API, on le récupère depuis la ligne de la liste
-                const patchedData = {
-                    ...res.data,
-                    companyName: res.data.companyName || request.companyName // Priorité à la donnée API, sinon fallback sur la liste
-                };
-                navigate('/request-wizard', {
-                    state: {
-                        requestData: patchedData,
-                        source: 'api'
-                    }
-                });
-            }
+            // Naviguer vers le wizard avec l'ID de la demande
+            // Le wizard récupérera les données via l'API
+            navigate(`/request-wizard/${request.requestQuoteId}`, {
+                state: {
+                    source: 'requests-list'
+                }
+            });
         } finally {
             setLoadingWizardId(null);
         }
