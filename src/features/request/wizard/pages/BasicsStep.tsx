@@ -12,8 +12,7 @@ import {
   useTheme,
   alpha,
   Chip,
-  Autocomplete,
-  Divider
+  Autocomplete
 } from '@mui/material';
 import {
   Business, Person, Email, Phone, AssignmentInd
@@ -24,7 +23,6 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { fr } from 'date-fns/locale';
-import { format } from 'date-fns';
 import { formatDisplayDate, toValidDisplayDate } from '../utils/dateUtils';
 
 import { DraftQuoteForm } from '../schema';
@@ -244,18 +242,37 @@ export const BasicsStep: React.FC<BasicsStepProps> = ({ readonly = false, reques
               {readonly ? (
                 <Box sx={{ 
                   p: 2, 
-                  border: `1px solid ${alpha(theme.palette.grey[300], 0.5)}`, 
-                  borderRadius: 1,
-                  bgcolor: alpha(theme.palette.grey[50], 0.5)
+                  border: `3px solid #0d3d0d`, 
+                  borderRadius: 2,
+                  bgcolor: '#0d3d0d',
+                  background: `linear-gradient(135deg, #0d3d0d 0%, #1b5e20 100%)`,
+                  boxShadow: `0 6px 16px ${alpha('#0d3d0d', 0.7)}`
                 }}>
-                  <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                    Cargo Type
+                  <Typography variant="body2" sx={{ 
+                    mb: 1, 
+                    fontWeight: 700,
+                    color: 'white',
+                    textShadow: '2px 2px 4px rgba(0,0,0,0.8)',
+                    fontSize: '0.9rem'
+                  }}>
+                    Type de cargo
                   </Typography>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <span style={{ fontSize: '20px' }}>
+                    <span style={{ 
+                      fontSize: '32px', 
+                      filter: 'drop-shadow(3px 3px 6px rgba(0,0,0,1))',
+                      textShadow: '3px 3px 6px rgba(0,0,0,1)'
+                    }}>
                       {getCargoTypeIcon(displayData?.cargoType || 'FCL')}
                     </span>
-                    <Typography variant="body1" sx={{ fontWeight: 600 }}>
+                    <Typography variant="body1" sx={{ 
+                      fontWeight: 900, 
+                      color: '#ffffff',
+                      fontSize: '1.4rem',
+                      textShadow: '3px 3px 6px rgba(0,0,0,1)',
+                      letterSpacing: '1px',
+                      fontFamily: 'monospace'
+                    }}>
                       {cargoTypes.find(t => t.value === displayData?.cargoType)?.label || displayData?.cargoType}
                     </Typography>
                   </Box>
@@ -306,18 +323,42 @@ export const BasicsStep: React.FC<BasicsStepProps> = ({ readonly = false, reques
               {readonly ? (
                 <Box sx={{ 
                   p: 2, 
-                  border: `1px solid ${alpha(theme.palette.grey[300], 0.5)}`, 
-                  borderRadius: 1,
-                  bgcolor: alpha(theme.palette.grey[50], 0.5)
+                  border: `3px solid #002171`, 
+                  borderRadius: 2,
+                  bgcolor: '#002171',
+                  background: `linear-gradient(135deg, #002171 0%, #0d47a1 100%)`,
+                  boxShadow: `0 6px 16px ${alpha('#002171', 0.7)}`
                 }}>
-                  <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                  <Typography variant="body2" sx={{ 
+                    mb: 1, 
+                    fontWeight: 800,
+                    color: '#ffffff',
+                    textShadow: '3px 3px 6px rgba(0,0,0,1)',
+                    fontSize: '1rem',
+                    letterSpacing: '0.5px'
+                  }}>
                     Incoterm
                   </Typography>
                   <Chip 
                     label={displayData?.incoterm || 'N/A'} 
-                    size="small" 
-                    variant="outlined"
-                    sx={{ fontWeight: 600 }}
+                    size="medium" 
+                    variant="filled"
+                    sx={{ 
+                      fontWeight: 900,
+                      fontSize: '1.3rem',
+                      bgcolor: '#ffffff',
+                      color: '#002171',
+                      border: `4px solid #ffffff`,
+                      boxShadow: '0 6px 16px rgba(0,0,0,0.6)',
+                      textShadow: '2px 2px 4px rgba(0,0,0,0.5)',
+                      fontFamily: 'monospace',
+                      letterSpacing: '1px',
+                      '&:hover': {
+                        bgcolor: alpha('#002171', 0.1),
+                        transform: 'scale(1.05)',
+                        transition: 'all 0.2s ease'
+                      }
+                    }}
                   />
                 </Box>
               ) : (

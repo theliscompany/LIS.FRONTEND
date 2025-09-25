@@ -69,10 +69,11 @@ export const NewRequestWizard: React.FC = () => {
   console.log('[NewRequestWizard] Mode readonly:', isReadonly, { requestId, hasRequestData: !!location.state?.requestData, draftId });
 
   // Hook pour la sauvegarde des brouillons
-  const { saveDraft } = useDraftQuoteSave({
+  const { saveDraftWithOptions } = useDraftQuoteSave({
     requestQuoteId: requestId || '',
-    onSuccess: (draftId) => {
-      console.log('✅ [NewRequestWizard] Brouillon sauvegardé avec ID:', draftId);
+    draftId: draftId || undefined, // Utiliser le draftId actuel
+    onSuccess: (savedDraftId) => {
+      console.log('✅ [NewRequestWizard] Brouillon sauvegardé avec ID:', savedDraftId);
     },
     onError: (error) => {
       console.error('❌ [NewRequestWizard] Erreur lors de la sauvegarde:', error);
@@ -104,6 +105,7 @@ export const NewRequestWizard: React.FC = () => {
               origin: (response.data as any).shipment?.origin?.location,
               destination: (response.data as any).shipment?.destination?.location,
               optionsCount: (response.data as any).options?.length || 0,
+              options: (response.data as any).options,
               // Ajouter d'autres champs pour debug
               hasCustomer: !!(response.data as any).customer,
               hasShipment: !!(response.data as any).shipment,
@@ -192,6 +194,8 @@ export const NewRequestWizard: React.FC = () => {
       console.log('[WIZARD] Adaptation des données de brouillon:', draftData);
       const adaptedForm = adaptDraftToWizardForm(draftData, currentUserEmail);
       console.log('[WIZARD] Formulaire adapté depuis le brouillon:', adaptedForm);
+      console.log('🔍 [WIZARD] Options adaptées:', adaptedForm.existingOptions);
+      console.log('🔍 [WIZARD] Nombre d\'options adaptées:', adaptedForm.existingOptions?.length || 0);
       return adaptedForm;
     }
 
@@ -263,19 +267,21 @@ export const NewRequestWizard: React.FC = () => {
   const handleAutoSave = useCallback(async (formData: DraftQuoteForm) => {
     try {
       console.log('🔄 [NewRequestWizard] Auto-save triggered');
-      const savedDraftId = await saveDraft(formData);
+      console.log('🆔 [NewRequestWizard] DraftId pour auto-save:', draftId);
+      const savedDraftId = await saveDraftWithOptions(formData, draftId || undefined);
       console.log('✅ [NewRequestWizard] Auto-save completed with ID:', savedDraftId);
     } catch (error) {
       console.error('❌ [NewRequestWizard] Auto-save failed:', error);
       throw error;
     }
-  }, [saveDraft]);
+  }, [saveDraftWithOptions, draftId]);
 
   // Submit handler - uses the new save system
   const handleSubmit = useCallback(async (formData: DraftQuoteForm) => {
     try {
       console.log('🔄 [NewRequestWizard] Submit triggered');
-      const savedDraftId = await saveDraft(formData);
+      console.log('🆔 [NewRequestWizard] DraftId pour submit:', draftId);
+      const savedDraftId = await saveDraftWithOptions(formData, draftId || undefined);
       console.log('✅ [NewRequestWizard] Submit completed with ID:', savedDraftId);
       
       enqueueSnackbar('Brouillon sauvegardé avec succès', { variant: 'success' });
@@ -284,7 +290,7 @@ export const NewRequestWizard: React.FC = () => {
       console.error('❌ [NewRequestWizard] Submit failed:', error);
       enqueueSnackbar('Erreur lors de la sauvegarde du brouillon', { variant: 'error' });
     }
-  }, [saveDraft, navigate, enqueueSnackbar]);
+  }, [saveDraftWithOptions, draftId, navigate, enqueueSnackbar]);
 
   // Step change handler
   const handleStepChange = useCallback((step: string) => {

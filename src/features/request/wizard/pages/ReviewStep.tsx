@@ -409,12 +409,18 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
                     label={formData.basics.cargoType}
                     color={getCargoTypeColor(formData.basics.cargoType) as any}
                     sx={{
-                      fontSize: '1rem',
-                      fontWeight: 600,
+                      fontSize: '1.1rem',
+                      fontWeight: 700,
                       py: 2,
                       px: 1,
-                      background: 'linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%)',
-                      boxShadow: '0 4px 12px rgba(25, 118, 210, 0.2)'
+                      background: 'linear-gradient(135deg, #0d3d0d 0%, #1b5e20 100%)',
+                      color: '#ffffff',
+                      boxShadow: '0 6px 16px rgba(13, 61, 13, 0.4)',
+                      textShadow: '2px 2px 4px rgba(0,0,0,0.8)',
+                      '& .MuiChip-icon': {
+                        color: '#ffffff',
+                        filter: 'drop-shadow(2px 2px 4px rgba(0,0,0,0.8))'
+                      }
                     }}
                   />
                 </Stack>
@@ -432,12 +438,14 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
                     label={formData.basics.incoterm}
                     color="primary"
                     sx={{
-                      fontSize: '1rem',
-                      fontWeight: 600,
+                      fontSize: '1.1rem',
+                      fontWeight: 700,
                       py: 2,
                       px: 1,
-                      background: 'linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%)',
-                      boxShadow: '0 4px 12px rgba(25, 118, 210, 0.2)'
+                      background: 'linear-gradient(135deg, #002171 0%, #0d47a1 100%)',
+                      color: '#ffffff',
+                      boxShadow: '0 6px 16px rgba(0, 33, 113, 0.4)',
+                      textShadow: '2px 2px 4px rgba(0,0,0,0.8)'
                     }}
                   />
                 </Stack>
@@ -735,9 +743,7 @@ const SaveDraftButton: React.FC<{
         >
           {isDraftSaving 
             ? '💾 Sauvegarde...' 
-            : draftId 
-              ? `🔄 Mettre à jour (PUT) & ${existingOptionsCount} option${existingOptionsCount > 1 ? 's' : ''}`
-              : `➕ Créer (POST) & ${existingOptionsCount} option${existingOptionsCount > 1 ? 's' : ''}`
+            : `💾 Save Draft${existingOptionsCount > 0 ? ` (${existingOptionsCount} option${existingOptionsCount > 1 ? 's' : ''})` : ''}`
           }
         </Button>
       </Box>

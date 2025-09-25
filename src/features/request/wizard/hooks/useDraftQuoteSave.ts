@@ -61,6 +61,8 @@ export const useDraftQuoteSave = ({ requestQuoteId, draftId, onSuccess, onError 
       setIsSaving(true);
       
       console.log('🚀 [SAVE] === DÉBUT DE LA SAUVEGARDE ===');
+      console.log('🆔 [SAVE] DraftId reçu:', existingDraftId);
+      console.log('🆔 [SAVE] DraftId du hook:', draftId);
       console.log('📋 [SAVE] Données du formulaire:', JSON.stringify(formData, null, 2));
       console.log('🆔 [SAVE] RequestQuoteId:', requestQuoteId);
       console.log('🆔 [SAVE] ExistingDraftId:', existingDraftId || 'Aucun (création)');
@@ -77,14 +79,15 @@ export const useDraftQuoteSave = ({ requestQuoteId, draftId, onSuccess, onError 
       const createRequest = toCreateDraftQuoteRequest(formData, requestQuoteId);
       console.log('🔄 [SAVE] Sauvegarde du brouillon avec options:', createRequest);
 
-      let draftId: string;
+      let savedDraftId: string;
 
       if (existingDraftId) {
         // Mettre à jour un brouillon existant avec PUT (incluant les options)
-        console.log('🔄 [SAVE] Mise à jour du brouillon existant:', existingDraftId);
+        console.log('🔄 [SAVE] === MISE À JOUR DU BROUILLON EXISTANT (PUT) ===');
+        console.log('🆔 [SAVE] DraftId existant:', existingDraftId);
         
         // Convertir les options vers le format API
-        console.log('🔍 [SAVE] formData.existingOptions:', formData.existingOptions);
+        console.log('🔍 [SAVE] formData.existingOptions (avec seafreights array):', formData.existingOptions);
         const optionsPayload = formData.existingOptions && formData.existingOptions.length > 0 
           ? formData.existingOptions.map(option => {
               console.log('🔍 [SAVE] Conversion option:', option);
@@ -113,13 +116,14 @@ export const useDraftQuoteSave = ({ requestQuoteId, draftId, onSuccess, onError 
         });
         
         console.log('✅ [API] Réponse PUT:', JSON.stringify(response, null, 2));
-        draftId = existingDraftId;
+        savedDraftId = existingDraftId;
       } else {
         // Créer un nouveau brouillon avec POST (incluant les options)
-        console.log('🔄 [SAVE] Création d\'un nouveau brouillon');
+        console.log('🔄 [SAVE] === CRÉATION D\'UN NOUVEAU BROUILLON (POST) ===');
+        console.log('🆔 [SAVE] Aucun DraftId existant, création d\'un nouveau brouillon');
         
         // Convertir les options vers le format API
-        console.log('🔍 [SAVE] formData.existingOptions (POST):', formData.existingOptions);
+        console.log('🔍 [SAVE] formData.existingOptions (POST avec seafreights array):', formData.existingOptions);
         const optionsPayload = formData.existingOptions && formData.existingOptions.length > 0 
           ? formData.existingOptions.map(option => {
               console.log('🔍 [SAVE] Conversion option (POST):', option);
@@ -144,8 +148,8 @@ export const useDraftQuoteSave = ({ requestQuoteId, draftId, onSuccess, onError 
         });
         
         console.log('✅ [API] Réponse POST:', JSON.stringify(response, null, 2));
-        draftId = (response as any).data?.data?.draftQuoteId || (response as any).data?.draftQuoteId;
-        if (!draftId) {
+        savedDraftId = (response as any).data?.data?.draftQuoteId || (response as any).data?.draftQuoteId;
+        if (!savedDraftId) {
           console.error('❌ [API] Structure de réponse inattendue:', {
             hasData: !!(response as any).data,
             hasDataData: !!(response as any).data?.data,
@@ -162,8 +166,8 @@ export const useDraftQuoteSave = ({ requestQuoteId, draftId, onSuccess, onError 
       // Pas besoin de les sauvegarder séparément
 
       console.log('🎉 [SAVE] === SAUVEGARDE TERMINÉE AVEC SUCCÈS ===');
-      console.log('🆔 [SAVE] DraftId final:', draftId);
-      return draftId;
+      console.log('🆔 [SAVE] DraftId final:', savedDraftId);
+      return savedDraftId;
     } catch (error) {
       console.error('💥 [SAVE] === ERREUR LORS DE LA SAUVEGARDE ===');
       console.error('❌ [SAVE] Erreur lors de la sauvegarde avec options:', error);

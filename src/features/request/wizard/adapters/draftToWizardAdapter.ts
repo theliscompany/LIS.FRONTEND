@@ -121,24 +121,84 @@ export const adaptDraftToWizardForm = (
       }
     },
     // Adapter les options existantes
-    existingOptions: draftData.data?.options?.map((option: any) => ({
-      id: option.optionId || uuidv4(),
-      name: option.label || `Option ${draftData.data?.options?.indexOf(option) + 1}`,
-      seafreights: option.seafreights || [],
-      haulages: option.haulages || [],
-      services: option.services || [],
-      containers: option.containers || [],
-      ports: option.ports || [],
-      totals: option.totals || {
-        seafreights: 0,
-        haulages: 0,
-        services: 0,
-        grandTotal: 0
-      },
-      currency: option.currency || 'EUR',
-      validUntil: option.validUntil || new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString(),
-      isPreferred: option.isPreferred || false
-    })) || [],
+    existingOptions: draftData.data?.options?.map((option: any) => {
+      console.log('🔍 [DRAFT_ADAPTER] Mapping option API (nouvelle structure seafreights array):', option);
+      
+      // Mapper seafreights (array dans l'API) vers seafreights (array dans le wizard)
+      const seafreights = option.seafreights?.map((sf: any) => ({
+        id: sf.id || uuidv4(),
+        carrier: sf.carrier || '',
+        service: sf.service || '',
+        etd: sf.etd || null,
+        eta: sf.eta || null,
+        rates: sf.rate?.map((rate: any) => ({
+          containerType: rate.containerType || '',
+          basePrice: rate.basePrice || 0,
+          currency: rate.currency || 'EUR'
+        })) || [],
+        surcharges: sf.surcharges || []
+      })) || [];
+
+      // Mapper haulages
+      const haulages = option.haulages?.map((haulage: any) => ({
+        id: haulage.id || uuidv4(),
+        mode: haulage.mode || 'truck',
+        leg: haulage.phase || 'pre',
+        from: haulage.from || '',
+        to: haulage.to || '',
+        price: haulage.basePrice || 0,
+        note: haulage.note || '',
+        pricingScope: haulage.pricingScope || 'per_container',
+        containerFilter: haulage.containerFilter || [],
+        windows: haulage.windows || null,
+        surcharges: haulage.surcharges || []
+      })) || [];
+
+      // Mapper services
+      const services = option.services?.map((service: any) => ({
+        id: service.id || uuidv4(),
+        code: service.code || '',
+        label: service.label || '',
+        price: service.value || 0,
+        currency: service.currency || 'EUR',
+        calc: service.calc || 'flat',
+        unit: service.unit || 'per_shipment',
+        taxable: service.taxable || false
+      })) || [];
+
+      // Mapper containers
+      const containers = option.containers?.map((container: any) => ({
+        containerType: container.containerType || '',
+        quantity: container.quantity || 1,
+        teu: container.teu || 1
+      })) || [];
+
+      const mappedOption = {
+        id: option.optionId || uuidv4(),
+        name: option.label || `Option ${draftData.data?.options?.indexOf(option) + 1}`,
+        description: option.description || undefined,
+        seafreights: seafreights,
+        haulages: haulages,
+        services: services,
+        containers: containers,
+        ports: [], // Les ports ne sont pas stockés dans les options
+        totals: option.totals || {
+          seafreights: 0,
+          haulages: 0,
+          services: 0,
+          grandTotal: 0
+        },
+        currency: option.currency || 'EUR',
+        validUntil: option.validUntil || new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString(),
+        isPreferred: option.isPreferred || false,
+        totalPrice: option.totals?.grandTotal || 0,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+
+      console.log('✅ [DRAFT_ADAPTER] Option mappée (avec seafreights array):', mappedOption);
+      return mappedOption;
+    }) || [],
     // Option en cours avec les données du wizard
     currentOption: {
       seafreights: seafreights.map((sf: any) => ({

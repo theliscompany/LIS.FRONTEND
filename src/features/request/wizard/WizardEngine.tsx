@@ -146,6 +146,17 @@ export const WizardEngine: React.FC<WizardEngineProps> = ({
     };
   }, [watchedValues, isValid, debouncedAutoSave]);
 
+  // Initialiser preferredOptionId quand les options sont chargées
+  useEffect(() => {
+    if (watchedValues.existingOptions && watchedValues.existingOptions.length > 0) {
+      const preferredOption = watchedValues.existingOptions.find(option => option.isPreferred);
+      if (preferredOption && preferredOption.id !== preferredOptionId) {
+        setPreferredOptionId(preferredOption.id);
+        console.log('Initialized preferred option from loaded data:', preferredOption.id);
+      }
+    }
+  }, [watchedValues.existingOptions, preferredOptionId]);
+
   // Handle step change
   const handleStepChange = useCallback((step: WizardStepId) => {
     setCurrentStep(step);
@@ -224,8 +235,18 @@ export const WizardEngine: React.FC<WizardEngineProps> = ({
   // Handle setting preferred option
   const handleSetPreferredOption = useCallback((optionId: string) => {
     setPreferredOptionId(optionId);
+    
+    // Mettre à jour le champ isPreferred dans les options du formulaire
+    const formData = form.getValues();
+    const updatedOptions = formData.existingOptions?.map(option => ({
+      ...option,
+      isPreferred: option.id === optionId
+    })) || [];
+    
+    form.setValue('existingOptions', updatedOptions);
     console.log('Preferred option set:', optionId);
-  }, []);
+    console.log('Updated options with isPreferred:', updatedOptions);
+  }, [form]);
 
   // Handle duplicating an existing option
   const handleDuplicateOption = useCallback(async (option: QuoteOption) => {

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Paper,
   Typography,
@@ -15,7 +15,9 @@ import {
   Fade,
   Card,
   CardContent,
-  Grid
+  Grid,
+  Tabs,
+  Tab
 } from '@mui/material';
 import {
   LocationOn,
@@ -43,6 +45,24 @@ interface LivePreviewProps {
 
 export const LivePreview: React.FC<LivePreviewProps> = ({ values }) => {
   const theme = useTheme();
+  const [activeTab, setActiveTab] = useState(0);
+
+  // Debug logs
+  console.log('🔍 [LivePreview] Debug:', {
+    activeTab,
+    hasCurrentOption: !!values.currentOption,
+    existingOptionsCount: values.existingOptions?.length || 0,
+    existingOptions: values.existingOptions?.map(opt => ({ id: opt.id, name: opt.name }))
+  });
+
+  // Gérer le changement automatique de tab quand une nouvelle option est créée
+  useEffect(() => {
+    const totalOptions = (values.existingOptions?.length || 0) + (values.currentOption ? 1 : 0);
+    if (totalOptions > 0 && activeTab >= totalOptions) {
+      // Si l'index actuel est plus grand que le nombre d'options, revenir au premier tab
+      setActiveTab(0);
+    }
+  }, [values.existingOptions?.length, values.currentOption, activeTab]);
 
   const getCargoTypeColor = (cargoType: string) => {
     switch (cargoType) {
@@ -239,24 +259,128 @@ export const LivePreview: React.FC<LivePreviewProps> = ({ values }) => {
 
         <Divider sx={{ mb: 3 }} />
 
-        {/* Option en cours */}
-        {values.currentOption && (
-          <Box sx={{ mb: 3 }}>
-            <Typography variant="h6" sx={{ fontWeight: 600, mb: 2, color: theme.palette.info.main }}>
-              📝 Option en cours
-            </Typography>
-            <OptionDetails option={values.currentOption} isCurrentOption />
+        {/* Tabs pour les options */}
+        <Box sx={{ mb: 3 }}>
+          <Typography variant="h6" sx={{ fontWeight: 600, mb: 2, color: theme.palette.info.main }}>
+            📋 Options du brouillon
+          </Typography>
+          
+          {/* Tabs */}
+          <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 1 }}>
+            <Tabs 
+              value={activeTab} 
+              onChange={(_, newValue) => setActiveTab(newValue)}
+              variant="scrollable"
+              scrollButtons="auto"
+            >
+              {/* Tab pour l'option en cours */}
+              {values.currentOption && (
+                <Tab 
+                  label={
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <span>📝</span>
+                      <span>Option en cours</span>
+                      <Chip 
+                        size="small" 
+                        label={`${(values.currentOption.seafreights?.length || 0) + (values.currentOption.haulages?.length || 0) + (values.currentOption.services?.length || 0)}`}
+                        sx={{ 
+                          height: 20, 
+                          fontSize: '0.75rem',
+                          bgcolor: theme.palette.info.light,
+                          color: theme.palette.info.contrastText
+                        }}
+                      />
+                    </Box>
+                  }
+                  sx={{ 
+                    minHeight: 48,
+                    textTransform: 'none',
+                    fontWeight: activeTab === 0 ? 600 : 400
+                  }}
+                />
+              )}
+              
+              {/* Tabs pour les options existantes */}
+              {values.existingOptions?.map((option, index) => {
+                const totalItems = (option.seafreights?.length || 0) + (option.haulages?.length || 0) + (option.services?.length || 0);
+                return (
+                  <Tab 
+                    key={option.id || index}
+                    label={
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <span>✅</span>
+                        <span>{option.name || `Option ${index + 1}`}</span>
+                        <Chip 
+                          size="small" 
+                          label={totalItems}
+                          sx={{ 
+                            height: 20, 
+                            fontSize: '0.75rem',
+                            bgcolor: theme.palette.success.light,
+                            color: theme.palette.success.contrastText
+                          }}
+                        />
+                      </Box>
+                    }
+                    sx={{ 
+                      minHeight: 48,
+                      textTransform: 'none',
+                      fontWeight: activeTab === (values.currentOption ? index + 1 : index) ? 600 : 400
+                    }}
+                  />
+                );
+              })}
+            </Tabs>
           </Box>
-        )}
 
-        {/* Message si aucune option en cours */}
-        {!values.currentOption && (
-          <Box sx={{ textAlign: 'center', py: 4 }}>
-            <Typography variant="body2" color="text.secondary">
-              Commencez à sélectionner des offres pour voir l'option en cours
-            </Typography>
+          {/* Contenu des tabs */}
+          <Box sx={{ minHeight: 'auto', pt: 1 }}>
+            {/* Déterminer quelle option afficher */}
+            {(() => {
+              // Si on a une option en cours et qu'on est sur le tab 0
+              if (values.currentOption && activeTab === 0) {
+                return (
+                  <Fade in={true} timeout={300}>
+                    <Box>
+                      <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1, color: theme.palette.info.main }}>
+                        📝 Option en cours
+                      </Typography>
+                      <OptionDetails option={values.currentOption} isCurrentOption />
+                    </Box>
+                  </Fade>
+                );
+              }
+              
+              // Si on a des options existantes
+              if (values.existingOptions && values.existingOptions.length > 0) {
+                const optionIndex = values.currentOption ? activeTab - 1 : activeTab;
+                const option = values.existingOptions[optionIndex];
+                
+                if (option) {
+                  return (
+                    <Fade in={true} timeout={300}>
+                      <Box>
+                        <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1, color: theme.palette.success.main }}>
+                          ✅ {option.name || `Option ${optionIndex + 1}`}
+                        </Typography>
+                        <OptionDetails option={option} isCurrentOption={false} />
+                      </Box>
+                    </Fade>
+                  );
+                }
+              }
+              
+              // Message si aucune option
+              return (
+                <Box sx={{ textAlign: 'center', py: 4 }}>
+                  <Typography variant="body2" color="text.secondary">
+                    Commencez à sélectionner des offres pour voir les options
+                  </Typography>
+                </Box>
+              );
+            })()}
           </Box>
-        )}
+        </Box>
 
         {/* Empty State */}
         {!values.basics?.origin?.city && !values.basics?.destination?.city && (

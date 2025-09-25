@@ -212,8 +212,8 @@ export const StepRouter: React.FC<StepRouterProps> = ({
           {/* Manual save button */}
           <Button
             startIcon={<Save />}
-            onClick={onSave}
-            disabled={isAutoSaving || !hasUnsavedChanges}
+            onClick={onSaveDraft}
+            disabled={isAutoSaving || isDraftSaving}
             size="small"
             variant="outlined"
           >

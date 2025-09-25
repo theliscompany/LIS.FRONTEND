@@ -106,11 +106,12 @@ export type DraftQuoteOptionDto = {
     currency?: (string) | null;
     containers?: Array<DraftQuoteOptionContainerDto> | null;
     planning?: DraftQuotePlanningDto;
-    seafreight?: DraftQuoteOptionSeafreightDto;
+    seafreights?: Array<DraftQuoteOptionSeafreightDto> | null;
     haulages?: Array<DraftQuoteOptionHaulageDto> | null;
     services?: Array<DraftQuoteOptionServiceDto> | null;
     totals?: DraftQuoteOptionTotalsDto;
     terms?: DraftQuoteOptionTermsDto;
+    isPreferred?: boolean;
 };
 
 export type DraftQuoteOptionHaulageDto = {
@@ -479,11 +480,12 @@ export type QuoteSelectedOptionDto = {
     currency?: (string) | null;
     containers?: Array<QuoteContainerDto> | null;
     planning?: QuotePlanningDto;
-    seafreight?: QuoteSeafreightDto;
+    seafreights?: Array<QuoteSeafreightDto> | null;
     haulages?: Array<QuoteHaulageDto> | null;
     services?: Array<QuoteServiceDto> | null;
     totals?: QuoteTotalsDto;
     terms?: QuoteTermsDto;
+    isPreferred?: boolean;
 };
 
 export type QuoteServiceDto = {

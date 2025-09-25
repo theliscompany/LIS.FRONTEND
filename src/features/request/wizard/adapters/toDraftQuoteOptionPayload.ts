@@ -16,23 +16,26 @@ export const toDraftQuoteOptionPayload = (option: QuoteOption): DraftQuoteOption
   console.log('🔍 [ADAPTER] option.seafreights:', option.seafreights);
   console.log('🔍 [ADAPTER] option.haulages:', option.haulages);
   console.log('🔍 [ADAPTER] option.services:', option.services);
+  console.log('⭐ [ADAPTER] option.isPreferred:', option.isPreferred);
 
   // Calculer les totaux
   const totals = calculateOptionTotals(option);
 
-  return {
+  const payload = {
     optionId: option.id,
     label: option.name || 'Option sans nom',
     validUntil: option.validUntil || new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString(),
     currency: option.currency || 'EUR',
     containers: option.containers?.map(toDraftQuoteOptionContainerDto) || [],
-    seafreight: option.seafreights && option.seafreights.length > 0 
-      ? toDraftQuoteOptionSeafreightDto(option.seafreights[0]) 
-      : undefined,
+    seafreights: option.seafreights?.map(toDraftQuoteOptionSeafreightDto) || [],
     haulages: option.haulages?.map(toDraftQuoteOptionHaulageDto) || [],
     services: option.services?.map(toDraftQuoteOptionServiceDto) || [],
-    totals: totals
+    totals: totals,
+    isPreferred: option.isPreferred || false
   };
+
+  console.log('✅ [ADAPTER] Payload final avec isPreferred:', payload);
+  return payload;
 };
 
 /**
