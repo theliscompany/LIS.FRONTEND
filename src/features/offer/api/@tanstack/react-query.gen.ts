@@ -2,9 +2,9 @@
 
 import type { OptionsLegacyParser } from '@hey-api/client-axios';
 import { queryOptions, type UseMutationOptions, infiniteQueryOptions, type InfiniteData } from '@tanstack/react-query';
-import type { PostApiQuotesData, PostApiQuotesError, PostApiQuotesResponse, GetApiQuotesData, GetApiQuotesByIdData, PutApiQuotesByIdData, PutApiQuotesByIdError, PutApiQuotesByIdResponse, DeleteApiQuotesByIdData, DeleteApiQuotesByIdError, DeleteApiQuotesByIdResponse, PostApiQuotesByIdApprovalData, PostApiQuotesByIdApprovalError, PostApiQuotesByIdApprovalResponse, PostApiDraftQuotesData, PostApiDraftQuotesError, PostApiDraftQuotesResponse, GetApiDraftQuotesData, GetApiDraftQuotesError, GetApiDraftQuotesResponse, GetApiDraftQuotesByIdData, PutApiDraftQuotesByIdData, PutApiDraftQuotesByIdError, PutApiDraftQuotesByIdResponse, DeleteApiDraftQuotesByIdData, DeleteApiDraftQuotesByIdError, DeleteApiDraftQuotesByIdResponse, PostApiDraftQuotesByIdOptionsData, PostApiDraftQuotesByIdOptionsError, PostApiDraftQuotesByIdOptionsResponse, DeleteApiDraftQuotesByIdOptionsByOptionIdData, DeleteApiDraftQuotesByIdOptionsByOptionIdError, DeleteApiDraftQuotesByIdOptionsByOptionIdResponse, PostApiDraftQuotesByIdFinalizeData, PostApiDraftQuotesByIdFinalizeError, PostApiDraftQuotesByIdFinalizeResponse } from '../types.gen';
+import type { PostApiQuotesData, PostApiQuotesError, PostApiQuotesResponse, GetApiQuotesData, PostApiQuotesByIdSelectOptionData, PostApiQuotesByIdSelectOptionError, PostApiQuotesByIdSelectOptionResponse, GetApiQuotesByIdData, PutApiQuotesByIdData, PutApiQuotesByIdError, PutApiQuotesByIdResponse, DeleteApiQuotesByIdData, DeleteApiQuotesByIdError, DeleteApiQuotesByIdResponse, PostApiQuotesByIdApprovalData, PostApiQuotesByIdApprovalError, PostApiQuotesByIdApprovalResponse, PostApiDraftQuotesData, PostApiDraftQuotesError, PostApiDraftQuotesResponse, GetApiDraftQuotesData, GetApiDraftQuotesError, GetApiDraftQuotesResponse, GetApiDraftQuotesByIdData, PutApiDraftQuotesByIdData, PutApiDraftQuotesByIdError, PutApiDraftQuotesByIdResponse, DeleteApiDraftQuotesByIdData, DeleteApiDraftQuotesByIdError, DeleteApiDraftQuotesByIdResponse, PostApiDraftQuotesByIdOptionsData, PostApiDraftQuotesByIdOptionsError, PostApiDraftQuotesByIdOptionsResponse, DeleteApiDraftQuotesByIdOptionsByOptionIdData, DeleteApiDraftQuotesByIdOptionsByOptionIdError, DeleteApiDraftQuotesByIdOptionsByOptionIdResponse, PostApiDraftQuotesByIdFinalizeData, PostApiDraftQuotesByIdFinalizeError, PostApiDraftQuotesByIdFinalizeResponse } from '../types.gen';
 import type { AxiosError } from 'axios';
-import { client, postApiQuotes, getApiQuotes, getApiQuotesById, putApiQuotesById, deleteApiQuotesById, postApiQuotesByIdApproval, postApiDraftQuotes, getApiDraftQuotes, getApiDraftQuotesById, putApiDraftQuotesById, deleteApiDraftQuotesById, postApiDraftQuotesByIdOptions, deleteApiDraftQuotesByIdOptionsByOptionId, postApiDraftQuotesByIdFinalize } from '../sdk.gen';
+import { client, postApiQuotes, getApiQuotes, postApiQuotesByIdSelectOption, getApiQuotesById, putApiQuotesById, deleteApiQuotesById, postApiQuotesByIdApproval, postApiDraftQuotes, getApiDraftQuotes, getApiDraftQuotesById, putApiDraftQuotesById, deleteApiDraftQuotesById, postApiDraftQuotesByIdOptions, deleteApiDraftQuotesByIdOptionsByOptionId, postApiDraftQuotesByIdFinalize, getApiDraftQuotesOptionTypes } from '../sdk.gen';
 
 type QueryKey<TOptions extends OptionsLegacyParser> = [
     Pick<TOptions, 'baseURL' | 'body' | 'headers' | 'path' | 'query'> & {
@@ -83,6 +83,39 @@ export const getApiQuotesOptions = (options?: OptionsLegacyParser<GetApiQuotesDa
         },
         queryKey: getApiQuotesQueryKey(options)
     });
+};
+
+export const postApiQuotesByIdSelectOptionQueryKey = (options: OptionsLegacyParser<PostApiQuotesByIdSelectOptionData>) => [
+    createQueryKey('postApiQuotesByIdSelectOption', options)
+];
+
+export const postApiQuotesByIdSelectOptionOptions = (options: OptionsLegacyParser<PostApiQuotesByIdSelectOptionData>) => {
+    return queryOptions({
+        queryFn: async ({ queryKey, signal }) => {
+            const { data } = await postApiQuotesByIdSelectOption({
+                ...options,
+                ...queryKey[0],
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: postApiQuotesByIdSelectOptionQueryKey(options)
+    });
+};
+
+export const postApiQuotesByIdSelectOptionMutation = (options?: Partial<OptionsLegacyParser<PostApiQuotesByIdSelectOptionData>>) => {
+    const mutationOptions: UseMutationOptions<PostApiQuotesByIdSelectOptionResponse, AxiosError<PostApiQuotesByIdSelectOptionError>, OptionsLegacyParser<PostApiQuotesByIdSelectOptionData>> = {
+        mutationFn: async (localOptions) => {
+            const { data } = await postApiQuotesByIdSelectOption({
+                ...options,
+                ...localOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
 };
 
 export const getApiQuotesByIdQueryKey = (options: OptionsLegacyParser<GetApiQuotesByIdData>) => [
@@ -399,4 +432,23 @@ export const postApiDraftQuotesByIdFinalizeMutation = (options?: Partial<Options
         }
     };
     return mutationOptions;
+};
+
+export const getApiDraftQuotesOptionTypesQueryKey = (options?: OptionsLegacyParser) => [
+    createQueryKey('getApiDraftQuotesOptionTypes', options)
+];
+
+export const getApiDraftQuotesOptionTypesOptions = (options?: OptionsLegacyParser) => {
+    return queryOptions({
+        queryFn: async ({ queryKey, signal }) => {
+            const { data } = await getApiDraftQuotesOptionTypes({
+                ...options,
+                ...queryKey[0],
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getApiDraftQuotesOptionTypesQueryKey(options)
+    });
 };

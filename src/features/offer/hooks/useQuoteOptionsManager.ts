@@ -18,7 +18,9 @@ import type { QuoteOptionDto, QuoteOptionRequest } from '../api/types.gen';
 
 export interface QuoteOption {
   optionId: string;
+  name?: string;
   description: string;
+  optionType?: string;
   haulage?: any;
   seaFreight?: any;
   miscellaneous?: any[];

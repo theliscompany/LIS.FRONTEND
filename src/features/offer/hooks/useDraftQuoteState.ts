@@ -120,9 +120,9 @@ export const useDraftQuoteState = (options: UseDraftQuoteStateOptions = {}) => {
   }, []);
 
   // Gestion des options
-  const addOption = useCallback((option?: Partial<DraftQuoteOption>) => {
+  const addOption = useCallback((option?: Partial<DraftQuoteOption>, optionType?: string) => {
     const newOption = {
-      ...createEmptyOption(),
+      ...createEmptyOption(optionType),
       ...option,
     };
     
@@ -253,7 +253,8 @@ export const useDraftQuoteState = (options: UseDraftQuoteStateOptions = {}) => {
   }, [draftQuote.options]);
 
   const canFinalize = useMemo(() => {
-    return validation.isValid && hasOptions && selectedOptionId && draftQuote.status === 'in_progress';
+    return validation.isValid && hasOptions && selectedOptionId && 
+           draftQuote.status === 'in_progress' && draftQuote.status !== 'used';
   }, [validation.isValid, hasOptions, selectedOptionId, draftQuote.status]);
 
   const totalOptions = useMemo(() => {

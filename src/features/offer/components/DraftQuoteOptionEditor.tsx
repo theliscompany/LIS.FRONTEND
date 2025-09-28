@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import type { DraftQuoteOption, DraftQuoteOptionContainer, DraftQuoteOptionHaulage, DraftQuoteOptionService } from '../types/DraftQuote';
 import { calculateOptionTotals } from '../services/draftQuoteService';
+import { useDraftQuoteOptionTypes } from '../hooks/useDraftQuoteOptionTypes';
 
 interface DraftQuoteOptionEditorProps {
   option: DraftQuoteOption;
@@ -19,6 +20,7 @@ export const DraftQuoteOptionEditor: React.FC<DraftQuoteOptionEditorProps> = ({
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [localOption, setLocalOption] = useState<DraftQuoteOption>(option);
+  const { data: optionTypesData, isLoading: isLoadingOptionTypes } = useDraftQuoteOptionTypes();
 
   // Synchroniser avec les props
   useEffect(() => {
@@ -162,6 +164,22 @@ export const DraftQuoteOptionEditor: React.FC<DraftQuoteOptionEditorProps> = ({
           <div className="form-section">
             <h4>Basic Information</h4>
             <div className="form-row">
+              <div className="form-group">
+                <label>Option Type:</label>
+                <select
+                  value={localOption.optionType || ''}
+                  onChange={(e) => updateLocalOption({ optionType: e.target.value })}
+                  disabled={isLoadingOptionTypes}
+                >
+                  <option value="">Select option type</option>
+                  {optionTypesData?.data?.map((optionType: string) => (
+                    <option key={optionType} value={optionType}>
+                      {optionType}
+                    </option>
+                  ))}
+                </select>
+                {isLoadingOptionTypes && <span className="loading-text">Loading option types...</span>}
+              </div>
               <div className="form-group">
                 <label>Valid Until:</label>
                 <input

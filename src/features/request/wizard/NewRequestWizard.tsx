@@ -2,6 +2,7 @@ import React, { useCallback, useMemo, useState, useEffect } from 'react';
 import { useNavigate, useLocation, useParams } from 'react-router-dom';
 import { useSnackbar } from 'notistack';
 import { useAccount, useMsal } from '@azure/msal-react';
+import { useQueryClient } from '@tanstack/react-query';
 import { CircularProgress, Box, Typography } from '@mui/material';
 
 import { WizardEngine } from './WizardEngine';
@@ -12,12 +13,14 @@ import { getApiRequestById } from '../api/sdk.gen';
 import { getApiDraftQuotesById } from '@features/offer/api/sdk.gen';
 import { RequestQuoteResponseViewModel } from '../api/types.gen';
 import { useDraftQuoteSave } from './hooks/useDraftQuoteSave';
+import { useCreateQuoteFromDraft } from './hooks/useCreateQuoteFromDraft';
 
 export const NewRequestWizard: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const params = useParams();
   const { enqueueSnackbar } = useSnackbar();
+  const queryClient = useQueryClient();
 
   // State pour les données de la demande ou du brouillon
   const [requestData, setRequestData] = useState<RequestQuoteResponseViewModel | null>(null);
@@ -80,6 +83,9 @@ export const NewRequestWizard: React.FC = () => {
       enqueueSnackbar('Erreur lors de la sauvegarde du brouillon', { variant: 'error' });
     }
   });
+
+  // Hook pour la création du devis depuis le brouillon
+  const { mutateAsync: createQuoteFromDraft, isPending: isFinalizing } = useCreateQuoteFromDraft();
 
   // Charger les données de la demande ou du brouillon
   useEffect(() => {
@@ -263,34 +269,91 @@ export const NewRequestWizard: React.FC = () => {
     }
   }
 
-  // Auto-save handler - uses the new save system
-  const handleAutoSave = useCallback(async (formData: DraftQuoteForm) => {
-    try {
-      console.log('🔄 [NewRequestWizard] Auto-save triggered');
-      console.log('🆔 [NewRequestWizard] DraftId pour auto-save:', draftId);
-      const savedDraftId = await saveDraftWithOptions(formData, draftId || undefined);
-      console.log('✅ [NewRequestWizard] Auto-save completed with ID:', savedDraftId);
-    } catch (error) {
-      console.error('❌ [NewRequestWizard] Auto-save failed:', error);
-      throw error;
-    }
-  }, [saveDraftWithOptions, draftId]);
+  // Auto-save disabled - only manual save via buttons
 
-  // Submit handler - uses the new save system
+  // Fonction pour rafraîchir la liste des devis
+  const handleQuoteCreated = useCallback(() => {
+    console.log('🔄 [NewRequestWizard] Rafraîchissement de la liste des devis...');
+    // Invalider le cache des devis pour forcer le rafraîchissement
+    queryClient.invalidateQueries({ queryKey: ['quotes'] });
+    queryClient.invalidateQueries({ queryKey: ['draftQuotes'] });
+  }, [queryClient]);
+
+  // Submit handler - creates the final quote
   const handleSubmit = useCallback(async (formData: DraftQuoteForm) => {
     try {
-      console.log('🔄 [NewRequestWizard] Submit triggered');
-      console.log('🆔 [NewRequestWizard] DraftId pour submit:', draftId);
-      const savedDraftId = await saveDraftWithOptions(formData, draftId || undefined);
-      console.log('✅ [NewRequestWizard] Submit completed with ID:', savedDraftId);
+      console.log('🔄 [NewRequestWizard] Create Quote triggered');
+      console.log('🆔 [NewRequestWizard] DraftId pour création du devis:', draftId);
+      console.log('📋 [NewRequestWizard] FormData reçu:', JSON.stringify(formData, null, 2));
+      console.log('🔍 [NewRequestWizard] FormData.basics:', formData.basics);
+      console.log('🔍 [NewRequestWizard] FormData.existingOptions:', formData.existingOptions);
       
-      enqueueSnackbar('Brouillon sauvegardé avec succès', { variant: 'success' });
-      navigate(`/draft-quotes/${savedDraftId}`);
+      // Vérifier que formData a la structure attendue
+      if (!formData.basics) {
+        console.error('❌ [NewRequestWizard] formData.basics est undefined');
+        throw new Error('Données du formulaire invalides: section basics manquante');
+      }
+      
+      // First, ensure the draft is saved with all options
+      const savedDraftId = await saveDraftWithOptions(formData, draftId || undefined);
+      console.log('✅ [NewRequestWizard] Brouillon sauvegardé avec ID:', savedDraftId);
+      
+      // Vérifier que le brouillon a bien des options après sauvegarde
+      if (!formData.existingOptions || formData.existingOptions.length === 0) {
+        console.error('❌ [NewRequestWizard] Aucune option dans le formulaire:', {
+          hasExistingOptions: !!formData.existingOptions,
+          optionsLength: formData.existingOptions?.length || 0,
+          formDataKeys: Object.keys(formData)
+        });
+        throw new Error('Aucune option trouvée dans le formulaire. Veuillez créer au moins une option avant de finaliser le devis.');
+      }
+      
+      console.log('✅ [NewRequestWizard] Brouillon vérifié:', {
+        optionsCount: formData.existingOptions.length,
+        options: formData.existingOptions.map(opt => ({ id: opt.id || 'no-id', name: opt.name || 'no-name' }))
+      });
+      
+      // Create the final quote from the draft
+      console.log('📋 [NewRequestWizard] Création du devis depuis le brouillon...');
+      const finalizeResponse = await createQuoteFromDraft({
+        path: { id: savedDraftId || '' }
+      });
+      
+      console.log('✅ [NewRequestWizard] Devis créé avec succès:', finalizeResponse);
+      
+      // Navigate to the created quote page
+      const quoteId = (finalizeResponse as any).data?.quoteId;
+      if (quoteId) {
+        navigate(`/quotes/${quoteId}`);
+      } else {
+        // Fallback to draft page if quoteId is not available
+        navigate(`/draft-quotes/${savedDraftId}`);
+      }
     } catch (error) {
-      console.error('❌ [NewRequestWizard] Submit failed:', error);
-      enqueueSnackbar('Erreur lors de la sauvegarde du brouillon', { variant: 'error' });
+      console.error('❌ [NewRequestWizard] Create Quote failed:', error);
+      
+      // Gestion spécifique des erreurs selon le type
+      if (error instanceof Error) {
+        if (error.message.includes('doit contenir au moins une option')) {
+          enqueueSnackbar(error.message, { variant: 'warning' });
+        } else if (error.message.includes('Impossible de créer un devis à partir d\'un brouillon annulé')) {
+          enqueueSnackbar('Ce brouillon a été annulé et ne peut plus être utilisé pour créer un devis.', { variant: 'error' });
+        } else if (error.message.includes('Impossible de créer un devis à partir d\'un brouillon expiré')) {
+          enqueueSnackbar('Ce brouillon a expiré et ne peut plus être utilisé pour créer un devis.', { variant: 'error' });
+        } else if (error.message.includes('Statut de brouillon non supporté')) {
+          enqueueSnackbar(error.message, { variant: 'warning' });
+        } else if (error.message.includes('Only in-progress drafts can be finalized')) {
+          enqueueSnackbar('Ce brouillon a déjà été finalisé ou n\'est pas dans le bon statut pour être finalisé.', { variant: 'warning' });
+        } else if (error.message.includes('Only in-progress or finalized drafts can be converted to quotes')) {
+          enqueueSnackbar('Ce brouillon n\'est pas dans un état valide pour créer un devis. Seuls les brouillons en cours ou finalisés peuvent être convertis.', { variant: 'warning' });
+        } else {
+          enqueueSnackbar('Erreur lors de la création du devis', { variant: 'error' });
+        }
+      } else {
+        enqueueSnackbar('Erreur lors de la création du devis', { variant: 'error' });
+      }
     }
-  }, [saveDraftWithOptions, draftId, navigate, enqueueSnackbar]);
+  }, [saveDraftWithOptions, createQuoteFromDraft, draftId, navigate, enqueueSnackbar]);
 
   // Step change handler
   const handleStepChange = useCallback((step: string) => {
@@ -345,7 +408,7 @@ export const NewRequestWizard: React.FC = () => {
   return (
     <WizardEngine
       defaultValues={initialValues}
-      onAutoSave={handleAutoSave}
+      onAutoSave={async () => {}} // Auto-save disabled
       onSubmit={handleSubmit}
       initialStep={initialStep}
       onStepChange={handleStepChange}
@@ -354,6 +417,8 @@ export const NewRequestWizard: React.FC = () => {
       readonly={isReadonly} // Mode readonly si on a un ID de demande ou des données existantes
       requestQuoteId={requestId || ''} // Passer l'ID de la demande pour la sauvegarde
       draftId={draftId || ''} // Passer l'ID du brouillon pour la sauvegarde
+      isFinalizing={isFinalizing} // Passer l'état de finalisation
+      onQuoteCreated={handleQuoteCreated} // Callback pour rafraîchir la liste des devis
     />
   );
 };

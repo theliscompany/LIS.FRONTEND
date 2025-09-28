@@ -803,7 +803,7 @@ export const OptionsComparison: React.FC<OptionsComparisonProps> = ({
                 <Grid item xs={12} sm={4}>
                   <Box sx={{ textAlign: 'center' }}>
                     <Typography variant="h6" sx={{ fontWeight: 700, color: theme.palette.primary.main }}>
-                      {formatPrice(Math.min(...existingOptions.map(opt => calculateOptionTotal(opt))))}
+                      {formatPrice(Math.min(...existingOptions.map(opt => calculateTotalWithMargin(opt))))}
                     </Typography>
                     <Typography variant="body2" color="text.secondary">Prix minimum</Typography>
                   </Box>
@@ -811,7 +811,7 @@ export const OptionsComparison: React.FC<OptionsComparisonProps> = ({
                 <Grid item xs={12} sm={4}>
                   <Box sx={{ textAlign: 'center' }}>
                     <Typography variant="h6" sx={{ fontWeight: 700, color: theme.palette.secondary.main }}>
-                      {formatPrice(Math.max(...existingOptions.map(opt => calculateOptionTotal(opt))))}
+                      {formatPrice(Math.max(...existingOptions.map(opt => calculateTotalWithMargin(opt))))}
                     </Typography>
                     <Typography variant="body2" color="text.secondary">Prix maximum</Typography>
                   </Box>
@@ -819,7 +819,7 @@ export const OptionsComparison: React.FC<OptionsComparisonProps> = ({
                 <Grid item xs={12} sm={4}>
                   <Box sx={{ textAlign: 'center' }}>
                     <Typography variant="h6" sx={{ fontWeight: 700, color: theme.palette.success.main }}>
-                      {formatPrice(existingOptions.reduce((sum, opt) => sum + calculateOptionTotal(opt), 0) / existingOptions.length)}
+                      {formatPrice(existingOptions.reduce((sum, opt) => sum + calculateTotalWithMargin(opt), 0) / existingOptions.length)}
                     </Typography>
                     <Typography variant="body2" color="text.secondary">Prix moyen</Typography>
                   </Box>

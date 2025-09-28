@@ -40,32 +40,32 @@ import {
 import { DataGrid, GridColDef, GridRenderCellParams } from '@mui/x-data-grid';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-// Imports commentés - endpoints supprimés de la nouvelle API
-// import { 
-//   getApiQuoteOfferStatusByStatus, 
-//   putApiQuoteOfferByIdStatus
-// } from '@features/offer/api';
-// import { QuoteOfferStatus } from '@features/offer/api/types.gen';
-
-// Type temporaire pour éviter les erreurs
-const QuoteOfferStatus = {
-  SENT_TO_CLIENT: 'SENT_TO_CLIENT'
-};
+import { useQuotes } from '@features/offer/services/draftQuoteService';
 import QuoteDisplay from '@features/offer/components/QuoteDisplay';
 
 interface ApprovedQuote {
   id: string;
-  requestQuoteId: number;
-  quoteOfferNumber: string;
-  emailUser: string;
-  created: string;
-  status: QuoteOfferStatus;
-  comment?: string;
-  internalComment?: string;
-  options: any[];
+  requestQuoteId: string;
+  quoteNumber: string;
+  status: string;
+  createdAt: string;
+  updatedAt: string;
   customer?: {
-    contactName: string;
-    email: string;
+    name: string;
+    emails: string[];
+  };
+  shipment?: {
+    origin: {
+      location: string;
+    };
+    destination: {
+      location: string;
+    };
+  };
+  selectedOption?: {
+    totals: {
+      grandTotal: number;
+    };
   };
 }
 
@@ -73,8 +73,14 @@ const ApprovedQuotes: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   
-  const [quotes, setQuotes] = useState<ApprovedQuote[]>([]);
-  const [loading, setLoading] = useState(true);
+  // Utiliser le nouveau hook pour récupérer les devis approuvés
+  const { data: quotesData, isLoading: loading, error, refetch } = useQuotes({
+    status: 'approved',
+    page: 1,
+    pageSize: 100
+  });
+
+  const quotes = quotesData?.data?.data || [];
   const [selectedQuote, setSelectedQuote] = useState<ApprovedQuote | null>(null);
   const [sendDialog, setSendDialog] = useState(false);
   const [emailMessage, setEmailMessage] = useState('');
@@ -86,41 +92,10 @@ const ApprovedQuotes: React.FC = () => {
     severity: 'success'
   });
 
-  useEffect(() => {
-    loadApprovedQuotes();
-  }, []);
-
-  const loadApprovedQuotes = async () => {
-    try {
-      setLoading(true);
-      
-      // Fonctionnalité désactivée - API non disponible dans la nouvelle version
-      console.warn('ApprovedQuotes: API endpoints supprimés de la nouvelle version');
-      setQuotes([]);
-      
-      /*
-      const response = await getApiQuoteOfferStatusByStatus({
-        path: {
-          status: QuoteOfferStatus.APPROVED
-        }
-      });
-      
-      if (response?.data?.data) {
-        // S'assurer que la réponse est un tableau
-        const quotesData = Array.isArray(response.data.data) ? response.data.data : [];
-        setQuotes(quotesData);
-      } else {
-        setQuotes([]);
-      }
-      */
-    } catch (error) {
-      console.error('Erreur lors du chargement des devis approuvés:', error);
-      showSnackbar('Erreur lors du chargement des devis approuvés', 'error');
-      setQuotes([]);
-    } finally {
-      setLoading(false);
-    }
-  };
+  // Gestion des erreurs
+  if (error) {
+    console.error('Erreur lors du chargement des devis approuvés:', error);
+  }
 
   const showSnackbar = (message: string, severity: 'success' | 'error') => {
     setSnackbar({ open: true, message, severity });
@@ -148,7 +123,7 @@ const ApprovedQuotes: React.FC = () => {
       showSnackbar('Devis envoyé au client avec succès', 'success');
       setSendDialog(false);
       setEmailMessage('');
-      loadApprovedQuotes();
+      refetch();
       */
     } catch (error) {
       console.error('ApprovedQuotes: Fonctionnalité désactivée:', error);
@@ -185,11 +160,10 @@ const ApprovedQuotes: React.FC = () => {
     // S'assurer que quotes est un tableau
     const quotesArray = Array.isArray(quotes) ? quotes : [];
     const total = quotesArray.length;
-    const withEmail = quotesArray.filter(q => q.customer?.email).length;
-    const withoutEmail = quotesArray.filter(q => !q.customer?.email).length;
+    const withEmail = quotesArray.filter(q => q.customer?.emails && q.customer.emails.length > 0).length;
+    const withoutEmail = quotesArray.filter(q => !q.customer?.emails || q.customer.emails.length === 0).length;
     const totalValue = quotesArray.reduce((sum, q) => {
-      const option = q.options?.[0];
-      const total = option?.totals?.grandTotal || 0;
+      const total = q.selectedOption?.totals?.grandTotal || 0;
       return sum + total;
     }, 0);
     
@@ -275,7 +249,7 @@ const ApprovedQuotes: React.FC = () => {
                 <Button
                   variant="outlined"
                   startIcon={<Refresh />}
-                  onClick={loadApprovedQuotes}
+                  onClick={() => refetch()}
                 >
                   Actualiser
                 </Button>
@@ -404,12 +378,12 @@ const ApprovedQuotes: React.FC = () => {
                 rows={Array.isArray(quotes) ? quotes : []}
                 columns={[
                   {
-                    field: 'quoteOfferNumber',
+                    field: 'quoteNumber',
                     headerName: 'N° Devis',
                     width: 150,
                     renderCell: (params: GridRenderCellParams) => (
                       <Typography variant="body2" fontWeight="bold" color="primary">
-                        {params.value || `DRAFT-${params.row.id.slice(-6)}`}
+                        {params.value || `QUOTE-${params.row.id.slice(-6)}`}
                       </Typography>
                     )
                   },
@@ -428,21 +402,8 @@ const ApprovedQuotes: React.FC = () => {
                     )
                   },
                   {
-                    field: 'emailUser',
-                    headerName: 'Créé par',
-                    width: 180,
-                    renderCell: (params: GridRenderCellParams) => (
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        <Avatar sx={{ width: 24, height: 24, bgcolor: 'primary.main' }}>
-                          <Person fontSize="small" />
-                        </Avatar>
-                        <Typography variant="body2">{params.value}</Typography>
-                      </Box>
-                    )
-                  },
-                  {
-                    field: 'created',
-                    headerName: 'Approuvé le',
+                    field: 'createdAt',
+                    headerName: 'Créé le',
                     width: 150,
                     valueFormatter: (params) => new Date(params.value).toLocaleDateString('fr-FR')
                   },
@@ -453,24 +414,24 @@ const ApprovedQuotes: React.FC = () => {
                     renderCell: (params: GridRenderCellParams) => (
                       <Box>
                         <Typography variant="body2" fontWeight="medium">
-                          {params.row.customer?.contactName || 'N/A'}
+                          {params.row.customer?.name || 'N/A'}
                         </Typography>
                         <Typography variant="caption" color="text.secondary">
-                          {params.row.customer?.email || 'Email non disponible'}
+                          {params.row.customer?.emails?.[0] || 'Email non disponible'}
                         </Typography>
                       </Box>
                     )
                   },
                   {
-                    field: 'route',
+                    field: 'shipment',
                     headerName: 'Trajet',
                     width: 200,
                     renderCell: (params: GridRenderCellParams) => {
-                      const option = params.row.options?.[0];
-                      if (!option) return 'N/A';
+                      const shipment = params.row.shipment;
+                      if (!shipment) return 'N/A';
                       
-                      const from = option.selectedHaulage?.loadingCityName || option.selectedHaulage?.pickupAddress?.city || option.portDeparture?.portName || 'Départ';
-                      const to = option.selectedSeafreights?.[0]?.destinationPortName || option.selectedSeafreights?.[0]?.destinationPort?.portName || option.portDestination?.portName || 'Arrivée';
+                      const from = shipment.origin?.location || 'Départ';
+                      const to = shipment.destination?.location || 'Arrivée';
                       
                       return (
                         <Typography variant="body2">
@@ -490,6 +451,16 @@ const ApprovedQuotes: React.FC = () => {
                         icon={<CheckCircle />}
                         size="small"
                       />
+                    )
+                  },
+                  {
+                    field: 'selectedOption',
+                    headerName: 'Valeur',
+                    width: 120,
+                    renderCell: (params: GridRenderCellParams) => (
+                      <Typography variant="body2" fontWeight="medium" color="primary">
+                        € {params.value?.totals?.grandTotal?.toLocaleString() || '0'}
+                      </Typography>
                     )
                   },
                   {
@@ -522,7 +493,7 @@ const ApprovedQuotes: React.FC = () => {
                           color="primary"
                           startIcon={<Send />}
                           onClick={() => handleQuoteAction('send', params.row.id)}
-                          disabled={processing || !params.row.customer?.email}
+                          disabled={processing || !params.row.customer?.emails || params.row.customer.emails.length === 0}
                         >
                           Envoyer au client
                         </Button>
@@ -571,13 +542,13 @@ const ApprovedQuotes: React.FC = () => {
           {selectedQuote && (
             <Box sx={{ mb: 3 }}>
               <Typography variant="h6" gutterBottom>
-                Devis {selectedQuote.quoteOfferNumber}
+                Devis {selectedQuote.quoteNumber}
               </Typography>
               <Typography variant="body2" color="text.secondary" gutterBottom>
-                Client: {selectedQuote.customer?.contactName}
+                Client: {selectedQuote.customer?.name}
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                Email: {selectedQuote.customer?.email}
+                Email: {selectedQuote.customer?.emails?.[0] || 'Non disponible'}
               </Typography>
             </Box>
           )}

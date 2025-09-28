@@ -91,6 +91,12 @@
   color: #721c24;
 }
 
+.draft-quote-card .status-used {
+  background-color: #d1ecf1;
+  color: #0c5460;
+  border: 1px solid #bee5eb;
+}
+
 .draft-quote-card .card-content {
   margin-bottom: 15px;
 }
@@ -380,6 +386,10 @@
 
 .draft-quote-editor .stat-value.status-cancelled {
   color: #721c24;
+}
+
+.draft-quote-editor .stat-value.status-used {
+  color: #0c5460;
 }
 
 /* Option Editor */

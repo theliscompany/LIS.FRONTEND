@@ -57,18 +57,6 @@ export const TotalsDisplay: React.FC<TotalsDisplayProps> = ({ formData }) => {
     return calculateOptionTotal(currentOption);
   };
 
-  // Calculer le total de toutes les options existantes
-  const calculateExistingOptionsTotal = (): number => {
-    const existingOptions = formData.existingOptions || [];
-    return existingOptions.reduce((total, option) => {
-      return total + calculateOptionTotal(option);
-    }, 0);
-  };
-
-  // Calculer le total général
-  const calculateGrandTotal = (): number => {
-    return calculateCurrentOptionTotal() + calculateExistingOptionsTotal();
-  };
 
   // Compter les éléments sélectionnés
   const getCurrentOptionCounts = () => {
@@ -91,8 +79,6 @@ export const TotalsDisplay: React.FC<TotalsDisplayProps> = ({ formData }) => {
   };
 
   const currentOptionTotal = calculateCurrentOptionTotal();
-  const existingOptionsTotal = calculateExistingOptionsTotal();
-  const grandTotal = calculateGrandTotal();
   const currentCounts = getCurrentOptionCounts();
   const existingCounts = getExistingOptionsCounts();
 
@@ -251,40 +237,6 @@ export const TotalsDisplay: React.FC<TotalsDisplayProps> = ({ formData }) => {
             </Grid>
 
 
-            {/* Total Général */}
-            <Grid item xs={12}>
-              <Box sx={{
-                p: 3,
-                borderRadius: 2,
-                background: `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.1)} 0%, ${alpha(theme.palette.secondary.main, 0.1)} 100%)`,
-                border: `2px solid ${alpha(theme.palette.primary.main, 0.3)}`,
-                textAlign: 'center'
-              }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1, mb: 2 }}>
-                  <TrendingUp sx={{ color: theme.palette.primary.main, fontSize: 32 }} />
-                  <Typography variant="h5" sx={{ fontWeight: 700, color: theme.palette.primary.main }}>
-                    Total Général
-                  </Typography>
-                </Box>
-                
-                <Typography variant="h3" sx={{ 
-                  fontWeight: 800, 
-                  color: grandTotal > 0 ? theme.palette.primary.main : theme.palette.text.secondary,
-                  background: grandTotal > 0 ? `linear-gradient(45deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})` : 'none',
-                  backgroundClip: grandTotal > 0 ? 'text' : 'initial',
-                  WebkitBackgroundClip: grandTotal > 0 ? 'text' : 'initial',
-                  WebkitTextFillColor: grandTotal > 0 ? 'transparent' : 'initial'
-                }}>
-                  {formatPrice(grandTotal)}
-                </Typography>
-
-                {grandTotal > 0 && (
-                  <Typography variant="body2" sx={{ mt: 1, opacity: 0.8 }}>
-                    {existingCounts.totalOptions} option(s) sauvegardée(s) + option en cours
-                  </Typography>
-                )}
-              </Box>
-            </Grid>
           </Grid>
         </CardContent>
       </Card>

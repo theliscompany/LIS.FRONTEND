@@ -37,7 +37,7 @@ import {
 } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 import { format } from 'date-fns';
-import { DraftQuoteForm } from './schema';
+import { DraftQuoteForm, calculateMarginAmount, calculateTotalWithMargin, formatMarginDisplay } from './schema';
 
 interface LivePreviewProps {
   values: DraftQuoteForm;
@@ -407,8 +407,8 @@ const OptionDetails: React.FC<{ option: any; isCurrentOption?: boolean }> = ({ o
     }).format(price);
   };
 
-  // Calculer le total de l'option en temps réel
-  const calculateOptionTotal = (option: any): number => {
+  // Calculer le total de l'option en temps réel (sans marge)
+  const calculateOptionBaseTotal = (option: any): number => {
     let total = 0;
 
     // Ajouter les prix des seafreights
@@ -429,6 +429,12 @@ const OptionDetails: React.FC<{ option: any; isCurrentOption?: boolean }> = ({ o
     });
 
     return total;
+  };
+
+  // Calculer le total avec marge
+  const calculateOptionTotal = (option: any): number => {
+    const baseTotal = calculateOptionBaseTotal(option);
+    return calculateTotalWithMargin(baseTotal, option.margin);
   };
 
   const optionTotal = calculateOptionTotal(option);
@@ -558,19 +564,46 @@ const OptionDetails: React.FC<{ option: any; isCurrentOption?: boolean }> = ({ o
              <>
                <Divider sx={{ my: 2 }} />
                <Box sx={{ 
-                 display: 'flex', 
-                 justifyContent: 'space-between', 
-                 alignItems: 'center',
-                 p: 1,
-                 borderRadius: 1,
-                 background: alpha(theme.palette.primary.main, 0.1)
+                 p: 2,
+                 borderRadius: 2,
+                 background: alpha(theme.palette.primary.main, 0.05),
+                 border: `1px solid ${alpha(theme.palette.primary.main, 0.2)}`
                }}>
-                 <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-                   Total de l'option:
+                 <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1 }}>
+                   💰 Détail du prix
                  </Typography>
-                 <Typography variant="h6" sx={{ fontWeight: 700, color: theme.palette.primary.main }}>
-                   {formatPrice(optionTotal)}
-                 </Typography>
+                 
+                 <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                   <Typography variant="body2" color="text.secondary">
+                     Prix de base:
+                   </Typography>
+                   <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                     {formatPrice(calculateOptionBaseTotal(option))}
+                   </Typography>
+                 </Box>
+                 
+                 {option.margin && option.margin.value > 0 && (
+                   <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                     <Typography variant="body2" color="text.secondary">
+                       Marge ({formatMarginDisplay(option.margin)}):
+                     </Typography>
+                     <Typography variant="body2" sx={{ fontWeight: 500, color: theme.palette.success.main }}>
+                       +{formatPrice(calculateMarginAmount(calculateOptionBaseTotal(option), option.margin))}
+                     </Typography>
+                   </Box>
+                 )}
+                 
+                 
+                 <Divider sx={{ my: 1 }} />
+                 
+                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                   <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
+                     Total:
+                   </Typography>
+                   <Typography variant="h6" sx={{ fontWeight: 700, color: theme.palette.primary.main }}>
+                     {formatPrice(optionTotal)}
+                   </Typography>
+                 </Box>
                </Box>
              </>
            )}

@@ -175,8 +175,8 @@ export const adaptDraftToWizardForm = (
 
       const mappedOption = {
         id: option.optionId || uuidv4(),
-        name: option.label || `Option ${draftData.data?.options?.indexOf(option) + 1}`,
-        description: option.description || undefined,
+        name: option.name || option.label || `Option ${draftData.data?.options?.indexOf(option) + 1}`,
+        description: option.description || '',
         seafreights: seafreights,
         haulages: haulages,
         services: services,
@@ -191,9 +191,18 @@ export const adaptDraftToWizardForm = (
         currency: option.currency || 'EUR',
         validUntil: option.validUntil || new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString(),
         isPreferred: option.isPreferred || false,
+        optionType: option.optionType || 'Standard',
         totalPrice: option.totals?.grandTotal || 0,
         createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        updatedAt: new Date().toISOString(),
+        // Ajouter la marge si elle existe
+        ...(option.margin && {
+          margin: {
+            type: option.margin.type || 'percentage',
+            value: option.margin.value || 0,
+            amount: option.margin.amount || 0
+          }
+        })
       };
 
       console.log('✅ [DRAFT_ADAPTER] Option mappée (avec seafreights array):', mappedOption);

@@ -864,6 +864,7 @@ export function statusLabel(value: string) {
         case "APPROVED":
             return "Approuvé";
         case "SENT_TO_CLIENT":
+        case "SentToClient":
             return "Envoyé au client";
         case "PENDING":
             return "En attente";
@@ -906,6 +907,7 @@ export function colorsTypes(value: string) {
         case "APPROVED":
             return "success";
         case "SENT_TO_CLIENT":
+        case "SentToClient":
             return "info";
         case "PENDING":
             return "warning";

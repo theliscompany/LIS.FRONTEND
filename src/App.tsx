@@ -24,6 +24,8 @@ import RefuseOffer from '@features/offer/pages/RefuseOffer';
 import QuoteViewerPage from '@features/offer/pages/QuoteViewerPage';
 import DraftQuotes from '@features/offer/pages/DraftQuotes';
 import DraftQuotesSimple from '@features/offer/pages/DraftQuotes_Simple';
+import AllQuotes from '@features/offer/pages/AllQuotes';
+import QuoteDetails from '@features/offer/pages/QuoteDetails';
 import HandleRequest from '@features/request/pages/HandleRequest';
 import Requests from '@features/request/pages/Requests';
 import RequestsSearch from '@features/request/pages/RequestsSearch';
@@ -101,6 +103,9 @@ function App() {
                     <Route path='miscellaneousAll' element={<MiscellaneousCRUDPage />} />
                     <Route path="quote-offers" element={<PriceOffers />} />
                     <Route path="quote-offers/:id" element={<ManagePriceOffer />} />
+                    <Route path="quotes" element={<AllQuotes />} />
+                    <Route path="quotes/:id" element={<QuoteDetails />} />
+                    <Route path="quotes/:id/manage" element={<ManagePriceOffer />} />
                     <Route path="quote-viewer/:quoteId" element={<QuoteViewerPage />} />
                     <Route path="draft-quotes" element={<DraftQuotes />} />
                     <Route path="draft-quotes-simple" element={<DraftQuotesSimple />} />

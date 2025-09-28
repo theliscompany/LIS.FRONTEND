@@ -7,12 +7,15 @@ import {
   useAddDraftQuoteOption,
   useDeleteDraftQuoteOption,
   useFinalizeDraftQuote,
+  useCreateQuoteFromDraft,
   mapDraftQuoteFromApi,
   mapDraftQuoteToApi,
   mapOptionToApi,
   validateDraftQuote,
+  validateDraftQuoteForQuoteCreation,
   createEmptyOption,
   calculateOptionTotals,
+  createQuoteRequestFromDraft,
 } from '../services/draftQuoteService';
 import type { DraftQuote, DraftQuoteOption, DraftQuoteStatus } from '../types/DraftQuote';
 
@@ -45,6 +48,7 @@ export const DraftQuoteManager: React.FC<DraftQuoteManagerProps> = ({
   const addOptionMutation = useAddDraftQuoteOption();
   const deleteOptionMutation = useDeleteDraftQuoteOption();
   const finalizeMutation = useFinalizeDraftQuote();
+  const createQuoteMutation = useCreateQuoteFromDraft();
 
   // Gestionnaires d'événements
   const handleCreateDraftQuote = async (draftQuoteData: Partial<DraftQuote>) => {
@@ -126,6 +130,49 @@ export const DraftQuoteManager: React.FC<DraftQuoteManagerProps> = ({
       }
     } catch (error) {
       console.error('Error finalizing draft quote:', error);
+    }
+  };
+
+  const handleCreateQuoteFromDraft = async (draftId: string, options?: {
+    validityDays?: number;
+    paymentTerms?: string;
+    notes?: string;
+  }) => {
+    try {
+      // Trouver le brouillon dans la liste
+      const draftQuote = draftQuotes.find(d => d.draftQuoteId === draftId);
+      if (!draftQuote) {
+        throw new Error('Brouillon non trouvé');
+      }
+
+      // Valider le brouillon pour la création de devis
+      const validation = validateDraftQuoteForQuoteCreation(draftQuote);
+      if (!validation.isValid) {
+        console.error('Validation errors:', validation.errors);
+        throw new Error(validation.errors.join(', '));
+      }
+
+      // Afficher les avertissements s'il y en a
+      if (validation.warnings.length > 0) {
+        console.warn('Validation warnings:', validation.warnings);
+      }
+
+      const quoteRequest = createQuoteRequestFromDraft(draftId, options);
+      const result = await createQuoteMutation.mutateAsync({
+        body: quoteRequest,
+      });
+      
+      console.log('Quote created from draft:', result);
+      
+      // Notifier le parent si un callback est fourni
+      if (onQuoteCreated && result.data?.data?.quoteId) {
+        onQuoteCreated(result.data.data.quoteId);
+      }
+      
+      return result;
+    } catch (error) {
+      console.error('Error creating quote from draft:', error);
+      throw error;
     }
   };
 
@@ -294,7 +341,7 @@ const DraftQuoteCard: React.FC<DraftQuoteCardProps> = ({
           Add Option
         </button>
         
-        {draftQuote.status === 'in_progress' && (
+        {draftQuote.status === 'in_progress' && draftQuote.status !== 'used' && (
           <button 
             onClick={handleFinalize} 
             className="btn btn-success"
@@ -302,6 +349,23 @@ const DraftQuoteCard: React.FC<DraftQuoteCardProps> = ({
           >
             Finalize Quote
           </button>
+        )}
+        
+        {(draftQuote.status === 'in_progress' || draftQuote.status === 'finalized') && draftQuote.status !== 'used' && (
+          <button 
+            onClick={() => handleCreateQuoteFromDraft(draftQuote.draftQuoteId || '')} 
+            className="btn btn-primary"
+            disabled={!draftQuote.options || draftQuote.options.length === 0}
+          >
+            Create Quote
+          </button>
+        )}
+        
+        {draftQuote.status === 'used' && (
+          <div className="alert alert-info">
+            <i className="fas fa-info-circle"></i>
+            Ce brouillon a déjà été utilisé pour créer un devis et ne peut plus être modifié.
+          </div>
         )}
         
         <button onClick={onDelete} className="btn btn-danger">
@@ -323,13 +387,19 @@ const DraftQuoteCard: React.FC<DraftQuoteCardProps> = ({
                   checked={selectedOptionId === option.optionId}
                   onChange={(e) => setSelectedOptionId(e.target.value)}
                 />
-                <span className="option-label">{option.label}</span>
+                <span className="option-label">{option.name || option.label || 'Option sans nom'}</span>
                 <span className="option-total">
                   {option.totals?.grandTotal?.toFixed(2)} {option.currency}
                 </span>
               </div>
               
               <div className="option-details">
+                {option.description && (
+                  <p><strong>Description:</strong> {option.description}</p>
+                )}
+                {option.optionType && (
+                  <p><strong>Type:</strong> {option.optionType}</p>
+                )}
                 <p><strong>Valid Until:</strong> {option.validUntil}</p>
                 <p><strong>Containers:</strong> {option.containers?.map(c => `${c.quantity}x ${c.containerType}`).join(', ')}</p>
                 
@@ -512,6 +582,7 @@ const CreateDraftQuoteForm: React.FC<CreateDraftQuoteFormProps> = ({
         </form>
       </div>
     </div>
+
   );
 };
 

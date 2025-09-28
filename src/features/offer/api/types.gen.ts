@@ -13,7 +13,6 @@ export type CreateDraftQuoteRequest = {
 
 export type CreateQuoteRequest = {
     draftQuoteId?: (string) | null;
-    selectedOptionId?: (string) | null;
     validityDays?: number;
     paymentTerms?: (string) | null;
     notes?: (string) | null;
@@ -101,7 +100,9 @@ export type DraftQuoteOptionContainerDto = {
 
 export type DraftQuoteOptionDto = {
     optionId?: (string) | null;
+    name?: (string) | null;
     label?: (string) | null;
+    description?: (string) | null;
     validUntil?: (string) | null;
     currency?: (string) | null;
     containers?: Array<DraftQuoteOptionContainerDto> | null;
@@ -112,6 +113,8 @@ export type DraftQuoteOptionDto = {
     totals?: DraftQuoteOptionTotalsDto;
     terms?: DraftQuoteOptionTermsDto;
     isPreferred?: boolean;
+    optionType?: (string) | null;
+    margin?: DraftQuoteOptionMarginDto;
 };
 
 export type DraftQuoteOptionHaulageDto = {
@@ -125,6 +128,12 @@ export type DraftQuoteOptionHaulageDto = {
     windows?: DraftQuoteWindowsDto;
     basePrice?: number;
     surcharges?: Array<DraftQuoteSurchargeDto> | null;
+};
+
+export type DraftQuoteOptionMarginDto = {
+    type?: (string) | null;
+    value?: number;
+    amount?: number;
 };
 
 export type DraftQuoteOptionSeafreightDto = {
@@ -286,6 +295,14 @@ export type ObjectCommonApiResponse = {
     errors?: Array<(string)> | null;
 };
 
+export type ObjectListCommonApiResponse = {
+    code?: number;
+    message?: (string) | null;
+    data?: Array<unknown> | null;
+    meta?: unknown;
+    errors?: Array<(string)> | null;
+};
+
 export type QuoteAddressDto = {
     line1?: (string) | null;
     line2?: (string) | null;
@@ -316,6 +333,7 @@ export type QuoteAvailableOptionDto = {
     containers?: Array<QuoteContainerDto> | null;
     planning?: QuotePlanningDto;
     totals?: QuoteTotalsDto;
+    margin?: QuoteOptionMarginDto;
 };
 
 export type QuoteClientApprovalDto = {
@@ -403,6 +421,12 @@ export type QuoteMetadataDto = {
     notes?: (string) | null;
 };
 
+export type QuoteOptionMarginDto = {
+    type?: (string) | null;
+    value?: number;
+    amount?: number;
+};
+
 export type QuotePlanningDto = {
     emptyPickupDate?: (Date) | null;
     vgmDate?: (Date) | null;
@@ -486,6 +510,7 @@ export type QuoteSelectedOptionDto = {
     totals?: QuoteTotalsDto;
     terms?: QuoteTermsDto;
     isPreferred?: boolean;
+    margin?: QuoteOptionMarginDto;
 };
 
 export type QuoteServiceDto = {
@@ -547,6 +572,10 @@ export type QuoteWindowsDto = {
     returnDeadline?: (Date) | null;
 };
 
+export type SelectOptionRequest = {
+    optionId?: (string) | null;
+};
+
 export type UpdateDraftQuoteRequest = {
     customer?: DraftQuoteCustomerDto;
     shipment?: DraftQuoteShipmentDto;
@@ -584,6 +613,17 @@ export type GetApiQuotesData = {
 export type GetApiQuotesResponse = (QuoteResponsePagedResultCommonApiResponse);
 
 export type GetApiQuotesError = unknown;
+
+export type PostApiQuotesByIdSelectOptionData = {
+    body?: SelectOptionRequest;
+    path: {
+        id: string;
+    };
+};
+
+export type PostApiQuotesByIdSelectOptionResponse = (QuoteResponseCommonApiResponse);
+
+export type PostApiQuotesByIdSelectOptionError = (ObjectCommonApiResponse);
 
 export type GetApiQuotesByIdData = {
     path: {
@@ -710,6 +750,10 @@ export type PostApiDraftQuotesByIdFinalizeData = {
 export type PostApiDraftQuotesByIdFinalizeResponse = (DraftQuoteResponseCommonApiResponse);
 
 export type PostApiDraftQuotesByIdFinalizeError = (ObjectCommonApiResponse);
+
+export type GetApiDraftQuotesOptionTypesResponse = (ObjectListCommonApiResponse);
+
+export type GetApiDraftQuotesOptionTypesError = unknown;
 
 export type PostApiQuotesResponseTransformer = (data: any) => Promise<PostApiQuotesResponse>;
 
@@ -875,6 +919,13 @@ export const QuoteResponsePagedResultCommonApiResponseModelResponseTransformer: 
 
 export const GetApiQuotesResponseTransformer: GetApiQuotesResponseTransformer = async (data) => {
     QuoteResponsePagedResultCommonApiResponseModelResponseTransformer(data);
+    return data;
+};
+
+export type PostApiQuotesByIdSelectOptionResponseTransformer = (data: any) => Promise<PostApiQuotesByIdSelectOptionResponse>;
+
+export const PostApiQuotesByIdSelectOptionResponseTransformer: PostApiQuotesByIdSelectOptionResponseTransformer = async (data) => {
+    QuoteResponseCommonApiResponseModelResponseTransformer(data);
     return data;
 };
 

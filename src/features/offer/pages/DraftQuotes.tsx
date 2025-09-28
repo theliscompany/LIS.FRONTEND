@@ -22,7 +22,6 @@ import {
   Fade,
   TextField,
   InputAdornment,
-  LinearProgress,
   Tooltip
 } from '@mui/material';
 import {
@@ -32,8 +31,6 @@ import {
   Dashboard,
   Timeline,
   Search,
-  TrendingUp,
-  Assessment,
   Schedule,
   Assignment,
   Person,
@@ -50,30 +47,82 @@ import {
 
 interface DraftQuote {
   id: string;
-  quoteOfferNumber?: number;
+  draftQuoteId?: string;
   requestQuoteId?: string;
-  clientNumber?: string;
-  emailUser?: string;
+  resumeToken?: string;
+  createdAt?: Date;
+  updatedAt?: Date;
   status?: string;
-  created?: string;
-  assignedTo?: string;
-  lastModified?: string;
-  progress?: number;
+  currency?: string;
+  incoterm?: string;
+  customer?: {
+    type?: string;
+    name?: string;
+    vat?: string;
+    emails?: string[];
+    phones?: string[];
+    address?: {
+      line1?: string;
+      line2?: string;
+      city?: string;
+      zip?: string;
+      country?: string;
+    };
+    contactPerson?: {
+      fullName?: string;
+      phone?: string;
+      email?: string;
+    };
+  };
+  shipment?: {
+    origin?: {
+      location?: string;
+      country?: string;
+    };
+    destination?: {
+      location?: string;
+      country?: string;
+    };
+    requestedDeparture?: Date;
+    cargoType?: string;
+    goodsDescription?: string;
+    containers?: Array<{
+      containerType?: string;
+      quantity?: number;
+    }>;
+  };
+  attachments?: Array<{
+    id?: string;
+    name?: string;
+    mime?: string;
+  }>;
+  commercialTerms?: any;
+  wizard?: {
+    currentStep?: number;
+    completedSteps?: number[];
+  };
+  options?: Array<{
+    optionId?: string;
+    name?: string;
+    label?: string;
+    description?: string;
+    validUntil?: string;
+    currency?: string;
+    isPreferred?: boolean;
+    optionType?: string;
+    containers?: any[];
+    planning?: any;
+    seafreights?: any[];
+    haulages?: any[];
+    services?: any[];
+    totals?: any;
+    terms?: any;
+  }>;
+  // Champs calculés pour l'affichage
   currentStep?: number;
   totalSteps?: number;
   completedSteps?: string[];
-  draftData?: any;
-  requestData?: any;
-  step1?: any;
-  step2?: any;
-  step3?: any;
-  step4?: any;
-  step5?: any;
-  step6?: any;
-  savedOptions?: any[];
-  selectedHaulage?: any;
-  selectedSeafreights?: any[];
-  selectedMiscellaneous?: any[];
+  assignedTo?: string;
 }
 
 const formatDate = (dateValue: any): string => {
@@ -106,108 +155,6 @@ const formatDate = (dateValue: any): string => {
   }
 };
 
-/**
- * Calcule la progression d'un brouillon côté frontend (utilisé comme fallback)
- * 
- * ✅ PROGRESSION PERSISTÉE IMPLÉMENTÉE :
- * Le backend persiste maintenant la progression dans WizardData :
- * 
- * - currentStep: number (1-6) - étape actuelle du wizard
- * - completedSteps: number[] - liste des numéros d'étapes terminées
- * 
- * Le frontend utilise en priorité ces valeurs persistées et calcule la progression
- * en pourcentage basée sur le nombre d'étapes complétées.
- * Cette fonction sert de fallback si les données persistées ne sont pas disponibles.
- */
-const calculateProgress = (quote: DraftQuote): { progress: number; currentStep: number; completedSteps: string[] } => {
-  let progress = 0;
-  let currentStep = 1;
-  const completedSteps: string[] = [];
-  const stepWeight = 100 / 6; // 16.67% par étape
-  
-  // Step 1: Informations générales (client, produit, incoterm)
-  if (quote.step1 && Object.keys(quote.step1).length > 0) {
-    const hasClient = quote.step1.customer?.contactName || quote.step1.customer?.email;
-    const hasProduct = quote.step1.productName?.productName || quote.step1.productName;
-    const hasIncoterm = quote.step1.incotermName;
-    const hasCities = quote.step1.cityFrom && quote.step1.cityTo;
-    
-    if (hasClient && hasProduct && hasIncoterm && hasCities) {
-      progress += stepWeight;
-      completedSteps.push('1/6 Informations générales');
-      currentStep = 2;
-    }
-  }
-  
-  // Step 2: Services sélectionnés
-  if (quote.step2 && Object.keys(quote.step2).length > 0) {
-    const hasServices = quote.step2.selected && Array.isArray(quote.step2.selected) && quote.step2.selected.length > 0;
-    
-    if (hasServices) {
-      progress += stepWeight;
-      completedSteps.push('2/6 Services');
-      currentStep = 3;
-    }
-  }
-  
-  // Step 3: Conteneurs et route
-  if (quote.step3 && Object.keys(quote.step3).length > 0) {
-    const hasContainers = quote.step3.containers && Array.isArray(quote.step3.containers) && quote.step3.containers.length > 0;
-    const hasRoute = quote.step3.route && 
-                    quote.step3.route.origin && 
-                    quote.step3.route.destination;
-    
-    if (hasContainers && hasRoute) {
-      progress += stepWeight;
-      completedSteps.push('3/6 Conteneurs & Route');
-      currentStep = 4;
-    }
-  }
-  
-  // Step 4: Haulage sélectionné
-  if (quote.step4 && Object.keys(quote.step4).length > 0) {
-    const hasHaulageSelection = quote.step4.selection && 
-                               quote.step4.selection.haulierId && 
-                               quote.step4.selection.haulierName;
-    
-    if (hasHaulageSelection || quote.selectedHaulage) {
-      progress += stepWeight;
-      completedSteps.push('4/6 Transport routier');
-      currentStep = 5;
-    }
-  }
-  
-  // Step 5: Seafreight sélectionné
-  if (quote.step5 && Object.keys(quote.step5).length > 0) {
-    const hasSeafreightSelections = quote.step5.selections && 
-                                   Array.isArray(quote.step5.selections) && 
-                                   quote.step5.selections.length > 0;
-    
-    if (hasSeafreightSelections || (quote.selectedSeafreights && quote.selectedSeafreights.length > 0)) {
-      progress += stepWeight;
-      completedSteps.push('5/6 Transport maritime');
-      currentStep = 6;
-    }
-  }
-  
-  // Step 6: Miscellaneous ou options sauvegardées
-  if (quote.step6 && Object.keys(quote.step6).length > 0) {
-    progress += stepWeight;
-    completedSteps.push('6/6 Finalisation');
-    currentStep = 7; // Terminé
-  } else if (quote.savedOptions && quote.savedOptions.length > 0) {
-    // Si des options sont sauvegardées, considérer comme partiellement terminé
-    progress += stepWeight * 0.5;
-    completedSteps.push('6/6 Options sauvegardées');
-    currentStep = 6;
-  }
-  
-  return {
-    progress: Math.round(progress),
-    currentStep: Math.min(currentStep, 6),
-    completedSteps
-  };
-};
 
 const DraftQuotes: React.FC = () => {
   const navigate = useNavigate();
@@ -290,26 +237,10 @@ const DraftQuotes: React.FC = () => {
       if (draftsData && Array.isArray(draftsData)) {
         console.log('[DraftQuotes] Nombre de brouillons trouvés:', draftsData.length);
         
-        // Voir les statuts de tous les éléments
-        draftsData.forEach((quote: any, index: number) => {
-          console.log(`[DraftQuotes] Brouillon ${index} - Status: "${quote.status}", ID: ${quote.id}, Email: ${quote.emailUser}`);
-        });
-        
         const draftQuotes = draftsData
           .filter((quote: any) => {
-            // 🔍 DEBUG : Voir tous les brouillons pour comprendre la structure
-            console.log(`[DraftQuotes] Brouillon analysé:`, {
-              id: quote.id,
-              draftQuoteId: quote.draftQuoteId,
-              hasId: !!quote.id,
-              hasDraftQuoteId: !!quote.draftQuoteId,
-              idType: typeof quote.id,
-              draftQuoteIdType: typeof quote.draftQuoteId,
-              fullQuote: quote
-            });
-            
-            // ✅ Utiliser draftQuoteId (ID MongoDB) au lieu de id
-            const mongoId = quote.draftQuoteId || quote.id;
+            // Utiliser draftQuoteId comme ID principal
+            const mongoId = quote.draftQuoteId;
             if (!mongoId) {
               console.warn(`[DraftQuotes] Brouillon sans ID MongoDB - ignoré:`, quote);
               return false;
@@ -317,95 +248,71 @@ const DraftQuotes: React.FC = () => {
             return true;
           })
           .map((quote: any, index: number) => {
-            // Log pour déboguer la structure des données
             console.log(`[DraftQuotes] Brouillon ${index} - Structure complète:`, {
-              id: quote.id,
-              quoteOfferNumber: quote.quoteOfferNumber,
+              draftQuoteId: quote.draftQuoteId,
               requestQuoteId: quote.requestQuoteId,
-              clientNumber: quote.clientNumber,
-              emailUser: quote.emailUser,
               status: quote.status,
-              created: quote.created,
-              assignedTo: quote.assignedTo,
-              lastModified: quote.lastModified,
-              draftData: quote.draftData
+              createdAt: quote.createdAt,
+              updatedAt: quote.updatedAt,
+              customer: quote.customer,
+              shipment: quote.shipment,
+              wizard: quote.wizard,
+              options: quote.options
             });
             
-            // Extraire les données sauvegardées depuis draftData
-            const draftData = quote.draftData || {};
+            // Extraire les données wizard
+            const wizardData = quote.wizard || {};
+            const persistedCurrentStep = wizardData.currentStep || 1;
+            const persistedCompletedSteps = wizardData.completedSteps || [];
             
-            // Créer un objet temporaire pour le calcul de progression
-            const quoteForCalculation = {
-              ...quote,
-              step1: draftData.step1 || {},
-              step2: draftData.step2 || {},
-              step3: draftData.step3 || {},
-              step4: draftData.step4 || {},
-              step5: draftData.step5 || {},
-              step6: draftData.step6 || {},
-              selectedHaulage: draftData.selectedHaulage || null,
-              selectedSeafreights: draftData.selectedSeafreights || [],
-              selectedMiscellaneous: draftData.selectedMiscellaneous || [],
-              savedOptions: quote.savedOptions || []
-            };
+            // Calculer les étapes finales
+            const finalCurrentStep = persistedCurrentStep;
+            const finalCompletedSteps = persistedCompletedSteps.map((step: number) => `${step}/6 Étape ${step}`);
             
-            // Utiliser la progression persistée depuis l'API (WizardData) si disponible
-            const wizardData = draftData.wizard || {};
-            const persistedCurrentStep = wizardData.currentStep;
-            const persistedCompletedSteps = wizardData.completedSteps;
+            // Extraire les informations du client
+            const customerName = quote.customer?.name || 'Non défini';
+            const customerEmail = quote.customer?.contactPerson?.email || 
+                                (quote.customer?.emails && quote.customer.emails.length > 0 ? quote.customer.emails[0] : 'Non défini');
             
-            // Calculer la progression comme fallback si pas persistée
-            const progressInfo = calculateProgress(quoteForCalculation);
+            // Extraire les informations de l'expédition
+            const origin = quote.shipment?.origin?.location || 'Non défini';
+            const destination = quote.shipment?.destination?.location || 'Non défini';
             
-            // Priorité : données persistées depuis wizard > calcul frontend
-            const finalCurrentStep = persistedCurrentStep !== undefined ? persistedCurrentStep : progressInfo.currentStep;
-            const finalCompletedSteps = persistedCompletedSteps && Array.isArray(persistedCompletedSteps) ? 
-                                       persistedCompletedSteps.map(step => `${step}/6 Étape ${step}`) : progressInfo.completedSteps;
-            const finalProgress = persistedCompletedSteps && Array.isArray(persistedCompletedSteps) ? 
-                                 Math.round((persistedCompletedSteps.length / 6) * 100) : progressInfo.progress;
-            
-            console.log(`[DraftQuotes] Brouillon ${quote.id} - Progression:`, {
-              wizardData: wizardData,
-              persistedCurrentStep: persistedCurrentStep,
-              persistedCompletedSteps: persistedCompletedSteps,
-              calculatedProgress: progressInfo.progress,
-              calculatedCurrentStep: progressInfo.currentStep,
-              calculatedCompletedSteps: progressInfo.completedSteps,
-              finalProgress: finalProgress,
-              finalCurrentStep: finalCurrentStep,
-              finalCompletedSteps: finalCompletedSteps
-            });
-            
-            console.log(`[DraftQuotes] Brouillon ${quote.id} - Données client:`, {
-              clientNumber: quote.clientNumber
+            console.log(`[DraftQuotes] Brouillon ${quote.draftQuoteId} - Données extraites:`, {
+              customerName,
+              customerEmail,
+              origin,
+              destination,
+              finalCurrentStep,
+              finalCompletedSteps
             });
             
             return {
-              id: quote.draftQuoteId || quote.id || `temp-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`, // ✅ Utiliser draftQuoteId (ID MongoDB)
-              quoteOfferNumber: quote.quoteOfferNumber || 0,
+              id: quote.draftQuoteId,
+              draftQuoteId: quote.draftQuoteId,
               requestQuoteId: quote.requestQuoteId,
-              clientNumber: quote.clientNumber,
-              emailUser: quote.emailUser,
+              resumeToken: quote.resumeToken,
+              createdAt: quote.createdAt,
+              updatedAt: quote.updatedAt,
               status: quote.status || 'DRAFT',
-              created: quote.created,
-              assignedTo: quote.assignedTo || '',
-              lastModified: quote.lastModified,
-              progress: finalProgress,
+              currency: quote.currency,
+              incoterm: quote.incoterm,
+              customer: quote.customer,
+              shipment: quote.shipment,
+              attachments: quote.attachments,
+              commercialTerms: quote.commercialTerms,
+              wizard: quote.wizard,
+              options: quote.options,
+              // Champs calculés pour l'affichage
               currentStep: finalCurrentStep,
               totalSteps: 6,
               completedSteps: finalCompletedSteps,
-              draftData: draftData,
-              requestData: quote.requestData || {},
-              step1: draftData.step1 || {},
-              step2: draftData.step2 || {},
-              step3: draftData.step3 || {},
-              step4: draftData.step4 || {},
-              step5: draftData.step5 || {},
-              step6: draftData.step6 || {},
-              savedOptions: quote.savedOptions || [],
-              selectedHaulage: draftData.selectedHaulage || null,
-              selectedSeafreights: draftData.selectedSeafreights || [],
-              selectedMiscellaneous: draftData.selectedMiscellaneous || []
+              assignedTo: '', // Pas encore supporté par l'API
+              // Champs de compatibilité pour l'affichage
+              clientNumber: customerName,
+              emailUser: customerEmail,
+              created: quote.createdAt,
+              lastModified: quote.updatedAt
             };
           });
         
@@ -462,7 +369,7 @@ const DraftQuotes: React.FC = () => {
     
     console.log('[DraftQuotes] Continuer le brouillon:', draft.id);
     console.log('[DraftQuotes] Étape actuelle:', draft.currentStep);
-    console.log('[DraftQuotes] Données du draft:', draft.draftData);
+    console.log('[DraftQuotes] Données du draft:', draft);
 
     // Naviguer vers le nouveau wizard avec le draftId dans l'URL
     // Le wizard fera lui-même l'appel API pour récupérer les données
@@ -542,11 +449,19 @@ const DraftQuotes: React.FC = () => {
   };
 
   // Filtrer les brouillons selon le terme de recherche
-  const filteredDrafts = drafts.filter(draft =>
-        draft.emailUser?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    draft.requestQuoteId?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        draft.assignedTo?.toLowerCase().includes(searchTerm.toLowerCase())
-      );
+  const filteredDrafts = drafts.filter(draft => {
+    const searchLower = searchTerm.toLowerCase();
+    const customerEmail = draft.customer?.contactPerson?.email || 
+                        (draft.customer?.emails && draft.customer.emails.length > 0 ? draft.customer.emails[0] : '');
+    return (
+      customerEmail?.toLowerCase().includes(searchLower) ||
+      draft.requestQuoteId?.toLowerCase().includes(searchLower) ||
+      draft.assignedTo?.toLowerCase().includes(searchLower) ||
+      draft.customer?.name?.toLowerCase().includes(searchLower) ||
+      draft.draftQuoteId?.toLowerCase().includes(searchLower) ||
+      draft.status?.toLowerCase().includes(searchLower)
+    );
+  });
 
   if (loading) {
     return (
@@ -671,32 +586,6 @@ const DraftQuotes: React.FC = () => {
             </Typography>
           </Card>
         </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <Card sx={{ p: 2, textAlign: 'center' }}>
-            <Avatar sx={{ bgcolor: 'success.main', mx: 'auto', mb: 1 }}>
-              <TrendingUp />
-            </Avatar>
-            <Typography variant="h4" fontWeight="bold">
-              {Math.round(drafts.reduce((acc, d) => acc + (d.progress || 0), 0) / drafts.length) || 0}%
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Progression Moyenne
-            </Typography>
-          </Card>
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <Card sx={{ p: 2, textAlign: 'center' }}>
-            <Avatar sx={{ bgcolor: 'info.main', mx: 'auto', mb: 1 }}>
-              <Assessment />
-            </Avatar>
-            <Typography variant="h4" fontWeight="bold">
-              {drafts.filter(d => (d.progress || 0) > 80).length}
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Presque Terminés
-            </Typography>
-          </Card>
-        </Grid>
       </Grid>
 
       {/* Contenu principal */}
@@ -746,14 +635,14 @@ const DraftQuotes: React.FC = () => {
                         <Stack direction="row" justifyContent="space-between" alignItems="flex-start" sx={{ mb: 2 }}>
                           <Box>
                             <Typography variant="h6" fontWeight="bold">
-                              Brouillon #{draft.quoteOfferNumber || 'N/A'}
-                      </Typography>
+                              Brouillon #{draft.draftQuoteId?.substring(0, 8) || 'N/A'}
+                            </Typography>
                             <Typography variant="body2" color="text.secondary">
-                              ID: {draft.id ? draft.id.substring(0, 8) + '...' : 'N/A'}
+                              ID: {draft.draftQuoteId ? draft.draftQuoteId.substring(0, 8) + '...' : 'N/A'}
                             </Typography>
                           </Box>
                             <Chip 
-                            label={draft.status}
+                            label={draft.status || 'DRAFT'}
                             color="warning"
                               size="small"
                           />
@@ -762,11 +651,11 @@ const DraftQuotes: React.FC = () => {
                         {/* Informations principales */}
                         <Stack spacing={1} sx={{ mb: 2 }}>
                           {/* Nom du client */}
-                          {draft.clientNumber && (
+                          {draft.customer?.name && (
                             <Box display="flex" alignItems="center" gap={1}>
                               <Business fontSize="small" color="action" />
                               <Typography variant="body2" sx={{ fontWeight: 500, color: '#2c3e50' }}>
-                                {draft.clientNumber}
+                                {draft.customer.name}
                               </Typography>
                             </Box>
                           )}
@@ -775,16 +664,17 @@ const DraftQuotes: React.FC = () => {
                           <Box display="flex" alignItems="center" gap={1}>
                             <Person fontSize="small" color="action" />
                             <Typography variant="body2">
-                              {draft.emailUser || 'Email non défini'}
+                              {draft.customer?.contactPerson?.email || 
+                               (draft.customer?.emails && draft.customer.emails.length > 0 ? draft.customer.emails[0] : 'Email non défini')}
                             </Typography>
                           </Box>
                           
-                          {/* Assigné à */}
-                          {draft.assignedTo && (
+                          {/* Informations d'expédition */}
+                          {draft.shipment && (
                             <Box display="flex" alignItems="center" gap={1}>
                               <Assignment fontSize="small" color="action" />
                               <Typography variant="body2">
-                                Assigné à: {draft.assignedTo}
+                                {draft.shipment.origin?.location || 'N/A'} → {draft.shipment.destination?.location || 'N/A'}
                               </Typography>
                             </Box>
                           )}
@@ -793,69 +683,11 @@ const DraftQuotes: React.FC = () => {
                           <Box display="flex" alignItems="center" gap={1}>
                             <Schedule fontSize="small" color="action" />
                             <Typography variant="body2">
-                              {formatDate(draft.created)}
+                              {formatDate(draft.createdAt)}
                             </Typography>
                           </Box>
                         </Stack>
 
-                        {/* Progression */}
-                          <Box sx={{ mb: 2 }}>
-                          <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1 }}>
-                            <Typography variant="body2" fontWeight="medium">
-                                Progression
-                        </Typography>
-                            <Typography variant="body2" color="primary" fontWeight="bold">
-                              {draft.progress || 0}%
-                        </Typography>
-                          </Stack>
-                          <LinearProgress 
-                            variant="determinate" 
-                            value={draft.progress || 0}
-                            sx={{ 
-                              borderRadius: 1, 
-                              height: 8,
-                              backgroundColor: '#f0f0f0',
-                              '& .MuiLinearProgress-bar': {
-                                backgroundColor: (draft.progress || 0) >= 100 ? '#4caf50' : 
-                                               (draft.progress || 0) >= 80 ? '#2196f3' :
-                                               (draft.progress || 0) >= 50 ? '#ff9800' : '#f44336'
-                              }
-                            }}
-                          />
-                          <Box sx={{ mt: 1 }}>
-                            <Typography variant="caption" color="text.secondary">
-                              Étape actuelle: {draft.currentStep}/{draft.totalSteps}
-                            </Typography>
-                            {draft.completedSteps && draft.completedSteps.length > 0 && (
-                              <Box sx={{ mt: 0.5 }}>
-                                <Typography variant="caption" color="success.main" fontWeight="medium">
-                                  ✓ Étapes complétées:
-                                </Typography>
-                                <Box sx={{ mt: 0.5, display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                                  {draft.completedSteps.slice(0, 3).map((step, index) => (
-                                    <Chip
-                                      key={index}
-                                      label={step}
-                                      size="small"
-                                      color="success"
-                                      variant="outlined"
-                                      sx={{ fontSize: '0.7rem', height: 20 }}
-                                    />
-                                  ))}
-                                  {draft.completedSteps.length > 3 && (
-                                    <Chip
-                                      label={`+${draft.completedSteps.length - 3}`}
-                                      size="small"
-                                      color="primary"
-                                      variant="outlined"
-                                      sx={{ fontSize: '0.7rem', height: 20 }}
-                                    />
-                                  )}
-                                </Box>
-                              </Box>
-                            )}
-                          </Box>
-                          </Box>
 
                         {/* Actions */}
                         <Stack direction="row" spacing={1}>
@@ -914,36 +746,42 @@ const DraftQuotes: React.FC = () => {
                 rows={filteredDrafts}
                 columns={[
                   {
-                    field: 'quoteOfferNumber',
+                    field: 'draftQuoteId',
                     headerName: 'Numéro',
-                    width: 100,
+                    width: 120,
                     renderCell: (params: GridRenderCellParams) => (
                       <Typography variant="body2" fontWeight="medium">
-                        #{params.value || 'N/A'}
+                        #{params.value?.substring(0, 8) || 'N/A'}
                       </Typography>
                     )
                   },
                   {
-                    field: 'emailUser',
+                    field: 'customer',
                     headerName: 'Utilisateur',
                     width: 200,
-                    renderCell: (params: GridRenderCellParams) => (
-                      <Box display="flex" alignItems="center" gap={1}>
-                        <Avatar sx={{ width: 24, height: 24, fontSize: 12 }}>
-                          {params.value?.charAt(0)?.toUpperCase() || 'U'}
-                        </Avatar>
-                        <Typography variant="body2">
-                          {params.value || 'Non défini'}
-                        </Typography>
-                      </Box>
-                    )
+                    renderCell: (params: GridRenderCellParams) => {
+                      const customer = params.value;
+                      const email = customer?.contactPerson?.email || 
+                                  (customer?.emails && customer.emails.length > 0 ? customer.emails[0] : 'Non défini');
+                      return (
+                        <Box display="flex" alignItems="center" gap={1}>
+                          <Avatar sx={{ width: 24, height: 24, fontSize: 12 }}>
+                            {email?.charAt(0)?.toUpperCase() || 'U'}
+                          </Avatar>
+                          <Typography variant="body2">
+                            {email}
+                          </Typography>
+                        </Box>
+                      );
+                    }
                   },
                   {
-                    field: 'clientNumber',
+                    field: 'customer',
                     headerName: 'Client',
                     width: 200,
                     renderCell: (params: GridRenderCellParams) => {
-                      const clientName = params.value;
+                      const customer = params.value;
+                      const clientName = customer?.name;
                       
                       return clientName ? (
                         <Box display="flex" alignItems="center" gap={1}>
@@ -972,74 +810,6 @@ const DraftQuotes: React.FC = () => {
                     )
                   },
                   {
-                    field: 'progress',
-                    headerName: 'Progression',
-                    width: 200,
-                    renderCell: (params: GridRenderCellParams) => (
-                      <Box sx={{ width: '100%' }}>
-                        <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 0.5 }}>
-                          <Typography variant="caption" fontWeight="medium">
-                            Étape {params.row.currentStep}/{params.row.totalSteps}
-                          </Typography>
-                          <Typography variant="caption" color="primary" fontWeight="bold">
-                            {params.value || 0}%
-                          </Typography>
-                        </Stack>
-                        <LinearProgress 
-                          variant="determinate" 
-                          value={params.value || 0}
-                          sx={{ 
-                            borderRadius: 1, 
-                            height: 6,
-                            backgroundColor: '#f0f0f0',
-                            '& .MuiLinearProgress-bar': {
-                              backgroundColor: params.value >= 100 ? '#4caf50' : 
-                                             params.value >= 80 ? '#2196f3' :
-                                             params.value >= 50 ? '#ff9800' : '#f44336'
-                            }
-                          }}
-                        />
-                        {params.row.completedSteps && params.row.completedSteps.length > 0 && (
-                          <Typography variant="caption" color="success.main" sx={{ fontSize: '0.7rem' }}>
-                            ✓ {params.row.completedSteps.length} étape{params.row.completedSteps.length > 1 ? 's' : ''} complétée{params.row.completedSteps.length > 1 ? 's' : ''}
-                          </Typography>
-                        )}
-                      </Box>
-                    )
-                  },
-                  {
-                    field: 'completedSteps',
-                    headerName: 'Étapes complétées',
-                    width: 180,
-                    renderCell: (params: GridRenderCellParams) => (
-                      <Box sx={{ width: '100%' }}>
-                        {params.value && params.value.length > 0 ? (
-                          <Stack spacing={0.5}>
-                            {params.value.slice(0, 2).map((step: string, index: number) => (
-                              <Chip
-                                key={index}
-                                label={step}
-                                size="small"
-                                color="success"
-                                variant="outlined"
-                                sx={{ fontSize: '0.7rem', height: 18 }}
-                              />
-                            ))}
-                            {params.value.length > 2 && (
-                              <Typography variant="caption" color="text.secondary">
-                                +{params.value.length - 2} autres...
-                              </Typography>
-                            )}
-                          </Stack>
-                        ) : (
-                          <Typography variant="body2" color="text.secondary">
-                            Aucune étape complétée
-                          </Typography>
-                        )}
-                      </Box>
-                    )
-                  },
-                  {
                     field: 'assignedTo',
                     headerName: 'Assigné à',
                     width: 130,
@@ -1058,7 +828,7 @@ const DraftQuotes: React.FC = () => {
                     )
                   },
                   {
-                    field: 'created',
+                    field: 'createdAt',
                     headerName: 'Créé le',
                     width: 130,
                     renderCell: (params: GridRenderCellParams) => (

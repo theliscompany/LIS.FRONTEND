@@ -23,7 +23,9 @@ export const toDraftQuoteOptionPayload = (option: QuoteOption): DraftQuoteOption
 
   const payload = {
     optionId: option.id,
-    label: option.name || 'Option sans nom',
+    name: option.name || 'Option sans nom',
+    label: option.name || 'Option sans nom', // Garder label pour compatibilité
+    description: option.description || '',
     validUntil: option.validUntil || new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString(),
     currency: option.currency || 'EUR',
     containers: option.containers?.map(toDraftQuoteOptionContainerDto) || [],
@@ -31,7 +33,16 @@ export const toDraftQuoteOptionPayload = (option: QuoteOption): DraftQuoteOption
     haulages: option.haulages?.map(toDraftQuoteOptionHaulageDto) || [],
     services: option.services?.map(toDraftQuoteOptionServiceDto) || [],
     totals: totals,
-    isPreferred: option.isPreferred || false
+    isPreferred: option.isPreferred || false,
+    optionType: option.optionType || 'Standard',
+    // Ajouter la marge si elle existe
+    ...(option.margin && {
+      margin: {
+        type: option.margin.type,
+        value: option.margin.value,
+        amount: option.margin.amount || 0
+      }
+    })
   };
 
   console.log('✅ [ADAPTER] Payload final avec isPreferred:', payload);

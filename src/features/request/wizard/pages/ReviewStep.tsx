@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useFormContext } from 'react-hook-form';
 import { OptionsComparison } from '../components/OptionsComparison';
+import QuotePreviewDialog from '../components/QuotePreviewDialog';
 import {
   Box,
   Typography,
@@ -54,7 +55,7 @@ import {
   Create
 } from '@mui/icons-material';
 
-import { DraftQuoteForm, QuoteOption } from '../schema';
+import { DraftQuoteForm, QuoteOption, calculateTotalWithMargin, calculateOptionBaseTotal } from '../schema';
 import { validateFormForSubmission } from '../toDraftQuote';
 
 // Composant TabPanel personnalisé
@@ -81,18 +82,22 @@ function TabPanel(props: TabPanelProps) {
 }
 
 interface ReviewStepProps {
-  onSubmit: () => void;
+  onSubmit: (data: DraftQuoteForm) => Promise<void>;
   onSaveDraft: () => Promise<string | null>;
   isDraftSaving: boolean;
   lastDraftSaved: Date | null;
   draftId?: string | null;
   onCreateOption: () => void;
   onEditOption: (option: QuoteOption) => void;
+  onUpdateOption?: (optionId: string, updatedOption: Partial<QuoteOption>) => void;
   onDeleteOption: (optionId: string) => void;
   onViewOption: (option: QuoteOption) => void;
   onSetPreferredOption: (optionId: string) => void;
   preferredOptionId?: string;
   onDuplicateOption: (option: QuoteOption) => void;
+  optionTypesData?: any;
+  isLoadingOptionTypes?: boolean;
+  onQuoteCreated?: () => void; // Callback pour rafraîchir la liste des devis
 }
 
 export const ReviewStep: React.FC<ReviewStepProps> = ({ 
@@ -103,27 +108,47 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
   draftId,
   onCreateOption,
   onEditOption,
+  onUpdateOption,
   onDeleteOption,
   onViewOption,
   onSetPreferredOption,
   preferredOptionId,
-  onDuplicateOption
+  onDuplicateOption,
+  optionTypesData,
+  isLoadingOptionTypes = false,
+  onQuoteCreated
 }) => {
   const { watch, control } = useFormContext<DraftQuoteForm>();
   const [showAttachmentDialog, setShowAttachmentDialog] = useState(false);
   const [newAttachment, setNewAttachment] = useState({ name: '', url: '' });
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
   const [activeTab, setActiveTab] = useState(0);
+  const [showPreviewDialog, setShowPreviewDialog] = useState(false);
+  const [isCreatingOption, setIsCreatingOption] = useState(false);
 
   const formData = watch();
   const existingOptions = formData.existingOptions || [];
-  const canCreateOption = existingOptions.length < 3 && draftId; // Nécessite un brouillon existant
+  const canCreateOption = existingOptions.length >= 1; // Activé dès qu'il y a au moins une option
+
+  // Gestion de la prévisualisation et création d'option
+  const handlePreviewOption = () => {
+    setShowPreviewDialog(true);
+  };
+
+  const handleConfirmCreateQuote = async () => {
+    setIsCreatingOption(true);
+    try {
+      await onSubmit(formData);
+    } finally {
+      setIsCreatingOption(false);
+    }
+  };
 
   const handleSubmit = () => {
     const validation = validateFormForSubmission(formData);
     if (validation.isValid) {
       setValidationErrors([]);
-      onSubmit();
+      onSubmit(formData);
     } else {
       setValidationErrors(validation.errors);
     }
@@ -262,11 +287,11 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
                   }
                 }}
               />
-              <Tab 
-                icon={<Create />} 
-                iconPosition="start" 
-                label="Créer une nouvelle option"
-                disabled={!canCreateOption}
+               <Tab 
+                 icon={<Create />} 
+                 iconPosition="start" 
+                 label="Create Quote"
+                 disabled={!canCreateOption}
                 sx={{
                   background: activeTab === 1 ? 'linear-gradient(135deg, #e8f5e8 0%, #c8e6c9 100%)' : 'transparent',
                   color: activeTab === 1 ? '#2e7d32' : canCreateOption ? 'inherit' : '#ccc',
@@ -288,8 +313,11 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
                 preferredOptionId={preferredOptionId}
                 onDuplicateOption={onDuplicateOption}
                 onEditOption={onEditOption}
+                onUpdateOption={onUpdateOption}
                 onDeleteOption={onDeleteOption}
                 onViewOption={onViewOption}
+                optionTypesData={optionTypesData}
+                isLoadingOptionTypes={isLoadingOptionTypes}
               />
             </TabPanel>
 
@@ -308,29 +336,29 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
                   textAlign: 'center',
                   p: 4
                 }}>
-                  <Typography variant="h4" sx={{ 
-                    fontWeight: 700, 
-                    mb: 2,
-                    color: '#2e7d32',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: 2
-                  }}>
-                    <Create sx={{ fontSize: 40 }} />
-                    Créer une nouvelle option
-                  </Typography>
-                  <Typography variant="body1" sx={{ color: '#666', mb: 4 }}>
-                    {draftId 
-                      ? 'Configurez les détails de votre nouvelle option de devis'
-                      : 'Vous devez d\'abord sauvegarder le brouillon pour créer des options'
-                    }
-                  </Typography>
+                   <Typography variant="h4" sx={{ 
+                     fontWeight: 700, 
+                     mb: 2,
+                     color: '#2e7d32',
+                     display: 'flex',
+                     alignItems: 'center',
+                     justifyContent: 'center',
+                     gap: 2
+                   }}>
+                     <Create sx={{ fontSize: 40 }} />
+                     Create Quote
+                   </Typography>
+                   <Typography variant="body1" sx={{ color: '#666', mb: 4 }}>
+                     {existingOptions.length >= 1 
+                       ? 'Créez le devis final avec les options configurées'
+                       : 'Vous devez d\'abord configurer au moins une option'
+                     }
+                   </Typography>
                   
                   <Button
                     variant="contained"
                     size="large"
-                    onClick={onCreateOption}
+                    onClick={handlePreviewOption}
                     disabled={!canCreateOption}
                     sx={{
                       background: canCreateOption 
@@ -354,7 +382,7 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
                       transition: 'all 0.3s ease'
                     }}
                   >
-                    {draftId ? '🚀 Commencer la création' : '⚠️ Brouillon requis'}
+                     {existingOptions.length >= 1 ? '👁️ Prévisualiser & Créer' : '⚠️ Option requise'}
                   </Button>
                 </Card>
               </motion.div>
@@ -682,6 +710,7 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
         onSaveDraft={onSaveDraft}
         isDraftSaving={isDraftSaving}
         draftId={draftId}
+        onCreateOption={onCreateOption}
       />
 
       {/* Bouton pour sauvegarder l'option actuelle */}
@@ -689,6 +718,16 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
         onSaveDraft={onSaveDraft}
         isDraftSaving={isDraftSaving}
         draftId={draftId}
+      />
+
+      {/* Dialog de prévisualisation du devis */}
+      <QuotePreviewDialog
+        open={showPreviewDialog}
+        onClose={() => setShowPreviewDialog(false)}
+        onConfirm={handleConfirmCreateQuote}
+        formData={formData}
+        isCreating={isCreatingOption}
+        onQuoteCreated={onQuoteCreated}
       />
     </Box>
   );
@@ -699,7 +738,8 @@ const SaveDraftButton: React.FC<{
   onSaveDraft?: () => Promise<string | null>;
   isDraftSaving?: boolean;
   draftId?: string | null;
-}> = ({ onSaveDraft, isDraftSaving, draftId }) => {
+  onCreateOption?: () => void;
+}> = ({ onSaveDraft, isDraftSaving, draftId, onCreateOption }) => {
   const { watch } = useFormContext<DraftQuoteForm>();
   const formData = watch();
   const existingOptionsCount = formData.existingOptions?.length || 0;
@@ -718,34 +758,61 @@ const SaveDraftButton: React.FC<{
         borderRadius: 3,
         border: '1px solid rgba(25, 118, 210, 0.2)'
       }}>
-        <Button
-          variant="contained"
-          size="large"
-          onClick={onSaveDraft}
-          disabled={isDraftSaving}
-          sx={{
-            background: 'linear-gradient(135deg, #1976d2 0%, #42a5f5 100%)',
-            color: 'white',
-            px: 4,
-            py: 2,
-            fontSize: '1.2rem',
-            fontWeight: 700,
-            borderRadius: 3,
-            textTransform: 'none',
-            boxShadow: '0 8px 32px rgba(25, 118, 210, 0.3)',
-            '&:hover': {
-              background: 'linear-gradient(135deg, #1565c0 0%, #1976d2 100%)',
-              transform: 'translateY(-2px)',
-              boxShadow: '0 12px 40px rgba(25, 118, 210, 0.4)'
-            },
-            transition: 'all 0.3s ease'
-          }}
-        >
-          {isDraftSaving 
-            ? '💾 Sauvegarde...' 
-            : `💾 Save Draft${existingOptionsCount > 0 ? ` (${existingOptionsCount} option${existingOptionsCount > 1 ? 's' : ''})` : ''}`
-          }
-        </Button>
+        <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+          <Button
+            variant="contained"
+            size="large"
+            onClick={onSaveDraft}
+            disabled={isDraftSaving}
+            sx={{
+              background: 'linear-gradient(135deg, #1976d2 0%, #42a5f5 100%)',
+              color: 'white',
+              px: 4,
+              py: 2,
+              fontSize: '1.2rem',
+              fontWeight: 700,
+              borderRadius: 3,
+              textTransform: 'none',
+              boxShadow: '0 8px 32px rgba(25, 118, 210, 0.3)',
+              '&:hover': {
+                background: 'linear-gradient(135deg, #1565c0 0%, #1976d2 100%)',
+                transform: 'translateY(-2px)',
+                boxShadow: '0 12px 40px rgba(25, 118, 210, 0.4)'
+              },
+              transition: 'all 0.3s ease'
+            }}
+          >
+            {isDraftSaving 
+              ? '💾 Sauvegarde...' 
+              : '💾 Save Draft'
+            }
+          </Button>
+          
+          <Button
+            variant="outlined"
+            size="large"
+            onClick={onCreateOption}
+            sx={{
+              border: '2px solid #2e7d32',
+              color: '#2e7d32',
+              px: 4,
+              py: 2,
+              fontSize: '1.2rem',
+              fontWeight: 700,
+              borderRadius: 3,
+              textTransform: 'none',
+              '&:hover': {
+                background: '#2e7d32',
+                color: 'white',
+                transform: 'translateY(-2px)',
+                boxShadow: '0 12px 40px rgba(46, 125, 50, 0.4)'
+              },
+              transition: 'all 0.3s ease'
+            }}
+          >
+            ➕ Créer une nouvelle option
+          </Button>
+        </Box>
       </Box>
     </motion.div>
   );
@@ -771,12 +838,32 @@ const SaveOptionButton: React.FC<{
   
   const canSaveDraft = true; // Le bouton Save Draft doit toujours être actif
   
-  const handleSaveOption = async () => {
-    if (optionName.trim() && canSaveOption) {
+  // Pré-remplir les champs avec les valeurs du wizard
+  const handleOpenSaveDialog = () => {
+    setOptionName(currentOption.name || '');
+    setOptionDescription(currentOption.description || '');
+    setShowSaveDialog(true);
+  };
+  
+  // Sauvegarder directement si les informations sont déjà complètes
+  const handleQuickSave = async () => {
+    if (currentOption.name && canSaveOption) {
+      // Sauvegarder directement sans ouvrir le modal
+      await handleSaveOptionDirect();
+    } else {
+      // Ouvrir le modal pour saisir les informations manquantes
+      handleOpenSaveDialog();
+    }
+  };
+  
+  const handleSaveOptionDirect = async () => {
+    if (canSaveOption) {
       const newOption = {
         id: `option_${Date.now()}`,
-        name: optionName.trim(),
-        description: optionDescription.trim() || undefined,
+        name: currentOption.name || `Option ${Date.now()}`,
+        description: currentOption.description || undefined,
+        optionType: currentOption.optionType || 'Standard',
+        margin: currentOption.margin || { type: 'percentage', value: 0, amount: 0 },
         seafreights: currentOption.seafreights,
         haulages: currentOption.haulages,
         services: currentOption.services,
@@ -790,6 +877,56 @@ const SaveOptionButton: React.FC<{
       
       // Reset current option
       setValue('currentOption', {
+        name: '',
+        description: '',
+        optionType: null,
+        margin: { type: 'percentage', value: 0, amount: 0 },
+        seafreights: [],
+        haulages: [],
+        services: []
+      });
+      
+      // Sauvegarder le brouillon si la fonction est fournie
+      if (onSaveDraft) {
+        try {
+          await onSaveDraft();
+          console.log('✅ Brouillon sauvegardé après création d\'option');
+        } catch (error) {
+          console.error('❌ Erreur lors de la sauvegarde du brouillon:', error);
+        }
+      }
+    }
+  };
+  
+  const handleSaveOption = async () => {
+    // Utiliser les valeurs déjà saisies dans le wizard ou les valeurs du modal
+    const finalName = optionName.trim() || currentOption.name || `Option ${Date.now()}`;
+    const finalDescription = optionDescription.trim() || currentOption.description || '';
+    
+    if (canSaveOption) {
+      const newOption = {
+        id: `option_${Date.now()}`,
+        name: finalName,
+        description: finalDescription || undefined,
+        optionType: currentOption.optionType || 'Standard',
+        margin: currentOption.margin || { type: 'percentage', value: 0, amount: 0 },
+        seafreights: currentOption.seafreights,
+        haulages: currentOption.haulages,
+        services: currentOption.services,
+        totalPrice: calculateTotalPrice(currentOption),
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+      
+      const updatedOptions = [...existingOptions, newOption];
+      setValue('existingOptions', updatedOptions);
+      
+      // Reset current option
+      setValue('currentOption', {
+        name: '',
+        description: '',
+        optionType: null,
+        margin: { type: 'percentage', value: 0, amount: 0 },
         seafreights: [],
         haulages: [],
         services: []
@@ -812,23 +949,11 @@ const SaveOptionButton: React.FC<{
   };
   
   const calculateTotalPrice = (option: any): number => {
-    let total = 0;
+    // Calculer le prix de base (sans marge)
+    const baseTotal = calculateOptionBaseTotal(option);
     
-    option.seafreights?.forEach((sf: any) => {
-      sf.rates?.forEach((rate: any) => {
-        total += rate.basePrice || 0;
-      });
-    });
-    
-    option.haulages?.forEach((haulage: any) => {
-      total += haulage.price || 0;
-    });
-    
-    option.services?.forEach((service: any) => {
-      total += service.price || 0;
-    });
-    
-    return total;
+    // Calculer le total avec marge bénéficiaire
+    return calculateTotalWithMargin(baseTotal, option.margin);
   };
   
   return (
@@ -850,7 +975,7 @@ const SaveOptionButton: React.FC<{
           <Button
             variant="contained"
             size="large"
-            onClick={() => setShowSaveDialog(true)}
+            onClick={handleQuickSave}
             disabled={!canSaveOption}
             sx={{
               background: canSaveOption ? 'linear-gradient(135deg, #2e7d32 0%, #4caf50 100%)' : '#ccc',
@@ -870,7 +995,12 @@ const SaveOptionButton: React.FC<{
               transition: 'all 0.3s ease'
             }}
           >
-            {draftId ? '💾 Sauvegarder cette option & brouillon' : '⚠️ Brouillon requis pour sauvegarder'}
+            {draftId 
+              ? (currentOption.name 
+                  ? '💾 Ajouter cette option au devis en cours' 
+                  : '✏️ Configurer et ajouter cette option')
+              : '⚠️ Brouillon requis pour sauvegarder'
+            }
           </Button>
         </Box>
       </motion.div>
@@ -901,6 +1031,11 @@ const SaveOptionButton: React.FC<{
           Sauvegarder l'option & brouillon
         </DialogTitle>
         <DialogContent sx={{ p: 3 }}>
+          <Alert severity="info" sx={{ mb: 2, borderRadius: 2 }}>
+            <Typography variant="body2">
+              Les champs sont pré-remplis avec les informations saisies dans le wizard. Vous pouvez les modifier si nécessaire.
+            </Typography>
+          </Alert>
           <TextField
             fullWidth
             label="Nom de l'option *"

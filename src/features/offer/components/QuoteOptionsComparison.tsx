@@ -15,9 +15,6 @@ import {
   TableRow,
   Paper,
   Grid,
-  Card,
-  CardContent,
-  CardHeader,
   Chip,
   IconButton,
   FormControl,
@@ -28,16 +25,43 @@ import {
   FormControlLabel,
   Stack,
   Divider,
-  Alert
+  Alert,
+  Tabs,
+  Tab,
+  TextField
 } from '@mui/material';
 import {
   Close as CloseIcon,
   Star as StarIcon,
   StarBorder as StarBorderIcon,
   Check as CheckIcon,
-  Cancel as CancelIcon
+  Edit as EditIcon,
+  Settings as SettingsIcon,
+  Save as SaveIcon
 } from '@mui/icons-material';
 import type { QuoteOption } from '../hooks/useQuoteOptionsManager';
+
+// Composant TabPanel pour les onglets
+interface TabPanelProps {
+  children?: React.ReactNode;
+  index: number;
+  value: number;
+}
+
+function TabPanel(props: TabPanelProps) {
+  const { children, value, index, ...other } = props;
+  return (
+    <div
+      role="tabpanel"
+      hidden={value !== index}
+      id={`option-tabpanel-${index}`}
+      aria-labelledby={`option-tab-${index}`}
+      {...other}
+    >
+      {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
+    </div>
+  );
+}
 
 interface QuoteOptionsComparisonProps {
   open: boolean;
@@ -47,6 +71,8 @@ interface QuoteOptionsComparisonProps {
   onOptionSelect?: (optionId: string) => void;
   onOptionEdit?: (option: QuoteOption) => void;
   onOptionView?: (option: QuoteOption) => void;
+  onUpdateOption?: (optionId: string, updatedOption: Partial<QuoteOption>) => void;
+  optionTypesData?: any;
 }
 
 interface ComparisonCriteria {
@@ -66,7 +92,9 @@ const QuoteOptionsComparison: React.FC<QuoteOptionsComparisonProps> = ({
   selectedOptionId,
   onOptionSelect,
   onOptionEdit,
-  onOptionView
+  onOptionView,
+  onUpdateOption,
+  optionTypesData
 }) => {
   const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
   const [criteria, setCriteria] = useState<ComparisonCriteria>({
@@ -79,6 +107,16 @@ const QuoteOptionsComparison: React.FC<QuoteOptionsComparisonProps> = ({
     features: true
   });
   const [sortBy, setSortBy] = useState<'price' | 'name' | 'validity'>('price');
+  
+  // États pour le modal d'édition avec onglets
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [editingOption, setEditingOption] = useState<QuoteOption | null>(null);
+  const [editTabValue, setEditTabValue] = useState(0);
+  const [editFormData, setEditFormData] = useState({
+    name: '',
+    description: '',
+    optionType: ''
+  });
 
   // Filtrer les options sélectionnées
   const filteredOptions = useMemo(() => {
@@ -157,6 +195,53 @@ const QuoteOptionsComparison: React.FC<QuoteOptionsComparisonProps> = ({
   };
 
   const bestOption = getBestOption();
+
+  // Fonctions pour le modal d'édition avec onglets
+  const handleOpenEditModal = (option: QuoteOption) => {
+    setEditingOption(option);
+    setEditFormData({
+      name: option.name || '',
+      description: option.description || '',
+      optionType: option.optionType || ''
+    });
+    setEditTabValue(0);
+    setEditModalOpen(true);
+  };
+
+  const handleCloseEditModal = () => {
+    setEditModalOpen(false);
+    setEditingOption(null);
+    setEditFormData({ name: '', description: '', optionType: '' });
+    setEditTabValue(0);
+  };
+
+  const handleSaveEdit = () => {
+    if (editingOption && onUpdateOption) {
+      onUpdateOption(editingOption.optionId, {
+        name: editFormData.name,
+        description: editFormData.description,
+        optionType: editFormData.optionType
+      });
+      handleCloseEditModal();
+    }
+  };
+
+  const handleEditOptionClick = (option: QuoteOption) => {
+    if (onUpdateOption) {
+      // Utiliser le modal de modification avec onglets
+      handleOpenEditModal(option);
+    } else if (onOptionEdit) {
+      // Utiliser l'ancienne méthode (wizard)
+      onOptionEdit(option);
+    }
+  };
+
+  const handleTechnicalDetailsEdit = () => {
+    if (editingOption && onOptionEdit) {
+      handleCloseEditModal();
+      onOptionEdit(editingOption);
+    }
+  };
 
   if (options.length === 0) {
     return (
@@ -308,8 +393,16 @@ const QuoteOptionsComparison: React.FC<QuoteOptionsComparisonProps> = ({
                     <TableCell>
                       <Box>
                         <Typography variant="subtitle2" fontWeight="bold">
-                          Option {index + 1}
+                          {option.name || `Option ${index + 1}`}
                         </Typography>
+                        {option.optionType && (
+                          <Chip
+                            label={option.optionType}
+                            size="small"
+                            variant="outlined"
+                            sx={{ mb: 1, fontSize: '0.7rem', height: 20 }}
+                          />
+                        )}
                         <Typography variant="body2" color="text.secondary">
                           {option.description}
                         </Typography>
@@ -434,9 +527,10 @@ const QuoteOptionsComparison: React.FC<QuoteOptionsComparisonProps> = ({
                           {onOptionEdit && (
                             <IconButton
                               size="small"
-                              onClick={() => onOptionEdit(option)}
+                              onClick={() => handleEditOptionClick(option)}
+                              title="Modifier l'option"
                             >
-                              <CheckIcon />
+                              <EditIcon />
                             </IconButton>
                           )}
                         </Stack>
@@ -468,6 +562,151 @@ const QuoteOptionsComparison: React.FC<QuoteOptionsComparisonProps> = ({
           </Button>
         )}
       </DialogActions>
+
+      {/* Modal d'édition avec onglets */}
+      <Dialog 
+        open={editModalOpen} 
+        onClose={handleCloseEditModal}
+        maxWidth="md"
+        fullWidth
+        PaperProps={{
+          sx: { borderRadius: 3 }
+        }}
+      >
+        <DialogTitle sx={{ 
+          background: `linear-gradient(135deg, #1976d2 0%, #42a5f5 100%)`,
+          color: 'white',
+          fontWeight: 700,
+          display: 'flex',
+          alignItems: 'center',
+          gap: 1
+        }}>
+          <EditIcon />
+          Modifier l'option
+        </DialogTitle>
+        
+        <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+          <Tabs 
+            value={editTabValue} 
+            onChange={(_, newValue) => setEditTabValue(newValue)}
+            aria-label="onglets de modification"
+          >
+            <Tab 
+              label="Informations" 
+              icon={<EditIcon />} 
+              iconPosition="start"
+              id="option-tab-0"
+              aria-controls="option-tabpanel-0"
+            />
+            <Tab 
+              label="Détails techniques" 
+              icon={<SettingsIcon />} 
+              iconPosition="start"
+              id="option-tab-1"
+              aria-controls="option-tabpanel-1"
+            />
+          </Tabs>
+        </Box>
+
+        <TabPanel value={editTabValue} index={0}>
+          <Alert severity="info" sx={{ mb: 3 }}>
+            Modifiez les informations de base de l'option. Les changements sont sauvegardés immédiatement.
+          </Alert>
+          
+          <Stack spacing={3}>
+            <TextField
+              label="Nom de l'option"
+              value={editFormData.name}
+              onChange={(e) => setEditFormData(prev => ({ ...prev, name: e.target.value }))}
+              fullWidth
+              variant="outlined"
+              placeholder="Ex: Option Express, Option Économique..."
+            />
+            
+            <TextField
+              label="Description"
+              value={editFormData.description}
+              onChange={(e) => setEditFormData(prev => ({ ...prev, description: e.target.value }))}
+              fullWidth
+              multiline
+              rows={3}
+              variant="outlined"
+              placeholder="Décrivez cette option..."
+            />
+            
+            <FormControl fullWidth>
+              <InputLabel>Type d'option</InputLabel>
+              <Select
+                value={editFormData.optionType}
+                onChange={(e) => setEditFormData(prev => ({ ...prev, optionType: e.target.value }))}
+                label="Type d'option"
+              >
+                <MenuItem value="">
+                  <em>Sélectionner un type</em>
+                </MenuItem>
+                {optionTypesData?.data?.map((optionType: any, index: number) => (
+                  <MenuItem key={index} value={typeof optionType === 'string' ? optionType : optionType.value || optionType.name || String(optionType)}>
+                    {typeof optionType === 'string' ? optionType : optionType.label || optionType.name || String(optionType)}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </Stack>
+        </TabPanel>
+
+        <TabPanel value={editTabValue} index={1}>
+          <Alert severity="warning" sx={{ mb: 3 }}>
+            <Typography variant="subtitle2" gutterBottom>
+              Modification des détails techniques
+            </Typography>
+            <Typography variant="body2">
+              Pour modifier les détails techniques (seafreights, haulages, services), 
+              vous serez redirigé vers le wizard de configuration.
+            </Typography>
+          </Alert>
+          
+          <Box sx={{ p: 3, textAlign: 'center' }}>
+            <SettingsIcon sx={{ fontSize: 64, color: 'text.secondary', mb: 2 }} />
+            <Typography variant="h6" gutterBottom>
+              Détails techniques
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+              Configurez les seafreights, haulages et services pour cette option
+            </Typography>
+            
+            <Button
+              variant="contained"
+              startIcon={<SettingsIcon />}
+              onClick={handleTechnicalDetailsEdit}
+              size="large"
+              sx={{ borderRadius: 2 }}
+            >
+              Ouvrir le wizard de configuration
+            </Button>
+          </Box>
+        </TabPanel>
+
+        <DialogActions sx={{ p: 3, gap: 1 }}>
+          <Button 
+            onClick={handleCloseEditModal}
+            variant="outlined"
+            sx={{ borderRadius: 2 }}
+          >
+            Annuler
+          </Button>
+          {editTabValue === 0 && (
+            <Button 
+              onClick={handleSaveEdit}
+              variant="contained"
+              startIcon={<SaveIcon />}
+              sx={{ borderRadius: 2 }}
+              disabled={!editFormData.name.trim()}
+            >
+              Sauvegarder
+            </Button>
+          )}
+        </DialogActions>
+      </Dialog>
     </Dialog>
   );
 };

@@ -47,40 +47,32 @@ import {
 import { DataGrid, GridColDef, GridRenderCellParams } from '@mui/x-data-grid';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-// Imports commentés - fonctions supprimées de la nouvelle API
-// import { 
-//   getApiQuoteOfferStatusByStatus, 
-//   putApiQuoteOfferByIdStatus,
-//   putApiQuoteOfferByIdApproval 
-// } from '@features/offer/api';
-// import { QuoteOfferStatus, ClientApprovalStatus } from '@features/offer/api/types.gen';
-
-// Types temporaires pour éviter les erreurs
-const QuoteOfferStatus = {
-  PENDING_APPROVAL: 'PENDING_APPROVAL',
-  APPROVED: 'APPROVED'
-};
-
-const ClientApprovalStatus = {
-  PENDING: 'PENDING'
-};
+import { useQuotes } from '@features/offer/services/draftQuoteService';
 import QuoteDisplay from '@features/offer/components/QuoteDisplay';
 
 interface QuoteForApproval {
   id: string;
-  requestQuoteId: number;
-  quoteOfferNumber: string;
-  emailUser: string;
-  created: string;
-  status: QuoteOfferStatus;
-  clientApproval: ClientApprovalStatus;
-  comment?: string;
-  internalComment?: string;
-  options: any[];
-  clientNumber?: string;
+  requestQuoteId: string;
+  quoteNumber: string;
+  status: string;
+  createdAt: string;
+  updatedAt: string;
   customer?: {
-    contactName: string;
-    email: string;
+    name: string;
+    emails: string[];
+  };
+  shipment?: {
+    origin: {
+      location: string;
+    };
+    destination: {
+      location: string;
+    };
+  };
+  selectedOption?: {
+    totals: {
+      grandTotal: number;
+    };
   };
 }
 
@@ -88,8 +80,14 @@ const QuoteApproval: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   
-  const [quotes, setQuotes] = useState<QuoteForApproval[]>([]);
-  const [loading, setLoading] = useState(true);
+  // Utiliser le nouveau hook pour récupérer les devis en attente d'approbation
+  const { data: quotesData, isLoading: loading, error, refetch } = useQuotes({
+    status: 'pending',
+    page: 1,
+    pageSize: 100
+  });
+
+  const quotes = quotesData?.data?.data || [];
   const [selectedQuote, setSelectedQuote] = useState<QuoteForApproval | null>(null);
   const [approvalDialog, setApprovalDialog] = useState(false);
   const [rejectionDialog, setRejectionDialog] = useState(false);
@@ -104,39 +102,11 @@ const QuoteApproval: React.FC = () => {
     severity: 'success'
   });
 
-  useEffect(() => {
-    loadPendingQuotes();
-  }, []);
+  // Gestion des erreurs
+  if (error) {
+    console.error('Erreur lors du chargement des devis en attente:', error);
+  }
 
-  const loadPendingQuotes = async () => {
-    try {
-      setLoading(true);
-      // Fonctionnalité désactivée - API non disponible dans la nouvelle version
-      console.warn('QuoteApproval: API endpoints supprimés de la nouvelle version');
-      setQuotes([]);
-      /*
-      const response = await getApiQuoteOfferStatusByStatus({
-        path: {
-          status: QuoteOfferStatus.PENDING_APPROVAL
-        }
-      });
-      
-      if (response?.data?.data) {
-        // S'assurer que la réponse est un tableau
-        const quotesData = Array.isArray(response.data.data) ? response.data.data : [];
-        setQuotes(quotesData);
-      } else {
-        setQuotes([]);
-      }
-      */
-    } catch (error) {
-      console.error('QuoteApproval: Composant désactivé - API non disponible:', error);
-      showSnackbar('Fonctionnalité temporairement indisponible', 'warning');
-      setQuotes([]);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const showSnackbar = (message: string, severity: 'success' | 'error' | 'warning') => {
     setSnackbar({ open: true, message, severity });
@@ -171,7 +141,7 @@ const QuoteApproval: React.FC = () => {
       showSnackbar('Devis approuvé avec succès', 'success');
       setApprovalDialog(false);
       setApprovalComment('');
-      loadPendingQuotes();
+      refetch();
       */
     } catch (error) {
       console.error('QuoteApproval handleApprove: Fonctionnalité désactivée:', error);
@@ -210,7 +180,7 @@ const QuoteApproval: React.FC = () => {
       showSnackbar('Devis rejeté', 'success');
       setRejectionDialog(false);
       setRejectionReason('');
-      loadPendingQuotes();
+      refetch();
       */
     } catch (error) {
       console.error('QuoteApproval handleReject: Fonctionnalité désactivée:', error);
@@ -335,7 +305,7 @@ const QuoteApproval: React.FC = () => {
                 <Button
                   variant="outlined"
                   startIcon={<Refresh />}
-                  onClick={loadPendingQuotes}
+                  onClick={() => refetch()}
                 >
                   Actualiser
                 </Button>

@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback, useRef, useState } from 'react';
+import React, { useEffect, useCallback, useState } from 'react';
 import { useForm, FormProvider } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { 
@@ -9,31 +9,33 @@ import {
   Paper, 
   Container,
   Typography,
-  Fade,
   useTheme,
   alpha,
   LinearProgress
 } from '@mui/material';
 import { motion, AnimatePresence } from 'framer-motion';
 
-import { DraftQuoteFormSchema, DraftQuoteForm, QuoteOption } from './schema';
+import { DraftQuoteFormSchema, DraftQuoteForm, QuoteOption, calculateTotalWithMargin } from './schema';
 import { wizardSteps, type WizardStepId } from './wizard.config';
 import { StepRouter } from './StepRouter';
 import { LivePreview } from './LivePreview';
-import { useDebounce } from './hooks/useDebounce';
+// useDebounce removed - auto-save disabled
 import { useDraftQuoteSave } from './hooks/useDraftQuoteSave';
+import { useDraftQuoteOptionTypes } from '@features/offer/hooks/useDraftQuoteOptionTypes';
 
 interface WizardEngineProps {
   defaultValues: DraftQuoteForm;
-  onAutoSave: (data: DraftQuoteForm) => Promise<void>;
-  onSubmit: (data: any) => Promise<void>;
+  onAutoSave: (data: DraftQuoteForm) => Promise<void>; // Kept for compatibility but not used
+  onSubmit: (data: DraftQuoteForm) => Promise<void>;
   initialStep?: string;
   onStepChange?: (step: string) => void;
   requestData?: any;
-  draftData?: any;
+  draftData?: any; // Kept for compatibility but not used
   readonly?: boolean;
   requestQuoteId?: string;
   draftId?: string;
+  isFinalizing?: boolean;
+  onQuoteCreated?: () => void; // Callback pour rafraîchir la liste des devis
 }
 
 export const WizardEngine: React.FC<WizardEngineProps> = ({
@@ -46,14 +48,16 @@ export const WizardEngine: React.FC<WizardEngineProps> = ({
   draftData,
   readonly = false,
   requestQuoteId = '',
-  draftId = ''
+  draftId = '',
+  isFinalizing = false,
+  onQuoteCreated
 }) => {
   const theme = useTheme();
   const [currentStep, setCurrentStep] = useState<WizardStepId>(initialStep as WizardStepId);
-  const [isAutoSaving, setIsAutoSaving] = useState(false);
+  // Auto-save disabled
   const [progress, setProgress] = useState(0);
   const [preferredOptionId, setPreferredOptionId] = useState<string | undefined>();
-  const autoSaveTimeoutRef = useRef<NodeJS.Timeout>();
+  // Auto-save timeout ref removed
   const [currentDraftId, setCurrentDraftId] = useState<string | null>(draftId || null);
 
   // Hook pour la sauvegarde du brouillon
@@ -69,17 +73,20 @@ export const WizardEngine: React.FC<WizardEngineProps> = ({
     }
   });
 
+  // Hook pour récupérer les types d'options disponibles
+  const { data: optionTypesData, isLoading: isLoadingOptionTypes } = useDraftQuoteOptionTypes();
+
   const form = useForm<DraftQuoteForm>({
     resolver: zodResolver(DraftQuoteFormSchema),
     defaultValues,
     mode: 'onChange'
   });
 
-  const { watch, handleSubmit, formState: { errors, isValid, isDirty }, reset } = form;
+  const { watch, formState: { isDirty }, reset } = form;
   const watchedValues = watch();
+  
 
-  // Auto-save state
-  const [lastAutoSave, setLastAutoSave] = useState<Date | null>(null);
+  // Manual save state
   const hasUnsavedChanges = isDirty;
 
   // Réinitialiser le formulaire quand les defaultValues changent
@@ -111,40 +118,7 @@ export const WizardEngine: React.FC<WizardEngineProps> = ({
     setProgress(Math.min(baseProgress + completionBonus, 100));
   }, [currentStep, watchedValues]);
 
-  // Auto-save with debounce
-  const debouncedAutoSave = useDebounce(
-    useCallback(async (data: DraftQuoteForm) => {
-      try {
-        setIsAutoSaving(true);
-        await onAutoSave(data);
-        setLastAutoSave(new Date());
-      } catch (error) {
-        console.error('Auto-save failed:', error);
-      } finally {
-        setIsAutoSaving(false);
-      }
-    }, [onAutoSave]),
-    800
-  );
-
-  // Watch for changes and trigger auto-save
-  useEffect(() => {
-    if (autoSaveTimeoutRef.current) {
-      clearTimeout(autoSaveTimeoutRef.current);
-    }
-
-    autoSaveTimeoutRef.current = setTimeout(() => {
-      if (isValid && Object.keys(watchedValues).length > 0) {
-        debouncedAutoSave(watchedValues);
-      }
-    }, 1000);
-
-    return () => {
-      if (autoSaveTimeoutRef.current) {
-        clearTimeout(autoSaveTimeoutRef.current);
-      }
-    };
-  }, [watchedValues, isValid, debouncedAutoSave]);
+  // Auto-save disabled - only manual save via buttons
 
   // Initialiser preferredOptionId quand les options sont chargées
   useEffect(() => {
@@ -158,8 +132,8 @@ export const WizardEngine: React.FC<WizardEngineProps> = ({
   }, [watchedValues.existingOptions, preferredOptionId]);
 
   // Handle step change
-  const handleStepChange = useCallback((step: WizardStepId) => {
-    setCurrentStep(step);
+  const handleStepChange = useCallback((step: string) => {
+    setCurrentStep(step as WizardStepId);
     onStepChange?.(step);
   }, [onStepChange]);
 
@@ -189,7 +163,7 @@ export const WizardEngine: React.FC<WizardEngineProps> = ({
         console.log('🔄 [WIZARD] Création du brouillon avant de créer une option...');
         const formData = form.getValues();
         const newDraftId = await saveDraftWithOptions(formData);
-        setDraftId(newDraftId);
+        setCurrentDraftId(newDraftId);
         console.log('✅ [WIZARD] Brouillon créé avec ID:', newDraftId);
       } catch (error) {
         console.error('❌ [WIZARD] Erreur lors de la création du brouillon:', error);
@@ -199,6 +173,14 @@ export const WizardEngine: React.FC<WizardEngineProps> = ({
 
     // Reset current option to empty state
     form.setValue('currentOption', {
+      name: '',
+      description: '',
+      optionType: null,
+      margin: {
+        type: 'percentage' as const,
+        value: 0,
+        amount: 0
+      },
       seafreights: [],
       haulages: [],
       services: []
@@ -211,6 +193,14 @@ export const WizardEngine: React.FC<WizardEngineProps> = ({
   const handleEditOption = useCallback((option: QuoteOption) => {
     // Load the option into current option for editing
     form.setValue('currentOption', {
+      name: option.name || '',
+      description: option.description || '',
+      optionType: option.optionType || null,
+      margin: option.margin || {
+        type: 'percentage' as const,
+        value: 0,
+        amount: 0
+      },
       seafreights: option.seafreights,
       haulages: option.haulages,
       services: option.services
@@ -218,6 +208,23 @@ export const WizardEngine: React.FC<WizardEngineProps> = ({
     // Navigate to options step to edit
     handleStepChange('options');
   }, [form, handleStepChange]);
+
+  // Handle updating an existing option (for modal editing)
+  const handleUpdateOption = useCallback((optionId: string, updatedOption: Partial<QuoteOption>) => {
+    const currentOptions = form.getValues('existingOptions') || [];
+    const updatedOptions = currentOptions.map(option => 
+      option.id === optionId 
+        ? { ...option, ...updatedOption }
+        : option
+    );
+    
+    form.setValue('existingOptions', updatedOptions);
+    
+    // Trigger form validation and save if needed
+    form.trigger('existingOptions');
+    
+    console.log('✅ [WizardEngine] Option mise à jour:', { optionId, updatedOption, updatedOptions });
+  }, [form]);
 
   // Handle deleting an existing option
   const handleDeleteOption = useCallback((optionId: string) => {
@@ -256,7 +263,7 @@ export const WizardEngine: React.FC<WizardEngineProps> = ({
         console.log('🔄 [WIZARD] Création du brouillon avant de dupliquer l\'option...');
         const formData = form.getValues();
         const newDraftId = await saveDraftWithOptions(formData);
-        setDraftId(newDraftId);
+        setCurrentDraftId(newDraftId);
         console.log('✅ [WIZARD] Brouillon créé avec ID:', newDraftId);
       } catch (error) {
         console.error('❌ [WIZARD] Erreur lors de la création du brouillon:', error);
@@ -305,7 +312,7 @@ export const WizardEngine: React.FC<WizardEngineProps> = ({
         console.log('🔄 [WIZARD] Création du brouillon avant de sauvegarder l\'option...');
         const formData = form.getValues();
         const newDraftId = await saveDraftWithOptions(formData);
-        setDraftId(newDraftId);
+        setCurrentDraftId(newDraftId);
         console.log('✅ [WIZARD] Brouillon créé avec ID:', newDraftId);
       } catch (error) {
         console.error('❌ [WIZARD] Erreur lors de la création du brouillon:', error);
@@ -318,9 +325,7 @@ export const WizardEngine: React.FC<WizardEngineProps> = ({
     
     console.log('🔍 [WIZARD] Debug handleSaveCurrentOption:');
     console.log('📊 [WIZARD] currentOption récupéré:', currentOption);
-    console.log('📊 [WIZARD] currentOption.seafreights:', currentOption?.seafreights);
-    console.log('📊 [WIZARD] currentOption.haulages:', currentOption?.haulages);
-    console.log('📊 [WIZARD] currentOption.services:', currentOption?.services);
+    console.log('📊 [WIZARD] currentOption.margin:', currentOption?.margin);
     
     if (existingOptions.length >= 3) {
       throw new Error('Maximum 3 options allowed per draft');
@@ -333,6 +338,8 @@ export const WizardEngine: React.FC<WizardEngineProps> = ({
       id: `option_${Date.now()}`,
       name: optionName,
       description: optionDescription,
+      optionType: currentOption.optionType || null,
+      margin: currentOption.margin || undefined,
       seafreights: currentOption.seafreights || [],
       haulages: currentOption.haulages || [],
       services: currentOption.services || [],
@@ -361,6 +368,14 @@ export const WizardEngine: React.FC<WizardEngineProps> = ({
     
     // Reset current option
     form.setValue('currentOption', {
+      name: '',
+      description: '',
+      optionType: null,
+      margin: {
+        type: 'percentage' as const,
+        value: 0,
+        amount: 0
+      },
       seafreights: [],
       haulages: [],
       services: []
@@ -379,39 +394,35 @@ export const WizardEngine: React.FC<WizardEngineProps> = ({
     return newOption;
   }, [form, saveDraftWithOptions, currentDraftId, saveDraft]);
 
-  // Calculate total price for an option
+  // Calculate total price for an option (including margin)
   const calculateTotalPrice = useCallback((option: any): number => {
-    let total = 0;
+    let baseTotal = 0;
     
     // Add seafreight prices
     option.seafreights?.forEach((sf: any) => {
       sf.rates?.forEach((rate: any) => {
-        total += rate.basePrice || 0;
+        baseTotal += rate.basePrice || 0;
       });
     });
     
     // Add haulage prices
     option.haulages?.forEach((haulage: any) => {
-      total += haulage.price || 0;
+      baseTotal += haulage.price || 0;
     });
     
     // Add service prices
     option.services?.forEach((service: any) => {
-      total += service.price || 0;
+      baseTotal += service.price || 0;
     });
     
-    return total;
+    // Apply margin if present
+    return calculateTotalWithMargin(baseTotal, option.margin);
   }, []);
 
-  // Handle manual save
+  // Handle manual save - disabled since auto-save is removed
   const handleSave = useCallback(async () => {
-    try {
-      const formData = form.getValues();
-      await onAutoSave(formData);
-    } catch (error) {
-      console.error('Manual save failed:', error);
-    }
-  }, [form, onAutoSave]);
+    console.log('Manual save disabled - use Save Draft button instead');
+  }, []);
 
   // Handle saving draft to database
   const handleSaveDraft = useCallback(async () => {
@@ -439,12 +450,29 @@ export const WizardEngine: React.FC<WizardEngineProps> = ({
   // Handle form submission
   const handleFormSubmit = useCallback(async (data: DraftQuoteForm) => {
     try {
+      console.log('🔄 [WizardEngine] handleFormSubmit appelé');
+      console.log('📋 [WizardEngine] Data reçu:', JSON.stringify(data, null, 2));
+      console.log('🔍 [WizardEngine] Data.basics:', data.basics);
+      console.log('🔍 [WizardEngine] Data.existingOptions:', data.existingOptions);
       await onSubmit(data);
     } catch (error) {
       console.error('Submit failed:', error);
       throw error;
     }
   }, [onSubmit]);
+
+  // Handle form submission for ReviewStep (no parameters)
+  const handleFormSubmitForReview = useCallback(async (): Promise<void> => {
+    try {
+      console.log('🔄 [WizardEngine] handleFormSubmitForReview appelé');
+      const formData = form.getValues();
+      console.log('📋 [WizardEngine] Data du formulaire:', JSON.stringify(formData, null, 2));
+      // Appeler onSubmit directement avec les données du formulaire
+      await onSubmit(formData);
+    } catch (error) {
+      console.error('❌ [WizardEngine] Erreur lors de la soumission:', error);
+    }
+  }, [onSubmit, form]);
 
   // Get current step index
   const currentStepIndex = wizardSteps.findIndex(step => step.id === currentStep);
@@ -566,32 +594,7 @@ export const WizardEngine: React.FC<WizardEngineProps> = ({
                   overflow: 'hidden'
                 }}
               >
-                {/* Auto-save indicator */}
-                {isAutoSaving && (
-                  <Box
-                    sx={{
-                      position: 'absolute',
-                      top: 16,
-                      right: 16,
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 1,
-                      color: theme.palette.info.main,
-                      fontSize: '0.875rem'
-                    }}
-                  >
-                    <Box
-                      sx={{
-                        width: 8,
-                        height: 8,
-                        borderRadius: '50%',
-                        backgroundColor: theme.palette.info.main,
-                        animation: 'pulse 1.5s infinite'
-                      }}
-                    />
-                    Saving...
-                  </Box>
-                )}
+                {/* Auto-save indicator removed */}
 
                 {/* Stepper */}
                 <Stepper 
@@ -648,26 +651,31 @@ export const WizardEngine: React.FC<WizardEngineProps> = ({
                         onStepChange={handleStepChange}
                         onNext={handleNext}
                         onPrevious={handlePrevious}
-                        onSubmit={handleFormSubmit}
+                        onSubmit={handleFormSubmitForReview}
                         onSave={handleSave}
                         onSaveDraft={handleSaveDraft}
                         onReset={handleReset}
-                        isAutoSaving={isAutoSaving}
+                        isAutoSaving={false}
                         isDraftSaving={isDraftSaving}
                         hasUnsavedChanges={hasUnsavedChanges}
-                        lastAutoSave={lastAutoSave}
+                        lastAutoSave={null}
                         lastDraftSaved={lastDraftSaved}
                         requestData={requestData}
                         readonly={readonly}
                         draftId={currentDraftId}
                         onCreateOption={handleCreateOption}
                         onEditOption={handleEditOption}
+                        onUpdateOption={handleUpdateOption}
                         onDeleteOption={handleDeleteOption}
                         onViewOption={handleViewOption}
                         onSetPreferredOption={handleSetPreferredOption}
                         preferredOptionId={preferredOptionId}
                         onDuplicateOption={handleDuplicateOption}
                         onSaveCurrentOption={handleSaveCurrentOption}
+                        isFinalizing={isFinalizing}
+                        optionTypesData={optionTypesData}
+                        isLoadingOptionTypes={isLoadingOptionTypes}
+                        onQuoteCreated={onQuoteCreated}
                       />
                     </motion.div>
                   </AnimatePresence>

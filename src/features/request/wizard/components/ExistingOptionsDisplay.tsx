@@ -27,7 +27,7 @@ import {
   CheckCircle
 } from '@mui/icons-material';
 import { motion } from 'framer-motion';
-import { QuoteOption } from '../schema';
+import { QuoteOption, calculateTotalWithMargin, calculateOptionBaseTotal } from '../schema';
 
 interface ExistingOptionsDisplayProps {
   options: QuoteOption[];
@@ -47,26 +47,11 @@ export const ExistingOptionsDisplay: React.FC<ExistingOptionsDisplayProps> = ({
   const canAddMore = options.length < maxOptions;
 
   const calculateTotalPrice = (option: QuoteOption): number => {
-    let total = 0;
+    // Calculer le prix de base (sans marge)
+    const baseTotal = calculateOptionBaseTotal(option);
     
-    // Prix des seafreights
-    option.seafreights.forEach(sf => {
-      sf.rates.forEach(rate => {
-        total += rate.basePrice;
-      });
-    });
-    
-    // Prix des haulages
-    option.haulages.forEach(haulage => {
-      total += haulage.price;
-    });
-    
-    // Prix des services
-    option.services.forEach(service => {
-      total += service.price || 0;
-    });
-    
-    return total;
+    // Calculer le total avec marge bénéficiaire
+    return calculateTotalWithMargin(baseTotal, option.margin);
   };
 
   const getOptionIcon = (option: QuoteOption) => {

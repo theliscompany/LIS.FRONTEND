@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { Box, Button, Alert, AlertTitle, Typography } from '@mui/material';
 import { Save, ArrowBack, ArrowForward, Send } from '@mui/icons-material';
@@ -8,13 +8,14 @@ import { wizardSteps, navigationConfig, isStepComplete } from './wizard.config';
 import { BasicsStep } from './pages/BasicsStep';
 import { OptionsStep } from './pages/OptionsStep';
 import { ReviewStep } from './pages/ReviewStep';
+import QuotePreviewDialog from './components/QuotePreviewDialog';
 
 interface StepRouterProps {
   currentStep: string;
   onStepChange: (step: string) => void;
   onNext: () => void;
   onPrevious: () => void;
-  onSubmit: () => void;
+  onSubmit: (data: DraftQuoteForm) => Promise<void>;
   onSave: () => void;
   onSaveDraft: () => Promise<string | null>;
   onReset: () => void;
@@ -28,12 +29,17 @@ interface StepRouterProps {
   draftId?: string | null;
   onCreateOption?: () => void;
   onEditOption?: (option: any) => void;
+  onUpdateOption?: (optionId: string, updatedOption: Partial<any>) => void;
   onDeleteOption?: (optionId: string) => void;
   onViewOption?: (option: any) => void;
   onSetPreferredOption?: (optionId: string) => void;
   preferredOptionId?: string;
   onDuplicateOption?: (option: any) => void;
   onSaveCurrentOption?: (optionName: string, optionDescription?: string) => Promise<any>;
+  isFinalizing?: boolean;
+  optionTypesData?: any;
+  isLoadingOptionTypes?: boolean;
+  onQuoteCreated?: () => void; // Callback pour rafraîchir la liste des devis
 }
 
 export const StepRouter: React.FC<StepRouterProps> = ({
@@ -55,15 +61,22 @@ export const StepRouter: React.FC<StepRouterProps> = ({
   draftId,
   onCreateOption,
   onEditOption,
+  onUpdateOption,
   onDeleteOption,
   onViewOption,
   onSetPreferredOption,
   preferredOptionId,
   onDuplicateOption,
-  onSaveCurrentOption
+  onSaveCurrentOption,
+  isFinalizing = false,
+  optionTypesData,
+  isLoadingOptionTypes = false,
+  onQuoteCreated
 }) => {
   const { formState: { errors }, watch } = useFormContext<DraftQuoteForm>();
   const formData = watch();
+  const [showPreviewDialog, setShowPreviewDialog] = useState(false);
+  const [isCreatingQuote, setIsCreatingQuote] = useState(false);
 
   // Get current step index
   const currentStepIndex = wizardSteps.findIndex(step => step.id === currentStep);
@@ -76,6 +89,30 @@ export const StepRouter: React.FC<StepRouterProps> = ({
   // In readonly mode, allow navigation even if step is not "complete" by validation
   const canGoNext = currentStepIndex < wizardSteps.length - 1 && (isCurrentStepComplete || readonly);
   
+  // Check if we can create quote (enabled when at least one option exists)
+  const canCreateQuote = (formData.existingOptions?.length || 0) >= 1;
+
+  // Handle preview quote
+  const handlePreviewQuote = () => {
+    setShowPreviewDialog(true);
+  };
+
+  // Handle confirm create quote - this should create the final quote, not a new option
+  const handleConfirmCreateQuote = async () => {
+    setIsCreatingQuote(true);
+    try {
+      console.log('🔄 [StepRouter] handleConfirmCreateQuote appelé');
+      console.log('📋 [StepRouter] FormData actuel:', JSON.stringify(formData, null, 2));
+      console.log('🔍 [StepRouter] FormData.basics:', formData.basics);
+      console.log('🔍 [StepRouter] FormData.existingOptions:', formData.existingOptions);
+      
+      // This should create the final quote with all existing options
+      await onSubmit(formData);
+    } finally {
+      setIsCreatingQuote(false);
+    }
+  };
+  
   // Debug logging
   console.log('🔍 [STEP_ROUTER] Navigation debug:', {
     currentStep,
@@ -83,6 +120,8 @@ export const StepRouter: React.FC<StepRouterProps> = ({
     isCurrentStepComplete,
     readonly,
     canGoNext,
+    canCreateQuote,
+    existingOptionsCount: formData.existingOptions?.length || 0,
     hasFormData: !!formData,
     formDataKeys: formData ? Object.keys(formData) : []
   });
@@ -112,13 +151,17 @@ export const StepRouter: React.FC<StepRouterProps> = ({
             isDraftSaving={isDraftSaving}
             lastDraftSaved={lastDraftSaved}
             draftId={draftId}
-            onCreateOption={onCreateOption}
-            onEditOption={onEditOption}
-            onDeleteOption={onDeleteOption}
-            onViewOption={onViewOption}
-            onSetPreferredOption={onSetPreferredOption}
+            onCreateOption={onCreateOption || (() => {})}
+            onEditOption={onEditOption || (() => {})}
+            onUpdateOption={onUpdateOption}
+            onDeleteOption={onDeleteOption || (() => {})}
+            onViewOption={onViewOption || (() => {})}
+            onSetPreferredOption={onSetPreferredOption || (() => {})}
             preferredOptionId={preferredOptionId}
-            onDuplicateOption={onDuplicateOption}
+            onDuplicateOption={onDuplicateOption || (() => {})}
+            optionTypesData={optionTypesData}
+            isLoadingOptionTypes={isLoadingOptionTypes}
+            onQuoteCreated={onQuoteCreated}
           />
         );
       default:
@@ -231,21 +274,19 @@ export const StepRouter: React.FC<StepRouterProps> = ({
             Reset
           </Button>
 
-          {/* Total indicator */}
-          <TotalIndicator formData={formData} />
         </Box>
 
         {/* Right side - Next/Submit button */}
         {currentStep === 'review' ? (
           <Button
             endIcon={<Send />}
-            onClick={onSubmit}
-            disabled={!isCurrentStepComplete || isAutoSaving}
+            onClick={handlePreviewQuote}
+            disabled={!canCreateQuote || isAutoSaving || isFinalizing}
             variant="contained"
             color="primary"
             size="large"
           >
-            Create Option
+            Preview Quote
           </Button>
         ) : (
           <Button
@@ -259,81 +300,18 @@ export const StepRouter: React.FC<StepRouterProps> = ({
           </Button>
         )}
       </Box>
+
+      {/* Dialog de prévisualisation du devis */}
+      <QuotePreviewDialog
+        open={showPreviewDialog}
+        onClose={() => setShowPreviewDialog(false)}
+        onConfirm={handleConfirmCreateQuote}
+        formData={formData}
+        isCreating={isCreatingQuote || isFinalizing}
+      />
     </Box>
   );
 };
 
-// Indicateur de total compact
-const TotalIndicator: React.FC<{ formData: DraftQuoteForm }> = ({ formData }) => {
-
-  // Calculer le total général
-  const calculateGrandTotal = (): number => {
-    let total = 0;
-
-    // Total de l'option actuelle
-    const currentOption = formData.currentOption;
-    if (currentOption) {
-      currentOption.seafreights?.forEach((sf: any) => {
-        sf.rates?.forEach((rate: any) => {
-          total += rate.basePrice || 0;
-        });
-      });
-
-      currentOption.haulages?.forEach((haulage: any) => {
-        total += haulage.price || 0;
-      });
-
-      currentOption.services?.forEach((service: any) => {
-        total += service.price || 0;
-      });
-    }
-
-    // Total des options existantes
-    const existingOptions = formData.existingOptions || [];
-    existingOptions.forEach((option) => {
-      total += option.totalPrice || 0;
-    });
-
-    return total;
-  };
-
-  const grandTotal = calculateGrandTotal();
-  const existingOptionsCount = (formData.existingOptions || []).length;
-
-  const formatPrice = (price: number) => {
-    if (price === 0) return '0 €';
-    return new Intl.NumberFormat('fr-FR', {
-      style: 'currency',
-      currency: 'EUR',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0
-    }).format(price);
-  };
-
-  if (grandTotal === 0) return null;
-
-  return (
-    <Box sx={{
-      display: 'flex',
-      alignItems: 'center',
-      gap: 1,
-      px: 2,
-      py: 1,
-      borderRadius: 2,
-      background: 'linear-gradient(135deg, #1976d2 0%, #7b1fa2 100%)',
-      color: 'white',
-      minWidth: 'fit-content'
-    }}>
-      <Typography variant="body2" sx={{ fontWeight: 600 }}>
-        💰 {formatPrice(grandTotal)}
-      </Typography>
-      {existingOptionsCount > 0 && (
-        <Typography variant="caption" sx={{ opacity: 0.8 }}>
-          ({existingOptionsCount} option{existingOptionsCount > 1 ? 's' : ''})
-        </Typography>
-      )}
-    </Box>
-  );
-};
 
 export default StepRouter;

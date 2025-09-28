@@ -352,8 +352,8 @@ const Layout = () : React.ReactNode => {
                                     <MenuItem onClick={() => { navigate('/requests'); handleCloseNavMenu(); }}>
                                         <Typography textAlign="center">{t('requests')}</Typography>
                                     </MenuItem>
-                                    <MenuItem onClick={() => { navigate('/quote-offers'); handleCloseNavMenu(); }}>
-                                        <Typography textAlign="center">{t('priceOffers')}</Typography>
+                                    <MenuItem onClick={() => { navigate('/quotes'); handleCloseNavMenu(); }}>
+                                        <Typography textAlign="center">Tous les Devis</Typography>
                                     </MenuItem>
                                     <MenuItem onClick={() => { navigate('/quote-approval'); handleCloseNavMenu(); }}>
                                         <Typography textAlign="center">Validation Interne</Typography>
@@ -633,7 +633,7 @@ const Layout = () : React.ReactNode => {
                                         nested 
                                     />
                                     <ModernNavigationLink 
-                                        url="/quote-offers" 
+                                        url="/quotes" 
                                         title="Tous les Devis" 
                                         icon={<Description fontSize="small" />} 
                                         nested 

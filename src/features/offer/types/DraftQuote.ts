@@ -160,7 +160,9 @@ export interface DraftQuoteOptionTerms {
 
 export interface DraftQuoteOption {
   optionId?: string | null;
+  name?: string | null;
   label?: string | null;
+  description?: string | null;
   validUntil?: string | null;
   currency?: string | null;
   containers?: DraftQuoteOptionContainer[] | null;
@@ -170,6 +172,7 @@ export interface DraftQuoteOption {
   services?: DraftQuoteOptionService[] | null;
   totals?: DraftQuoteOptionTotals;
   terms?: DraftQuoteOptionTerms;
+  optionType?: string | null;
 }
 
 export interface DraftQuoteSeafreight {
@@ -274,6 +277,7 @@ export type DraftQuoteStatus =
   | 'draft'
   | 'in_progress'
   | 'finalized'
+  | 'used' // Brouillon déjà utilisé pour créer un devis
   | 'cancelled';
 
 // Types pour les validations

@@ -20,15 +20,23 @@ import {
   alpha,
   Badge,
   Stack,
-  Divider
+  Divider,
+  Dialog,
+  DialogTitle,
+  DialogActions,
+  TextField,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  Alert,
+  Tabs,
+  Tab
 } from '@mui/material';
 import {
   Star,
   StarBorder,
   CompareArrows,
-  CheckCircle,
-  Cancel,
-  TrendingUp,
   DirectionsBoat,
   DirectionsCar,
   Build,
@@ -38,10 +46,34 @@ import {
   Edit,
   Delete,
   List as ListIcon,
-  Assessment
+  Assessment,
+  Settings as SettingsIcon,
+  Save as SaveIcon
 } from '@mui/icons-material';
 import { motion } from 'framer-motion';
-import { DraftQuoteForm, QuoteOption } from '../schema';
+import { DraftQuoteForm, QuoteOption, calculateTotalWithMargin, calculateOptionBaseTotal } from '../schema';
+
+// Composant TabPanel pour les onglets
+interface TabPanelProps {
+  children?: React.ReactNode;
+  index: number;
+  value: number;
+}
+
+function TabPanel(props: TabPanelProps) {
+  const { children, value, index, ...other } = props;
+  return (
+    <div
+      role="tabpanel"
+      hidden={value !== index}
+      id={`option-tabpanel-${index}`}
+      aria-labelledby={`option-tab-${index}`}
+      {...other}
+    >
+      {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
+    </div>
+  );
+}
 
 interface OptionsComparisonProps {
   formData: DraftQuoteForm;
@@ -51,6 +83,9 @@ interface OptionsComparisonProps {
   onEditOption: (option: QuoteOption) => void;
   onDeleteOption: (optionId: string) => void;
   onViewOption: (option: QuoteOption) => void;
+  onUpdateOption?: (optionId: string, updatedOption: Partial<QuoteOption>) => void;
+  optionTypesData?: any;
+  isLoadingOptionTypes?: boolean;
 }
 
 export const OptionsComparison: React.FC<OptionsComparisonProps> = ({ 
@@ -60,10 +95,22 @@ export const OptionsComparison: React.FC<OptionsComparisonProps> = ({
   onDuplicateOption,
   onEditOption,
   onDeleteOption,
-  onViewOption
+  onViewOption,
+  onUpdateOption,
+  optionTypesData
 }) => {
   const theme = useTheme();
   const [comparisonMode, setComparisonMode] = useState<'simple' | 'table' | 'detailed'>('simple');
+  
+  // États pour le modal de modification avec onglets
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [editingOption, setEditingOption] = useState<QuoteOption | null>(null);
+  const [editTabValue, setEditTabValue] = useState(0);
+  const [editFormData, setEditFormData] = useState({
+    name: '',
+    description: '',
+    optionType: ''
+  });
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('fr-FR', {
@@ -74,27 +121,23 @@ export const OptionsComparison: React.FC<OptionsComparisonProps> = ({
   };
 
   // Calculer le total d'une option
+  // Utiliser les fonctions du schema pour assurer la cohérence
   const calculateOptionTotal = (option: QuoteOption): number => {
-    let total = 0;
+    return calculateOptionBaseTotal(option);
+  };
 
-    // Seafreights
-    option.seafreights?.forEach((sf: any) => {
-      sf.rates?.forEach((rate: any) => {
-        total += rate.basePrice || 0;
-      });
+  // Fonction locale pour debug et compatibilité
+  const calculateTotalWithMarginLocal = (option: QuoteOption): number => {
+    const baseTotal = calculateOptionTotal(option);
+    console.log('🔍 [OptionsComparison] Debug marge:', {
+      optionName: option.name,
+      baseTotal,
+      margin: option.margin,
+      marginType: option.margin?.type,
+      marginValue: option.margin?.value,
+      calculatedWithSchema: calculateTotalWithMargin(baseTotal, option.margin)
     });
-
-    // Haulages
-    option.haulages?.forEach((haulage: any) => {
-      total += haulage.price || 0;
-    });
-
-    // Services
-    option.services?.forEach((service: any) => {
-      total += service.price || 0;
-    });
-
-    return total;
+    return calculateTotalWithMargin(baseTotal, option.margin);
   };
 
   // Compter les éléments par catégorie
@@ -107,6 +150,62 @@ export const OptionsComparison: React.FC<OptionsComparisonProps> = ({
   };
 
   const existingOptions = formData.existingOptions || [];
+
+  // Fonctions de gestion du modal de modification avec onglets
+  const handleOpenEditModal = (option: QuoteOption) => {
+    setEditingOption(option);
+    setEditFormData({
+      name: option.name || '',
+      description: option.description || '',
+      optionType: option.optionType || ''
+    });
+    setEditTabValue(0);
+    setEditModalOpen(true);
+  };
+
+  const handleCloseEditModal = () => {
+    setEditModalOpen(false);
+    setEditingOption(null);
+    setEditFormData({
+      name: '',
+      description: '',
+      optionType: ''
+    });
+    setEditTabValue(0);
+  };
+
+  const handleSaveEdit = () => {
+    if (editingOption && onUpdateOption) {
+      onUpdateOption(editingOption.id || '', {
+        name: editFormData.name,
+        description: editFormData.description,
+        optionType: editFormData.optionType
+        // Marge conservée telle quelle (pas de modification via le modal)
+      });
+      handleCloseEditModal();
+    } else {
+      // Fallback vers l'ancienne méthode
+      onEditOption(editingOption!);
+      handleCloseEditModal();
+    }
+  };
+
+  const handleEditOptionClick = (option: QuoteOption) => {
+    if (onUpdateOption) {
+      // Utiliser le modal de modification avec onglets
+      handleOpenEditModal(option);
+    } else {
+      // Utiliser l'ancienne méthode (wizard)
+      onEditOption(option);
+    }
+  };
+
+  const handleTechnicalDetailsEdit = () => {
+    if (editingOption && onEditOption) {
+      handleCloseEditModal();
+      onEditOption(editingOption);
+    }
+  };
 
   if (existingOptions.length === 0) {
     return (
@@ -192,7 +291,6 @@ export const OptionsComparison: React.FC<OptionsComparisonProps> = ({
                 </TableHead>
                 <TableBody>
                   {existingOptions.map((option, index) => {
-                    const total = calculateOptionTotal(option);
                     const counts = getOptionCounts(option);
                     const isPreferred = preferredOptionId === option.id;
                     
@@ -207,16 +305,26 @@ export const OptionsComparison: React.FC<OptionsComparisonProps> = ({
                         }}
                       >
                         <TableCell>
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                            <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-                              {option.name || `Option ${index + 1}`}
-                            </Typography>
-                            {isPreferred && (
+                          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 0.5 }}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                              <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+                                {option.name || `Option ${index + 1}`}
+                              </Typography>
+                              {isPreferred && (
+                                <Chip 
+                                  label="Préférée" 
+                                  size="small" 
+                                  color="warning" 
+                                  icon={<Star />}
+                                />
+                              )}
+                            </Box>
+                            {option.optionType && (
                               <Chip 
-                                label="Préférée" 
-                                size="small" 
-                                color="warning" 
-                                icon={<Star />}
+                                label={option.optionType} 
+                                size="small"
+                                variant="outlined"
+                                sx={{ fontSize: '0.7rem', height: 20 }}
                               />
                             )}
                           </Box>
@@ -247,8 +355,13 @@ export const OptionsComparison: React.FC<OptionsComparisonProps> = ({
                         </TableCell>
                         <TableCell align="center">
                           <Typography variant="h6" sx={{ fontWeight: 700, color: theme.palette.primary.main }}>
-                            {formatPrice(total)}
+                            {formatPrice(calculateTotalWithMarginLocal(option))}
                           </Typography>
+                          {option.margin && (
+                            <Typography variant="caption" color="text.secondary">
+                              Base: {formatPrice(calculateOptionTotal(option))} + Marge: {formatPrice(calculateTotalWithMarginLocal(option) - calculateOptionTotal(option))}
+                            </Typography>
+                          )}
                         </TableCell>
                         <TableCell align="center">
                           <Box sx={{ display: 'flex', gap: 0.5, justifyContent: 'center', flexWrap: 'wrap' }}>
@@ -258,7 +371,7 @@ export const OptionsComparison: React.FC<OptionsComparisonProps> = ({
                               </IconButton>
                             </Tooltip>
                             <Tooltip title="Modifier l'option">
-                              <IconButton onClick={() => onEditOption(option)} color="primary" size="small">
+                              <IconButton onClick={() => handleEditOptionClick(option)} color="primary" size="small">
                                 <Edit />
                               </IconButton>
                             </Tooltip>
@@ -312,16 +425,26 @@ export const OptionsComparison: React.FC<OptionsComparisonProps> = ({
                           textAlign: 'center',
                           position: 'relative'
                         }}>
-                          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
-                            <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-                              {option.name || `Option ${index + 1}`}
-                            </Typography>
-                            {preferredOptionId === option.id && (
+                          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0.5 }}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                              <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+                                {option.name || `Option ${index + 1}`}
+                              </Typography>
+                              {preferredOptionId === option.id && (
+                                <Chip 
+                                  label="Préférée" 
+                                  size="small" 
+                                  color="warning" 
+                                  icon={<Star />}
+                                />
+                              )}
+                            </Box>
+                            {option.optionType && (
                               <Chip 
-                                label="Préférée" 
-                                size="small" 
-                                color="warning" 
-                                icon={<Star />}
+                                label={option.optionType} 
+                                size="small"
+                                variant="outlined"
+                                sx={{ fontSize: '0.7rem', height: 20 }}
                               />
                             )}
                           </Box>
@@ -359,7 +482,6 @@ export const OptionsComparison: React.FC<OptionsComparisonProps> = ({
                         </Box>
                       </TableCell>
                       {existingOptions.map((option, index) => {
-                        const total = calculateOptionTotal(option);
                         return (
                           <TableCell key={option.id || index} sx={{ textAlign: 'center' }}>
                             <Typography variant="h6" sx={{ 
@@ -370,7 +492,7 @@ export const OptionsComparison: React.FC<OptionsComparisonProps> = ({
                               WebkitBackgroundClip: 'text',
                               WebkitTextFillColor: 'transparent'
                             }}>
-                              {formatPrice(total)}
+                              {formatPrice(calculateTotalWithMarginLocal(option))}
                             </Typography>
                           </TableCell>
                         );
@@ -555,7 +677,7 @@ export const OptionsComparison: React.FC<OptionsComparisonProps> = ({
                               </IconButton>
                             </Tooltip>
                             <Tooltip title="Modifier l'option">
-                              <IconButton onClick={() => onEditOption(option)} color="primary" size="small">
+                              <IconButton onClick={() => handleEditOptionClick(option)} color="primary" size="small">
                                 <Edit />
                               </IconButton>
                             </Tooltip>
@@ -590,7 +712,6 @@ export const OptionsComparison: React.FC<OptionsComparisonProps> = ({
             /* Mode Simple - Cards */
             <Grid container spacing={3}>
               {existingOptions.map((option, index) => {
-                const total = calculateOptionTotal(option);
                 const counts = getOptionCounts(option);
                 const isPreferred = preferredOptionId === option.id;
                 
@@ -636,9 +757,19 @@ export const OptionsComparison: React.FC<OptionsComparisonProps> = ({
                         <CardContent sx={{ p: 3, height: '100%', display: 'flex', flexDirection: 'column' }}>
                           {/* Header */}
                           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
-                            <Typography variant="h6" sx={{ fontWeight: 700, color: theme.palette.primary.main }}>
-                              {option.name || `Option ${index + 1}`}
-                            </Typography>
+                            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+                              <Typography variant="h6" sx={{ fontWeight: 700, color: theme.palette.primary.main }}>
+                                {option.name || `Option ${index + 1}`}
+                              </Typography>
+                              {option.optionType && (
+                                <Chip 
+                                  label={option.optionType} 
+                                  size="small"
+                                  variant="outlined"
+                                  sx={{ fontSize: '0.7rem', height: 20, alignSelf: 'flex-start' }}
+                                />
+                              )}
+                            </Box>
                             <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
                               <Tooltip title="Voir l'option">
                                 <IconButton
@@ -651,7 +782,7 @@ export const OptionsComparison: React.FC<OptionsComparisonProps> = ({
                               </Tooltip>
                               <Tooltip title="Modifier l'option">
                                 <IconButton
-                                  onClick={() => onEditOption(option)}
+                                  onClick={() => handleEditOptionClick(option)}
                                   color="primary"
                                   size="small"
                                 >
@@ -719,13 +850,13 @@ export const OptionsComparison: React.FC<OptionsComparisonProps> = ({
                           <Box sx={{ textAlign: 'center', mt: 'auto' }}>
                             <Typography variant="h4" sx={{ 
                               fontWeight: 800, 
-                              color: total > 0 ? theme.palette.primary.main : theme.palette.text.secondary,
-                              background: total > 0 ? `linear-gradient(45deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})` : 'none',
-                              backgroundClip: total > 0 ? 'text' : 'initial',
-                              WebkitBackgroundClip: total > 0 ? 'text' : 'initial',
-                              WebkitTextFillColor: total > 0 ? 'transparent' : 'initial'
+                              color: calculateTotalWithMarginLocal(option) > 0 ? theme.palette.primary.main : theme.palette.text.secondary,
+                              background: calculateTotalWithMarginLocal(option) > 0 ? `linear-gradient(45deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})` : 'none',
+                              backgroundClip: calculateTotalWithMarginLocal(option) > 0 ? 'text' : 'initial',
+                              WebkitBackgroundClip: calculateTotalWithMarginLocal(option) > 0 ? 'text' : 'initial',
+                              WebkitTextFillColor: calculateTotalWithMarginLocal(option) > 0 ? 'transparent' : 'initial'
                             }}>
-                              {formatPrice(total)}
+                              {formatPrice(calculateTotalWithMarginLocal(option))}
                             </Typography>
                             <Typography variant="body2" color="text.secondary">
                               Total de l'option
@@ -750,7 +881,7 @@ export const OptionsComparison: React.FC<OptionsComparisonProps> = ({
                 <Grid item xs={12} sm={4}>
                   <Box sx={{ textAlign: 'center' }}>
                     <Typography variant="h6" sx={{ fontWeight: 700, color: theme.palette.primary.main }}>
-                      {formatPrice(Math.min(...existingOptions.map(opt => calculateOptionTotal(opt))))}
+                      {formatPrice(Math.min(...existingOptions.map(opt => calculateTotalWithMarginLocal(opt))))}
                     </Typography>
                     <Typography variant="body2" color="text.secondary">Prix minimum</Typography>
                   </Box>
@@ -758,7 +889,7 @@ export const OptionsComparison: React.FC<OptionsComparisonProps> = ({
                 <Grid item xs={12} sm={4}>
                   <Box sx={{ textAlign: 'center' }}>
                     <Typography variant="h6" sx={{ fontWeight: 700, color: theme.palette.secondary.main }}>
-                      {formatPrice(Math.max(...existingOptions.map(opt => calculateOptionTotal(opt))))}
+                      {formatPrice(Math.max(...existingOptions.map(opt => calculateTotalWithMarginLocal(opt))))}
                     </Typography>
                     <Typography variant="body2" color="text.secondary">Prix maximum</Typography>
                   </Box>
@@ -766,7 +897,7 @@ export const OptionsComparison: React.FC<OptionsComparisonProps> = ({
                 <Grid item xs={12} sm={4}>
                   <Box sx={{ textAlign: 'center' }}>
                     <Typography variant="h6" sx={{ fontWeight: 700, color: theme.palette.success.main }}>
-                      {formatPrice(existingOptions.reduce((sum, opt) => sum + calculateOptionTotal(opt), 0) / existingOptions.length)}
+                      {formatPrice(existingOptions.reduce((sum, opt) => sum + calculateTotalWithMarginLocal(opt), 0) / existingOptions.length)}
                     </Typography>
                     <Typography variant="body2" color="text.secondary">Prix moyen</Typography>
                   </Box>
@@ -776,6 +907,210 @@ export const OptionsComparison: React.FC<OptionsComparisonProps> = ({
           )}
         </CardContent>
       </Card>
+
+      {/* Modal de modification d'option avec onglets */}
+      <Dialog 
+        open={editModalOpen} 
+        onClose={handleCloseEditModal}
+        maxWidth="md"
+        fullWidth
+        PaperProps={{
+          sx: { borderRadius: 3 }
+        }}
+      >
+        <DialogTitle sx={{ 
+          background: `linear-gradient(135deg, #1976d2 0%, #42a5f5 100%)`,
+          color: 'white',
+          fontWeight: 700,
+          display: 'flex',
+          alignItems: 'center',
+          gap: 1
+        }}>
+          <Edit />
+          Modifier l'option
+        </DialogTitle>
+        
+        <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+          <Tabs 
+            value={editTabValue} 
+            onChange={(_, newValue) => setEditTabValue(newValue)}
+            aria-label="onglets de modification"
+          >
+            <Tab 
+              label="Informations" 
+              icon={<Edit />} 
+              iconPosition="start"
+              id="option-tab-0"
+              aria-controls="option-tabpanel-0"
+            />
+            <Tab 
+              label="Détails techniques" 
+              icon={<SettingsIcon />} 
+              iconPosition="start"
+              id="option-tab-1"
+              aria-controls="option-tabpanel-1"
+            />
+          </Tabs>
+        </Box>
+
+        <TabPanel value={editTabValue} index={0}>
+          <Alert severity="info" sx={{ mb: 3 }}>
+            Modifiez les informations de base de l'option. Les changements sont sauvegardés immédiatement.
+          </Alert>
+          
+          <Stack spacing={3}>
+            <TextField
+              label="Nom de l'option"
+              value={editFormData.name}
+              onChange={(e) => setEditFormData(prev => ({ ...prev, name: e.target.value }))}
+              fullWidth
+              variant="outlined"
+              placeholder="Ex: Option Express, Option Économique..."
+            />
+            
+            <TextField
+              label="Description"
+              value={editFormData.description}
+              onChange={(e) => setEditFormData(prev => ({ ...prev, description: e.target.value }))}
+              fullWidth
+              multiline
+              rows={3}
+              variant="outlined"
+              placeholder="Décrivez cette option..."
+            />
+            
+            <FormControl fullWidth>
+              <InputLabel>Type d'option</InputLabel>
+              <Select
+                value={editFormData.optionType}
+                onChange={(e) => setEditFormData(prev => ({ ...prev, optionType: e.target.value }))}
+                label="Type d'option"
+              >
+                <MenuItem value="">
+                  <em>Sélectionner un type</em>
+                </MenuItem>
+                {optionTypesData?.data?.map((optionType: any, index: number) => (
+                  <MenuItem key={index} value={typeof optionType === 'string' ? optionType : optionType.value || optionType.name || String(optionType)}>
+                    {typeof optionType === 'string' ? optionType : optionType.label || optionType.name || String(optionType)}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+
+            {/* Section Marge bénéficiaire - Lecture seule */}
+            {editingOption?.margin && editingOption.margin.value > 0 && (
+              <Box sx={{ 
+                p: 2, 
+                border: `1px solid ${alpha(theme.palette.primary.main, 0.2)}`, 
+                borderRadius: 2,
+                backgroundColor: alpha(theme.palette.primary.main, 0.05)
+              }}>
+                <Typography variant="h6" sx={{ mb: 2, color: theme.palette.primary.main }}>
+                  💰 Marge bénéficiaire
+                </Typography>
+                
+                <Stack spacing={2}>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <Typography variant="body2" color="text.secondary">
+                      Type de marge:
+                    </Typography>
+                    <Chip 
+                      label={editingOption.margin.type === 'percentage' ? 'Pourcentage' : 'Montant fixe'}
+                      size="small"
+                      color="primary"
+                      variant="outlined"
+                    />
+                  </Box>
+                  
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <Typography variant="body2" color="text.secondary">
+                      Valeur:
+                    </Typography>
+                    <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                      {editingOption.margin.type === 'percentage' 
+                        ? `${editingOption.margin.value}%`
+                        : formatPrice(editingOption.margin.value)
+                      }
+                    </Typography>
+                  </Box>
+                  
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <Typography variant="body2" color="text.secondary">
+                      Montant calculé:
+                    </Typography>
+                    <Typography variant="body2" sx={{ fontWeight: 600, color: theme.palette.success.main }}>
+                      {formatPrice(
+                        editingOption.margin.type === 'percentage' 
+                          ? (calculateOptionTotal(editingOption) * editingOption.margin.value) / 100
+                          : editingOption.margin.value
+                      )}
+                    </Typography>
+                  </Box>
+                  
+                  <Alert severity="info" sx={{ mt: 1 }}>
+                    <Typography variant="caption">
+                      Pour modifier la marge, utilisez l'onglet "Marge" dans l'étape 2 du wizard.
+                    </Typography>
+                  </Alert>
+                </Stack>
+              </Box>
+            )}
+          </Stack>
+        </TabPanel>
+
+        <TabPanel value={editTabValue} index={1}>
+          <Alert severity="warning" sx={{ mb: 3 }}>
+            <Typography variant="subtitle2" gutterBottom>
+              Modification des détails techniques
+            </Typography>
+            <Typography variant="body2">
+              Pour modifier les détails techniques (seafreights, haulages, services), 
+              vous serez redirigé vers le wizard de configuration.
+            </Typography>
+          </Alert>
+          
+          <Box sx={{ p: 3, textAlign: 'center' }}>
+            <SettingsIcon sx={{ fontSize: 64, color: 'text.secondary', mb: 2 }} />
+            <Typography variant="h6" gutterBottom>
+              Détails techniques
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+              Configurez les seafreights, haulages et services pour cette option
+            </Typography>
+            
+            <Button
+              variant="contained"
+              startIcon={<SettingsIcon />}
+              onClick={handleTechnicalDetailsEdit}
+              size="large"
+              sx={{ borderRadius: 2 }}
+            >
+              Ouvrir le wizard de configuration
+            </Button>
+          </Box>
+        </TabPanel>
+
+        <DialogActions sx={{ p: 3, gap: 1 }}>
+          <Button 
+            onClick={handleCloseEditModal}
+            variant="outlined"
+            sx={{ borderRadius: 2 }}
+          >
+            Annuler
+          </Button>
+          {editTabValue === 0 && (
+            <Button 
+              onClick={handleSaveEdit}
+              variant="contained"
+              startIcon={<SaveIcon />}
+              sx={{ borderRadius: 2 }}
+              disabled={!editFormData.name.trim()}
+            >
+              Sauvegarder
+            </Button>
+          )}
+        </DialogActions>
+      </Dialog>
     </motion.div>
   );
 };

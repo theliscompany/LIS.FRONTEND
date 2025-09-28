@@ -439,6 +439,7 @@ export const BasicsStep: React.FC<BasicsStepProps> = ({ readonly = false, reques
                         render={({ field }) => (
                           <TextField
                             {...field}
+                            value={field.value || ''}
                             fullWidth
                             label="City *"
                             error={!!errors.basics?.origin?.city}
@@ -471,7 +472,7 @@ export const BasicsStep: React.FC<BasicsStepProps> = ({ readonly = false, reques
                           <Autocomplete
                             options={countries}
                             getOptionLabel={(option) => option?.name || ''}
-                            value={countries.find(country => country.name === field.value) || null}
+                            value={countries.find(country => country.name === field.value) || undefined}
                             renderInput={(params) => (
                               <TextField
                                 {...params}
@@ -544,6 +545,7 @@ export const BasicsStep: React.FC<BasicsStepProps> = ({ readonly = false, reques
                         render={({ field }) => (
                           <TextField
                             {...field}
+                            value={field.value || ''}
                             fullWidth
                             label="City *"
                             error={!!errors.basics?.destination?.city}
@@ -576,7 +578,7 @@ export const BasicsStep: React.FC<BasicsStepProps> = ({ readonly = false, reques
                           <Autocomplete
                             options={countries}
                             getOptionLabel={(option) => option?.name || ''}
-                            value={countries.find(country => country.name === field.value) || null}
+                            value={countries.find(country => country.name === field.value) || undefined}
                             renderInput={(params) => (
                               <TextField
                                 {...params}
@@ -687,6 +689,7 @@ export const BasicsStep: React.FC<BasicsStepProps> = ({ readonly = false, reques
                   render={({ field }) => (
                     <TextField
                       {...field}
+                      value={field.value || ''}
                       fullWidth
                       multiline
                       rows={3}

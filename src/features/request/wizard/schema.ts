@@ -5,6 +5,7 @@ export const QuoteOptionSchema = z.object({
   id: z.string().optional(),
   name: z.string().min(1, "Le nom de l'option est requis"),
   description: z.string().optional(),
+  optionType: z.string().nullable().optional(),
   seafreights: z.array(z.object({
     id: z.string().optional(),
     carrier: z.string(),
@@ -52,6 +53,12 @@ export const QuoteOptionSchema = z.object({
     haulages: z.number().nonnegative(),
     services: z.number().nonnegative(),
     grandTotal: z.number().nonnegative()
+  }).optional(),
+  // Marge bénéficiaire
+  margin: z.object({
+    type: z.enum(["percentage", "fixed"]),
+    value: z.number().nonnegative(),
+    amount: z.number().nonnegative().optional() // Calculé automatiquement
   }).optional(),
   currency: z.string().optional(),
   validUntil: z.string().optional(),
@@ -128,6 +135,9 @@ export const DraftQuoteFormSchema = z.object({
   
   // Option en cours de création/modification
   currentOption: z.object({
+    name: z.string().optional(),
+    description: z.string().optional(),
+    optionType: z.string().nullable().optional(),
     seafreights: z.array(z.object({
       carrier: z.string(),
       service: z.string(),
@@ -149,6 +159,12 @@ export const DraftQuoteFormSchema = z.object({
       label: z.string(),
       price: z.number().nonnegative().optional()
     })),
+    // Marge bénéficiaire pour l'option en cours
+    margin: z.object({
+      type: z.enum(["percentage", "fixed"]),
+      value: z.number().nonnegative(),
+      amount: z.number().nonnegative().optional()
+    }).optional(),
   }),
   
   attachments: z.array(z.object({
@@ -180,9 +196,17 @@ export const defaultDraftQuoteForm: DraftQuoteForm = {
   },
   existingOptions: [],
   currentOption: {
+    name: '',
+    description: '',
+    optionType: null,
     seafreights: [],
     haulages: [],
     services: [],
+    margin: {
+      type: 'percentage' as const,
+      value: 0,
+      amount: 0
+    },
   },
   attachments: [],
 };
@@ -198,4 +222,56 @@ export const validateDraftQuoteFormField = (field: string, value: unknown) => {
     return fieldSchema.safeParse(value);
   }
   return { success: false, error: new Error(`Unknown field: ${field}`) };
+};
+
+// Fonctions utilitaires pour la marge bénéficiaire
+export const calculateOptionBaseTotal = (option: any): number => {
+  let total = 0;
+
+  // Ajouter les prix des seafreights
+  option.seafreights?.forEach((sf: any) => {
+    sf.rates?.forEach((rate: any) => {
+      total += rate.basePrice || 0;
+    });
+  });
+
+  // Ajouter les prix des haulages
+  option.haulages?.forEach((haulage: any) => {
+    total += haulage.price || 0;
+  });
+
+  // Ajouter les prix des services
+  option.services?.forEach((service: any) => {
+    total += service.price || 0;
+  });
+
+  return total;
+};
+
+export const calculateMarginAmount = (baseTotal: number, margin: { type: 'percentage' | 'fixed'; value: number }): number => {
+  // Si le type n'est pas défini, considérer comme pourcentage par défaut
+  if (!margin.type || margin.type === 'percentage') {
+    return (baseTotal * margin.value) / 100;
+  } else {
+    return margin.value;
+  }
+};
+
+export const calculateTotalWithMargin = (baseTotal: number, margin?: { type: 'percentage' | 'fixed'; value: number }): number => {
+  if (!margin || margin.value === 0) return baseTotal;
+  const marginAmount = calculateMarginAmount(baseTotal, margin);
+  return baseTotal + marginAmount;
+};
+
+export const formatMarginDisplay = (margin?: { type: 'percentage' | 'fixed'; value: number }): string => {
+  if (!margin) return '';
+  // Si le type n'est pas défini, considérer comme pourcentage par défaut
+  if (!margin.type || margin.type === 'percentage') {
+    return `${margin.value}%`;
+  } else {
+    return new Intl.NumberFormat('fr-FR', {
+      style: 'currency',
+      currency: 'EUR'
+    }).format(margin.value);
+  }
 };

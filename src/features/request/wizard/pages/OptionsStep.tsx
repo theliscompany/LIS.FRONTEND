@@ -4,7 +4,8 @@ import {
   Button, IconButton, TextField, FormControl, InputLabel, Select, MenuItem,
   Chip, Divider, Alert, AlertTitle, List, ListItem, ListItemText, ListItemSecondaryAction,
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
-  Avatar, CircularProgress, Dialog, DialogTitle, DialogContent, DialogActions
+  Avatar, CircularProgress, Dialog, DialogTitle, DialogContent, DialogActions,
+  RadioGroup, FormControlLabel, Radio, InputAdornment, Stack
 } from '@mui/material';
 import {
   Add,
@@ -25,6 +26,7 @@ import HaulageSelection from '../components/HaulageSelection';
 import ServicesSelection from '../components/ServicesSelection';
 import PortAutocomplete from '../../../../components/shared/PortAutocomplete';
 import SelectionDebugger from '../components/SelectionDebugger';
+import { useDraftQuoteOptionTypes } from '@features/offer/hooks/useDraftQuoteOptionTypes';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -52,6 +54,9 @@ export const OptionsStep: React.FC<OptionsStepProps> = ({ onSaveCurrentOption, d
   const theme = useTheme();
   const [tabValue, setTabValue] = useState(0);
   const { control, formState: { errors }, watch } = useFormContext<DraftQuoteForm>();
+  
+  // Hook pour récupérer les types d'options disponibles
+  const { data: optionTypesData, isLoading: isLoadingOptionTypes } = useDraftQuoteOptionTypes();
   
   // Watch current option data
   const currentOption = watch('currentOption');
@@ -165,6 +170,13 @@ export const OptionsStep: React.FC<OptionsStepProps> = ({ onSaveCurrentOption, d
               id="options-tab-3"
               aria-controls="options-tabpanel-3"
             />
+            <Tab
+              icon={<AttachMoney />}
+              iconPosition="start"
+              label="Marge"
+              id="options-tab-4"
+              aria-controls="options-tabpanel-4"
+            />
           </Tabs>
         </Box>
 
@@ -198,6 +210,11 @@ export const OptionsStep: React.FC<OptionsStepProps> = ({ onSaveCurrentOption, d
               console.log('Services selection updated:', services);
             }} 
           />
+        </TabPanel>
+
+        {/* Marge Tab */}
+        <TabPanel value={tabValue} index={4}>
+          <OptionMarginConfiguration />
         </TabPanel>
       </Paper>
 
@@ -270,6 +287,15 @@ const RouteAndCargoConfiguration: React.FC = () => {
             Configure your shipping route and container requirements
           </Typography>
         </Box>
+      </motion.div>
+      
+      {/* Section Configuration de base de l'option */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 0.1 }}
+      >
+        <OptionBasicConfiguration />
       </motion.div>
       
       <Grid container spacing={4}>
@@ -356,7 +382,7 @@ const RouteConfiguration: React.FC = () => {
               render={({ field }) => (
                 <PortAutocomplete
                   label="Select departure port"
-                  value={field.value || null}
+                  value={field.value || undefined}
                   onChange={field.onChange}
                 />
               )}
@@ -390,7 +416,7 @@ const RouteConfiguration: React.FC = () => {
               render={({ field }) => (
                 <PortAutocomplete
                   label="Select arrival port"
-                  value={field.value || null}
+                  value={field.value || undefined}
                   onChange={field.onChange}
                 />
               )}
@@ -692,6 +718,233 @@ const CargoConfiguration: React.FC = () => {
   );
 };
 
+// Composant pour la configuration de base de l'option
+const OptionBasicConfiguration: React.FC = () => {
+  const { control, watch } = useFormContext<DraftQuoteForm>();
+  const { data: optionTypesData, isLoading: isLoadingOptionTypes } = useDraftQuoteOptionTypes();
+  const theme = useTheme();
+
+  return (
+    <Card sx={{
+      borderRadius: 3,
+      boxShadow: '0 8px 32px rgba(0,0,0,0.1)',
+      background: 'linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%)',
+      border: '1px solid rgba(0,0,0,0.05)',
+      overflow: 'hidden',
+      mb: 4
+    }}>
+      <Box sx={{
+        background: 'linear-gradient(135deg, #2e7d32 0%, #4caf50 100%)',
+        p: 2,
+        color: 'white'
+      }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Build sx={{ fontSize: 28 }} />
+          <Typography variant="h6" sx={{ fontWeight: 700 }}>
+            Configuration de l'Option
+          </Typography>
+        </Box>
+        <Typography variant="body2" sx={{ opacity: 0.9, mt: 0.5 }}>
+          Définissez le type et les informations de base de cette option
+        </Typography>
+      </Box>
+      
+      <Box sx={{ p: 3 }}>
+        <Grid container spacing={3}>
+          <Grid item xs={12} md={6}>
+            <Controller
+              name="currentOption.optionType"
+              control={control}
+              render={({ field }) => (
+                <FormControl fullWidth>
+                  <InputLabel>Type d'option</InputLabel>
+                  <Select
+                    {...field}
+                    value={field.value || ''}
+                    label="Type d'option"
+                    disabled={isLoadingOptionTypes}
+                  >
+                    <MenuItem value="">
+                      <em>Sélectionner un type</em>
+                    </MenuItem>
+                    {optionTypesData?.data?.map((optionType: any, index: number) => (
+                      <MenuItem key={index} value={typeof optionType === 'string' ? optionType : optionType.value || optionType.name || String(optionType)}>
+                        {typeof optionType === 'string' ? optionType : optionType.label || optionType.name || String(optionType)}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                  {isLoadingOptionTypes && (
+                    <Typography variant="caption" color="text.secondary" sx={{ mt: 1 }}>
+                      Chargement des types d'options...
+                    </Typography>
+                  )}
+                </FormControl>
+              )}
+            />
+          </Grid>
+          
+          <Grid item xs={12} md={6}>
+            <Controller
+              name="currentOption.name"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  value={field.value || ''}
+                  fullWidth
+                  label="Nom de l'option"
+                  placeholder="Ex: Option Express, Option Standard..."
+                  variant="outlined"
+                />
+              )}
+            />
+          </Grid>
+          
+          <Grid item xs={12}>
+            <Controller
+              name="currentOption.description"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  value={field.value || ''}
+                  fullWidth
+                  label="Description de l'option"
+                  placeholder="Décrivez cette option (priorité délai, priorité coût, etc.)"
+                  variant="outlined"
+                  multiline
+                  rows={2}
+                />
+              )}
+            />
+          </Grid>
+        </Grid>
+      </Box>
+    </Card>
+  );
+};
+
+// Composant pour la configuration de la marge bénéficiaire
+const OptionMarginConfiguration: React.FC = () => {
+  const { control, watch } = useFormContext<DraftQuoteForm>();
+  const theme = useTheme();
+
+  return (
+    <Card sx={{
+      borderRadius: 3,
+      boxShadow: '0 8px 32px rgba(0,0,0,0.1)',
+      background: 'linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%)',
+      border: '1px solid rgba(0,0,0,0.05)',
+      overflow: 'hidden'
+    }}>
+      <Box sx={{
+        background: 'linear-gradient(135deg, #1976d2 0%, #42a5f5 100%)',
+        p: 2,
+        color: 'white'
+      }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <AttachMoney sx={{ fontSize: 28 }} />
+          <Typography variant="h6" sx={{ fontWeight: 700 }}>
+            Configuration de la Marge Bénéficiaire
+          </Typography>
+        </Box>
+        <Typography variant="body2" sx={{ opacity: 0.9, mt: 0.5 }}>
+          Définissez la marge bénéficiaire pour cette option
+        </Typography>
+      </Box>
+      
+      <Box sx={{ p: 3 }}>
+        <Grid container spacing={3}>
+          <Grid item xs={12} md={6}>
+            <Controller
+              name="currentOption.margin.type"
+              control={control}
+              render={({ field }) => (
+                <FormControl component="fieldset">
+                  <Typography variant="subtitle1" sx={{ mb: 2, fontWeight: 600 }}>
+                    Type de marge
+                  </Typography>
+                  <RadioGroup
+                    {...field}
+                    value={field.value || 'percentage'}
+                    row
+                    sx={{ gap: 2 }}
+                  >
+                    <FormControlLabel 
+                      value="percentage" 
+                      control={<Radio size="small" />} 
+                      label="Pourcentage (%)" 
+                    />
+                    <FormControlLabel 
+                      value="fixed" 
+                      control={<Radio size="small" />} 
+                      label="Montant fixe (€)" 
+                    />
+                  </RadioGroup>
+                </FormControl>
+              )}
+            />
+          </Grid>
+          
+          <Grid item xs={12} md={6}>
+            <Controller
+              name="currentOption.margin.value"
+              control={control}
+              render={({ field }) => {
+                const marginType = watch('currentOption.margin.type') || 'percentage';
+                return (
+                  <TextField
+                    {...field}
+                    value={field.value || 0}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      // Convertir en nombre ou 0 si vide
+                      const numericValue = value === '' ? 0 : parseFloat(value) || 0;
+                      field.onChange(numericValue);
+                    }}
+                    fullWidth
+                    label={marginType === 'percentage' ? 'Pourcentage de marge' : 'Montant de marge'}
+                    type="number"
+                    variant="outlined"
+                    InputProps={{
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          {marginType === 'percentage' ? '%' : '€'}
+                        </InputAdornment>
+                      ),
+                    }}
+                    helperText={
+                      marginType === 'percentage' 
+                        ? 'Ex: 15 pour 15% de marge'
+                        : 'Ex: 500 pour 500€ de marge fixe'
+                    }
+                  />
+                );
+              }}
+            />
+          </Grid>
+        </Grid>
+        
+        {/* Aperçu du calcul de marge */}
+        <Box sx={{ 
+          mt: 3, 
+          p: 2, 
+          backgroundColor: alpha(theme.palette.primary.main, 0.05),
+          borderRadius: 2,
+          border: `1px solid ${alpha(theme.palette.primary.main, 0.2)}`
+        }}>
+          <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600, color: theme.palette.primary.main }}>
+            💰 Aperçu du calcul
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            La marge sera calculée automatiquement et ajoutée au total de l'option.
+            Vous pourrez voir le détail dans l'aperçu en temps réel.
+          </Typography>
+        </Box>
+      </Box>
+    </Card>
+  );
+};
 
 interface OptionsStepProps {
   onSaveCurrentOption?: (optionName: string, optionDescription?: string) => Promise<any>;
